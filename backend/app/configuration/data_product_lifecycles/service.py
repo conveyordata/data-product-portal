@@ -12,7 +12,9 @@ from app.configuration.data_product_lifecycles.schema_request import (
     DataProductLifeCycleUpdate,
 )
 from app.configuration.data_product_lifecycles.schema_response import (
+    CreateDataProductLifeCycleResponse,
     DataProductLifeCyclesGetItem,
+    UpdateDataProductLifeCycleResponse,
 )
 
 
@@ -27,24 +29,24 @@ class DataProductLifeCycleService:
 
     def create_data_product_lifecycle(
         self, data_product_lifecycle: DataProductLifeCycleCreate
-    ) -> dict[str, UUID]:
+    ) -> CreateDataProductLifeCycleResponse:
         data_product_lifecycle = DataProductLifeCycleModel(
             **data_product_lifecycle.parse_pydantic_schema()
         )
         self.db.add(data_product_lifecycle)
         self.db.commit()
-        return {"id": data_product_lifecycle.id}
+        return CreateDataProductLifeCycleResponse(id=data_product_lifecycle.id)
 
     def update_data_product_lifecycle(
         self, id: UUID, data_product_lifecycle: DataProductLifeCycleUpdate
-    ) -> dict[str, UUID]:
+    ) -> UpdateDataProductLifeCycleResponse:
         lifecycle = self.db.get(DataProductLifeCycleModel, id)
         lifecycle.color = data_product_lifecycle.color
         lifecycle.is_default = data_product_lifecycle.is_default
         lifecycle.name = data_product_lifecycle.name
         lifecycle.value = data_product_lifecycle.value
         self.db.commit()
-        return {"id": id}
+        return UpdateDataProductLifeCycleResponse(id=id)
 
     def delete_data_product_lifecycle(self, lifecycle_id: UUID) -> None:
         lifecycle = self.db.get(DataProductLifeCycleModel, lifecycle_id)

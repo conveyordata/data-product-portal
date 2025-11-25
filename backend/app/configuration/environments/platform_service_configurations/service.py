@@ -8,6 +8,7 @@ from app.configuration.environments.platform_service_configurations.model import
     EnvironmentPlatformServiceConfiguration as EnvPlatformServiceConfigurationModel,
 )
 from app.configuration.environments.platform_service_configurations.schema_response import (
+    EnvironmentConfigsGet,
     EnvironmentConfigsGetItem,
 )
 
@@ -28,12 +29,12 @@ class EnvironmentPlatformServiceConfigurationService:
 
     def get_all_platform_service_configs(
         self, platform_id: UUID, service_id: UUID
-    ) -> Sequence[EnvironmentConfigsGetItem]:
+    ) -> EnvironmentConfigsGet:
         stmt = select(EnvPlatformServiceConfigurationModel).where(
             EnvPlatformServiceConfigurationModel.platform_id == platform_id,
             EnvPlatformServiceConfigurationModel.service_id == service_id,
         )
-        return self.db.scalars(stmt).all()
+        return EnvironmentConfigsGet(environment_configs=self.db.scalars(stmt).all())
 
     def get_environment_platform_service_configs(
         self, environment_id: UUID

@@ -6,13 +6,13 @@ from pydantic import Field, computed_field
 from app.configuration.environments.platform_service_configurations.schema_response import (
     EnvironmentConfigsGetItem,
 )
+from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.tags.schema import Tag
 from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_products.schema import DataProduct
 from app.datasets.schema import Dataset
-from app.platform_services.schema import PlatformService
 from app.shared.schema import ORMModel
 
 

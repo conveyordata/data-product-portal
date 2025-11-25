@@ -72,19 +72,6 @@ def get_environment_platform_service_config(
 
 
 @router.get(
-    "/platforms/{platform_id}/services/{service_id}/config",
-)
-def get_environment_platform_service_config_for_all_envs(
-    platform_id: UUID,
-    service_id: UUID,
-    db: Session = Depends(get_db_session),
-) -> Sequence[EnvironmentConfigsGetItem]:
-    return EnvironmentPlatformServiceConfigurationService(
-        db
-    ).get_all_platform_service_configs(platform_id, service_id)
-
-
-@router.get(
     "/{id}/platforms/{platform_id}/config",
     dependencies=[
         Depends(
@@ -138,3 +125,30 @@ def get_environment_configs(
             db
         ).get_environment_platform_service_configs(id)
     )
+
+
+@router.get(
+    "/envs/platforms/{platform_id}/services/{service_id}/config",
+    deprecated=True,
+)
+def get_environment_platform_service_config_for_all_envs_old(
+    platform_id: UUID,
+    service_id: UUID,
+    db: Session = Depends(get_db_session),
+) -> Sequence[EnvironmentConfigsGetItem]:
+    return get_environment_platform_service_config_for_all_envs(
+        platform_id, service_id, db
+    ).environment_configs
+
+
+@router.get(
+    "/v2/configuration/environments/platforms/{platform_id}/services/{service_id}/config",
+)
+def get_environment_platform_service_config_for_all_envs(
+    platform_id: UUID,
+    service_id: UUID,
+    db: Session = Depends(get_db_session),
+) -> EnvironmentConfigsGet:
+    return EnvironmentPlatformServiceConfigurationService(
+        db
+    ).get_all_platform_service_configs(platform_id, service_id)

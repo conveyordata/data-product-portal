@@ -50,3 +50,11 @@ class DataProductSettingValueGet(BaseDataProductSettingValueGet):
 
 class DataProductSettingValuesGet(BaseDataProductSettingValueGet):
     pass
+
+
+class UpdateDataProductSettingResponse(ORMModel):
+    id: UUID
+
+
+class CreateDataProductSettingResponse(ORMModel):
+    id: UUID

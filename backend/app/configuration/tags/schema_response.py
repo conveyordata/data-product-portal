@@ -19,3 +19,11 @@ class TagsGetItem(BaseTagGet):
 
 class TagsGet(ORMModel):
     tags: Sequence[TagsGetItem]
+
+
+class CreateTagResponse(ORMModel):
+    id: UUID
+
+
+class UpdateTagResponse(ORMModel):
+    id: UUID

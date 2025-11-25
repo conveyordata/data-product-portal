@@ -18,7 +18,9 @@ from app.configuration.data_product_settings.schema_request import (
     DataProductSettingValueCreate,
 )
 from app.configuration.data_product_settings.schema_response import (
+    CreateDataProductSettingResponse,
     DataProductSettingsGetItem,
+    UpdateDataProductSettingResponse,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
@@ -87,7 +89,7 @@ class DataProductSettingService:
 
     def create_data_product_setting(
         self, setting: DataProductSettingCreate
-    ) -> dict[str, UUID]:
+    ) -> CreateDataProductSettingResponse:
         if (
             validity := self.namespace_validator.validate_namespace(
                 setting.namespace, self.db, setting.scope
@@ -101,11 +103,11 @@ class DataProductSettingService:
         setting = DataProductSettingModel(**setting.parse_pydantic_schema())
         self.db.add(setting)
         self.db.commit()
-        return {"id": setting.id}
+        return CreateDataProductSettingResponse(id=setting.id)
 
     def update_data_product_setting(
         self, id: UUID, setting: DataProductSettingUpdate
-    ) -> dict[str, UUID]:
+    ) -> UpdateDataProductSettingResponse:
         current_setting = self.db.get(DataProductSettingModel, id)
         update_setting = setting.model_dump(exclude_unset=True)
 
@@ -127,7 +129,7 @@ class DataProductSettingService:
             setattr(current_setting, k, v)
 
         self.db.commit()
-        return {"id": id}
+        return UpdateDataProductSettingResponse(id=id)
 
     def delete_data_product_setting(self, setting_id: UUID) -> None:
         data_product_setting = self.db.get(
