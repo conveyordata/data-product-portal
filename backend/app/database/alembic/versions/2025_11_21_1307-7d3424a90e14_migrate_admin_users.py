@@ -50,10 +50,10 @@ def downgrade() -> None:
     # Revert can_become_admin and admin_expiry
     op.execute(
         """
-        INSERT INTO role_assignments_global (user_id, role_id)
-        SELECT id, (
+        INSERT INTO role_assignments_global (id, user_id, role_id, decision)
+        SELECT gen_random_uuid(), id, (
             SELECT id FROM roles WHERE prototype = 3
-        )
+        ), 'APPROVED'
         FROM users
         WHERE can_become_admin = TRUE
         """
