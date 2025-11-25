@@ -31,6 +31,12 @@ tasks:
         fs.writeFileSync(file, updated);
         '
 
+  update:open-api-spec:
+    desc: "Update OpenAPI spec with new version"
+    cmds:
+      - cd backend && poetry run python -m app.open_api_export
+      - mv backend/openapi.json docs/static/openapi.json
+
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
@@ -93,5 +99,6 @@ tasks:
     cmds:
       - task: bump:version-file
       - task: bump:release-notes
+      - task: update:open-api-spec
       - task: release:commit
       - task: release:pr
