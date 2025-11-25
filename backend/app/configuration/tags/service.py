@@ -7,7 +7,11 @@ from sqlalchemy.orm import Session
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema_request import TagCreate, TagUpdate
-from app.configuration.tags.schema_response import TagsGetItem
+from app.configuration.tags.schema_response import (
+    CreateTagResponse,
+    TagsGetItem,
+    UpdateTagResponse,
+)
 
 
 class TagService:
@@ -17,14 +21,14 @@ class TagService:
     def get_tags(self) -> Sequence[TagsGetItem]:
         return self.db.scalars(select(TagModel).order_by(asc(TagModel.value))).all()
 
-    def create_tag(self, tag: TagCreate) -> dict[str, UUID]:
+    def create_tag(self, tag: TagCreate) -> CreateTagResponse:
         tag = TagModel(**tag.parse_pydantic_schema())
         self.db.add(tag)
         self.db.commit()
 
-        return {"id": tag.id}
+        return CreateTagResponse(id=tag.id)
 
-    def update_tag(self, id: UUID, tag: TagUpdate) -> dict[str, UUID]:
+    def update_tag(self, id: UUID, tag: TagUpdate) -> UpdateTagResponse:
         current_tag = ensure_tag_exists(id, self.db)
         updated_tag = tag.model_dump(exclude_unset=True)
 
@@ -32,7 +36,7 @@ class TagService:
             setattr(current_tag, attr, value)
 
         self.db.commit()
-        return {"id": id}
+        return UpdateTagResponse(id=id)
 
     def remove_tag(self, id: UUID) -> None:
         tag = self.db.get(TagModel, id)

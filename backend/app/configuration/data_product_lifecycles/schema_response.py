@@ -22,3 +22,11 @@ class DataProductLifeCyclesGetItem(BaseDataProductLifeCycleGet):
 
 class DataProductLifeCyclesGet(ORMModel):
     data_product_life_cycles: Sequence[DataProductLifeCyclesGetItem]
+
+
+class CreateDataProductLifeCycleResponse(ORMModel):
+    id: UUID
+
+
+class UpdateDataProductLifeCycleResponse(ORMModel):
+    id: UUID

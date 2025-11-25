@@ -9,8 +9,10 @@ from app.configuration.data_product_lifecycles.schema_request import (
     DataProductLifeCycleUpdate,
 )
 from app.configuration.data_product_lifecycles.schema_response import (
+    CreateDataProductLifeCycleResponse,
     DataProductLifeCyclesGet,
     DataProductLifeCyclesGetItem,
+    UpdateDataProductLifeCycleResponse,
 )
 from app.configuration.data_product_lifecycles.service import (
     DataProductLifeCycleService,
@@ -51,7 +53,7 @@ router = APIRouter()
 def create_data_product_lifecycle(
     data_product_lifecycle: DataProductLifeCycleCreate,
     db: Session = Depends(get_db_session),
-) -> dict[str, UUID]:
+) -> CreateDataProductLifeCycleResponse:
     return DataProductLifeCycleService(db).create_data_product_lifecycle(
         data_product_lifecycle
     )
@@ -87,7 +89,7 @@ def update_data_product_lifecycle(
     id: UUID,
     data_product_lifecycle: DataProductLifeCycleUpdate,
     db: Session = Depends(get_db_session),
-) -> dict[str, UUID]:
+) -> UpdateDataProductLifeCycleResponse:
     return DataProductLifeCycleService(db).update_data_product_lifecycle(
         id, data_product_lifecycle
     )

@@ -16,9 +16,9 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
 
 from app.configuration.platforms.model import Platform
+from app.configuration.platforms.platform_services.model import PlatformService
 from app.configuration.tags.model import Tag, tag_data_output_table
 from app.database.database import Base
-from app.platform_services.model import PlatformService
 from app.shared.model import BaseORM
 
 

@@ -24,3 +24,11 @@ class DomainsGetItem(BaseDomainGet):
 
 class DomainsGet(ORMModel):
     domains: Sequence[DomainsGetItem]
+
+
+class CreateDomainResponse(ORMModel):
+    id: UUID
+
+
+class UpdateDomainResponse(ORMModel):
+    id: UUID

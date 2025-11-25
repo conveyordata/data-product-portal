@@ -5,7 +5,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.configuration.tags.schema_request import TagCreate, TagUpdate
-from app.configuration.tags.schema_response import TagsGet, TagsGetItem
+from app.configuration.tags.schema_response import (
+    CreateTagResponse,
+    TagsGet,
+    TagsGetItem,
+    UpdateTagResponse,
+)
 from app.configuration.tags.service import TagService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
@@ -24,7 +29,7 @@ router = APIRouter()
 )
 def create_tag(
     tag: TagCreate, db: Session = Depends(get_db_session)
-) -> dict[str, UUID]:
+) -> CreateTagResponse:
     return TagService(db).create_tag(tag)
 
 
@@ -38,7 +43,7 @@ def create_tag(
 )
 def update_tag(
     id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)
-) -> dict[str, UUID]:
+) -> UpdateTagResponse:
     return TagService(db).update_tag(id, tag)
 
 

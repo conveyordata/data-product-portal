@@ -8,7 +8,12 @@ from sqlalchemy.orm import Session, selectinload
 from app.configuration.domains.model import Domain as DomainModel
 from app.configuration.domains.model import ensure_domain_exists
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
-from app.configuration.domains.schema_response import DomainGet, DomainsGetItem
+from app.configuration.domains.schema_response import (
+    CreateDomainResponse,
+    DomainGet,
+    DomainsGetItem,
+    UpdateDomainResponse,
+)
 
 
 class DomainService:
@@ -47,13 +52,13 @@ class DomainService:
 
         return domain
 
-    def create_domain(self, domain: DomainCreate) -> dict[str, UUID]:
+    def create_domain(self, domain: DomainCreate) -> CreateDomainResponse:
         domain = DomainModel(**domain.parse_pydantic_schema())
         self.db.add(domain)
         self.db.commit()
-        return {"id": domain.id}
+        return CreateDomainResponse(id=domain.id)
 
-    def update_domain(self, id: UUID, domain: DomainUpdate) -> dict[str, UUID]:
+    def update_domain(self, id: UUID, domain: DomainUpdate) -> UpdateDomainResponse:
         current_domain = self.db.get(DomainModel, id)
         updated_domain = domain.parse_pydantic_schema()
 
@@ -61,7 +66,7 @@ class DomainService:
             setattr(current_domain, attr, value)
 
         self.db.commit()
-        return {"id": id}
+        return UpdateDomainResponse(id=id)
 
     def remove_domain(self, id: UUID) -> None:
         domain = self.db.get(
