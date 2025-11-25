@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.4.2
+
 ### features
 - **[Admin rights]**: It is no longer allowed to have permanent admin rights. Users who were admins before will now get the option to temporarily elevate themselves to super user rights.
 This avoids the pitfall where you permanently are allowed to do everything and no longer have a view on how the normal user flow looks.
