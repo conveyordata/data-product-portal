@@ -35,6 +35,7 @@ from app.data_products.service import DataProductService
 from app.database.database import ensure_exists
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.datasets.service import DatasetService
 from app.graph.graph import Graph
 from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
@@ -111,23 +112,38 @@ class DataOutputService:
         return model
 
     def remove_data_output(self, id: UUID) -> DataOutputModel:
-        data_output = self.db.get(DataOutputModel, id)
-        if not data_output:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data Output {id} not found",
-            )
+        data_output = self.get_data_output_with_links(id)
 
         result = copy.deepcopy(data_output)
         self.db.delete(data_output)
+        self.db.flush()
+
+        self.update_search_vector_associated_datasets(result)
         self.db.commit()
         return result
+
+    def get_data_output_with_links(self, id: UUID) -> DataOutputModel:
+        data_output: DataOutputModel | None = self.get_data_output(id)
+        if not data_output:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Required data output with {id} does not exist",
+            )
+        return data_output
+
+    def update_search_vector_associated_datasets(self, result: DataOutputModel):
+        dataset_service = DatasetService(self.db)
+        for dataset_link in result.dataset_links:
+            dataset_service.recalculate_search_vector_for(dataset_link.dataset_id)
 
     def update_data_output_status(
         self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
     ) -> None:
-        current_data_output = self.ensure_data_output_exists(id)
+        current_data_output = self.get_data_output_with_links(id)
         current_data_output.status = data_output.status
+        self.db.flush()
+
+        self.update_search_vector_associated_datasets(current_data_output)
         self.db.commit()
 
     def link_dataset_to_data_output(
@@ -168,6 +184,8 @@ class DataOutputService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
+        self.db.flush()
+        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         self.db.commit()
         return dataset_link
 
@@ -194,6 +212,8 @@ class DataOutputService:
             )
 
         data_output.dataset_links.remove(data_output_dataset)
+        self.db.flush()
+        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         self.db.commit()
         return data_output
 

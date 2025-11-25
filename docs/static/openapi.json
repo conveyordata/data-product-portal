@@ -262,6 +262,75 @@
         }
       }
     },
+    "/api/datasets/search": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Search Datasets",
+        "operationId": "search_datasets_api_datasets_search_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "title": "Query"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatasetsSearch"
+                  },
+                  "title": "Response Search Datasets Api Datasets Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/datasets/namespace_suggestion": {
       "get": {
         "tags": [
@@ -12612,6 +12681,115 @@
           "data_product_name"
         ],
         "title": "DatasetsGet"
+      },
+      "DatasetsSearch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DatasetStatus"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage"
+          },
+          "access_type": {
+            "$ref": "#/components/schemas/DatasetAccessType"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          },
+          "lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataProductLifeCycle"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "data_product_settings": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductSettingValue"
+            },
+            "type": "array",
+            "title": "Data Product Settings"
+          },
+          "data_output_links": {
+            "items": {
+              "$ref": "#/components/schemas/DataOutputLink"
+            },
+            "type": "array",
+            "title": "Data Output Links"
+          },
+          "data_product_count": {
+            "type": "integer",
+            "title": "Data Product Count"
+          },
+          "data_product_name": {
+            "type": "string",
+            "title": "Data Product Name"
+          },
+          "rank": {
+            "type": "number",
+            "title": "Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "namespace",
+          "name",
+          "description",
+          "status",
+          "usage",
+          "access_type",
+          "data_product_id",
+          "tags",
+          "domain",
+          "lifecycle",
+          "data_product_settings",
+          "data_output_links",
+          "data_product_count",
+          "data_product_name",
+          "rank"
+        ],
+        "title": "DatasetsSearch"
       },
       "DecisionStatus": {
         "type": "string",

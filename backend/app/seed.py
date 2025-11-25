@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.authorization.service import AuthorizationService
 from app.database.database import get_db_session
+from app.datasets.service import DatasetService
 
 
 def seed_db(path: str, **template_vars):
@@ -24,3 +25,4 @@ def seed_db(path: str, **template_vars):
 
     raw_connection.commit()
     AuthorizationService(db).reload_enforcer()
+    DatasetService(db).recalculate_search_vector_datasets()
