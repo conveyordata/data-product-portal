@@ -99,7 +99,7 @@ class TestUsersRouter:
             external_id=settings.DEFAULT_USERNAME, can_become_admin=False
         )
         response = client.put(
-            f"{ENDPOINT}/can_become_admin",
+            f"{ENDPOINT}/set_can_become_admin",
             json={
                 "user_id": str(user.id),
                 "can_become_admin": True,
@@ -118,7 +118,7 @@ class TestUsersRouter:
             role_id=role.id,
         )
         response = client.put(
-            f"{ENDPOINT}/can_become_admin",
+            f"{ENDPOINT}/set_can_become_admin",
             json={
                 "user_id": str(user.id),
                 "can_become_admin": False,
@@ -141,7 +141,7 @@ class TestUsersRouter:
             role_id=role.id,
         )
         response = client.put(
-            f"{ENDPOINT}/can_become_admin",
+            f"{ENDPOINT}/set_can_become_admin",
             json={
                 "user_id": str(user.id),
                 "can_become_admin": False,
@@ -166,7 +166,7 @@ class TestUsersRouter:
             role_id=role.id,
         )
         response = client.put(
-            f"{ENDPOINT}/can_become_admin",
+            f"{ENDPOINT}/set_can_become_admin",
             json={
                 "user_id": str(user.id),
                 "can_become_admin": True,

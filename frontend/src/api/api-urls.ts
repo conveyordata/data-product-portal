@@ -44,7 +44,7 @@ export enum ApiUrl {
     UserDataProducts = '/api/data_products/user/:userId',
     UserDatasets = '/api/datasets/user/:userId',
     UserSeenTour = '/api/users/seen_tour',
-    UserBecomeAdmin = '/api/users/can_become_admin',
+    UserBecomeAdmin = '/api/users/set_can_become_admin',
     Authorize = '/api/auth/user',
     Roles = '/api/roles',
     RolesGet = '/api/roles/:scope',

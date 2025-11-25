@@ -68,7 +68,7 @@ def mark_tour_as_seen(
 
 
 @router.put(
-    "/can_become_admin",
+    "/set_can_become_admin",
     dependencies=[
         Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
     ],
