@@ -14,9 +14,6 @@ from app.database.database import Base, ensure_exists
 from app.datasets.enums import OutputPortAccessType
 from app.datasets.status import OutputPortStatus
 from app.datasets.curated_queries.model import DatasetCuratedQuery
-from app.datasets.enums import DatasetAccessType
-from app.datasets.status import DatasetStatus
-from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:

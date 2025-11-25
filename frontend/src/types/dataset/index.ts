@@ -6,6 +6,7 @@ export type {
     DatasetCreateRequest,
     DatasetCreateResponse,
 } from './dataset-create.contract.ts';
+export type { DatasetCuratedQueryContract } from './dataset-curated-query.contract.ts';
 export type {
     DatasetUpdateFormSchema,
     DatasetUpdateRequest,
