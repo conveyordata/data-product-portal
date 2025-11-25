@@ -8,7 +8,6 @@ ANY_ACT: AuthorizationAction = cast(AuthorizationAction, 0)
 
 
 class TestAuthorization:
-
     def test_everyone_role(self, authorizer: Authorization):
         allowed = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
         denied = AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS

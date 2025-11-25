@@ -1,8 +1,8 @@
 import factory
-from tests.factories.event import EventFactory
-from tests.factories.user import UserFactory
 
 from app.notifications.model import Notification
+from tests.factories.event import EventFactory
+from tests.factories.user import UserFactory
 
 
 class NotificationFactory(factory.alchemy.SQLAlchemyModelFactory):

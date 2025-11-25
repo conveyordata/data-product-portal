@@ -1,6 +1,7 @@
 import json
 
 import pytest
+
 from tests.factories import (
     EnvironmentFactory,
     EnvPlatformConfigFactory,
@@ -42,8 +43,7 @@ class TestEnvironmentsRouter:
             environment=EnvironmentFactory(name="production"),
         )
         response = client.get(
-            f"{ENDPOINT}/platforms/{service.platform.id}"
-            f"/services/{service.id}/config",
+            f"{ENDPOINT}/platforms/{service.platform.id}/services/{service.id}/config",
         )
 
         assert response.status_code == 200
@@ -90,7 +90,7 @@ class TestEnvironmentsRouter:
     @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_config_forbidden(self, client):
         response = client.get(
-            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid" "/config",
+            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid/config",
         )
         assert response.status_code == 422
 

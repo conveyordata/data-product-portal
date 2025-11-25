@@ -1,3 +1,6 @@
+from app.core.authz import Action
+from app.role_assignments.data_product.service import RoleAssignmentService
+from app.roles.schema import Scope
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -5,13 +8,8 @@ from tests.factories import (
     UserFactory,
 )
 
-from app.core.authz import Action
-from app.role_assignments.data_product.service import RoleAssignmentService
-from app.roles.schema import Scope
-
 
 class TestDataProductRoleAssignmentsService:
-
     def test_user_has_permission(self, session):
         service = RoleAssignmentService(db=session)
         data_product = DataProductFactory()

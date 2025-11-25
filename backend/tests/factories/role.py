@@ -2,13 +2,13 @@ from typing import Final
 
 import factory
 from faker import Faker
-from tests import test_session
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
 from app.roles import ADMIN_UUID
 from app.roles.model import Role
 from app.roles.schema import Prototype, Scope
+from tests import test_session
 
 faker: Final[Faker] = Faker()
 

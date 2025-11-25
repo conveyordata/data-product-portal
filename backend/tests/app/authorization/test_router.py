@@ -1,11 +1,11 @@
 import uuid
 
 from fastapi.testclient import TestClient
-from tests.factories import UserFactory
 
 from app.authorization.schema import AccessResponse
 from app.core.authz import Action, Authorization
 from app.settings import settings
+from tests.factories import UserFactory
 
 ENDPOINT = "/api/authz"
 

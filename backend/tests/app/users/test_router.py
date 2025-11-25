@@ -1,11 +1,11 @@
 import pytest
-from tests.factories import UserFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.roles.schema import Scope
 from app.settings import settings
+from tests.factories import UserFactory
+from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 ENDPOINT = "/api/users"
 

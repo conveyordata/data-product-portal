@@ -1,27 +1,31 @@
 from fastapi import APIRouter, Security
 
 from app.authorization.router import router as authorization
+from app.configuration.data_product_lifecycles.router import (
+    router as data_product_lifecycle,
+)
+from app.configuration.data_product_settings.router import (
+    router as data_product_setting,
+)
+from app.configuration.data_product_types.router import router as data_product_type
+from app.configuration.domains.router import router as domain
+from app.configuration.environments.router import router as environment
+from app.configuration.platforms.router import router as platform
+from app.configuration.tags.router import router as tag
+from app.configuration.theme_settings.router import router as theme_settings
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
 from app.data_outputs.router import router as data_outputs
 from app.data_outputs_datasets.router import router as data_output_dataset
-from app.data_product_lifecycles.router import router as data_product_lifecycle
-from app.data_product_settings.router import router as data_product_setting
-from app.data_product_types.router import router as data_product_type
 from app.data_products.router import router as data_product
 from app.data_products_datasets.router import router as data_product_dataset
 from app.datasets.router import router as dataset
-from app.domains.router import router as domain
-from app.environments.router import router as environment
 from app.events.router import router as events
 from app.graph.router import router as graph
 from app.notifications.router import router as notification
 from app.pending_actions.router import router as pending_action
-from app.platforms.router import router as platform
 from app.role_assignments.router import router as role_assignment
 from app.roles.router import router as role
-from app.tags.router import router as tag
-from app.theme_settings.router import router as theme_settings
 from app.users.router import router as user
 
 router = (

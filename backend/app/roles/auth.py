@@ -15,7 +15,6 @@ class _AuthRole:
 
 
 class AuthRole(_AuthRole):
-
     def __init__(self, role: Role):
         super().__init__(
             id=str(role.id),

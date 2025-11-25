@@ -21,6 +21,7 @@ def backend_analytics(api_version: str):
                     "arch": platform.machine(),
                     "sandbox": str(settings.SANDBOX),
                 },
+                timeout=5,
             )
     except Exception as e:
         logger.warning(f"Unable to connect to scarf: {e}")

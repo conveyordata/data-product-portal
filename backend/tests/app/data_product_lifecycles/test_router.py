@@ -1,4 +1,5 @@
 import pytest
+
 from tests.factories import DataProductFactory, LifecycleFactory
 
 ENDPOINT = "/api/data_product_lifecycles"

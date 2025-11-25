@@ -91,6 +91,10 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     lifespan=combined_lifespan,
     **oidc_kwargs,
+    swagger_ui_parameters={
+        "docExpansion": "none",
+        "tagsSorter": "alpha",
+    },
 )
 
 mcp_app = mcp.http_app(path="/mcp")
