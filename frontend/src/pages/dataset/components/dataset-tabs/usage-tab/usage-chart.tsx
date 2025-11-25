@@ -20,7 +20,7 @@ type ChartDataPoint = {
     consumer: string;
 };
 
-function transformDataForChart(responses: DatasetQueryStatsDailyResponse[]): ChartDataPoint[] {
+function transformDataForChart(responses: DatasetQueryStatsDailyResponse[], unknownLabel: string): ChartDataPoint[] {
     const oneMonthAgo = subMonths(new Date(), 1);
     const now = new Date();
 
@@ -31,7 +31,7 @@ function transformDataForChart(responses: DatasetQueryStatsDailyResponse[]): Cha
             return {
                 timestamp: date.getTime(),
                 queryCount: stat.query_count,
-                consumer: stat.consumer_data_product_name || 'Unknown',
+                consumer: stat.consumer_data_product_name || unknownLabel,
             };
         })
         .filter((stat) => stat.timestamp >= oneMonthAgo.getTime())
@@ -84,8 +84,8 @@ export function UsageChart({ data, isLoading }: Props) {
         if (!data?.dataset_query_stats_daily_responses) {
             return [];
         }
-        return transformDataForChart(data.dataset_query_stats_daily_responses);
-    }, [data]);
+        return transformDataForChart(data.dataset_query_stats_daily_responses, t('Unknown'));
+    }, [data, t]);
 
     if (isLoading) {
         return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }} />;
