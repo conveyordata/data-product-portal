@@ -23,7 +23,11 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.database.database import get_db_session
+<<<<<<< HEAD
 from app.datasets.query_stats_daily.router import router as query_stats_daily_router
+=======
+from app.datasets.curated_queries.router import router as curated_queries_router
+>>>>>>> 8b6cabee (backend implementation of dataset/{id}/usage/curated_queries)
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreate,
@@ -384,3 +388,4 @@ def set_value_for_dataset(
 
 
 router.include_router(query_stats_daily_router)
+router.include_router(curated_queries_router)
