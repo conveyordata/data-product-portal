@@ -37,7 +37,7 @@ export function UserMenu() {
             return;
         }
 
-        const updateTimeRemaining = async () => {
+        const reload_when_admin_expires = async () => {
             const expiry = new Date(`${isAdmin.time}Z`).getTime(); // UTC → epoch ms
             const now = Date.now();
             const diff = expiry - now;
@@ -51,8 +51,8 @@ export function UserMenu() {
             }
         };
 
-        updateTimeRemaining();
-        const interval = setInterval(updateTimeRemaining, 1000);
+        reload_when_admin_expires();
+        const interval = setInterval(reload_when_admin_expires, 1000);
 
         return () => clearInterval(interval);
     }, [isAdmin, user, revokeAdmin]);
@@ -118,30 +118,28 @@ export function UserMenu() {
                     arrow={{ pointAtCenter: true }}
                     mouseLeaveDelay={0.3}
                 >
-                    <div>
-                        {
-                            <Badge
-                                count={
-                                    isAdmin?.is_admin
-                                        ? t('Admin powers until ') +
-                                          new Date(`${isAdmin?.time}Z`).toLocaleTimeString(undefined, {
-                                              hour: '2-digit',
-                                              minute: '2-digit',
-                                          })
-                                        : 0
-                                }
-                                showZero={false}
-                                color={colorPrimary}
-                                style={{ fontSize: 10 }}
-                                size="small"
-                                offset={[-50, 0]}
-                            >
-                                <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
-                                    {userInitials || <UserOutlined />}
-                                </Avatar>
-                            </Badge>
-                        }
-                    </div>
+                    {
+                        <Badge
+                            count={
+                                isAdmin?.is_admin
+                                    ? t('Admin powers until ') +
+                                      new Date(`${isAdmin?.time}Z`).toLocaleTimeString(undefined, {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                      })
+                                    : 0
+                            }
+                            showZero={false}
+                            color={colorPrimary}
+                            style={{ fontSize: 10 }}
+                            size="small"
+                            offset={[-50, 0]}
+                        >
+                            <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
+                                {userInitials || <UserOutlined />}
+                            </Avatar>
+                        </Badge>
+                    }
                 </Dropdown>
             </Flex>
         </Flex>

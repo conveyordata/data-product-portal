@@ -43,7 +43,7 @@ class UserService:
         user.has_seen_tour = True
         self.db.commit()
 
-    def can_become_admin(self, request: CanBecomeAdminUpdate) -> None:
+    def set_can_become_admin(self, request: CanBecomeAdminUpdate) -> None:
         if not request.can_become_admin:
             if (
                 len(

@@ -43,8 +43,7 @@ def become_admin(
     request: BecomeAdmin,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> bool:
-    # TODO Check this in a resolver?
+):
     user = ensure_user_exists(user.id, db)
     if not user.can_become_admin:
         raise HTTPException(
@@ -53,7 +52,7 @@ def become_admin(
         )
     user.admin_expiry = request.expiry
     authorizer = Authorization()
-    return authorizer.assign_admin_role(user_id=str(user.id))
+    authorizer.assign_admin_role(user_id=str(user.id))
 
 
 @router.post(
@@ -62,11 +61,10 @@ def become_admin(
 def revoke_admin(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> bool:
-    # TODO Check this in a resolver?
+):
     user = ensure_user_exists(user.id, db)
     authorizer = Authorization()
-    return authorizer.revoke_admin_role(user_id=user.id)
+    authorizer.revoke_admin_role(user_id=user.id)
 
 
 @router.post(

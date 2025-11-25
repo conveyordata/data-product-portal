@@ -8,6 +8,7 @@ from app.roles.schema import Role, Scope
 from app.settings import settings
 from app.users.schema import User
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
+from tests.factories.dataset import DatasetFactory
 
 ENDPOINT = "/api/role_assignments/global"
 
@@ -50,13 +51,20 @@ class TestGlobalRoleAssignmentsRouter:
 
     def test_become_admin(self, client: TestClient):
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+        ds = DatasetFactory()
+
+        delete = client.delete(f"/api/datasets/{ds.id}")
+        assert delete.status_code == status.HTTP_403_FORBIDDEN
 
         response = client.post(
             f"{ENDPOINT}/become_admin",
             json={"expiry": "2024-12-31T23:59:59Z"},
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() is True
+
+        # User became admin, can delete datasets now
+        delete = client.delete(f"/api/datasets/{ds.id}")
+        assert delete.status_code == status.HTTP_200_OK
 
     def test_become_admin_not_allowed(self, client: TestClient):
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=False)
@@ -74,19 +82,16 @@ class TestGlobalRoleAssignmentsRouter:
             f"{ENDPOINT}/revoke_admin",
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() is False
         response = client.post(
             f"{ENDPOINT}/become_admin",
             json={"expiry": "2024-12-31T23:59:59Z"},
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() is True
 
         response = client.post(
             f"{ENDPOINT}/revoke_admin",
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() is True
 
     def test_create_assignment_admin(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)

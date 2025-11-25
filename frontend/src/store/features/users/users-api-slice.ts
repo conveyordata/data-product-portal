@@ -38,7 +38,7 @@ export const usersApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: userTa
         canBecomeAdmin: builder.mutation<void, { user_id: string; can_become_admin: boolean }>({
             query: (payload) => ({
                 url: ApiUrl.UserBecomeAdmin,
-                method: 'POST',
+                method: 'PUT',
                 data: payload,
             }),
             invalidatesTags: (_, _error, { user_id }) => [{ type: TagTypes.User, id: user_id }],

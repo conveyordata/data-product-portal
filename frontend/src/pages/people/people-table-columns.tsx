@@ -89,8 +89,6 @@ export const getPeopleTableColumns = ({
                     name = everyone?.name;
                 }
                 if (canAssignRole) {
-                    // const disabled = role?.role.prototype === Prototype.ADMIN && lockAdmins;
-
                     return (
                         <TableCellItem>
                             <RoleSelector
@@ -98,7 +96,6 @@ export const getPeopleTableColumns = ({
                                 role={role}
                                 onChange={(value: string) => onChange(user.id, value, role)}
                                 options={options}
-                                // disabled={disabled}
                             />
                         </TableCellItem>
                     );

@@ -98,7 +98,7 @@ class TestUsersRouter:
         user = UserFactory(
             external_id=settings.DEFAULT_USERNAME, can_become_admin=False
         )
-        response = client.post(
+        response = client.put(
             f"{ENDPOINT}/can_become_admin",
             json={
                 "user_id": str(user.id),
@@ -117,7 +117,7 @@ class TestUsersRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        response = client.post(
+        response = client.put(
             f"{ENDPOINT}/can_become_admin",
             json={
                 "user_id": str(user.id),
@@ -140,7 +140,7 @@ class TestUsersRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        response = client.post(
+        response = client.put(
             f"{ENDPOINT}/can_become_admin",
             json={
                 "user_id": str(user.id),
@@ -165,7 +165,7 @@ class TestUsersRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        response = client.post(
+        response = client.put(
             f"{ENDPOINT}/can_become_admin",
             json={
                 "user_id": str(user.id),
