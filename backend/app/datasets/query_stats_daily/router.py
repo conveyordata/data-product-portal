@@ -9,7 +9,6 @@ from app.datasets.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyUpdates,
 )
 from app.datasets.query_stats_daily.schema_response import (
-    DatasetQueryStatsDailyResponse,
     DatasetQueryStatsDailyResponses,
 )
 from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
@@ -23,12 +22,7 @@ def get_query_stats(
     db: Session = Depends(get_db_session),
 ) -> DatasetQueryStatsDailyResponses:
     service = DatasetQueryStatsDailyService(db)
-    stats = service.get_query_stats_daily(dataset_id=id)
-    return DatasetQueryStatsDailyResponses(
-        dataset_query_stats_daily_responses=[
-            DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
-        ]
-    )
+    return service.get_query_stats_daily(dataset_id=id)
 
 
 @router.patch("")

@@ -11,6 +11,7 @@ from app.datasets.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyUpdate,
 )
 from app.datasets.query_stats_daily.schema_response import (
+    DatasetQueryStatsDailyResponse,
     DatasetQueryStatsDailyResponses,
 )
 
@@ -22,10 +23,15 @@ class DatasetQueryStatsDailyService:
     def get_query_stats_daily(
         self, dataset_id: UUID
     ) -> DatasetQueryStatsDailyResponses:
-        return (
+        stats = (
             self.db.query(DatasetQueryStatsDaily)
             .filter(DatasetQueryStatsDaily.dataset_id == dataset_id)
             .all()
+        )
+        return DatasetQueryStatsDailyResponses(
+            dataset_query_stats_daily_responses=[
+                DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
+            ]
         )
 
     def update_query_stats_daily(

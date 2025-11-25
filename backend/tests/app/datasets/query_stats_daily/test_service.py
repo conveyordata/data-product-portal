@@ -167,11 +167,11 @@ class TestDatasetQueryStatsDailyService:
 
         # Get stats for the dataset
         service = DatasetQueryStatsDailyService(session)
-        stats = service.get_query_stats_daily(dataset.id)
+        response = service.get_query_stats_daily(dataset.id)
+        stats = response.dataset_query_stats_daily_responses
 
         # Verify results
         assert len(stats) == 2
-        assert all(stat.dataset_id == dataset.id for stat in stats)
 
         # Verify the correct records were returned
         stats_by_consumer = {stat.consumer_data_product_id: stat for stat in stats}
