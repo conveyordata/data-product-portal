@@ -130,8 +130,8 @@ begin
     -- USERS
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('alice.baker@pharma.com', 'a02d3714-97e3-40d8-92b7-3b018fd1229f', 'alice.baker@pharma.com', 'Alice', 'Baker', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO alice_id;
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('bob.johnson@pharma.com', '35f2dd11-3119-4eb3-8f19-01b323131221', 'bob.johnson@pharma.com', 'Bob', 'Johnson', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO bob_id;
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'jane.researcher@pharma.com', 'Jane', 'Researcher', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO jane_id;
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('john.scientist@pharma.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.scientist@pharma.com', 'John', 'Scientist', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO john_id;
+    INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'jane.researcher@pharma.com', true, 'Jane', 'Researcher', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO jane_id;
+    INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('john.scientist@pharma.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.scientist@pharma.com', true, 'John', 'Scientist', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO john_id;
 
     -- ROLES
     -- ...existing roles code...
@@ -407,11 +407,6 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
     INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('c4c38b4e-d807-4761-988d-2a2ad39c19cb', '2f645d36-ca49-45d9-97ad-28a5504e86bf', 'b72fca38-17ff-4259-a075-5aaa5973343c', '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', 'b72fca38-17ff-4259-a075-5aaa5973343c', '2025-10-28 18:32:27.702949', 'b72fca38-17ff-4259-a075-5aaa5973343c', '2025-10-28 18:32:27.707971', '2025-10-28 18:32:27.698395', '2025-10-28 18:32:27.707136', NULL);
     INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('3515c47a-00e6-4d24-8710-8ef6753430e7', 'd10fe76b-d39d-4028-909c-aea3fd8a1405', 'b72fca38-17ff-4259-a075-5aaa5973343c', '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', 'b72fca38-17ff-4259-a075-5aaa5973343c', '2025-10-28 18:37:19.964192', 'b72fca38-17ff-4259-a075-5aaa5973343c', '2025-10-28 18:37:19.968735', '2025-10-28 18:37:19.95961', '2025-10-28 18:37:19.967996', NULL);
 
-    -- INSERT ROLE ASSIGNMENTS FOR GLOBAL ROLES
-    INSERT INTO public.role_assignments_global (id, user_id, role_id, decision, requested_on, decided_on, decided_by_id)
-    VALUES
-        ('f2d1fc47-3afa-49be-b652-fa6de00bea6b', john_id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
-        ('b8288793-ae92-4808-9927-d3da20d1321b', jane_id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id);
     -- INSERT TAGS
     INSERT INTO public.tags (id, value, created_on, updated_on, deleted_at) VALUES ('6578f7bd-aebe-433e-8732-999d36d34af6', 'PII', '2025-10-28 16:32:14.563446', NULL, NULL);
     INSERT INTO public.tags (id, value, created_on, updated_on, deleted_at) VALUES ('be182db6-5268-466c-ae48-e5d6899c6d05', 'Sensitive', '2025-10-28 16:32:27.884892', NULL, NULL);

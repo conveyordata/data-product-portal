@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy import UUID, Boolean, Column, DateTime, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -33,6 +33,8 @@ class User(Base, BaseORM):
     )
 
     has_seen_tour = Column(Boolean, default=False, nullable=False)
+    can_become_admin = Column(Boolean, default=False, nullable=False)
+    admin_expiry = Column(DateTime(timezone=False), nullable=True)
 
     notifications: Mapped[list["Notification"]] = relationship(
         "Notification",
@@ -57,6 +59,7 @@ class User(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_roles", "data_product"
     )
+
     global_role: Mapped["GlobalRoleAssignment"] = relationship(
         "GlobalRoleAssignment",
         foreign_keys="GlobalRoleAssignment.user_id",

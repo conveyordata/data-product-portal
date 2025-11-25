@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
+from app.core.authz.background_tasks import check_expired_admins
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
@@ -67,7 +68,9 @@ async def lifespan(_: FastAPI):
         AuthorizationService(db).reload_enforcer()
 
     backend_analytics(API_VERSION)
+    task = asyncio.create_task(check_expired_admins())
     yield
+    task.cancel()
 
 
 # Combine both lifespans

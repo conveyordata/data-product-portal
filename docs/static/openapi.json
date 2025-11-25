@@ -127,8 +127,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "boolean",
-                  "title": "Response Is Admin Api Authz Admin Get"
+                  "$ref": "#/components/schemas/IsAdminResponse",
+                  "type": "boolean"
                 }
               }
             }
@@ -7505,6 +7505,57 @@
         }
       }
     },
+    "/api/users/set_can_become_admin": {
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Set Can Become Admin",
+        "operationId": "set_can_become_admin_api_users_set_can_become_admin_put",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CanBecomeAdminUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/roles/{scope}": {
       "get": {
         "tags": [
@@ -7827,6 +7878,98 @@
                 "schema": {
                   "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/role_assignments/global/become_admin": {
+      "post": {
+        "tags": [
+          "role_assignments"
+        ],
+        "summary": "Become Admin",
+        "operationId": "become_admin_api_role_assignments_global_become_admin_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BecomeAdmin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/role_assignments/global/revoke_admin": {
+      "post": {
+        "tags": [
+          "role_assignments"
+        ],
+        "summary": "Revoke Admin",
+        "operationId": "revoke_admin_api_role_assignments_global_revoke_admin_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -9872,6 +10015,37 @@
           "approved_by"
         ],
         "title": "BaseDataOutputDatasetAssociationGet"
+      },
+      "BecomeAdmin": {
+        "properties": {
+          "expiry": {
+            "type": "string",
+            "title": "Expiry"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expiry"
+        ],
+        "title": "BecomeAdmin"
+      },
+      "CanBecomeAdminUpdate": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "can_become_admin": {
+            "type": "boolean",
+            "title": "Can Become Admin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "can_become_admin"
+        ],
+        "title": "CanBecomeAdminUpdate"
       },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
@@ -13292,6 +13466,30 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "IsAdminResponse": {
+        "properties": {
+          "is_admin": {
+            "type": "boolean",
+            "title": "Is Admin"
+          },
+          "time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_admin"
+        ],
+        "title": "IsAdminResponse"
+      },
       "LinkDatasetsToDataProduct": {
         "properties": {
           "dataset_ids": {
@@ -14143,6 +14341,22 @@
           "has_seen_tour": {
             "type": "boolean",
             "title": "Has Seen Tour"
+          },
+          "can_become_admin": {
+            "type": "boolean",
+            "title": "Can Become Admin"
+          },
+          "admin_expiry": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Expiry"
           }
         },
         "type": "object",
@@ -14152,7 +14366,8 @@
           "external_id",
           "first_name",
           "last_name",
-          "has_seen_tour"
+          "has_seen_tour",
+          "can_become_admin"
         ],
         "title": "User"
       },
@@ -14213,6 +14428,22 @@
             "type": "boolean",
             "title": "Has Seen Tour"
           },
+          "can_become_admin": {
+            "type": "boolean",
+            "title": "Can Become Admin"
+          },
+          "admin_expiry": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Expiry"
+          },
           "global_role": {
             "anyOf": [
               {
@@ -14232,6 +14463,7 @@
           "first_name",
           "last_name",
           "has_seen_tour",
+          "can_become_admin",
           "global_role"
         ],
         "title": "UsersGet"

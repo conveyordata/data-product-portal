@@ -3,7 +3,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
@@ -16,9 +16,7 @@ from app.role_assignments.global_.schema import (
 )
 from app.roles.model import Role as RoleModel
 from app.roles.schema import Prototype, Scope
-from app.users.model import User as UserModel
 from app.users.schema import User
-from app.users.service import SYSTEM_ACCOUNT
 
 
 class RoleAssignmentService:
@@ -49,6 +47,7 @@ class RoleAssignmentService:
         self, request: RoleAssignmentRequest, *, actor: User
     ) -> RoleAssignment:
         self.ensure_is_global_scope(request.role_id)
+        self.ensure_is_not_admin(request.role_id)
         role_assignment = GlobalRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
@@ -60,7 +59,6 @@ class RoleAssignmentService:
 
     def delete_assignment(self, id_: UUID) -> RoleAssignment:
         assignment = self.get_assignment(id_)
-        self._guard_against_illegal_admin_removal(assignment)
 
         self.db.delete(assignment)
         self.db.commit()
@@ -70,7 +68,6 @@ class RoleAssignmentService:
         self, request: UpdateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
-        self._guard_against_illegal_admin_removal(assignment)
 
         if (role_id := request.role_id) is not None:
             self.ensure_is_global_scope(role_id)
@@ -91,25 +88,10 @@ class RoleAssignmentService:
                 detail="Role not found for this scope",
             )
 
-    def _guard_against_illegal_admin_removal(self, assignment: RoleAssignment) -> None:
-        if (
-            assignment.role is not None
-            and assignment.role.prototype == Prototype.ADMIN
-            and assignment.decision == DecisionStatus.APPROVED
-            and self._count_admins() <= 1
-        ):
+    def ensure_is_not_admin(self, role_id: UUID) -> None:
+        role = self.db.get(RoleModel, role_id)
+        if role and role.prototype == Prototype.ADMIN:
             raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "At least one user needs to have admin rights",
+                status.HTTP_400_BAD_REQUEST,
+                "Admin role assignments are no longer allowed",
             )
-
-    def _count_admins(self) -> int:
-        query = (
-            select(func.count())
-            .select_from(GlobalRoleAssignment)
-            .join(GlobalRoleAssignment.user)
-            .where(UserModel.email != SYSTEM_ACCOUNT)
-            .join(GlobalRoleAssignment.role)
-            .where(RoleModel.prototype == Prototype.ADMIN)
-        )
-        return self.db.scalar(query)

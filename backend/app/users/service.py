@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
-from app.users.schema_request import UserCreate
+from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import UsersGet
 
 SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
@@ -17,12 +17,13 @@ class UserService:
         self.db = db
 
     def get_users(self) -> Sequence[UsersGet]:
-        return self.db.scalars(
+        users = self.db.scalars(
             select(UserModel)
             .outerjoin(UserModel.global_role)
             .where(UserModel.email != SYSTEM_ACCOUNT)
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
+        return users
 
     def remove_user(self, id: UUID) -> None:
         user = ensure_user_exists(id, self.db)
@@ -40,4 +41,19 @@ class UserService:
     def mark_tour_as_seen(self, user_id: UUID) -> None:
         user = ensure_user_exists(user_id, self.db)
         user.has_seen_tour = True
+        self.db.commit()
+
+    def set_can_become_admin(self, request: CanBecomeAdminUpdate) -> None:
+        if not request.can_become_admin:
+            if (
+                len(
+                    self.db.scalars(
+                        select(UserModel).where(UserModel.can_become_admin)
+                    ).all()
+                )
+                <= 1
+            ):
+                raise ValueError("At least one user must be able to become admin.")
+        user = ensure_user_exists(request.user_id, self.db)
+        user.can_become_admin = request.can_become_admin
         self.db.commit()
