@@ -140,7 +140,7 @@ class DeviceFlowService:
         else:
             raise ExpiredDeviceCodeError()
 
-    def _verify_auth_header(self, auth_client_id: str, client_id: str) -> bool:
+    def _verify_auth_header(self, auth_client_id: str, client_id: str):
         if auth_client_id != client_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -149,12 +149,11 @@ class DeviceFlowService:
                     "client id in header does not match request"
                 ),
             )
-        return True
 
     def get_device_token(
         self, auth_client_id: str, client_id: str, db: Session, scope: str = "openid"
     ) -> DeviceFlow:
-        assert self._verify_auth_header(auth_client_id, client_id)
+        self._verify_auth_header(auth_client_id, client_id)
         return self.generate_device_flow_codes(db, client_id, scope)
 
     def get_jwt_token(
@@ -171,7 +170,7 @@ class DeviceFlowService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="POST Call on /token invalid: incorrect grant type",
             )
-        assert self._verify_auth_header(auth_client_id, client_id)
+        self._verify_auth_header(auth_client_id, client_id)
         return self.fetch_jwt_tokens(request, db, device_code, client_id)
 
     def request_user_code_processing(

@@ -56,7 +56,8 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
             )
 
     def swap(self) -> tuple[bool, bool]:
-        assert self.previous_role_id is not None
+        if self.previous_role_id is None:
+            raise ValueError("Cannot swap roles without a previous role")
 
         authorizer = Authorization()
 
