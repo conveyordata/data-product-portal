@@ -5,11 +5,13 @@ from sqlalchemy import UUID, Boolean, Column, DateTime, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.database.database import Base, ensure_exists
 from app.events.model import Event
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:

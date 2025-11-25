@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Security
 
+from app.authorization.role_assignments.router import router as role_assignment
+from app.authorization.roles.router import router as role
 from app.authorization.router import router as authorization
 from app.configuration.data_product_lifecycles.router import (
     router as data_product_lifecycle,
@@ -24,8 +26,6 @@ from app.events.router import router as events
 from app.graph.router import router as graph
 from app.notifications.router import router as notification
 from app.pending_actions.router import router as pending_action
-from app.role_assignments.router import router as role_assignment
-from app.roles.router import router as role
 from app.users.router import router as user
 
 router = (

@@ -1,13 +1,13 @@
 import pytest
 from sqlalchemy.orm import selectinload
 
+from app.authorization.roles import ADMIN_UUID
+from app.authorization.roles.schema import Prototype, Scope
 from app.data_outputs.model import DataOutput
 from app.data_outputs.service import DataOutputService
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.datasets.model import Dataset
 from app.datasets.service import DatasetService
-from app.roles import ADMIN_UUID
-from app.roles.schema import Prototype, Scope
 from app.settings import settings
 from tests import test_session
 from tests.factories import (
@@ -26,14 +26,14 @@ from tests.factories import (
 class TestDatasetsService:
     def test_private_dataset_not_visible(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, user) is False
 
     def test_get_private_dataset_by_owner(self):
         owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(
             role_id=role.id, dataset_id=ds.id, user_id=owner.id
         )
@@ -44,13 +44,13 @@ class TestDatasetsService:
         admin = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
         GlobalRoleAssignmentFactory(role_id=role.id, user_id=admin.id)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, admin) is True
 
     def test_get_private_dataset_by_member_of_consuming_data_product(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         dp = DataProductFactory()
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
         DataProductRoleAssignmentFactory(

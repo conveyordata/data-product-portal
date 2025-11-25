@@ -1,9 +1,9 @@
 from uuid import UUID
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 
 

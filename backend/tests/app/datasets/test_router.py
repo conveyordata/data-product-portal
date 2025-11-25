@@ -3,12 +3,12 @@ from copy import deepcopy
 
 import pytest
 
+from app.authorization.roles.schema import Prototype, Scope
+from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.datasets.service import DatasetService
-from app.roles.schema import Prototype, Scope
-from app.roles.service import RoleService
 from app.settings import settings
 from tests.factories import (
     DataProductDatasetAssociationFactory,
@@ -39,7 +39,7 @@ def dataset_payload():
         "owners": [
             str(user.id),
         ],
-        "access_type": DatasetAccessType.RESTRICTED.value,
+        "access_type": OutputPortAccessType.RESTRICTED.value,
         "domain_id": str(domain.id),
         "data_product_id": str(data_product.id),
     }
@@ -377,26 +377,26 @@ class TestDatasetsRouter:
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
     def test_get_private_dataset_not_allowed(self, client):
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 403
 
     def test_get_private_dataset_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
     def test_get_private_dataset_by_admin(self, client):
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 200
 
     def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         dp = DataProductFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -409,7 +409,7 @@ class TestDatasetsRouter:
         assert response.status_code == 200
 
     def test_get_private_datasets_not_allowed(self, client):
-        DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         response = client.get(ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 0
@@ -417,7 +417,7 @@ class TestDatasetsRouter:
     def test_get_private_datasets_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = client.get(ENDPOINT)
         assert response.status_code == 200
@@ -425,13 +425,13 @@ class TestDatasetsRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_get_private_datasets_by_admin(self, client):
-        DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         response = client.get(ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 1
 
     def test_get_private_datasets_by_member_of_consuming_data_product(self, client):
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         dp = DataProductFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATA_PRODUCT)

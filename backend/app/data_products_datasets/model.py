@@ -11,8 +11,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.database.database import Base
-from app.role_assignments.enums import DecisionStatus
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct

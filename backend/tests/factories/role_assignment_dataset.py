@@ -1,8 +1,8 @@
 import factory
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.core.authz.authorization import Authorization
-from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.enums import DecisionStatus
 from tests import test_session
 
 

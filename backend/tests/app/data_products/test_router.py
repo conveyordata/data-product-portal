@@ -5,10 +5,10 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
+from app.authorization.roles.schema import Scope
+from app.authorization.roles.service import RoleService
 from app.core.authz import Action
 from app.core.namespace.validation import NamespaceValidityType
-from app.roles.schema import Scope
-from app.roles.service import RoleService
 from app.settings import settings
 from tests.factories import (
     DataOutputFactory,

@@ -1,5 +1,5 @@
+from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
-from app.roles.schema import Scope
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
