@@ -1,4 +1,10 @@
 import pytest
+
+from app.core.authz import Action
+from app.datasets.enums import DatasetAccessType
+from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Scope
+from app.settings import settings
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
     DataOutputFactory,
@@ -9,12 +15,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.core.authz import Action
-from app.datasets.enums import DatasetAccessType
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
-from app.settings import settings
 
 DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
 DATA_OUTPUTS_ENDPOINT = "/api/data_outputs"

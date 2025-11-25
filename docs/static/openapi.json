@@ -2568,107 +2568,14 @@
         }
       }
     },
-    "/api/data_product_types": {
-      "get": {
-        "tags": [
-          "data_product_types"
-        ],
-        "summary": "Get Data Products Types",
-        "operationId": "get_data_products_types_api_data_product_types_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DataProductTypesGet"
-                  },
-                  "title": "Response Get Data Products Types Api Data Product Types Get"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "data_product_types"
-        ],
-        "summary": "Create Data Product Type",
-        "operationId": "create_data_product_type_api_data_product_types_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DataProductTypeCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Data Product successfully created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Create Data Product Type Api Data Product Types Post"
-                },
-                "example": {
-                  "id": "random id of the new data product"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Owner not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "User id for owner not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/data_product_types/{id}": {
       "get": {
         "tags": [
-          "data_product_types"
+          "Configuration - Data product types"
         ],
         "summary": "Get Data Product Type",
         "operationId": "get_data_product_type_api_data_product_types__id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -2706,10 +2613,11 @@
       },
       "put": {
         "tags": [
-          "data_product_types"
+          "Configuration - Data product types"
         ],
         "summary": "Update Data Product Type",
         "operationId": "update_data_product_type_api_data_product_types__id__put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -2748,12 +2656,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Update Data Product Type Api Data Product Types  Id  Put"
+                  "$ref": "#/components/schemas/UpdateDataProductTypeResponse"
                 }
               }
             }
@@ -2772,10 +2675,11 @@
       },
       "delete": {
         "tags": [
-          "data_product_types"
+          "Configuration - Data product types"
         ],
         "summary": "Remove Data Product Type",
         "operationId": "remove_data_product_type_api_data_product_types__id__delete",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -2820,13 +2724,404 @@
         }
       }
     },
+    "/api/data_product_types": {
+      "post": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Create Data Product Type",
+        "operationId": "create_data_product_type_api_data_product_types_post",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProductTypeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data Product successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDataProductTypeResponse"
+                },
+                "example": {
+                  "id": "random id of the new data product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Owner not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "User id for owner not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Get Data Products Types Old",
+        "operationId": "get_data_products_types_old_api_data_product_types_get",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataProductTypesGetItem"
+                  },
+                  "title": "Response Get Data Products Types Old Api Data Product Types Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_product_types/migrate/{from_id}/{to_id}": {
       "put": {
         "tags": [
-          "data_product_types"
+          "Configuration - Data product types"
         ],
         "summary": "Migrate Data Product Type",
         "operationId": "migrate_data_product_type_api_data_product_types_migrate__from_id___to_id__put",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "from_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "From Id"
+            }
+          },
+          {
+            "name": "to_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "To Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_types/{id}": {
+      "get": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Get Data Product Type",
+        "operationId": "get_data_product_type_api_v2_configuration_data_product_types__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductTypeGet"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Update Data Product Type",
+        "operationId": "update_data_product_type_api_v2_configuration_data_product_types__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProductTypeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDataProductTypeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Remove Data Product Type",
+        "operationId": "remove_data_product_type_api_v2_configuration_data_product_types__id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_types": {
+      "post": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Create Data Product Type",
+        "operationId": "create_data_product_type_api_v2_configuration_data_product_types_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProductTypeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data Product successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDataProductTypeResponse"
+                },
+                "example": {
+                  "id": "random id of the new data product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Owner not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "User id for owner not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Get Data Products Types",
+        "operationId": "get_data_products_types_api_v2_configuration_data_product_types_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductTypesGet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_types/migrate/{from_id}/{to_id}": {
+      "put": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Migrate Data Product Type",
+        "operationId": "migrate_data_product_type_api_v2_configuration_data_product_types_migrate__from_id___to_id__put",
         "parameters": [
           {
             "name": "from_id",
@@ -2882,35 +3177,13 @@
       }
     },
     "/api/data_product_lifecycles": {
-      "get": {
-        "tags": [
-          "data_product_lifecycles"
-        ],
-        "summary": "Get Data Products Lifecycles",
-        "operationId": "get_data_products_lifecycles_api_data_product_lifecycles_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DataProductLifeCyclesGet"
-                  },
-                  "title": "Response Get Data Products Lifecycles Api Data Product Lifecycles Get"
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
         "tags": [
-          "data_product_lifecycles"
+          "Configuration - Data product lifecycles"
         ],
         "summary": "Create Data Product Lifecycle",
         "operationId": "create_data_product_lifecycle_api_data_product_lifecycles_post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "token",
@@ -2939,12 +3212,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Create Data Product Lifecycle Api Data Product Lifecycles Post"
+                  "$ref": "#/components/schemas/CreateDataProductLifeCycleResponse"
                 },
                 "example": {
                   "id": "random id of the new data product"
@@ -2973,15 +3241,40 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
+        "summary": "Get Data Products Lifecycles Old",
+        "operationId": "get_data_products_lifecycles_old_api_data_product_lifecycles_get",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataProductLifeCyclesGetItem"
+                  },
+                  "title": "Response Get Data Products Lifecycles Old Api Data Product Lifecycles Get"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/data_product_lifecycles/{id}": {
       "put": {
         "tags": [
-          "data_product_lifecycles"
+          "Configuration - Data product lifecycles"
         ],
         "summary": "Update Data Product Lifecycle",
         "operationId": "update_data_product_lifecycle_api_data_product_lifecycles__id__put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -3020,12 +3313,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Update Data Product Lifecycle Api Data Product Lifecycles  Id  Put"
+                  "$ref": "#/components/schemas/UpdateDataProductLifeCycleResponse"
                 },
                 "example": {
                   "id": "random id of the updated data product lifecycle"
@@ -3057,10 +3345,221 @@
       },
       "delete": {
         "tags": [
-          "data_product_lifecycles"
+          "Configuration - Data product lifecycles"
         ],
         "summary": "Delete Data Product Lifecycle",
         "operationId": "delete_data_product_lifecycle_api_data_product_lifecycles__id__delete",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_lifecycles": {
+      "post": {
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
+        "summary": "Create Data Product Lifecycle",
+        "operationId": "create_data_product_lifecycle_api_v2_configuration_data_product_lifecycles_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProductLifeCycleCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data Product successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDataProductLifeCycleResponse"
+                },
+                "example": {
+                  "id": "random id of the new data product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Owner not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "User id for owner not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
+        "summary": "Get Data Products Lifecycles",
+        "operationId": "get_data_products_lifecycles_api_v2_configuration_data_product_lifecycles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductLifeCyclesGet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_lifecycles/{id}": {
+      "put": {
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
+        "summary": "Update Data Product Lifecycle",
+        "operationId": "update_data_product_lifecycle_api_v2_configuration_data_product_lifecycles__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProductLifeCycleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data Product lifecycle updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDataProductLifeCycleResponse"
+                },
+                "example": {
+                  "id": "random id of the updated data product lifecycle"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Owner not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "User id for owner not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
+        "summary": "Delete Data Product Lifecycle",
+        "operationId": "delete_data_product_lifecycle_api_v2_configuration_data_product_lifecycles__id__delete",
         "parameters": [
           {
             "name": "id",
@@ -3106,35 +3605,13 @@
       }
     },
     "/api/data_product_settings": {
-      "get": {
-        "tags": [
-          "data_product_settings"
-        ],
-        "summary": "Get Data Products Settings",
-        "operationId": "get_data_products_settings_api_data_product_settings_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DataProductSettingsGet"
-                  },
-                  "title": "Response Get Data Products Settings Api Data Product Settings Get"
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
         "tags": [
-          "data_product_settings"
+          "Configuration - Data product settings"
         ],
         "summary": "Create Data Product Setting",
         "operationId": "create_data_product_setting_api_data_product_settings_post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "token",
@@ -3163,12 +3640,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Create Data Product Setting Api Data Product Settings Post"
+                  "$ref": "#/components/schemas/CreateDataProductSettingResponse"
                 }
               }
             }
@@ -3184,15 +3656,40 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Get Data Products Settings Old",
+        "operationId": "get_data_products_settings_old_api_data_product_settings_get",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataProductSettingsGetItem"
+                  },
+                  "title": "Response Get Data Products Settings Old Api Data Product Settings Get"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/data_product_settings/namespace_suggestion": {
       "get": {
         "tags": [
-          "data_product_settings"
+          "Configuration - Data product settings"
         ],
         "summary": "Get Data Product Settings Namespace Suggestion",
         "operationId": "get_data_product_settings_namespace_suggestion_api_data_product_settings_namespace_suggestion_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "name",
@@ -3231,10 +3728,11 @@
     "/api/data_product_settings/validate_namespace": {
       "get": {
         "tags": [
-          "data_product_settings"
+          "Configuration - Data product settings"
         ],
         "summary": "Validate Data Product Settings Namespace",
         "operationId": "validate_data_product_settings_namespace_api_data_product_settings_validate_namespace_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "namespace",
@@ -3281,7 +3779,7 @@
     "/api/data_product_settings/namespace_length_limits": {
       "get": {
         "tags": [
-          "data_product_settings"
+          "Configuration - Data product settings"
         ],
         "summary": "Get Data Product Settings Namespace Length Limits",
         "operationId": "get_data_product_settings_namespace_length_limits_api_data_product_settings_namespace_length_limits_get",
@@ -3296,16 +3794,18 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_product_settings/{id}": {
       "put": {
         "tags": [
-          "data_product_settings"
+          "Configuration - Data product settings"
         ],
         "summary": "Update Data Product Setting",
         "operationId": "update_data_product_setting_api_data_product_settings__id__put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -3344,12 +3844,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Update Data Product Setting Api Data Product Settings  Id  Put"
+                  "$ref": "#/components/schemas/UpdateDataProductSettingResponse"
                 }
               }
             }
@@ -3368,10 +3863,308 @@
       },
       "delete": {
         "tags": [
-          "data_product_settings"
+          "Configuration - Data product settings"
         ],
         "summary": "Delete Data Product Setting",
         "operationId": "delete_data_product_setting_api_data_product_settings__id__delete",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_settings": {
+      "post": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Create Data Product Setting",
+        "operationId": "create_data_product_setting_api_v2_configuration_data_product_settings_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProductSettingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDataProductSettingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Get Data Products Settings",
+        "operationId": "get_data_products_settings_api_v2_configuration_data_product_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductSettingsGet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_settings/namespace_suggestion": {
+      "get": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Get Data Product Settings Namespace Suggestion",
+        "operationId": "get_data_product_settings_namespace_suggestion_api_v2_configuration_data_product_settings_namespace_suggestion_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceSuggestion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_settings/validate_namespace": {
+      "get": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Validate Data Product Settings Namespace",
+        "operationId": "validate_data_product_settings_namespace_api_v2_configuration_data_product_settings_validate_namespace_get",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Namespace"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DataProductSettingScope"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceValidation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_settings/namespace_length_limits": {
+      "get": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Get Data Product Settings Namespace Length Limits",
+        "operationId": "get_data_product_settings_namespace_length_limits_api_v2_configuration_data_product_settings_namespace_length_limits_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceLengthLimits"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/data_product_settings/{id}": {
+      "put": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Update Data Product Setting",
+        "operationId": "update_data_product_setting_api_v2_configuration_data_product_settings__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProductSettingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDataProductSettingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Delete Data Product Setting",
+        "operationId": "delete_data_product_setting_api_v2_configuration_data_product_settings__id__delete",
         "parameters": [
           {
             "name": "id",
@@ -4462,97 +5255,14 @@
         }
       }
     },
-    "/api/domains": {
-      "get": {
-        "tags": [
-          "domains"
-        ],
-        "summary": "Get Domains",
-        "operationId": "get_domains_api_domains_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DomainsGet"
-                  },
-                  "title": "Response Get Domains Api Domains Get"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "domains"
-        ],
-        "summary": "Create Domain",
-        "operationId": "create_domain_api_domains_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DomainCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Domain successfully created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Create Domain Api Domains Post"
-                },
-                "example": {
-                  "id": "random id of the new domain"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/domains/{id}": {
       "get": {
         "tags": [
-          "domains"
+          "Configuration - Domains"
         ],
         "summary": "Get Domain",
         "operationId": "get_domain_api_domains__id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -4590,10 +5300,11 @@
       },
       "put": {
         "tags": [
-          "domains"
+          "Configuration - Domains"
         ],
         "summary": "Update Domain",
         "operationId": "update_domain_api_domains__id__put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -4632,12 +5343,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Update Domain Api Domains  Id  Put"
+                  "$ref": "#/components/schemas/UpdateDomainResponse"
                 }
               }
             }
@@ -4656,10 +5362,11 @@
       },
       "delete": {
         "tags": [
-          "domains"
+          "Configuration - Domains"
         ],
         "summary": "Remove Domain",
         "operationId": "remove_domain_api_domains__id__delete",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -4704,13 +5411,95 @@
         }
       }
     },
+    "/api/domains": {
+      "post": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Create Domain",
+        "operationId": "create_domain_api_domains_post",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Domain successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDomainResponse"
+                },
+                "example": {
+                  "id": "random id of the new domain"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Get Domains Old",
+        "operationId": "get_domains_old_api_domains_get",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DomainsGetItem"
+                  },
+                  "title": "Response Get Domains Old Api Domains Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/domains/migrate/{from_id}/{to_id}": {
       "put": {
         "tags": [
-          "domains"
+          "Configuration - Domains"
         ],
         "summary": "Migrate Domain",
         "operationId": "migrate_domain_api_domains_migrate__from_id___to_id__put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "from_id",
@@ -4765,24 +5554,288 @@
         }
       }
     },
-    "/api/envs": {
+    "/api/v2/configuration/domains/{id}": {
       "get": {
         "tags": [
-          "environments"
+          "Configuration - Domains"
         ],
-        "summary": "Get Environments",
-        "operationId": "get_environments_api_envs_get",
+        "summary": "Get Domain",
+        "operationId": "get_domain_api_v2_configuration_domains__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Environment"
-                  },
-                  "type": "array",
-                  "title": "Response Get Environments Api Envs Get"
+                  "$ref": "#/components/schemas/DomainGet"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Update Domain",
+        "operationId": "update_domain_api_v2_configuration_domains__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDomainResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Remove Domain",
+        "operationId": "remove_domain_api_v2_configuration_domains__id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains": {
+      "post": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Create Domain",
+        "operationId": "create_domain_api_v2_configuration_domains_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Domain successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDomainResponse"
+                },
+                "example": {
+                  "id": "random id of the new domain"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Get Domains",
+        "operationId": "get_domains_api_v2_configuration_domains_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DomainsGet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/migrate/{from_id}/{to_id}": {
+      "put": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Migrate Domain",
+        "operationId": "migrate_domain_api_v2_configuration_domains_migrate__from_id___to_id__put",
+        "parameters": [
+          {
+            "name": "from_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "From Id"
+            }
+          },
+          {
+            "name": "to_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "To Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -4793,10 +5846,11 @@
     "/api/envs/{id}": {
       "get": {
         "tags": [
-          "environments"
+          "Configuration - Environments"
         ],
         "summary": "Get Environment",
         "operationId": "get_environment_api_envs__id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -4833,60 +5887,14 @@
         }
       }
     },
-    "/api/envs/{id}/configs": {
-      "get": {
-        "tags": [
-          "environments"
-        ],
-        "summary": "Get Environment Configs",
-        "operationId": "get_environment_configs_api_envs__id__configs_get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
-                  },
-                  "title": "Response Get Environment Configs Api Envs  Id  Configs Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/envs/configs/{config_id}": {
       "get": {
         "tags": [
-          "environments"
+          "Configuration - Environments"
         ],
         "summary": "Get Environment Configs By Id",
         "operationId": "get_environment_configs_by_id_api_envs_configs__config_id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "config_id",
@@ -4915,7 +5923,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
+                  "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
                 }
               }
             }
@@ -4936,10 +5944,11 @@
     "/api/envs/{id}/platforms/{platform_id}/services/{service_id}/config": {
       "get": {
         "tags": [
-          "environments"
+          "Configuration - Environments"
         ],
         "summary": "Get Environment Platform Service Config",
         "operationId": "get_environment_platform_service_config_api_envs__id__platforms__platform_id__services__service_id__config_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -4988,64 +5997,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/envs/platforms/{platform_id}/services/{service_id}/config": {
-      "get": {
-        "tags": [
-          "environments"
-        ],
-        "summary": "Get Environment Platform Service Config For All Envs",
-        "operationId": "get_environment_platform_service_config_for_all_envs_api_envs_platforms__platform_id__services__service_id__config_get",
-        "parameters": [
-          {
-            "name": "platform_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Platform Id"
-            }
-          },
-          {
-            "name": "service_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Service Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
-                  },
-                  "title": "Response Get Environment Platform Service Config For All Envs Api Envs Platforms  Platform Id  Services  Service Id  Config Get"
+                  "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
                 }
               }
             }
@@ -5066,10 +6018,11 @@
     "/api/envs/{id}/platforms/{platform_id}/config": {
       "get": {
         "tags": [
-          "environments"
+          "Configuration - Environments"
         ],
         "summary": "Get Environment Platform Config",
         "operationId": "get_environment_platform_config_api_envs__id__platforms__platform_id__config_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -5108,7 +6061,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvironmentPlatformConfiguration"
+                  "$ref": "#/components/schemas/EnvironmentPlatformConfigGet"
                 }
               }
             }
@@ -5126,24 +6079,42 @@
         }
       }
     },
-    "/api/platforms": {
+    "/api/v2/configuration/environments/{id}": {
       "get": {
         "tags": [
-          "platforms"
+          "Configuration - Environments"
         ],
-        "summary": "Get All Platforms",
-        "operationId": "get_all_platforms_api_platforms_get",
+        "summary": "Get Environment",
+        "operationId": "get_environment_api_v2_configuration_environments__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Platform"
-                  },
-                  "type": "array",
-                  "title": "Response Get All Platforms Api Platforms Get"
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -5151,13 +6122,250 @@
         }
       }
     },
-    "/api/platforms/{id}/services": {
+    "/api/v2/configuration/environments/configs/{config_id}": {
       "get": {
         "tags": [
-          "platforms"
+          "Configuration - Environments"
         ],
-        "summary": "Get Platform Services",
-        "operationId": "get_platform_services_api_platforms__id__services_get",
+        "summary": "Get Environment Configs By Id",
+        "operationId": "get_environment_configs_by_id_api_v2_configuration_environments_configs__config_id__get",
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Config Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/environments/{id}/platforms/{platform_id}/services/{service_id}/config": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environment Platform Service Config",
+        "operationId": "get_environment_platform_service_config_api_v2_configuration_environments__id__platforms__platform_id__services__service_id__config_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "platform_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Platform Id"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Service Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/environments/{id}/platforms/{platform_id}/config": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environment Platform Config",
+        "operationId": "get_environment_platform_config_api_v2_configuration_environments__id__platforms__platform_id__config_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "platform_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Platform Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentPlatformConfigGet"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/envs": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environments Old",
+        "operationId": "get_environments_old_api_envs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EnvironmentGetItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Environments Old Api Envs Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/configuration/environments": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environments",
+        "operationId": "get_environments_api_v2_configuration_environments_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentsGet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/envs/{id}/configs": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environment Configs Old",
+        "operationId": "get_environment_configs_old_api_envs__id__configs_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -5178,9 +6386,163 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PlatformService"
+                    "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
                   },
-                  "title": "Response Get Platform Services Api Platforms  Id  Services Get"
+                  "title": "Response Get Environment Configs Old Api Envs  Id  Configs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/environments/{id}/configs": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environment Configs",
+        "operationId": "get_environment_configs_api_v2_configuration_environments__id__configs_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentConfigsGet"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/envs/platforms/{platform_id}/services/{service_id}/config": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environment Platform Service Config For All Envs Old",
+        "operationId": "get_environment_platform_service_config_for_all_envs_old_api_envs_platforms__platform_id__services__service_id__config_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "platform_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Platform Id"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Service Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
+                  },
+                  "title": "Response Get Environment Platform Service Config For All Envs Old Api Envs Platforms  Platform Id  Services  Service Id  Config Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/environments/platforms/{platform_id}/services/{service_id}/config": {
+      "get": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Get Environment Platform Service Config For All Envs",
+        "operationId": "get_environment_platform_service_config_for_all_envs_api_v2_configuration_environments_platforms__platform_id__services__service_id__config_get",
+        "parameters": [
+          {
+            "name": "platform_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Platform Id"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Service Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentConfigsGet"
                 }
               }
             }
@@ -5201,11 +6563,12 @@
     "/api/platforms/{id}/services/{service_id}": {
       "get": {
         "tags": [
-          "platforms"
+          "Configuration - Platforms"
         ],
         "summary": "Get Platform Service Config",
         "description": "Get Platform Service config",
         "operationId": "get_platform_service_config_api_platforms__id__services__service_id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -5262,38 +6625,14 @@
         }
       }
     },
-    "/api/platforms/configs": {
-      "get": {
-        "tags": [
-          "platforms"
-        ],
-        "summary": "Get All Platform Service Configurations",
-        "operationId": "get_all_platform_service_configurations_api_platforms_configs_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/PlatformServiceConfiguration"
-                  },
-                  "type": "array",
-                  "title": "Response Get All Platform Service Configurations Api Platforms Configs Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/platforms/configs/{config_id}": {
       "get": {
         "tags": [
-          "platforms"
+          "Configuration - Platforms"
         ],
         "summary": "Get Single Platform Service Configuration",
         "operationId": "get_single_platform_service_configuration_api_platforms_configs__config_id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "config_id",
@@ -5330,13 +6669,212 @@
         }
       }
     },
-    "/api/tags": {
+    "/api/v2/configuration/platforms/{id}/services/{service_id}": {
       "get": {
         "tags": [
-          "tags"
+          "Configuration - Platforms"
         ],
-        "summary": "Get Tags",
-        "operationId": "get_tags_api_tags_get",
+        "summary": "Get Platform Service Config",
+        "description": "Get Platform Service config",
+        "operationId": "get_platform_service_config_api_v2_configuration_platforms__id__services__service_id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Service Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformServiceConfiguration"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Platform service configuration not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Platform service configuration not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/platforms/configs/{config_id}": {
+      "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
+        "summary": "Get Single Platform Service Configuration",
+        "operationId": "get_single_platform_service_configuration_api_v2_configuration_platforms_configs__config_id__get",
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Config Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformServiceConfiguration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/platforms/configs": {
+      "get": {
+        "summary": "Get All Platform Service Configurations Old",
+        "operationId": "get_all_platform_service_configurations_old_api_platforms_configs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformServiceConfiguration"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Platform Service Configurations Old Api Platforms Configs Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/configuration/platforms/configs": {
+      "get": {
+        "summary": "Get All Platform Service Configurations",
+        "operationId": "get_all_platform_service_configurations_api_v2_configuration_platforms_configs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllPlatformServiceConfigurationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/platforms": {
+      "get": {
+        "summary": "Get All Platforms Old",
+        "operationId": "get_all_platforms_old_api_platforms_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Platform"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Platforms Old Api Platforms Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/configuration/platforms": {
+      "get": {
+        "summary": "Get All Platforms",
+        "operationId": "get_all_platforms_api_v2_configuration_platforms_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllPlatformsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/platforms/{id}/services": {
+      "get": {
+        "summary": "Get Platform Services Old",
+        "operationId": "get_platform_services_old_api_platforms__id__services_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5345,21 +6883,74 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/TagsGet"
+                    "$ref": "#/components/schemas/PlatformService"
                   },
-                  "title": "Response Get Tags Api Tags Get"
+                  "title": "Response Get Platform Services Old Api Platforms  Id  Services Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
         }
-      },
+      }
+    },
+    "/api/v2/configuration/platforms/{id}/services": {
+      "get": {
+        "summary": "Get Platform Services",
+        "operationId": "get_platform_services_api_v2_configuration_platforms__id__services_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformServicesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tags": {
       "post": {
         "tags": [
-          "tags"
+          "Configuration - Tags"
         ],
         "summary": "Create Tag",
         "operationId": "create_tag_api_tags_post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "token",
@@ -5388,12 +6979,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Create Tag Api Tags Post"
+                  "$ref": "#/components/schemas/CreateTagResponse"
                 }
               }
             }
@@ -5409,15 +6995,40 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Tags"
+        ],
+        "summary": "Get Tags Old",
+        "operationId": "get_tags_old_api_tags_get",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TagsGetItem"
+                  },
+                  "title": "Response Get Tags Old Api Tags Get"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/tags/{id}": {
       "put": {
         "tags": [
-          "tags"
+          "Configuration - Tags"
         ],
         "summary": "Update Tag",
         "operationId": "update_tag_api_tags__id__put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -5456,12 +7067,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Update Tag Api Tags  Id  Put"
+                  "$ref": "#/components/schemas/UpdateTagResponse"
                 }
               }
             }
@@ -5480,10 +7086,195 @@
       },
       "delete": {
         "tags": [
-          "tags"
+          "Configuration - Tags"
         ],
         "summary": "Remove Tag",
         "operationId": "remove_tag_api_tags__id__delete",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/tags": {
+      "post": {
+        "tags": [
+          "Configuration - Tags"
+        ],
+        "summary": "Create Tag",
+        "operationId": "create_tag_api_v2_configuration_tags_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTagResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Configuration - Tags"
+        ],
+        "summary": "Get Tags",
+        "operationId": "get_tags_api_v2_configuration_tags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagsGet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/tags/{id}": {
+      "put": {
+        "tags": [
+          "Configuration - Tags"
+        ],
+        "summary": "Update Tag",
+        "operationId": "update_tag_api_v2_configuration_tags__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTagResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Tags"
+        ],
+        "summary": "Remove Tag",
+        "operationId": "remove_tag_api_v2_configuration_tags__id__delete",
         "parameters": [
           {
             "name": "id",
@@ -7038,10 +8829,11 @@
     "/api/theme_settings": {
       "get": {
         "tags": [
-          "theme_settings"
+          "Configuration - Theme settings"
         ],
         "summary": "Get Settings",
         "operationId": "get_settings_api_theme_settings_get",
+        "deprecated": true,
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7057,10 +8849,81 @@
       },
       "put": {
         "tags": [
-          "theme_settings"
+          "Configuration - Theme settings"
         ],
         "summary": "Update Settings",
         "operationId": "update_settings_api_theme_settings_put",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThemeSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/theme_settings": {
+      "get": {
+        "tags": [
+          "Configuration - Theme settings"
+        ],
+        "summary": "Get Settings",
+        "operationId": "get_settings_api_v2_configuration_theme_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThemeSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuration - Theme settings"
+        ],
+        "summary": "Update Settings",
+        "operationId": "update_settings_api_v2_configuration_theme_settings_put",
         "parameters": [
           {
             "name": "token",
@@ -8010,6 +9873,62 @@
         ],
         "title": "BaseDataOutputDatasetAssociationGet"
       },
+      "CreateDataProductLifeCycleResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateDataProductLifeCycleResponse"
+      },
+      "CreateDataProductSettingResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateDataProductSettingResponse"
+      },
+      "CreateDataProductTypeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateDataProductTypeResponse"
+      },
+      "CreateDomainResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateDomainResponse"
+      },
       "CreateRole": {
         "properties": {
           "name": {
@@ -8039,6 +9958,20 @@
           "permissions"
         ],
         "title": "CreateRole"
+      },
+      "CreateTagResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateTagResponse"
       },
       "DataOutputCreate": {
         "properties": {
@@ -9134,6 +11067,22 @@
       },
       "DataProductLifeCyclesGet": {
         "properties": {
+          "data_product_life_cycles": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductLifeCyclesGetItem"
+            },
+            "type": "array",
+            "title": "Data Product Life Cycles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product_life_cycles"
+        ],
+        "title": "DataProductLifeCyclesGet"
+      },
+      "DataProductLifeCyclesGetItem": {
+        "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
@@ -9164,7 +11113,7 @@
           "color",
           "is_default"
         ],
-        "title": "DataProductLifeCyclesGet"
+        "title": "DataProductLifeCyclesGetItem"
       },
       "DataProductLink": {
         "properties": {
@@ -9512,6 +11461,22 @@
       },
       "DataProductSettingsGet": {
         "properties": {
+          "data_product_settings": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductSettingsGetItem"
+            },
+            "type": "array",
+            "title": "Data Product Settings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product_settings"
+        ],
+        "title": "DataProductSettingsGet"
+      },
+      "DataProductSettingsGetItem": {
+        "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
@@ -9560,7 +11525,7 @@
           "default",
           "scope"
         ],
-        "title": "DataProductSettingsGet"
+        "title": "DataProductSettingsGetItem"
       },
       "DataProductStatus": {
         "type": "string",
@@ -9693,6 +11658,22 @@
       },
       "DataProductTypesGet": {
         "properties": {
+          "data_product_types": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductTypesGetItem"
+            },
+            "type": "array",
+            "title": "Data Product Types"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product_types"
+        ],
+        "title": "DataProductTypesGet"
+      },
+      "DataProductTypesGetItem": {
+        "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
@@ -9722,7 +11703,7 @@
           "icon_key",
           "data_product_count"
         ],
-        "title": "DataProductTypesGet"
+        "title": "DataProductTypesGetItem"
       },
       "DataProductUpdate": {
         "properties": {
@@ -10747,6 +12728,22 @@
       },
       "DomainsGet": {
         "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/DomainsGetItem"
+            },
+            "type": "array",
+            "title": "Domains"
+          }
+        },
+        "type": "object",
+        "required": [
+          "domains"
+        ],
+        "title": "DomainsGet"
+      },
+      "DomainsGetItem": {
+        "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
@@ -10777,7 +12774,7 @@
           "data_product_count",
           "dataset_count"
         ],
-        "title": "DomainsGet"
+        "title": "DomainsGetItem"
       },
       "Edge": {
         "properties": {
@@ -10875,41 +12872,23 @@
         ],
         "title": "Environment"
       },
-      "EnvironmentPlatformConfiguration": {
+      "EnvironmentConfigsGet": {
         "properties": {
-          "config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AWSEnvironmentPlatformConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksEnvironmentPlatformConfiguration"
-              }
-            ],
-            "title": "Config"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "environment": {
-            "$ref": "#/components/schemas/Environment"
-          },
-          "platform": {
-            "$ref": "#/components/schemas/Platform"
+          "environment_configs": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
+            },
+            "type": "array",
+            "title": "Environment Configs"
           }
         },
         "type": "object",
         "required": [
-          "config",
-          "id",
-          "environment",
-          "platform"
+          "environment_configs"
         ],
-        "title": "EnvironmentPlatformConfiguration"
+        "title": "EnvironmentConfigsGet"
       },
-      "EnvironmentPlatformServiceConfiguration": {
+      "EnvironmentConfigsGetItem": {
         "properties": {
           "config": {
             "items": {
@@ -10957,7 +12936,91 @@
           "environment",
           "service"
         ],
-        "title": "EnvironmentPlatformServiceConfiguration"
+        "title": "EnvironmentConfigsGetItem"
+      },
+      "EnvironmentGetItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "acronym": {
+            "type": "string",
+            "title": "Acronym"
+          },
+          "context": {
+            "type": "string",
+            "title": "Context"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "acronym",
+          "context"
+        ],
+        "title": "EnvironmentGetItem"
+      },
+      "EnvironmentPlatformConfigGet": {
+        "properties": {
+          "config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AWSEnvironmentPlatformConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/DatabricksEnvironmentPlatformConfiguration"
+              }
+            ],
+            "title": "Config"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/Environment"
+          },
+          "platform": {
+            "$ref": "#/components/schemas/Platform"
+          }
+        },
+        "type": "object",
+        "required": [
+          "config",
+          "id",
+          "environment",
+          "platform"
+        ],
+        "title": "EnvironmentPlatformConfigGet"
+      },
+      "EnvironmentsGet": {
+        "properties": {
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGetItem"
+            },
+            "type": "array",
+            "title": "Environments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environments"
+        ],
+        "title": "EnvironmentsGet"
       },
       "EventGet": {
         "properties": {
@@ -11097,6 +13160,54 @@
           "user"
         ],
         "title": "EventReferenceEntity"
+      },
+      "GetAllPlatformServiceConfigurationsResponse": {
+        "properties": {
+          "platform_service_configurations": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformServiceConfiguration"
+            },
+            "type": "array",
+            "title": "Platform Service Configurations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "platform_service_configurations"
+        ],
+        "title": "GetAllPlatformServiceConfigurationsResponse"
+      },
+      "GetAllPlatformsResponse": {
+        "properties": {
+          "platforms": {
+            "items": {
+              "$ref": "#/components/schemas/Platform"
+            },
+            "type": "array",
+            "title": "Platforms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "platforms"
+        ],
+        "title": "GetAllPlatformsResponse"
+      },
+      "GetPlatformServicesResponse": {
+        "properties": {
+          "platform_services": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformService"
+            },
+            "type": "array",
+            "title": "Platform Services"
+          }
+        },
+        "type": "object",
+        "required": [
+          "platform_services"
+        ],
+        "title": "GetPlatformServicesResponse"
       },
       "GlueDataOutput": {
         "properties": {
@@ -11808,6 +13919,22 @@
       },
       "TagsGet": {
         "properties": {
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagsGetItem"
+            },
+            "type": "array",
+            "title": "Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tags"
+        ],
+        "title": "TagsGet"
+      },
+      "TagsGetItem": {
+        "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
@@ -11823,7 +13950,7 @@
           "id",
           "value"
         ],
-        "title": "TagsGet"
+        "title": "TagsGetItem"
       },
       "TechnicalInfo": {
         "properties": {
@@ -11868,6 +13995,62 @@
           "portal_name"
         ],
         "title": "ThemeSettings"
+      },
+      "UpdateDataProductLifeCycleResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateDataProductLifeCycleResponse"
+      },
+      "UpdateDataProductSettingResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateDataProductSettingResponse"
+      },
+      "UpdateDataProductTypeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateDataProductTypeResponse"
+      },
+      "UpdateDomainResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateDomainResponse"
       },
       "UpdateRole": {
         "properties": {
@@ -11918,6 +14101,20 @@
           "id"
         ],
         "title": "UpdateRole"
+      },
+      "UpdateTagResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateTagResponse"
       },
       "User": {
         "properties": {

@@ -1,6 +1,6 @@
 import factory
 
-from app.environments.model import Environment
+from app.configuration.environments.model import Environment
 
 
 class EnvironmentFactory(factory.alchemy.SQLAlchemyModelFactory):

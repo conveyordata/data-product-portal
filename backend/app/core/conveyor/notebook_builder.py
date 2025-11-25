@@ -5,6 +5,8 @@ from fastapi import HTTPException, status
 
 from app.core.auth.oidc import OIDCConfiguration
 
+conveyor_timeout = 5
+
 
 class NotebookBuilderConveyor:
     def __init__(self):
@@ -44,12 +46,14 @@ class NotebookBuilderConveyor:
         result = requests.get(
             f"{self.conveyor_api}/environments",
             headers={"Authorization": f"Bearer {self.token}"},
+            timeout=conveyor_timeout,
         )
         if result.status_code != 200:
             self.token = self.authenticate()
         result = requests.get(
             f"{self.conveyor_api}/environments",
             headers={"Authorization": f"Bearer {self.token}"},
+            timeout=conveyor_timeout,
         )
         if result.status_code != 200:
             raise ValueError("still unauthenticated with conveyor after reauth attempt")
@@ -60,6 +64,7 @@ class NotebookBuilderConveyor:
         data_products = requests.get(
             f"{self.conveyor_api}/projects",
             headers={"Authorization": f"Bearer {self.token}"},
+            timeout=conveyor_timeout,
         ).json()
         try:
             data_product_id = next(

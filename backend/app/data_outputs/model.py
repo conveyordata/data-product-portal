@@ -5,21 +5,21 @@ from sqlalchemy import Boolean, Column, Enum, ForeignKey, String, and_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, foreign, relationship
 
+from app.configuration.environments.platform_service_configurations.model import (
+    EnvironmentPlatformServiceConfiguration,
+)
 from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-from app.environment_platform_service_configurations.model import (
-    EnvironmentPlatformServiceConfiguration,
-)
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
 
+from app.configuration.platforms.model import Platform
+from app.configuration.platforms.platform_services.model import PlatformService
+from app.configuration.tags.model import Tag, tag_data_output_table
 from app.database.database import Base
-from app.platform_services.model import PlatformService
-from app.platforms.model import Platform
 from app.shared.model import BaseORM
-from app.tags.model import Tag, tag_data_output_table
 
 
 class DataOutput(Base, BaseORM):

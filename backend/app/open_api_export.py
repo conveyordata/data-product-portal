@@ -14,7 +14,7 @@ app = typer.Typer(
 
 @app.command()
 def export_openapi(
-    output: Path = typer.Argument(default="openapi.json", help="Path where to export")
+    output: Path = typer.Argument(default="openapi.json", help="Path where to export"),
 ):
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)

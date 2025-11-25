@@ -1,4 +1,5 @@
 import pytest
+
 from tests.factories import DataProductFactory, DatasetFactory, DomainFactory
 
 ENDPOINT = "/api/domains"

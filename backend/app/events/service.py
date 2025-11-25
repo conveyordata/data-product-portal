@@ -2,9 +2,8 @@ from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_, select, update
 from sqlalchemy import event as sql_event
-from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 
 from app.data_outputs.model import DataOutput

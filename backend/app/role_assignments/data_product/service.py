@@ -70,9 +70,7 @@ class RoleAssignmentService:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
-                        "Role assignment already"
-                        " exists for"
-                        " this user and data product."
+                        "Role assignment already exists for this user and data product."
                     ),
                 )
 

@@ -1,16 +1,15 @@
 import pytest
 from fastapi.testclient import TestClient
-from tests.factories import NotificationFactory, UserFactory
 
 from app.notifications.schema import Notification
 from app.settings import settings
 from app.users.schema import User
+from tests.factories import NotificationFactory, UserFactory
 
 ENDPOINT = "/api/notifications"
 
 
 class TestNotificationsRouter:
-
     def test_get_notifications(self, client: TestClient):
         user: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
         notification: Notification = NotificationFactory(user=user)

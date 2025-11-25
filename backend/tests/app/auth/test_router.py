@@ -1,3 +1,6 @@
+from app.core.authz.actions import AuthorizationAction
+from app.roles.schema import Scope
+from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -5,10 +8,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.core.authz.actions import AuthorizationAction
-from app.roles.schema import Scope
-from app.settings import settings
 
 ENDPOINT = "/api/auth"
 

@@ -1,10 +1,10 @@
 import factory
-from tests import test_session
 
 from app.core.authz.authorization import Authorization
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.roles import ADMIN_UUID
+from tests import test_session
 
 
 class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):

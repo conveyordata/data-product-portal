@@ -1,15 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
-from tests.factories import RoleFactory
 
 from app.roles import ADMIN_UUID
 from app.roles.schema import Role, Scope
+from tests.factories import RoleFactory
 
 ENDPOINT = "/api/roles"
 
 
 class TestRolesRouter:
-
     test_role = {
         "name": "test",
         "scope": "dataset",

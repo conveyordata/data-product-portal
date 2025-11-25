@@ -1,5 +1,14 @@
 import pytest
 from sqlalchemy.orm import selectinload
+
+from app.data_outputs.model import DataOutput
+from app.data_outputs.service import DataOutputService
+from app.datasets.enums import DatasetAccessType
+from app.datasets.model import Dataset
+from app.datasets.service import DatasetService
+from app.roles import ADMIN_UUID
+from app.roles.schema import Prototype, Scope
+from app.settings import settings
 from tests import test_session
 from tests.factories import (
     DataOutputFactory,
@@ -12,15 +21,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.data_outputs.model import DataOutput
-from app.data_outputs.service import DataOutputService
-from app.datasets.enums import DatasetAccessType
-from app.datasets.model import Dataset
-from app.datasets.service import DatasetService
-from app.roles import ADMIN_UUID
-from app.roles.schema import Prototype, Scope
-from app.settings import settings
 
 
 class TestDatasetsService:

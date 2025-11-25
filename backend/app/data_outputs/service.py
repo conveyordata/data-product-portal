@@ -8,6 +8,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.configuration.platforms.platform_services.model import PlatformService
+from app.configuration.tags.model import Tag as TagModel
+from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceLengthLimits,
@@ -34,10 +37,7 @@ from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.service import DatasetService
 from app.graph.graph import Graph
-from app.platform_services.model import PlatformService
 from app.role_assignments.enums import DecisionStatus
-from app.tags.model import Tag as TagModel
-from app.tags.model import ensure_tag_exists
 from app.users.schema import User
 
 
