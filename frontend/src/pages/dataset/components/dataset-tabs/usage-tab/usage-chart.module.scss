@@ -5,13 +5,34 @@
     width: 100%;
     max-height: 220px;
     overflow: hidden;
-    background: var(--color-neutral-2, #f5f5f5);
-    padding: globals.$spacing-m;
     border-radius: globals.$border-radius-sm;
-    font-family: globals.$font-family-mono;
-    white-space: pre-wrap;
 }
 
 .sqlCodeExpanded {
     max-height: none;
+}
+
+.syntaxHighlighter {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    width: 100%;
+
+    :global(pre) {
+        margin: 0 !important;
+        padding: globals.$spacing-m !important;
+        background: var(--color-neutral-2, #f5f5f5) !important;
+        border-radius: globals.$border-radius-sm;
+        font-family: globals.$font-family-mono !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word;
+        overflow-x: auto;
+        font-size: inherit;
+    }
+
+    :global(code) {
+        font-family: globals.$font-family-mono !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word;
+    }
 }

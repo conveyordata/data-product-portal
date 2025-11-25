@@ -5,6 +5,9 @@ import { addDays, format, isSameDay, isSameMonth, subMonths } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { magula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
 import type {
     DatasetQueryStatsDailyResponse,
@@ -49,11 +52,16 @@ function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: CuratedQueryI
                 </Flex>
                 <Flex vertical gap={4}>
                     <Flex gap={8} align="start">
-                        <Typography.Paragraph
-                            className={`${styles.sqlCode} ${isExpanded ? styles.sqlCodeExpanded : ''}`}
-                        >
-                            {query.query_text}
-                        </Typography.Paragraph>
+                        <Flex flex={1} className={`${styles.sqlCode} ${isExpanded ? styles.sqlCodeExpanded : ''}`}>
+                            <SyntaxHighlighter
+                                language="sql"
+                                style={magula}
+                                className={styles.syntaxHighlighter}
+                                showLineNumbers={false}
+                            >
+                                {query.query_text}
+                            </SyntaxHighlighter>
+                        </Flex>
                         <Button
                             type="default"
                             size="middle"
