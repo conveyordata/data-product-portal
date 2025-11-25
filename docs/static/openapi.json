@@ -7570,13 +7570,13 @@
         }
       }
     },
-    "/api/users/can_become_admin": {
-      "post": {
+    "/api/users/set_can_become_admin": {
+      "put": {
         "tags": [
           "users"
         ],
-        "summary": "Can Become Admin",
-        "operationId": "can_become_admin_api_users_can_become_admin_post",
+        "summary": "Set Can Become Admin",
+        "operationId": "set_can_become_admin_api_users_set_can_become_admin_put",
         "parameters": [
           {
             "name": "token",
@@ -7993,10 +7993,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "boolean",
-                  "title": "Response Become Admin Api Role Assignments Global Become Admin Post"
-                }
+                "schema": {}
               }
             }
           },
@@ -8037,10 +8034,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "boolean",
-                  "title": "Response Revoke Admin Api Role Assignments Global Revoke Admin Post"
-                }
+                "schema": {}
               }
             }
           },
