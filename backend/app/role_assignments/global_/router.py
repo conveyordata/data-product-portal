@@ -11,6 +11,7 @@ from app.database.database import get_db_session
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.auth import GlobalAuthAssignment
 from app.role_assignments.global_.schema import (
+    BecomeAdmin,
     CreateRoleAssignment,
     DecideRoleAssignment,
     ModifyRoleAssignment,
@@ -20,6 +21,7 @@ from app.role_assignments.global_.schema import (
 )
 from app.role_assignments.global_.service import RoleAssignmentService
 from app.roles import ADMIN_UUID
+from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 router = APIRouter(prefix="/global")
@@ -32,6 +34,37 @@ def list_assignments(
     db: Session = Depends(get_db_session),
 ) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db).list_assignments(user_id=user_id, role_id=role_id)
+
+
+@router.post(
+    "/become_admin",
+)
+def become_admin(
+    request: BecomeAdmin,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+):
+    user = ensure_user_exists(user.id, db)
+    if not user.can_become_admin:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            detail="User is not allowed to elevate to admin",
+        )
+    user.admin_expiry = request.expiry
+    authorizer = Authorization()
+    authorizer.assign_admin_role(user_id=str(user.id))
+
+
+@router.post(
+    "/revoke_admin",
+)
+def revoke_admin(
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+):
+    user = ensure_user_exists(user.id, db)
+    authorizer = Authorization()
+    authorizer.revoke_admin_role(user_id=user.id)
 
 
 @router.post(
@@ -49,7 +82,8 @@ def create_assignment(
 ) -> RoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db).create_assignment(
-        RoleAssignmentRequest(user_id=request.user_id, role_id=role_id), actor=user
+        RoleAssignmentRequest(user_id=request.user_id, role_id=role_id),
+        actor=user,
     )
 
 

@@ -8,6 +8,7 @@ from app.roles.schema import Role, Scope
 from app.settings import settings
 from app.users.schema import User
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
+from tests.factories.dataset import DatasetFactory
 
 ENDPOINT = "/api/role_assignments/global"
 
@@ -48,14 +49,58 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
+    def test_become_admin(self, client: TestClient):
+        UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+        ds = DatasetFactory()
+
+        delete = client.delete(f"/api/datasets/{ds.id}")
+        assert delete.status_code == status.HTTP_403_FORBIDDEN
+
+        response = client.post(
+            f"{ENDPOINT}/become_admin",
+            json={"expiry": "2024-12-31T23:59:59Z"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        # User became admin, can delete datasets now
+        delete = client.delete(f"/api/datasets/{ds.id}")
+        assert delete.status_code == status.HTTP_200_OK
+
+    def test_become_admin_not_allowed(self, client: TestClient):
+        UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=False)
+
+        response = client.post(
+            f"{ENDPOINT}/become_admin",
+            json={"expiry": "2024-12-31T23:59:59Z"},
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_revoke_admin(self, client: TestClient):
+        UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+
+        response = client.post(
+            f"{ENDPOINT}/revoke_admin",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response = client.post(
+            f"{ENDPOINT}/become_admin",
+            json={"expiry": "2024-12-31T23:59:59Z"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        response = client.post(
+            f"{ENDPOINT}/revoke_admin",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
     def test_create_assignment_admin(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        RoleFactory.admin()
         authz_role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
-        admin: Role = RoleFactory.admin()
 
         response = client.post(
             f"{ENDPOINT}",
@@ -64,11 +109,8 @@ class TestGlobalRoleAssignmentsRouter:
                 "role_id": "admin",
             },
         )
-        assert response.status_code == status.HTTP_200_OK
-
-        data = response.json()
-        assert data["user"]["id"] == str(user.id)
-        assert data["role"]["id"] == str(admin.id)
+        # Create admin assignment is no longer allowed
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_delete_assignment(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -260,4 +302,4 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
 
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_200_OK  # No longer an issue

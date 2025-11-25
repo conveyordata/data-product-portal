@@ -6,7 +6,9 @@ sidebar_position: 200
 
 ## Unreleased
 
-## features
+### features
+- **[Admin rights]**: It is no longer allowed to have permanent admin rights. Users who were admins before will now get the option to temporarily elevate themselves to super user rights.
+This avoids the pitfall where you permanently are allowed to do everything and no longer have a view on how the normal user flow looks.
 - **[API]**: We are working on a v2 version of the API, we have already migrated the endpoints:
   - `/api/data_product_lifecycles` -> `/api/v2/configuration/data_product_lifecycles`
   - `/api/data_product_settings` -> `/api/v2/configuration/data_product_settings`

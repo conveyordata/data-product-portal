@@ -35,10 +35,19 @@ export const usersApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: userTa
                 method: 'POST',
             }),
         }),
+        canBecomeAdmin: builder.mutation<void, { user_id: string; can_become_admin: boolean }>({
+            query: (payload) => ({
+                url: ApiUrl.UserBecomeAdmin,
+                method: 'PUT',
+                data: payload,
+            }),
+            invalidatesTags: (_, _error, { user_id }) => [{ type: TagTypes.User, id: user_id }],
+        }),
     }),
     overrideExisting: false,
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetAllUsersQuery, useCreateUserMutation, useSeenTourMutation } = usersApiSlice;
+export const { useGetAllUsersQuery, useCreateUserMutation, useSeenTourMutation, useCanBecomeAdminMutation } =
+    usersApiSlice;

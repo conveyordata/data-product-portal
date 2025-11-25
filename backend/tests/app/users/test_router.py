@@ -1,7 +1,11 @@
 import pytest
 
+from app.core.authz.actions import AuthorizationAction
+from app.roles.schema import Scope
 from app.settings import settings
 from tests.factories import UserFactory
+from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 ENDPOINT = "/api/users"
 
@@ -89,3 +93,89 @@ class TestUsersRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 2
+
+    def test_can_become_admin_not_admin(self, client):
+        user = UserFactory(
+            external_id=settings.DEFAULT_USERNAME, can_become_admin=False
+        )
+        response = client.put(
+            f"{ENDPOINT}/set_can_become_admin",
+            json={
+                "user_id": str(user.id),
+                "can_become_admin": True,
+            },
+        )
+        assert response.status_code == 403
+
+    def test_can_unbecome_admin(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+        UserFactory(can_become_admin=True)
+        role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        response = client.put(
+            f"{ENDPOINT}/set_can_become_admin",
+            json={
+                "user_id": str(user.id),
+                "can_become_admin": False,
+            },
+        )
+        assert response.status_code == 200
+        response = client.get(f"{ENDPOINT}")
+        data = response.json()
+        for user_data in data:
+            if user_data["id"] == str(user.id):
+                assert user_data["can_become_admin"] is False
+
+    def test_can_not_unbecome_admin_latest_admin(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+        role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        response = client.put(
+            f"{ENDPOINT}/set_can_become_admin",
+            json={
+                "user_id": str(user.id),
+                "can_become_admin": False,
+            },
+        )
+        assert response.status_code == 400
+        response = client.get(f"{ENDPOINT}")
+        data = response.json()
+        for user_data in data:
+            if user_data["id"] == str(user.id):
+                assert user_data["can_become_admin"] is True
+
+    def test_can_become_admin(self, client):
+        user = UserFactory(
+            external_id=settings.DEFAULT_USERNAME, can_become_admin=False
+        )
+        role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        response = client.put(
+            f"{ENDPOINT}/set_can_become_admin",
+            json={
+                "user_id": str(user.id),
+                "can_become_admin": True,
+            },
+        )
+        assert response.status_code == 200
+
+        response = client.get(f"{ENDPOINT}")
+        data = response.json()
+        for user_data in data:
+            if user_data["id"] == str(user.id):
+                assert user_data["can_become_admin"] is True
