@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from app.authorization.roles.schema import Scope
 from app.authorization.roles.service import RoleService
 from app.core.authz import Action
-from app.core.namespace.validation import NamespaceValidityType
+from app.resource_names.schema_response import NamespaceValidityType
 from app.settings import settings
 from tests.factories import (
     DataOutputFactory,

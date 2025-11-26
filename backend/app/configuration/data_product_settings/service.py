@@ -23,13 +23,11 @@ from app.configuration.data_product_settings.schema_response import (
     UpdateDataProductSettingResponse,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.namespace.validation import (
+from app.resource_names.validation import (
     DataProductSettingNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
-    NamespaceValidityType,
 )
+from app.resource_names.schema_response import NamespaceValidityType, NamespaceValidation, NamespaceSuggestion, \
+    NamespaceLengthLimits
 
 
 class DataProductSettingService:

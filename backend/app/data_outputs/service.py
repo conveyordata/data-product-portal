@@ -12,13 +12,11 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.platforms.platform_services.model import PlatformService
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
-from app.core.namespace.validation import (
+from app.resource_names.validation import (
     DataOutputNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
     NamespaceValidator,
-    NamespaceValidityType,
 )
+from app.resource_names.schema_response import NamespaceValidityType, NamespaceSuggestion, NamespaceLengthLimits
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_request import (
     DataOutputCreate,

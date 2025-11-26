@@ -18,11 +18,7 @@ from app.configuration.data_product_settings.schema_response import (
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.core.namespace.validation import (
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
-)
+from app.resource_names.schema_response import NamespaceValidation, NamespaceSuggestion, NamespaceLengthLimits
 from app.database.database import get_db_session
 
 router = APIRouter()

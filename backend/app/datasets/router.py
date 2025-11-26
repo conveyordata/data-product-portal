@@ -17,11 +17,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.namespace.validation import (
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
-)
+from app.resource_names.schema_response import NamespaceValidation, NamespaceSuggestion, NamespaceLengthLimits
 from app.database.database import get_db_session
 from app.datasets.schema_request import (
     DatasetAboutUpdate,

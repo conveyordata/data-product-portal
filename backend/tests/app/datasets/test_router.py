@@ -6,7 +6,7 @@ import pytest
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
-from app.core.namespace.validation import NamespaceValidityType
+from app.resource_names.schema_response import NamespaceValidityType
 from app.datasets.enums import OutputPortAccessType
 from app.datasets.service import DatasetService
 from app.settings import settings

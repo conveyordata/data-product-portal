@@ -2,7 +2,6 @@ import re
 from enum import Enum
 from typing import Final, Optional
 
-from pydantic import BaseModel
 from sqlalchemy import UUID, and_, exists, select
 from sqlalchemy.orm import Session
 
@@ -10,26 +9,9 @@ from app.configuration.data_product_settings.enums import DataProductSettingScop
 from app.configuration.data_product_settings.model import DataProductSetting
 from app.data_outputs.model import DataOutput
 from app.database.database import Base
+from app.resource_names.schema_response import NamespaceValidityType, NamespaceValidation, NamespaceSuggestion, \
+    NamespaceLengthLimits
 from app.settings import settings
-
-
-class NamespaceValidityType(str, Enum):
-    VALID = "VALID"
-    INVALID_LENGTH = "INVALID_LENGTH"
-    INVALID_CHARACTERS = "INVALID_CHARACTERS"
-    DUPLICATE_NAMESPACE = "DUPLICATE_NAMESPACE"
-
-
-class NamespaceValidation(BaseModel):
-    validity: NamespaceValidityType
-
-
-class NamespaceSuggestion(BaseModel):
-    namespace: str
-
-
-class NamespaceLengthLimits(BaseModel):
-    max_length: int
 
 
 class NamespaceValidator:

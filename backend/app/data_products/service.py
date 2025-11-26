@@ -27,14 +27,12 @@ from app.configuration.tags.model import ensure_tag_exists
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
-from app.core.namespace.validation import (
+from app.resource_names.validation import (
     DataOutputNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
     NamespaceValidator,
-    NamespaceValidityType,
 )
+from app.resource_names.schema_response import NamespaceValidityType, NamespaceValidation, NamespaceSuggestion, \
+    NamespaceLengthLimits
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation

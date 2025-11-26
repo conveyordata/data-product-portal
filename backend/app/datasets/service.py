@@ -17,13 +17,11 @@ from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
 from app.core.logging import logger
-from app.core.namespace.validation import (
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
+from app.resource_names.validation import (
     NamespaceValidator,
-    NamespaceValidityType,
 )
+from app.resource_names.schema_response import NamespaceValidityType, NamespaceValidation, NamespaceSuggestion, \
+    NamespaceLengthLimits
 from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
