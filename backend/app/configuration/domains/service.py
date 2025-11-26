@@ -10,8 +10,8 @@ from app.configuration.domains.model import ensure_domain_exists
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
     CreateDomainResponse,
-    DomainGet,
-    DomainsGetItem,
+    DomainGetOld,
+    GetDomainsItemOld,
     UpdateDomainResponse,
 )
 
@@ -20,7 +20,7 @@ class DomainService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_domains(self) -> Sequence[DomainsGetItem]:
+    def get_domains(self) -> Sequence[GetDomainsItemOld]:
         return (
             self.db.scalars(
                 select(DomainModel)
@@ -34,7 +34,7 @@ class DomainService:
             .all()
         )
 
-    def get_domain(self, id: UUID) -> DomainGet:
+    def get_domain(self, id: UUID) -> DomainGetOld:
         domain = self.db.get(
             DomainModel,
             id,

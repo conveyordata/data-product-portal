@@ -26,7 +26,7 @@ from app.authorization.role_assignments.output_port.schema import (
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
-from app.configuration.domains.schema_response import DomainGet
+from app.configuration.domains.schema_response import DomainGetOld
 from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
@@ -198,7 +198,7 @@ def universal_search(
                             break
 
                 result_domains = [
-                    DomainGet.model_validate(domain).model_dump()
+                    DomainGetOld.model_validate(domain).model_dump()
                     for domain in filtered_domains
                 ]
                 query_results.update({"domains": result_domains})
@@ -409,7 +409,7 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
             if not domain:
                 return {"error": f"Domain {domain_id} not found"}
 
-            return DomainGet.model_validate(domain).model_dump()
+            return DomainGetOld.model_validate(domain).model_dump()
         finally:
             db.close()
 
@@ -458,7 +458,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                     ],
                 },
                 "domains": [
-                    DomainGet.model_validate(domain).model_dump()
+                    DomainGetOld.model_validate(domain).model_dump()
                     for domain in all_domains
                 ],
             }

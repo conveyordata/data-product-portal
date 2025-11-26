@@ -7,9 +7,11 @@ from sqlalchemy.orm import Session
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
     CreateDomainResponse,
-    DomainGet,
-    DomainsGet,
-    DomainsGetItem,
+    DomainGetOld,
+    GetDomainResponse,
+    GetDomainsItem,
+    GetDomainsItemOld,
+    GetDomainsResponse,
     UpdateDomainResponse,
 )
 from app.configuration.domains.service import DomainService
@@ -18,11 +20,6 @@ from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
 router = APIRouter()
-
-
-@router.get("/{id}")
-def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> DomainGet:
-    return DomainService(db).get_domain(id)
 
 
 @router.post(
@@ -89,15 +86,34 @@ def migrate_domain(
 
 _router = router
 router = APIRouter(tags=["Configuration - Domains"])
-router.include_router(_router, prefix="/domains", deprecated=True)
-router.include_router(_router, prefix="/v2/configuration/domains")
+old_route = "/domains"
+route = "/v2/configuration/domains"
+router.include_router(_router, prefix=old_route, deprecated=True)
+router.include_router(_router, prefix=route)
 
 
 @router.get("/domains", deprecated=True)
-def get_domains_old(db: Session = Depends(get_db_session)) -> Sequence[DomainsGetItem]:
-    return get_domains(db).domains
+def get_domains_old(
+    db: Session = Depends(get_db_session),
+) -> Sequence[GetDomainsItemOld]:
+    return DomainService(db).get_domains()
 
 
 @router.get("/v2/configuration/domains")
-def get_domains(db: Session = Depends(get_db_session)) -> DomainsGet:
-    return DomainsGet(domains=DomainService(db).get_domains())
+def get_domains(db: Session = Depends(get_db_session)) -> GetDomainsResponse:
+    return GetDomainsResponse(
+        domains=[
+            GetDomainsItem.from_get_domains_item_old(domain)
+            for domain in get_domains_old(db)
+        ]
+    )
+
+
+@router.get(f"{old_route}/{{id}}", deprecated=True)
+def get_domain_old(id: UUID, db: Session = Depends(get_db_session)) -> DomainGetOld:
+    return DomainService(db).get_domain(id)
+
+
+@router.get(f"{route}/{{id}}")
+def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> GetDomainResponse:
+    return GetDomainResponse.from_domain_get_old(DomainService(db).get_domain(id))

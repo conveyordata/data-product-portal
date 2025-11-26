@@ -5391,33 +5391,46 @@
         }
       }
     },
-    "/api/domains/{id}": {
-      "get": {
+    "/api/domains": {
+      "post": {
         "tags": [
           "Configuration - Domains"
         ],
-        "summary": "Get Domain",
-        "operationId": "get_domain_api_domains__id__get",
+        "summary": "Create Domain",
+        "operationId": "create_domain_api_domains_post",
         "deprecated": true,
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "token",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "title": "Id"
+              "default": "",
+              "title": "Token"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainCreate"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Domain successfully created",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DomainGet"
+                  "$ref": "#/components/schemas/CreateDomainResponse"
+                },
+                "example": {
+                  "id": "random id of the new domain"
                 }
               }
             }
@@ -5434,6 +5447,32 @@
           }
         }
       },
+      "get": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Get Domains Old",
+        "operationId": "get_domains_old_api_domains_get",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetDomainsItemOld"
+                  },
+                  "title": "Response Get Domains Old Api Domains Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/domains/{id}": {
       "put": {
         "tags": [
           "Configuration - Domains"
@@ -5545,48 +5584,33 @@
             }
           }
         }
-      }
-    },
-    "/api/domains": {
-      "post": {
+      },
+      "get": {
         "tags": [
           "Configuration - Domains"
         ],
-        "summary": "Create Domain",
-        "operationId": "create_domain_api_domains_post",
+        "summary": "Get Domain Old",
+        "operationId": "get_domain_old_api_domains__id__get",
         "deprecated": true,
         "parameters": [
           {
-            "name": "token",
-            "in": "query",
-            "required": false,
+            "name": "id",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "",
-              "title": "Token"
+              "format": "uuid",
+              "title": "Id"
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DomainCreate"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Domain successfully created",
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateDomainResponse"
-                },
-                "example": {
-                  "id": "random id of the new domain"
+                  "$ref": "#/components/schemas/DomainGetOld"
                 }
               }
             }
@@ -5597,30 +5621,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Domains"
-        ],
-        "summary": "Get Domains Old",
-        "operationId": "get_domains_old_api_domains_get",
-        "deprecated": true,
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DomainsGetItem"
-                  },
-                  "title": "Response Get Domains Old Api Domains Get"
                 }
               }
             }
@@ -5690,32 +5690,45 @@
         }
       }
     },
-    "/api/v2/configuration/domains/{id}": {
-      "get": {
+    "/api/v2/configuration/domains": {
+      "post": {
         "tags": [
           "Configuration - Domains"
         ],
-        "summary": "Get Domain",
-        "operationId": "get_domain_api_v2_configuration_domains__id__get",
+        "summary": "Create Domain",
+        "operationId": "create_domain_api_v2_configuration_domains_post",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "token",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "title": "Id"
+              "default": "",
+              "title": "Token"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainCreate"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Domain successfully created",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DomainGet"
+                  "$ref": "#/components/schemas/CreateDomainResponse"
+                },
+                "example": {
+                  "id": "random id of the new domain"
                 }
               }
             }
@@ -5732,6 +5745,27 @@
           }
         }
       },
+      "get": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Get Domains",
+        "operationId": "get_domains_api_v2_configuration_domains_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDomainsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/{id}": {
       "put": {
         "tags": [
           "Configuration - Domains"
@@ -5841,47 +5875,32 @@
             }
           }
         }
-      }
-    },
-    "/api/v2/configuration/domains": {
-      "post": {
+      },
+      "get": {
         "tags": [
           "Configuration - Domains"
         ],
-        "summary": "Create Domain",
-        "operationId": "create_domain_api_v2_configuration_domains_post",
+        "summary": "Get Domain",
+        "operationId": "get_domain_api_v2_configuration_domains__id__get",
         "parameters": [
           {
-            "name": "token",
-            "in": "query",
-            "required": false,
+            "name": "id",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "",
-              "title": "Token"
+              "format": "uuid",
+              "title": "Id"
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DomainCreate"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Domain successfully created",
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateDomainResponse"
-                },
-                "example": {
-                  "id": "random id of the new domain"
+                  "$ref": "#/components/schemas/GetDomainResponse"
                 }
               }
             }
@@ -5892,25 +5911,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Domains"
-        ],
-        "summary": "Get Domains",
-        "operationId": "get_domains_api_v2_configuration_domains_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DomainsGet"
                 }
               }
             }
@@ -14349,7 +14349,7 @@
         ],
         "title": "DomainCreate"
       },
-      "DomainGet": {
+      "DomainGetOld": {
         "properties": {
           "id": {
             "type": "string",
@@ -14387,7 +14387,8 @@
           "data_products",
           "datasets"
         ],
-        "title": "DomainGet"
+        "title": "DomainGetOld",
+        "deprecated": true
       },
       "DomainUpdate": {
         "properties": {
@@ -14406,56 +14407,6 @@
           "description"
         ],
         "title": "DomainUpdate"
-      },
-      "DomainsGet": {
-        "properties": {
-          "domains": {
-            "items": {
-              "$ref": "#/components/schemas/DomainsGetItem"
-            },
-            "type": "array",
-            "title": "Domains"
-          }
-        },
-        "type": "object",
-        "required": [
-          "domains"
-        ],
-        "title": "DomainsGet"
-      },
-      "DomainsGetItem": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "data_product_count": {
-            "type": "integer",
-            "title": "Data Product Count"
-          },
-          "dataset_count": {
-            "type": "integer",
-            "title": "Dataset Count"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "data_product_count",
-          "dataset_count"
-        ],
-        "title": "DomainsGetItem"
       },
       "Edge": {
         "properties": {
@@ -14873,6 +14824,131 @@
           "platforms"
         ],
         "title": "GetAllPlatformsResponse"
+      },
+      "GetDomainResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "data_products": {
+            "items": {
+              "$ref": "#/components/schemas/DataProduct"
+            },
+            "type": "array",
+            "title": "Data Products"
+          },
+          "output_ports": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPort"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "data_products",
+          "output_ports"
+        ],
+        "title": "GetDomainResponse"
+      },
+      "GetDomainsItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "data_product_count": {
+            "type": "integer",
+            "title": "Data Product Count"
+          },
+          "output_port_count": {
+            "type": "integer",
+            "title": "Output Port Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "data_product_count",
+          "output_port_count"
+        ],
+        "title": "GetDomainsItem"
+      },
+      "GetDomainsItemOld": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "data_product_count": {
+            "type": "integer",
+            "title": "Data Product Count"
+          },
+          "dataset_count": {
+            "type": "integer",
+            "title": "Dataset Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "data_product_count",
+          "dataset_count"
+        ],
+        "title": "GetDomainsItemOld",
+        "deprecated": true
+      },
+      "GetDomainsResponse": {
+        "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/GetDomainsItem"
+            },
+            "type": "array",
+            "title": "Domains"
+          }
+        },
+        "type": "object",
+        "required": [
+          "domains"
+        ],
+        "title": "GetDomainsResponse"
       },
       "GetPlatformServicesResponse": {
         "properties": {
