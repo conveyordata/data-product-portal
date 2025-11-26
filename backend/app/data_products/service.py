@@ -502,7 +502,7 @@ class DataProductService:
 
     def get_snowflake_url(self, id: UUID, environment: str) -> str:
         config = json.loads(self.get_env_platform_config(id, environment, "Snowflake"))
-        if "login_url" not in config.keys():
+        if "login_url" not in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="login_url missing from Snowflake configuration",

@@ -77,9 +77,8 @@ async def lifespan(_: FastAPI):
 @asynccontextmanager
 async def combined_lifespan(app: FastAPI):
     # Run both lifespans
-    async with lifespan(app):
-        async with mcp_app.lifespan(app):
-            yield
+    async with lifespan(app), mcp_app.lifespan(app):
+        yield
 
 
 app = FastAPI(

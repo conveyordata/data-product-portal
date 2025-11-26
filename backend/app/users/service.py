@@ -44,16 +44,15 @@ class UserService:
         self.db.commit()
 
     def set_can_become_admin(self, request: CanBecomeAdminUpdate) -> None:
-        if not request.can_become_admin:
-            if (
-                len(
-                    self.db.scalars(
-                        select(UserModel).where(UserModel.can_become_admin)
-                    ).all()
-                )
-                <= 1
-            ):
-                raise ValueError("At least one user must be able to become admin.")
+        if not request.can_become_admin and (
+            len(
+                self.db.scalars(
+                    select(UserModel).where(UserModel.can_become_admin)
+                ).all()
+            )
+            <= 1
+        ):
+            raise ValueError("At least one user must be able to become admin.")
         user = ensure_user_exists(request.user_id, self.db)
         user.can_become_admin = request.can_become_admin
         self.db.commit()
