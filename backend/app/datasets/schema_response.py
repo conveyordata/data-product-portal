@@ -9,8 +9,8 @@ from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_products.schema import DataProduct
 from app.data_products_datasets.schema import DataProductDatasetAssociation
-from app.datasets.enums import DatasetAccessType
-from app.datasets.status import DatasetStatus
+from app.datasets.enums import OutputPortAccessType
+from app.datasets.status import OutputPortStatus
 from app.shared.schema import ORMModel
 
 
@@ -33,9 +33,9 @@ class BaseDatasetGet(ORMModel):
     namespace: str
     name: str
     description: str
-    status: DatasetStatus
+    status: OutputPortStatus
     usage: Optional[str]
-    access_type: DatasetAccessType
+    access_type: OutputPortAccessType
     data_product_id: UUID
 
     # Nested schemas

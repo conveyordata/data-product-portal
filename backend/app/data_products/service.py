@@ -12,6 +12,8 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Prototype
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -49,15 +51,13 @@ from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.service import DatasetService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Prototype
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -323,7 +323,7 @@ class DataProductService:
 
         approval_status = (
             DecisionStatus.PENDING
-            if dataset.access_type != DatasetAccessType.PUBLIC
+            if dataset.access_type != OutputPortAccessType.PUBLIC
             else DecisionStatus.APPROVED
         )
 
@@ -502,7 +502,7 @@ class DataProductService:
 
     def get_snowflake_url(self, id: UUID, environment: str) -> str:
         config = json.loads(self.get_env_platform_config(id, environment, "Snowflake"))
-        if "login_url" not in config.keys():
+        if "login_url" not in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="login_url missing from Snowflake configuration",

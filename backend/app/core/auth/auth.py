@@ -51,7 +51,7 @@ if settings.OIDC_ENABLED:
     def secured_call(token: str = Depends(oidc.oidc_dependency)) -> JWTToken:
         jwt = JWTTokenValid(token)
         if not jwt.is_valid():
-            raise PyJWTError()
+            raise PyJWTError
         return JWTToken(sub=jwt.valid_jwt_token.get("sub"), token=token)
 
     def authorize_user(

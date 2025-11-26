@@ -2,7 +2,7 @@ import uuid
 
 from fastapi.testclient import TestClient
 
-from app.authorization.schema import AccessResponse
+from app.authorization.schema_response import AccessResponse
 from app.core.authz import Action, Authorization
 from app.settings import settings
 from tests.factories import UserFactory

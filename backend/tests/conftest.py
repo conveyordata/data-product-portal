@@ -11,7 +11,7 @@ from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz.authorization import Authorization
 from app.database.database import Base, get_db_session
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.main import app
 from app.settings import settings
 from tests.factories.role import RoleFactory
@@ -28,7 +28,7 @@ def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
     init(force=True, seed_path=None)
-    yield
+    return
 
 
 def override_get_db():
@@ -100,7 +100,7 @@ def default_dataset_payload() -> dict[str, Any]:
         "namespace": "test-dataset",
         "tags": [],
         "owners": [str(user.id)],
-        "access_type": DatasetAccessType.RESTRICTED,
+        "access_type": OutputPortAccessType.RESTRICTED,
         "domain_id": str(domain.id),
     }
 
@@ -123,5 +123,5 @@ def admin() -> UserFactory:
 
 
 @pytest.fixture
-def authorizer() -> Generator[Authorization, None, None]:
-    yield Authorization()
+def authorizer() -> Authorization:
+    return Authorization()

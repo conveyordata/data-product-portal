@@ -14,19 +14,20 @@ LOG_CONFIG_PATH = os.path.join(
 
 
 def get_logger(name: str, prefix: str = "local"):
-    dict_config = json.load(open(LOG_CONFIG_PATH))
-    dict_config["handlers"]["fileHandler"]["filename"] = os.path.join(
-        settings.LOGGING_DIRECTORY, prefix
-    )
+    with open(LOG_CONFIG_PATH) as log_config_file:
+        dict_config = json.load(log_config_file)
+        dict_config["handlers"]["fileHandler"]["filename"] = os.path.join(
+            settings.LOGGING_DIRECTORY, prefix
+        )
 
-    if not os.path.exists(settings.LOGGING_DIRECTORY):
-        os.makedirs(settings.LOGGING_DIRECTORY)
+        if not os.path.exists(settings.LOGGING_DIRECTORY):
+            os.makedirs(settings.LOGGING_DIRECTORY)
 
-    logging.config.dictConfig(dict_config)
+        logging.config.dictConfig(dict_config)
 
-    app_logger = logging.getLogger(name)
-    app_logger.setLevel(LOG_LEVEL)
-    return app_logger
+        app_logger = logging.getLogger(name)
+        app_logger.setLevel(LOG_LEVEL)
+        return app_logger
 
 
 logger = get_logger(__name__)

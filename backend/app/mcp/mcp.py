@@ -6,7 +6,27 @@ from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
-from app.configuration.domains.schema_response import DomainGet
+from app.authorization.role_assignments.data_product.schema import (
+    RoleAssignmentResponse as DataProductRoleAssignmentResponse,
+)
+
+# Add role assignment imports
+from app.authorization.role_assignments.data_product.service import (
+    RoleAssignmentService as DataProductRoleAssignmentService,
+)
+from app.authorization.role_assignments.global_.schema import (
+    RoleAssignmentResponse as GlobalRoleAssignmentResponse,
+)
+from app.authorization.role_assignments.global_.service import (
+    RoleAssignmentService as GlobalRoleAssignmentService,
+)
+from app.authorization.role_assignments.output_port.schema import (
+    RoleAssignmentResponse as DatasetRoleAssignmentResponse,
+)
+from app.authorization.role_assignments.output_port.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
+)
+from app.configuration.domains.schema_response import DomainGetOld
 from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
@@ -23,26 +43,6 @@ from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
-from app.role_assignments.data_product.schema import (
-    RoleAssignmentResponse as DataProductRoleAssignmentResponse,
-)
-
-# Add role assignment imports
-from app.role_assignments.data_product.service import (
-    RoleAssignmentService as DataProductRoleAssignmentService,
-)
-from app.role_assignments.dataset.schema import (
-    RoleAssignmentResponse as DatasetRoleAssignmentResponse,
-)
-from app.role_assignments.dataset.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
-from app.role_assignments.global_.schema import (
-    RoleAssignmentResponse as GlobalRoleAssignmentResponse,
-)
-from app.role_assignments.global_.service import (
-    RoleAssignmentService as GlobalRoleAssignmentService,
-)
 from app.settings import settings
 
 
@@ -54,7 +54,7 @@ def initialize_models():
         print(f"Warning during model initialization: {e}")
 
 
-initialize_models()  # TODO Figure out if this is still needed
+initialize_models()
 
 
 def get_auth_provider() -> Optional[JWTVerifier]:
@@ -198,7 +198,7 @@ def universal_search(
                             break
 
                 result_domains = [
-                    DomainGet.model_validate(domain).model_dump()
+                    DomainGetOld.model_validate(domain).model_dump()
                     for domain in filtered_domains
                 ]
                 query_results.update({"domains": result_domains})
@@ -409,7 +409,7 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
             if not domain:
                 return {"error": f"Domain {domain_id} not found"}
 
-            return DomainGet.model_validate(domain).model_dump()
+            return DomainGetOld.model_validate(domain).model_dump()
         finally:
             db.close()
 
@@ -458,7 +458,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                     ],
                 },
                 "domains": [
-                    DomainGet.model_validate(domain).model_dump()
+                    DomainGetOld.model_validate(domain).model_dump()
                     for domain in all_domains
                 ],
             }

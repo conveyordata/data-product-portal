@@ -1,8 +1,8 @@
 import factory
 
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.datasets.model import Dataset
-from app.datasets.status import DatasetStatus
+from app.datasets.status import OutputPortStatus
 
 from .data_product import DataProductFactory
 from .domain import DomainFactory
@@ -17,8 +17,8 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = factory.Faker("word")
     description = factory.Faker("text", max_nb_chars=20)
     about = factory.Faker("text", max_nb_chars=20)
-    status = DatasetStatus.ACTIVE.value
-    access_type = DatasetAccessType.PUBLIC.value
+    status = OutputPortStatus.ACTIVE.value
+    access_type = OutputPortAccessType.PUBLIC.value
     domain = factory.SubFactory(DomainFactory)
     usage = factory.Faker("word")
     data_product = factory.SubFactory(DataProductFactory)

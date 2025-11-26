@@ -6,21 +6,23 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_lifecycles.model import DataProductLifecycle
 from app.configuration.domains.model import Domain
 from app.configuration.tags.model import Tag, tag_dataset_table
 from app.database.database import Base, ensure_exists
-from app.datasets.enums import DatasetAccessType
-from app.datasets.status import DatasetStatus
-from app.role_assignments.enums import DecisionStatus
+from app.datasets.enums import OutputPortAccessType
+from app.datasets.status import OutputPortStatus
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
+    from app.authorization.role_assignments.output_port.model import (
+        DatasetRoleAssignment,
+    )
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
-    from app.role_assignments.dataset.model import DatasetRoleAssignment
 
 
 class Dataset(Base, BaseORM):
@@ -31,8 +33,12 @@ class Dataset(Base, BaseORM):
     name = Column(String)
     description = Column(String)
     about = Column(String)
-    access_type = Column(Enum(DatasetAccessType), default=DatasetAccessType.PUBLIC)
-    status: DatasetStatus = Column(Enum(DatasetStatus), default=DatasetStatus.ACTIVE)
+    access_type = Column(
+        Enum(OutputPortAccessType), default=OutputPortAccessType.PUBLIC
+    )
+    status: OutputPortStatus = Column(
+        Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
+    )
     usage = Column(String, nullable=True)
     search_vector = Column(postgresql.TSVECTOR)
 

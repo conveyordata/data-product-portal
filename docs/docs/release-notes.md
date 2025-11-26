@@ -18,6 +18,11 @@ This avoids the pitfall where you permanently are allowed to do everything and n
   - `/api/platforms` -> `/api/v2/configuration/platforms`
   - `/api/tags` -> `/api/v2/configuration/tags`
   - `/api/theme_settings` -> `/api/v2/configuration/theme_settings`
+  - `/api/authz` -> `/api/v2/authz`
+  - `/api/role_assignments/dataset` -> `/api/v2/authz/role_assignments/output_port`
+  - `/api/role_assignments/data_product` -> `/api/v2/authz/role_assignments/data_product`
+  - `/api/role_assignments/global` -> `/api/v2/authz/role_assignments/global`
+  - `/api/roles` -> `/api/v2/authz/roles`
 
 ## 0.4.1
 

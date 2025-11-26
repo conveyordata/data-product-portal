@@ -33,7 +33,7 @@ repos:
   rev: v1.16.1
   hooks:
     - id: mypy
-      language_version: python3.12
+      language_version: python3.13
       additional_dependencies:
       - types-cachetools
       - types-requests
