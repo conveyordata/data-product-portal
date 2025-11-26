@@ -92,7 +92,7 @@ class DeviceFlowService:
             )
             device_flow.last_checked = utc_now()
             db.commit()
-            raise SlowDownException()
+            raise SlowDownException
 
         device_flow.last_checked = utc_now()
         self.logger.debug(
@@ -138,7 +138,7 @@ class DeviceFlowService:
             db.commit()
             return data
         else:
-            raise ExpiredDeviceCodeError()
+            raise ExpiredDeviceCodeError
 
     def _verify_auth_header(self, auth_client_id: str, client_id: str):
         if auth_client_id != client_id:
@@ -189,12 +189,12 @@ class DeviceFlowService:
             DeviceFlowStatus.DENIED,
         ):
             self.logger.debug("The device code has already been expired or been used")
-            raise ExpiredUserCodeError()
+            raise ExpiredUserCodeError
         if utc_now() > device_flow.max_expiry:
             self.logger.debug("User Code has expired")
             device_flow.status = DeviceFlowStatus.EXPIRED
             db.commit()
-            raise ExpiredUserCodeError()
+            raise ExpiredUserCodeError
         self.logger.debug("User Code is valid and action is authorize")
         confirm_uri = (
             "/api/auth/device/allow?"

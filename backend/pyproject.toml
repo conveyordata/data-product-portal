@@ -89,6 +89,7 @@ select = [
     "EXE", #flake8-executable
     "FIX", #flake8-fixme
     "ISC", #flake8-implicit-str-concat
+    "RSE", #flake8-raise
 ]
 
 [tool.ruff.lint.per-file-ignores]
