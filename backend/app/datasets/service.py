@@ -386,6 +386,29 @@ class DatasetService:
                         animated=True,
                     )
                 )
+
+        # if no data outputs are linked yet, still show the owner data product
+        if level >= 2 and not dataset.data_output_links:
+            nodes.append(
+                Node(
+                    id=f"{dataset.data_product.id}_2",
+                    data=NodeData(
+                        id=f"{dataset.data_product.id}",
+                        name=dataset.data_product.name,
+                        icon_key=dataset.data_product.type.icon_key,
+                    ),
+                    type=NodeType.dataProductNode,
+                )
+            )
+            edges.append(
+                Edge(
+                    id=f"{dataset.data_product.id}-{dataset.id}-2",
+                    target=dataset.id,
+                    source=f"{dataset.data_product.id}_2",
+                    animated=True,
+                )
+            )
+
         return Graph(nodes=set(nodes), edges=set(edges))
 
     def validate_dataset_namespace(self, namespace: str) -> NamespaceValidation:
