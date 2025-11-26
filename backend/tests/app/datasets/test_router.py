@@ -332,11 +332,36 @@ class TestDatasetsRouter:
         assert response.json()["usage"] == "new usage"
 
     def test_get_graph_data(self, client):
-        ds = DatasetFactory()
+        dp = DataProductFactory()
+        ds = DatasetFactory(data_product=dp)
         response = client.get(f"{ENDPOINT}/{ds.id}/graph")
         assert response.json() == {
-            "edges": [],
+            "edges": [
+                {
+                    "id": f"{str(dp.id)}-{str(ds.id)}-2",
+                    "source": f"{str(dp.id)}_2",
+                    "target": str(ds.id),
+                    "animated": True,
+                    "sourceHandle": "right_s",
+                    "targetHandle": "left_t",
+                }
+            ],
             "nodes": [
+                {
+                    "data": {
+                        "id": f"{str(dp.id)}",
+                        "name": dp.name,
+                        "description": None,
+                        "icon_key": "default",
+                        "domain": None,
+                        "domain_id": None,
+                        "assignments": None,
+                        "link_to_id": None,
+                    },
+                    "id": f"{str(dp.id)}_2",
+                    "isMain": False,
+                    "type": "dataProductNode",
+                },
                 {
                     "data": {
                         "icon_key": None,
@@ -351,7 +376,7 @@ class TestDatasetsRouter:
                     "id": str(ds.id),
                     "isMain": True,
                     "type": "datasetNode",
-                }
+                },
             ],
         }
 

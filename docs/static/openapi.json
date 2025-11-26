@@ -9148,16 +9148,6 @@
               "default": true,
               "title": "Dataset Nodes Enabled"
             }
-          },
-          {
-            "name": "data_output_nodes_enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true,
-              "title": "Data Output Nodes Enabled"
-            }
           }
         ],
         "responses": {
