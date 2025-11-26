@@ -263,7 +263,7 @@ class GraphService:
                     )
                     source_nodes.append(edge.source)
             # now we can create new edges between all source nodes and all target nodes
-            is_animated = all([edge.animated for edge in source_edges + target_edges])
+            is_animated = all(edge.animated for edge in source_edges + target_edges)
             for source_node in source_nodes:
                 for target_node in target_nodes:
                     new_edge = Edge(
