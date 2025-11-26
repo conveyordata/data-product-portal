@@ -85,6 +85,7 @@ select = [
     "S", #flake-8 bandit, security rules
     "PT", #flake-8 pytest style
     "SIM", #flake-8 simplify rules
+    "C4", #flake-8 comprehensions, help with writing better list/set/dict comprehensions.
 ]
 
 [tool.ruff.lint.per-file-ignores]

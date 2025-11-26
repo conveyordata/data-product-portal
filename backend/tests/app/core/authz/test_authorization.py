@@ -108,7 +108,7 @@ class TestAuthorization:
         user = "test_user"
         obj = "test_resource"
         act = AuthorizationAction.DATA_PRODUCT__DELETE
-        all_acts = list(map(lambda a: a, AuthorizationAction))
+        all_acts = list(AuthorizationAction)
 
         authorizer.sync_role_permissions(role_id=role, actions=all_acts)
         authorizer.assign_resource_role(user_id=user, role_id=role, resource_id=obj)
