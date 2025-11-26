@@ -83,6 +83,7 @@ select = [
     "YTT", #flake-2020 rules, check for YTT bugs
     "ASYNC", #flake8 async rules
     "S", #flake-8 bandit, security rules
+    "RSE", #flake8-raise
 ]
 
 [tool.ruff.lint.per-file-ignores]
