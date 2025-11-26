@@ -1,8 +1,10 @@
 import factory
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.authz.authorization import Authorization
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.enums import DecisionStatus
 from tests import test_session
 
 

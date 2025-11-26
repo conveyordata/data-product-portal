@@ -9,6 +9,7 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
@@ -21,7 +22,6 @@ from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
 from app.mcp.router import router as mcp_router
-from app.roles.service import RoleService
 from app.settings import settings
 from app.shared.router import router
 

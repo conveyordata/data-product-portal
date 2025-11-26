@@ -13,11 +13,12 @@
     "/api/authz/access/{action}": {
       "get": {
         "tags": [
-          "authz"
+          "Authorization"
         ],
         "summary": "Check Access",
         "description": "Allows the requesting user to check whether an access check will fail or succeed.\nUseful to conditionally disable parts of the UI that are known to be inaccessible.",
         "operationId": "check_access_api_authz_access__action__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "action",
@@ -105,10 +106,11 @@
     "/api/authz/admin": {
       "get": {
         "tags": [
-          "authz"
+          "Authorization"
         ],
         "summary": "Is Admin",
         "operationId": "is_admin_api_authz_admin_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "token",
@@ -123,12 +125,146 @@
         ],
         "responses": {
           "200": {
-            "description": "Admin role assignment",
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IsAdminResponse",
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/IsAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/access/{action}": {
+      "get": {
+        "tags": [
+          "Authorization"
+        ],
+        "summary": "Check Access",
+        "description": "Allows the requesting user to check whether an access check will fail or succeed.\nUseful to conditionally disable parts of the UI that are known to be inaccessible.",
+        "operationId": "check_access_api_v2_authz_access__action__get",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AuthorizationAction"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Resource"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Domain"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessResponse",
+                  "type": "object",
+                  "properties": {
+                    "access": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/admin": {
+      "get": {
+        "tags": [
+          "Authorization"
+        ],
+        "summary": "Is Admin",
+        "operationId": "is_admin_api_v2_authz_admin_get",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IsAdminResponse"
                 }
               }
             }
@@ -7556,58 +7692,14 @@
         }
       }
     },
-    "/api/roles/{scope}": {
-      "get": {
-        "tags": [
-          "roles"
-        ],
-        "summary": "Get Roles",
-        "operationId": "get_roles_api_roles__scope__get",
-        "parameters": [
-          {
-            "name": "scope",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Scope"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Role"
-                  },
-                  "title": "Response Get Roles Api Roles  Scope  Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/roles": {
       "post": {
         "tags": [
-          "roles"
+          "Authorization - Roles"
         ],
         "summary": "Create Role",
         "operationId": "create_role_api_roles_post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "token",
@@ -7658,10 +7750,10 @@
       },
       "patch": {
         "tags": [
-          "roles"
+          "Authorization - Roles"
         ],
-        "summary": "Update Role",
-        "operationId": "update_role_api_roles_patch",
+        "summary": "Update Role Old",
+        "operationId": "update_role_old_api_roles_patch",
         "parameters": [
           {
             "name": "token",
@@ -7679,7 +7771,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateRole"
+                "$ref": "#/components/schemas/UpdateRoleOld"
               }
             }
           }
@@ -7714,10 +7806,11 @@
     "/api/roles/{id}": {
       "delete": {
         "tags": [
-          "roles"
+          "Authorization - Roles"
         ],
         "summary": "Remove Role",
         "operationId": "remove_role_api_roles__id__delete",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -7772,82 +7865,13 @@
         }
       }
     },
-    "/api/role_assignments/global": {
-      "get": {
-        "tags": [
-          "role_assignments"
-        ],
-        "summary": "List Assignments",
-        "operationId": "list_assignments_api_role_assignments_global_get",
-        "parameters": [
-          {
-            "name": "user_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "User Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Role Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
-                  },
-                  "title": "Response List Assignments Api Role Assignments Global Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v2/authz/roles": {
       "post": {
         "tags": [
-          "role_assignments"
+          "Authorization - Roles"
         ],
-        "summary": "Create Assignment",
-        "operationId": "create_assignment_api_role_assignments_global_post",
+        "summary": "Create Role",
+        "operationId": "create_role_api_v2_authz_roles_post",
         "parameters": [
           {
             "name": "token",
@@ -7865,18 +7889,233 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__global___schema__CreateRoleAssignment"
+                "$ref": "#/components/schemas/CreateRole"
               }
             }
           }
         },
         "responses": {
           "200": {
+            "description": "Role successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                },
+                "example": {
+                  "id": "random id of the new role"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/roles/{id}": {
+      "delete": {
+        "tags": [
+          "Authorization - Roles"
+        ],
+        "summary": "Remove Role",
+        "operationId": "remove_role_api_v2_authz_roles__id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Role not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Role not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Authorization - Roles"
+        ],
+        "summary": "Update Role",
+        "operationId": "update_role_api_v2_authz_roles__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRole"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                },
+                "example": {
+                  "id": "id of the updated role"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles/{scope}": {
+      "get": {
+        "tags": [
+          "Authorization - Roles"
+        ],
+        "summary": "Get Roles Old",
+        "operationId": "get_roles_old_api_roles__scope__get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Role"
+                  },
+                  "title": "Response Get Roles Old Api Roles  Scope  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/roles/{scope}": {
+      "get": {
+        "tags": [
+          "Authorization - Roles"
+        ],
+        "summary": "Get Roles",
+        "operationId": "get_roles_api_v2_authz_roles__scope__get",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRolesResponse"
                 }
               }
             }
@@ -7897,10 +8136,11 @@
     "/api/role_assignments/global/become_admin": {
       "post": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
         "summary": "Become Admin",
         "operationId": "become_admin_api_role_assignments_global_become_admin_post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "token",
@@ -7948,10 +8188,11 @@
     "/api/role_assignments/global/revoke_admin": {
       "post": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
         "summary": "Revoke Admin",
         "operationId": "revoke_admin_api_role_assignments_global_revoke_admin_post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "token",
@@ -7986,13 +8227,399 @@
         }
       }
     },
+    "/api/role_assignments/global": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Create Assignment",
+        "operationId": "create_assignment_api_role_assignments_global_post",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__CreateRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "List Assignments Old",
+        "operationId": "list_assignments_old_api_role_assignments_global_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "role_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
+                  },
+                  "title": "Response List Assignments Old Api Role Assignments Global Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/role_assignments/global/{id}": {
       "delete": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
         "summary": "Delete Assignment",
         "operationId": "delete_assignment_api_role_assignments_global__id__delete",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/global/become_admin": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Become Admin",
+        "operationId": "become_admin_api_v2_authz_role_assignments_global_become_admin_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BecomeAdmin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/global/revoke_admin": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Revoke Admin",
+        "operationId": "revoke_admin_api_v2_authz_role_assignments_global_revoke_admin_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/global": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Create Assignment",
+        "operationId": "create_assignment_api_v2_authz_role_assignments_global_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__CreateRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "List Assignments",
+        "operationId": "list_assignments_api_v2_authz_role_assignments_global_get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "role_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__ListRoleAssignmentsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/global/{id}": {
+      "delete": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Delete Assignment",
+        "operationId": "delete_assignment_api_v2_authz_role_assignments_global__id__delete",
         "parameters": [
           {
             "name": "id",
@@ -8040,10 +8667,11 @@
     "/api/role_assignments/global/{id}/decide": {
       "patch": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "Decide Assignment",
-        "operationId": "decide_assignment_api_role_assignments_global__id__decide_patch",
+        "summary": "Decide Assignment Old",
+        "operationId": "decide_assignment_old_api_role_assignments_global__id__decide_patch",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -8071,7 +8699,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__dataset__schema__DecideRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__DecideRoleAssignment"
               }
             }
           }
@@ -8082,7 +8710,70 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/global/{id}/decide": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Decide Assignment",
+        "operationId": "decide_assignment_api_v2_authz_role_assignments_global__id__decide_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__DecideRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -8103,10 +8794,11 @@
     "/api/role_assignments/global/{id}/role": {
       "patch": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "Modify Assigned Role",
-        "operationId": "modify_assigned_role_api_role_assignments_global__id__role_patch",
+        "summary": "Modify Assigned Role Old",
+        "operationId": "modify_assigned_role_old_api_role_assignments_global__id__role_patch",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -8134,7 +8826,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__global___schema__ModifyRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__ModifyRoleAssignment"
               }
             }
           }
@@ -8145,7 +8837,358 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/global/{id}/role": {
+      "put": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Modify Assigned Role",
+        "operationId": "modify_assigned_role_api_v2_authz_role_assignments_global__id__role_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__ModifyRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/role_assignments/data_product/{id}": {
+      "delete": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Delete Assignment",
+        "operationId": "delete_assignment_api_role_assignments_data_product__id__delete",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Create Assignment Old",
+        "operationId": "create_assignment_old_api_role_assignments_data_product__id__post",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Modify Assigned Role Old",
+        "operationId": "modify_assigned_role_old_api_role_assignments_data_product__id__patch",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__ModifyRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/data_product/{id}": {
+      "delete": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Delete Assignment",
+        "operationId": "delete_assignment_api_v2_authz_role_assignments_data_product__id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Modify Assigned Role",
+        "operationId": "modify_assigned_role_api_v2_authz_role_assignments_data_product__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__ModifyRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -8166,10 +9209,11 @@
     "/api/role_assignments/data_product": {
       "get": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "List Assignments",
-        "operationId": "list_assignments_api_role_assignments_data_product_get",
+        "summary": "List Assignments Old",
+        "operationId": "list_assignments_old_api_role_assignments_data_product_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "data_product_id",
@@ -8247,9 +9291,9 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignmentResponse"
+                    "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
                   },
-                  "title": "Response List Assignments Api Role Assignments Data Product Get"
+                  "title": "Response List Assignments Old Api Role Assignments Data Product Get"
                 }
               }
             }
@@ -8267,13 +9311,165 @@
         }
       }
     },
-    "/api/role_assignments/data_product/{id}": {
+    "/api/v2/authz/role_assignments/data_product": {
+      "get": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "List Assignments",
+        "operationId": "list_assignments_api_v2_authz_role_assignments_data_product_get",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "role_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role Id"
+            }
+          },
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DecisionStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decision"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__ListRoleAssignmentsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
         "summary": "Create Assignment",
-        "operationId": "create_assignment_api_role_assignments_data_product__id__post",
+        "operationId": "create_assignment_api_v2_authz_role_assignments_data_product_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__CreateRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/role_assignments/data_product/request/{id}": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Request Assignment Old",
+        "operationId": "request_assignment_old_api_role_assignments_data_product_request__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -8301,7 +9497,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__data_product__schema__CreateRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
               }
             }
           }
@@ -8312,7 +9508,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -8328,13 +9524,196 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/v2/authz/role_assignments/data_product/request": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Request Assignment",
+        "operationId": "request_assignment_api_v2_authz_role_assignments_data_product_request_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RequestRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/role_assignments/data_product/{id}/decide": {
+      "patch": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Decide Assignment Old",
+        "operationId": "decide_assignment_old_api_role_assignments_data_product__id__decide_patch",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__DecideRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/data_product/{id}/decide": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Decide Assignment",
+        "operationId": "decide_assignment_api_v2_authz_role_assignments_data_product__id__decide_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__DecideRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/role_assignments/dataset/{id}": {
       "delete": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
         "summary": "Delete Assignment",
-        "operationId": "delete_assignment_api_role_assignments_data_product__id__delete",
+        "operationId": "delete_assignment_api_role_assignments_dataset__id__delete",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -8378,75 +9757,12 @@
           }
         }
       },
-      "patch": {
-        "tags": [
-          "role_assignments"
-        ],
-        "summary": "Modify Assigned Role",
-        "operationId": "modify_assigned_role_api_role_assignments_data_product__id__patch",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__data_product__schema__ModifyRoleAssignment"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignmentResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/role_assignments/data_product/request/{id}": {
       "post": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "Request Assignment",
-        "operationId": "request_assignment_api_role_assignments_data_product_request__id__post",
+        "summary": "Create Assignment Old",
+        "operationId": "create_assignment_old_api_role_assignments_dataset__id__post",
         "parameters": [
           {
             "name": "id",
@@ -8474,7 +9790,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__data_product__schema__CreateRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
               }
             }
           }
@@ -8485,7 +9801,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/RoleAssignmentResponseOld"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Modify Assigned Role Old",
+        "operationId": "modify_assigned_role_old_api_role_assignments_dataset__id__patch",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__ModifyRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleAssignmentResponseOld"
                 }
               }
             }
@@ -8503,13 +9881,62 @@
         }
       }
     },
-    "/api/role_assignments/data_product/{id}/decide": {
-      "patch": {
+    "/api/v2/authz/role_assignments/output_port/{id}": {
+      "delete": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "Decide Assignment",
-        "operationId": "decide_assignment_api_role_assignments_data_product__id__decide_patch",
+        "summary": "Delete Assignment",
+        "operationId": "delete_assignment_api_v2_authz_role_assignments_output_port__id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Modify Assigned Role",
+        "operationId": "modify_assigned_role_api_v2_authz_role_assignments_output_port__id__put",
         "parameters": [
           {
             "name": "id",
@@ -8537,7 +9964,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__dataset__schema__DecideRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__ModifyRoleAssignment"
               }
             }
           }
@@ -8548,7 +9975,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -8569,10 +9996,11 @@
     "/api/role_assignments/dataset": {
       "get": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "List Assignments",
-        "operationId": "list_assignments_api_role_assignments_dataset_get",
+        "summary": "List Assignments Old",
+        "operationId": "list_assignments_old_api_role_assignments_dataset_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "dataset_id",
@@ -8650,9 +10078,9 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignmentResponse"
+                    "$ref": "#/components/schemas/RoleAssignmentResponseOld"
                   },
-                  "title": "Response List Assignments Api Role Assignments Dataset Get"
+                  "title": "Response List Assignments Old Api Role Assignments Dataset Get"
                 }
               }
             }
@@ -8670,24 +10098,112 @@
         }
       }
     },
-    "/api/role_assignments/dataset/{id}": {
+    "/api/v2/authz/role_assignments/output_port": {
+      "get": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "List Assignments",
+        "operationId": "list_assignments_api_v2_authz_role_assignments_output_port_get",
+        "parameters": [
+          {
+            "name": "output_port_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Output Port Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "role_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role Id"
+            }
+          },
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DecisionStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decision"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__ListRoleAssignmentsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
         "summary": "Create Assignment",
-        "operationId": "create_assignment_api_role_assignments_dataset__id__post",
+        "operationId": "create_assignment_api_v2_authz_role_assignments_output_port_post",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
           {
             "name": "token",
             "in": "query",
@@ -8704,7 +10220,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__dataset__schema__CreateRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignment"
               }
             }
           }
@@ -8715,117 +10231,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignmentResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "role_assignments"
-        ],
-        "summary": "Delete Assignment",
-        "operationId": "delete_assignment_api_role_assignments_dataset__id__delete",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "role_assignments"
-        ],
-        "summary": "Modify Assigned Role",
-        "operationId": "modify_assigned_role_api_role_assignments_dataset__id__patch",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__dataset__schema__ModifyRoleAssignment"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -8846,10 +10252,11 @@
     "/api/role_assignments/dataset/request/{id}": {
       "post": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "Request Assignment",
-        "operationId": "request_assignment_api_role_assignments_dataset_request__id__post",
+        "summary": "Request Assignment Old",
+        "operationId": "request_assignment_old_api_role_assignments_dataset_request__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -8877,7 +10284,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__dataset__schema__CreateRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
               }
             }
           }
@@ -8888,7 +10295,60 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/RoleAssignmentOld"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/output_port/request": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Request Assignment",
+        "operationId": "request_assignment_api_v2_authz_role_assignments_output_port_request_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RequestRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -8909,10 +10369,11 @@
     "/api/role_assignments/dataset/{id}/decide": {
       "patch": {
         "tags": [
-          "role_assignments"
+          "Authorization - Role assignments"
         ],
-        "summary": "Decide Assignment",
-        "operationId": "decide_assignment_api_role_assignments_dataset__id__decide_patch",
+        "summary": "Decide Assignment Old",
+        "operationId": "decide_assignment_old_api_role_assignments_dataset__id__decide_patch",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -8940,7 +10401,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__role_assignments__dataset__schema__DecideRoleAssignment"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__DecideRoleAssignment"
               }
             }
           }
@@ -8951,7 +10412,70 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignmentResponse"
+                  "$ref": "#/components/schemas/RoleAssignmentResponseOld"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authz/role_assignments/output_port/{id}/decide": {
+      "post": {
+        "tags": [
+          "Authorization - Role assignments"
+        ],
+        "summary": "Decide Assignment",
+        "operationId": "decide_assignment_api_v2_authz_role_assignments_output_port__id__decide_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__DecideRoleAssignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -12157,10 +13681,10 @@
             "title": "Description"
           },
           "status": {
-            "$ref": "#/components/schemas/DatasetStatus"
+            "$ref": "#/components/schemas/OutputPortStatus"
           },
           "access_type": {
-            "$ref": "#/components/schemas/DatasetAccessType"
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "data_product_id": {
             "type": "string",
@@ -12178,7 +13702,8 @@
           "access_type",
           "data_product_id"
         ],
-        "title": "Dataset"
+        "title": "Dataset",
+        "deprecated": true
       },
       "DatasetAboutUpdate": {
         "properties": {
@@ -12192,15 +13717,6 @@
           "about"
         ],
         "title": "DatasetAboutUpdate"
-      },
-      "DatasetAccessType": {
-        "type": "string",
-        "enum": [
-          "public",
-          "restricted",
-          "private"
-        ],
-        "title": "DatasetAccessType"
       },
       "DatasetCreate": {
         "properties": {
@@ -12217,7 +13733,7 @@
             "title": "Description"
           },
           "access_type": {
-            "$ref": "#/components/schemas/DatasetAccessType"
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "about": {
             "anyOf": [
@@ -12303,7 +13819,7 @@
             "title": "Description"
           },
           "status": {
-            "$ref": "#/components/schemas/DatasetStatus"
+            "$ref": "#/components/schemas/OutputPortStatus"
           },
           "usage": {
             "anyOf": [
@@ -12317,7 +13833,7 @@
             "title": "Usage"
           },
           "access_type": {
-            "$ref": "#/components/schemas/DatasetAccessType"
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "data_product_id": {
             "type": "string",
@@ -12479,19 +13995,10 @@
         ],
         "title": "DatasetLinks"
       },
-      "DatasetStatus": {
-        "type": "string",
-        "enum": [
-          "pending",
-          "active",
-          "archived"
-        ],
-        "title": "DatasetStatus"
-      },
       "DatasetStatusUpdate": {
         "properties": {
           "status": {
-            "$ref": "#/components/schemas/DatasetStatus"
+            "$ref": "#/components/schemas/OutputPortStatus"
           }
         },
         "type": "object",
@@ -12515,7 +14022,7 @@
             "title": "Description"
           },
           "access_type": {
-            "$ref": "#/components/schemas/DatasetAccessType"
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "about": {
             "anyOf": [
@@ -12598,7 +14105,7 @@
             "title": "Description"
           },
           "status": {
-            "$ref": "#/components/schemas/DatasetStatus"
+            "$ref": "#/components/schemas/OutputPortStatus"
           },
           "usage": {
             "anyOf": [
@@ -12612,7 +14119,7 @@
             "title": "Usage"
           },
           "access_type": {
-            "$ref": "#/components/schemas/DatasetAccessType"
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "data_product_id": {
             "type": "string",
@@ -12702,7 +14209,7 @@
             "title": "Description"
           },
           "status": {
-            "$ref": "#/components/schemas/DatasetStatus"
+            "$ref": "#/components/schemas/OutputPortStatus"
           },
           "usage": {
             "anyOf": [
@@ -12716,7 +14223,7 @@
             "title": "Usage"
           },
           "access_type": {
-            "$ref": "#/components/schemas/DatasetAccessType"
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "data_product_id": {
             "type": "string",
@@ -13383,6 +14890,22 @@
         ],
         "title": "GetPlatformServicesResponse"
       },
+      "GetRolesResponse": {
+        "properties": {
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            },
+            "type": "array",
+            "title": "Roles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roles"
+        ],
+        "title": "GetRolesResponse"
+      },
       "GlueDataOutput": {
         "properties": {
           "configuration_type": {
@@ -13698,10 +15221,10 @@
                 "items": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignment"
+                      "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignment"
                     },
                     {
-                      "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignment"
+                      "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RoleAssignment"
                     }
                   ]
                 },
@@ -13764,6 +15287,67 @@
           "user"
         ],
         "title": "NotificationGet"
+      },
+      "OutputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OutputPortStatus"
+          },
+          "access_type": {
+            "$ref": "#/components/schemas/OutputPortAccessType"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "status",
+          "access_type",
+          "data_product_id"
+        ],
+        "title": "OutputPort"
+      },
+      "OutputPortAccessType": {
+        "type": "string",
+        "enum": [
+          "public",
+          "restricted",
+          "private"
+        ],
+        "title": "OutputPortAccessType"
+      },
+      "OutputPortStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "active",
+          "archived"
+        ],
+        "title": "OutputPortStatus"
       },
       "Platform": {
         "properties": {
@@ -13968,6 +15552,229 @@
           "prototype"
         ],
         "title": "Role"
+      },
+      "RoleAssignmentOld": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "dataset": {
+            "$ref": "#/components/schemas/Dataset"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dataset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Dataset Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Id"
+          },
+          "requested_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By Id"
+          },
+          "decided_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "dataset",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by",
+          "dataset_id",
+          "user_id",
+          "role_id",
+          "requested_by_id",
+          "decided_by_id"
+        ],
+        "title": "RoleAssignmentOld",
+        "deprecated": true
+      },
+      "RoleAssignmentResponseOld": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "dataset": {
+            "$ref": "#/components/schemas/Dataset"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "dataset",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by"
+        ],
+        "title": "RoleAssignmentResponseOld",
+        "deprecated": true
       },
       "S3DataOutput": {
         "properties": {
@@ -14252,6 +16059,48 @@
       },
       "UpdateRole": {
         "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "permissions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AuthorizationAction"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "title": "UpdateRole"
+      },
+      "UpdateRoleOld": {
+        "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
@@ -14298,7 +16147,8 @@
         "required": [
           "id"
         ],
-        "title": "UpdateRole"
+        "title": "UpdateRoleOld",
+        "deprecated": true
       },
       "UpdateTagResponse": {
         "properties": {
@@ -14447,7 +16297,7 @@
           "global_role": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
+                "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
               },
               {
                 "type": "null"
@@ -14500,6 +16350,785 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "app__authorization__role_assignments__data_product__schema__CreateRoleAssignment": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id",
+          "data_product_id"
+        ],
+        "title": "CreateRoleAssignment"
+      },
+      "app__authorization__role_assignments__data_product__schema__ListRoleAssignmentsResponse": {
+        "properties": {
+          "role_assignments": {
+            "items": {
+              "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse"
+            },
+            "type": "array",
+            "title": "Role Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_assignments"
+        ],
+        "title": "ListRoleAssignmentsResponse"
+      },
+      "app__authorization__role_assignments__data_product__schema__ModifyRoleAssignment": {
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_id"
+        ],
+        "title": "ModifyRoleAssignment"
+      },
+      "app__authorization__role_assignments__data_product__schema__RequestRoleAssignment": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id",
+          "data_product_id"
+        ],
+        "title": "RequestRoleAssignment"
+      },
+      "app__authorization__role_assignments__data_product__schema__RoleAssignment": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Id"
+          },
+          "requested_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By Id"
+          },
+          "decided_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by",
+          "data_product_id",
+          "user_id",
+          "role_id",
+          "requested_by_id",
+          "decided_by_id"
+        ],
+        "title": "RoleAssignment"
+      },
+      "app__authorization__role_assignments__data_product__schema__RoleAssignmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by"
+        ],
+        "title": "RoleAssignmentResponse"
+      },
+      "app__authorization__role_assignments__global___schema__CreateRoleAssignment": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "string",
+                "const": "admin"
+              }
+            ],
+            "title": "Role Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id"
+        ],
+        "title": "CreateRoleAssignment"
+      },
+      "app__authorization__role_assignments__global___schema__ListRoleAssignmentsResponse": {
+        "properties": {
+          "role_assignments": {
+            "items": {
+              "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__RoleAssignmentResponse"
+            },
+            "type": "array",
+            "title": "Role Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_assignments"
+        ],
+        "title": "ListRoleAssignmentsResponse"
+      },
+      "app__authorization__role_assignments__global___schema__ModifyRoleAssignment": {
+        "properties": {
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "string",
+                "const": "admin"
+              }
+            ],
+            "title": "Role Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_id"
+        ],
+        "title": "ModifyRoleAssignment"
+      },
+      "app__authorization__role_assignments__global___schema__RoleAssignmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by"
+        ],
+        "title": "RoleAssignmentResponse"
+      },
+      "app__authorization__role_assignments__output_port__schema__CreateRoleAssignment": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id",
+          "output_port_id"
+        ],
+        "title": "CreateRoleAssignment"
+      },
+      "app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id"
+        ],
+        "title": "CreateRoleAssignmentOld",
+        "deprecated": true
+      },
+      "app__authorization__role_assignments__output_port__schema__DecideRoleAssignment": {
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "DecideRoleAssignment"
+      },
+      "app__authorization__role_assignments__output_port__schema__ListRoleAssignmentsResponse": {
+        "properties": {
+          "role_assignments": {
+            "items": {
+              "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RoleAssignmentResponse"
+            },
+            "type": "array",
+            "title": "Role Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_assignments"
+        ],
+        "title": "ListRoleAssignmentsResponse"
+      },
+      "app__authorization__role_assignments__output_port__schema__ModifyRoleAssignment": {
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_id"
+        ],
+        "title": "ModifyRoleAssignment"
+      },
+      "app__authorization__role_assignments__output_port__schema__RequestRoleAssignment": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id",
+          "output_port_id"
+        ],
+        "title": "RequestRoleAssignment"
+      },
+      "app__authorization__role_assignments__output_port__schema__RoleAssignment": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Id"
+          },
+          "requested_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By Id"
+          },
+          "decided_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by",
+          "output_port_id",
+          "user_id",
+          "role_id",
+          "requested_by_id",
+          "decided_by_id"
+        ],
+        "title": "RoleAssignment"
+      },
+      "app__authorization__role_assignments__output_port__schema__RoleAssignmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by"
+        ],
+        "title": "RoleAssignmentResponse"
       },
       "app__data_outputs__schema__DataOutput": {
         "properties": {
@@ -14790,652 +17419,6 @@
           "owner"
         ],
         "title": "DataOutput"
-      },
-      "app__role_assignments__data_product__schema__CreateRoleAssignment": {
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "user_id",
-          "role_id"
-        ],
-        "title": "CreateRoleAssignment"
-      },
-      "app__role_assignments__data_product__schema__ModifyRoleAssignment": {
-        "properties": {
-          "role_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role_id"
-        ],
-        "title": "ModifyRoleAssignment"
-      },
-      "app__role_assignments__data_product__schema__RoleAssignment": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          },
-          "requested_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested By Id"
-          },
-          "decided_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by",
-          "data_product_id",
-          "user_id",
-          "role_id",
-          "requested_by_id",
-          "decided_by_id"
-        ],
-        "title": "RoleAssignment"
-      },
-      "app__role_assignments__data_product__schema__RoleAssignmentResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by"
-        ],
-        "title": "RoleAssignmentResponse"
-      },
-      "app__role_assignments__dataset__schema__CreateRoleAssignment": {
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "user_id",
-          "role_id"
-        ],
-        "title": "CreateRoleAssignment"
-      },
-      "app__role_assignments__dataset__schema__DecideRoleAssignment": {
-        "properties": {
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          }
-        },
-        "type": "object",
-        "required": [
-          "decision"
-        ],
-        "title": "DecideRoleAssignment"
-      },
-      "app__role_assignments__dataset__schema__ModifyRoleAssignment": {
-        "properties": {
-          "role_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role_id"
-        ],
-        "title": "ModifyRoleAssignment"
-      },
-      "app__role_assignments__dataset__schema__RoleAssignment": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          },
-          "requested_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested By Id"
-          },
-          "decided_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "dataset",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by",
-          "dataset_id",
-          "user_id",
-          "role_id",
-          "requested_by_id",
-          "decided_by_id"
-        ],
-        "title": "RoleAssignment"
-      },
-      "app__role_assignments__dataset__schema__RoleAssignmentResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "dataset",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by"
-        ],
-        "title": "RoleAssignmentResponse"
-      },
-      "app__role_assignments__global___schema__CreateRoleAssignment": {
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "string",
-                "const": "admin"
-              }
-            ],
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "user_id",
-          "role_id"
-        ],
-        "title": "CreateRoleAssignment"
-      },
-      "app__role_assignments__global___schema__ModifyRoleAssignment": {
-        "properties": {
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "string",
-                "const": "admin"
-              }
-            ],
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role_id"
-        ],
-        "title": "ModifyRoleAssignment"
-      },
-      "app__role_assignments__global___schema__RoleAssignmentResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "$ref": "#/components/schemas/Role"
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by"
-        ],
-        "title": "RoleAssignmentResponse"
       }
     },
     "securitySchemes": {

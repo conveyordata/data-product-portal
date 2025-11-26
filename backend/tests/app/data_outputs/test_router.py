@@ -5,11 +5,11 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
+from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.schema import S3DataOutput
 from app.data_outputs.schema_request import DataOutputResultStringRequest
-from app.roles.schema import Scope
 from app.settings import settings
 from tests.factories import (
     DataOutputFactory,

@@ -11,7 +11,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-from app.roles.schema import Prototype
+from app.authorization.roles.schema import Prototype
 
 # revision identifiers, used by Alembic.
 revision: str = "c9b48c675202"

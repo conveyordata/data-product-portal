@@ -3,23 +3,25 @@ from casbin_sqlalchemy_adapter import Adapter, CasbinRule
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.core.authz import Authorization
-from app.core.logging import logger
-from app.role_assignments.data_product.auth import DataProductAuthAssignment
-from app.role_assignments.data_product.service import (
+from app.authorization.role_assignments.data_product.auth import (
+    DataProductAuthAssignment,
+)
+from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
-from app.role_assignments.dataset.auth import DatasetAuthAssignment
-from app.role_assignments.dataset.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
-from app.role_assignments.enums import DecisionStatus
-from app.role_assignments.global_.auth import GlobalAuthAssignment
-from app.role_assignments.global_.service import (
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
+from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
-from app.roles.auth import AuthRole
-from app.roles.service import RoleService
+from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
+from app.authorization.role_assignments.output_port.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
+)
+from app.authorization.roles.auth import AuthRole
+from app.authorization.roles.service import RoleService
+from app.core.authz import Authorization
+from app.core.logging import logger
 
 
 class AuthorizationService:

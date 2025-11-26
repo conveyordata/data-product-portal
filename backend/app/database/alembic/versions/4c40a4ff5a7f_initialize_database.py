@@ -16,8 +16,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.configuration.data_product_types.enums import DataProductIconKey
 from app.core.auth.device_flows.schema import DeviceFlowStatus
 from app.data_products.status import DataProductStatus
-from app.datasets.enums import DatasetAccessType
-from app.datasets.status import DatasetStatus
+from app.datasets.enums import OutputPortAccessType
+from app.datasets.status import OutputPortStatus
 from app.shared.model import utcnow
 
 
@@ -129,9 +129,13 @@ def upgrade() -> None:
         sa.Column("name", sa.String),
         sa.Column("description", sa.String),
         sa.Column("about", sa.String),
-        sa.Column("status", sa.Enum(DatasetStatus), default=DatasetStatus.PENDING),
         sa.Column(
-            "access_type", sa.Enum(DatasetAccessType), default=DatasetAccessType.PUBLIC
+            "status", sa.Enum(OutputPortStatus), default=OutputPortStatus.PENDING
+        ),
+        sa.Column(
+            "access_type",
+            sa.Enum(OutputPortAccessType),
+            default=OutputPortAccessType.PUBLIC,
         ),
         sa.Column("business_area_id", UUID, sa.ForeignKey("business_areas.id")),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),

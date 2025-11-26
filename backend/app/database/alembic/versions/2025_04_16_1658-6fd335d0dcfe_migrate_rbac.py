@@ -16,15 +16,17 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.roles.model import Role as RoleModel
+from app.authorization.roles.schema import CreateRole, Prototype, Scope
+from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action, Authorization
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.enums import DecisionStatus
-from app.role_assignments.global_.model import GlobalRoleAssignment
-from app.roles.model import Role as RoleModel
-from app.roles.schema import CreateRole, Prototype, Scope
-from app.roles.service import RoleService
 
 # revision identifiers, used by Alembic.
 revision: str = "6fd335d0dcfe"

@@ -4,10 +4,12 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.role_assignments.data_product.schema import (
+from app.authorization.role_assignments.data_product.schema import (
     RoleAssignment as DataProductRoleAssignment,
 )
-from app.role_assignments.dataset.schema import RoleAssignment as DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.schema import (
+    RoleAssignment as DatasetRoleAssignment,
+)
 
 
 class NodeData(BaseModel):

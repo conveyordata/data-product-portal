@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.database.database import Base
-from app.role_assignments.enums import DecisionStatus
 
 if TYPE_CHECKING:
     from app.data_outputs.model import DataOutput

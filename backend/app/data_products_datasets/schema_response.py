@@ -2,9 +2,9 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.schema import DataProduct
 from app.datasets.schema import Dataset
-from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
