@@ -54,7 +54,7 @@ def initialize_models():
         print(f"Warning during model initialization: {e}")
 
 
-initialize_models()  # TODO Figure out if this is still needed
+initialize_models()
 
 
 def get_auth_provider() -> Optional[JWTVerifier]:

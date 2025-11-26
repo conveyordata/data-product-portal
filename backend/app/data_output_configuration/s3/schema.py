@@ -19,16 +19,9 @@ class S3DataOutput(BaseDataOutputConfiguration):
         orm_model = S3DataOutputModel
 
     def validate_configuration(self, data_product: DataProduct):
-        # TODO
-        # if not self.suffix.startswith(data_product.namespace):
-        #     raise ValueError("Invalid suffix specified")
         pass
 
     def on_create(self):
-        # TODO Automatically create everything? To be seen
-        # Will this replace terraform? Should we read the config from terraform?
-        # client = get_client("s3")
-        # client.put_object(Bucket=self.bucket, Key=self.prefix, Body="")
         pass
 
     def render_template(self, template, **context):
