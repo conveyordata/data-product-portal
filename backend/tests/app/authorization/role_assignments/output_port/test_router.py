@@ -1,14 +1,13 @@
+from typing import TYPE_CHECKING
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.schema import RoleAssignment
 from app.authorization.roles.schema import Prototype, Role, Scope
 from app.core.authz import Action
-from app.datasets.model import Dataset
 from app.settings import settings
-from app.users.schema import User
 from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
@@ -16,6 +15,11 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+
+if TYPE_CHECKING:
+    from app.authorization.role_assignments.output_port.schema import RoleAssignment
+    from app.datasets.model import Dataset
+    from app.users.schema import User
 
 OLD_ENDPOINT = "/api/role_assignments/dataset"
 ENDPOINT = "/api/v2/authz/role_assignments/output_port"

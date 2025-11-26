@@ -28,12 +28,12 @@ class SubjectResolver(ABC):
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
         if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
         if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
         json_body = await request.json()
         if isinstance(json_body, dict) and (result := json_body.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
 
         return cls.DEFAULT
 

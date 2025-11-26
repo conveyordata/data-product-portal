@@ -1,5 +1,4 @@
-from typing import List
-from uuid import UUID
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -13,6 +12,9 @@ from app.datasets.model import Dataset
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 
 class GraphService:

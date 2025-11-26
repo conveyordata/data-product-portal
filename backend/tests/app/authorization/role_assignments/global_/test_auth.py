@@ -1,11 +1,15 @@
+from typing import TYPE_CHECKING
+
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
-from app.authorization.role_assignments.global_.schema import RoleAssignment
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Authorization
-from app.users.schema import User
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
+
+if TYPE_CHECKING:
+    from app.authorization.role_assignments.global_.schema import RoleAssignment
+    from app.users.schema import User
 
 
 class TestAuth:
