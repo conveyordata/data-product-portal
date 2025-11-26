@@ -34,37 +34,28 @@ class GraphService:
         domains = (
             self.db.scalars(
                 select(Domain).options(
-                    selectinload(Domain.datasets),
-                    selectinload(Domain.data_products),
+                    selectinload(Domain.datasets).selectinload(
+                        Dataset.data_product_links
+                    ),
+                    selectinload(Domain.data_products).selectinload(
+                        DataProduct.datasets
+                    ),
+                    selectinload(Domain.data_products).selectinload(
+                        DataProduct.dataset_links
+                    ),
+                    selectinload(Domain.data_products).selectinload(
+                        DataProduct.assignments
+                    ),
+                    selectinload(Domain.datasets).selectinload(
+                        Dataset.data_product_links
+                    ),
                 )
             )
             .unique()
             .all()
         )
-
-        data_products = (
-            self.db.scalars(
-                select(DataProduct).options(
-                    selectinload(DataProduct.dataset_links),
-                    selectinload(DataProduct.assignments),
-                    selectinload(DataProduct.datasets),
-                )
-            )
-            .unique()
-            .all()
-        )
-
-        # get all datasets
-        datasets = (
-            self.db.scalars(
-                select(Dataset).options(
-                    selectinload(Dataset.data_product_links),
-                    selectinload(Dataset.data_output_links),
-                )
-            )
-            .unique()
-            .all()
-        )
+        datasets = {d for domain in domains for d in domain.datasets}
+        data_products = {dp for domain in domains for dp in domain.data_products}
 
         # Nodes are { data products + datasets + data outputs }
         data_product_nodes = [
@@ -124,8 +115,6 @@ class GraphService:
             nodes += dataset_nodes
         edges: List[Edge] = []
         if data_product_nodes_enabled and dataset_nodes_enabled:
-            # Edges are the links between data products, datasets and data outputs
-            # TODO If there are no technical assets, this link still needs to show. Also in the small explorer
             for dataset_get in datasets:
                 dataset = dataset_get
                 edges.append(
@@ -165,7 +154,6 @@ class GraphService:
                     )
 
         elif not data_product_nodes_enabled and dataset_nodes_enabled:
-            # TODO If there are no technical assets, this link still needs to show. Also in the small explorer
             for data_product in data_products:
                 for dataset_link in data_product.dataset_links:
                     # If the data product has it's own dataset as children then we can show the link.
