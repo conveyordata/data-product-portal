@@ -28,7 +28,7 @@ def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
     init(force=True, seed_path=None)
-    yield
+    return
 
 
 def override_get_db():
@@ -123,5 +123,5 @@ def admin() -> UserFactory:
 
 
 @pytest.fixture
-def authorizer() -> Generator[Authorization, None, None]:
-    yield Authorization()
+def authorizer() -> Authorization:
+    return Authorization()
