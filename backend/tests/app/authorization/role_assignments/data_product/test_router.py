@@ -506,10 +506,8 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 2
-        assert (
-            data[0].get("decision") != DecisionStatus.PENDING
-            and data[1].get("decision") != DecisionStatus.PENDING
-        )
+        assert data[0].get("decision") != DecisionStatus.PENDING
+        assert data[1].get("decision") != DecisionStatus.PENDING
 
     def test_request_data_product_role_assignment_without_accept_permission(
         self, client: TestClient
