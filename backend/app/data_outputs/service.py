@@ -100,8 +100,6 @@ class DataOutputService:
         else:
             data_product = self.db.get(DataProductModel, id)
 
-            # TODO Figure out if this validation needs to happen either way
-            # somehow and let sourcealigned be handled internally there?
             data_output.configuration.validate_configuration(data_product)
 
         data_output_schema = data_output.parse_pydantic_schema()

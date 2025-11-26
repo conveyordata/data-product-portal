@@ -36,6 +36,4 @@ class TestAuthRouter:
             f"={data_product.namespace}"
             "&environment=production"
         )
-        assert (
-            response.status_code == 501 or response.status_code == 400
-        )  # TODO Actually test through mocking
+        assert response.status_code == 501 or response.status_code == 400
