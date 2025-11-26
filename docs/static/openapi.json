@@ -10904,36 +10904,6 @@
         }
       }
     },
-    "/api/events/latest": {
-      "get": {
-        "tags": [
-          "events"
-        ],
-        "summary": "Get Latest Event Timestamp",
-        "operationId": "get_latest_event_timestamp_api_events_latest_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Response Get Latest Event Timestamp Api Events Latest Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/auth/device/device_token": {
       "post": {
         "tags": [
