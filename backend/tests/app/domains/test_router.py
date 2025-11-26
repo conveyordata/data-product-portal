@@ -2,7 +2,8 @@ import pytest
 
 from tests.factories import DataProductFactory, DatasetFactory, DomainFactory
 
-ENDPOINT = "/api/domains"
+OLD_ENDPOINT = "/api/domains"
+ENDPOINT = "/api/v2/configuration/domains"
 
 
 @pytest.fixture
@@ -17,11 +18,23 @@ class TestDomainsRouter:
         assert response.status_code == 200
         assert "id" in response.json()
 
+    def test_get_domains_old(self, client):
+        DomainFactory()
+        domains = self.get_domains_old(client)
+        assert domains.status_code == 200
+        assert len(domains.json()) == 1
+
     def test_get_domains(self, client):
         DomainFactory()
         domains = self.get_domains(client)
         assert domains.status_code == 200
-        assert len(domains.json()) == 1
+        assert len(domains.json()["domains"]) == 1
+
+    def test_get_domain_old(self, client):
+        domain = DomainFactory()
+        response = self.get_domain_old(client, domain.id)
+        assert response.status_code == 200
+        assert response.json()["id"] == str(domain.id)
 
     def test_get_domain(self, client):
         domain = DomainFactory()
@@ -91,7 +104,11 @@ class TestDomainsRouter:
 
     @staticmethod
     def create_domain(client, payload):
-        return client.post(ENDPOINT, json=payload)
+        return client.post(OLD_ENDPOINT, json=payload)
+
+    @staticmethod
+    def get_domain_old(client, domain_id):
+        return client.get(f"{OLD_ENDPOINT}/{domain_id}")
 
     @staticmethod
     def get_domain(client, domain_id):
@@ -99,11 +116,15 @@ class TestDomainsRouter:
 
     @staticmethod
     def update_domain(client, payload, domain_id):
-        return client.put(f"{ENDPOINT}/{domain_id}", json=payload)
+        return client.put(f"{OLD_ENDPOINT}/{domain_id}", json=payload)
 
     @staticmethod
     def remove_domain(client, domain_id):
-        return client.delete(f"{ENDPOINT}/{domain_id}")
+        return client.delete(f"{OLD_ENDPOINT}/{domain_id}")
+
+    @staticmethod
+    def get_domains_old(client):
+        return client.get(OLD_ENDPOINT)
 
     @staticmethod
     def get_domains(client):
@@ -111,4 +132,4 @@ class TestDomainsRouter:
 
     @staticmethod
     def migrate_domains(client, from_id, to_id):
-        return client.put(f"{ENDPOINT}/migrate/{from_id}/{to_id}")
+        return client.put(f"{OLD_ENDPOINT}/migrate/{from_id}/{to_id}")
