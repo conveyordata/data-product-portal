@@ -90,6 +90,7 @@ select = [
     "FIX", #flake8-fixme
     "ISC", #flake8-implicit-str-concat
     "RSE", #flake8-raise
+    "T20", #flake-8 print
 ]
 
 [tool.ruff.lint.per-file-ignores]

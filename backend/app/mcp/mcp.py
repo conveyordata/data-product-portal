@@ -30,6 +30,7 @@ from app.configuration.domains.schema_response import DomainGetOld
 from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
+from app.core.logging import logger
 
 # Import Pydantic schemas - corrected paths
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
@@ -51,7 +52,7 @@ def initialize_models():
     try:
         configure_mappers()
     except Exception as e:
-        print(f"Warning during model initialization: {e}")
+        logger.warn(f"Warning during model initialization: {e}")
 
 
 initialize_models()
