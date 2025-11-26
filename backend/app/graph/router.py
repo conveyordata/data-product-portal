@@ -14,11 +14,9 @@ def get_graph_data(
     domain_nodes_enabled: bool = True,
     data_product_nodes_enabled: bool = True,
     dataset_nodes_enabled: bool = True,
-    data_output_nodes_enabled: bool = True,
 ) -> Graph:
     return GraphService(db).get_graph_data(
         domain_nodes_enabled=domain_nodes_enabled,
         data_product_nodes_enabled=data_product_nodes_enabled,
         dataset_nodes_enabled=dataset_nodes_enabled,
-        data_output_nodes_enabled=data_output_nodes_enabled,
     )

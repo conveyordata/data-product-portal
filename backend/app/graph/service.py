@@ -23,13 +23,8 @@ class GraphService:
         domain_nodes_enabled: bool = True,
         data_product_nodes_enabled: bool = True,
         dataset_nodes_enabled: bool = True,
-        data_output_nodes_enabled: bool = True,
     ) -> Graph:
-        if not (
-            data_product_nodes_enabled
-            or dataset_nodes_enabled
-            or data_output_nodes_enabled
-        ):
+        if not (data_product_nodes_enabled or dataset_nodes_enabled):
             return Graph(nodes=[], edges=[])
         domains = (
             self.db.scalars(
