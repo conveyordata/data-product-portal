@@ -48,7 +48,7 @@ class RoleService:
         if (
             Scope(role.scope) is Scope.GLOBAL
             and Prototype(role.prototype) is Prototype.ADMIN
-            and "permissions" in update.keys()
+            and "permissions" in update
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,

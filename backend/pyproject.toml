@@ -84,6 +84,7 @@ select = [
     "ASYNC", #flake8 async rules
     "S", #flake-8 bandit, security rules
     "PT", #flake-8 pytest style
+    "SIM", #flake-8 simplify rules
 ]
 
 [tool.ruff.lint.per-file-ignores]
