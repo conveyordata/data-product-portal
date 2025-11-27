@@ -229,7 +229,10 @@ export function UsageChart({
                     </Flex>
                 )}
             </Card>
-            <Card title={t('Curated Queries')} bordered={false}>
+            <Flex vertical className={styles.curatedQueriesSection}>
+                <Typography.Title level={4} className={styles.sectionTitle}>
+                    {t('Curated Queries')}
+                </Typography.Title>
                 {areCuratedQueriesLoading ? (
                     <Skeleton active paragraph={{ rows: 4 }} />
                 ) : queries.length === 0 ? (
@@ -238,6 +241,8 @@ export function UsageChart({
                     <List
                         itemLayout="vertical"
                         dataSource={queries}
+                        split={false}
+                        className={styles.curatedQueries}
                         renderItem={(item) => {
                             const key = item.curated_query_id;
                             const isExpanded = getIsExpanded(key, item.query_text);
@@ -254,7 +259,7 @@ export function UsageChart({
                         }}
                     />
                 )}
-            </Card>
+            </Flex>
         </Flex>
     );
 }
