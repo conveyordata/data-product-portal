@@ -1,8 +1,9 @@
 import { Area } from '@ant-design/charts';
-import { Empty, Flex, Spin, Typography } from 'antd';
+import { Empty, Flex, Typography } from 'antd';
 import { addDays, format, isSameDay, isSameMonth, subMonths } from 'date-fns';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import type {
     DatasetQueryStatsDailyResponse,
     DatasetQueryStatsDailyResponses,
@@ -88,7 +89,7 @@ export function UsageChart({ data, isLoading }: Props) {
     }, [data, t]);
 
     if (isLoading) {
-        return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }} />;
+        return <LoadingSpinner />;
     }
 
     if (!data?.dataset_query_stats_daily_responses || data.dataset_query_stats_daily_responses.length === 0) {
