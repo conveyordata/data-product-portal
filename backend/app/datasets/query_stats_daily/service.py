@@ -21,6 +21,10 @@ TimeRangeLiteral = Literal["1m", "90d", "1y"]
 DEFAULT_GRANULARITY: GranularityLiteral = "week"
 DEFAULT_TIME_RANGE: TimeRangeLiteral = "90d"
 
+MAX_CONSUMER_DATA_PRODUCTS = 5
+OTHER_CONSUMER_DATA_PRODUCT_ID = UUID("00000000-0000-0000-0000-000000000000")
+OTHER_CONSUMER_DATA_PRODUCT_NAME = "Other"
+
 TIME_RANGE_TO_DAYS: dict[TimeRangeLiteral, int] = {
     "1m": 30,
     "90d": 90,
@@ -58,9 +62,9 @@ class DatasetQueryStatsDailyService:
         ]
 
         if granularity != "day":
-            response_stats = self._aggregate_by_granularity(
-                response_stats, granularity
-            )
+            response_stats = self._aggregate_by_granularity(response_stats, granularity)
+
+        response_stats = self._group_low_volume_consumers(response_stats)
 
         return DatasetQueryStatsDailyResponses(
             dataset_query_stats_daily_responses=response_stats
@@ -106,7 +110,7 @@ class DatasetQueryStatsDailyService:
             .delete(synchronize_session=False)
         )
         self.db.commit()
-        
+
     @staticmethod
     def _start_date_from_range(time_range: TimeRangeLiteral) -> date:
         delta_days = TIME_RANGE_TO_DAYS.get(
@@ -142,6 +146,96 @@ class DatasetQueryStatsDailyService:
                 str(stat.consumer_data_product_id),
             ),
         )
+
+    def _group_low_volume_consumers(
+        self,
+        stats: list[DatasetQueryStatsDailyResponse],
+        limit: int = MAX_CONSUMER_DATA_PRODUCTS,
+    ) -> list[DatasetQueryStatsDailyResponse]:
+        if not stats:
+            return stats
+
+        consumer_totals, consumer_names = self._consumer_totals_and_names(stats)
+
+        if len(consumer_totals) <= limit:
+            return stats
+
+        top_consumer_ids = self._top_consumer_ids(
+            consumer_totals, consumer_names, limit
+        )
+        grouped_stats = self._merge_other_consumers(stats, top_consumer_ids)
+        return sorted(
+            grouped_stats,
+            key=lambda stat: (
+                stat.date,
+                stat.consumer_data_product_name or "",
+                str(stat.consumer_data_product_id),
+            ),
+        )
+
+    def _consumer_totals_and_names(
+        self, stats: list[DatasetQueryStatsDailyResponse]
+    ) -> tuple[dict[UUID, int], dict[UUID, str | None]]:
+        consumer_totals: dict[UUID, int] = {}
+        consumer_names: dict[UUID, str | None] = {}
+
+        for stat in stats:
+            consumer_totals[stat.consumer_data_product_id] = (
+                consumer_totals.get(stat.consumer_data_product_id, 0) + stat.query_count
+            )
+
+            if (
+                stat.consumer_data_product_name is not None
+                and consumer_names.get(stat.consumer_data_product_id) is None
+            ):
+                consumer_names[stat.consumer_data_product_id] = (
+                    stat.consumer_data_product_name
+                )
+
+        return consumer_totals, consumer_names
+
+    @staticmethod
+    def _top_consumer_ids(
+        consumer_totals: dict[UUID, int],
+        consumer_names: dict[UUID, str | None],
+        limit: int,
+    ) -> set[UUID]:
+        sorted_consumers = sorted(
+            consumer_totals.items(),
+            key=lambda item: (
+                -item[1],
+                consumer_names.get(item[0]) or "",
+                str(item[0]),
+            ),
+        )
+        return {consumer_id for consumer_id, _ in sorted_consumers[:limit]}
+
+    @staticmethod
+    def _merge_other_consumers(
+        stats: list[DatasetQueryStatsDailyResponse],
+        top_consumer_ids: set[UUID],
+    ) -> list[DatasetQueryStatsDailyResponse]:
+        other_by_date: dict[date, DatasetQueryStatsDailyResponse] = {}
+        filtered_stats: list[DatasetQueryStatsDailyResponse] = []
+
+        for stat in stats:
+            if stat.consumer_data_product_id in top_consumer_ids:
+                filtered_stats.append(stat)
+                continue
+
+            existing_other = other_by_date.get(stat.date)
+            if existing_other:
+                existing_other.query_count += stat.query_count
+                continue
+
+            other_by_date[stat.date] = DatasetQueryStatsDailyResponse(
+                date=stat.date,
+                consumer_data_product_id=OTHER_CONSUMER_DATA_PRODUCT_ID,
+                query_count=stat.query_count,
+                consumer_data_product_name=OTHER_CONSUMER_DATA_PRODUCT_NAME,
+            )
+
+        return filtered_stats + list(other_by_date.values())
 
     @staticmethod
     def _truncate_date(value: date, granularity: GranularityLiteral) -> date:
