@@ -21,7 +21,6 @@ export type Granularity = 'day' | 'week' | 'month';
 
 export type ChartDataPoint = {
     date: string; // ISO string used for x axis sorting
-    displayDate: string; // human-friendly label
     timestamp: number;
     queryCount: number;
     consumer: string;
@@ -63,18 +62,15 @@ function buildBuckets(rangeStart: Date, now: Date, granularity: Granularity) {
     const end = alignToGranularity(now, granularity);
 
     let current = new Date(start);
-    let lastMonth = -1;
 
     while (current <= end) {
         let displayDate: string;
-        if (granularity === 'day') {
-            const currentMonth = current.getMonth();
-            displayDate = currentMonth !== lastMonth ? format(current, 'MMM d') : format(current, 'd');
-            lastMonth = currentMonth;
+        if (granularity === 'month') {
+            displayDate = format(current, 'MMM-yyyy');
         } else if (granularity === 'week') {
-            displayDate = format(current, 'MMM d');
+            displayDate = `week:${format(current, 'ww')}`;
         } else {
-            displayDate = format(current, 'MMM');
+            displayDate = format(current, 'dd-MM-yyyy');
         }
 
         buckets.push({
@@ -125,8 +121,7 @@ export function transformDataForChart(
         for (const bucket of buckets) {
             const key = `${bucket.isoDate}|${consumer}`;
             filledData.push({
-                date: bucket.isoDate,
-                displayDate: bucket.displayDate,
+                date: bucket.displayDate,
                 timestamp: bucket.timestamp,
                 queryCount: dataByKey.get(key) ?? 0,
                 consumer,

@@ -1,6 +1,5 @@
 import { Area } from '@ant-design/charts';
 import { Card, Empty, Spin } from 'antd';
-import { format } from 'date-fns';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,6 +24,7 @@ export function QueriesOverTimeChart({ data, granularity, isLoading, dayRange, c
         return <Empty description={t('No usage data available for this time range and granularity')} />;
     }
 
+    // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
     const config = {
         data: chartData,
         xField: 'date',
@@ -34,47 +34,25 @@ export function QueriesOverTimeChart({ data, granularity, isLoading, dayRange, c
         smooth: true,
         isStack: true,
         stack: true,
-        // shapeField: 'smooth',
+        shapeField: 'smooth',
         animation: {
             appear: {
                 animation: 'path-in',
                 duration: 1000,
             },
         },
-        xAxis: {
-            title: {
-                text: t('Date'),
-            },
-            label: {
-                formatter: (value: string) => {
-                    const dateValue = new Date(value);
-                    if (Number.isNaN(dateValue.getTime())) {
-                        return value;
-                    }
-
-                    if (granularity === 'day') {
-                        const isShortRange = dayRange <= 31;
-                        if (isShortRange) {
-                            return dateValue.getDate() === 1 ? format(dateValue, 'MMM d') : format(dateValue, 'd');
-                        }
-                        return dateValue.getDate() === 1 ? format(dateValue, 'MMM') : '';
-                    }
-
-                    if (granularity === 'week') {
-                        return format(dateValue, 'MMM d');
-                    }
-
-                    return format(dateValue, 'MMM');
-                },
-            },
-        },
-        yAxis: {
-            title: {
-                text: t('Query Count'),
-            },
-        },
         legend: {
             position: 'top-right' as const,
+        },
+        axis: {
+            x: {
+                title: 'Date',
+                labelFontSize: 13,
+            },
+            y: {
+                title: 'Query Count',
+                labelFontSize: 13,
+            },
         },
     };
 

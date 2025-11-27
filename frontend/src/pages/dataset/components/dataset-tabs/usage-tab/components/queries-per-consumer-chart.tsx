@@ -35,14 +35,14 @@ export function QueriesPerConsumerChart({ data, granularity, isLoading, dayRange
             actions: [['transpose']],
         },
         legend: false as const,
-        xAxis: {
-            title: {
-                text: t('Consumer'),
+        axis: {
+            x: {
+                title: 'Consuming Data Product',
+                labelFontSize: 15,
             },
-        },
-        yAxis: {
-            title: {
-                text: t('Query Count'),
+            y: {
+                title: 'Query Count',
+                labelFontSize: 15,
             },
         },
     };
