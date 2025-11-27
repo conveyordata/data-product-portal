@@ -15,7 +15,7 @@ python-dotenv = "^1.2.1"
 fastapi = "0.122.0"
 gunicorn = "^23.0.0"
 uvicorn = "^0.38.0"
-pydantic = { version = "^2.12.4", extras = ['email'] }
+pydantic = { version = "^2.12.5", extras = ['email'] }
 pydantic-settings = "^2.12.0"
 typer = "^0.20.0"
 requests = "^2.32.5"
