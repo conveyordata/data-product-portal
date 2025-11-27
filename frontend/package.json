@@ -17,6 +17,7 @@
         "dep-viz": "npm run build && npx open-cli dependencies.html"
     },
     "dependencies": {
+        "@ant-design/charts": "^2.6.6",
         "@ant-design/colors": "^8.0.0",
         "@ant-design/v5-patch-for-react-19": "^1.0.3",
         "@dagrejs/dagre": "^1.1.8",

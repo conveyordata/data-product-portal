@@ -432,4 +432,13 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('3d2fe240-1505-4de6-8302-771d7d157992', 'be182db6-5268-466c-ae48-e5d6899c6d05', '2025-10-28 18:18:37.476131', NULL);
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', '6578f7bd-aebe-433e-8732-999d36d34af6', '2025-10-28 18:32:27.687291', NULL);
 
+    -- Insert 4 example rows into dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count) VALUES
+        ('2025-10-21', histology_rnd_dataset_id, rnd_program_pipeline_id, 5),
+        ('2025-10-25', histology_rnd_dataset_id, rnd_program_pipeline_id, 15),
+        ('2025-10-26', histology_rnd_dataset_id, rnd_program_pipeline_id, 20),
+        ('2025-10-25', histology_rnd_dataset_id, ai_model_histology_images_id, 20),
+        ('2025-10-26', histology_rnd_dataset_id, ai_model_histology_images_id, 10);
+
+
 end $$;
