@@ -16,7 +16,7 @@ from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
 router = APIRouter(prefix="/{id}/query_stats", tags=["datasets"])
 
 
-@router.get("", response_model=DatasetQueryStatsDailyResponses)
+@router.get("")
 def get_query_stats(
     id: UUID,
     db: Session = Depends(get_db_session),

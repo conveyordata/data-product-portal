@@ -1,12 +1,11 @@
 from datetime import date, timedelta
 
+from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
 from tests.factories import (
     DataProductFactory,
     DatasetFactory,
     DatasetQueryStatsDailyFactory,
 )
-
-from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
 
 ENDPOINT = "/api/datasets"
 
