@@ -1,4 +1,5 @@
 import pytest
+
 from tests.factories import (
     DataOutputFactory,
     DataProductFactory,

@@ -17,7 +17,7 @@ from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
 router = APIRouter(prefix="/{id}/query_stats", tags=["datasets"])
 
 
-@router.get("", response_model=DatasetQueryStatsDailyResponses)
+@router.get("")
 def get_query_stats(
     id: UUID,
     granularity: Literal["week", "month", "day"] = Query(default="week"),
@@ -25,7 +25,9 @@ def get_query_stats(
     db: Session = Depends(get_db_session),
 ) -> DatasetQueryStatsDailyResponses:
     service = DatasetQueryStatsDailyService(db)
-    return service.get_query_stats_daily(dataset_id=id, granularity=granularity, time_range=time_range)
+    return service.get_query_stats_daily(
+        dataset_id=id, granularity=granularity, time_range=time_range
+    )
 
 
 @router.patch("")

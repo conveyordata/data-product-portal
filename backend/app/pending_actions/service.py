@@ -3,10 +3,12 @@ from typing import Sequence
 
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.service import (
+    RoleAssignmentService,
+)
 from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.data_products_datasets.service import DataProductDatasetService
 from app.pending_actions.schema import PendingAction
-from app.role_assignments.data_product.service import RoleAssignmentService
 from app.users.schema import User
 
 

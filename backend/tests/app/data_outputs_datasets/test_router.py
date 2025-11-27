@@ -1,4 +1,10 @@
 import pytest
+
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Scope
+from app.core.authz import Action
+from app.datasets.enums import OutputPortAccessType
+from app.settings import settings
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
     DataOutputFactory,
@@ -9,12 +15,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.core.authz import Action
-from app.datasets.enums import DatasetAccessType
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
-from app.settings import settings
 
 DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
 DATA_OUTPUTS_ENDPOINT = "/api/data_outputs"
@@ -79,7 +79,7 @@ class TestDataOutputsDatasetsRouter:
     def test_request_data_output_link_private_dataset_no_access(self, client):
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 403
@@ -89,7 +89,7 @@ class TestDataOutputsDatasetsRouter:
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory(
-            access_type=DatasetAccessType.PRIVATE, data_product=data_product
+            access_type=OutputPortAccessType.PRIVATE, data_product=data_product
         )
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

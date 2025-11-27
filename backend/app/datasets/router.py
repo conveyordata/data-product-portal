@@ -1,9 +1,18 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
+from app.authorization.role_assignments.output_port.schema import (
+    UpdateRoleAssignment,
+)
+from app.authorization.role_assignments.output_port.service import RoleAssignmentService
+from app.authorization.roles.schema import Prototype, Scope
+from app.authorization.roles.service import RoleService
+from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
@@ -13,7 +22,6 @@ from app.core.namespace.validation import (
     NamespaceSuggestion,
     NamespaceValidation,
 )
-from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.datasets.query_stats_daily.router import router as query_stats_daily_router
 from app.datasets.schema_request import (
@@ -23,7 +31,7 @@ from app.datasets.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
 from app.datasets.service import DatasetService
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -31,15 +39,6 @@ from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
-from app.role_assignments.dataset.auth import DatasetAuthAssignment
-from app.role_assignments.dataset.schema import (
-    CreateRoleAssignment,
-    UpdateRoleAssignment,
-)
-from app.role_assignments.dataset.service import RoleAssignmentService
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Prototype, Scope
-from app.roles.service import RoleService
 from app.users.model import User
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
@@ -51,6 +50,16 @@ def get_datasets(
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
     return DatasetService(db).get_datasets(user)
+
+
+@router.get("/search")
+def search_datasets(
+    query: str = Query(min_length=3),
+    limit: int = Query(default=100, ge=1, le=100),
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> Sequence[DatasetsSearch]:
+    return DatasetService(db).search_datasets(query=query, limit=limit, user=user)
 
 
 @router.get("/namespace_suggestion")
@@ -155,10 +164,8 @@ def _assign_owner_role_assignments(
     for owner_id in owners:
         assignment = assignment_service.create_assignment(
             dataset_id,
-            CreateRoleAssignment(
-                user_id=owner_id,
-                role_id=owner_role.id,
-            ),
+            user_id=owner_id,
+            role_id=owner_role.id,
             actor=actor,
         )
         assignment = assignment_service.update_assignment(

@@ -10,6 +10,7 @@ import type {
 } from '@/types/dataset';
 import type { DatasetQueryStatsDailyResponses } from '@/types/dataset/dataset-query-stats-daily.contract.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
+import type { DatasetsSearchContract } from '@/types/dataset/datasets-search.contract.ts';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type { QueryParams } from '@/types/http.ts';
@@ -26,6 +27,20 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
         getAllDatasets: builder.query<DatasetsGetContract, void>({
             query: () => ({
                 url: ApiUrl.Datasets,
+                method: 'GET',
+            }),
+            providesTags: (result = []) =>
+                result
+                    ? [
+                          { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
+                          ...result.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
+                      ]
+                    : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        searchDatasets: builder.query<DatasetsSearchContract, { query: string }>({
+            query: (query) => ({
+                url: ApiUrl.DatasetSearch,
+                params: query,
                 method: 'GET',
             }),
             providesTags: (result = []) =>
@@ -185,6 +200,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
 });
 
 export const {
+    useSearchDatasetsQuery,
     useGetAllDatasetsQuery,
     useGetDatasetByIdQuery,
     useCreateDatasetMutation,

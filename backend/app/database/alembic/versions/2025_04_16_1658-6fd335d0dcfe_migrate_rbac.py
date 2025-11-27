@@ -16,15 +16,17 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.roles.model import Role as RoleModel
+from app.authorization.roles.schema import CreateRole, Prototype, Scope
+from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action, Authorization
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.enums import DecisionStatus
-from app.role_assignments.global_.model import GlobalRoleAssignment
-from app.roles.model import Role as RoleModel
-from app.roles.schema import CreateRole, Prototype, Scope
-from app.roles.service import RoleService
 
 # revision identifiers, used by Alembic.
 revision: str = "6fd335d0dcfe"
@@ -102,11 +104,16 @@ class RoleMigrationService:
         memberships = self.db.execute(
             sa.select(self.data_product_membership)
         ).fetchall()
+        if not memberships:
+            return
 
         owner_role = self.role_service.find_prototype(
             Scope.DATA_PRODUCT, Prototype.OWNER
         )
-        assert owner_role is not None
+        if owner_role is None:
+            raise Exception(
+                "Unable to transfer product memberships: owner role does not exist"
+            )
 
         # Create the member role if it doesn't exist
         member_role = self.db.scalars(
@@ -149,7 +156,8 @@ class RoleMigrationService:
 
     @classmethod
     def map_decision(
-        cls, membership  #: DataProductMembership,
+        cls,
+        membership,  #: DataProductMembership,
     ) -> tuple[DecisionStatus, Optional[UUID], Optional[datetime]]:
         if membership.status == DataProductMembershipStatus.APPROVED:
             return (
@@ -168,10 +176,15 @@ class RoleMigrationService:
         raise ValueError("Invalid membership status")
 
     def _transfer_dataset_memberships(self):
-        owner_role = self.role_service.find_prototype(Scope.DATASET, Prototype.OWNER)
-        assert owner_role is not None
-
         datasets = self.db.scalars(sa.select(dataset_table)).unique().all()
+        if not datasets:
+            return
+        owner_role = self.role_service.find_prototype(Scope.DATASET, Prototype.OWNER)
+        if owner_role is None:
+            raise Exception(
+                "Unable to transfer dataset memberships: owner role does not exist"
+            )
+
         for dataset in datasets:
             for owner in dataset.owners:
                 self.db.add(
@@ -187,10 +200,15 @@ class RoleMigrationService:
         self.db.commit()
 
     def _transfer_global_memberships(self):
-        admin_role = self.role_service.find_prototype(Scope.GLOBAL, Prototype.ADMIN)
-        assert admin_role is not None
-
         users = self.db.execute(sa.sql.text("""select * from users""")).all()
+        if not users:
+            return
+        admin_role = self.role_service.find_prototype(Scope.GLOBAL, Prototype.ADMIN)
+        if admin_role is None:
+            raise ValueError(
+                "Unable to transfer global memberships: admin role does not exist"
+            )
+
         for user in users:
             if user.is_admin:
                 self.db.add(

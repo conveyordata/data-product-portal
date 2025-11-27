@@ -2,18 +2,11 @@ import { usePostHog } from '@posthog/react';
 import { Flex, Pagination } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDebounce } from 'use-debounce';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
-import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import type { DatasetsGetContract } from '@/types/dataset';
+import { useGetAllDatasetsQuery, useSearchDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
-
-function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
-    if (!searchTerm) {
-        return datasets;
-    }
-    return datasets.filter((dataset) => dataset.name.toLowerCase().includes(searchTerm.toLowerCase()));
-}
 
 export function Marketplace() {
     const { t } = useTranslation();
@@ -21,19 +14,24 @@ export function Marketplace() {
 
     const pageSize = 12;
     const [currentPage, setCurrentPage] = useState(1);
-    const { data: datasets = [] } = useGetAllDatasetsQuery();
-    const CAPTURE_SEARCH_EVENT_DELAY = 750;
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+    const { data: datasets = [] } = useGetAllDatasetsQuery();
 
-    const filteredOutputPorts = useMemo(() => {
-        return filterDatasets(datasets, searchTerm);
-    }, [datasets, searchTerm]);
+    const { data: datasetSearchResult = [] } = useSearchDatasetsQuery(
+        {
+            query: debouncedSearchTerm,
+        },
+        { skip: debouncedSearchTerm?.length < 3 },
+    );
+
+    const finalDatasetResults = debouncedSearchTerm?.length >= 3 ? datasetSearchResult : datasets;
 
     const paginatedOutputPorts = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
         const endIndex = startIndex + pageSize;
-        return filteredOutputPorts.slice(startIndex, endIndex);
-    }, [filteredOutputPorts, currentPage]);
+        return finalDatasetResults.slice(startIndex, endIndex);
+    }, [finalDatasetResults, currentPage]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -45,18 +43,11 @@ export function Marketplace() {
     };
 
     useEffect(() => {
-        if (searchTerm === undefined || searchTerm === '') return;
-
-        const oldTerm = searchTerm;
-        const timeoutId = setTimeout(() => {
-            posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
-                search_term: oldTerm,
-            });
-        }, CAPTURE_SEARCH_EVENT_DELAY);
-
-        // clear if searchTerm gets updated beforehand
-        return () => clearTimeout(timeoutId);
-    }, [posthog, searchTerm]);
+        if (debouncedSearchTerm?.length < 3) return;
+        posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
+            search_term: debouncedSearchTerm,
+        });
+    }, [posthog, debouncedSearchTerm]);
 
     return (
         <SearchPage
@@ -69,7 +60,7 @@ export function Marketplace() {
                     <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
                 ))}
             </Flex>
-            {filteredOutputPorts.length > pageSize && (
+            {finalDatasetResults.length > pageSize && (
                 <Flex
                     key="pagination-container"
                     justify={'flex-end'}
@@ -80,7 +71,7 @@ export function Marketplace() {
                     <Pagination
                         current={currentPage}
                         pageSize={pageSize}
-                        total={filteredOutputPorts.length}
+                        total={finalDatasetResults.length}
                         onChange={handlePageChange}
                         showSizeChanger={false} // Disable page size changer
                         showTotal={(total, range) =>

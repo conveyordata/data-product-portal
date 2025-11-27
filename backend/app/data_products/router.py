@@ -5,6 +5,22 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.auth import (
+    DataProductAuthAssignment,
+)
+from app.authorization.role_assignments.data_product.schema import (
+    UpdateRoleAssignment,
+)
+from app.authorization.role_assignments.data_product.service import (
+    RoleAssignmentService,
+)
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
+)
+from app.authorization.roles.schema import Prototype, Scope
+from app.authorization.roles.service import RoleService
+from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
@@ -17,7 +33,6 @@ from app.core.namespace.validation import (
 from app.data_outputs.schema_request import DataOutputCreate
 from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs.service import DataOutputService
-from app.data_product_settings.service import DataProductSettingService
 from app.data_products import email
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -35,25 +50,13 @@ from app.data_products.schema_response import (
 from app.data_products.service import DataProductService
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
-from app.role_assignments.data_product.auth import DataProductAuthAssignment
-from app.role_assignments.data_product.schema import (
-    CreateRoleAssignment,
-    UpdateRoleAssignment,
-)
-from app.role_assignments.data_product.service import RoleAssignmentService
-from app.role_assignments.dataset.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Prototype, Scope
-from app.roles.service import RoleService
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_products", tags=["data_products"])
@@ -171,10 +174,8 @@ def _assign_owner_role_assignments(
     for owner_id in owners:
         response = assignment_service.create_assignment(
             data_product_id,
-            CreateRoleAssignment(
-                user_id=owner_id,
-                role_id=owner_role.id,
-            ),
+            user_id=owner_id,
+            role_id=owner_role.id,
             actor=actor,
         )
         assignment = assignment_service.update_assignment(
@@ -540,7 +541,7 @@ def _send_dataset_link_emails(
     db: Session,
 ) -> None:
     for dataset_link in dataset_links:
-        if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
+        if dataset_link.dataset.access_type != OutputPortAccessType.PUBLIC:
             approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
                 dataset_link.dataset_id,
                 Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,

@@ -1,6 +1,5 @@
-from collections.abc import Callable
 from pathlib import Path
-from typing import Sequence, TypeAlias, Union
+from typing import Awaitable, Callable, Sequence, TypeAlias, Union
 from uuid import UUID
 
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
@@ -23,7 +22,6 @@ ID: TypeAlias = Union[str, UUID]
 
 
 class Authorization(metaclass=Singleton):
-
     def __init__(self) -> None:
         self._enforcer: Enforcer = self._initialize()
         self._cache: Cache = LRUCache(maxsize=settings.AUTHORIZER_CACHE_SIZE)
@@ -53,13 +51,13 @@ class Authorization(metaclass=Singleton):
         resolver: type[SubjectResolver],
         *,
         object_id: str = "id",
-    ) -> Callable[[Request, User, Session], None]:
-        def inner(
+    ) -> Callable[[Request, User, Session], Awaitable[None]]:
+        async def inner(
             request: Request,
             user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
-            obj = resolver.resolve(request, object_id, db)
+            obj = await resolver.resolve(request, object_id, db)
             dom = resolver.resolve_domain(db, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):

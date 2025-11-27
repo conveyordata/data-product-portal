@@ -2,11 +2,6 @@ from datetime import date, timedelta
 
 import pytest
 from sqlalchemy.orm import Session
-from tests.factories import (
-    DataProductFactory,
-    DatasetFactory,
-    DatasetQueryStatsDailyFactory,
-)
 
 from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
 from app.datasets.query_stats_daily.schema_request import (
@@ -14,6 +9,11 @@ from app.datasets.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyUpdate,
 )
 from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
+from tests.factories import (
+    DataProductFactory,
+    DatasetFactory,
+    DatasetQueryStatsDailyFactory,
+)
 
 
 @pytest.fixture

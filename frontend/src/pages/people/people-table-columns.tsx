@@ -1,4 +1,4 @@
-import { Select, type TableColumnsType } from 'antd';
+import { Checkbox, Select, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { type GlobalRoleAssignmentContract, Prototype, type RoleContract } from '@/types/roles/role.contract.ts';
@@ -32,12 +32,14 @@ export const getPeopleTableColumns = ({
     canAssignRole,
     allRoles,
     onChange,
+    changeCheckbox,
 }: {
     t: TFunction;
     users: UsersGetContract;
     canAssignRole: boolean;
     allRoles: RoleContract[];
     onChange: (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => void;
+    changeCheckbox: (user_id: string, can_become_admin: boolean) => void;
 }): TableColumnsType<UsersGetContract[0]> => {
     const sorter = new Sorter<UsersGetContract[0]>();
     const everyone = allRoles.find((role) => role.prototype === Prototype.EVERYONE);
@@ -46,10 +48,7 @@ export const getPeopleTableColumns = ({
         value: role.prototype === Prototype.EVERYONE ? '' : role.id,
     }));
 
-    const numberOfAdmins = data.filter((user) => user.global_role?.role.prototype === Prototype.ADMIN).length;
-    const lockAdmins = numberOfAdmins <= 1;
-
-    return [
+    const columns: TableColumnsType<UsersGetContract[0]> = [
         {
             title: t('Id'),
             dataIndex: 'id',
@@ -85,9 +84,11 @@ export const getPeopleTableColumns = ({
             ellipsis: { showTitle: false },
             width: 4,
             render: (role: GlobalRoleAssignmentContract | null, user: UserContract) => {
+                let name = role?.role.name;
+                if (role?.role.prototype === Prototype.ADMIN) {
+                    name = everyone?.name;
+                }
                 if (canAssignRole) {
-                    const disabled = role?.role.prototype === Prototype.ADMIN && lockAdmins;
-
                     return (
                         <TableCellItem>
                             <RoleSelector
@@ -95,13 +96,31 @@ export const getPeopleTableColumns = ({
                                 role={role}
                                 onChange={(value: string) => onChange(user.id, value, role)}
                                 options={options}
-                                disabled={disabled}
                             />
                         </TableCellItem>
                     );
                 }
-                return <TableCellItem text={role?.role.name || everyone?.name} />;
+                return <TableCellItem text={name || everyone?.name} />;
             },
         },
     ];
+
+    if (canAssignRole) {
+        columns.push({
+            title: t('Can become admin'),
+            dataIndex: 'can_become_admin',
+            ellipsis: { showTitle: false },
+            width: 2,
+            render: (_, user) => {
+                return (
+                    <Checkbox
+                        checked={user.can_become_admin}
+                        onChange={(e) => changeCheckbox(user.id, e.target.checked)}
+                    />
+                );
+            },
+        });
+    }
+
+    return columns;
 };

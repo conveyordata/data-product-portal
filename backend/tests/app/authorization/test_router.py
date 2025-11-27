@@ -1,11 +1,11 @@
 import uuid
 
 from fastapi.testclient import TestClient
-from tests.factories import UserFactory
 
-from app.authorization.schema import AccessResponse
+from app.authorization.schema_response import AccessResponse
 from app.core.authz import Action, Authorization
 from app.settings import settings
+from tests.factories import UserFactory
 
 ENDPOINT = "/api/authz"
 
@@ -44,9 +44,9 @@ class TestAuthorizationRouter:
     def test_is_admin(self, client: TestClient):
         response = client.get(f"{ENDPOINT}/admin")
         assert response.status_code == 200
-        assert response.json() is False
+        assert response.json()["is_admin"] is False
 
     def test_is_admin_authorized(self, client: TestClient, admin):
         response = client.get(f"{ENDPOINT}/admin")
         assert response.status_code == 200
-        assert response.json() is True
+        assert response.json()["is_admin"] is True

@@ -1,17 +1,17 @@
 from typing import Optional
 from uuid import UUID
 
+from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
+from app.configuration.data_product_settings.schema import DataProductSettingValue
+from app.configuration.domains.schema import Domain
+from app.configuration.tags.schema import Tag
 from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
-from app.data_product_lifecycles.schema import DataProductLifeCycle
-from app.data_product_settings.schema import DataProductSettingValue
 from app.data_products.schema import DataProduct
 from app.data_products_datasets.schema import DataProductDatasetAssociation
-from app.datasets.enums import DatasetAccessType
-from app.datasets.status import DatasetStatus
-from app.domains.schema import Domain
+from app.datasets.enums import OutputPortAccessType
+from app.datasets.status import OutputPortStatus
 from app.shared.schema import ORMModel
-from app.tags.schema import Tag
 
 
 class DataProductLink(DataProductDatasetAssociation):
@@ -33,9 +33,9 @@ class BaseDatasetGet(ORMModel):
     namespace: str
     name: str
     description: str
-    status: DatasetStatus
+    status: OutputPortStatus
     usage: Optional[str]
-    access_type: DatasetAccessType
+    access_type: OutputPortAccessType
     data_product_id: UUID
 
     # Nested schemas
@@ -57,3 +57,7 @@ class DatasetGet(BaseDatasetGet):
 class DatasetsGet(BaseDatasetGet):
     data_product_count: int
     data_product_name: str
+
+
+class DatasetsSearch(DatasetsGet):
+    rank: float

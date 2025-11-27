@@ -4,6 +4,12 @@ from copy import deepcopy
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
+
+from app.authorization.roles.schema import Scope
+from app.authorization.roles.service import RoleService
+from app.core.authz import Action
+from app.core.namespace.validation import NamespaceValidityType
+from app.settings import settings
 from tests.factories import (
     DataOutputFactory,
     DataProductFactory,
@@ -20,12 +26,6 @@ from tests.factories import (
     TagFactory,
     UserFactory,
 )
-
-from app.core.authz import Action
-from app.core.namespace.validation import NamespaceValidityType
-from app.roles.schema import Scope
-from app.roles.service import RoleService
-from app.settings import settings
 
 ENDPOINT = "/api/data_products"
 
@@ -445,9 +445,7 @@ class TestDataProductsRouter:
         response = client.get(
             f"{ENDPOINT}/{data_product.id}/signin_url?environment=production"
         )
-        assert (
-            response.status_code == 501 or response.status_code == 400
-        )  # TODO Add actual AWS test through mocking
+        assert response.status_code == 501 or response.status_code == 400
 
     def test_get_databricks_url(self, client):
         env = EnvironmentFactory(name="production")
@@ -497,7 +495,7 @@ class TestDataProductsRouter:
             config=json.dumps({"login_url": "test_1.com"}),
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/snowflake_url?" "environment=production"
+            f"{ENDPOINT}/{data_product.id}/snowflake_url?environment=production"
         )
         assert response.status_code == 200
         assert response.json() == "test_1.com"

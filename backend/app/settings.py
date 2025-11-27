@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 1025
     SMTP_NO_LOGIN: bool = False
     SMTP_USERNAME: str = "admin"
-    SMTP_PASSWORD: str = "not-set"
+    SMTP_PASSWORD: str = ""
     FROM_MAIL_ADDRESS: str = "noreply@dataproductportal.com"
     CORPORATION: str = "Dataminded"
     EMAIL_BUTTON_COLOR: str = "#3B9672"
@@ -65,6 +65,9 @@ class Settings(BaseSettings):
     POSTHOG_API_KEY: str = "phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc"
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
     POSTHOG_ENABLED: bool = True
+
+    # Postgres FTS indexing
+    SEARCH_INDEXING_DISABLED: bool = False
 
 
 class LogLevel(str, Enum):
