@@ -136,7 +136,7 @@ class TestDatasetQueryStatsDailyRouter:
 
         response = client.get(
             f"{ENDPOINT}/{dataset.id}/query_stats",
-            params={"granularity": "week", "time_range": "90d"},
+            params={"granularity": "week", "day_range": 90},
         )
 
         assert response.status_code == 200

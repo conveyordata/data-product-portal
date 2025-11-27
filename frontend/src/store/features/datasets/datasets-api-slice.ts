@@ -8,7 +8,10 @@ import type {
     DatasetUpdateRequest,
     DatasetUpdateResponse,
 } from '@/types/dataset';
-import type { DatasetQueryStatsDailyResponses } from '@/types/dataset/dataset-query-stats-daily.contract.ts';
+import type {
+    DatasetQueryStatsDailyResponses,
+    DatasetQueryStatsGranularity,
+} from '@/types/dataset/dataset-query-stats-daily.contract.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import type { DatasetsSearchContract } from '@/types/dataset/datasets-search.contract.ts';
 import type { EventContract } from '@/types/events/event.contract';
@@ -173,19 +176,19 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             DatasetQueryStatsDailyResponses,
             {
                 datasetId: string;
-                granularity?: 'day' | 'week' | 'month';
-                timeRange?: '1m' | '90d' | '1y';
+                granularity?: DatasetQueryStatsGranularity;
+                dayRange?: number;
             }
         >({
-            query: ({ datasetId, granularity, timeRange }) => {
+            query: ({ datasetId, granularity, dayRange }) => {
                 const params: QueryParams = {};
 
                 if (granularity) {
                     params.granularity = granularity;
                 }
 
-                if (timeRange) {
-                    params.time_range = timeRange;
+                if (typeof dayRange === 'number') {
+                    params.day_range = dayRange;
                 }
 
                 return {

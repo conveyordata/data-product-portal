@@ -1,5 +1,6 @@
 from datetime import date, timedelta
-from typing import Iterable, Literal
+from enum import Enum
+from typing import Iterable
 from uuid import UUID
 
 from sqlalchemy.dialects.postgresql import insert
@@ -15,21 +16,19 @@ from app.datasets.query_stats_daily.schema_response import (
     DatasetQueryStatsDailyResponses,
 )
 
-GranularityLiteral = Literal["day", "week", "month"]
-TimeRangeLiteral = Literal["1m", "90d", "1y"]
 
-DEFAULT_GRANULARITY: GranularityLiteral = "week"
-DEFAULT_TIME_RANGE: TimeRangeLiteral = "90d"
+class QueryStatsGranularity(str, Enum):
+    DAY = "day"
+    WEEK = "week"
+    MONTH = "month"
+
+
+DEFAULT_GRANULARITY = QueryStatsGranularity.WEEK
+DEFAULT_DAY_RANGE = 90
 
 MAX_CONSUMER_DATA_PRODUCTS = 5
 OTHER_CONSUMER_DATA_PRODUCT_ID = UUID("00000000-0000-0000-0000-000000000000")
 OTHER_CONSUMER_DATA_PRODUCT_NAME = "Other"
-
-TIME_RANGE_TO_DAYS: dict[TimeRangeLiteral, int] = {
-    "1m": 30,
-    "90d": 90,
-    "1y": 365,
-}
 
 
 class DatasetQueryStatsDailyService:
@@ -39,15 +38,21 @@ class DatasetQueryStatsDailyService:
     def get_query_stats_daily(
         self,
         dataset_id: UUID,
-        granularity: GranularityLiteral = DEFAULT_GRANULARITY,
-        time_range: TimeRangeLiteral = DEFAULT_TIME_RANGE,
+        granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
+        day_range: int = DEFAULT_DAY_RANGE,
     ) -> DatasetQueryStatsDailyResponses:
-        if granularity not in {"day", "week", "month"}:
-            granularity = DEFAULT_GRANULARITY
-        if time_range not in TIME_RANGE_TO_DAYS:
-            time_range = DEFAULT_TIME_RANGE
+        try:
+            granularity_enum = (
+                granularity
+                if isinstance(granularity, QueryStatsGranularity)
+                else QueryStatsGranularity(granularity)
+            )
+        except ValueError:
+            granularity_enum = DEFAULT_GRANULARITY
 
-        start_date = self._start_date_from_range(time_range)
+        day_range_value = day_range if day_range > 0 else DEFAULT_DAY_RANGE
+
+        start_date = self._start_date_from_day_range(day_range_value)
         stats = (
             self.db.query(DatasetQueryStatsDaily)
             .filter(
@@ -61,8 +66,10 @@ class DatasetQueryStatsDailyService:
             DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
         ]
 
-        if granularity != "day":
-            response_stats = self._aggregate_by_granularity(response_stats, granularity)
+        if granularity_enum != QueryStatsGranularity.DAY:
+            response_stats = self._aggregate_by_granularity(
+                response_stats, granularity_enum
+            )
 
         response_stats = self._group_low_volume_consumers(response_stats)
 
@@ -112,16 +119,13 @@ class DatasetQueryStatsDailyService:
         self.db.commit()
 
     @staticmethod
-    def _start_date_from_range(time_range: TimeRangeLiteral) -> date:
-        delta_days = TIME_RANGE_TO_DAYS.get(
-            time_range, TIME_RANGE_TO_DAYS[DEFAULT_TIME_RANGE]
-        )
-        return date.today() - timedelta(days=delta_days)
+    def _start_date_from_day_range(day_range: int) -> date:
+        return date.today() - timedelta(days=day_range)
 
     def _aggregate_by_granularity(
         self,
         stats: list[DatasetQueryStatsDailyResponse],
-        granularity: GranularityLiteral,
+        granularity: QueryStatsGranularity,
     ) -> list[DatasetQueryStatsDailyResponse]:
         aggregated: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse] = {}
         for stat in stats:
@@ -238,14 +242,14 @@ class DatasetQueryStatsDailyService:
         return filtered_stats + list(other_by_date.values())
 
     @staticmethod
-    def _truncate_date(value: date, granularity: GranularityLiteral) -> date:
-        if granularity == "day":
+    def _truncate_date(value: date, granularity: QueryStatsGranularity) -> date:
+        if granularity == QueryStatsGranularity.DAY:
             return value
 
-        if granularity == "week":
+        if granularity == QueryStatsGranularity.WEEK:
             return value - timedelta(days=value.weekday())
 
-        if granularity == "month":
+        if granularity == QueryStatsGranularity.MONTH:
             return value.replace(day=1)
 
         return value

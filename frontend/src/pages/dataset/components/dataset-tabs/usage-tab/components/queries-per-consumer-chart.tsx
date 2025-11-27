@@ -6,15 +6,15 @@ import { useTranslation } from 'react-i18next';
 import type { UsageChartProps } from './chart-data.utils';
 import { aggregateQueriesPerConsumer, transformDataForChart } from './chart-data.utils';
 
-export function QueriesPerConsumerChart({ data, granularity, isLoading, timeRange, className }: UsageChartProps) {
+export function QueriesPerConsumerChart({ data, granularity, isLoading, dayRange, className }: UsageChartProps) {
     const { t } = useTranslation();
 
     const chartData = useMemo(() => {
         if (!data?.dataset_query_stats_daily_responses) {
             return [];
         }
-        return transformDataForChart(data.dataset_query_stats_daily_responses, timeRange, granularity);
-    }, [data, granularity, timeRange]);
+        return transformDataForChart(data.dataset_query_stats_daily_responses, dayRange, granularity);
+    }, [data, granularity, dayRange]);
 
     const consumerTotals = useMemo(() => aggregateQueriesPerConsumer(chartData), [chartData]);
 

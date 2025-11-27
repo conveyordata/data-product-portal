@@ -7,15 +7,15 @@ import { useTranslation } from 'react-i18next';
 import type { UsageChartProps } from './chart-data.utils';
 import { transformDataForChart } from './chart-data.utils';
 
-export function QueriesOverTimeChart({ data, granularity, isLoading, timeRange, className }: UsageChartProps) {
+export function QueriesOverTimeChart({ data, granularity, isLoading, dayRange, className }: UsageChartProps) {
     const { t } = useTranslation();
 
     const chartData = useMemo(() => {
         if (!data?.dataset_query_stats_daily_responses) {
             return [];
         }
-        return transformDataForChart(data.dataset_query_stats_daily_responses, timeRange, granularity);
-    }, [data, granularity, timeRange]);
+        return transformDataForChart(data.dataset_query_stats_daily_responses, dayRange, granularity);
+    }, [data, granularity, dayRange]);
 
     if (isLoading) {
         return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }} />;
@@ -53,7 +53,8 @@ export function QueriesOverTimeChart({ data, granularity, isLoading, timeRange, 
                     }
 
                     if (granularity === 'day') {
-                        if (timeRange === '1m') {
+                        const isShortRange = dayRange <= 31;
+                        if (isShortRange) {
                             return dateValue.getDate() === 1 ? format(dateValue, 'MMM d') : format(dateValue, 'd');
                         }
                         return dateValue.getDate() === 1 ? format(dateValue, 'MMM') : '';

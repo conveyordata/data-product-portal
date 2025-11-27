@@ -8,7 +8,10 @@ from app.datasets.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyDelete,
     DatasetQueryStatsDailyUpdate,
 )
-from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
+from app.datasets.query_stats_daily.service import (
+    DatasetQueryStatsDailyService,
+    QueryStatsGranularity,
+)
 from tests.factories import (
     DataProductFactory,
     DatasetFactory,
@@ -168,7 +171,9 @@ class TestDatasetQueryStatsDailyService:
         # Get stats for the dataset
         service = DatasetQueryStatsDailyService(session)
         response = service.get_query_stats_daily(
-            dataset.id, granularity="day", time_range="1y"
+            dataset.id,
+            granularity=QueryStatsGranularity.DAY,
+            day_range=365,
         )
         stats = response.dataset_query_stats_daily_responses
 
@@ -210,7 +215,9 @@ class TestDatasetQueryStatsDailyService:
 
         service = DatasetQueryStatsDailyService(session)
         response = service.get_query_stats_daily(
-            dataset.id, granularity="week", time_range="1y"
+            dataset.id,
+            granularity=QueryStatsGranularity.WEEK,
+            day_range=365,
         )
 
         stats = response.dataset_query_stats_daily_responses
@@ -219,7 +226,7 @@ class TestDatasetQueryStatsDailyService:
         assert stats[0].query_count == 300
         assert stats[0].consumer_data_product_id == consumer.id
 
-    def test_get_query_stats_daily_time_range_filter(self, session: Session):
+    def test_get_query_stats_daily_day_range_filter(self, session: Session):
         dataset = DatasetFactory()
         consumer = DataProductFactory()
 
@@ -242,7 +249,9 @@ class TestDatasetQueryStatsDailyService:
 
         service = DatasetQueryStatsDailyService(session)
         response = service.get_query_stats_daily(
-            dataset.id, granularity="day", time_range="1m"
+            dataset.id,
+            granularity=QueryStatsGranularity.DAY,
+            day_range=30,
         )
 
         stats = response.dataset_query_stats_daily_responses

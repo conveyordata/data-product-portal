@@ -1,11 +1,22 @@
-import { format, subDays, subMonths, subYears } from 'date-fns';
+import {
+    addDays,
+    addMonths,
+    addWeeks,
+    format,
+    formatISO,
+    parseISO,
+    startOfDay,
+    startOfMonth,
+    startOfWeek,
+    subDays,
+} from 'date-fns';
 
 import type {
     DatasetQueryStatsDailyResponse,
     DatasetQueryStatsDailyResponses,
 } from '@/types/dataset/dataset-query-stats-daily.contract';
 
-export type TimeRange = '1m' | '90d' | '1y';
+export type DayRange = number;
 export type Granularity = 'day' | 'week' | 'month';
 
 export type ChartDataPoint = {
@@ -21,52 +32,29 @@ export type ConsumerTotal = {
     totalQueries: number;
 };
 
-export function getRangeStart(now: Date, timeRange: TimeRange): Date {
-    if (timeRange === '90d') {
-        return subDays(now, 90);
-    }
-
-    if (timeRange === '1y') {
-        return subYears(now, 1);
-    }
-
-    return subMonths(now, 1);
-}
-
-function normalizeToUTCDate(date: Date): Date {
-    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+export function getRangeStart(now: Date, dayRange: DayRange): Date {
+    const safeRange = Math.max(dayRange, 1);
+    return subDays(now, safeRange);
 }
 
 function alignToGranularity(date: Date, granularity: Granularity): Date {
-    const aligned = normalizeToUTCDate(date);
     if (granularity === 'week') {
-        const day = aligned.getUTCDay();
-        const diff = (day + 6) % 7; // convert Sunday=0 to Monday=0
-        aligned.setUTCDate(aligned.getUTCDate() - diff);
-        return aligned;
+        return startOfWeek(date, { weekStartsOn: 1 });
     }
-
     if (granularity === 'month') {
-        aligned.setUTCDate(1);
-        return aligned;
+        return startOfMonth(date);
     }
-
-    return aligned;
+    return startOfDay(date);
 }
 
 function incrementDate(current: Date, granularity: Granularity): Date {
-    const next = new Date(current);
     if (granularity === 'week') {
-        next.setUTCDate(next.getUTCDate() + 7);
-        return next;
+        return addWeeks(current, 1);
     }
     if (granularity === 'month') {
-        // force day 1 to avoid month rollover
-        next.setUTCMonth(next.getUTCMonth() + 1, 1);
-        return next;
+        return addMonths(current, 1);
     }
-    next.setUTCDate(next.getUTCDate() + 1);
-    return next;
+    return addDays(current, 1);
 }
 
 function buildBuckets(rangeStart: Date, now: Date, granularity: Granularity) {
@@ -90,7 +78,7 @@ function buildBuckets(rangeStart: Date, now: Date, granularity: Granularity) {
         }
 
         buckets.push({
-            isoDate: current.toISOString().slice(0, 10),
+            isoDate: formatISO(current, { representation: 'date' }),
             displayDate,
             timestamp: current.getTime(),
         });
@@ -103,18 +91,18 @@ function buildBuckets(rangeStart: Date, now: Date, granularity: Granularity) {
 
 export function transformDataForChart(
     responses: DatasetQueryStatsDailyResponse[],
-    timeRange: TimeRange,
+    dayRange: DayRange,
     granularity: Granularity,
 ): ChartDataPoint[] {
     const now = new Date();
-    const rangeStart = getRangeStart(now, timeRange);
+    const rangeStart = getRangeStart(now, dayRange);
 
     // transform date strings to Date objects
     const processedData = responses
         .map((stat) => {
-            const date = new Date(stat.date);
+            const date = parseISO(stat.date);
             return {
-                isoDate: date.toISOString().slice(0, 10),
+                isoDate: formatISO(date, { representation: 'date' }),
                 timestamp: date.getTime(),
                 queryCount: stat.query_count,
                 consumer: stat.consumer_data_product_name || 'Unknown',
@@ -169,6 +157,6 @@ export type UsageChartProps = {
     data: DatasetQueryStatsDailyResponses | undefined;
     granularity: Granularity;
     isLoading: boolean;
-    timeRange: TimeRange;
+    dayRange: DayRange;
     className?: string;
 };

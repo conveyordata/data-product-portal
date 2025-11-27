@@ -1,4 +1,3 @@
-from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -12,7 +11,11 @@ from app.datasets.query_stats_daily.schema_request import (
 from app.datasets.query_stats_daily.schema_response import (
     DatasetQueryStatsDailyResponses,
 )
-from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
+from app.datasets.query_stats_daily.service import (
+    DEFAULT_DAY_RANGE,
+    DatasetQueryStatsDailyService,
+    QueryStatsGranularity,
+)
 
 router = APIRouter(prefix="/{id}/query_stats", tags=["datasets"])
 
@@ -20,13 +23,13 @@ router = APIRouter(prefix="/{id}/query_stats", tags=["datasets"])
 @router.get("")
 def get_query_stats(
     id: UUID,
-    granularity: Literal["week", "month", "day"] = Query(default="week"),
-    time_range: Literal["1m", "90d", "1y"] = Query(default="90d"),
+    granularity: QueryStatsGranularity = Query(default=QueryStatsGranularity.WEEK),
+    day_range: int = Query(default=DEFAULT_DAY_RANGE, ge=1),
     db: Session = Depends(get_db_session),
 ) -> DatasetQueryStatsDailyResponses:
     service = DatasetQueryStatsDailyService(db)
     return service.get_query_stats_daily(
-        dataset_id=id, granularity=granularity, time_range=time_range
+        dataset_id=id, granularity=granularity, day_range=day_range
     )
 
 

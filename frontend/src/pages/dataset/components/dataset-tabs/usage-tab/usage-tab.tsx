@@ -2,6 +2,7 @@ import { Flex, Select, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetDatasetQueryStatsDailyQuery } from '@/store/features/datasets/datasets-api-slice';
+import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
 import { QueriesOverTimeChart } from './components/queries-over-time-chart';
 import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
 import styles from './usage-tab.module.scss';
@@ -12,8 +13,8 @@ type Props = {
 
 export function UsageTab({ datasetId }: Props) {
     const { t } = useTranslation();
-    const [granularity, setGranularity] = useState<'day' | 'week' | 'month'>('week');
-    const [timeRange, setTimeRange] = useState<'1m' | '90d' | '1y'>('90d');
+    const [granularity, setGranularity] = useState<DatasetQueryStatsGranularity>('week');
+    const [dayRange, setDayRange] = useState<number>(90);
 
     const granularityOptions = useMemo(
         () => [
@@ -24,19 +25,10 @@ export function UsageTab({ datasetId }: Props) {
         [t],
     );
 
-    const timeRangeOptions = useMemo(
-        () => [
-            { label: t('Last 30 days'), value: '1m' },
-            { label: t('Last 90 days'), value: '90d' },
-            { label: t('Last year'), value: '1y' },
-        ],
-        [t],
-    );
-
     const { data, isLoading } = useGetDatasetQueryStatsDailyQuery({
         datasetId,
         granularity,
-        timeRange,
+        dayRange,
     });
 
     return (
@@ -48,7 +40,15 @@ export function UsageTab({ datasetId }: Props) {
                 </Flex>
                 <Flex vertical className={styles.filterGroup}>
                     <Typography.Text>{t('Time Range')}</Typography.Text>
-                    <Select value={timeRange} onChange={setTimeRange} options={timeRangeOptions} />
+                    <Select
+                        value={dayRange}
+                        onChange={(value) => setDayRange(Number(value))}
+                        options={[
+                            { label: t('Last 30 days'), value: 30 },
+                            { label: t('Last 90 days'), value: 90 },
+                            { label: t('Last year'), value: 365 },
+                        ]}
+                    />
                 </Flex>
             </Flex>
             <Flex className={styles.chartsGrid} gap={16} wrap>
@@ -57,14 +57,14 @@ export function UsageTab({ datasetId }: Props) {
                     data={data}
                     granularity={granularity}
                     isLoading={isLoading}
-                    timeRange={timeRange}
+                    dayRange={dayRange}
                 />
                 <QueriesPerConsumerChart
                     className={styles.chartCard}
                     data={data}
                     granularity={granularity}
                     isLoading={isLoading}
-                    timeRange={timeRange}
+                    dayRange={dayRange}
                 />
             </Flex>
         </Flex>
