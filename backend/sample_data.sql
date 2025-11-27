@@ -440,7 +440,62 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('3d2fe240-1505-4de6-8302-771d7d157992', 'be182db6-5268-466c-ae48-e5d6899c6d05', '2025-10-28 18:18:37.476131', NULL);
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', '6578f7bd-aebe-433e-8732-999d36d34af6', '2025-10-28 18:32:27.687291', NULL);
 
-    -- Insert dynamic dataset query stats
+
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert dynamic dataset query stats
+    -- ------------------------------------------------------------------------------------------------
+
+    -- 1. Histology Clinical dataset query stats (adding 7 to test the other category aggregation)
+
+    -- Single-query daily consumer over the last six months
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, prediction_model_id, 1
+    FROM generate_series((CURRENT_DATE - INTERVAL '6 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs;
+
+    -- Ten weekday queries for the last four months
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, rnd_program_pipeline_id, 10
+    FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) BETWEEN 1 AND 5;
+
+    -- Weekly Monday pings for Biomarker Discovery (consumer #3)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '81815c4c-f323-4cf1-b25b-f43f231f510f', 3
+    FROM generate_series((CURRENT_DATE - INTERVAL '5 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) = 1;
+
+    -- Mid-week bursts for Clinical Trial Performance (consumer #4)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '6e580d91-14ea-495e-a6d7-5db236a5c1d5', 8
+    FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) = 3;
+
+    -- Structured cadence (5th, 15th, 25th) for Clinical Data Quality Monitor (consumer #5)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT
+        (date_trunc('month', CURRENT_DATE) - make_interval(months => month_idx) + make_interval(days => day_idx))::date,
+        histology_clinical_dataset_id,
+        '9fa5e299-fcc4-45e0-b48d-cc3deb68eefe',
+        4
+    FROM generate_series(0, 4) AS gs_month(month_idx)
+    CROSS JOIN LATERAL unnest(ARRAY[5, 15, 25]) AS day_in_month(day_idx);
+
+    -- First-of-month spikes for Regulatory Submission Tracker (consumer #6)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT
+        (date_trunc('month', CURRENT_DATE) - make_interval(months => month_idx))::date,
+        histology_clinical_dataset_id,
+        'fbcd7899-2763-4659-bd28-2a278910ef85',
+        18
+    FROM generate_series(0, 5) AS month_span(month_idx);
+
+    -- Weekend monitoring for Safety Signal Detection (consumer #7)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '08039e5d-50a7-447a-b691-f5dc6b420dea', 6
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) IN (6, 7);
+
+    -- 2. Histology R&D dataset query stats
     FOR month_offset IN 0..4 LOOP
         INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
         VALUES (
@@ -463,13 +518,15 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
         END LOOP;
     END LOOP;
 
-    -- Legacy-style snapshot rows with rolling dates
     INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count) VALUES
         ((CURRENT_DATE - INTERVAL '34 days')::date, histology_rnd_dataset_id, rnd_program_pipeline_id, 5),
         ((CURRENT_DATE - INTERVAL '10 days')::date, histology_rnd_dataset_id, rnd_program_pipeline_id, 15),
         ((CURRENT_DATE - INTERVAL '4 days')::date, histology_rnd_dataset_id, rnd_program_pipeline_id, 20),
         ((CURRENT_DATE - INTERVAL '10 days')::date, histology_rnd_dataset_id, ai_model_histology_images_id, 20),
         ((CURRENT_DATE - INTERVAL '4 days')::date, histology_rnd_dataset_id, ai_model_histology_images_id, 10);
+    -- ------------------------------------------------------------------------------------------------
+    -- END of Insert dynamic dataset query stats
+    -- ------------------------------------------------------------------------------------------------
 
 
 end $$;
