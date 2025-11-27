@@ -2,15 +2,15 @@ from typing import Literal, Optional, Self
 
 from pydantic import model_validator
 
+from app.configuration.environments.platform_service_configurations.schemas import (
+    AWSGlueConfig,
+)
 from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.glue.model import (
     GlueDataOutput as GlueDataOutputModel,
 )
 from app.data_products.schema import DataProduct
-from app.environment_platform_service_configurations.schemas.glue_schema import (
-    AWSGlueConfig,
-)
 
 
 class GlueDataOutput(BaseDataOutputConfiguration):
@@ -34,7 +34,6 @@ class GlueDataOutput(BaseDataOutputConfiguration):
         return self
 
     def validate_configuration(self, data_product: DataProduct):
-        # TODO Force defaul t bucket identifier if bucket = ''
         if not self.database.startswith(data_product.namespace):
             raise ValueError("Invalid database specified")
 

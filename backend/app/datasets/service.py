@@ -3,10 +3,20 @@ from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
+)
+from app.configuration.data_product_lifecycles.model import (
+    DataProductLifecycle as DataProductLifeCycleModel,
+)
+from app.configuration.tags.model import Tag as TagModel
+from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
+from app.core.logging import logger
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -18,13 +28,10 @@ from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_product_lifecycles.model import (
-    DataProductLifecycle as DataProductLifeCycleModel,
-)
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
@@ -34,18 +41,32 @@ from app.datasets.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
+from app.datasets.search_dataset import (
+    recalculate_search_vector_dataset_statement,
+    recalculate_search_vector_datasets_statement,
+)
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.role_assignments.dataset.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
-from app.role_assignments.enums import DecisionStatus
-from app.tags.model import Tag as TagModel
-from app.tags.model import ensure_tag_exists
+from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
+
+
+def get_dataset_load_options():
+    return [
+        selectinload(DatasetModel.data_product_links)
+        .selectinload(DataProductDatasetAssociationModel.data_product)
+        .raiseload("*"),
+        selectinload(DatasetModel.data_output_links)
+        .selectinload(DataOutputDatasetAssociationModel.data_output)
+        .options(
+            joinedload(DataOutput.configuration),
+            joinedload(DataOutput.owner),
+            raiseload("*"),
+        ),
+    ]
 
 
 class DatasetService:
@@ -90,7 +111,58 @@ class DatasetService:
 
         return dataset
 
+    def search_datasets(
+        self, query: str, limit: int, user: UserModel
+    ) -> Sequence[DatasetsSearch]:
+        load_options = get_dataset_load_options()
+        stmt = (
+            select(
+                DatasetModel,
+                func.ts_rank_cd(
+                    DatasetModel.search_vector,
+                    func.websearch_to_tsquery("english", query),
+                    32,  # 32 normalizes all results between 0-1
+                ).label("rank"),
+            )
+            .options(*load_options)
+            .where(
+                DatasetModel.search_vector.op("@@")(
+                    func.websearch_to_tsquery("english", query)
+                )
+            )
+            .order_by(desc("rank"))
+        )
+        results = self.db.execute(stmt).unique().all()
+        filtered_datasets: list[DatasetsSearch] = []
+        for row in results:
+            if len(filtered_datasets) >= limit:
+                return filtered_datasets
+            dataset = row[0]
+            rank = row[1]
+            if self.is_visible_to_user(dataset, user):
+                dataset.rank = rank
+                filtered_datasets.append(dataset)
+        return filtered_datasets
+
+    def recalculate_search_vector_for(self, dataset_id: UUID) -> int:
+        if settings.SEARCH_INDEXING_DISABLED:
+            logger.debug("Search indexing is disabled, skipping recalculation")
+            return 0
+        sql = recalculate_search_vector_dataset_statement(dataset_id)
+        result = self.db.execute(sql, {"dataset_id": dataset_id})
+        return result.rowcount
+
+    def recalculate_search_vector_datasets(self) -> int:
+        if settings.SEARCH_INDEXING_DISABLED:
+            logger.debug("Search indexing is disabled, skipping recalculation")
+            return 0
+        sql = recalculate_search_vector_datasets_statement()
+        result = self.db.execute(sql)
+        self.db.commit()
+        return result.rowcount
+
     def get_datasets(self, user: UserModel) -> Sequence[DatasetsGet]:
+        load_options = get_dataset_load_options()
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
@@ -100,18 +172,7 @@ class DatasetService:
             dataset
             for dataset in self.db.scalars(
                 select(DatasetModel)
-                .options(
-                    selectinload(DatasetModel.data_product_links)
-                    .selectinload(DataProductDatasetAssociationModel.data_product)
-                    .raiseload("*"),
-                    selectinload(DatasetModel.data_output_links)
-                    .selectinload(DataOutputDatasetAssociationModel.data_output)
-                    .options(
-                        joinedload(DataOutput.configuration),
-                        joinedload(DataOutput.owner),
-                        raiseload("*"),
-                    ),
-                )
+                .options(*load_options)
                 .order_by(asc(DatasetModel.name))
             )
             .unique()
@@ -170,6 +231,8 @@ class DatasetService:
         model = DatasetModel(**dataset_schema, tags=tags)
 
         self.db.add(model)
+        self.db.flush()
+        self.recalculate_search_vector_for(model.id)
         self.db.commit()
         return model
 
@@ -209,7 +272,8 @@ class DatasetService:
                 current_dataset.tags = new_tags
             else:
                 setattr(current_dataset, k, v) if v else None
-
+        self.db.flush()
+        self.recalculate_search_vector_for(id)
         self.db.commit()
         return {"id": current_dataset.id}
 
@@ -337,7 +401,7 @@ class DatasetService:
 
     def is_visible_to_user(self, dataset: DatasetModel, user: User) -> bool:
         if (
-            dataset.access_type != DatasetAccessType.PRIVATE
+            dataset.access_type != OutputPortAccessType.PRIVATE
             or Authorization().has_admin_role(user_id=str(user.id))
             or DatasetRoleAssignmentService(self.db).has_assignment(
                 dataset_id=dataset.id, user=user

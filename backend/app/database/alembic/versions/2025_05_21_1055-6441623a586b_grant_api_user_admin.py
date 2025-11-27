@@ -12,18 +12,18 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.orm import Session
 
-from app.role_assignments.enums import DecisionStatus
-from app.role_assignments.global_.model import GlobalRoleAssignment
-from app.role_assignments.global_.router import (
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.global_.router import (
     create_assignment,
     decide_assignment,
     delete_assignment,
 )
-from app.role_assignments.global_.schema import (
+from app.authorization.role_assignments.global_.schema import (
     CreateRoleAssignment,
     DecideRoleAssignment,
 )
-from app.roles import ADMIN_UUID
+from app.authorization.roles import ADMIN_UUID
 from app.users.model import User
 
 # revision identifiers, used by Alembic.

@@ -1,6 +1,7 @@
 import json
 
 import pytest
+
 from tests.factories import (
     PlatformFactory,
     PlatformServiceConfigFactory,

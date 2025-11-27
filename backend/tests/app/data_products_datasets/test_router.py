@@ -4,6 +4,12 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
+
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Scope
+from app.core.authz import Action
+from app.datasets.enums import OutputPortAccessType
+from app.settings import settings
 from tests.factories import (
     DataProductDatasetAssociationFactory,
     DataProductFactory,
@@ -13,12 +19,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.core.authz import Action
-from app.datasets.enums import DatasetAccessType
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
-from app.settings import settings
 
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
 DATA_PRODUCTS_ENDPOINT = "/api/data_products"
@@ -116,7 +116,7 @@ class TestDataProductsDatasetsRouter:
 
     def test_request_data_product_link_private_dataset_no_access(self, client):
         data_product = DataProductFactory()
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
 
         response = self.request_data_product_dataset_link(
             client, data_product.id, ds.id
@@ -135,7 +135,7 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         role = RoleFactory(scope=Scope.DATASET)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -326,7 +326,7 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(access_type=DatasetAccessType.RESTRICTED)
+        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],

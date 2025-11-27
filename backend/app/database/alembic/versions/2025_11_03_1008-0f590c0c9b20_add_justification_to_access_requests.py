@@ -1,4 +1,4 @@
-"""empty message
+"""Add justification to access requests
 
 Revision ID: 0f590c0c9b20
 Revises: f0b94d78c72c

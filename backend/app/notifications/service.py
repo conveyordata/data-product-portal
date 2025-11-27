@@ -6,13 +6,15 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
 from app.notifications.model import Notification as NotificationModel
 from app.notifications.schema_response import NotificationGet
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
 
 

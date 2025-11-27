@@ -1,14 +1,14 @@
 import random
 
 from sqlalchemy import select
+
+from app.configuration.platforms.platform_services.model import PlatformService
 from tests import test_session
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
 from tests.factories.dataset import DatasetFactory
-
-from app.platform_services.model import PlatformService
 
 
 def add_random_data(

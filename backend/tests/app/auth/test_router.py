@@ -1,3 +1,6 @@
+from app.authorization.roles.schema import Scope
+from app.core.authz.actions import AuthorizationAction
+from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -5,10 +8,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.core.authz.actions import AuthorizationAction
-from app.roles.schema import Scope
-from app.settings import settings
 
 ENDPOINT = "/api/auth"
 
@@ -37,6 +36,4 @@ class TestAuthRouter:
             f"={data_product.namespace}"
             "&environment=production"
         )
-        assert (
-            response.status_code == 501 or response.status_code == 400
-        )  # TODO Actually test through mocking
+        assert response.status_code == 501 or response.status_code == 400

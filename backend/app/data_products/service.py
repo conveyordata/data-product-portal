@@ -12,6 +12,18 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Prototype
+from app.configuration.data_product_lifecycles.model import (
+    DataProductLifecycle as DataProductLifeCycleModel,
+)
+from app.configuration.environments.model import Environment as EnvironmentModel
+from app.configuration.environments.platform_configurations.model import (
+    EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
+)
+from app.configuration.platforms.model import Platform as PlatformModel
+from app.configuration.tags.model import Tag as TagModel
+from app.configuration.tags.model import ensure_tag_exists
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
@@ -26,9 +38,6 @@ from app.core.namespace.validation import (
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-from app.data_product_lifecycles.model import (
-    DataProductLifecycle as DataProductLifeCycleModel,
-)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema_request import (
@@ -42,23 +51,14 @@ from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.service import DatasetService
-from app.environment_platform_configurations.model import (
-    EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
-)
-from app.environments.model import Environment as EnvironmentModel
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.platforms.model import Platform as PlatformModel
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Prototype
 from app.settings import settings
-from app.tags.model import Tag as TagModel
-from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -323,7 +323,7 @@ class DataProductService:
 
         approval_status = (
             DecisionStatus.PENDING
-            if dataset.access_type != DatasetAccessType.PUBLIC
+            if dataset.access_type != OutputPortAccessType.PUBLIC
             else DecisionStatus.APPROVED
         )
 
@@ -491,18 +491,18 @@ class DataProductService:
         platform_config = self.get_env_platform_config(id, environment, "Databricks")
         data_product = self.db.get(DataProductModel, id)
         config = json.loads(platform_config)["workspace_urls"]
-        if not str(data_product.domain_id) in config:
+        if str(data_product.domain_id) not in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for" f"domain {data_product.domain.name}"
+                    f"Workspace not configured fordomain {data_product.domain.name}"
                 ),
             )
         return config[str(data_product.domain_id)]
 
     def get_snowflake_url(self, id: UUID, environment: str) -> str:
         config = json.loads(self.get_env_platform_config(id, environment, "Snowflake"))
-        if "login_url" not in config.keys():
+        if "login_url" not in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="login_url missing from Snowflake configuration",

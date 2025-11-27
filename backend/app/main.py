@@ -9,9 +9,11 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
+from app.core.authz.background_tasks import check_expired_admins
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
@@ -20,7 +22,6 @@ from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
 from app.mcp.router import router as mcp_router
-from app.roles.service import RoleService
 from app.settings import settings
 from app.shared.router import router
 
@@ -67,16 +68,17 @@ async def lifespan(_: FastAPI):
         AuthorizationService(db).reload_enforcer()
 
     backend_analytics(API_VERSION)
+    task = asyncio.create_task(check_expired_admins())
     yield
+    task.cancel()
 
 
 # Combine both lifespans
 @asynccontextmanager
 async def combined_lifespan(app: FastAPI):
     # Run both lifespans
-    async with lifespan(app):
-        async with mcp_app.lifespan(app):
-            yield
+    async with lifespan(app), mcp_app.lifespan(app):
+        yield
 
 
 app = FastAPI(
@@ -88,6 +90,10 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     lifespan=combined_lifespan,
     **oidc_kwargs,
+    swagger_ui_parameters={
+        "docExpansion": "none",
+        "tagsSorter": "alpha",
+    },
 )
 
 mcp_app = mcp.http_app(path="/mcp")

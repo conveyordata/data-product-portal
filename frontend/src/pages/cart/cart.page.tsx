@@ -183,7 +183,6 @@ function Cart() {
 
         return submitFormIssues;
     }, [overlappingDatasetIds, selectedProductDatasetsInCart, t]);
-
     return (
         <Row gutter={16}>
             <Col span={10}>

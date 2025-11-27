@@ -9,7 +9,7 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.users.schema import User
-from app.users.schema_request import UserCreate
+from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import UsersGet
 from app.users.service import UserService
 
@@ -65,3 +65,16 @@ def mark_tour_as_seen(
     user: User = Depends(get_authenticated_user),
 ) -> None:
     UserService(db).mark_tour_as_seen(user.id)
+
+
+@router.put(
+    "/set_can_become_admin",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
+    ],
+)
+def set_can_become_admin(
+    request: CanBecomeAdminUpdate,
+    db: Session = Depends(get_db_session),
+) -> None:
+    UserService(db).set_can_become_admin(request)

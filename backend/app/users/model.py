@@ -1,15 +1,17 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy import UUID, Boolean, Column, DateTime, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.database.database import Base, ensure_exists
 from app.events.model import Event
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -33,6 +35,8 @@ class User(Base, BaseORM):
     )
 
     has_seen_tour = Column(Boolean, default=False, nullable=False)
+    can_become_admin = Column(Boolean, default=False, nullable=False)
+    admin_expiry = Column(DateTime(timezone=False), nullable=True)
 
     notifications: Mapped[list["Notification"]] = relationship(
         "Notification",
@@ -57,6 +61,7 @@ class User(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_roles", "data_product"
     )
+
     global_role: Mapped["GlobalRoleAssignment"] = relationship(
         "GlobalRoleAssignment",
         foreign_keys="GlobalRoleAssignment.user_id",

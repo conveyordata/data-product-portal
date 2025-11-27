@@ -30,6 +30,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
         },
         { skip: !dataProductId },
     );
+
     const { data: can_link_data_output } = useCheckAccessQuery(
         {
             resource: dataProductId,

@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-from app.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.

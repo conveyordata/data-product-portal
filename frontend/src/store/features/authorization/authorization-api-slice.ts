@@ -17,7 +17,7 @@ const authorizationApiSlice = baseApiSlice.injectEndpoints({
                 };
             },
         }),
-        isAdmin: builder.query<boolean, void>({
+        isAdmin: builder.query<{ is_admin: boolean; time: string }, void>({
             query: () => ({
                 url: ApiUrl.AdminCheck,
                 method: 'GET',

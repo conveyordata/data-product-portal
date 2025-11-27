@@ -1,8 +1,8 @@
 import factory
-from tests.factories.lifecycle import LifecycleFactory
 
 from app.data_products.model import DataProduct
 from app.data_products.status import DataProductStatus
+from tests.factories.lifecycle import LifecycleFactory
 
 from .data_product_type import DataProductTypeFactory
 from .domain import DomainFactory
