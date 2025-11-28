@@ -68,7 +68,7 @@ function buildBuckets(rangeStart: Date, now: Date, granularity: Granularity) {
         if (granularity === 'month') {
             displayDate = format(current, 'MMM-yyyy');
         } else if (granularity === 'week') {
-            displayDate = `week:${format(current, 'ww')}`;
+            displayDate = `${format(current, 'yyyy')}-W${format(current, 'II')}`;
         } else {
             displayDate = format(current, 'dd-MM-yyyy');
         }
