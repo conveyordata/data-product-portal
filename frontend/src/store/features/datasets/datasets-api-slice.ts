@@ -5,7 +5,7 @@ import type {
     DatasetContract,
     DatasetCreateRequest,
     DatasetCreateResponse,
-    DatasetCuratedQueryContract,
+    DatasetCuratedQueriesContract,
     DatasetUpdateRequest,
     DatasetUpdateResponse,
 } from '@/types/dataset';
@@ -51,7 +51,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                       ]
                     : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
         }),
-        getDatasetQueryCuratedQueries: builder.query<DatasetCuratedQueryContract[], string>({
+        getDatasetQueryCuratedQueries: builder.query<DatasetCuratedQueriesContract, string>({
             query: (datasetId) => ({
                 url: buildUrl(ApiUrl.DatasetCuratedQueries, { datasetId }),
                 method: 'GET',

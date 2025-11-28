@@ -13,3 +13,7 @@ class DatasetCuratedQuery(ORMModel):
     sort_order: int
     created_at: datetime
     updated_at: datetime | None
+
+
+class DatasetCuratedQueries(ORMModel):
+    dataset_curated_queries: list[DatasetCuratedQuery]

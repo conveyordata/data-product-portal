@@ -8,6 +8,7 @@ from app.datasets.curated_queries.model import (
     DatasetCuratedQuery as DatasetCuratedQueryModel,
 )
 from app.datasets.curated_queries.schema_request import DatasetCuratedQueryInput
+from app.datasets.curated_queries.schema_response import DatasetCuratedQueries
 from app.datasets.model import ensure_dataset_exists
 
 
@@ -15,11 +16,9 @@ class DatasetCuratedQueryService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_curated_queries(
-        self, dataset_id: UUID
-    ) -> Sequence[DatasetCuratedQueryModel]:
+    def get_curated_queries(self, dataset_id: UUID) -> DatasetCuratedQueries:
         ensure_dataset_exists(dataset_id, self.db)
-        return self.db.scalars(
+        queries = self.db.scalars(
             select(DatasetCuratedQueryModel)
             .where(DatasetCuratedQueryModel.output_port_id == dataset_id)
             .order_by(
@@ -27,10 +26,11 @@ class DatasetCuratedQueryService:
                 asc(DatasetCuratedQueryModel.created_at),
             )
         ).all()
+        return DatasetCuratedQueries(dataset_curated_queries=queries)
 
     def replace_curated_queries(
         self, dataset_id: UUID, curated_queries: Sequence[DatasetCuratedQueryInput]
-    ) -> Sequence[DatasetCuratedQueryModel]:
+    ) -> DatasetCuratedQueries:
         ensure_dataset_exists(dataset_id, self.db)
         self.db.execute(
             delete(DatasetCuratedQueryModel).where(

@@ -8,3 +8,7 @@ export interface DatasetCuratedQueryContract {
     created_at: string;
     updated_at?: string | null;
 }
+
+export interface DatasetCuratedQueriesContract {
+    dataset_curated_queries: DatasetCuratedQueryContract[];
+}

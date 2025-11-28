@@ -23,7 +23,7 @@ export function UsageTab({ datasetId }: Props) {
     return (
         <UsageChart
             usageData={usageData}
-            curatedQueries={curatedQueries}
+            curatedQueries={curatedQueries?.dataset_curated_queries}
             isUsageLoading={isUsageLoading}
             areCuratedQueriesLoading={areCuratedQueriesLoading}
         />
