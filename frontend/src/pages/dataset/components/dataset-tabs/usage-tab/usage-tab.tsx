@@ -9,19 +9,16 @@ type Props = {
 };
 
 export function UsageTab({ datasetId }: Props) {
-    const {
-        data: usageData,
-        isLoading: isUsageLoading,
-    } = useGetDatasetQueryStatsDailyQuery(datasetId, {
+    const { data: usageData, isLoading: isUsageLoading } = useGetDatasetQueryStatsDailyQuery(datasetId, {
         skip: !datasetId,
     });
 
-    const {
-        data: curatedQueries,
-        isLoading: areCuratedQueriesLoading,
-    } = useGetDatasetQueryCuratedQueriesQuery(datasetId, {
-        skip: !datasetId,
-    });
+    const { data: curatedQueries, isLoading: areCuratedQueriesLoading } = useGetDatasetQueryCuratedQueriesQuery(
+        datasetId,
+        {
+            skip: !datasetId,
+        },
+    );
 
     return (
         <UsageChart

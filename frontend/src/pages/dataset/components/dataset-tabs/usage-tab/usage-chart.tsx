@@ -1,12 +1,12 @@
 import { Area } from '@ant-design/charts';
 import { CopyOutlined } from '@ant-design/icons';
-import { Button, Card, Empty, Flex, List, message, Skeleton, Typography } from 'antd';
+import { Button, Card, Empty, Flex, List, message, Skeleton, Tabs, Typography } from 'antd';
 import { addDays, format, isSameDay, isSameMonth, subMonths } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { magula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
 import type {
@@ -36,6 +36,17 @@ type Props = {
     curatedQueries?: DatasetCuratedQueryContract[];
     isUsageLoading: boolean;
     areCuratedQueriesLoading: boolean;
+};
+
+enum UsageTabKeys {
+    UsageStatistics = 'usage-statistics',
+    CuratedQueries = 'curated-queries',
+}
+
+type Tab = {
+    label: string;
+    key: UsageTabKeys;
+    children: ReactNode;
 };
 
 function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: CuratedQueryItemProps) {
@@ -134,12 +145,7 @@ function transformDataForChart(responses: DatasetQueryStatsDailyResponse[], unkn
     return filledData.sort((a, b) => a.timestamp - b.timestamp);
 }
 
-export function UsageChart({
-    usageData,
-    curatedQueries,
-    isUsageLoading,
-    areCuratedQueriesLoading,
-}: Props) {
+export function UsageChart({ usageData, curatedQueries, isUsageLoading, areCuratedQueriesLoading }: Props) {
     const { t } = useTranslation();
     const [expandedQueries, setExpandedQueries] = useState<Record<string, boolean>>({});
     const [messageApi, contextHolder] = message.useMessage();
@@ -153,113 +159,158 @@ export function UsageChart({
 
     const queries = useMemo(() => curatedQueries ?? [], [curatedQueries]);
 
-    const handleToggle = (id: string) => {
+    const handleToggle = useCallback((id: string) => {
         setExpandedQueries((prev) => ({ ...prev, [id]: !prev[id] }));
-    };
+    }, []);
 
-    const handleCopy = async (queryText: string) => {
-        try {
-            await navigator.clipboard.writeText(queryText);
-            messageApi.success(t('SQL copied to clipboard'));
-        } catch (_error) {
-            messageApi.error(t('Failed to copy SQL'));
-        }
-    };
+    const handleCopy = useCallback(
+        async (queryText: string) => {
+            try {
+                await navigator.clipboard.writeText(queryText);
+                messageApi.success(t('SQL copied to clipboard'));
+            } catch (_error) {
+                messageApi.error(t('Failed to copy SQL'));
+            }
+        },
+        [messageApi, t],
+    );
 
-    const getIsExpanded = (id: string, queryText: string) => {
-        if (id in expandedQueries) {
-            return expandedQueries[id];
-        }
-        return queryText.split('\n').length <= LINES_THRESHOLD;
-    };
+    const getIsExpanded = useCallback(
+        (id: string, queryText: string) => {
+            if (id in expandedQueries) {
+                return expandedQueries[id];
+            }
+            return queryText.split('\n').length <= LINES_THRESHOLD;
+        },
+        [expandedQueries],
+    );
 
     const hasUsageData =
-        usageData?.dataset_query_stats_daily_responses &&
-        usageData.dataset_query_stats_daily_responses.length > 0;
+        usageData?.dataset_query_stats_daily_responses && usageData.dataset_query_stats_daily_responses.length > 0;
 
-    const chartConfig = {
-        data: chartData,
-        xField: 'date',
-        yField: 'queryCount',
-        seriesField: 'consumer',
-        colorField: 'consumer',
-        smooth: true,
-        isStack: true,
-        stack: true,
-        animation: {
-            appear: {
-                animation: 'path-in',
-                duration: 1000,
+    const chartConfig = useMemo(() => {
+        return {
+            data: chartData,
+            xField: 'date',
+            yField: 'queryCount',
+            seriesField: 'consumer',
+            colorField: 'consumer',
+            smooth: true,
+            isStack: true,
+            stack: true,
+            animation: {
+                appear: {
+                    animation: 'path-in',
+                    duration: 1000,
+                },
             },
-        },
-        xAxis: {
-            title: {
-                text: t('Date'),
+            xAxis: {
+                title: {
+                    text: t('Date'),
+                },
             },
-        },
-        yAxis: {
-            title: {
-                text: t('Query Count'),
+            yAxis: {
+                title: {
+                    text: t('Query Count'),
+                },
             },
-        },
-        tooltip: {
-            formatter: (datum: ChartDataPoint) => ({
-                name: datum.consumer,
-                value: datum.queryCount,
-                title: datum.date,
-            }),
-        },
-        legend: {
-            position: 'top-right' as const,
-        },
-    };
+            tooltip: {
+                formatter: (datum: ChartDataPoint) => ({
+                    name: datum.consumer,
+                    value: datum.queryCount,
+                    title: datum.date,
+                }),
+            },
+            legend: {
+                position: 'top-right' as const,
+            },
+        };
+    }, [chartData, t]);
+
+    const tabs: Tab[] = useMemo(() => {
+        return [
+            {
+                label: t('Usage statistics'),
+                key: UsageTabKeys.UsageStatistics,
+                children: (
+                    <Card bordered={false}>
+                        {isUsageLoading ? (
+                            <LoadingSpinner />
+                        ) : !hasUsageData ? (
+                            <Empty description={t('No usage data available for the last month')} />
+                        ) : (
+                            <Flex vertical gap={16}>
+                                <Typography.Title level={3}>{t('Usage Statistics - Last Month')}</Typography.Title>
+                                <Area {...chartConfig} />
+                            </Flex>
+                        )}
+                    </Card>
+                ),
+            },
+            {
+                label: t('Curated queries'),
+                key: UsageTabKeys.CuratedQueries,
+                children: (
+                    <Flex vertical className={styles.curatedQueriesSection}>
+                        <Typography.Title level={4} className={styles.sectionTitle}>
+                            {t('Curated Queries')}
+                        </Typography.Title>
+                        {areCuratedQueriesLoading ? (
+                            <Skeleton active paragraph={{ rows: 4 }} />
+                        ) : queries.length === 0 ? (
+                            <Empty description={t('No curated queries available')} />
+                        ) : (
+                            <List
+                                itemLayout="vertical"
+                                dataSource={queries}
+                                split={false}
+                                className={styles.curatedQueries}
+                                renderItem={(item) => {
+                                    const key = item.curated_query_id;
+                                    const isExpanded = getIsExpanded(key, item.query_text);
+
+                                    return (
+                                        <CuratedQueryItem
+                                            key={key}
+                                            query={item}
+                                            isExpanded={isExpanded}
+                                            onToggle={() => handleToggle(key)}
+                                            onCopy={handleCopy}
+                                        />
+                                    );
+                                }}
+                            />
+                        )}
+                    </Flex>
+                ),
+            },
+        ];
+    }, [
+        areCuratedQueriesLoading,
+        chartConfig,
+        getIsExpanded,
+        handleCopy,
+        handleToggle,
+        hasUsageData,
+        isUsageLoading,
+        queries,
+        t,
+    ]);
 
     return (
         <Flex vertical gap={24}>
             {contextHolder}
-            <Card bordered={false}>
-                {isUsageLoading ? (
-                    <LoadingSpinner />
-                ) : !hasUsageData ? (
-                    <Empty description={t('No usage data available for the last month')} />
-                ) : (
-                    <Flex vertical gap={16}>
-                        <Typography.Title level={3}>{t('Usage Statistics - Last Month')}</Typography.Title>
-                        <Area {...chartConfig} />
-                    </Flex>
-                )}
-            </Card>
-            <Flex vertical className={styles.curatedQueriesSection}>
-                <Typography.Title level={4} className={styles.sectionTitle}>
-                    {t('Curated Queries')}
-                </Typography.Title>
-                {areCuratedQueriesLoading ? (
-                    <Skeleton active paragraph={{ rows: 4 }} />
-                ) : queries.length === 0 ? (
-                    <Empty description={t('No curated queries available')} />
-                ) : (
-                    <List
-                        itemLayout="vertical"
-                        dataSource={queries}
-                        split={false}
-                        className={styles.curatedQueries}
-                        renderItem={(item) => {
-                            const key = item.curated_query_id;
-                            const isExpanded = getIsExpanded(key, item.query_text);
-
-                            return (
-                                <CuratedQueryItem
-                                    key={key}
-                                    query={item}
-                                    isExpanded={isExpanded}
-                                    onToggle={() => handleToggle(key)}
-                                    onCopy={handleCopy}
-                                />
-                            );
-                        }}
-                    />
-                )}
-            </Flex>
+            <Tabs
+                defaultActiveKey={UsageTabKeys.UsageStatistics}
+                items={tabs.map(({ key, label, children }) => ({
+                    label,
+                    key,
+                    children,
+                    className: styles.tabPane,
+                }))}
+                size="middle"
+                rootClassName={styles.tabContainer}
+            />
         </Flex>
     );
 }
