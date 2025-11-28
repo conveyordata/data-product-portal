@@ -1,8 +1,9 @@
 import { Empty, Flex, Select, Spin, Typography } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetDatasetQueryStatsDailyQuery } from '@/store/features/datasets/datasets-api-slice';
 import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
+import { aggregateQueriesPerConsumer, transformDataForChart } from './components/chart-data.utils';
 import { QueriesOverTimeChart } from './components/queries-over-time-chart';
 import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
 import styles from './usage-tab.module.scss';
@@ -16,7 +17,6 @@ export function UsageTab({ datasetId }: Props) {
     const [granularity, setGranularity] = useState<DatasetQueryStatsGranularity>('week');
     const longestDayRange = 365;
     const [dayRange, setDayRange] = useState<number>(longestDayRange);
-    const [hasUsageData, setHasUsageData] = useState<boolean | null>(null);
 
     const granularityOptions = useMemo(
         () => [
@@ -33,14 +33,21 @@ export function UsageTab({ datasetId }: Props) {
         dayRange,
     });
 
-    useEffect(() => {
-        if (dayRange === longestDayRange && !isLoading && !isFetching) {
-            const hasData = Boolean(data?.dataset_query_stats_daily_responses?.length);
-            setHasUsageData(hasData);
-        }
-    }, [data, dayRange, isFetching, isLoading]);
+    const isLoadingState = isLoading || isFetching;
+    const responses = data?.dataset_query_stats_daily_responses;
+    const hasUsageData = Boolean(responses?.length);
+    const unknownLabel = t('Unknown');
 
-    if (hasUsageData === null) {
+    const chartData = useMemo(() => {
+        if (!responses?.length) {
+            return [];
+        }
+        return transformDataForChart(responses, dayRange, granularity, unknownLabel);
+    }, [responses, dayRange, granularity, unknownLabel]);
+
+    const consumerTotals = useMemo(() => aggregateQueriesPerConsumer(chartData), [chartData]);
+
+    if (isLoadingState && !hasUsageData) {
         return (
             <Flex vertical className={styles.container} align="center" justify="center">
                 <Spin size="large" />
@@ -48,7 +55,7 @@ export function UsageTab({ datasetId }: Props) {
         );
     }
 
-    if (!hasUsageData) {
+    if (!isLoadingState && !hasUsageData) {
         return (
             <Flex vertical className={styles.container} align="center" justify="center">
                 <Empty description={t('No usage data available for this dataset')} />
@@ -79,17 +86,15 @@ export function UsageTab({ datasetId }: Props) {
             <Flex className={styles.chartsGrid} gap={16} wrap>
                 <QueriesOverTimeChart
                     className={styles.chartCard}
-                    data={data}
-                    granularity={granularity}
-                    isLoading={isLoading}
-                    dayRange={dayRange}
+                    data={chartData}
+                    isLoading={isLoadingState}
+                    hasData={hasUsageData}
                 />
                 <QueriesPerConsumerChart
                     className={styles.chartCard}
-                    data={data}
-                    granularity={granularity}
-                    isLoading={isLoading}
-                    dayRange={dayRange}
+                    data={consumerTotals}
+                    isLoading={isLoadingState}
+                    hasData={hasUsageData}
                 />
             </Flex>
         </Flex>

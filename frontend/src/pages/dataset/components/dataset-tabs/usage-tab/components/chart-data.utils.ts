@@ -11,10 +11,7 @@ import {
     subDays,
 } from 'date-fns';
 
-import type {
-    DatasetQueryStatsDailyResponse,
-    DatasetQueryStatsDailyResponses,
-} from '@/types/dataset/dataset-query-stats-daily.contract';
+import type { DatasetQueryStatsDailyResponse } from '@/types/dataset/dataset-query-stats-daily.contract';
 
 export type DayRange = number;
 export type Granularity = 'day' | 'week' | 'month';
@@ -89,6 +86,7 @@ export function transformDataForChart(
     responses: DatasetQueryStatsDailyResponse[],
     dayRange: DayRange,
     granularity: Granularity,
+    unknownLabel: string,
 ): ChartDataPoint[] {
     const now = new Date();
     const rangeStart = getRangeStart(now, dayRange);
@@ -101,7 +99,7 @@ export function transformDataForChart(
                 isoDate: formatISO(date, { representation: 'date' }),
                 timestamp: date.getTime(),
                 queryCount: stat.query_count,
-                consumer: stat.consumer_data_product_name || 'Unknown',
+                consumer: stat.consumer_data_product_name || unknownLabel,
             };
         })
         .sort((a, b) => a.timestamp - b.timestamp);
@@ -147,11 +145,3 @@ export function aggregateQueriesPerConsumer(dataPoints: ChartDataPoint[]): Consu
         }))
         .sort((a, b) => b.totalQueries - a.totalQueries);
 }
-
-export type UsageChartProps = {
-    data: DatasetQueryStatsDailyResponses | undefined;
-    granularity: Granularity;
-    isLoading: boolean;
-    dayRange: DayRange;
-    className?: string;
-};
