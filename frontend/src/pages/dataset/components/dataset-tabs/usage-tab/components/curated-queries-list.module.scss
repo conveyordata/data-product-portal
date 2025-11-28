@@ -1,0 +1,21 @@
+@use '@/styles/globals';
+
+.curatedQueriesSection {
+    width: 100%;
+}
+
+.curatedQueries {
+    :global(.ant-list-items) {
+        border: none !important;
+    }
+
+    :global(.ant-list-item) {
+        border: none !important;
+        padding: globals.$spacing-m 0;
+    }
+
+    :global(.ant-list-item:not(:last-child)) {
+        margin-bottom: globals.$spacing-m;
+        border-bottom: 1px solid var(--color-neutral-3, #d9d9d9) !important;
+    }
+}
