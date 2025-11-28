@@ -1,8 +1,8 @@
+from app.authorization.roles.schema import Scope
+from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.datasets.curated_queries.schema_request import DatasetCuratedQueryInput
 from app.datasets.curated_queries.service import DatasetCuratedQueryService
-from app.roles.schema import Scope
-from app.roles.service import RoleService
 from app.settings import settings
 from tests.factories import (
     DatasetFactory,
@@ -53,8 +53,8 @@ class TestCuratedQueriesRouter:
         )
         assert put_response.status_code == 200
         body = put_response.json()
-        assert len(body) == 2
-        assert body[0]["title"] == "New deviations"
+        assert len(body["dataset_curated_queries"]) == 2
+        assert body["dataset_curated_queries"][0]["title"] == "New deviations"
 
     def test_curated_queries_get(self, client, session):
         dataset = DatasetFactory()
@@ -76,5 +76,5 @@ class TestCuratedQueriesRouter:
         get_response = client.get(f"{ENDPOINT}/{dataset.id}/usage/curated_queries")
         assert get_response.status_code == 200
         data = get_response.json()
-        assert len(data) == 1
-        assert data[0]["title"] == "Existing query"
+        assert len(data["dataset_curated_queries"]) == 1
+        assert data["dataset_curated_queries"][0]["title"] == "Existing query"

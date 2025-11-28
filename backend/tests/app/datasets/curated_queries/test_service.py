@@ -29,7 +29,7 @@ class TestCuratedQueriesService:
         ]
 
         result = service.replace_curated_queries(dataset.id, curated_queries)
-        assert [item.title for item in result] == [
+        assert [item.title for item in result.dataset_curated_queries] == [
             "Primary spotlight",
             "Auto-indexed",
             "Secondary rollup",
@@ -51,4 +51,4 @@ class TestCuratedQueriesService:
         )
 
         result_after_clear = service.replace_curated_queries(dataset.id, [])
-        assert result_after_clear == []
+        assert result_after_clear.dataset_curated_queries == []
