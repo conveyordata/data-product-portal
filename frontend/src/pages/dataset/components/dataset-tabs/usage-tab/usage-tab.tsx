@@ -1,5 +1,5 @@
-import { Flex, Select, Typography } from 'antd';
-import { useMemo, useState } from 'react';
+import { Empty, Flex, Select, Spin, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetDatasetQueryStatsDailyQuery } from '@/store/features/datasets/datasets-api-slice';
 import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
@@ -14,7 +14,9 @@ type Props = {
 export function UsageTab({ datasetId }: Props) {
     const { t } = useTranslation();
     const [granularity, setGranularity] = useState<DatasetQueryStatsGranularity>('week');
-    const [dayRange, setDayRange] = useState<number>(90);
+    const longestDayRange = 365;
+    const [dayRange, setDayRange] = useState<number>(longestDayRange);
+    const [hasUsageData, setHasUsageData] = useState<boolean | null>(null);
 
     const granularityOptions = useMemo(
         () => [
@@ -25,11 +27,34 @@ export function UsageTab({ datasetId }: Props) {
         [t],
     );
 
-    const { data, isLoading } = useGetDatasetQueryStatsDailyQuery({
+    const { data, isLoading, isFetching } = useGetDatasetQueryStatsDailyQuery({
         datasetId,
         granularity,
         dayRange,
     });
+
+    useEffect(() => {
+        if (dayRange === longestDayRange && !isLoading && !isFetching) {
+            const hasData = Boolean(data?.dataset_query_stats_daily_responses?.length);
+            setHasUsageData(hasData);
+        }
+    }, [data, dayRange, isFetching, isLoading]);
+
+    if (hasUsageData === null) {
+        return (
+            <Flex vertical className={styles.container} align="center" justify="center">
+                <Spin size="large" />
+            </Flex>
+        );
+    }
+
+    if (!hasUsageData) {
+        return (
+            <Flex vertical className={styles.container} align="center" justify="center">
+                <Empty description={t('No usage data available for this dataset')} />
+            </Flex>
+        );
+    }
 
     return (
         <Flex vertical className={styles.container}>
@@ -46,7 +71,7 @@ export function UsageTab({ datasetId }: Props) {
                         options={[
                             { label: t('Last 30 days'), value: 30 },
                             { label: t('Last 90 days'), value: 90 },
-                            { label: t('Last year'), value: 365 },
+                            { label: t('Last year'), value: longestDayRange },
                         ]}
                     />
                 </Flex>
