@@ -13,7 +13,6 @@ from app.configuration.tags.model import Tag, tag_dataset_table
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import OutputPortAccessType
 from app.datasets.status import OutputPortStatus
-from app.datasets.curated_queries.model import DatasetCuratedQuery
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -70,16 +69,6 @@ class Dataset(Base, BaseORM):
         order_by="DataOutputDatasetAssociation.status.desc()",
         cascade="all, delete-orphan",
         lazy="raise",
-    )
-    curated_queries: Mapped[list["DatasetCuratedQuery"]] = relationship(
-        "DatasetCuratedQuery",
-        back_populates="dataset",
-        cascade="all, delete-orphan",
-        order_by=lambda: (
-            DatasetCuratedQuery.sort_order.asc(),
-            DatasetCuratedQuery.created_at.asc(),
-        ),
-        lazy="selectin",
     )
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_dataset_table, back_populates="datasets", lazy="joined"

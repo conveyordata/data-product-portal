@@ -1,15 +1,16 @@
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, ForeignKey, SmallInteger, String, Text
+from sqlalchemy import DateTime, ForeignKey, SmallInteger, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.database import Base
 from app.shared.model import utcnow
 
 if TYPE_CHECKING:
-    from app.datasets.model import Dataset
+    pass
 
 
 class DatasetCuratedQuery(Base):
@@ -30,12 +31,9 @@ class DatasetCuratedQuery(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     query_text: Mapped[str] = mapped_column(Text, nullable=False)
     sort_order: Mapped[int] = mapped_column(SmallInteger, default=0, nullable=False)
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=utcnow(), nullable=False
     )
-    updated_at = Column(DateTime(timezone=True), onupdate=utcnow())
-
-    dataset: Mapped["Dataset"] = relationship(
-        "Dataset",
-        back_populates="curated_queries",
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), onupdate=utcnow()
     )
