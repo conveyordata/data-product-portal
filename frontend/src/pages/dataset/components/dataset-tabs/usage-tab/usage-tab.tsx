@@ -2,6 +2,7 @@ import { Empty, Flex, Select, Spin, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetDatasetQueryStatsDailyQuery } from '@/store/features/datasets/datasets-api-slice';
+import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
 import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
 import { aggregateQueriesPerConsumer, transformDataForChart } from './components/chart-data.utils';
 import { QueriesOverTimeChart } from './components/queries-over-time-chart';
@@ -14,6 +15,7 @@ type Props = {
 
 export function UsageTab({ datasetId }: Props) {
     const { t } = useTranslation();
+    const { data: version } = useGetVersionQuery();
     const [granularity, setGranularity] = useState<DatasetQueryStatsGranularity>('week');
     const longestDayRange = 365;
     const [dayRange, setDayRange] = useState<number>(longestDayRange);
@@ -56,9 +58,23 @@ export function UsageTab({ datasetId }: Props) {
     }
 
     if (!isLoadingState && !hasUsageData) {
+        const versionPath = version?.version.split('.').slice(0, 2).join('.') ?? '0.4';
+        const docsUrl = `https://docs.dataproductportal.com/docs/${versionPath}.x/developer-guide/data-product-usage-ingestion`;
+
         return (
             <Flex vertical className={styles.container} align="center" justify="center">
-                <Empty description={t('No usage data available for this dataset')} />
+                <Empty
+                    description={
+                        <Flex vertical align="center" gap={8}>
+                            <Typography.Text>{t('No usage data available for this dataset')}</Typography.Text>
+                            <Typography.Text type="secondary">
+                                <a href={docsUrl} target="_blank" rel="noopener noreferrer">
+                                    {t('Learn how to ingest usage data')}
+                                </a>
+                            </Typography.Text>
+                        </Flex>
+                    }
+                />
             </Flex>
         );
     }
