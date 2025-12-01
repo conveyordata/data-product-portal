@@ -9,10 +9,9 @@ type QueriesOverTimeChartProps = {
     data: ChartDataPoint[];
     isLoading: boolean;
     hasData: boolean;
-    className?: string;
 };
 
-export function QueriesOverTimeChart({ data, isLoading, hasData, className }: QueriesOverTimeChartProps) {
+export function QueriesOverTimeChart({ data, isLoading, hasData }: QueriesOverTimeChartProps) {
     const { t } = useTranslation();
 
     const config = useMemo(() => {
@@ -56,7 +55,6 @@ export function QueriesOverTimeChart({ data, isLoading, hasData, className }: Qu
 
     return (
         <ChartCard
-            className={className}
             title={t('Usage Statistics - Last Month')}
             isLoading={isLoading}
             hasData={hasData}

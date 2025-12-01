@@ -7,7 +7,6 @@ import type { DatasetQueryStatsDailyResponses } from '@/types/dataset/dataset-qu
 import { transformDataForChart } from './components/chart-data.utils';
 import { CuratedQueriesList } from './components/curated-queries-list';
 import { QueriesOverTimeChart } from './components/queries-over-time-chart';
-import styles from './usage-chart.module.scss';
 
 type Props = {
     usageData?: DatasetQueryStatsDailyResponses;
@@ -62,10 +61,8 @@ export function UsageChart({ usageData, curatedQueries, isUsageLoading, areCurat
                     label,
                     key,
                     children,
-                    className: styles.tabPane,
                 }))}
                 size="middle"
-                rootClassName={styles.tabContainer}
             />
         </Flex>
     );

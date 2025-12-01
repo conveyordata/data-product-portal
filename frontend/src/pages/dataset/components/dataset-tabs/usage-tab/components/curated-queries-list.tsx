@@ -1,7 +1,8 @@
-import { Empty, Flex, List, message, Skeleton } from 'antd';
+import { Empty, Flex, List, Skeleton } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
 import styles from './curated-queries-list.module.scss';
 import { CuratedQueryItem, SQL_LINES_THRESHOLD } from './curated-query-item';
@@ -14,7 +15,6 @@ type CuratedQueriesListProps = {
 export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListProps) {
     const { t } = useTranslation();
     const [expandedQueries, setExpandedQueries] = useState<Record<string, boolean>>({});
-    const [messageApi, contextHolder] = message.useMessage();
 
     const queriesList = useMemo(() => queries ?? [], [queries]);
 
@@ -26,12 +26,12 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
         async (queryText: string) => {
             try {
                 await navigator.clipboard.writeText(queryText);
-                messageApi.success(t('SQL copied to clipboard'));
+                dispatchMessage({ content: t('SQL copied to clipboard'), type: 'success' });
             } catch (_error) {
-                messageApi.error(t('Failed to copy SQL'));
+                dispatchMessage({ content: t('Failed to copy SQL'), type: 'error' });
             }
         },
-        [messageApi, t],
+        [t],
     );
 
     const getIsExpanded = useCallback(
@@ -45,36 +45,33 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
     );
 
     return (
-        <>
-            {contextHolder}
-            <Flex vertical className={styles.curatedQueriesSection}>
-                {isLoading ? (
-                    <Skeleton active paragraph={{ rows: 4 }} />
-                ) : queriesList.length === 0 ? (
-                    <Empty description={t('No curated queries available')} />
-                ) : (
-                    <List
-                        itemLayout="vertical"
-                        dataSource={queriesList}
-                        split={false}
-                        className={styles.curatedQueries}
-                        renderItem={(item) => {
-                            const key = `${item.output_port_id}-${item.sort_order}`;
-                            const isExpanded = getIsExpanded(key, item.query_text);
+        <Flex vertical className={styles.curatedQueriesSection}>
+            {isLoading ? (
+                <Skeleton active paragraph={{ rows: 4 }} />
+            ) : queriesList.length === 0 ? (
+                <Empty description={t('No curated queries available')} />
+            ) : (
+                <List
+                    itemLayout="vertical"
+                    dataSource={queriesList}
+                    split={false}
+                    className={styles.curatedQueries}
+                    renderItem={(item) => {
+                        const key = `${item.output_port_id}-${item.sort_order}`;
+                        const isExpanded = getIsExpanded(key, item.query_text);
 
-                            return (
-                                <CuratedQueryItem
-                                    key={key}
-                                    query={item}
-                                    isExpanded={isExpanded}
-                                    onToggle={() => handleToggle(key)}
-                                    onCopy={handleCopy}
-                                />
-                            );
-                        }}
-                    />
-                )}
-            </Flex>
-        </>
+                        return (
+                            <CuratedQueryItem
+                                key={key}
+                                query={item}
+                                isExpanded={isExpanded}
+                                onToggle={() => handleToggle(key)}
+                                onCopy={handleCopy}
+                            />
+                        );
+                    }}
+                />
+            )}
+        </Flex>
     );
 }
