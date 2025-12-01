@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import DateTime, ForeignKey, SmallInteger, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -26,7 +26,7 @@ class DatasetCuratedQuery(Base):
         SmallInteger, primary_key=True, default=0, nullable=False
     )
     title: Mapped[str] = mapped_column(String(length=255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     query_text: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=utcnow(), nullable=False

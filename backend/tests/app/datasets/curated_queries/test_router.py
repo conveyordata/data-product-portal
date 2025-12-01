@@ -38,7 +38,6 @@ class TestCuratedQueriesRouter:
                     "title": "Top enrolling sites",
                     "description": "Ranks sites by screened patients.",
                     "query_text": "SELECT site_id, screened_patients FROM enrollment ORDER BY screened_patients DESC LIMIT 5;",
-                    "sort_order": 2,
                 },
                 {
                     "title": "New deviations",
@@ -54,7 +53,8 @@ class TestCuratedQueriesRouter:
         assert put_response.status_code == 200
         body = put_response.json()
         assert len(body["dataset_curated_queries"]) == 2
-        assert body["dataset_curated_queries"][0]["title"] == "New deviations"
+        assert body["dataset_curated_queries"][0]["title"] == "Top enrolling sites"
+        assert body["dataset_curated_queries"][1]["title"] == "New deviations"
 
     def test_curated_queries_get(self, client, session):
         dataset = DatasetFactory()
@@ -68,7 +68,6 @@ class TestCuratedQueriesRouter:
                     title="Existing query",
                     description="Stored during setup",
                     query_text="SELECT 1",
-                    sort_order=0,
                 )
             ],
         )

@@ -44,9 +44,7 @@ class DatasetCuratedQueryService:
                     title=curated_query.title,
                     description=curated_query.description,
                     query_text=curated_query.query_text,
-                    sort_order=curated_query.sort_order
-                    if curated_query.sort_order is not None
-                    else index,
+                    sort_order=index,
                 )
             )
         self.db.commit()

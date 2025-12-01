@@ -9,7 +9,6 @@ from app.database.database import get_db_session
 from app.datasets.curated_queries.schema_request import DatasetCuratedQueriesUpdate
 from app.datasets.curated_queries.schema_response import DatasetCuratedQueries
 from app.datasets.curated_queries.service import DatasetCuratedQueryService
-from app.datasets.service import DatasetService
 from app.users.model import User
 
 router = APIRouter(prefix="/{id}/usage/curated_queries", tags=["datasets"])
@@ -21,7 +20,6 @@ def get_dataset_curated_queries(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> DatasetCuratedQueries:
-    DatasetService(db).get_dataset(id, user)
     return DatasetCuratedQueryService(db).get_curated_queries(id)
 
 

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from app.shared.schema import ORMModel
@@ -8,10 +9,10 @@ class DatasetCuratedQuery(ORMModel):
     output_port_id: UUID
     sort_order: int
     title: str
-    description: str | None
+    description: Optional[str]
     query_text: str
     created_at: datetime
-    updated_at: datetime | None
+    updated_at: Optional[datetime]
 
 
 class DatasetCuratedQueries(ORMModel):

@@ -10,19 +10,17 @@ class TestCuratedQueriesService:
 
         curated_queries = [
             DatasetCuratedQueryInput(
-                title="Secondary rollup",
+                title="First query",
                 description=None,
-                query_text="SELECT 2",
-                sort_order=5,
-            ),
-            DatasetCuratedQueryInput(
-                title="Primary spotlight",
-                description="Focus on highest priority",
                 query_text="SELECT 1",
-                sort_order=1,
             ),
             DatasetCuratedQueryInput(
-                title="Auto-indexed",
+                title="Second query",
+                description="Focus on highest priority",
+                query_text="SELECT 2",
+            ),
+            DatasetCuratedQueryInput(
+                title="Third query",
                 description=None,
                 query_text="SELECT 3",
             ),
@@ -30,9 +28,9 @@ class TestCuratedQueriesService:
 
         result = service.replace_curated_queries(dataset.id, curated_queries)
         assert [item.title for item in result.dataset_curated_queries] == [
-            "Primary spotlight",
-            "Auto-indexed",
-            "Secondary rollup",
+            "First query",
+            "Second query",
+            "Third query",
         ]
 
     def test_replace_curated_queries_clears_existing(self, session):

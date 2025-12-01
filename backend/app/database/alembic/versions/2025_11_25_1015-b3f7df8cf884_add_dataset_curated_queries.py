@@ -37,7 +37,7 @@ def upgrade() -> None:
             nullable=False,
             server_default="0",
         ),
-        sa.Column("title", sa.String(length=255), nullable=False),
+        sa.Column("title", sa.Text(), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("query_text", sa.Text(), nullable=False),
         sa.Column(
