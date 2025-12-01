@@ -33,16 +33,6 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
         [t],
     );
 
-    const getIsExpanded = useCallback(
-        (id: string, queryText: string) => {
-            if (id in expandedQueries) {
-                return expandedQueries[id];
-            }
-            return queryText.split('\n').length <= SQL_LINES_THRESHOLD;
-        },
-        [expandedQueries],
-    );
-
     return (
         <>
             {isLoading ? (
@@ -57,7 +47,8 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
                     bordered={false}
                     renderItem={(item) => {
                         const key = `${item.output_port_id}-${item.sort_order}`;
-                        const isExpanded = getIsExpanded(key, item.query_text);
+                        const isExpanded =
+                            expandedQueries[key] ?? item.query_text.split('\n').length <= SQL_LINES_THRESHOLD;
 
                         return (
                             <CuratedQueryItem

@@ -1,4 +1,4 @@
-import { Flex, Tabs } from 'antd';
+import { Tabs } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -54,16 +54,14 @@ export function UsageChart({ usageData, curatedQueries, isUsageLoading, areCurat
     }, [chartData, curatedQueries, areCuratedQueriesLoading, hasUsageData, isUsageLoading, t]);
 
     return (
-        <Flex vertical gap={24}>
-            <Tabs
-                defaultActiveKey={UsageTabKeys.UsageStatistics}
-                items={tabs.map(({ key, label, children }) => ({
-                    label,
-                    key,
-                    children,
-                }))}
-                size="middle"
-            />
-        </Flex>
+        <Tabs
+            defaultActiveKey={UsageTabKeys.UsageStatistics}
+            items={tabs.map(({ key, label, children }) => ({
+                label,
+                key,
+                children,
+            }))}
+            size="middle"
+        />
     );
 }
