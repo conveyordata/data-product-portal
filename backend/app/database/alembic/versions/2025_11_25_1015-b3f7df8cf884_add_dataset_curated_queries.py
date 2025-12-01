@@ -24,22 +24,22 @@ def upgrade() -> None:
     op.create_table(
         "dataset_curated_queries",
         sa.Column(
-            "curated_query_id",
-            sa.UUID,
-            primary_key=True,
-            nullable=False,
-            server_default=sa.text("gen_random_uuid()"),
-        ),
-        sa.Column(
             "output_port_id",
             sa.UUID,
             sa.ForeignKey("datasets.id", ondelete="CASCADE"),
+            primary_key=True,
             nullable=False,
+        ),
+        sa.Column(
+            "sort_order",
+            sa.SmallInteger(),
+            primary_key=True,
+            nullable=False,
+            server_default="0",
         ),
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("query_text", sa.Text(), nullable=False),
-        sa.Column("sort_order", sa.SmallInteger(), nullable=False, server_default="0"),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

@@ -194,9 +194,8 @@ begin
     INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d10fe76b-d39d-4028-909c-aea3fd8a1405', 'rnd-prioritization-information', 'RnD prioritization information', 'All data required to rank and score the different R&D programs', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:37:19.95164', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, 'ccdc13fa-4a1a-4dde-ad1c-efa0d58eafb7');
 
     -- DATASET CURATED QUERIES
-    INSERT INTO public.dataset_curated_queries (curated_query_id, output_port_id, title, description, query_text, sort_order)
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
         VALUES (
-            'e6e5b679-09a7-4f03-8b04-8153a47746d4',
             'bdad0dec-19e6-4c85-a655-0960ca3a484c',
             'QC failure hot-spots',
             'Highlights the organs and staining protocols that most often cause histology slide rejection.',
@@ -222,20 +221,18 @@ ORDER BY organ, failure_count DESC;',
             0
         );
 
-    INSERT INTO public.dataset_curated_queries (curated_query_id, output_port_id, title, description, query_text, sort_order)
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
         VALUES (
-            '6d0eea5c-8d7f-406b-89a7-93de1d75e0d1',
-            '1b5f0d56-0699-42ce-a407-f47df844b0e2',
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
             'Latest monthly demand rollup',
             'Quick sanity-check of forecasted demand by month.',
             'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
             1
         );
 
-    INSERT INTO public.dataset_curated_queries (curated_query_id, output_port_id, title, description, query_text, sort_order)
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
         VALUES (
-            '5ff33530-9f47-4e77-b94e-e6f5926789c2',
-            'd7cef1cf-6e81-44b2-bab6-a6d4c85b52e5',
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
             'Top unresolved data quality issues',
             'Surfaces the longest-running clinical data defects that still lack remediation owners.',
             'SELECT

@@ -59,7 +59,7 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
                         split={false}
                         className={styles.curatedQueries}
                         renderItem={(item) => {
-                            const key = item.curated_query_id;
+                            const key = `${item.output_port_id}-${item.sort_order}`;
                             const isExpanded = getIsExpanded(key, item.query_text);
 
                             return (
