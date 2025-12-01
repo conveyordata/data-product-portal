@@ -1,5 +1,5 @@
 import { CopyOutlined } from '@ant-design/icons';
-import { Button, Flex, List, Typography } from 'antd';
+import { Button, Flex, List } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { magula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
@@ -23,14 +23,11 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
 
     return (
         <List.Item>
-            <Flex vertical gap={12}>
-                <Flex vertical gap={4}>
-                    <Typography.Text strong>{query.title}</Typography.Text>
-                    {query.description && <Typography.Text type="secondary">{query.description}</Typography.Text>}
-                </Flex>
-                <Flex vertical gap={4}>
-                    <Flex gap={8} align="start">
-                        <Flex flex={1} className={`${styles.sqlCode} ${isExpanded ? styles.sqlCodeExpanded : ''}`}>
+            <Flex vertical gap={0}>
+                <List.Item.Meta title={query.title} description={query.description} />
+                <Flex vertical gap="small">
+                    <Flex gap="small" align="start">
+                        <Flex flex={1} className={styles.sqlCode}>
                             <SyntaxHighlighter
                                 language="sql"
                                 style={magula}

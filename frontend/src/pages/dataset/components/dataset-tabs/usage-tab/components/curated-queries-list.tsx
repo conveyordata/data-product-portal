@@ -1,10 +1,9 @@
-import { Empty, Flex, List, Skeleton } from 'antd';
+import { Empty, List, Skeleton } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
-import styles from './curated-queries-list.module.scss';
 import { CuratedQueryItem, SQL_LINES_THRESHOLD } from './curated-query-item';
 
 type CuratedQueriesListProps = {
@@ -45,7 +44,7 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
     );
 
     return (
-        <Flex vertical className={styles.curatedQueriesSection}>
+        <>
             {isLoading ? (
                 <Skeleton active paragraph={{ rows: 4 }} />
             ) : queriesList.length === 0 ? (
@@ -55,7 +54,7 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
                     itemLayout="vertical"
                     dataSource={queriesList}
                     split={false}
-                    className={styles.curatedQueries}
+                    bordered={false}
                     renderItem={(item) => {
                         const key = `${item.output_port_id}-${item.sort_order}`;
                         const isExpanded = getIsExpanded(key, item.query_text);
@@ -72,6 +71,6 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
                     }}
                 />
             )}
-        </Flex>
+        </>
     );
 }
