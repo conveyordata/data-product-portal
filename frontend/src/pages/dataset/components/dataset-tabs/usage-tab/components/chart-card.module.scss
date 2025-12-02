@@ -1,0 +1,12 @@
+@use '@/styles/globals';
+
+.chartCard {
+    :global(.ant-card-body) {
+        padding: 0;
+    }
+}
+
+.content {
+    min-height: 280px;
+    width: 100%;
+}

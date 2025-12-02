@@ -1,4 +1,5 @@
 import { Area } from '@ant-design/charts';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ChartCard } from './chart-card';
@@ -13,37 +14,45 @@ type QueriesOverTimeChartProps = {
 
 export function QueriesOverTimeChart({ data, isLoading, hasData, className }: QueriesOverTimeChartProps) {
     const { t } = useTranslation();
-    // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
-    const config = {
-        data,
-        xField: 'date',
-        yField: 'queryCount',
-        seriesField: 'consumer',
-        colorField: 'consumer',
-        smooth: true,
-        isStack: true,
-        stack: true,
-        shapeField: 'smooth',
-        animation: {
-            appear: {
-                animation: 'path-in',
-                duration: 1000,
+
+    const config = useMemo(() => {
+        return {
+            data,
+            xField: 'date',
+            yField: 'queryCount',
+            seriesField: 'consumer',
+            colorField: 'consumer',
+            smooth: true,
+            isStack: true,
+            stack: true,
+            animation: {
+                appear: {
+                    animation: 'path-in',
+                    duration: 1000,
+                },
             },
-        },
-        legend: {
-            position: 'top-right' as const,
-        },
-        axis: {
-            x: {
-                title: t('Date'),
-                labelFontSize: 13,
+            xAxis: {
+                title: {
+                    text: t('Date'),
+                },
             },
-            y: {
-                title: t('Query Count'),
-                labelFontSize: 13,
+            yAxis: {
+                title: {
+                    text: t('Query Count'),
+                },
             },
-        },
-    };
+            tooltip: {
+                formatter: (datum: ChartDataPoint) => ({
+                    name: datum.consumer,
+                    value: datum.queryCount,
+                    title: datum.date,
+                }),
+            },
+            legend: {
+                position: 'top-right' as const,
+            },
+        };
+    }, [data, t]);
 
     return (
         <ChartCard

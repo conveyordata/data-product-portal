@@ -69,6 +69,7 @@ begin
     TRUNCATE TABLE public.role_assignments_global CASCADE;
     TRUNCATE TABLE public.role_assignments_data_product CASCADE;
     TRUNCATE TABLE public.role_assignments_dataset CASCADE;
+    TRUNCATE TABLE public.dataset_curated_queries CASCADE;
 
     -- PLATFORMS
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
@@ -194,6 +195,64 @@ begin
     INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('b8777d07-e042-445e-8965-89f71ddc76f5', 'sales-performance-by-week', 'Sales performance by week', 'Shows our sales information by week.', NULL, 'ACTIVE', 'PUBLIC', 'acaaaafe-cde9-4746-9835-f1e0c3c85b6c', '2025-10-28 18:20:47.895478', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '86b74246-734f-4cea-a984-3dd0d27fc565');
     INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', 'expose-patient-stratification-information', 'Expose patient stratification information', 'Combine all the anonymized patient data such that you can cluster them.', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:32:27.687291', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '58b837a5-33d0-41cf-bf95-eb9af846f4d0');
     INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d10fe76b-d39d-4028-909c-aea3fd8a1405', 'rnd-prioritization-information', 'RnD prioritization information', 'All data required to rank and score the different R&D programs', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:37:19.95164', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, 'ccdc13fa-4a1a-4dde-ad1c-efa0d58eafb7');
+
+    -- DATASET CURATED QUERIES
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'QC failure hot-spots',
+            'Highlights the organs and staining protocols that most often cause histology slide rejection.',
+            'WITH qc_events AS (
+    SELECT organ, stain_protocol, rejection_reason, collected_on, technician
+    FROM histology_slide_qc
+    WHERE collected_on >= DATE_TRUNC(''month'', CURRENT_DATE) - INTERVAL ''6 months''
+),
+ranked AS (
+    SELECT
+        organ,
+        stain_protocol,
+        rejection_reason,
+        COUNT(*) AS failure_count,
+        DENSE_RANK() OVER (PARTITION BY organ ORDER BY COUNT(*) DESC) AS organ_rank
+    FROM qc_events
+    GROUP BY organ, stain_protocol, rejection_reason
+)
+SELECT organ, stain_protocol, rejection_reason, failure_count
+FROM ranked
+WHERE organ_rank <= 3
+ORDER BY organ, failure_count DESC;',
+            0
+        );
+
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'Latest monthly demand rollup',
+            'Quick sanity-check of forecasted demand by month.',
+            'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
+            1
+        );
+
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'Top unresolved data quality issues',
+            'Surfaces the longest-running clinical data defects that still lack remediation owners.',
+            'SELECT
+    issue_id,
+    study_id,
+    domain,
+    detected_on,
+    severity,
+    assigned_team,
+    status,
+    NOW()::date - detected_on::date AS days_open
+FROM clinical_data_quality_issues
+WHERE status NOT IN (''Resolved'', ''Closed'')
+ORDER BY severity DESC, detected_on ASC
+LIMIT 25;',
+            2
+        );
 
     -- DATA PRODUCTS - DATASETS
     INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)

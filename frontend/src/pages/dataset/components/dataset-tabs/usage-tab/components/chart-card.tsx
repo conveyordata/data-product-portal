@@ -1,5 +1,8 @@
-import { Card, Empty, Flex, Spin } from 'antd';
+import { Card, Empty, Flex } from 'antd';
 import type { ReactNode } from 'react';
+
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import styles from './chart-card.module.scss';
 
 type ChartCardProps = {
     title: string;
@@ -15,13 +18,13 @@ export function ChartCard({ title, className, isLoading, hasData, emptyDescripti
 
     if (isLoading) {
         content = (
-            <Flex align="center" justify="center" style={{ minHeight: 280 }}>
-                <Spin size="large" />
+            <Flex align="center" justify="center" className={styles.content}>
+                <LoadingSpinner />
             </Flex>
         );
     } else if (!hasData) {
         content = (
-            <Flex align="center" justify="center" style={{ minHeight: 280 }}>
+            <Flex align="center" justify="center" className={styles.content}>
                 <Empty description={emptyDescription} />
             </Flex>
         );
