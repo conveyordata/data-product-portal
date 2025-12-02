@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
+import styles from './curated-queries-list.module.scss';
 import { CuratedQueryItem, SQL_LINES_THRESHOLD } from './curated-query-item';
 
 type CuratedQueriesListProps = {
@@ -38,7 +39,9 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
             {isLoading ? (
                 <Skeleton active paragraph={{ rows: 4 }} />
             ) : queriesList.length === 0 ? (
-                <Empty description={t('No curated queries available')} />
+                <div className={styles.emptyState}>
+                    <Empty description={t('No curated queries available')} />
+                </div>
             ) : (
                 <List
                     itemLayout="vertical"

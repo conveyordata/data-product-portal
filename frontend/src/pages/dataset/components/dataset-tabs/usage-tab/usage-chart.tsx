@@ -1,5 +1,4 @@
-import { Tabs } from 'antd';
-import { type ReactNode, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
@@ -15,17 +14,6 @@ type Props = {
     areCuratedQueriesLoading: boolean;
 };
 
-enum UsageTabKeys {
-    UsageStatistics = 'usage-statistics',
-    CuratedQueries = 'curated-queries',
-}
-
-type Tab = {
-    label: string;
-    key: UsageTabKeys;
-    children: ReactNode;
-};
-
 export function UsageChart({ usageData, curatedQueries, isUsageLoading, areCuratedQueriesLoading }: Props) {
     const { t } = useTranslation();
 
@@ -38,30 +26,10 @@ export function UsageChart({ usageData, curatedQueries, isUsageLoading, areCurat
 
     const hasUsageData = Boolean(usageData?.dataset_query_stats_daily_responses?.length);
 
-    const tabs: Tab[] = useMemo(() => {
-        return [
-            {
-                label: t('Usage Statistics'),
-                key: UsageTabKeys.UsageStatistics,
-                children: <QueriesOverTimeChart data={chartData} isLoading={isUsageLoading} hasData={hasUsageData} />,
-            },
-            {
-                label: t('Curated Queries'),
-                key: UsageTabKeys.CuratedQueries,
-                children: <CuratedQueriesList queries={curatedQueries} isLoading={areCuratedQueriesLoading} />,
-            },
-        ];
-    }, [chartData, curatedQueries, areCuratedQueriesLoading, hasUsageData, isUsageLoading, t]);
-
     return (
-        <Tabs
-            defaultActiveKey={UsageTabKeys.UsageStatistics}
-            items={tabs.map(({ key, label, children }) => ({
-                label,
-                key,
-                children,
-            }))}
-            size="middle"
-        />
+        <>
+            <QueriesOverTimeChart data={chartData} isLoading={isUsageLoading} hasData={hasUsageData} />
+            <CuratedQueriesList queries={curatedQueries} isLoading={areCuratedQueriesLoading} />
+        </>
     );
 }
