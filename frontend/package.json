@@ -20,7 +20,7 @@
         "@ant-design/charts": "^2.6.6",
         "@ant-design/colors": "^8.0.0",
         "@ant-design/v5-patch-for-react-19": "^1.0.3",
-        "@dagrejs/dagre": "^1.1.8",
+        "@dagrejs/dagre": "^2.0.1",
         "@fontsource/inter": "^5.2.8",
         "@posthog/react": "^1.5.0",
         "@reduxjs/toolkit": "^2.11.0",
