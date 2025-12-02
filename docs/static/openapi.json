@@ -14073,15 +14073,14 @@
       },
       "DatasetCuratedQuery": {
         "properties": {
-          "curated_query_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Curated Query Id"
-          },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
             "title": "Output Port Id"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
           },
           "title": {
             "type": "string",
@@ -14101,10 +14100,6 @@
           "query_text": {
             "type": "string",
             "title": "Query Text"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
           },
           "created_at": {
             "type": "string",
@@ -14126,12 +14121,11 @@
         },
         "type": "object",
         "required": [
-          "curated_query_id",
           "output_port_id",
+          "sort_order",
           "title",
           "description",
           "query_text",
-          "sort_order",
           "created_at",
           "updated_at"
         ],
@@ -14157,17 +14151,6 @@
           "query_text": {
             "type": "string",
             "title": "Query Text"
-          },
-          "sort_order": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sort Order"
           }
         },
         "type": "object",
