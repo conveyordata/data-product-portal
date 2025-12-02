@@ -1,4 +1,4 @@
-import { Empty, List, Skeleton } from 'antd';
+import { Empty, Flex, List, Skeleton, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -39,31 +39,34 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
             {isLoading ? (
                 <Skeleton active paragraph={{ rows: 4 }} />
             ) : queriesList.length === 0 ? (
-                <div className={styles.emptyState}>
+                <Flex className={styles.emptyState}>
                     <Empty description={t('No curated queries available')} />
-                </div>
+                </Flex>
             ) : (
-                <List
-                    itemLayout="vertical"
-                    dataSource={queriesList}
-                    split={false}
-                    bordered={false}
-                    renderItem={(item) => {
-                        const key = `${item.output_port_id}-${item.sort_order}`;
-                        const isExpanded =
-                            expandedQueries[key] ?? item.query_text.split('\n').length <= SQL_LINES_THRESHOLD;
+                <>
+                    <Typography.Title level={4}>{t('Curated Queries')}</Typography.Title>
+                    <List
+                        itemLayout="vertical"
+                        dataSource={queriesList}
+                        split={false}
+                        bordered={false}
+                        renderItem={(item) => {
+                            const key = `${item.output_port_id}-${item.sort_order}`;
+                            const isExpanded =
+                                expandedQueries[key] ?? item.query_text.split('\n').length <= SQL_LINES_THRESHOLD;
 
-                        return (
-                            <CuratedQueryItem
-                                key={key}
-                                query={item}
-                                isExpanded={isExpanded}
-                                onToggle={() => handleToggle(key)}
-                                onCopy={handleCopy}
-                            />
-                        );
-                    }}
-                />
+                            return (
+                                <CuratedQueryItem
+                                    key={key}
+                                    query={item}
+                                    isExpanded={isExpanded}
+                                    onToggle={() => handleToggle(key)}
+                                    onCopy={handleCopy}
+                                />
+                            );
+                        }}
+                    />
+                </>
             )}
         </>
     );

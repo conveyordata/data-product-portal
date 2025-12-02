@@ -2,7 +2,6 @@ import { Card, Empty, Flex } from 'antd';
 import type { ReactNode } from 'react';
 
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import styles from './chart-card.module.scss';
 
 type ChartCardProps = {
     title: string;
@@ -17,13 +16,13 @@ export function ChartCard({ title, isLoading, hasData, emptyDescription, childre
 
     if (isLoading) {
         content = (
-            <Flex align="center" justify="center" className={styles.content}>
+            <Flex align="center" justify="center">
                 <LoadingSpinner />
             </Flex>
         );
     } else if (!hasData) {
         content = (
-            <Flex align="center" justify="center" className={styles.content}>
+            <Flex align="center" justify="center">
                 <Empty description={emptyDescription} />
             </Flex>
         );
