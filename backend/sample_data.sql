@@ -573,11 +573,11 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
     END LOOP;
 
     INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count) VALUES
-        ((CURRENT_DATE - INTERVAL '34 days')::date, histology_rnd_dataset_id, rnd_program_pipeline_id, 5),
-        ((CURRENT_DATE - INTERVAL '10 days')::date, histology_rnd_dataset_id, rnd_program_pipeline_id, 15),
-        ((CURRENT_DATE - INTERVAL '4 days')::date, histology_rnd_dataset_id, rnd_program_pipeline_id, 20),
-        ((CURRENT_DATE - INTERVAL '10 days')::date, histology_rnd_dataset_id, ai_model_histology_images_id, 20),
-        ((CURRENT_DATE - INTERVAL '4 days')::date, histology_rnd_dataset_id, ai_model_histology_images_id, 10);
+        ((CURRENT_DATE - INTERVAL '34 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 5),
+        ((CURRENT_DATE - INTERVAL '10 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 15),
+        ((CURRENT_DATE - INTERVAL '4 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 20),
+        ((CURRENT_DATE - INTERVAL '10 days')::date, demand_forecast_dataset_id, ai_model_histology_images_id, 20),
+        ((CURRENT_DATE - INTERVAL '4 days')::date, demand_forecast_dataset_id, ai_model_histology_images_id, 10);
     -- ------------------------------------------------------------------------------------------------
     -- END of Insert dynamic dataset query stats
     -- ------------------------------------------------------------------------------------------------
