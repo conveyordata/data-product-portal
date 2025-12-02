@@ -1,4 +1,4 @@
-import { Empty, Flex, Select, Spin, Tabs, Typography } from 'antd';
+import { Empty, Flex, Select, Spin, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,11 +15,6 @@ import styles from './usage-tab.module.scss';
 type Props = {
     datasetId: string;
 };
-
-enum UsageTabKeys {
-    UsageStatistics = 'usage-statistics',
-    CuratedQueries = 'curated-queries',
-}
 
 export function UsageTab({ datasetId }: Props) {
     const { t } = useTranslation();
@@ -63,8 +58,8 @@ export function UsageTab({ datasetId }: Props) {
 
     const consumerTotals = useMemo(() => aggregateQueriesPerConsumer(chartData), [chartData]);
 
-    const usageStatisticsContent = (
-        <>
+    return (
+        <Flex vertical gap="large">
             {isLoadingState && !hasUsageData ? (
                 <Flex vertical className={styles.container} align="center" justify="center">
                     <Spin size="large" />
@@ -109,29 +104,10 @@ export function UsageTab({ datasetId }: Props) {
                     </Flex>
                 </Flex>
             )}
-        </>
-    );
-
-    const curatedQueriesContent = (
-        <CuratedQueriesList queries={curatedQueries?.dataset_curated_queries} isLoading={areCuratedQueriesLoading} />
-    );
-
-    return (
-        <Tabs
-            defaultActiveKey={UsageTabKeys.UsageStatistics}
-            items={[
-                {
-                    key: UsageTabKeys.UsageStatistics,
-                    label: t('Usage Statistics'),
-                    children: usageStatisticsContent,
-                },
-                {
-                    key: UsageTabKeys.CuratedQueries,
-                    label: t('Curated Queries'),
-                    children: curatedQueriesContent,
-                },
-            ]}
-            size="middle"
-        />
+            <CuratedQueriesList
+                queries={curatedQueries?.dataset_curated_queries}
+                isLoading={areCuratedQueriesLoading}
+            />
+        </Flex>
     );
 }

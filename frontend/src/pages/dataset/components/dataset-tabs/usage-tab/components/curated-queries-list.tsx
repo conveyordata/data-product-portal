@@ -1,9 +1,10 @@
-import { Empty, List, Skeleton } from 'antd';
+import { Empty, Flex, List, Skeleton, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
+import styles from './curated-queries-list.module.scss';
 import { CuratedQueryItem, SQL_LINES_THRESHOLD } from './curated-query-item';
 
 type CuratedQueriesListProps = {
@@ -38,30 +39,34 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
             {isLoading ? (
                 <Skeleton active paragraph={{ rows: 4 }} />
             ) : queriesList.length === 0 ? (
-                <Empty description={t('No curated queries available')} />
+                <Flex className={styles.emptyState} justify="center" align="center">
+                    <Empty description={t('No curated queries available')} />
+                </Flex>
             ) : (
-                <List
-                    itemLayout="vertical"
-                    dataSource={queriesList}
-                    split={false}
-                    bordered={false}
-                    renderItem={(item) => {
-                        const key = `${item.output_port_id}-${item.sort_order}`;
-                        const queryLines = item.query_text.split('\n');
-                        const hasLongSql = queryLines.length > SQL_LINES_THRESHOLD;
-                        const isExpanded = expandedQueries[key] !== undefined ? expandedQueries[key] : !hasLongSql; // Short queries are expanded by default
+                <>
+                    <Typography.Title level={4}>{t('Curated Queries')}</Typography.Title>
+                    <List
+                        itemLayout="vertical"
+                        dataSource={queriesList}
+                        split={false}
+                        bordered={false}
+                        renderItem={(item) => {
+                            const key = `${item.output_port_id}-${item.sort_order}`;
+                            const isExpanded =
+                                expandedQueries[key] ?? item.query_text.split('\n').length <= SQL_LINES_THRESHOLD;
 
-                        return (
-                            <CuratedQueryItem
-                                key={key}
-                                query={item}
-                                isExpanded={isExpanded}
-                                onToggle={() => handleToggle(key)}
-                                onCopy={handleCopy}
-                            />
-                        );
-                    }}
-                />
+                            return (
+                                <CuratedQueryItem
+                                    key={key}
+                                    query={item}
+                                    isExpanded={isExpanded}
+                                    onToggle={() => handleToggle(key)}
+                                    onCopy={handleCopy}
+                                />
+                            );
+                        }}
+                    />
+                </>
             )}
         </>
     );

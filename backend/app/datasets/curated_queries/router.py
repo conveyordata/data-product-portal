@@ -3,13 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.database.database import get_db_session
 from app.datasets.curated_queries.schema_request import DatasetCuratedQueriesUpdate
 from app.datasets.curated_queries.schema_response import DatasetCuratedQueries
 from app.datasets.curated_queries.service import DatasetCuratedQueryService
-from app.users.model import User
 
 router = APIRouter(prefix="/{id}/usage/curated_queries", tags=["datasets"])
 
@@ -18,7 +16,6 @@ router = APIRouter(prefix="/{id}/usage/curated_queries", tags=["datasets"])
 def get_dataset_curated_queries(
     id: UUID,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
 ) -> DatasetCuratedQueries:
     return DatasetCuratedQueryService(db).get_curated_queries(id)
 
