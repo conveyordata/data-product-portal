@@ -92,7 +92,7 @@ Payload:
   "dataset_combined_with_updates": [
     {
       "date": "YYYY-MM-DD",
-      "combined_with_dataset_id": "uuid",
+      "combined_with_output_port_id": "uuid",
       "consumer_data_product_id": "uuid",
       "query_count": "integer"
     },
@@ -106,7 +106,7 @@ Payload:
 ```[json]
 {
   "date": "YYYY-MM-DD",
-  "combined_with_dataset_id": "uuid",
+  "combined_with_output_port_id": "uuid",
   "consumer_data_product_id": "uuid"
 }
 ```
