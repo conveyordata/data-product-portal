@@ -55,25 +55,18 @@ As we want to support sorting operations and don't expect too many curated queri
 
 Push daily stats
 
-* `PATCH /api/datasets/{id}/usage/time-series`
+* `PATCH /api/datasets/{id}/usage/query-stats`
 
 Payload:
 ```[json]
 {
-  "query_stats": [
+  "dataset_query_stats_daily_updates": [
     {
       "date": "YYYY-MM-DD",
-      "consumer_id": "uuid",
+      "consumer_data_product_id": "uuid",
       "query_count": "integer"
-    }
-  ],
-  "asset_stats": [
-    {
-      "date": "YYYY-MM-DD",
-      "asset_id": "uuid",
-      "consumer_id": "uuid",
-      "query_count": "integer"
-    }
+    },
+    ...
   ]
 }
 ```
@@ -82,15 +75,69 @@ Payload:
   - Limits: Requires payload size limit on this. We can solve splitting in the SDK (ADR-0007).
 
 
-`DELETE /api/datasets/{id}/usage/time-series`
+`DELETE /api/datasets/{id}/usage/query-stats`
 * Payload:
 ```[json]
 {
   "date": "YYYY-MM-DD"
   "consumer_data_product_id": "uuid"
-  "asset_id": "uuid"
 }
 ```
+
+* `PATCH /api/datasets/{id}/usage/combined-with`
+
+Payload:
+```[json]
+{
+  "dataset_combined_with_updates": [
+    {
+      "date": "YYYY-MM-DD",
+      "combined_with_dataset_id": "uuid",
+      "consumer_data_product_id": "uuid",
+      "query_count": "integer"
+    },
+    ...
+  ]
+}
+```
+
+* `DELETE /api/datasets/{id}/usage/combined-with`
+* Payload:
+```[json]
+{
+  "date": "YYYY-MM-DD",
+  "combined_with_dataset_id": "uuid",
+  "consumer_data_product_id": "uuid"
+}
+```
+
+* `PATCH /api/datasets/{id}/usage/popular-assets`
+
+Payload:
+```[json]
+{
+  "dataset_popular_assets_updates": [
+    {
+      "date": "YYYY-MM-DD",
+      "asset_id": "uuid",
+      "consumer_data_product_id": "uuid",
+      "query_count": "integer"
+    },
+    ...
+  ]
+}
+```
+
+* `DELETE /api/datasets/{id}/usage/popular-assets`
+* Payload:
+```[json]
+{
+  "date": "YYYY-MM-DD",
+  "asset_id": "uuid",
+  "consumer_data_product_id": "uuid"
+}
+```
+
 
 
 

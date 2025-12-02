@@ -66,7 +66,7 @@ Schema:
 * date (DATE, PK)
 * output_port_id (UUID, PK, FK)
 * tech_asset_id (UUID, PK, FK)
-* consumer_id (UUID, PK, FK) - link to other data product
+* consumer_id (UUID, PK, FK) - link to other data product that is consuming this asset
 * query_count (INT)
 
 #### Table 3: output_port_combined_with
