@@ -93,7 +93,7 @@ export function UsageTab({ datasetId }: Props) {
                             />
                         </Flex>
                     </Flex>
-                    <Flex className={styles.chartsGrid} gap={16} wrap>
+                    <Flex className={styles.chartsGrid} gap={32}>
                         <QueriesOverTimeChart
                             className={styles.chartCard}
                             data={chartData}

@@ -13,6 +13,8 @@ type QueriesPerConsumerChartProps = {
 
 export function QueriesPerConsumerChart({ data, isLoading, hasData, className }: QueriesPerConsumerChartProps) {
     const { t } = useTranslation();
+
+    // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
     const config = {
         data,
         xField: 'consumer',

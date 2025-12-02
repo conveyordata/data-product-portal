@@ -18,8 +18,11 @@ type CuratedQueryItemProps = {
 
 export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: CuratedQueryItemProps) {
     const { t } = useTranslation();
-    const hasLongSql = query.query_text.split('\n').length > SQL_LINES_THRESHOLD;
-    const shouldShowToggle = hasLongSql;
+    const queryLines = query.query_text.split('\n');
+    const hasLongSql = queryLines.length > SQL_LINES_THRESHOLD;
+
+    const displayedQuery =
+        isExpanded || !hasLongSql ? query.query_text : queryLines.slice(0, SQL_LINES_THRESHOLD).join('\n');
 
     return (
         <List.Item>
@@ -34,7 +37,7 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
                                 className={styles.syntaxHighlighter}
                                 showLineNumbers={false}
                             >
-                                {query.query_text}
+                                {displayedQuery}
                             </SyntaxHighlighter>
                         </Flex>
                         <Button
@@ -45,7 +48,7 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
                             onClick={() => onCopy(query.query_text)}
                         />
                     </Flex>
-                    {shouldShowToggle && (
+                    {hasLongSql && (
                         <Button type="link" size="small" onClick={onToggle}>
                             {isExpanded ? t('Show less') : t('Show more')}
                         </Button>

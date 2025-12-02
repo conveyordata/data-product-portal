@@ -1204,29 +1204,19 @@
             "in": "query",
             "required": false,
             "schema": {
-              "enum": [
-                "week",
-                "month",
-                "day"
-              ],
-              "type": "string",
-              "default": "week",
-              "title": "Granularity"
+              "$ref": "#/components/schemas/QueryStatsGranularity",
+              "default": "week"
             }
           },
           {
-            "name": "time_range",
+            "name": "day_range",
             "in": "query",
             "required": false,
             "schema": {
-              "enum": [
-                "1m",
-                "90d",
-                "1y"
-              ],
-              "type": "string",
-              "default": "90d",
-              "title": "Time Range"
+              "type": "integer",
+              "minimum": 1,
+              "default": 90,
+              "title": "Day Range"
             }
           }
         ],
@@ -14103,15 +14093,14 @@
       },
       "DatasetCuratedQuery": {
         "properties": {
-          "curated_query_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Curated Query Id"
-          },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
             "title": "Output Port Id"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
           },
           "title": {
             "type": "string",
@@ -14131,10 +14120,6 @@
           "query_text": {
             "type": "string",
             "title": "Query Text"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
           },
           "created_at": {
             "type": "string",
@@ -14156,12 +14141,11 @@
         },
         "type": "object",
         "required": [
-          "curated_query_id",
           "output_port_id",
+          "sort_order",
           "title",
           "description",
           "query_text",
-          "sort_order",
           "created_at",
           "updated_at"
         ],
@@ -14187,17 +14171,6 @@
           "query_text": {
             "type": "string",
             "title": "Query Text"
-          },
-          "sort_order": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sort Order"
           }
         },
         "type": "object",
@@ -16035,6 +16008,15 @@
           3
         ],
         "title": "Prototype"
+      },
+      "QueryStatsGranularity": {
+        "type": "string",
+        "enum": [
+          "day",
+          "week",
+          "month"
+        ],
+        "title": "QueryStatsGranularity"
       },
       "RedshiftConfig": {
         "properties": {

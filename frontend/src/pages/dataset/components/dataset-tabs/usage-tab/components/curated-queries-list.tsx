@@ -47,8 +47,9 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
                     bordered={false}
                     renderItem={(item) => {
                         const key = `${item.output_port_id}-${item.sort_order}`;
-                        const isExpanded =
-                            expandedQueries[key] ?? item.query_text.split('\n').length <= SQL_LINES_THRESHOLD;
+                        const queryLines = item.query_text.split('\n');
+                        const hasLongSql = queryLines.length > SQL_LINES_THRESHOLD;
+                        const isExpanded = expandedQueries[key] !== undefined ? expandedQueries[key] : !hasLongSql; // Short queries are expanded by default
 
                         return (
                             <CuratedQueryItem

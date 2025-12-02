@@ -15,6 +15,7 @@ type QueriesOverTimeChartProps = {
 export function QueriesOverTimeChart({ data, isLoading, hasData, className }: QueriesOverTimeChartProps) {
     const { t } = useTranslation();
 
+    // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
     const config = useMemo(() => {
         return {
             data,
@@ -31,22 +32,15 @@ export function QueriesOverTimeChart({ data, isLoading, hasData, className }: Qu
                     duration: 1000,
                 },
             },
-            xAxis: {
-                title: {
-                    text: t('Date'),
+            axis: {
+                x: {
+                    title: t('Date'),
+                    labelFontSize: 13,
                 },
-            },
-            yAxis: {
-                title: {
-                    text: t('Query Count'),
+                y: {
+                    title: t('Query Count'),
+                    labelFontSize: 13,
                 },
-            },
-            tooltip: {
-                formatter: (datum: ChartDataPoint) => ({
-                    name: datum.consumer,
-                    value: datum.queryCount,
-                    title: datum.date,
-                }),
             },
             legend: {
                 position: 'top-right' as const,
