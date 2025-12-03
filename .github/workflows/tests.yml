@@ -47,22 +47,20 @@ jobs:
       - name: Checkout github repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
+      - name: Set up poetry
+        uses: abatilo/actions-poetry@65c61eae400c65c9510a584af85138c1ae19bbc0 # v3.0.2
+        with:
+          poetry-version: "2.1.4"
+      - name: Setup a local virtual environment (if no poetry.toml file)
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
       - name: Setup Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           cache: 'poetry'
           cache-dependency-path: 'backend/poetry.lock'
           python-version-file: 'backend/pyproject.toml'
-
-      - name: Set up poetry
-        uses: abatilo/actions-poetry@65c61eae400c65c9510a584af85138c1ae19bbc0 # v3.0.2
-        with:
-          poetry-version: "2.1.4"
-
-      - name: Setup a local virtual environment (if no poetry.toml file)
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
 
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         name: Define a cache for the virtual environment based on the dependencies lock file
@@ -116,18 +114,18 @@ jobs:
     steps:
     - name: Git checkout
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-    - name: Setup Python
-      uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
-      with:
-        cache: 'poetry'
-        cache-dependency-path: 'backend/poetry.lock'
-        python-version-file: 'backend/pyproject.toml'
     - name: Install Poetry
       uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
       with:
         version: "2.1.4"
         virtualenvs-create: true
         virtualenvs-in-project: true
+    - name: Setup Python
+      uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      with:
+        cache: 'poetry'
+        cache-dependency-path: 'backend/poetry.lock'
+        python-version-file: 'backend/pyproject.toml'
     - name: Install Python dependencies
       working-directory: backend
       run: poetry install --no-interaction
