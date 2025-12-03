@@ -1,16 +1,20 @@
+from typing import TYPE_CHECKING
+
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
-from app.authorization.role_assignments.output_port.schema import RoleAssignment
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Authorization
-from app.datasets.model import Dataset
-from app.users.schema import User
 from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
+
+if TYPE_CHECKING:
+    from app.authorization.role_assignments.output_port.schema import RoleAssignment
+    from app.datasets.model import Dataset
+    from app.users.schema import User
 
 
 class TestAuth:

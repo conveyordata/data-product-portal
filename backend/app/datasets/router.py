@@ -23,6 +23,7 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.database.database import get_db_session
+from app.datasets.query_stats_daily.router import router as query_stats_daily_router
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreate,
@@ -380,3 +381,6 @@ def set_value_for_dataset(
         )
     )
     RefreshInfrastructureLambda().trigger()
+
+
+router.include_router(query_stats_daily_router)
