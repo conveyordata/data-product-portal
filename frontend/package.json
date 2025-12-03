@@ -67,7 +67,7 @@
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^5.1.1",
         "axios-mock-adapter": "^2.1.0",
-        "esbuild": "^0.27.0",
+        "esbuild": "^0.27.1",
         "i18next-parser": "^9.3.0",
         "msw": "^2.12.3",
         "rollup-plugin-visualizer": "^6.0.5",
