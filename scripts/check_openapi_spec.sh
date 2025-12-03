@@ -3,7 +3,7 @@
 set -ex
 
 pushd backend
-  cat .test.env
+  source .test.env
   poetry run python -m app.open_api_export ../docs/static/openapi.json
 popd
 

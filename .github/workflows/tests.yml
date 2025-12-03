@@ -137,9 +137,3 @@ jobs:
 
     - name: Run pre-commit
       uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
-      env:
-        POSTGRES_PASSWORD: ${{ needs.environment.outputs.POSTGRES_PASSWORD }}
-        POSTGRES_PORT: ${{ needs.environment.outputs.POSTGRES_PORT }}
-        POSTGRES_SERVER: ${{ needs.environment.outputs.POSTGRES_SERVER }}
-        POSTGRES_DB: ${{ needs.environment.outputs.POSTGRES_DB }}
-        POSTGRES_USER: ${{ needs.environment.outputs.POSTGRES_USER }}
