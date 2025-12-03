@@ -1,8 +1,10 @@
 import { BaseEdge, type EdgeProps, getStraightPath } from '@xyflow/react';
 
-export function StraightEdge({ id, sourceX, sourceY, targetX, targetY, style }: EdgeProps) {
+export function StraightEdge({ id, sourceX, sourceY, targetX, targetY, style, data }: EdgeProps) {
     // Define a margin to stop the edge before the node boundary (hard coded... based on size of node would be better code practice)
     const margin = 35;
+    // How to write this better?
+    const dimmed = data?.dimmed as boolean | undefined;
 
     // angle
     const angle = Math.atan2(targetY - sourceY, targetX - sourceX);
@@ -32,17 +34,20 @@ export function StraightEdge({ id, sourceX, sourceY, targetX, targetY, style }: 
     return (
         <>
             <BaseEdge id={id} path={edgePath} style={style} />;{/* Arrow in the middle */}
-            <polygon
-                points="0,0 12,4 0,8 2,4"
-                fill="currentColor"
-                stroke="currentColor"
-                strokeWidth="1"
-                transform={`translate(${midX}, ${midY}) rotate(${angleDeg}) translate(-6, -4)`}
-                style={{
-                    fill: style?.stroke || '#b1b1b7',
-                    stroke: style?.stroke || '#b1b1b7',
-                }}
-            />
+            {/* Only show the arrow if the edge is not dimmed */}
+            {!dimmed && (
+                <polygon
+                    points="0,0 12,4 0,8 2,4"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    transform={`translate(${midX}, ${midY}) rotate(${angleDeg}) translate(-6, -4)`}
+                    style={{
+                        fill: style?.stroke || '#b1b1b7',
+                        stroke: style?.stroke || '#b1b1b7',
+                    }}
+                />
+            )}
         </>
     );
 }
