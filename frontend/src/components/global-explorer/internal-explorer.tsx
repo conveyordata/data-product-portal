@@ -89,7 +89,6 @@ export default function InternalFullExplorer() {
     const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
         dataProductsEnabled: true,
         datasetsEnabled: true,
-        dataOutputsEnabled: true,
         domainsEnabled: true,
     });
 
@@ -109,7 +108,6 @@ export default function InternalFullExplorer() {
         {
             includeDataProducts: sidebarFilters.dataProductsEnabled,
             includeDatasets: sidebarFilters.datasetsEnabled,
-            includeDataOutputs: sidebarFilters.dataOutputsEnabled,
             includeDomains: sidebarFilters.domainsEnabled,
         },
         {
