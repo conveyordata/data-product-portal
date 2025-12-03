@@ -7,8 +7,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.configuration.data_product_lifecycles.model import DataProductLifecycle
-from app.configuration.domains.model import Domain
 from app.configuration.tags.model import Tag, tag_dataset_table
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import OutputPortAccessType
@@ -19,7 +17,9 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.model import (
         DatasetRoleAssignment,
     )
+    from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
+    from app.configuration.domains.model import Domain
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation

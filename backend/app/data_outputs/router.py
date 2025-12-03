@@ -239,14 +239,15 @@ def link_dataset_to_data_output(
     approvers = RoleAssignmentService(db).users_with_authz_action(
         dataset_link.dataset_id, Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST
     )
-    background_tasks.add_task(
-        email.send_link_dataset_email(
-            dataset_link.dataset,
-            dataset_link.data_output,
-            requester=deepcopy(authenticated_user),
-            approvers=[deepcopy(approver) for approver in approvers],
+    if authenticated_user not in approvers:
+        background_tasks.add_task(
+            email.send_link_dataset_email(
+                dataset_link.dataset,
+                dataset_link.data_output,
+                requester=deepcopy(authenticated_user),
+                approvers=[deepcopy(approver) for approver in approvers],
+            )
         )
-    )
     return {"id": dataset_link.id}
 
 

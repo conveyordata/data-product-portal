@@ -1180,6 +1180,150 @@
         }
       }
     },
+    "/api/datasets/{id}/query_stats": {
+      "get": {
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
+        "summary": "Get Query Stats",
+        "operationId": "get_query_stats_api_datasets__id__query_stats_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetQueryStatsDailyResponses"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
+        "summary": "Update Query Stats",
+        "operationId": "update_query_stats_api_datasets__id__query_stats_patch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetQueryStatsDailyUpdates"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
+        "summary": "Delete Query Stat",
+        "operationId": "delete_query_stat_api_datasets__id__query_stats_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetQueryStatsDailyDelete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_products": {
       "get": {
         "tags": [
@@ -13954,6 +14098,117 @@
           "dataset"
         ],
         "title": "DatasetLinks"
+      },
+      "DatasetQueryStatsDailyDelete": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "consumer_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consumer Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "consumer_data_product_id"
+        ],
+        "title": "DatasetQueryStatsDailyDelete"
+      },
+      "DatasetQueryStatsDailyResponse": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "consumer_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consumer Data Product Id"
+          },
+          "query_count": {
+            "type": "integer",
+            "title": "Query Count"
+          },
+          "consumer_data_product_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consumer Data Product Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "consumer_data_product_id",
+          "query_count"
+        ],
+        "title": "DatasetQueryStatsDailyResponse"
+      },
+      "DatasetQueryStatsDailyResponses": {
+        "properties": {
+          "dataset_query_stats_daily_responses": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetQueryStatsDailyResponse"
+            },
+            "type": "array",
+            "title": "Dataset Query Stats Daily Responses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_query_stats_daily_responses"
+        ],
+        "title": "DatasetQueryStatsDailyResponses"
+      },
+      "DatasetQueryStatsDailyUpdate": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "consumer_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consumer Data Product Id"
+          },
+          "query_count": {
+            "type": "integer",
+            "title": "Query Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "consumer_data_product_id",
+          "query_count"
+        ],
+        "title": "DatasetQueryStatsDailyUpdate"
+      },
+      "DatasetQueryStatsDailyUpdates": {
+        "properties": {
+          "dataset_query_stats_daily_updates": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetQueryStatsDailyUpdate"
+            },
+            "type": "array",
+            "title": "Dataset Query Stats Daily Updates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_query_stats_daily_updates"
+        ],
+        "title": "DatasetQueryStatsDailyUpdates"
       },
       "DatasetStatusUpdate": {
         "properties": {

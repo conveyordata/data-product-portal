@@ -1,14 +1,13 @@
+from typing import TYPE_CHECKING
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.authorization.role_assignments.data_product.schema import RoleAssignment
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype, Role, Scope
 from app.core.authz import Action
-from app.data_products.model import DataProduct
 from app.settings import settings
-from app.users.schema import User
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -16,6 +15,11 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+
+if TYPE_CHECKING:
+    from app.authorization.role_assignments.data_product.schema import RoleAssignment
+    from app.data_products.model import DataProduct
+    from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/data_product"
 ENDPOINT_DATA_PRODUCT = "/api/data_products"

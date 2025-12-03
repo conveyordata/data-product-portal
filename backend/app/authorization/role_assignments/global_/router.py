@@ -101,7 +101,7 @@ def delete_assignment(
 def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
     if role_id == "admin":
         return ADMIN_UUID
-    return cast(UUID, role_id)
+    return cast("UUID", role_id)
 
 
 _router = router
