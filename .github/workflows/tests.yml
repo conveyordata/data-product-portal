@@ -70,18 +70,12 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./backend
-        run: poetry install --with test
-
-      - name: Ensure open api spec is up to date
-        run: |
-          cp backend/.test.env backend/.env
-          ./scripts/check_openapi_spec.sh
+        run: poetry install --no-interaction --with test
 
       - name: Run the automated tests
         working-directory: ./backend
         id: run-test
         run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
-
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
         run: ./check_coverage.sh
@@ -114,6 +108,7 @@ jobs:
     steps:
     - name: Git checkout
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
     - name: Install Poetry
       uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
       with:
@@ -129,6 +124,7 @@ jobs:
     - name: Install Python dependencies
       working-directory: backend
       run: poetry install --no-interaction
+
     - name: Setup Node.js
       uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       with:
@@ -138,5 +134,12 @@ jobs:
     - name: Install npm dependencies
       working-directory: frontend
       run: npm ci --ignore-scripts --legacy-peer-deps
+
     - name: Run pre-commit
       uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+      env:
+        POSTGRES_PASSWORD: ${{ needs.environment.outputs.POSTGRES_PASSWORD }}
+        POSTGRES_PORT: ${{ needs.environment.outputs.POSTGRES_PORT }}
+        POSTGRES_SERVER: ${{ needs.environment.outputs.POSTGRES_SERVER }}
+        POSTGRES_DB: ${{ needs.environment.outputs.POSTGRES_DB }}
+        POSTGRES_USER: ${{ needs.environment.outputs.POSTGRES_USER }}
