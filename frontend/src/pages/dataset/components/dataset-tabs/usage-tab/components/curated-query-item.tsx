@@ -2,10 +2,13 @@ import { CopyOutlined } from '@ant-design/icons';
 import { Button, Flex, List } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import sql from 'react-syntax-highlighter/dist/esm/languages/hljs/sql';
 import { magula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
 import styles from './curated-query-item.module.scss';
+
+SyntaxHighlighter.registerLanguage('sql', sql);
 
 export const SQL_LINES_THRESHOLD = 10;
 
@@ -27,7 +30,7 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
                 <List.Item.Meta title={query.title} description={query.description} />
                 <Flex vertical gap="small">
                     <Flex gap="small" align="start">
-                        <Flex flex={1} className={styles.sqlCode}>
+                        <Flex flex={1} className={`${styles.sqlCode} ${!isExpanded ? styles.collapsed : ''}`}>
                             <SyntaxHighlighter
                                 language="sql"
                                 style={magula}
