@@ -1362,16 +1362,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
