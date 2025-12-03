@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
+from app.notifications.model import Notification
 from app.shared.model import BaseORM
 
 from .enums import EventReferenceEntity
@@ -14,7 +15,6 @@ if TYPE_CHECKING:
     from app.data_outputs.model import DataOutput
     from app.data_products.model import DataProduct
     from app.datasets.model import Dataset
-    from app.notifications.model import Notification
     from app.users.model import User
 
 
@@ -31,7 +31,7 @@ class Event(Base, BaseORM):
     actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     actor: Mapped["User"] = relationship("User")
 
-    notifications: Mapped[list["Notification"]] = relationship(
+    notifications: Mapped[list[Notification]] = relationship(
         "Notification",
         back_populates="event",
         foreign_keys="Notification.event_id",

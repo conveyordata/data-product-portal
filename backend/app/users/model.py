@@ -6,6 +6,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database.database import Base, ensure_exists
+from app.events.model import Event
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -20,7 +21,6 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
-    from app.events.model import Event
     from app.notifications.model import Notification
 
 
@@ -32,7 +32,7 @@ class User(Base, BaseORM):
     external_id = Column(String)
     first_name = Column(String)
     last_name = Column(String)
-    events: Mapped[list["Event"]] = relationship(
+    events: Mapped[list[Event]] = relationship(
         "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
     )
 
