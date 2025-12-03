@@ -50,7 +50,9 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
-          python-version: "3.13"
+          cache: 'poetry'
+          cache-dependency-path: 'backend/poetry.lock'
+          python-version-file: 'backend/pyproject.toml'
 
       - name: Set up poetry
         uses: abatilo/actions-poetry@65c61eae400c65c9510a584af85138c1ae19bbc0 # v3.0.2
@@ -120,9 +122,15 @@ jobs:
         cache: 'poetry'
         cache-dependency-path: 'backend/poetry.lock'
         python-version-file: 'backend/pyproject.toml'
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: "2.1.4"
+        virtualenvs-create: true
+        virtualenvs-in-project: true
     - name: Install Python dependencies
       working-directory: backend
-      run: poetry install
+      run: poetry install --no-interaction
     - name: Setup Node.js
       uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       with:
