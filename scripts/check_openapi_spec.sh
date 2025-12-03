@@ -5,8 +5,8 @@ set -ex
 pushd backend
   set -a
   source .test.env
-  poetry run python -m app.open_api_export ../docs/static/openapi.json
   set +a
+  poetry run python -m app.open_api_export ../docs/static/openapi.json
 popd
 
 #!/usr/bin/env bash
