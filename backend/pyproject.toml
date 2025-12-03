@@ -2,6 +2,10 @@
 name = "app"
 version = "0.0.1"
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "app"
 version = "0.0.1"
@@ -60,16 +64,14 @@ optional = true
 poethepoet = "^0.38.0"
 
 [tool.poe.tasks]
+lint = "ruff check --fix"
+format = "ruff format"
+ruff = ["lint", "format"]
 test = "pytest -v tests/"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 compose = "docker compose -f test-compose.yaml up -d"
 compose-down = "docker compose -f test-compose.yaml down"
 compile-requirements = "pip-compile --generate-hashes --upgrade requirements-poetry.in"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
 
 [tool.ruff.lint]
 #https://docs.astral.sh/ruff/rules/
@@ -90,6 +92,7 @@ select = [
     "FIX", #flake8-fixme
     "ISC", #flake8-implicit-str-concat
     "RSE", #flake8-raise
+    "T20", #flake-8 print
 ]
 
 [tool.ruff.lint.per-file-ignores]
