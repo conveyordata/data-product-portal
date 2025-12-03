@@ -1,25 +1,28 @@
 import uuid
 from copy import deepcopy
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
+from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.schema import S3DataOutput
 from app.data_outputs.schema_request import DataOutputResultStringRequest
-from app.roles.schema import Scope
 from app.settings import settings
 from tests.factories import (
     DataOutputFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    DatasetFactory,
     PlatformServiceFactory,
     RoleFactory,
     TagFactory,
     UserFactory,
 )
+from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
 
 ENDPOINT = "/api/data_outputs"
 
@@ -452,6 +455,69 @@ class TestDataOutputsRouter:
         response = self.get_data_output_result_string(client, request)
         assert response.status_code == 200
         assert response.json() == "bucket/suffix/path"
+
+    @patch("app.data_outputs.email.send_link_dataset_email")
+    def test_dataset_link_auto_approval_no_email_sent(
+        self, mock_send_email, client: TestClient
+    ):
+        """Test that no email is sent when dataset link request is auto-approved"""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        dataset = DatasetFactory(data_product=data_product)
+        data_output = DataOutputFactory(owner=data_product)
+
+        # Create role that allows linking datasets
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+        )
+
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        ds_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=ds_role.id, dataset_id=dataset.id
+        )
+        # Mock auto-approval scenario (same data product owner)
+        response = client.post(
+            f"{ENDPOINT}/{data_output.id}/dataset/{dataset.id}",
+        )
+
+        assert response.status_code == 200
+        # Verify no email was sent for auto-approved request
+        mock_send_email.assert_not_called()
+
+    @patch("app.data_outputs.email.send_link_dataset_email")
+    def test_dataset_link_manual_approval_email_sent(
+        self, mock_send_email, client: TestClient
+    ):
+        """Test that email is sent when dataset link request requires manual approval"""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        dataset = DatasetFactory(data_product=data_product)  # Different owner
+        data_output = DataOutputFactory(owner=data_product)
+
+        # Create role that allows linking datasets
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+        # Mock manual approval scenario (different data product owner)
+        response = client.post(
+            f"{ENDPOINT}/{data_output.id}/dataset/{dataset.id}",
+        )
+
+        assert response.status_code == 200
+        # Verify email was sent for manual approval request
+        mock_send_email.assert_called_once()
 
     @staticmethod
     def create_data_output(client: TestClient, default_data_output_payload) -> Response:

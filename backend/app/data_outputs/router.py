@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.output_port.service import RoleAssignmentService
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
@@ -24,7 +25,6 @@ from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
-from app.role_assignments.dataset.service import RoleAssignmentService
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
@@ -239,14 +239,15 @@ def link_dataset_to_data_output(
     approvers = RoleAssignmentService(db).users_with_authz_action(
         dataset_link.dataset_id, Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST
     )
-    background_tasks.add_task(
-        email.send_link_dataset_email(
-            dataset_link.dataset,
-            dataset_link.data_output,
-            requester=deepcopy(authenticated_user),
-            approvers=[deepcopy(approver) for approver in approvers],
+    if authenticated_user not in approvers:
+        background_tasks.add_task(
+            email.send_link_dataset_email(
+                dataset_link.dataset,
+                dataset_link.data_output,
+                requester=deepcopy(authenticated_user),
+                approvers=[deepcopy(approver) for approver in approvers],
+            )
         )
-    )
     return {"id": dataset_link.id}
 
 

@@ -9,6 +9,12 @@ sidebar_position: 200
 ## 0.4.2
 
 ### features
+- **[Explorer]**: Removed technical assets from full explorer view for clarity. Improved performance of graph fetching.
+
+### bugfixes
+- **[Explorer]**: Removed dangling pointers when disabling certain types. Show datasets in view if they don't have technical assets added yet.
+
+### features
 - **[Admin rights]**: It is no longer allowed to have permanent admin rights. Users who were admins before will now get the option to temporarily elevate themselves to super user rights.
 This avoids the pitfall where you permanently are allowed to do everything and no longer have a view on how the normal user flow looks.
 - **[API]**: We are working on a v2 version of the API, we have already migrated the endpoints:
@@ -20,6 +26,11 @@ This avoids the pitfall where you permanently are allowed to do everything and n
   - `/api/platforms` -> `/api/v2/configuration/platforms`
   - `/api/tags` -> `/api/v2/configuration/tags`
   - `/api/theme_settings` -> `/api/v2/configuration/theme_settings`
+  - `/api/authz` -> `/api/v2/authz`
+  - `/api/role_assignments/dataset` -> `/api/v2/authz/role_assignments/output_port`
+  - `/api/role_assignments/data_product` -> `/api/v2/authz/role_assignments/data_product`
+  - `/api/role_assignments/global` -> `/api/v2/authz/role_assignments/global`
+  - `/api/roles` -> `/api/v2/authz/roles`
 
 ## 0.4.1
 

@@ -1,9 +1,9 @@
 import factory
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.roles import ADMIN_UUID
 from app.core.authz.authorization import Authorization
-from app.role_assignments.enums import DecisionStatus
-from app.role_assignments.global_.model import GlobalRoleAssignment
-from app.roles import ADMIN_UUID
 from tests import test_session
 
 

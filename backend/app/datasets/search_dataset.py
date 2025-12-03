@@ -8,7 +8,7 @@ from app.core.logging import logger
 def recalculate_search_vector_statement(dataset_id: UUID | None = None) -> TextClause:
     logger.debug(
         "Recalculating search vector for"
-        + f"{str(dataset_id) if dataset_id else 'all datasets'}"
+        f"{str(dataset_id) if dataset_id else 'all datasets'}"
     )
 
     if dataset_id:

@@ -4,7 +4,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
 
 ANY: str = "does_not_matter"
-ANY_ACT: AuthorizationAction = cast(AuthorizationAction, 0)
+ANY_ACT: AuthorizationAction = cast("AuthorizationAction", 0)
 
 
 class TestAuthorization:
@@ -108,7 +108,7 @@ class TestAuthorization:
         user = "test_user"
         obj = "test_resource"
         act = AuthorizationAction.DATA_PRODUCT__DELETE
-        all_acts = list(map(lambda a: a, AuthorizationAction))
+        all_acts = list(AuthorizationAction)
 
         authorizer.sync_role_permissions(role_id=role, actions=all_acts)
         authorizer.assign_resource_role(user_id=user, role_id=role, resource_id=obj)

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import EmailStr
 
-from app.role_assignments.global_.schema import RoleAssignmentResponse
+from app.authorization.role_assignments.global_.schema import RoleAssignmentResponse
 from app.shared.schema import ORMModel
 
 

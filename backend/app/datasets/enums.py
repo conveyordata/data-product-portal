@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DatasetAccessType(str, Enum):
+class OutputPortAccessType(str, Enum):
     PUBLIC = "public"
     RESTRICTED = "restricted"
     PRIVATE = "private"

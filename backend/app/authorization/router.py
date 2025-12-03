@@ -3,12 +3,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.authorization.schema import AccessResponse, IsAdminResponse
+from app.authorization.schema_response import AccessResponse, IsAdminResponse
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.users.schema import User
 
-router = APIRouter(prefix="/authz", tags=["authz"])
+router = APIRouter()
 
 
 @router.get(
@@ -47,12 +47,6 @@ def check_access(
 
 @router.get(
     "/admin",
-    responses={
-        200: {
-            "description": "Admin role assignment",
-            "content": {"application/json": {"schema": {"type": "boolean"}}},
-        },
-    },
 )
 def is_admin(
     user: User = Depends(get_authenticated_user),
@@ -63,3 +57,9 @@ def is_admin(
         is_admin=authorizer.has_admin_role(user_id=user.id),
         time=user.admin_expiry.isoformat() if user.admin_expiry else None,
     )
+
+
+_router = router
+router = APIRouter(tags=["Authorization"])
+router.include_router(_router, prefix="/authz", deprecated=True)
+router.include_router(_router, prefix="/v2/authz")

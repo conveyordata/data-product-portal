@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 
 

@@ -33,7 +33,7 @@ repos:
   rev: v1.16.1
   hooks:
     - id: mypy
-      language_version: python3.12
+      language_version: python3.13
       additional_dependencies:
       - types-cachetools
       - types-requests
@@ -53,8 +53,14 @@ repos:
   hooks:
     - id: add-helm-version
       name: add-helm-version
-      entry: ./add_helm_version.sh
+      entry: ./scripts/add_helm_version.sh
       language: script
+    - id: regen-openapi-spec
+      name: Regen openapi spec
+      entry: ./scripts/check_openapi_spec.sh
+      language: script
+      types: [text]
+      files: ^backend\/.*\.py$
     - id: local-fe-check
       name: fe check
       entry: bash -c "cd frontend && npm run check:fix"

@@ -12,7 +12,6 @@ import styles from './sidebar.module.scss';
 export type SidebarFilters = {
     dataProductsEnabled: boolean;
     datasetsEnabled: boolean;
-    dataOutputsEnabled: boolean;
     domainsEnabled: boolean;
 };
 
@@ -123,18 +122,6 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                 }}
             >
                 {t('Output ports')}
-            </Tag.CheckableTag>
-            <Tag.CheckableTag
-                checked={sidebarFilters.dataOutputsEnabled}
-                className={styles.checkableTag}
-                onChange={(e) => {
-                    onFilterChange({
-                        ...sidebarFilters,
-                        dataOutputsEnabled: e.valueOf(),
-                    });
-                }}
-            >
-                {t('Technical Assets')}
             </Tag.CheckableTag>
             <Select
                 className={styles.select}

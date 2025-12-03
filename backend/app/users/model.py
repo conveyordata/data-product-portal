@@ -7,12 +7,16 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database.database import Base, ensure_exists
 from app.events.model import Event
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
+    from app.authorization.role_assignments.data_product.model import (
+        DataProductRoleAssignment,
+    )
+    from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+    from app.authorization.role_assignments.output_port.model import (
+        DatasetRoleAssignment,
+    )
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
@@ -28,7 +32,7 @@ class User(Base, BaseORM):
     external_id = Column(String)
     first_name = Column(String)
     last_name = Column(String)
-    events: Mapped[list["Event"]] = relationship(
+    events: Mapped[list[Event]] = relationship(
         "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
     )
 

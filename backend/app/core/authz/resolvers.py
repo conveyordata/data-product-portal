@@ -5,14 +5,16 @@ from fastapi import Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 from app.datasets.model import Dataset
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.dataset.model import DatasetRoleAssignment
 
 Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], None]
 
@@ -22,11 +24,17 @@ class SubjectResolver(ABC):
     model: Model = None
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
         if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
         if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
+        json_body = await request.json()
+        if isinstance(json_body, dict) and (result := json_body.get(key)) is not None:
+            return cast("str", result)
+
         return cls.DEFAULT
 
     @classmethod
@@ -45,7 +53,9 @@ class SubjectResolver(ABC):
 
 class EmptyResolver(SubjectResolver):
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
         return cls.DEFAULT
 
 
@@ -57,8 +67,10 @@ class DatasetRoleAssignmentResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DataProductResolver.resolve(request, key, db)
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
+        obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             assignment = (
                 db.scalars(
@@ -76,8 +88,10 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DataProductResolver.resolve(request, key, db)
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
+        obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             assignment = (
                 db.scalars(
@@ -101,8 +115,10 @@ class DataProductNameResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DataProductResolver.resolve(request, key, db)
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
+        obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_product = (
                 db.scalars(select(DataProduct).where(DataProduct.namespace == obj))
@@ -118,8 +134,10 @@ class DataOutputResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DataProductResolver.resolve(request, key, db)
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
+        obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_output = (
                 db.scalars(select(DataOutput).where(DataOutput.id == obj))
@@ -135,8 +153,10 @@ class DataOutputDatasetAssociationResolver(SubjectResolver):
     model: Model = Dataset
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DataProductResolver.resolve(request, key, db)
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
+        obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_output_dataset = (
                 db.scalars(
@@ -156,8 +176,10 @@ class DataProductDatasetAssociationResolver(SubjectResolver):
     model: Model = Dataset
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DataProductResolver.resolve(request, key, db)
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
+        obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_product_dataset = (
                 db.scalars(

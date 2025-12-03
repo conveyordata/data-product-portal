@@ -6,6 +6,10 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
+)
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -27,7 +31,7 @@ from app.data_outputs_datasets.model import (
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import OutputPortAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
@@ -45,10 +49,6 @@ from app.datasets.search_dataset import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.role_assignments.dataset.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
-from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -386,6 +386,29 @@ class DatasetService:
                         animated=True,
                     )
                 )
+
+        # if no data outputs are linked yet, still show the owner data product
+        if level >= 2 and not dataset.data_output_links:
+            nodes.append(
+                Node(
+                    id=f"{dataset.data_product.id}_2",
+                    data=NodeData(
+                        id=f"{dataset.data_product.id}",
+                        name=dataset.data_product.name,
+                        icon_key=dataset.data_product.type.icon_key,
+                    ),
+                    type=NodeType.dataProductNode,
+                )
+            )
+            edges.append(
+                Edge(
+                    id=f"{dataset.data_product.id}-{dataset.id}-2",
+                    target=dataset.id,
+                    source=f"{dataset.data_product.id}_2",
+                    animated=True,
+                )
+            )
+
         return Graph(nodes=set(nodes), edges=set(edges))
 
     def validate_dataset_namespace(self, namespace: str) -> NamespaceValidation:
@@ -401,7 +424,7 @@ class DatasetService:
 
     def is_visible_to_user(self, dataset: DatasetModel, user: User) -> bool:
         if (
-            dataset.access_type != DatasetAccessType.PRIVATE
+            dataset.access_type != OutputPortAccessType.PRIVATE
             or Authorization().has_admin_role(user_id=str(user.id))
             or DatasetRoleAssignmentService(self.db).has_assignment(
                 dataset_id=dataset.id, user=user

@@ -27,7 +27,6 @@ class TestAuthDeviceRouter:
             "grant-type:device_code"
         )
         assert response.status_code == 400  # user has not yet authorized
-        # TODO Test other flows
 
     def test_get_root(self, client):
         response = client.post(f"{ENDPOINT}/device_token?client_id=test")

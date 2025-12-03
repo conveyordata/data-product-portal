@@ -34,7 +34,6 @@ class GlueDataOutput(BaseDataOutputConfiguration):
         return self
 
     def validate_configuration(self, data_product: DataProduct):
-        # TODO Force defaul t bucket identifier if bucket = ''
         if not self.database.startswith(data_product.namespace):
             raise ValueError("Invalid database specified")
 
