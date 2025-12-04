@@ -5,13 +5,13 @@ from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.configuration.platforms.model import Platform
+from app.configuration.platforms.platform_services.model import PlatformService
 from app.database.database import Base
 from app.shared.model import BaseORM
-from app.configuration.platforms.model import Platform
 
 if TYPE_CHECKING:
     from app.configuration.environments.model import Environment
-    from app.configuration.platforms.platform_services.model import PlatformService
 
 
 class EnvironmentPlatformServiceConfiguration(Base, BaseORM):
@@ -24,5 +24,5 @@ class EnvironmentPlatformServiceConfiguration(Base, BaseORM):
     config = Column(String)
 
     platform: Mapped[Platform] = relationship()
-    service: Mapped["PlatformService"] = relationship()
+    service: Mapped[PlatformService] = relationship()
     environment: Mapped["Environment"] = relationship()
