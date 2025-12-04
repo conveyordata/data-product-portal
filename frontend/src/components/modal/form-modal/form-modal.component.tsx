@@ -25,7 +25,7 @@ export function FormModal({ title, onClose, isOpen, ...modalProps }: Props) {
             open={isOpen}
             onCancel={handleCloseModal}
             classNames={{
-                content: styles.formModalContent,
+                container: styles.formModalContent,
                 header: styles.formModalHeader,
                 body: styles.formModalBody,
             }}

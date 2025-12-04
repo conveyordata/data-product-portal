@@ -1,6 +1,5 @@
 import '@/styles/_globals.scss';
 import './i18n.ts';
-import '@ant-design/v5-patch-for-react-19';
 
 import { PostHogProvider } from '@posthog/react';
 import React from 'react';

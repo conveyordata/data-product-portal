@@ -83,7 +83,7 @@ export function UserMenu() {
                 style={{ maxWidth: '20em' }}
                 ellipsis={{
                     tooltip: {
-                        title: user?.first_name + ' ' + user?.last_name,
+                        title: `${user?.first_name} ${user?.last_name}`,
                         styles: { root: { maxWidth: 'fit-content' } },
                     },
                 }}
