@@ -2,10 +2,11 @@ name: Alembic Latest Migration Test
 
 on:
   push:
-    branches: [ "main", "feature/test-latest-migration" ]
+    branches: [ "main" ]
   pull_request:
     paths:
       - 'backend/app/database/alembic/**'
+      - 'backend/app/**/model.py'
 
 permissions:
   contents: read
