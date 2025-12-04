@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
+from app.configuration.domains.model import Domain  # noqa: TC001
 from app.configuration.tags.model import Tag, tag_data_product_table
 from app.data_products.status import DataProductStatus
 from app.database.database import Base, ensure_exists
@@ -18,7 +19,6 @@ if TYPE_CHECKING:
     )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
-    from app.configuration.domains.model import Domain
     from app.data_outputs.model import DataOutput
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
