@@ -49,7 +49,7 @@ function CartOverviewItem({ dataset, overlapping, selectedDataProductId }: CartO
                 {remainingCount > 0 && (
                     <Tooltip
                         title={
-                            <Space direction="vertical" size={'small'}>
+                            <Space orientation="vertical" size={'small'}>
                                 {dataProductOwners.slice(maxVisible).map((owner) => (
                                     <span key={owner.id}>{owner.email}</span>
                                 ))}

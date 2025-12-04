@@ -158,7 +158,7 @@ export function Notifications() {
                             </Flex>
                         </div>
                     }
-                    classNames={{ body: styles.notificationBody }}
+                    classNames={{ content: styles.notificationBody }}
                     trigger="hover"
                     placement="bottom"
                 >

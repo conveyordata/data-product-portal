@@ -15,9 +15,9 @@ export default function NotificationListener() {
     useEffect(() => {
         if (message && description) {
             notificationApi[type]({
-                message,
+                title: message,
                 description,
-                duration: null,
+                duration: false,
             });
         }
     }, [message, description, type, id, notificationApi]);

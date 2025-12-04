@@ -124,6 +124,7 @@ It contains more detailed information about concepts, how-to guides, installatio
 - Install [Docker](https://docs.docker.com/get-docker/) on your machine.
 
 ### Installation
+
 - Ensure your Docker service is running.
 
 - In order to set up a local 'production-like' server with a connection to a database, run the command below in the root of this project.
@@ -197,6 +198,7 @@ request with the integration you would like to see in the data product portal.
 Please find the relevant info in [Installation](docs/INSTALLATION.md)
 
 # Release Process
+
 To prepare a new release follow these steps, use the next minor or patch version (in this example 0.3.6):
 - Create a new branch from main called `chore/version_bump_036`
 - If you do a patch version bump: run `task bump-version -- 0.3.6` in root.
@@ -220,7 +222,7 @@ Check our [Contributing Guidelines](CONTRIBUTING.md).
 
 Distributed under the APACHE 2.0 License Copyright 2024 Dataminded. See [LICENSE](LICENSE.md) for more information.
 
-# Data Tracking Transparancy
+# Data Tracking Transparency
 
 This project has the possibility to track the actions of users using Data Product Portal in order to improve the UI and design.
 It also helps with error tracking and efficient debugging.

@@ -180,11 +180,11 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
             {isLoading ? (
                 <Skeleton active />
             ) : assignments?.length === 0 ? (
-                <Space direction="vertical" size={'middle'}>
+                <Space orientation="vertical" size="middle">
                     <Alert
                         showIcon
                         type="success"
-                        message={t('No assignments found for the {{ name }} role.', {
+                        title={t('No assignments found for the {{ name }} role.', {
                             name: role.name,
                         })}
                     />
@@ -195,11 +195,11 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                     </Text>
                 </Space>
             ) : (
-                <Space direction="vertical" size={'middle'}>
+                <Space orientation="vertical" size="middle">
                     <Alert
                         showIcon
                         type="warning"
-                        message={t('This role still has {{ count }} assignments.', {
+                        title={t('This role still has {{ count }} assignments.', {
                             count: numAssignments,
                         })}
                     />
