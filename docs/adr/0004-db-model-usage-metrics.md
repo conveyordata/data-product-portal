@@ -66,7 +66,17 @@ Schema:
 * date (DATE, PK)
 * output_port_id (UUID, PK, FK)
 * tech_asset_id (UUID, PK, FK)
-* consumer_id (UUID, PK, FK) - link to other data product
+* consumer_id (UUID, PK, FK) - link to other data product that is consuming this asset
+* query_count (INT)
+
+#### Table 3: output_port_combined_with
+
+Purpose: To power the "Most often combined with" usage section.
+Schema:
+* date (DATE, PK)
+* output_port_id_1 (UUID, PK, FK)
+* output_port_id_2 (UUID, PK, FK)
+* consumer_id (UUID, PK, FK) - link to data product that is combining these two output ports
 * query_count (INT)
 
 ## Pros and Cons of the Options
