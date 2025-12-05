@@ -16,8 +16,12 @@ def force_oidc_enabled():
     import app.core.auth.auth
 
     importlib.reload(app.core.auth.auth)
+    yield
+    settings.OIDC_ENABLED = False
+    # Reload the auth module to pick up the new setting
+    import app.core.auth.auth
 
-    return
+    importlib.reload(app.core.auth.auth)
 
 
 class TestCoreAuthentication:
