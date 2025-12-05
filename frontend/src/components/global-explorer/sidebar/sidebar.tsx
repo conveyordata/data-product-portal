@@ -1,8 +1,8 @@
 import { type Node, useReactFlow } from '@xyflow/react';
 import { Select, Tag } from 'antd';
+import type { MouseEvent } from 'react';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import type { DataProductContract } from '@/types/data-product';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
 import { CustomNodeTypes } from '../../charts/node-editor/node-types';
@@ -21,10 +21,10 @@ type Props = {
     sidebarFilters: SidebarFilters;
     onFilterChange: (filters: SidebarFilters) => void;
     nodeId: string | null;
-    setNodeId: (nodeId: string | null) => void; // Function to set the nodeId in the parent component
+    nodeClick: (event: MouseEvent | undefined, node: Node) => void;
 };
 
-export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNodeId }: Props) {
+export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeClick }: Props) {
     const { getNode, setNodes } = useReactFlow();
     const { t } = useTranslation();
     const currentInstance = useReactFlow();
@@ -128,7 +128,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                 showSearch
                 placeholder={String('Select a node')}
                 onSelect={(value: string) => {
-                    setNodeId(value); // Use the setNodeId function from the parent
+                    nodeClick(undefined, { id: value } as Node); // Use the setNodeId function from the parent
                 }}
                 value={nodeId ?? undefined}
                 filterOption={(input: string, option?: { value: string; label: string }) =>
