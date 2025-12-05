@@ -10,7 +10,7 @@ export function PlatformServiceConfigCreate() {
     return (
         <Flex vertical className={styles.container}>
             <Typography.Title level={3}>{t('New Platform Service Configuration')}</Typography.Title>
-            <Space direction={'vertical'} size={'large'} className={styles.container}>
+            <Space orientation="vertical" size="large" className={styles.container}>
                 <PlatformServiceConfigCreateForm />
             </Space>
         </Flex>

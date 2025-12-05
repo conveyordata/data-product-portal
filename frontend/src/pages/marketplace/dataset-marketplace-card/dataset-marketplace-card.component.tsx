@@ -80,7 +80,6 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Technical Assets')}
                     </Space>
                 ),
-                span: 2,
                 children: dataset.data_output_links.length,
             },
             {
@@ -117,6 +116,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
         ];
         return items;
     }
+
     if (!dataset) return <LoadingSpinner />;
     return (
         <Card
@@ -165,7 +165,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                 </Tooltip>,
             ]}
         >
-            <Space direction="vertical" style={{ width: '100%' }} size="small">
+            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
                 <Link to={createDatasetIdPath(dataset.id)}>
                     <Typography.Title level={5} style={{ marginBottom: 0 }}>
                         {dataset.name}

@@ -1,5 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v7';
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
 import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
@@ -78,6 +78,10 @@ const router = createBrowserRouter([
                                 element: <DataProductEdit />,
                             },
                         ],
+                    },
+                    {
+                        path: ApplicationPaths.Marketplace,
+                        element: <Navigate to={ApplicationPaths.Datasets} />,
                     },
                     {
                         path: ApplicationPaths.MarketplaceCart,

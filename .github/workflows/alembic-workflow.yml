@@ -2,10 +2,11 @@ name: Alembic Latest Migration Test
 
 on:
   push:
-    branches: [ "main", "feature/test-latest-migration" ]
+    branches: [ "main" ]
   pull_request:
     paths:
       - 'backend/app/database/alembic/**'
+      - 'backend/app/**/model.py'
 
 permissions:
   contents: read
@@ -15,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        name: Git checkout
         with:
           fetch-depth: 0
 

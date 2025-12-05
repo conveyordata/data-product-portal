@@ -18,6 +18,25 @@ tasks:
         sed -i '' "s/^version:.*/version: {{.CLI_ARGS}}/" {{.HELM_CHART}}
         sed -i '' "s/^  tag:.*/  tag: {{.CLI_ARGS}}/" {{.HELM_VALUES}}
 
+  bump:release-notes:
+    desc: "Update release notes with new version and date"
+    cmds:
+      - |
+        node -e '
+        const fs = require("fs");
+        const file = "docs/docs/release-notes.md";
+        const content = fs.readFileSync(file, "utf-8");
+        const newVersion = "{{.CLI_ARGS}}";
+        const updated = content.replace(/## Unreleased/, `## Unreleased\n\n## ${newVersion}`);
+        fs.writeFileSync(file, updated);
+        '
+
+  update:open-api-spec:
+    desc: "Update OpenAPI spec with new version"
+    cmds:
+      - cd backend && poetry run python -m app.open_api_export
+      - mv backend/openapi.json docs/static/openapi.json
+
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
@@ -79,5 +98,7 @@ tasks:
     desc: "Generic version bump without docs, execute on all releases, e.g. bump-version 0.2.0"
     cmds:
       - task: bump:version-file
+      - task: bump:release-notes
+      - task: update:open-api-spec
       - task: release:commit
       - task: release:pr

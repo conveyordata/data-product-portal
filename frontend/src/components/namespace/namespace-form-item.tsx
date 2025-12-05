@@ -65,7 +65,7 @@ export function NamespaceFormItem({
 
     return (
         <Form.Item label={t('Namespace')} tooltip={tooltip} required>
-            <Space.Compact direction="horizontal" className={styles.namespaceFormField}>
+            <Space.Compact orientation="horizontal" className={styles.namespaceFormField}>
                 <Form.Item
                     name={'namespace'}
                     noStyle
