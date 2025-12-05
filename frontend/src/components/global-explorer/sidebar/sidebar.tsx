@@ -1,8 +1,8 @@
 import { type Node, useReactFlow } from '@xyflow/react';
 import { Select, Tag } from 'antd';
+import type { MouseEvent } from 'react';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import type { DataProductContract } from '@/types/data-product';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
 import { CustomNodeTypes } from '../../charts/node-editor/node-types';
@@ -21,7 +21,7 @@ type Props = {
     sidebarFilters: SidebarFilters;
     onFilterChange: (filters: SidebarFilters) => void;
     nodeId: string | null;
-    nodeClick: (event: React.MouseEvent | undefined, node: Node) => void;
+    nodeClick: (event: MouseEvent | undefined, node: Node) => void;
 };
 
 export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeClick }: Props) {

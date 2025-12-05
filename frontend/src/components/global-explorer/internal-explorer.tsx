@@ -3,7 +3,7 @@ import '@xyflow/react/dist/base.css';
 import type { Edge, Node } from '@xyflow/react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { type MouseEvent, useCallback, useEffect, useState } from 'react';
 
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
@@ -18,7 +18,6 @@ import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
 import { useNodeEditor } from './use-node-editor';
 
 function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void): Node[] {
-    // Count how many children each domain node has
     // Parse regular nodes
     const regularNodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
@@ -59,9 +58,7 @@ function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void):
             return parseRegularNode(node, setNodeId, false, true, extra_attributes);
         });
 
-    // Parse domain nodes (only if domains are enabled and they have children)
-    // Domain nodes are parents so should come before their children in the array
-    return regularNodes; // Skip domain nodes for
+    return regularNodes; // Skip domain nodes for clarity and reduced clutter
 }
 
 function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | null) {
@@ -185,7 +182,7 @@ export default function InternalFullExplorer() {
     }, [currentInstance]);
 
     // Custom node click handler
-    function handleNodeClick(_event: React.MouseEvent | undefined, node: Node) {
+    function handleNodeClick(_event: MouseEvent | undefined, node: Node) {
         if (node) {
             setNodeId(node.id);
 

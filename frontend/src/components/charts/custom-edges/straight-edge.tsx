@@ -4,7 +4,7 @@ export function StraightEdge({ id, sourceX, sourceY, targetX, targetY, style, da
     // Define a margin to stop the edge before the node boundary (hard coded... based on size of node would be better code practice)
     const margin = 35;
     // How to write this better?
-    const dimmed = data?.dimmed as boolean | undefined;
+    const dimmed: boolean = (data?.dimmed as boolean) ?? false;
 
     // angle
     const angle = Math.atan2(targetY - sourceY, targetX - sourceX);
