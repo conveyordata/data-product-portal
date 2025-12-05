@@ -1,6 +1,7 @@
 # ADR Title
 
 ## Context and Problem Statement
+
 Description of the context and problem statement.
 
 ## Decision Drivers
@@ -20,7 +21,8 @@ Description of the context and problem statement.
 **Chosen option:** *Option X: Title*. Clear description of motivation.
 
 ### Confirmation
-Description how this will be reflected in the appliction.
+
+Description how this will be reflected in the application.
 
 ## Pros and Cons of the Options
 
