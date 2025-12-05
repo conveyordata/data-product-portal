@@ -70,7 +70,10 @@ if settings.OIDC_ENABLED:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Unauthenticated"
             )
-        return JWTToken(sub="systemaccount_bot", token="")
+        if not api_key:
+            return secured_call(jwt_token)
+        else:
+            return JWTToken(sub="systemaccount_bot", token="")
 
     def get_authenticated_user(
         token: JWTToken = Depends(api_key_authenticated),
