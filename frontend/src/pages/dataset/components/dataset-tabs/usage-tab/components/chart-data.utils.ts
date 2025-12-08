@@ -22,8 +22,7 @@ export function transformDataForChart(
     granularity: Granularity,
     unknownLabel: string,
 ): ChartDataPoint[] {
-    // Backend already builds buckets and fills missing periods with 0
-    // We just need to format the data for the chart
+    // format the time series data for the chart
     const chartData = responses.map((stat) => {
         const date = parseISO(stat.date);
         let displayDate: string;
@@ -44,7 +43,6 @@ export function transformDataForChart(
     });
 
     // Sort by timestamp to ensure correct chronological order
-    // (backend sorts, but this ensures frontend consistency)
     return chartData.sort((a, b) => a.timestamp - b.timestamp);
 }
 

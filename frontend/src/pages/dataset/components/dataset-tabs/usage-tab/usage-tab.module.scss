@@ -17,15 +17,12 @@
 .filter-group {
     min-width: 200px;
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: globals.$spacing-xs;
+    gap: globals.$spacing-l;
 }
 
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: globals.$spacing-l;
 }
 
 .chart-card {

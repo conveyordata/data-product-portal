@@ -75,7 +75,7 @@ export function UsageTab({ datasetId }: Props) {
                 <Flex vertical className={styles.container}>
                     <Flex className={styles.filters} gap={24} wrap>
                         <Flex className={styles.filterGroup}>
-                            <Typography.Text>{t('Time Range')}</Typography.Text>
+                            <Typography.Text>{t('Time Range')}:</Typography.Text>
                             <Radio.Group
                                 value={dayRange}
                                 onChange={(e: RadioChangeEvent) => setDayRange(e.target.value)}
