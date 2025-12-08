@@ -1372,8 +1372,8 @@
           "datasets",
           "datasets"
         ],
-        "summary": "Upsert Dataset Curated Queries",
-        "operationId": "upsert_dataset_curated_queries_api_datasets__id__usage_curated_queries_put",
+        "summary": "Replace Dataset Curated Queries",
+        "operationId": "replace_dataset_curated_queries_api_datasets__id__usage_curated_queries_put",
         "parameters": [
           {
             "name": "id",
