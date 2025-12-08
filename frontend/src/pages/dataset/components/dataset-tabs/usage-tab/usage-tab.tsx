@@ -1,4 +1,4 @@
-import { Empty, Flex, Select, Spin, Typography } from 'antd';
+import { Empty, Flex, Radio, type RadioChangeEvent, Spin, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,20 +18,21 @@ type Props = {
     datasetId: string;
 };
 
+function getGranularityFromDayRange(dayRange: number): DatasetQueryStatsGranularity {
+    if (dayRange === 365) {
+        return 'month';
+    }
+    if (dayRange === 90) {
+        return 'week';
+    }
+    return 'day';
+}
+
 export function UsageTab({ datasetId }: Props) {
     const { t } = useTranslation();
-    const [granularity, setGranularity] = useState<DatasetQueryStatsGranularity>('week');
     const longestDayRange = 365;
     const [dayRange, setDayRange] = useState<number>(longestDayRange);
-
-    const granularityOptions = useMemo(
-        () => [
-            { label: t('Day'), value: 'day' },
-            { label: t('Week'), value: 'week' },
-            { label: t('Month'), value: 'month' },
-        ],
-        [t],
-    );
+    const granularity = useMemo(() => getGranularityFromDayRange(dayRange), [dayRange]);
 
     const { data, isLoading, isFetching } = useGetDatasetQueryStatsDailyQuery({
         datasetId,
@@ -73,15 +74,11 @@ export function UsageTab({ datasetId }: Props) {
             ) : (
                 <Flex vertical className={styles.container}>
                     <Flex className={styles.filters} gap={24} wrap>
-                        <Flex vertical className={styles.filterGroup}>
-                            <Typography.Text>{t('Granularity')}</Typography.Text>
-                            <Select value={granularity} onChange={setGranularity} options={granularityOptions} />
-                        </Flex>
-                        <Flex vertical className={styles.filterGroup}>
+                        <Flex className={styles.filterGroup}>
                             <Typography.Text>{t('Time Range')}</Typography.Text>
-                            <Select
+                            <Radio.Group
                                 value={dayRange}
-                                onChange={(value) => setDayRange(Number(value))}
+                                onChange={(e: RadioChangeEvent) => setDayRange(e.target.value)}
                                 options={[
                                     { label: t('Last 30 days'), value: 30 },
                                     { label: t('Last 90 days'), value: 90 },

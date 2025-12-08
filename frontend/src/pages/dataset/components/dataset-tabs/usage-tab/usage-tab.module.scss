@@ -17,7 +17,8 @@
 .filter-group {
     min-width: 200px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: globals.$spacing-xs;
 }
 

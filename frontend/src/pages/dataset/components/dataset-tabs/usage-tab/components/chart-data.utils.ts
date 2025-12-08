@@ -17,7 +17,7 @@ export type DayRange = number;
 export type Granularity = 'day' | 'week' | 'month';
 
 export type ChartDataPoint = {
-    date: string; // ISO string used for x axis sorting
+    date: string;
     timestamp: number;
     queryCount: number;
     consumer: string;
@@ -91,29 +91,26 @@ export function transformDataForChart(
     const now = new Date();
     const rangeStart = getRangeStart(now, dayRange);
 
-    // transform date strings to Date objects
-    const processedData = responses
-        .map((stat) => {
-            const date = parseISO(stat.date);
-            return {
-                isoDate: formatISO(date, { representation: 'date' }),
-                timestamp: date.getTime(),
-                queryCount: stat.query_count,
-                consumer: stat.consumer_data_product_name || unknownLabel,
-            };
-        })
-        .sort((a, b) => a.timestamp - b.timestamp);
+    // Backend already aggregates by granularity, so we just map responses to buckets
+    // Create a map of backend data: key = "isoDate|consumer"
+    const backendDataMap = new Map<string, number>();
+    const consumers = new Set<string>();
 
-    const consumers = [...new Set(processedData.map((d) => d.consumer))];
-    const buckets = buildBuckets(rangeStart, now, granularity);
-    const dataByKey = new Map<string, number>();
+    for (const stat of responses) {
+        const date = parseISO(stat.date);
+        const isoDate = formatISO(date, { representation: 'date' });
+        const consumer = stat.consumer_data_product_name || unknownLabel;
+        const key = `${isoDate}|${consumer}`;
 
-    for (const entry of processedData) {
-        const key = `${entry.isoDate}|${entry.consumer}`;
-        const prev = dataByKey.get(key) ?? 0;
-        dataByKey.set(key, prev + entry.queryCount);
+        // Backend already aggregated, so there should only be one entry per key
+        backendDataMap.set(key, stat.query_count);
+        consumers.add(consumer);
     }
 
+    // Create buckets for the full time range (to fill gaps)
+    const buckets = buildBuckets(rangeStart, now, granularity);
+
+    // Map backend data to buckets and fill missing buckets with 0
     const filledData: ChartDataPoint[] = [];
     for (const consumer of consumers) {
         for (const bucket of buckets) {
@@ -121,7 +118,7 @@ export function transformDataForChart(
             filledData.push({
                 date: bucket.displayDate,
                 timestamp: bucket.timestamp,
-                queryCount: dataByKey.get(key) ?? 0,
+                queryCount: backendDataMap.get(key) ?? 0,
                 consumer,
             });
         }

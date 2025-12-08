@@ -41,18 +41,7 @@ class DatasetQueryStatsDailyService:
         granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
         day_range: int = DEFAULT_DAY_RANGE,
     ) -> DatasetQueryStatsDailyResponses:
-        try:
-            granularity_enum = (
-                granularity
-                if isinstance(granularity, QueryStatsGranularity)
-                else QueryStatsGranularity(granularity)
-            )
-        except ValueError:
-            granularity_enum = DEFAULT_GRANULARITY
-
-        day_range_value = day_range if day_range > 0 else DEFAULT_DAY_RANGE
-
-        start_date = self._start_date_from_day_range(day_range_value)
+        start_date = self._start_date_from_day_range(day_range)
         stats = (
             self.db.query(DatasetQueryStatsDaily)
             .filter(
@@ -66,10 +55,8 @@ class DatasetQueryStatsDailyService:
             DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
         ]
 
-        if granularity_enum != QueryStatsGranularity.DAY:
-            response_stats = self._aggregate_by_granularity(
-                response_stats, granularity_enum
-            )
+        if granularity != QueryStatsGranularity.DAY:
+            response_stats = self._aggregate_by_granularity(response_stats, granularity)
 
         response_stats = self._group_low_volume_consumers(response_stats)
 
@@ -104,7 +91,10 @@ class DatasetQueryStatsDailyService:
     def delete_query_stats_daily(
         self, dataset_id: UUID, delete_request: DatasetQueryStatsDailyDelete
     ) -> None:
-        target_date = date.fromisoformat(delete_request.date)
+        try:
+            target_date = date.fromisoformat(delete_request.date)
+        except ValueError as e:
+            raise ValueError(f"Invalid date format: {delete_request.date}") from e
 
         (
             self.db.query(DatasetQueryStatsDaily)
@@ -127,20 +117,24 @@ class DatasetQueryStatsDailyService:
         stats: list[DatasetQueryStatsDailyResponse],
         granularity: QueryStatsGranularity,
     ) -> list[DatasetQueryStatsDailyResponse]:
+        """
+        Aggregate stats by time granularity (week/month).
+        Preserves the consumer_data_product_name from the first stat encountered.
+        """
         aggregated: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse] = {}
         for stat in stats:
             bucket_date = self._truncate_date(stat.date, granularity)
             key = (bucket_date, stat.consumer_data_product_id)
-            existing = aggregated.get(key)
-            if existing:
-                existing.query_count += stat.query_count
-                continue
-            aggregated[key] = DatasetQueryStatsDailyResponse(
-                date=bucket_date,
-                consumer_data_product_id=stat.consumer_data_product_id,
-                query_count=stat.query_count,
-                consumer_data_product_name=stat.consumer_data_product_name,
-            )
+
+            if key in aggregated:
+                aggregated[key].query_count += stat.query_count
+            else:
+                aggregated[key] = DatasetQueryStatsDailyResponse(
+                    date=bucket_date,
+                    consumer_data_product_id=stat.consumer_data_product_id,
+                    query_count=stat.query_count,
+                    consumer_data_product_name=stat.consumer_data_product_name,
+                )
 
         return sorted(
             aggregated.values(),
@@ -243,13 +237,16 @@ class DatasetQueryStatsDailyService:
 
     @staticmethod
     def _truncate_date(value: date, granularity: QueryStatsGranularity) -> date:
+        """
+        Truncate a date to the start of the specified granularity period.
+        - DAY: returns the date as-is
+        - WEEK: returns Monday of the week
+        - MONTH: returns the first day of the month
+        """
         if granularity == QueryStatsGranularity.DAY:
             return value
-
         if granularity == QueryStatsGranularity.WEEK:
             return value - timedelta(days=value.weekday())
-
         if granularity == QueryStatsGranularity.MONTH:
             return value.replace(day=1)
-
         return value
