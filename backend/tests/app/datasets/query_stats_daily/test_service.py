@@ -177,11 +177,17 @@ class TestDatasetQueryStatsDailyService:
         )
         stats = response.dataset_query_stats_daily_responses
 
-        # Verify results
-        assert len(stats) == 2
+        # Verify buckets are filled (should have many entries due to bucket filling)
+        assert len(stats) > 2
+
+        # Filter to actual data points (non-zero query counts)
+        actual_stats = [stat for stat in stats if stat.query_count > 0]
+        assert len(actual_stats) == 2
 
         # Verify the correct records were returned
-        stats_by_consumer = {stat.consumer_data_product_id: stat for stat in stats}
+        stats_by_consumer = {
+            stat.consumer_data_product_id: stat for stat in actual_stats
+        }
         assert consumer1.id in stats_by_consumer
         assert consumer2.id in stats_by_consumer
         assert stats_by_consumer[consumer1.id].query_count == 100
@@ -221,10 +227,15 @@ class TestDatasetQueryStatsDailyService:
         )
 
         stats = response.dataset_query_stats_daily_responses
-        assert len(stats) == 1
-        assert stats[0].date == start_of_week
-        assert stats[0].query_count == 300
-        assert stats[0].consumer_data_product_id == consumer.id
+        # Verify buckets are filled (should have many entries due to bucket filling)
+        assert len(stats) > 1
+
+        # Find the actual data point (non-zero query count)
+        actual_stats = [stat for stat in stats if stat.query_count > 0]
+        assert len(actual_stats) == 1
+        assert actual_stats[0].date == start_of_week
+        assert actual_stats[0].query_count == 300
+        assert actual_stats[0].consumer_data_product_id == consumer.id
 
     def test_get_query_stats_daily_day_range_filter(self, session: Session):
         dataset = DatasetFactory()
@@ -255,9 +266,14 @@ class TestDatasetQueryStatsDailyService:
         )
 
         stats = response.dataset_query_stats_daily_responses
-        assert len(stats) == 1
-        assert stats[0].date == recent_date
-        assert stats[0].query_count == 50
+        # Verify buckets are filled (should have many entries due to bucket filling)
+        assert len(stats) > 1
+
+        # Find the actual data point (non-zero query count)
+        actual_stats = [stat for stat in stats if stat.query_count > 0]
+        assert len(actual_stats) == 1
+        assert actual_stats[0].date == recent_date
+        assert actual_stats[0].query_count == 50
 
     def test_delete_query_stats_daily_existing_row(
         self, session: Session, dataset_with_two_stats
