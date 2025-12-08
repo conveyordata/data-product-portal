@@ -30,15 +30,15 @@ We need a comprehensive set of API endpoints for the usage feature. This include
     * `GET /api/datasets/{id}/usage/time-series`
     * Query Params: `granularity=week|month|day` (default week), `time_range=90d|1y` (default 90d).
 
-1. Query Distribution by Consumer
-    * `GET /api/datasets/{id}/usage/consumer-distribution`
-    * Query Params: `time_range=7d|30d|90d` (default 90d).
-
-1. Curated Queries (List)
+2. Curated Queries (List)
     * `GET /api/datasets/{id}/usage/curated-queries`
 
-1. Most Popular Assets
+3. Most Popular Assets
     * `GET /api/datasets/{id}/usage/popular-assets`
+    * Query Params: `time_range=90d (default).`
+
+4. Most Often Combined With
+    * `GET /api/datasets/{id}/usage/combined-with`
     * Query Params: `time_range=90d (default).`
 
 #### Producer-Facing Endpoints (Metadata Management)
@@ -55,29 +55,91 @@ As we want to support sorting operations and don't expect too many curated queri
 
 Push daily stats
 
-* `POST /api/datasets/{id}/usage/ingest`
-* Payload:
-```
+* `PATCH /api/datasets/{id}/usage/query-stats`
+
+Payload:
+```[json]
 {
-  "query_stats": [
+  "dataset_query_stats_daily_updates": [
     {
       "date": "YYYY-MM-DD",
-      "consumer_id": "uuid",
+      "consumer_data_product_id": "uuid",
       "query_count": "integer"
-    }
-  ],
-  "asset_stats": [
-    {
-      "date": "YYYY-MM-DD",
-      "asset_id": "uuid",
-      "consumer_id": "uuid",
-      "query_count": "integer"
-    }
+    },
+    ...
   ]
 }
 ```
-* Success Response (202 Accepted): The data has been accepted for batch processing.
-* Limits: Requires payload size limit on this. We can solve splitting in the SDK (ADR-0007).
+
+  - Success Response (202 Accepted): The data has been accepted for batch processing.
+  - Limits: Requires payload size limit on this. We can solve splitting in the SDK (ADR-0007).
+
+
+`DELETE /api/datasets/{id}/usage/query-stats`
+* Payload:
+```[json]
+{
+  "date": "YYYY-MM-DD"
+  "consumer_data_product_id": "uuid"
+}
+```
+
+* `PATCH /api/datasets/{id}/usage/combined-with`
+
+Payload:
+```[json]
+{
+  "dataset_combined_with_updates": [
+    {
+      "date": "YYYY-MM-DD",
+      "combined_with_output_port_id": "uuid",
+      "consumer_data_product_id": "uuid",
+      "query_count": "integer"
+    },
+    ...
+  ]
+}
+```
+
+* `DELETE /api/datasets/{id}/usage/combined-with`
+* Payload:
+```[json]
+{
+  "date": "YYYY-MM-DD",
+  "combined_with_output_port_id": "uuid",
+  "consumer_data_product_id": "uuid"
+}
+```
+
+* `PATCH /api/datasets/{id}/usage/popular-assets`
+
+Payload:
+```[json]
+{
+  "dataset_popular_assets_updates": [
+    {
+      "date": "YYYY-MM-DD",
+      "asset_id": "uuid",
+      "consumer_data_product_id": "uuid",
+      "query_count": "integer"
+    },
+    ...
+  ]
+}
+```
+
+* `DELETE /api/datasets/{id}/usage/popular-assets`
+* Payload:
+```[json]
+{
+  "date": "YYYY-MM-DD",
+  "asset_id": "uuid",
+  "consumer_data_product_id": "uuid"
+}
+```
+
+
+
 
 ## Pros and Cons of the Options
 
