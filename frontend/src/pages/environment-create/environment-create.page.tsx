@@ -10,7 +10,7 @@ export function EnvironmentCreate() {
     return (
         <Flex vertical className={styles.container}>
             <Typography.Title level={3}>{t('New Environment')}</Typography.Title>
-            <Space direction={'vertical'} size={'large'} className={styles.container}>
+            <Space orientation="vertical" size="large" className={styles.container}>
                 <EnvironmentCreateForm />
             </Space>
         </Flex>

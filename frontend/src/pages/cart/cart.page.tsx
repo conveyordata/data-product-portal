@@ -236,7 +236,7 @@ function Cart() {
                             </Form.Item>
                             {submitFormIssues.length > 0 && (
                                 <Alert
-                                    message={t('Cannot submit request')}
+                                    title={t('Cannot submit request')}
                                     description={
                                         <ul style={{ margin: 0, paddingLeft: 20 }}>
                                             {submitFormIssues.map((reason) => (

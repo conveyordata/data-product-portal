@@ -101,7 +101,7 @@ const blueThemeConfig: ThemeConfig = {
         colorInfoTextActive: token.colorPrimaryTextActive,
         ...spacingTokens,
     },
-    cssVar: true,
+    cssVar: {},
 };
 
 const datamindedThemeConfig: ThemeConfig = {
@@ -202,7 +202,7 @@ const datamindedThemeConfig: ThemeConfig = {
         colorInfoTextActive: token.colorPrimaryTextActive,
         ...spacingTokens,
     },
-    cssVar: true,
+    cssVar: {},
 };
 
 const greenThemeConfig: ThemeConfig = {
@@ -282,7 +282,7 @@ const greenThemeConfig: ThemeConfig = {
         ...spacingTokens,
     },
     algorithm: theme.defaultAlgorithm,
-    cssVar: true,
+    cssVar: {},
 };
 
 export { blueThemeConfig, datamindedThemeConfig, greenThemeConfig };

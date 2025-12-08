@@ -7,7 +7,7 @@
       "name": "Stijn Janssens",
       "email": "stijn.janssens@dataminded.com"
     },
-    "version": "0.4.1"
+    "version": "0.4.2"
   },
   "paths": {
     "/api/authz/access/{action}": {
@@ -10931,16 +10931,6 @@
               "type": "boolean",
               "default": true,
               "title": "Dataset Nodes Enabled"
-            }
-          },
-          {
-            "name": "data_output_nodes_enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true,
-              "title": "Data Output Nodes Enabled"
             }
           }
         ],

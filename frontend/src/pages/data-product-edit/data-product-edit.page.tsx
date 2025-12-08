@@ -22,7 +22,7 @@ export function DataProductEdit() {
             <Typography.Title level={3} className={styles.title}>
                 {dataProduct?.name}
             </Typography.Title>
-            <Space direction={'vertical'} size={'large'} className={styles.container}>
+            <Space orientation="vertical" size="large" className={styles.container}>
                 <DataProductForm dataProductId={dataProductId} mode={'edit'} />
             </Space>
         </Flex>

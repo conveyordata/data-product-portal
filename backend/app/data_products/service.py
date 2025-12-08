@@ -514,6 +514,7 @@ class DataProductService:
             DataProductModel,
             id,
             populate_existing=True,
+            options=[selectinload(DataProductModel.datasets)],
         )
         nodes = [
             Node(
@@ -637,6 +638,28 @@ class DataProductService:
                                     == DecisionStatus.APPROVED,
                                 )
                             )
+
+        # if no data outputs are present, still show the children datasets
+        if not data_outputs:
+            for downstream_dataset in product.datasets:
+                nodes.append(
+                    Node(
+                        id=downstream_dataset.id,
+                        data=NodeData(
+                            id=downstream_dataset.id,
+                            name=downstream_dataset.name,
+                        ),
+                        type=NodeType.datasetNode,
+                    )
+                )
+                edges.append(
+                    Edge(
+                        id=f"{product.id}-{downstream_dataset.id}-direct",
+                        source=product.id,
+                        target=downstream_dataset.id,
+                        animated=True,
+                    )
+                )
 
         return Graph(nodes=set(nodes), edges=set(edges))
 

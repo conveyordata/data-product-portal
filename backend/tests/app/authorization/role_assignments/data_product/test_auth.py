@@ -1,18 +1,22 @@
+from typing import TYPE_CHECKING
+
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
-from app.authorization.role_assignments.data_product.schema import RoleAssignment
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Authorization
-from app.data_products.model import DataProduct
-from app.users.schema import User
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
+
+if TYPE_CHECKING:
+    from app.authorization.role_assignments.data_product.schema import RoleAssignment
+    from app.data_products.model import DataProduct
+    from app.users.schema import User
 
 
 class TestAuth:

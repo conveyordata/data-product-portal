@@ -1,9 +1,9 @@
 import '@xyflow/react/dist/base.css';
 
-import type { Node } from '@xyflow/react';
+import type { Edge, Node } from '@xyflow/react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { type MouseEvent, useCallback, useEffect, useState } from 'react';
 
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
@@ -14,21 +14,10 @@ import { parseRegularNode } from '@/utils/node-parser.helper';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from '../explorer/common';
 import styles from '../explorer/explorer.module.scss';
 import { parseEdges } from '../explorer/utils';
-import { parseDomainNode } from './nodes/domain-node-parser.helper';
 import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
 import { useNodeEditor } from './use-node-editor';
 
-function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void, domainsEnabled = true): Node[] {
-    // Count how many children each domain node has
-    const childCounts = nodes
-        .filter((node) => node.type !== CustomNodeTypes.DomainNode)
-        .reduce((acc: Record<string, number>, node) => {
-            if (node.data.domain_id) {
-                acc[node.data.domain_id] = (acc[node.data.domain_id] || 0) + 1;
-            }
-            return acc;
-        }, {});
-
+function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void): Node[] {
     // Parse regular nodes
     const regularNodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
@@ -65,18 +54,64 @@ function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void, 
                 default:
                     throw new Error(`Unknown node type: ${node.type}`);
             }
-            return parseRegularNode(node, setNodeId, domainsEnabled, true, extra_attributes);
+            // For now perma disable domains
+            return parseRegularNode(node, setNodeId, false, true, extra_attributes);
         });
 
-    // Parse domain nodes (only if domains are enabled and they have children)
-    const domainNodes = domainsEnabled
-        ? nodes
-              .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
-              .map((node, index) => parseDomainNode(node, setNodeId, index))
-        : [];
+    return regularNodes; // Skip domain nodes for clarity and reduced clutter
+}
 
-    // Domain nodes are parents so should come before their children in the array
-    return [...domainNodes, ...regularNodes];
+function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | null) {
+    if (!selectedId) {
+        // No selection - all nodes normal
+        return {
+            highlightedNodes: nodes.map((node) => ({ ...node, data: { ...node.data, dimmed: false } })),
+            highlightedEdges: edges.map((edge) => ({ ...edge, data: { ...edge.data, dimmed: false } })),
+        };
+    }
+
+    // Find directly connected node IDs
+    const connectedNodeIds = new Set<string>();
+    connectedNodeIds.add(selectedId);
+
+    edges.forEach((edge) => {
+        if (edge.source === selectedId) {
+            connectedNodeIds.add(edge.target);
+        }
+        if (edge.target === selectedId) {
+            connectedNodeIds.add(edge.source);
+        }
+    });
+
+    // Apply highlighting to nodes
+    const highlightedNodes = nodes.map((node) => ({
+        ...node,
+        data: {
+            ...node.data,
+            dimmed: !connectedNodeIds.has(node.id),
+        },
+        style: {
+            ...node.style,
+            opacity: connectedNodeIds.has(node.id) ? 1 : 0.3,
+            zIndex: connectedNodeIds.has(node.id) ? 10 : 1,
+        },
+    }));
+
+    // Apply highlighting to edges
+    const highlightedEdges = edges.map((edge) => ({
+        ...edge,
+        data: {
+            ...edge.data,
+            dimmed: !connectedNodeIds.has(edge.source) || !connectedNodeIds.has(edge.target),
+        },
+        style: {
+            ...edge.style,
+            opacity: connectedNodeIds.has(edge.source) && connectedNodeIds.has(edge.target) ? 1 : 0.2,
+            zIndex: connectedNodeIds.has(edge.source) && connectedNodeIds.has(edge.target) ? 10 : 1,
+        },
+    }));
+
+    return { highlightedNodes, highlightedEdges };
 }
 
 export default function InternalFullExplorer() {
@@ -89,9 +124,52 @@ export default function InternalFullExplorer() {
     const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
         dataProductsEnabled: true,
         datasetsEnabled: true,
-        dataOutputsEnabled: true,
         domainsEnabled: true,
     });
+
+    const [nodeId, setNodeId] = useState<string | null>(null);
+
+    const { data: graph, isFetching } = useGetGraphDataQuery(
+        {
+            includeDataProducts: sidebarFilters.dataProductsEnabled,
+            includeDatasets: sidebarFilters.datasetsEnabled,
+            includeDomains: sidebarFilters.domainsEnabled,
+        },
+        {
+            skip: false,
+        },
+    );
+
+    // Helper function to apply highlighting logic
+
+    const generateGraph = useCallback(async () => {
+        if (graph) {
+            const nodes = parseFullNodes(graph.nodes, setNodeId);
+            const edges = parseEdges(graph.edges, token);
+
+            // Explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
+            const straightEdges = edges.map((edge) => ({
+                ...edge,
+                type: CustomEdgeTypes.StraightEdge,
+            }));
+
+            // Apply highlighting based on selected node
+            const { highlightedNodes, highlightedEdges } = applyHighlighting(nodes, straightEdges, nodeId);
+
+            const positionedNodes = await applyLayout(
+                highlightedNodes,
+                highlightedEdges,
+                sidebarFilters.domainsEnabled,
+            );
+
+            setNodes(positionedNodes);
+            setEdges(highlightedEdges);
+        }
+    }, [graph, applyLayout, sidebarFilters, token, setEdges, setNodes, nodeId]);
+
+    useEffect(() => {
+        generateGraph();
+    }, [generateGraph]);
 
     useEffect(() => {
         // Give React Flow time to update its internals
@@ -103,55 +181,46 @@ export default function InternalFullExplorer() {
         return () => clearTimeout(timeout);
     }, [currentInstance]);
 
-    const [nodeId, setNodeId] = useState<string | null>(null);
+    // Custom node click handler
+    function handleNodeClick(_event: MouseEvent | undefined, node: Node) {
+        if (node) {
+            setNodeId(node.id);
 
-    const { data: graph, isFetching } = useGetGraphDataQuery(
-        {
-            includeDataProducts: sidebarFilters.dataProductsEnabled,
-            includeDatasets: sidebarFilters.datasetsEnabled,
-            includeDataOutputs: sidebarFilters.dataOutputsEnabled,
-            includeDomains: sidebarFilters.domainsEnabled,
-        },
-        {
-            skip: false,
-        },
-    );
+            setTimeout(() => {
+                // Get connected nodes for fitting view
+                const connectedNodeIds = new Set<string>();
+                connectedNodeIds.add(node.id);
 
-    const generateGraph = useCallback(async () => {
-        if (graph) {
-            const nodes = parseFullNodes(graph.nodes, setNodeId, sidebarFilters.domainsEnabled);
-            const edges = parseEdges(graph.edges, token);
+                edges.forEach((edge) => {
+                    if (edge.source === node.id) {
+                        connectedNodeIds.add(edge.target);
+                    }
+                    if (edge.target === node.id) {
+                        connectedNodeIds.add(edge.source);
+                    }
+                });
 
-            // Explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
-            const straightEdges = edges.map((edge) => ({
-                ...edge,
-                type: CustomEdgeTypes.StraightEdge,
-            }));
+                const connectedNodes = nodes.filter((n) => connectedNodeIds.has(n.id));
 
-            const positionedNodes = await applyLayout(nodes, straightEdges, sidebarFilters.domainsEnabled); // positions the nodes
-
-            setNodes(positionedNodes);
-            setEdges(straightEdges);
+                currentInstance.fitView({
+                    ...defaultFitViewOptions,
+                    nodes: connectedNodes,
+                    padding: 0.3,
+                });
+            }, 150);
         }
-    }, [graph, applyLayout, sidebarFilters, token, setEdges, setNodes]);
+    }
 
-    useEffect(() => {
-        generateGraph();
-    }, [generateGraph]);
+    // Function to clear selection
+    const handleBackgroundClick = useCallback(() => {
+        setNodeId(null);
+        setTimeout(() => {
+            currentInstance.fitView(defaultFitViewOptions);
+        }, 50);
+    }, [currentInstance]);
 
     if (isFetching) {
         return <LoadingSpinner />;
-    }
-
-    // Custom node click handler
-    function handleNodeClick(_event: React.MouseEvent, node: Node) {
-        if (node)
-            setTimeout(() => {
-                currentInstance.fitView({
-                    ...defaultFitViewOptions,
-                    nodes: [node],
-                });
-            }, 50); // Small delay to let React Flow's internal logic complete, otherwise there seems to be an automatic (internally managed) fit view, but to the wrong position.
     }
 
     return (
@@ -162,7 +231,7 @@ export default function InternalFullExplorer() {
                 onFilterChange={setSidebarFilters}
                 sidebarFilters={sidebarFilters}
                 nodeId={nodeId}
-                setNodeId={setNodeId}
+                nodeClick={handleNodeClick}
             />
             <NodeEditor
                 nodes={nodes}
@@ -171,6 +240,7 @@ export default function InternalFullExplorer() {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onNodeClick={handleNodeClick}
+                onPaneClick={handleBackgroundClick}
                 editorProps={{
                     draggable: false,
                     edgesReconnectable: false,

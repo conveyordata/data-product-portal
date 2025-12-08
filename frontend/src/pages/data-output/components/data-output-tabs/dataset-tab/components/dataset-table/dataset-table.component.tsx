@@ -46,7 +46,7 @@ export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
                 onChange={onChange}
                 pagination={{
                     ...pagination,
-                    position: ['topRight'],
+                    placement: ['topEnd'],
                     size: 'small',
                     showTotal: (total, range) =>
                         t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
