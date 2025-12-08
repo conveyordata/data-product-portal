@@ -21,23 +21,23 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
     const queryLines = query.query_text.split('\n');
     const hasLongSql = queryLines.length > SQL_LINES_THRESHOLD;
 
-    const displayedQuery =
-        isExpanded || !hasLongSql ? query.query_text : queryLines.slice(0, SQL_LINES_THRESHOLD).join('\n');
-
     return (
         <List.Item>
             <Flex vertical gap={0}>
                 <List.Item.Meta title={query.title} description={query.description} />
                 <Flex vertical gap="small">
                     <Flex gap="small" align="start">
-                        <Flex flex={1} className={styles.sqlCode}>
+                        <Flex
+                            flex={1}
+                            className={`${styles.sqlCode} ${!isExpanded && hasLongSql ? styles.collapsed : ''}`}
+                        >
                             <SyntaxHighlighter
                                 language="sql"
                                 style={magula}
                                 className={styles.syntaxHighlighter}
                                 showLineNumbers={false}
                             >
-                                {displayedQuery}
+                                {query.query_text}
                             </SyntaxHighlighter>
                         </Flex>
                         <Button
