@@ -8,7 +8,12 @@ import {
 } from '@/store/features/datasets/datasets-api-slice';
 
 import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
-import { aggregateQueriesPerConsumer, transformDataForChart } from './components/chart-data.utils';
+import {
+    aggregateQueriesPerConsumer,
+    createColorScaleConfig,
+    getUniqueConsumers,
+    transformDataForChart,
+} from './components/chart-data.utils';
 import { CuratedQueriesList } from './components/curated-queries-list';
 import { QueriesOverTimeChart } from './components/queries-over-time-chart';
 import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
@@ -61,6 +66,9 @@ export function UsageTab({ datasetId }: Props) {
 
     const consumerTotals = useMemo(() => aggregateQueriesPerConsumer(chartData), [chartData]);
 
+    const uniqueConsumers = useMemo(() => getUniqueConsumers(chartData), [chartData]);
+    const colorScaleConfig = useMemo(() => createColorScaleConfig(uniqueConsumers), [uniqueConsumers]);
+
     return (
         <Flex vertical gap="large">
             {isLoadingState && !hasUsageData ? (
@@ -88,11 +96,17 @@ export function UsageTab({ datasetId }: Props) {
                         </Flex>
                     </Flex>
                     <Flex className={styles.chartsGrid} gap={32}>
-                        <QueriesOverTimeChart data={chartData} isLoading={isLoadingState} hasData={hasUsageData} />
+                        <QueriesOverTimeChart
+                            data={chartData}
+                            isLoading={isLoadingState}
+                            hasData={hasUsageData}
+                            colorScaleConfig={colorScaleConfig}
+                        />
                         <QueriesPerConsumerChart
                             data={consumerTotals}
                             isLoading={isLoadingState}
                             hasData={hasUsageData}
+                            colorScaleConfig={colorScaleConfig}
                         />
                     </Flex>
                 </Flex>

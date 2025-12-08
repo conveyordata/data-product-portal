@@ -61,3 +61,23 @@ export function aggregateQueriesPerConsumer(dataPoints: ChartDataPoint[]): Consu
         }))
         .sort((a, b) => b.totalQueries - a.totalQueries);
 }
+
+export function getUniqueConsumers(dataPoints: ChartDataPoint[]): string[] {
+    const consumersSet = new Set<string>();
+    for (const point of dataPoints) {
+        consumersSet.add(point.consumer);
+    }
+    return Array.from(consumersSet).sort();
+}
+
+export function createColorScaleConfig(consumers: string[]) {
+    return {
+        scale: {
+            color: {
+                domain: consumers,
+            },
+        },
+    };
+}
+
+export type ColorScaleConfig = ReturnType<typeof createColorScaleConfig>;
