@@ -9,6 +9,8 @@ sidebar_position: 200
 ## 0.4.2
 
 ### features
+- **[Usage]**: Added usage tabs with curated queries and query statistics on data products. This feature is still in Beta.
+
 - **[Explorer]**: Removed technical assets from full explorer view for clarity. Improved performance of graph fetching.
 
 - **[Admin rights]**: It is no longer allowed to have permanent admin rights. Users who were admins before will now get the option to temporarily elevate themselves to super user rights.
