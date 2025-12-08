@@ -5,6 +5,7 @@ import type {
     DatasetContract,
     DatasetCreateRequest,
     DatasetCreateResponse,
+    DatasetCuratedQueriesContract,
     DatasetUpdateRequest,
     DatasetUpdateResponse,
 } from '@/types/dataset';
@@ -49,6 +50,13 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                           ...result.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
                       ]
                     : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        getDatasetQueryCuratedQueries: builder.query<DatasetCuratedQueriesContract, string>({
+            query: (datasetId) => ({
+                url: buildUrl(ApiUrl.DatasetCuratedQueries, { datasetId }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, datasetId) => [{ type: TagTypes.Dataset as const, id: datasetId }],
         }),
         getUserDatasets: builder.query<DatasetsGetContract, string>({
             query: (userId) => ({
@@ -182,6 +190,7 @@ export const {
     useSearchDatasetsQuery,
     useGetAllDatasetsQuery,
     useGetDatasetByIdQuery,
+    useGetDatasetQueryCuratedQueriesQuery,
     useCreateDatasetMutation,
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,

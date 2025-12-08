@@ -36,6 +36,7 @@
         "@tiptap/extension-typography": "^3.13.0",
         "@tiptap/extension-underline": "^3.13.0",
         "@tiptap/pm": "^3.0.7",
+        "@types/react-syntax-highlighter": "^15.5.13",
         "@tiptap/react": "^3.13.0",
         "@tiptap/starter-kit": "^3.13.0",
         "@xyflow/react": "^12.10.0",
@@ -55,6 +56,7 @@
         "react-i18next": "^16.4.0",
         "react-oidc-context": "^3.3.0",
         "react-redux": "^9.2.0",
+        "react-syntax-highlighter": "^16.1.0",
         "react-router": "^7.10.1",
         "use-debounce": "^10.0.6",
         "web-worker": "^1.5.0"

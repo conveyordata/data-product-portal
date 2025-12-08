@@ -1,4 +1,7 @@
-import { useGetDatasetQueryStatsDailyQuery } from '@/store/features/datasets/datasets-api-slice';
+import {
+    useGetDatasetQueryCuratedQueriesQuery,
+    useGetDatasetQueryStatsDailyQuery,
+} from '@/store/features/datasets/datasets-api-slice';
 import { UsageChart } from './usage-chart';
 
 type Props = {
@@ -6,7 +9,23 @@ type Props = {
 };
 
 export function UsageTab({ datasetId }: Props) {
-    const { data, isLoading } = useGetDatasetQueryStatsDailyQuery(datasetId);
+    const { data: usageData, isLoading: isUsageLoading } = useGetDatasetQueryStatsDailyQuery(datasetId, {
+        skip: !datasetId,
+    });
 
-    return <UsageChart data={data} isLoading={isLoading} />;
+    const { data: curatedQueries, isLoading: areCuratedQueriesLoading } = useGetDatasetQueryCuratedQueriesQuery(
+        datasetId,
+        {
+            skip: !datasetId,
+        },
+    );
+
+    return (
+        <UsageChart
+            usageData={usageData}
+            curatedQueries={curatedQueries?.dataset_curated_queries}
+            isUsageLoading={isUsageLoading}
+            areCuratedQueriesLoading={areCuratedQueriesLoading}
+        />
+    );
 }

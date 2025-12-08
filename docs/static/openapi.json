@@ -1324,6 +1324,122 @@
         }
       }
     },
+    "/api/datasets/{id}/usage/curated_queries": {
+      "get": {
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
+        "summary": "Get Dataset Curated Queries",
+        "operationId": "get_dataset_curated_queries_api_datasets__id__usage_curated_queries_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetCuratedQueries"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
+        "summary": "Replace Dataset Curated Queries",
+        "operationId": "replace_dataset_curated_queries_api_datasets__id__usage_curated_queries_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetCuratedQueriesUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetCuratedQueries"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Dataset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Dataset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_products": {
       "get": {
         "tags": [
@@ -13902,6 +14018,127 @@
           "owners"
         ],
         "title": "DatasetCreate"
+      },
+      "DatasetCuratedQueries": {
+        "properties": {
+          "dataset_curated_queries": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetCuratedQuery"
+            },
+            "type": "array",
+            "title": "Dataset Curated Queries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_curated_queries"
+        ],
+        "title": "DatasetCuratedQueries"
+      },
+      "DatasetCuratedQueriesUpdate": {
+        "properties": {
+          "curated_queries": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetCuratedQueryInput"
+            },
+            "type": "array",
+            "title": "Curated Queries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "curated_queries"
+        ],
+        "title": "DatasetCuratedQueriesUpdate"
+      },
+      "DatasetCuratedQuery": {
+        "properties": {
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "query_text": {
+            "type": "string",
+            "title": "Query Text"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_id",
+          "sort_order",
+          "title",
+          "description",
+          "query_text",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DatasetCuratedQuery"
+      },
+      "DatasetCuratedQueryInput": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "query_text": {
+            "type": "string",
+            "title": "Query Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "query_text"
+        ],
+        "title": "DatasetCuratedQueryInput"
       },
       "DatasetGet": {
         "properties": {
