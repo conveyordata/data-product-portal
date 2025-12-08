@@ -44,7 +44,7 @@ class DatasetQueryStatsDailyService:
         granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
         day_range: int = DEFAULT_DAY_RANGE,
     ) -> DatasetQueryStatsDailyResponses:
-        start_date = self._start_date_from_day_range(day_range)
+        start_date = date.today() - timedelta(days=day_range)
 
         # Build query with database-level aggregation if needed
         if granularity == QueryStatsGranularity.DAY:
@@ -158,10 +158,6 @@ class DatasetQueryStatsDailyService:
             .delete(synchronize_session=False)
         )
         self.db.commit()
-
-    @staticmethod
-    def _start_date_from_day_range(day_range: int) -> date:
-        return date.today() - timedelta(days=day_range)
 
     @staticmethod
     def _sort_stats_by_date_and_consumer(
