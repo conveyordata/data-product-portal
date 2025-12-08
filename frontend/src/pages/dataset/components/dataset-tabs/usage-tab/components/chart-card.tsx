@@ -15,11 +15,7 @@ export function ChartCard({ title, isLoading, hasData, emptyDescription, childre
     let content: ReactNode = children;
 
     if (isLoading) {
-        content = (
-            <Flex align="center" justify="center">
-                <LoadingSpinner />
-            </Flex>
-        );
+        content = <LoadingSpinner />;
     } else if (!hasData) {
         content = (
             <Flex align="center" justify="center">
