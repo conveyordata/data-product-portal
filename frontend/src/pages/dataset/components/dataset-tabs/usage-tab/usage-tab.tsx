@@ -34,8 +34,8 @@ function getGranularityFromDayRange(dayRange: number): DatasetQueryStatsGranular
 
 export function UsageTab({ datasetId }: Props) {
     const { t } = useTranslation();
-    const longestDayRange = 365;
-    const [dayRange, setDayRange] = useState<number>(longestDayRange);
+    const yearDayRange = 365;
+    const [dayRange, setDayRange] = useState<number>(yearDayRange);
     const granularity = useMemo(() => getGranularityFromDayRange(dayRange), [dayRange]);
 
     const { data, isLoading, isFetching } = useGetDatasetQueryStatsDailyQuery({
@@ -90,7 +90,7 @@ export function UsageTab({ datasetId }: Props) {
                                     options={[
                                         { label: t('Last 30 days'), value: 30 },
                                         { label: t('Last 90 days'), value: 90 },
-                                        { label: t('Last year'), value: longestDayRange },
+                                        { label: t('Last year'), value: yearDayRange },
                                     ]}
                                 />
                             </Flex>
