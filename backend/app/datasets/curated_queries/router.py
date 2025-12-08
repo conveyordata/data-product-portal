@@ -36,7 +36,7 @@ def get_dataset_curated_queries(
         ),
     ],
 )
-def upsert_dataset_curated_queries(
+def replace_dataset_curated_queries(
     id: UUID,
     curated_queries: DatasetCuratedQueriesUpdate,
     db: Session = Depends(get_db_session),

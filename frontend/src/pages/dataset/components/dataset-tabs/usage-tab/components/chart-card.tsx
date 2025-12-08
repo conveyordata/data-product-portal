@@ -5,22 +5,17 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 
 type ChartCardProps = {
     title: string;
-    className?: string;
     isLoading: boolean;
     hasData: boolean;
     emptyDescription: string;
     children: ReactNode;
 };
 
-export function ChartCard({ title, className, isLoading, hasData, emptyDescription, children }: ChartCardProps) {
+export function ChartCard({ title, isLoading, hasData, emptyDescription, children }: ChartCardProps) {
     let content: ReactNode = children;
 
     if (isLoading) {
-        content = (
-            <Flex align="center" justify="center">
-                <LoadingSpinner />
-            </Flex>
-        );
+        content = <LoadingSpinner />;
     } else if (!hasData) {
         content = (
             <Flex align="center" justify="center">
@@ -29,9 +24,5 @@ export function ChartCard({ title, className, isLoading, hasData, emptyDescripti
         );
     }
 
-    return (
-        <Card className={className} title={title} styles={{ body: { padding: 0 } }}>
-            {content}
-        </Card>
-    );
+    return <Card title={title}>{content}</Card>;
 }

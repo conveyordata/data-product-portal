@@ -9,13 +9,11 @@ type QueriesOverTimeChartProps = {
     data: ChartDataPoint[];
     isLoading: boolean;
     hasData: boolean;
-    className?: string;
 };
 
-export function QueriesOverTimeChart({ data, isLoading, hasData, className }: QueriesOverTimeChartProps) {
+export function QueriesOverTimeChart({ data, isLoading, hasData }: QueriesOverTimeChartProps) {
     const { t } = useTranslation();
 
-    // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
     const config = useMemo(() => {
         return {
             data,
@@ -50,11 +48,10 @@ export function QueriesOverTimeChart({ data, isLoading, hasData, className }: Qu
 
     return (
         <ChartCard
-            className={className}
-            title={t('Queries Over Time')}
+            title={t('Usage Statistics - Last Month')}
             isLoading={isLoading}
             hasData={hasData}
-            emptyDescription={t('No usage data available for this time range and granularity')}
+            emptyDescription={t('No usage data available for the last month')}
         >
             <Area {...config} />
         </ChartCard>

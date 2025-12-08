@@ -1,14 +1,18 @@
+from typing import TYPE_CHECKING
+
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.schema import RoleAssignment
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
-from app.users.schema import User
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 from tests.factories.dataset import DatasetFactory
+
+if TYPE_CHECKING:
+    from app.authorization.role_assignments.global_.schema import RoleAssignment
+    from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/global"
 

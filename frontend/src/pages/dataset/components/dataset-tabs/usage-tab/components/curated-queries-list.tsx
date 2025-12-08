@@ -39,7 +39,7 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
             {isLoading ? (
                 <Skeleton active paragraph={{ rows: 4 }} />
             ) : queriesList.length === 0 ? (
-                <Flex className={styles.emptyState} justify="center" align="center">
+                <Flex className={styles.emptyState} align="center" justify="center">
                     <Empty description={t('No curated queries available')} />
                 </Flex>
             ) : (

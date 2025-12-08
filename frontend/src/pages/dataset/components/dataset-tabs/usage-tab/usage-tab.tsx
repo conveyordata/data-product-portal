@@ -1,10 +1,12 @@
 import { Empty, Flex, Select, Spin, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
     useGetDatasetQueryCuratedQueriesQuery,
     useGetDatasetQueryStatsDailyQuery,
 } from '@/store/features/datasets/datasets-api-slice';
+
 import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
 import { aggregateQueriesPerConsumer, transformDataForChart } from './components/chart-data.utils';
 import { CuratedQueriesList } from './components/curated-queries-list';
@@ -89,14 +91,8 @@ export function UsageTab({ datasetId }: Props) {
                         </Flex>
                     </Flex>
                     <Flex className={styles.chartsGrid} gap={32}>
-                        <QueriesOverTimeChart
-                            className={styles.chartCard}
-                            data={chartData}
-                            isLoading={isLoadingState}
-                            hasData={hasUsageData}
-                        />
+                        <QueriesOverTimeChart data={chartData} isLoading={isLoadingState} hasData={hasUsageData} />
                         <QueriesPerConsumerChart
-                            className={styles.chartCard}
                             data={consumerTotals}
                             isLoading={isLoadingState}
                             hasData={hasUsageData}

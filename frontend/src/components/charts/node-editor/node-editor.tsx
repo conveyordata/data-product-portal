@@ -26,6 +26,7 @@ type Props = {
     onNodesChange: (changes: NodeChange[]) => void;
     onEdgesChange: (changes: EdgeChange[]) => void;
     onNodeClick?: ReactFlowProps['onNodeClick'];
+    onPaneClick?: ReactFlowProps['onPaneClick'];
     editorProps?: Omit<ReactFlowProps, 'nodes' | 'edges' | 'onConnect' | 'onNodesChange' | 'onEdgesChange'>;
     debug?: boolean;
 };
@@ -37,6 +38,7 @@ export function NodeEditor({
     onNodesChange,
     onEdgesChange,
     onNodeClick,
+    onPaneClick,
     debug,
     editorProps,
 }: Props) {
@@ -52,6 +54,7 @@ export function NodeEditor({
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onNodeClick={onNodeClick}
+                onPaneClick={onPaneClick}
                 fitView
                 onInit={(instance) => instance.fitView(defaultFitViewOptions)}
                 minZoom={MIN_ZOOM}

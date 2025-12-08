@@ -2,10 +2,13 @@ import { CopyOutlined } from '@ant-design/icons';
 import { Button, Flex, List } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import sql from 'react-syntax-highlighter/dist/esm/languages/hljs/sql';
 import { magula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 import type { DatasetCuratedQueryContract } from '@/types/dataset';
 import styles from './curated-query-item.module.scss';
+
+SyntaxHighlighter.registerLanguage('sql', sql);
 
 export const SQL_LINES_THRESHOLD = 10;
 
@@ -18,8 +21,8 @@ type CuratedQueryItemProps = {
 
 export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: CuratedQueryItemProps) {
     const { t } = useTranslation();
-    const queryLines = query.query_text.split('\n');
-    const hasLongSql = queryLines.length > SQL_LINES_THRESHOLD;
+    const hasLongSql = query.query_text.split('\n').length > SQL_LINES_THRESHOLD;
+    const shouldShowToggle = hasLongSql;
 
     return (
         <List.Item>
@@ -27,10 +30,7 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
                 <List.Item.Meta title={query.title} description={query.description} />
                 <Flex vertical gap="small">
                     <Flex gap="small" align="start">
-                        <Flex
-                            flex={1}
-                            className={`${styles.sqlCode} ${!isExpanded && hasLongSql ? styles.collapsed : ''}`}
-                        >
+                        <Flex flex={1} className={`${styles.sqlCode} ${!isExpanded ? styles.collapsed : ''}`}>
                             <SyntaxHighlighter
                                 language="sql"
                                 style={magula}
@@ -48,7 +48,7 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
                             onClick={() => onCopy(query.query_text)}
                         />
                     </Flex>
-                    {hasLongSql && (
+                    {shouldShowToggle && (
                         <Button type="link" size="small" onClick={onToggle}>
                             {isExpanded ? t('Show less') : t('Show more')}
                         </Button>

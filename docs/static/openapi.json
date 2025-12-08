@@ -7,7 +7,7 @@
       "name": "Stijn Janssens",
       "email": "stijn.janssens@dataminded.com"
     },
-    "version": "0.4.1"
+    "version": "0.4.2"
   },
   "paths": {
     "/api/authz/access/{action}": {
@@ -1392,8 +1392,8 @@
           "datasets",
           "datasets"
         ],
-        "summary": "Upsert Dataset Curated Queries",
-        "operationId": "upsert_dataset_curated_queries_api_datasets__id__usage_curated_queries_put",
+        "summary": "Replace Dataset Curated Queries",
+        "operationId": "replace_dataset_curated_queries_api_datasets__id__usage_curated_queries_put",
         "parameters": [
           {
             "name": "id",
@@ -10951,16 +10951,6 @@
               "type": "boolean",
               "default": true,
               "title": "Dataset Nodes Enabled"
-            }
-          },
-          {
-            "name": "data_output_nodes_enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true,
-              "title": "Data Output Nodes Enabled"
             }
           }
         ],

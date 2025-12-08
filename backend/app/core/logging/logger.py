@@ -21,7 +21,7 @@ def get_logger(name: str, prefix: str = "local"):
         )
 
         if not os.path.exists(settings.LOGGING_DIRECTORY):
-            os.makedirs(settings.LOGGING_DIRECTORY)
+            os.makedirs(settings.LOGGING_DIRECTORY, exist_ok=True)
 
         logging.config.dictConfig(dict_config)
 

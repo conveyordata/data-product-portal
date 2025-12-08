@@ -95,7 +95,7 @@ function InternalExplorer({ id, type }: Props) {
     }, [dataProductQuery, datasetQuery, dataOutputQuery, type]);
 
     const { data: graph, isFetching } = graphDataQuery;
-    const generateGraph = useCallback(async () => {
+    const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, t);
             const edges = parseEdges(graph.edges, token);
@@ -105,7 +105,7 @@ function InternalExplorer({ id, type }: Props) {
                 type: CustomEdgeTypes.DefaultEdge,
             }));
 
-            const positionedNodes = await applyLayout(nodes, straightEdges);
+            const positionedNodes = applyLayout(nodes, straightEdges);
 
             setNodes(positionedNodes);
             setEdges(straightEdges);

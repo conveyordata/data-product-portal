@@ -31,7 +31,7 @@ class Event(Base, BaseORM):
     actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     actor: Mapped["User"] = relationship("User")
 
-    notifications: Mapped[list["Notification"]] = relationship(
+    notifications: Mapped[list[Notification]] = relationship(
         "Notification",
         back_populates="event",
         foreign_keys="Notification.event_id",

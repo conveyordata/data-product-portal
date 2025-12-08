@@ -47,21 +47,19 @@ export function DataAccessTileGrid({
             disabled={isLoading}
         >
             <Form.Item>
-                <div>
-                    <Space wrap className={styles.radioButtonContainer}>
-                        {dataPlatforms.map((dataPlatform) => (
-                            <AccessDataTile<DataPlatform>
-                                key={dataPlatform.value}
-                                dataPlatform={dataPlatform}
-                                environments={getEnvironment(dataPlatform.value) ?? []}
-                                isDisabled={isDisabled || isLoading || isLoadingEnvironments || !canAccessData}
-                                isLoading={isLoading || isLoadingEnvironments}
-                                onMenuItemClick={onDataPlatformClick}
-                                onTileClick={onTileClick}
-                            />
-                        ))}
-                    </Space>
-                </div>
+                <Space wrap className={styles.radioButtonContainer}>
+                    {dataPlatforms.map((dataPlatform) => (
+                        <AccessDataTile<DataPlatform>
+                            key={dataPlatform.value}
+                            dataPlatform={dataPlatform}
+                            environments={getEnvironment(dataPlatform.value) ?? []}
+                            isDisabled={isDisabled || isLoading || isLoadingEnvironments || !canAccessData}
+                            isLoading={isLoading || isLoadingEnvironments}
+                            onMenuItemClick={onDataPlatformClick}
+                            onTileClick={onTileClick}
+                        />
+                    ))}
+                </Space>
             </Form.Item>
         </Form>
     );

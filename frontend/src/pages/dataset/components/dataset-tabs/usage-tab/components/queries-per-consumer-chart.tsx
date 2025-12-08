@@ -8,10 +8,9 @@ type QueriesPerConsumerChartProps = {
     data: ConsumerTotal[];
     isLoading: boolean;
     hasData: boolean;
-    className?: string;
 };
 
-export function QueriesPerConsumerChart({ data, isLoading, hasData, className }: QueriesPerConsumerChartProps) {
+export function QueriesPerConsumerChart({ data, isLoading, hasData }: QueriesPerConsumerChartProps) {
     const { t } = useTranslation();
 
     // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
@@ -38,7 +37,6 @@ export function QueriesPerConsumerChart({ data, isLoading, hasData, className }:
 
     return (
         <ChartCard
-            className={className}
             title={t('Queries per Consumer')}
             isLoading={isLoading}
             hasData={hasData}
