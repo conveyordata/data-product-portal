@@ -36,7 +36,7 @@ from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
 from app.datasets.service import DatasetService
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
-from app.events.schema_response import EventGet
+from app.events.schema_response import GetEventHistoryResponseItem
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
@@ -99,7 +99,7 @@ def get_user_datasets(
 @router.get("/{id}/history")
 def get_event_history(
     id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[EventGet]:
+) -> Sequence[GetEventHistoryResponseItem]:
     return EventService(db).get_history(id, EventReferenceEntity.DATASET)
 
 

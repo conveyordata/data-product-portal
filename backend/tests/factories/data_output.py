@@ -1,7 +1,7 @@
 import factory
 
 from app.data_outputs.model import DataOutput
-from app.data_outputs.status import DataOutputStatus
+from app.data_outputs.status import TechnicalAssetStatus
 from tests import test_session
 from tests.factories.data_product import DataProductFactory
 from tests.factories.platform_service import PlatformServiceFactory
@@ -16,7 +16,7 @@ class DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = factory.Faker("word")
     namespace = factory.Faker("word")
     description = factory.Faker("text", max_nb_chars=20)
-    status = DataOutputStatus.ACTIVE.value
+    status = TechnicalAssetStatus.ACTIVE.value
 
     service = factory.SubFactory(PlatformServiceFactory)
 
