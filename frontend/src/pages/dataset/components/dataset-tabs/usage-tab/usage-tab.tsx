@@ -56,8 +56,8 @@ export function UsageTab({ datasetId }: Props) {
         if (!responses?.length) {
             return [];
         }
-        return transformDataForChart(responses, dayRange, granularity, unknownLabel);
-    }, [responses, dayRange, granularity, unknownLabel]);
+        return transformDataForChart(responses, granularity, unknownLabel);
+    }, [responses, granularity, unknownLabel]);
 
     const consumerTotals = useMemo(() => aggregateQueriesPerConsumer(chartData), [chartData]);
 

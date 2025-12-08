@@ -21,7 +21,7 @@ export function UsageChart({ usageData, curatedQueries, isUsageLoading, areCurat
         if (!usageData?.dataset_query_stats_daily_responses) {
             return [];
         }
-        return transformDataForChart(usageData.dataset_query_stats_daily_responses, 365, 'week', t('Unknown'));
+        return transformDataForChart(usageData.dataset_query_stats_daily_responses, 'week', t('Unknown'));
     }, [usageData, t]);
 
     const hasUsageData = Boolean(usageData?.dataset_query_stats_daily_responses?.length);
