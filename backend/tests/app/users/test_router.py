@@ -19,6 +19,14 @@ class TestUsersRouter:
         data = response.json()
         assert len(data) == 1
 
+    def test_get_users_v2(self, client):
+        UserFactory()
+
+        response = client.get("/api/v2/users")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["users"]) == 1
+
     def test_remove_user_not_admin(self, client):
         user = UserFactory()
 
@@ -72,6 +80,17 @@ class TestUsersRouter:
         assert len(response.json()) == 1
         assert response.json()[0]["has_seen_tour"] is False
         response = client.post(f"{ENDPOINT}/seen_tour")
+        response = client.get(f"{ENDPOINT}")
+        assert len(response.json()) == 1
+        assert response.json()[0]["has_seen_tour"] is True
+        assert response.status_code == 200
+
+    def test_post_has_seen_tour_v2(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        response = client.get(f"{ENDPOINT}")
+        assert len(response.json()) == 1
+        assert response.json()[0]["has_seen_tour"] is False
+        response = client.post("/api/v2/users/current/seen_tour")
         response = client.get(f"{ENDPOINT}")
         assert len(response.json()) == 1
         assert response.json()[0]["has_seen_tour"] is True
@@ -179,3 +198,36 @@ class TestUsersRouter:
         for user_data in data:
             if user_data["id"] == str(user.id):
                 assert user_data["can_become_admin"] is True
+
+    # def test_get_pending_actions_no_action(self, client):
+    #     ds = DatasetFactory()
+    #     DataOutputDatasetAssociationFactory(dataset=ds)
+    #     response = client.get(f"/api/v2/users/current/pending_actions")
+    #     assert response.json() == {'pending_actions': []}
+
+    # def test_get_pending_actions(self, client):
+    #     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    #     data_product = DataProductFactory()
+    #     data_output = DataOutputFactory(owner=data_product)
+    #     role = RoleFactory(
+    #         scope=Scope.DATA_PRODUCT,
+    #         permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+    #     )
+    #     DataProductRoleAssignmentFactory(
+    #         user_id=user.id, role_id=role.id, data_product_id=data_product.id
+    #     )
+
+    #     ds = DatasetFactory(data_product=data_product)
+    #     role = RoleFactory(
+    #         scope=Scope.DATASET,
+    #         permissions=[AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+    #     )
+    #     DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
+    #     response = client.post(
+    #         f"{DATA_OUTPUTS_ENDPOINT}/{data_output.id}/dataset/{ds.id}"
+    #     )
+    #     assert response.status_code == 200
+    #     response = client.get(f"/api/v2/users/current/pending_actions")
+    #     assert response.json()[0]["data_output_id"] == str(data_output.id)
+    #     assert response.json()[0]["status"] == "pending"
