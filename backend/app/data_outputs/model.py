@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, foreign, relationship
 from app.configuration.environments.platform_service_configurations.model import (
     EnvironmentPlatformServiceConfiguration,
 )
-from app.data_outputs.status import DataOutputStatus
+from app.data_outputs.status import TechnicalAssetStatus
 
 if TYPE_CHECKING:
     from app.configuration.platforms.model import Platform
@@ -29,7 +29,7 @@ class DataOutput(Base, BaseORM):
     namespace = Column(String)
     name = Column(String)
     description = Column(String)
-    status: DataOutputStatus = Column(Enum(DataOutputStatus))
+    status: TechnicalAssetStatus = Column(Enum(TechnicalAssetStatus))
     sourceAligned = Column(Boolean)
 
     # Foreign keys

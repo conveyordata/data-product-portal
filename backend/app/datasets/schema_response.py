@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
-from app.configuration.data_product_settings.schema import DataProductSettingValue
+from app.configuration.data_product_settings.schema import OutputPortSettingValue
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
 from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
@@ -42,7 +42,7 @@ class BaseDatasetGet(ORMModel):
     tags: list[Tag]
     domain: Domain
     lifecycle: Optional[DataProductLifeCycle]
-    data_product_settings: list[DataProductSettingValue]
+    data_product_settings: list[OutputPortSettingValue]
     data_output_links: list[DataOutputLink]
 
 

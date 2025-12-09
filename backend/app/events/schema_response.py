@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from pydantic import NaiveDatetime
@@ -23,7 +23,7 @@ class BaseEventGet(ORMModel):
     created_on: NaiveDatetime
 
 
-class EventGet(BaseEventGet):
+class GetEventHistoryResponseItem(BaseEventGet):
     deleted_subject_identifier: Optional[str] = None
     deleted_target_identifier: Optional[str] = None
     actor: User
@@ -31,3 +31,7 @@ class EventGet(BaseEventGet):
     user: Optional[User] = None
     dataset: Optional[Dataset] = None
     data_output: Optional[DataOutput] = None
+
+
+class GetEventHistoryResponse(ORMModel):
+    events: Sequence[GetEventHistoryResponseItem]

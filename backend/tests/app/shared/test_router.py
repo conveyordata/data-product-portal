@@ -36,7 +36,7 @@ def test_endpoints_return_object_or_none():
 
                 if check_type in (str, int, bool, float, list, tuple, set, dict):
                     invalid_endpoints.append(
-                        f"Route '{route.path}' [{','.join(route.methods)}] returns a primitive type: {check_type}."
+                        f"Route '{route.name}'/'{route.path}' [{','.join(route.methods)}] returns a primitive type: {check_type}."
                     )
                     continue
 
@@ -85,16 +85,20 @@ def test_no_old_names_in_request_or_response_schemas():
         if isinstance(route, APIRoute):
             # Check Response
             if route.response_model:
-                check_type(route.response_model, f"Route '{route.path}' [Response]")
+                check_type(
+                    route.response_model,
+                    f"Route '{route.name}'/'{route.path}' [Response]",
+                )
 
             # Check Request Body
             if route.body_field:
                 # type_to_check = getattr(route.body_field, "annotation", None) or route.body_field.type_
                 check_type(
-                    route.body_field.type_, f"Route '{route.path}' [Request Body]"
+                    route.body_field.type_,
+                    f"Route '{route.name}'/'{route.path}' [Request Body]",
                 )
 
-    error_msg = "The following routes contain 'dataset' in request or response keys:\n"
+    error_msg = "The following routes contain 'dataset' or 'data_output' in request or response keys:\n"
     error_msg += "\n".join(invalid_keys)
 
     assert not invalid_keys, error_msg
