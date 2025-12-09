@@ -195,7 +195,7 @@ class DatasetQueryStatsDailyService:
         if not stats:
             return stats
 
-        consumer_totals = self._consumer_totals_and_names(stats)
+        consumer_totals = self._consumer_totals(stats)
 
         if len(consumer_totals) <= limit:
             return stats
@@ -204,7 +204,7 @@ class DatasetQueryStatsDailyService:
         grouped_stats = self._merge_other_consumers(stats, top_consumer_ids)
         return grouped_stats
 
-    def _consumer_totals_and_names(
+    def _consumer_totals(
         self, stats: list[DatasetQueryStatsDailyResponse]
     ) -> dict[UUID, int]:
         """
