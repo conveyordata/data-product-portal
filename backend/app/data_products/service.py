@@ -335,13 +335,12 @@ class DataProductService:
         *,
         actor: User,
     ) -> list[DataProductDatasetModel]:
-        dataset_links = []
-        for dataset_id in dataset_ids:
-            dataset_links.append(
-                self.link_dataset_to_data_product(
-                    id, dataset_id, justification, actor=actor
-                )
+        dataset_links = [
+            self.link_dataset_to_data_product(
+                id, dataset_id, justification, actor=actor
             )
+            for dataset_id in dataset_ids
+        ]
         self.db.commit()
         return dataset_links
 
