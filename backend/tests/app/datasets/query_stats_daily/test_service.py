@@ -322,7 +322,7 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
     """Unit tests for private methods of DatasetQueryStatsDailyService."""
 
     def test_consumer_totals_and_names(self, session: Session):
-        """Test _consumer_totals_and_names aggregates totals and names."""
+        """Test _consumer_totals_and_names aggregates totals."""
         service = DatasetQueryStatsDailyService(session)
         consumer1_id = uuid4()
         consumer2_id = uuid4()
@@ -348,12 +348,10 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
             ),
         ]
 
-        totals, names = service._consumer_totals_and_names(stats)
+        totals = service._consumer_totals_and_names(stats)
 
         assert totals[consumer1_id] == 150
         assert totals[consumer2_id] == 200
-        assert names[consumer1_id] == "Consumer 1"
-        assert names[consumer2_id] == "Consumer 2"
 
     def test_top_consumer_ids(self):
         """Test _top_consumer_ids selects top consumers by totals."""
@@ -368,15 +366,9 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
             consumer3_id: 200,
             consumer4_id: 50,
         }
-        consumer_names = {
-            consumer1_id: "Consumer 1",
-            consumer2_id: "Consumer 2",
-            consumer3_id: "Consumer 3",
-            consumer4_id: "Consumer 4",
-        }
 
         top_ids = DatasetQueryStatsDailyService._top_consumer_ids(
-            consumer_totals, consumer_names, limit=2
+            consumer_totals, limit=2
         )
 
         assert len(top_ids) == 2
