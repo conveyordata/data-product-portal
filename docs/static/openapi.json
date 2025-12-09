@@ -1198,6 +1198,26 @@
               "format": "uuid",
               "title": "Id"
             }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/QueryStatsGranularity",
+              "default": "week"
+            }
+          },
+          {
+            "name": "day_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 90,
+              "title": "Day Range"
+            }
           }
         ],
         "responses": {
@@ -18151,6 +18171,15 @@
           3
         ],
         "title": "Prototype"
+      },
+      "QueryStatsGranularity": {
+        "type": "string",
+        "enum": [
+          "day",
+          "week",
+          "month"
+        ],
+        "title": "QueryStatsGranularity"
       },
       "RedshiftConfig": {
         "properties": {

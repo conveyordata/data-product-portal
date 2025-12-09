@@ -65,16 +65,23 @@ class TestDatasetQueryStatsDailyRouter:
         )
         session.commit()
 
-        response = client.get(f"{ENDPOINT}/{dataset.id}/query_stats")
+        # Use day granularity with small day_range to avoid excessive bucket filling
+        response = client.get(
+            f"{ENDPOINT}/{dataset.id}/query_stats",
+            params={"granularity": "day", "day_range": 7},
+        )
 
         assert response.status_code == 200
 
         data = response.json()
         assert "dataset_query_stats_daily_responses" in data
         stats = data["dataset_query_stats_daily_responses"]
-        assert len(stats) == 2
 
-        for stat in stats:
+        # Find the actual data points (non-zero query counts)
+        actual_stats = [stat for stat in stats if stat["query_count"] > 0]
+        assert len(actual_stats) == 2
+
+        for stat in actual_stats:
             assert "date" in stat
             assert "consumer_data_product_id" in stat
             assert "query_count" in stat
@@ -105,3 +112,55 @@ class TestDatasetQueryStatsDailyRouter:
         assert response.status_code == 200
         stats = session.query(DatasetQueryStatsDaily).all()
         assert stats == []
+
+    def test_get_query_stats_with_query_params(self, client, session):
+        dataset = DatasetFactory()
+        consumer = DataProductFactory()
+        base_date = date.today() - timedelta(days=7)
+        start_of_week = base_date - timedelta(days=base_date.weekday())
+        middle_of_week = start_of_week + timedelta(days=2)
+        old_date = date.today() - timedelta(days=150)
+
+        DatasetQueryStatsDailyFactory(
+            date=start_of_week,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=50,
+        )
+        DatasetQueryStatsDailyFactory(
+            date=middle_of_week,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=75,
+        )
+        DatasetQueryStatsDailyFactory(
+            date=old_date,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=125,
+        )
+        session.commit()
+
+        response = client.get(
+            f"{ENDPOINT}/{dataset.id}/query_stats",
+            params={"granularity": "week", "day_range": 90},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        stats = data["dataset_query_stats_daily_responses"]
+
+        # The service fills missing buckets, so we'll get all weeks in the 90-day range
+        # Find the week with actual data (start_of_week and middle_of_week are in same week)
+        # They should be aggregated together: 50 + 75 = 125
+        actual_stats = [stat for stat in stats if stat["query_count"] > 0]
+        assert len(actual_stats) == 1
+        assert actual_stats[0]["date"] == start_of_week.isoformat()
+        assert actual_stats[0]["query_count"] == 125
+
+        # Verify that all stats have the expected structure
+        for stat in stats:
+            assert "date" in stat
+            assert "consumer_data_product_id" in stat
+            assert "query_count" in stat
+            assert "consumer_data_product_name" in stat

@@ -3,15 +3,16 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ChartCard } from './chart-card';
-import type { ChartDataPoint } from './chart-data.utils';
+import type { ChartDataPoint, ColorScaleConfig } from './chart-data.utils';
 
 type QueriesOverTimeChartProps = {
     data: ChartDataPoint[];
     isLoading: boolean;
     hasData: boolean;
+    colorScaleConfig: ColorScaleConfig;
 };
 
-export function QueriesOverTimeChart({ data, isLoading, hasData }: QueriesOverTimeChartProps) {
+export function QueriesOverTimeChart({ data, isLoading, hasData, colorScaleConfig }: QueriesOverTimeChartProps) {
     const { t } = useTranslation();
 
     const config = useMemo(() => {
@@ -22,36 +23,29 @@ export function QueriesOverTimeChart({ data, isLoading, hasData }: QueriesOverTi
             seriesField: 'consumer',
             colorField: 'consumer',
             smooth: true,
-            isStack: true,
             stack: true,
+            ...colorScaleConfig,
             animation: {
                 appear: {
                     animation: 'path-in',
                     duration: 1000,
                 },
             },
-            xAxis: {
-                title: {
-                    text: t('Date'),
+            axis: {
+                x: {
+                    title: t('Date'),
+                    labelFontSize: 13,
                 },
-            },
-            yAxis: {
-                title: {
-                    text: t('Query Count'),
+                y: {
+                    title: t('Query Count'),
+                    labelFontSize: 13,
                 },
-            },
-            tooltip: {
-                formatter: (datum: ChartDataPoint) => ({
-                    name: datum.consumer,
-                    value: datum.queryCount,
-                    title: datum.date,
-                }),
             },
             legend: {
                 position: 'top-right' as const,
             },
         };
-    }, [data, t]);
+    }, [data, t, colorScaleConfig]);
 
     return (
         <ChartCard

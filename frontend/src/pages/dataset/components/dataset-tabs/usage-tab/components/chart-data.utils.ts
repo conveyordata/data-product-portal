@@ -1,6 +1,9 @@
-import { addDays, format, isSameDay, isSameMonth, subMonths } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 import type { DatasetQueryStatsDailyResponse } from '@/types/dataset/dataset-query-stats-daily.contract';
+
+export type DayRange = number;
+export type Granularity = 'day' | 'week' | 'month';
 
 export type ChartDataPoint = {
     date: string;
@@ -9,58 +12,69 @@ export type ChartDataPoint = {
     consumer: string;
 };
 
+export type ConsumerTotal = {
+    consumer: string;
+    totalQueries: number;
+};
+
 export function transformDataForChart(
     responses: DatasetQueryStatsDailyResponse[],
+    granularity: Granularity,
     unknownLabel: string,
 ): ChartDataPoint[] {
-    const oneMonthAgo = subMonths(new Date(), 1);
-    const now = new Date();
-
-    const processedData = responses
-        .map((stat) => {
-            const date = new Date(stat.date);
-            return {
-                timestamp: date.getTime(),
-                queryCount: stat.query_count,
-                consumer: stat.consumer_data_product_name || unknownLabel,
-            };
-        })
-        .filter((stat) => stat.timestamp >= oneMonthAgo.getTime())
-        .sort((a, b) => a.timestamp - b.timestamp);
-
-    const consumers = [...new Set(processedData.map((d) => d.consumer))];
-
-    const allDates: Array<{ date: string; timestamp: number }> = [];
-    let currentDate = new Date(oneMonthAgo);
-    let lastMonthDate: Date | null = null;
-    while (currentDate <= now) {
-        const dateLabel =
-            !lastMonthDate || !isSameMonth(currentDate, lastMonthDate)
-                ? format(currentDate, 'MMM d')
-                : format(currentDate, 'd');
-        lastMonthDate = currentDate;
-
-        allDates.push({
-            date: dateLabel,
-            timestamp: currentDate.getTime(),
-        });
-        currentDate = addDays(currentDate, 1);
-    }
-
-    const filledData: ChartDataPoint[] = [];
-    for (const consumer of consumers) {
-        for (const dateInfo of allDates) {
-            const existingData = processedData.find(
-                (d) => isSameDay(d.timestamp, dateInfo.timestamp) && d.consumer === consumer,
-            );
-            filledData.push({
-                date: dateInfo.date,
-                timestamp: dateInfo.timestamp,
-                queryCount: existingData?.queryCount || 0,
-                consumer: consumer,
-            });
+    // format the time series data for the chart
+    const chartData = responses.map((stat) => {
+        const date = parseISO(stat.date);
+        let displayDate: string;
+        if (granularity === 'month') {
+            displayDate = format(date, 'MMM-yyyy');
+        } else if (granularity === 'week') {
+            displayDate = `${format(date, 'yyyy')}-W${format(date, 'II')}`;
+        } else {
+            displayDate = format(date, 'dd-MM-yyyy');
         }
+
+        return {
+            date: displayDate,
+            timestamp: date.getTime(),
+            queryCount: stat.query_count,
+            consumer: stat.consumer_data_product_name || unknownLabel,
+        };
+    });
+
+    return chartData;
+}
+
+export function aggregateQueriesPerConsumer(dataPoints: ChartDataPoint[]): ConsumerTotal[] {
+    const totalsMap = new Map<string, number>();
+
+    for (const point of dataPoints) {
+        const current = totalsMap.get(point.consumer) ?? 0;
+        totalsMap.set(point.consumer, current + point.queryCount);
     }
 
-    return filledData.sort((a, b) => a.timestamp - b.timestamp);
+    return [...totalsMap.entries()].map(([consumer, totalQueries]) => ({
+        consumer,
+        totalQueries,
+    }));
 }
+
+export function getUniqueConsumers(dataPoints: ChartDataPoint[]): string[] {
+    const consumersSet = new Set<string>();
+    for (const point of dataPoints) {
+        consumersSet.add(point.consumer);
+    }
+    return Array.from(consumersSet).sort();
+}
+
+export function createColorScaleConfig(consumers: string[]) {
+    return {
+        scale: {
+            color: {
+                domain: consumers,
+            },
+        },
+    };
+}
+
+export type ColorScaleConfig = ReturnType<typeof createColorScaleConfig>;

@@ -1,3 +1,5 @@
+export type DatasetQueryStatsGranularity = 'day' | 'week' | 'month';
+
 export type DatasetQueryStatsDailyResponse = {
     date: string;
     consumer_data_product_id: string;
