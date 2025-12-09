@@ -39,7 +39,10 @@ from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.service import DataOutputService
 
 # Import enums - corrected paths
-from app.data_products.schema_response import DataProductGet, DataProductsGet
+from app.data_products.schema_response import (
+    DataProductGet,
+    GetDataProductsResponseItem,
+)
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.datasets.schema_response import DatasetGet, DatasetsGet
@@ -138,7 +141,7 @@ def universal_search(
                             break
 
                 result_data_products = [
-                    DataProductsGet.model_validate(dp).model_dump()
+                    GetDataProductsResponseItem.model_validate(dp).model_dump()
                     for dp in filtered_data_products
                 ]
                 query_results.update({"data_products": result_data_products})
@@ -251,7 +254,7 @@ def search_data_products(
 
             return {
                 "data_products": [
-                    DataProductsGet.model_validate(dp).model_dump()
+                    GetDataProductsResponseItem.model_validate(dp).model_dump()
                     for dp in filtered_data_products
                 ],
                 "count": len(filtered_data_products),
@@ -450,7 +453,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                 },
                 "featured_content": {
                     "popular_data_products": [
-                        DataProductsGet.model_validate(dp).model_dump()
+                        GetDataProductsResponseItem.model_validate(dp).model_dump()
                         for dp in popular_data_products
                     ],
                     "popular_datasets": [
@@ -505,7 +508,7 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
             ]
 
             return {
-                "data_product": DataProductsGet.model_validate(
+                "data_product": GetDataProductsResponseItem.model_validate(
                     data_product
                 ).model_dump(),
                 "analytics": {

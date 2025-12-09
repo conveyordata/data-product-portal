@@ -21,7 +21,7 @@ from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
-from app.events.schema_response import EventGet
+from app.events.schema_response import GetEventHistoryResponseItem
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
@@ -65,7 +65,7 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
 @router.get("/{id}/history")
 def get_event_history(
     id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[EventGet]:
+) -> Sequence[GetEventHistoryResponseItem]:
     return EventService(db).get_history(id, EventReferenceEntity.DATA_OUTPUT)
 
 

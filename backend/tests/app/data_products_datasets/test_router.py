@@ -21,7 +21,8 @@ from tests.factories import (
 )
 
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
-DATA_PRODUCTS_ENDPOINT = "/api/data_products"
+OLD_DATA_PRODUCTS_ENDPOINT = "/api/data_products"
+DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 
 
 class TestDataProductsDatasetsRouter:
@@ -63,7 +64,7 @@ class TestDataProductsDatasetsRouter:
         ds = DatasetFactory()
 
         response = client.post(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product.id}/dataset/{str(ds.id)}",
+            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product.id}/dataset/{str(ds.id)}",
         )
         assert response.status_code == 200
         history = self.get_data_product_history(client, data_product.id).json()
@@ -469,7 +470,7 @@ class TestDataProductsDatasetsRouter:
         justification: str = "This is my birth right!",
     ) -> Response:
         return client.post(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
+            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
             json={
                 "dataset_ids": [str(dataset_id) for dataset_id in dataset_ids],
                 "justification": justification,
@@ -495,9 +496,9 @@ class TestDataProductsDatasetsRouter:
         client: TestClient, data_product_id, dataset_id
     ) -> Response:
         return client.delete(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
+            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
         )
 
     @staticmethod
     def get_data_product_history(client, data_product_id):
-        return client.get(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")
+        return client.get(f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")

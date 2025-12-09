@@ -27,7 +27,8 @@ from tests.factories import (
     UserFactory,
 )
 
-ENDPOINT = "/api/data_products"
+OLD_ENDPOINT = "/api/data_products"
+ENDPOINT = "/api/v2/data_products"
 
 
 @pytest.fixture
@@ -154,18 +155,33 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 400
 
+    def test_get_data_products_old(self, client):
+        data_product = DataProductFactory()
+        response = client.get(OLD_ENDPOINT)
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["id"] == str(data_product.id)
+
     def test_get_data_products(self, client):
         data_product = DataProductFactory()
         response = client.get(ENDPOINT)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert data[0]["id"] == str(data_product.id)
+        assert data["data_products"][0]["id"] == str(data_product.id)
 
-    def test_get_data_product_by_id(self, client):
+    def test_get_data_product_by_id_old(self, client):
         data_product = DataProductFactory()
 
-        response = self.get_data_product_by_id(client, data_product.id)
+        response = self.get_data_product_by_id_old(client, data_product.id)
+        assert response.status_code == 200
+        assert response.json()["id"] == str(data_product.id)
+
+    def test_get_data_product(self, client):
+        data_product = DataProductFactory()
+
+        response = self.get_data_product(client, data_product.id)
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
@@ -206,6 +222,14 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert len(response.json()) == 1
         assert response.json()[0]["id"] == str(data_output.id)
+
+    def test_get_technical_assets(self, client):
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
+        response = self.get_technical_assets(client, data_product.id)
+        assert response.status_code == 200, f"Failed with response: {response.text}"
+        assert len(response.json()) == 1
+        assert response.json()["technical_assets"][0]["id"] == str(data_output.id)
 
     def test_update_data_product_no_member(self, payload, client):
         data_product = DataProductFactory()
@@ -293,12 +317,12 @@ class TestDataProductsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        response = self.get_data_product_by_id(client, data_product.id)
+        response = self.get_data_product_by_id_old(client, data_product.id)
         assert response.json()["status"] == "pending"
         _ = self.update_data_product_status(
             client, {"status": "active"}, data_product.id
         )
-        response = self.get_data_product_by_id(client, data_product.id)
+        response = self.get_data_product_by_id_old(client, data_product.id)
         assert response.json()["status"] == "active"
 
     def test_update_usage_not_owner(self, client):
@@ -320,16 +344,16 @@ class TestDataProductsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        response = self.get_data_product_by_id(client, data_product.id)
+        response = self.get_data_product_by_id_old(client, data_product.id)
         assert response.json()["status"] == "pending"
         _ = self.update_data_product_usage(
             client, {"usage": "new usage"}, data_product.id
         )
-        response = self.get_data_product_by_id(client, data_product.id)
+        response = self.get_data_product_by_id_old(client, data_product.id)
         assert response.json()["usage"] == "new usage"
 
     def test_get_data_product_by_id_with_invalid_id(self, client):
-        data_product = self.get_data_product_by_id(client, self.invalid_id)
+        data_product = self.get_data_product_by_id_old(client, self.invalid_id)
         assert data_product.status_code == 404
 
     def test_update_data_product_with_invalid_data_product_id(self, client, payload):
@@ -355,13 +379,15 @@ class TestDataProductsRouter:
         setting = DataProductSettingFactory(scope="dataset")
         with pytest.raises(IntegrityError):
             client.post(
-                f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
+                f"{OLD_ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
             )
 
     def test_dataset_set_custom_setting_not_owner(self, client):
         data_product = DataProductFactory()
         setting = DataProductSettingFactory()
-        response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")
+        response = client.post(
+            f"{OLD_ENDPOINT}/{data_product.id}/settings/{setting.id}"
+        )
         assert response.status_code == 403
 
     def test_dataset_set_custom_setting(self, client):
@@ -378,15 +404,15 @@ class TestDataProductsRouter:
         )
         setting = DataProductSettingFactory()
         response = client.post(
-            f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
+            f"{OLD_ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
         )
         assert response.status_code == 200
-        response = client.get(f"{ENDPOINT}/{data_product.id}")
+        response = client.get(f"{OLD_ENDPOINT}/{data_product.id}")
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
     def test_get_graph_data(self, client):
         data_product = DataProductFactory()
-        response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
+        response = client.get(f"{OLD_ENDPOINT}/{data_product.id}/graph")
         assert response.json()["edges"] == []
         for node in response.json()["nodes"]:
             assert node == {
@@ -407,7 +433,7 @@ class TestDataProductsRouter:
 
     def test_get_aws_role_not_member(self, client):
         data_product = DataProductFactory()
-        response = client.get(f"{ENDPOINT}/{data_product.id}/role")
+        response = client.get(f"{OLD_ENDPOINT}/{data_product.id}/role")
         assert response.status_code == 403
 
     def test_get_aws_role(self, client):
@@ -424,7 +450,7 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/role?environment=production"
+            f"{OLD_ENDPOINT}/{data_product.id}/role?environment=production"
         )
         assert response.status_code == 200
         assert response.json() == env.context.replace("{{}}", data_product.namespace)
@@ -443,7 +469,7 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/signin_url?environment=production"
+            f"{OLD_ENDPOINT}/{data_product.id}/signin_url?environment=production"
         )
         assert response.status_code == 501 or response.status_code == 400
 
@@ -469,7 +495,7 @@ class TestDataProductsRouter:
             ),
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/databricks_workspace_url?"
+            f"{OLD_ENDPOINT}/{data_product.id}/databricks_workspace_url?"
             "environment=production"
         )
         assert response.status_code == 200
@@ -495,7 +521,7 @@ class TestDataProductsRouter:
             config=json.dumps({"login_url": "test_1.com"}),
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/snowflake_url?environment=production"
+            f"{OLD_ENDPOINT}/{data_product.id}/snowflake_url?environment=production"
         )
         assert response.status_code == 200
         assert response.json() == "test_1.com"
@@ -741,64 +767,72 @@ class TestDataProductsRouter:
 
     @staticmethod
     def create_data_product(client: TestClient, default_data_product_payload):
-        return client.post(ENDPOINT, json=default_data_product_payload)
+        return client.post(OLD_ENDPOINT, json=default_data_product_payload)
 
     @staticmethod
     def update_data_product(client: TestClient, payload, data_product_id):
-        return client.put(f"{ENDPOINT}/{data_product_id}", json=payload)
+        return client.put(f"{OLD_ENDPOINT}/{data_product_id}", json=payload)
 
     @staticmethod
     def update_data_product_about(client: TestClient, data_product_id):
         data = {"about": "Updated Data Product Description"}
-        return client.put(f"{ENDPOINT}/{data_product_id}/about", json=data)
+        return client.put(f"{OLD_ENDPOINT}/{data_product_id}/about", json=data)
 
     @staticmethod
     def update_data_product_status(client: TestClient, status, data_product_id):
-        return client.put(f"{ENDPOINT}/{data_product_id}/status", json=status)
+        return client.put(f"{OLD_ENDPOINT}/{data_product_id}/status", json=status)
 
     @staticmethod
     def update_data_product_usage(client: TestClient, usage, data_product_id):
-        return client.put(f"{ENDPOINT}/{data_product_id}/usage", json=usage)
+        return client.put(f"{OLD_ENDPOINT}/{data_product_id}/usage", json=usage)
 
     @staticmethod
     def delete_data_product(client: TestClient, data_product_id):
-        return client.delete(f"{ENDPOINT}/{data_product_id}")
+        return client.delete(f"{OLD_ENDPOINT}/{data_product_id}")
 
     @staticmethod
-    def get_data_product_by_id(client: TestClient, data_product_id):
+    def get_data_product_by_id_old(client: TestClient, data_product_id):
+        return client.get(f"{OLD_ENDPOINT}/{data_product_id}")
+
+    @staticmethod
+    def get_data_product(client: TestClient, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}")
 
     @staticmethod
     def get_data_outputs(client: TestClient, data_product_id):
-        return client.get(f"{ENDPOINT}/{data_product_id}/data_outputs")
+        return client.get(f"{OLD_ENDPOINT}/{data_product_id}/data_outputs")
+
+    @staticmethod
+    def get_technical_assets(client: TestClient, data_product_id):
+        return client.get(f"{ENDPOINT}/{data_product_id}/technical_assets")
 
     @staticmethod
     def get_data_product_by_user_id(client: TestClient, user_id):
-        return client.get(f"{ENDPOINT}/user/{user_id}")
+        return client.get(f"{OLD_ENDPOINT}/user/{user_id}")
 
     @staticmethod
     def get_data_product_history(client: TestClient, data_product_id):
-        return client.get(f"{ENDPOINT}/{data_product_id}/history")
+        return client.get(f"{OLD_ENDPOINT}/{data_product_id}/history")
 
     @staticmethod
     def get_conveyor_ide_url(client: TestClient, data_product_id):
-        return client.get(f"{ENDPOINT}/{data_product_id}/conveyor_ide_url")
+        return client.get(f"{OLD_ENDPOINT}/{data_product_id}/conveyor_ide_url")
 
     @staticmethod
     def get_namespace_suggestion(client: TestClient, name):
-        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+        return client.get(f"{OLD_ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
     def validate_namespace(client: TestClient, namespace):
-        return client.get(f"{ENDPOINT}/validate_namespace?namespace={namespace}")
+        return client.get(f"{OLD_ENDPOINT}/validate_namespace?namespace={namespace}")
 
     @staticmethod
     def get_namespace_length_limits(client: TestClient):
-        return client.get(f"{ENDPOINT}/namespace_length_limits")
+        return client.get(f"{OLD_ENDPOINT}/namespace_length_limits")
 
     @staticmethod
     def validate_data_output_namespace(client: TestClient, namespace, data_product_id):
         return client.get(
-            f"{ENDPOINT}/{data_product_id}/data_output"
+            f"{OLD_ENDPOINT}/{data_product_id}/data_output"
             f"/validate_namespace?namespace={namespace}"
         )

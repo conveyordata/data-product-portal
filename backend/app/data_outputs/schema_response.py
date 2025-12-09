@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
+from warnings import deprecated
 
 from pydantic import Field, computed_field
 
@@ -9,10 +10,13 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.tags.schema import Tag
 from app.data_output_configuration.schema_union import DataOutputConfiguration
-from app.data_outputs.status import DataOutputStatus
-from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
+from app.data_outputs.status import TechnicalAssetStatus
+from app.data_outputs_datasets.schema import (
+    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
+)
 from app.data_products.schema import DataProduct
-from app.datasets.schema import Dataset
+from app.datasets.schema import Dataset, OutputPort
 from app.shared.schema import ORMModel
 
 
@@ -22,7 +26,7 @@ class TechnicalInfo(ORMModel):
     info: Optional[str]
 
 
-class BaseDataOutputGet(ORMModel):
+class BaseTechnicalAssetGet(ORMModel):
     id: UUID
     name: str
     description: str
@@ -30,7 +34,8 @@ class BaseDataOutputGet(ORMModel):
     owner_id: UUID
     platform_id: UUID
     service_id: UUID
-    status: DataOutputStatus
+    status: TechnicalAssetStatus
+    sourceAligned: Optional[bool]
 
     # Nested schemas
     configuration: DataOutputConfiguration
@@ -67,16 +72,55 @@ class BaseDataOutputGet(ORMModel):
         return technical_info_list
 
 
+@deprecated("Use BaseTechnicalAssetGet instead")
+class BaseDataOutputGet(BaseTechnicalAssetGet):
+    pass
+
+
+class OutputPortLink(TechnicalAssetOutputPortAssociation):
+    output: OutputPort
+
+
+@deprecated("OutputPortLink instead")
 class DatasetLink(DataOutputDatasetAssociation):
     # Nested schemas
     dataset: Dataset
 
+    def convert(self) -> OutputPortLink:
+        base = self.model_dump(exclude={"dataset", "dataset_id", "data_output_id"})
+        return OutputPortLink(
+            **base,
+            output_port_id=self.dataset_id,
+            technical_asset_id=self.data_output_id,
+            output=self.dataset.convert(),
+        )
 
+
+class GetTechnicalAssetsResponseItem(BaseTechnicalAssetGet):
+    # Nested schemas
+    output_port_links: list[OutputPortLink]
+    tags: list[Tag]
+
+
+@deprecated("Use GetTechnicalAssetsResponseItem instead")
 class DataOutputGet(BaseDataOutputGet):
     # Nested schemas
     dataset_links: list[DatasetLink]
     tags: list[Tag]
 
+    def convert(self) -> GetTechnicalAssetsResponseItem:
+        base_data = self.model_dump(exclude={"dataset_links"})
+        return GetTechnicalAssetsResponseItem(
+            **base_data,
+            output_port_links=[dl.convert() for dl in self.dataset_links],
+            service=self.service,
+            environment_configurations=self.environment_configurations,
+        )
+
 
 class DataOutputsGet(DataOutputGet):
     pass
+
+
+class GetTechnicalAssetsResponse(ORMModel):
+    technical_assets: Sequence[GetTechnicalAssetsResponseItem]
