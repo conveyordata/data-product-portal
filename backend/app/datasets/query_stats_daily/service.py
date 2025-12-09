@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date, timedelta
 from enum import Enum
 from typing import Iterable
@@ -380,26 +381,24 @@ class DatasetQueryStatsDailyService:
             return stats
 
         # Calculate total queries per consumer
-        consumer_totals: dict[UUID, int] = {}
+        consumer_totals: dict[UUID, int] = defaultdict(int)
         for stat in stats:
-            consumer_id = stat.consumer_data_product_id
-            consumer_totals[consumer_id] = (
-                consumer_totals.get(consumer_id, 0) + stat.query_count
-            )
+            consumer_totals[stat.consumer_data_product_id] += stat.query_count
 
-        # Create ordering: highest totals first, "Other" always last
-        sorted_consumers = sorted(
-            consumer_totals.items(),
-            key=lambda item: (
-                # "Other" always sorts last
-                1 if item[0] == OTHER_CONSUMER_DATA_PRODUCT_ID else 0,
-                # Then by total queries descending
-                -item[1],
+        # Sort consumers: highest totals first, "Other" always last
+        # Use a stable sort key: (is_other, -total_queries)
+        sorted_consumer_ids = sorted(
+            consumer_totals.keys(),
+            key=lambda consumer_id: (
+                consumer_id
+                == OTHER_CONSUMER_DATA_PRODUCT_ID,  # False (0) sorts before True (1)
+                -consumer_totals[consumer_id],  # Negative for descending order
             ),
         )
-        consumer_order: dict[UUID, int] = {
-            consumer_id: index
-            for index, (consumer_id, _) in enumerate(sorted_consumers)
+
+        # Create order mapping: lower index = higher priority (rendered at bottom)
+        consumer_order = {
+            consumer_id: idx for idx, consumer_id in enumerate(sorted_consumer_ids)
         }
 
         # Sort stats: first by date, then by consumer order
@@ -407,6 +406,6 @@ class DatasetQueryStatsDailyService:
             stats,
             key=lambda stat: (
                 stat.date,
-                consumer_order.get(stat.consumer_data_product_id, 999999),
+                consumer_order[stat.consumer_data_product_id],
             ),
         )

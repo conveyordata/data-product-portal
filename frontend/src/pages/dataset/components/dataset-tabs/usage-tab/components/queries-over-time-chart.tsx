@@ -23,7 +23,6 @@ export function QueriesOverTimeChart({ data, isLoading, hasData, colorScaleConfi
             seriesField: 'consumer',
             colorField: 'consumer',
             smooth: true,
-            isStack: true,
             stack: true,
             ...colorScaleConfig,
             animation: {

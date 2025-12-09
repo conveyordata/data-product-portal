@@ -220,15 +220,31 @@ class TestDatasetQueryStatsDailyService:
         session.commit()
 
         service = DatasetQueryStatsDailyService(session)
+        day_range = 14
         response = service.get_query_stats_daily(
             dataset.id,
             granularity=QueryStatsGranularity.WEEK,
-            day_range=365,
+            day_range=day_range,
         )
 
         stats = response.dataset_query_stats_daily_responses
-        # Verify buckets are filled (should have many entries due to bucket filling)
-        assert len(stats) > 1
+
+        # Calculate expected number of week buckets: from (today - day_range) to today, aligned to weeks
+        # This matches the logic in _fill_missing_buckets -> _build_buckets
+        range_start = date.today() - timedelta(days=day_range)
+        start_week = QueryStatsGranularity.WEEK.align_date(range_start)
+        end_week = QueryStatsGranularity.WEEK.align_date(date.today())
+
+        # Count weeks from start_week to end_week (inclusive)
+        week_count = 0
+        current = start_week
+        while current <= end_week:
+            week_count += 1
+            current = QueryStatsGranularity.WEEK.increment_date(current)
+
+        # With 1 consumer, we expect week_count entries (one per week bucket)
+        expected_count = week_count
+        assert len(stats) == expected_count
 
         # Find the actual data point (non-zero query count)
         actual_stats = [stat for stat in stats if stat.query_count > 0]
@@ -266,8 +282,8 @@ class TestDatasetQueryStatsDailyService:
         )
 
         stats = response.dataset_query_stats_daily_responses
-        # Verify buckets are filled (should have many entries due to bucket filling)
-        assert len(stats) > 1
+        # Today + 30 days ago = 31 days
+        assert len(stats) == 31
 
         # Find the actual data point (non-zero query count)
         actual_stats = [stat for stat in stats if stat.query_count > 0]
