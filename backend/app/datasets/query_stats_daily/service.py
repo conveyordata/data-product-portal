@@ -310,17 +310,7 @@ class DatasetQueryStatsDailyService:
         """
         existing_data: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse] = {}
         for stat in stats:
-            bucket_date = granularity.align_date(stat.date)
-            key = (bucket_date, stat.consumer_data_product_id)
-
-            # Store stat with truncated date for consistency
-            if stat.date != bucket_date:
-                stat = DatasetQueryStatsDailyResponse(
-                    date=bucket_date,
-                    consumer_data_product_id=stat.consumer_data_product_id,
-                    query_count=stat.query_count,
-                    consumer_data_product_name=stat.consumer_data_product_name,
-                )
+            key = (stat.date, stat.consumer_data_product_id)
             existing_data[key] = stat
 
         return existing_data

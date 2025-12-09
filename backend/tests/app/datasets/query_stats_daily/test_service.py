@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from uuid import uuid4
 
 import pytest
 from sqlalchemy.orm import Session
@@ -8,7 +9,12 @@ from app.datasets.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyDelete,
     DatasetQueryStatsDailyUpdate,
 )
+from app.datasets.query_stats_daily.schema_response import (
+    DatasetQueryStatsDailyResponse,
+)
 from app.datasets.query_stats_daily.service import (
+    OTHER_CONSUMER_DATA_PRODUCT_ID,
+    OTHER_CONSUMER_DATA_PRODUCT_NAME,
     DatasetQueryStatsDailyService,
     QueryStatsGranularity,
 )
@@ -310,3 +316,151 @@ class TestDatasetQueryStatsDailyService:
 
         assert deleted_row is None
         assert remaining_row.consumer_data_product_id == consumer2.id
+
+
+class TestDatasetQueryStatsDailyServicePrivateMethods:
+    """Unit tests for private methods of DatasetQueryStatsDailyService."""
+
+    def test_consumer_totals_and_names(self, session: Session):
+        """Test _consumer_totals_and_names aggregates totals and names."""
+        service = DatasetQueryStatsDailyService(session)
+        consumer1_id = uuid4()
+        consumer2_id = uuid4()
+
+        stats = [
+            DatasetQueryStatsDailyResponse(
+                date=date.today(),
+                consumer_data_product_id=consumer1_id,
+                query_count=100,
+                consumer_data_product_name="Consumer 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date.today() - timedelta(days=1),
+                consumer_data_product_id=consumer1_id,
+                query_count=50,
+                consumer_data_product_name="Consumer 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date.today(),
+                consumer_data_product_id=consumer2_id,
+                query_count=200,
+                consumer_data_product_name="Consumer 2",
+            ),
+        ]
+
+        totals, names = service._consumer_totals_and_names(stats)
+
+        assert totals[consumer1_id] == 150
+        assert totals[consumer2_id] == 200
+        assert names[consumer1_id] == "Consumer 1"
+        assert names[consumer2_id] == "Consumer 2"
+
+    def test_top_consumer_ids(self):
+        """Test _top_consumer_ids selects top consumers by totals."""
+        consumer1_id = uuid4()
+        consumer2_id = uuid4()
+        consumer3_id = uuid4()
+        consumer4_id = uuid4()
+
+        consumer_totals = {
+            consumer1_id: 100,
+            consumer2_id: 300,
+            consumer3_id: 200,
+            consumer4_id: 50,
+        }
+        consumer_names = {
+            consumer1_id: "Consumer 1",
+            consumer2_id: "Consumer 2",
+            consumer3_id: "Consumer 3",
+            consumer4_id: "Consumer 4",
+        }
+
+        top_ids = DatasetQueryStatsDailyService._top_consumer_ids(
+            consumer_totals, consumer_names, limit=2
+        )
+
+        assert len(top_ids) == 2
+        assert consumer2_id in top_ids
+        assert consumer3_id in top_ids
+        assert consumer1_id not in top_ids
+        assert consumer4_id not in top_ids
+
+    def test_merge_other_consumers(self):
+        """Test _merge_other_consumers merges low-volume consumers into 'Other'."""
+        consumer1_id = uuid4()
+        consumer2_id = uuid4()
+        consumer3_id = uuid4()
+        top_consumer_ids = {consumer1_id}
+
+        stats = [
+            DatasetQueryStatsDailyResponse(
+                date=date(2024, 1, 1),
+                consumer_data_product_id=consumer1_id,
+                query_count=100,
+                consumer_data_product_name="Top Consumer",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date(2024, 1, 1),
+                consumer_data_product_id=consumer2_id,
+                query_count=50,
+                consumer_data_product_name="Low Volume 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date(2024, 1, 1),
+                consumer_data_product_id=consumer3_id,
+                query_count=30,
+                consumer_data_product_name="Low Volume 2",
+            ),
+        ]
+
+        result = DatasetQueryStatsDailyService._merge_other_consumers(
+            stats, top_consumer_ids
+        )
+
+        assert len(result) == 2
+        top_entry = next(
+            s for s in result if s.consumer_data_product_id == consumer1_id
+        )
+        assert top_entry.query_count == 100
+        other_entry = next(
+            s
+            for s in result
+            if s.consumer_data_product_id == OTHER_CONSUMER_DATA_PRODUCT_ID
+        )
+        assert other_entry.query_count == 80
+        assert (
+            other_entry.consumer_data_product_name == OTHER_CONSUMER_DATA_PRODUCT_NAME
+        )
+
+    def test_fill_missing_buckets(self, session: Session):
+        """Test _fill_missing_buckets fills missing time buckets with zeros."""
+        service = DatasetQueryStatsDailyService(session)
+        consumer_id = uuid4()
+        start_date = date.today() - timedelta(days=5)
+
+        stats = [
+            DatasetQueryStatsDailyResponse(
+                date=start_date,
+                consumer_data_product_id=consumer_id,
+                query_count=100,
+                consumer_data_product_name="Consumer 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=start_date + timedelta(days=3),
+                consumer_data_product_id=consumer_id,
+                query_count=200,
+                consumer_data_product_name="Consumer 1",
+            ),
+        ]
+
+        result = service._fill_missing_buckets(
+            stats, start_date, QueryStatsGranularity.DAY
+        )
+
+        expected_days = (date.today() - start_date).days + 1
+        assert len(result) == expected_days
+        existing_by_date = {s.date: s for s in result if s.query_count > 0}
+        assert existing_by_date[start_date].query_count == 100
+        assert existing_by_date[start_date + timedelta(days=3)].query_count == 200
+        zero_entries = [s for s in result if s.query_count == 0]
+        assert len(zero_entries) == expected_days - 2
