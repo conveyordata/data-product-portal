@@ -321,7 +321,7 @@ class TestDatasetQueryStatsDailyService:
 class TestDatasetQueryStatsDailyServicePrivateMethods:
     """Unit tests for private methods of DatasetQueryStatsDailyService."""
 
-    def test_consumer_totals_and_names(self, session: Session):
+    def test_consumer_totals(self, session: Session):
         """Test _consumer_totals_and_names aggregates totals."""
         service = DatasetQueryStatsDailyService(session)
         consumer1_id = uuid4()
@@ -348,7 +348,7 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
             ),
         ]
 
-        totals = service._consumer_totals_and_names(stats)
+        totals = service._consumer_totals(stats)
 
         assert totals[consumer1_id] == 150
         assert totals[consumer2_id] == 200
