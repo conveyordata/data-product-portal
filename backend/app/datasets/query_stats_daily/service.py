@@ -24,6 +24,34 @@ class QueryStatsGranularity(str, Enum):
     WEEK = "week"
     MONTH = "month"
 
+    def align_date(self, value: date) -> date:
+        """
+        Align a date to the start of the specified granularity period.
+        - DAY: returns the date as-is
+        - WEEK: returns Monday of the week
+        - MONTH: returns the first day of the month
+        """
+        if self == QueryStatsGranularity.DAY:
+            return value
+        if self == QueryStatsGranularity.WEEK:
+            return value - timedelta(days=value.weekday())
+        if self == QueryStatsGranularity.MONTH:
+            return value.replace(day=1)
+        return value
+
+    def increment_date(self, value: date) -> date:
+        """
+        Increment a date by one period according to the granularity.
+        """
+        if self == QueryStatsGranularity.WEEK:
+            return value + timedelta(weeks=1)
+        if self == QueryStatsGranularity.MONTH:
+            # Increment month, handling year rollover
+            if value.month == 12:
+                return value.replace(year=value.year + 1, month=1)
+            return value.replace(month=value.month + 1)
+        return value + timedelta(days=1)
+
 
 DEFAULT_GRANULARITY = QueryStatsGranularity.WEEK
 DEFAULT_DAY_RANGE = 90
@@ -97,19 +125,14 @@ class DatasetQueryStatsDailyService:
 
             results = self.db.execute(aggregated_query).all()
             response_stats = [
-                DatasetQueryStatsDailyResponse(
-                    date=row.date,
-                    consumer_data_product_id=row.consumer_data_product_id,
-                    query_count=row.query_count,
-                    consumer_data_product_name=row.consumer_data_product_name,
-                )
-                for row in results
+                DatasetQueryStatsDailyResponse.model_validate(row) for row in results
             ]
 
         response_stats = self._group_low_volume_consumers(response_stats)
         response_stats = self._fill_missing_buckets(
             response_stats, start_date, granularity
         )
+        response_stats = self._sort_by_consumer_total_queries(response_stats)
 
         return DatasetQueryStatsDailyResponses(
             dataset_query_stats_daily_responses=response_stats
@@ -159,20 +182,6 @@ class DatasetQueryStatsDailyService:
         )
         self.db.commit()
 
-    @staticmethod
-    def _sort_stats_by_date_and_consumer(
-        stats: list[DatasetQueryStatsDailyResponse],
-    ) -> list[DatasetQueryStatsDailyResponse]:
-        """Sort stats by date, then consumer name, then consumer ID."""
-        return sorted(
-            stats,
-            key=lambda stat: (
-                stat.date,
-                stat.consumer_data_product_name or EMPTY_STRING_FALLBACK,
-                str(stat.consumer_data_product_id),
-            ),
-        )
-
     def _group_low_volume_consumers(
         self,
         stats: list[DatasetQueryStatsDailyResponse],
@@ -190,7 +199,7 @@ class DatasetQueryStatsDailyService:
             consumer_totals, consumer_names, limit
         )
         grouped_stats = self._merge_other_consumers(stats, top_consumer_ids)
-        return self._sort_stats_by_date_and_consumer(grouped_stats)
+        return grouped_stats
 
     def _consumer_totals_and_names(
         self, stats: list[DatasetQueryStatsDailyResponse]
@@ -275,7 +284,7 @@ class DatasetQueryStatsDailyService:
 
         filled_stats = self._create_filled_buckets(buckets, consumers, existing_data)
 
-        return self._sort_stats_by_date_and_consumer(filled_stats)
+        return filled_stats
 
     def _extract_unique_consumers(
         self, stats: list[DatasetQueryStatsDailyResponse]
@@ -300,7 +309,7 @@ class DatasetQueryStatsDailyService:
         """
         existing_data: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse] = {}
         for stat in stats:
-            bucket_date = self._align_to_granularity(stat.date, granularity)
+            bucket_date = granularity.align_date(stat.date)
             key = (bucket_date, stat.consumer_data_product_id)
 
             # Store stat with truncated date for consistency
@@ -348,46 +357,56 @@ class DatasetQueryStatsDailyService:
         Returns a list of dates representing the start of each bucket period.
         """
         buckets: list[date] = []
-        start = DatasetQueryStatsDailyService._align_to_granularity(
-            range_start, granularity
-        )
-        end = DatasetQueryStatsDailyService._align_to_granularity(end_date, granularity)
+        start = granularity.align_date(range_start)
+        end = granularity.align_date(end_date)
 
         current = start
         while current <= end:
             buckets.append(current)
-            current = DatasetQueryStatsDailyService._increment_date(
-                current, granularity
-            )
+            current = granularity.increment_date(current)
 
         return buckets
 
     @staticmethod
-    def _align_to_granularity(value: date, granularity: QueryStatsGranularity) -> date:
+    def _sort_by_consumer_total_queries(
+        stats: list[DatasetQueryStatsDailyResponse],
+    ) -> list[DatasetQueryStatsDailyResponse]:
         """
-        Align a date to the start of the specified granularity period.
-        - DAY: returns the date as-is
-        - WEEK: returns Monday of the week
-        - MONTH: returns the first day of the month
+        Sort stats by date (ascending) and then by consumer total queries (descending).
+        Consumers with highest total queries appear first (at bottom of stacked chart).
+        "Other" category is always placed last regardless of total queries.
         """
-        if granularity == QueryStatsGranularity.DAY:
-            return value
-        if granularity == QueryStatsGranularity.WEEK:
-            return value - timedelta(days=value.weekday())
-        if granularity == QueryStatsGranularity.MONTH:
-            return value.replace(day=1)
-        return value
+        if not stats:
+            return stats
 
-    @staticmethod
-    def _increment_date(value: date, granularity: QueryStatsGranularity) -> date:
-        """
-        Increment a date by one period according to the granularity.
-        """
-        if granularity == QueryStatsGranularity.WEEK:
-            return value + timedelta(weeks=1)
-        if granularity == QueryStatsGranularity.MONTH:
-            # Increment month, handling year rollover
-            if value.month == 12:
-                return value.replace(year=value.year + 1, month=1)
-            return value.replace(month=value.month + 1)
-        return value + timedelta(days=1)
+        # Calculate total queries per consumer
+        consumer_totals: dict[UUID, int] = {}
+        for stat in stats:
+            consumer_id = stat.consumer_data_product_id
+            consumer_totals[consumer_id] = (
+                consumer_totals.get(consumer_id, 0) + stat.query_count
+            )
+
+        # Create ordering: highest totals first, "Other" always last
+        sorted_consumers = sorted(
+            consumer_totals.items(),
+            key=lambda item: (
+                # "Other" always sorts last
+                1 if item[0] == OTHER_CONSUMER_DATA_PRODUCT_ID else 0,
+                # Then by total queries descending
+                -item[1],
+            ),
+        )
+        consumer_order: dict[UUID, int] = {
+            consumer_id: index
+            for index, (consumer_id, _) in enumerate(sorted_consumers)
+        }
+
+        # Sort stats: first by date, then by consumer order
+        return sorted(
+            stats,
+            key=lambda stat: (
+                stat.date,
+                consumer_order.get(stat.consumer_data_product_id, 999999),
+            ),
+        )

@@ -11,7 +11,6 @@ import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query
 import {
     aggregateQueriesPerConsumer,
     createColorScaleConfig,
-    getUniqueConsumers,
     transformDataForChart,
 } from './components/chart-data.utils';
 import { CuratedQueriesList } from './components/curated-queries-list';
@@ -65,7 +64,10 @@ export function UsageTab({ datasetId }: Props) {
 
     const consumerTotals = useMemo(() => aggregateQueriesPerConsumer(chartData), [chartData]);
 
-    const uniqueConsumers = useMemo(() => getUniqueConsumers(chartData), [chartData]);
+    // Use the sorted order from consumerTotals (which is already sorted by total queries descending)
+    // This ensures areas with highest total queries are at the bottom of the stacked chart
+    // Note: Data is now sorted by consumer total queries in the backend
+    const uniqueConsumers = useMemo(() => consumerTotals.map((ct) => ct.consumer), [consumerTotals]);
     const colorScaleConfig = useMemo(() => createColorScaleConfig(uniqueConsumers), [uniqueConsumers]);
 
     return (

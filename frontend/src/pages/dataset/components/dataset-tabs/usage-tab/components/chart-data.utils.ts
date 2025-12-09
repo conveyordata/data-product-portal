@@ -42,8 +42,7 @@ export function transformDataForChart(
         };
     });
 
-    // Sort by timestamp to ensure correct chronological order
-    return chartData.sort((a, b) => a.timestamp - b.timestamp);
+    return chartData;
 }
 
 export function aggregateQueriesPerConsumer(dataPoints: ChartDataPoint[]): ConsumerTotal[] {
@@ -54,12 +53,10 @@ export function aggregateQueriesPerConsumer(dataPoints: ChartDataPoint[]): Consu
         totalsMap.set(point.consumer, current + point.queryCount);
     }
 
-    return [...totalsMap.entries()]
-        .map(([consumer, totalQueries]) => ({
-            consumer,
-            totalQueries,
-        }))
-        .sort((a, b) => b.totalQueries - a.totalQueries);
+    return [...totalsMap.entries()].map(([consumer, totalQueries]) => ({
+        consumer,
+        totalQueries,
+    }));
 }
 
 export function getUniqueConsumers(dataPoints: ChartDataPoint[]): string[] {
