@@ -75,19 +75,19 @@ router.include_router(_router, prefix=old_route, deprecated=True)
 router.include_router(_router, prefix=route)
 
 
-@router.get("/users", deprecated=True)
+@router.get(old_route, deprecated=True)
 def get_users_old(
     db: Session = Depends(get_db_session),
 ) -> Sequence[UsersGet]:
     return UserService(db).get_users()
 
 
-@router.get("/v2/users")
+@router.get(route)
 def get_users(db: Session = Depends(get_db_session)) -> GetUsersResponse:
     return GetUsersResponse(users=get_users_old(db))
 
 
-@router.post("/users/seen_tour", deprecated=True)
+@router.post(f"{old_route}/seen_tour", deprecated=True)
 def mark_tour_as_seen_old(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
@@ -95,7 +95,7 @@ def mark_tour_as_seen_old(
     UserService(db).mark_tour_as_seen(user.id)
 
 
-@router.post("/v2/users/current/seen_tour")
+@router.post(f"{route}/current/seen_tour")
 def mark_tour_as_seen(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
