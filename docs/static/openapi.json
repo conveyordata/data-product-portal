@@ -4285,6 +4285,135 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/input_ports": {
+      "get": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Get Data Product Input Ports",
+        "operationId": "get_data_product_input_ports_api_v2_data_products__id__input_ports_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataProductInputPortsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/output_ports": {
+      "get": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Get Data Product Output Ports",
+        "operationId": "get_data_product_output_ports_api_v2_data_products__id__output_ports_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataProductOutputPortsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/rolled_up_tags": {
+      "get": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Get Data Product Rolled Up Tags",
+        "operationId": "get_data_product_rolled_up_tags_api_v2_data_products__id__rolled_up_tags_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataProductRolledUpTagsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_products/{id}/role": {
       "get": {
         "tags": [
@@ -13374,94 +13503,6 @@
         ],
         "title": "BaseDataOutputDatasetAssociationGet"
       },
-      "BaseTechnicalAssetOutputPortAssociationGet": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "technical_asset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Technical Asset Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Requested On"
-          },
-          "denied_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Denied On"
-          },
-          "approved_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Approved On"
-          },
-          "requested_by": {
-            "$ref": "#/components/schemas/User"
-          },
-          "denied_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "output_port_id",
-          "technical_asset_id",
-          "status",
-          "requested_on",
-          "denied_on",
-          "approved_on",
-          "requested_by",
-          "denied_by",
-          "approved_by"
-        ],
-        "title": "BaseTechnicalAssetOutputPortAssociationGet"
-      },
       "BecomeAdmin": {
         "properties": {
           "expiry": {
@@ -15741,6 +15782,13 @@
             "type": "string",
             "format": "uuid",
             "title": "Data Product Id"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
           }
         },
         "type": "object",
@@ -15751,7 +15799,8 @@
           "description",
           "status",
           "access_type",
-          "data_product_id"
+          "data_product_id",
+          "tags"
         ],
         "title": "Dataset",
         "deprecated": true
@@ -16994,6 +17043,38 @@
         ],
         "title": "GetConveyorIdeUrlResponse"
       },
+      "GetDataProductInputPortsResponse": {
+        "properties": {
+          "input_ports": {
+            "items": {
+              "$ref": "#/components/schemas/InputPort"
+            },
+            "type": "array",
+            "title": "Input Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_ports"
+        ],
+        "title": "GetDataProductInputPortsResponse"
+      },
+      "GetDataProductOutputPortsResponse": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPort"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports"
+        ],
+        "title": "GetDataProductOutputPortsResponse"
+      },
       "GetDataProductResponse": {
         "properties": {
           "id": {
@@ -17067,35 +17148,6 @@
               }
             ],
             "title": "About"
-          },
-          "input_ports": {
-            "items": {
-              "$ref": "#/components/schemas/InputPort"
-            },
-            "type": "array",
-            "title": "Input Ports"
-          },
-          "technical_assets": {
-            "items": {
-              "$ref": "#/components/schemas/TechnicalAssetLinks"
-            },
-            "type": "array",
-            "title": "Technical Assets"
-          },
-          "output_ports": {
-            "items": {
-              "$ref": "#/components/schemas/OutputPort"
-            },
-            "type": "array",
-            "title": "Output Ports"
-          },
-          "rolled_up_tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "uniqueItems": true,
-            "title": "Rolled Up Tags"
           }
         },
         "type": "object",
@@ -17111,13 +17163,26 @@
           "type",
           "lifecycle",
           "data_product_settings",
-          "about",
-          "input_ports",
-          "technical_assets",
-          "output_ports",
-          "rolled_up_tags"
+          "about"
         ],
         "title": "GetDataProductResponse"
+      },
+      "GetDataProductRolledUpTagsResponse": {
+        "properties": {
+          "rolled_up_tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "uniqueItems": true,
+            "title": "Rolled Up Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rolled_up_tags"
+        ],
+        "title": "GetDataProductRolledUpTagsResponse"
       },
       "GetDataProductsResponse": {
         "properties": {
@@ -18223,6 +18288,13 @@
             "type": "string",
             "format": "uuid",
             "title": "Data Product Id"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
           }
         },
         "type": "object",
@@ -18233,7 +18305,8 @@
           "description",
           "status",
           "access_type",
-          "data_product_id"
+          "data_product_id",
+          "tags"
         ],
         "title": "OutputPort"
       },
@@ -18940,127 +19013,6 @@
           "value"
         ],
         "title": "TagsGetItem"
-      },
-      "TechnicalAssetLinks": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct"
-          },
-          "output_port_links": {
-            "items": {
-              "$ref": "#/components/schemas/BaseTechnicalAssetOutputPortAssociationGet"
-            },
-            "type": "array",
-            "title": "Output Port Links"
-          },
-          "result_string": {
-            "type": "string",
-            "title": "Result String",
-            "readOnly": true
-          },
-          "technical_info": {
-            "items": {
-              "$ref": "#/components/schemas/TechnicalInfo"
-            },
-            "type": "array",
-            "title": "Technical Info",
-            "readOnly": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "namespace",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "status",
-          "sourceAligned",
-          "configuration",
-          "owner",
-          "output_port_links",
-          "result_string",
-          "technical_info"
-        ],
-        "title": "TechnicalAssetLinks"
       },
       "TechnicalAssetStatus": {
         "type": "string",

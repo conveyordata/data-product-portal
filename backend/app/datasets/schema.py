@@ -1,6 +1,7 @@
 from uuid import UUID
 from warnings import deprecated
 
+from app.configuration.tags.schema import Tag
 from app.datasets.enums import OutputPortAccessType
 from app.datasets.status import OutputPortStatus
 from app.shared.schema import ORMModel
@@ -14,6 +15,7 @@ class OutputPort(ORMModel):
     status: OutputPortStatus
     access_type: OutputPortAccessType
     data_product_id: UUID
+    tags: list[Tag]
 
 
 @deprecated("use OutputPort instead")

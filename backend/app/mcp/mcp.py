@@ -342,7 +342,7 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
     try:
         db = next(get_db_session())
         try:
-            data_product = DataProductService(db).get_data_product(
+            data_product = DataProductService(db).get_data_product_old(
                 id=UUID(data_product_id),
             )
 
@@ -482,7 +482,7 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
             # Get the data product using service
-            data_product = DataProductService(db).get_data_product(
+            data_product = DataProductService(db).get_data_product_old(
                 id=UUID(data_product_id),
             )
 
@@ -542,7 +542,7 @@ def get_data_product_resource(data_product_id: str) -> str:
     try:
         db = next(get_db_session())
         try:
-            data_product = DataProductService(db).get_data_product(
+            data_product = DataProductService(db).get_data_product_old(
                 id=UUID(data_product_id),
             )
 

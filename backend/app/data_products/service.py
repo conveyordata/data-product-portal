@@ -25,6 +25,7 @@ from app.configuration.environments.platform_configurations.model import (
 from app.configuration.platforms.model import Platform as PlatformModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
+from app.configuration.tags.schema import Tag
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
@@ -51,6 +52,8 @@ from app.data_products.schema_request import (
 from app.data_products.schema_response import (
     DataProductGet,
     DataProductsGet,
+    DatasetLinks,
+    GetDataProductResponse,
     UpdateDataProductResponse,
 )
 from app.data_products_datasets.model import (
@@ -59,6 +62,7 @@ from app.data_products_datasets.model import (
 from app.datasets.enums import OutputPortAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.datasets.schema import OutputPort
 from app.datasets.service import DatasetService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -74,7 +78,42 @@ class DataProductService:
         self.namespace_validator = NamespaceValidator(DataProductModel)
         self.data_output_namespace_validator = DataOutputNamespaceValidator()
 
-    def get_data_product(self, id: UUID) -> DataProductGet:
+    def get_output_ports(self, data_product_id: UUID) -> Sequence[OutputPort]:
+        ensure_data_product_exists(data_product_id, self.db)
+        return (
+            self.db.scalars(
+                select(DatasetModel).filter(
+                    DatasetModel.data_product_id == data_product_id
+                ),
+            )
+            .unique()
+            .all()
+        )
+
+    def get_input_ports(self, data_product_id: UUID) -> Sequence[DatasetLinks]:
+        ensure_data_product_exists(data_product_id, self.db)
+        return (
+            self.db.scalars(
+                select(DataProductDatasetModel)
+                .options(
+                    selectinload(DataProductDatasetModel.dataset),
+                )
+                .filter(DataProductDatasetModel.data_product_id == data_product_id),
+            )
+            .unique()
+            .all()
+        )
+
+    def get_rolled_up_tags(self, data_product_id: UUID) -> set[Tag]:
+        ensure_data_product_exists(data_product_id, self.db)
+        rolled_up_tags = set()
+        for output_ports in self.get_output_ports(data_product_id):
+            rolled_up_tags.update(output_ports.tags)
+        for technical_asset in self.get_data_outputs(data_product_id):
+            rolled_up_tags.update(technical_asset.tags)
+        return rolled_up_tags
+
+    def get_data_product_old(self, id: UUID) -> DataProductGet:
         data_product = self.db.get(
             DataProductModel,
             id,
@@ -110,6 +149,21 @@ class DataProductService:
                 rolled_up_tags.update(output_link.data_output.tags)
 
         data_product.rolled_up_tags = rolled_up_tags
+
+        if not data_product.lifecycle:
+            data_product.lifecycle = default_lifecycle
+        return data_product
+
+    def get_data_product(self, id: UUID) -> GetDataProductResponse:
+        data_product = self.db.get(
+            DataProductModel,
+            id,
+        )
+        default_lifecycle = self.db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
+        )
 
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
