@@ -17,6 +17,8 @@ import { CuratedQueriesList } from './components/curated-queries-list';
 import { QueriesOverTimeChart } from './components/queries-over-time-chart';
 import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
 
+const { Link } = Typography;
+
 type Props = {
     datasetId: string;
 };
@@ -53,6 +55,8 @@ export function UsageTab({ datasetId }: Props) {
     const isLoadingState = isLoading || isFetching;
     const responses = data?.dataset_query_stats_daily_responses;
     const hasUsageData = Boolean(responses?.length);
+    const hasCuratedQueries = Boolean(!areCuratedQueriesLoading && curatedQueries?.dataset_curated_queries?.length);
+    const hasAnyData = hasUsageData || hasCuratedQueries;
     const unknownLabel = t('Unknown');
 
     const chartData = useMemo(() => {
@@ -76,9 +80,23 @@ export function UsageTab({ datasetId }: Props) {
                 <Flex vertical align="center" justify="center">
                     <Spin size="large" />
                 </Flex>
-            ) : !isLoadingState && !hasUsageData ? (
+            ) : !isLoadingState && !hasAnyData ? (
                 <Flex vertical align="center" justify="center">
-                    <Empty description={t('No usage data available for this dataset')} />
+                    <Empty
+                        description={
+                            <Typography.Text type="secondary">
+                                {t('Learn how to set up usage data ingestion in our')}{' '}
+                                <Link
+                                    href="https://docs.dataproductportal.com/docs/developer-guide/data-product-usage-ingestion"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {t('documentation')}
+                                </Link>
+                                .
+                            </Typography.Text>
+                        }
+                    />
                 </Flex>
             ) : (
                 <Row gutter={[32, 32]}>
@@ -116,10 +134,12 @@ export function UsageTab({ datasetId }: Props) {
                     </Col>
                 </Row>
             )}
-            <CuratedQueriesList
-                queries={curatedQueries?.dataset_curated_queries}
-                isLoading={areCuratedQueriesLoading}
-            />
+            {hasAnyData && (
+                <CuratedQueriesList
+                    queries={curatedQueries?.dataset_curated_queries}
+                    isLoading={areCuratedQueriesLoading}
+                />
+            )}
         </Flex>
     );
 }
