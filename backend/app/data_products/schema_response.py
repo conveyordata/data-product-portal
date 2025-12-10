@@ -86,10 +86,16 @@ class DataProductGet(BaseDataProductGet):
 class GetDataProductResponse(BaseDataProductGet):
     about: Optional[str]
 
-    # Nested schemas
-    input_ports: list[InputPort]
-    technical_assets: list[TechnicalAssetLinks]
-    output_ports: list[OutputPort]
+
+class GetDataProductInputPortsResponse(ORMModel):
+    input_ports: Sequence[InputPort]
+
+
+class GetDataProductOutputPortsResponse(ORMModel):
+    output_ports: Sequence[OutputPort]
+
+
+class GetDataProductRolledUpTagsResponse(ORMModel):
     rolled_up_tags: set[Tag]
 
 

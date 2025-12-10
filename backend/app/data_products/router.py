@@ -54,9 +54,13 @@ from app.data_products.schema_response import (
     CreateTechnicalAssetResponse,
     DataProductGet,
     DataProductsGet,
+    DatasetLinks,
     GetConveyorIdeUrlResponse,
     GetDatabricksWorkspaceUrlResponse,
+    GetDataProductInputPortsResponse,
+    GetDataProductOutputPortsResponse,
     GetDataProductResponse,
+    GetDataProductRolledUpTagsResponse,
     GetDataProductsResponse,
     GetSigninUrlResponse,
     GetSnowflakeUrlResponse,
@@ -965,27 +969,44 @@ def get_user_data_products(
 def get_data_product_old(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> DataProductGet:
-    return DataProductService(db).get_data_product(id)
+    return DataProductService(db).get_data_product_old(id)
 
 
 @router.get(f"{route}/{{id}}")
 def get_data_product(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductResponse:
-    data_product_old = DataProductGet.model_validate(
-        DataProductService(db).get_data_product(id)
-    )
-    base = data_product_old.model_dump(
-        exclude={"dataset_links", "data_outputs", "datasets"}
-    )
-    return GetDataProductResponse(
-        **base,
-        output_ports=[dataset.convert() for dataset in data_product_old.datasets],
+    return DataProductService(db).get_data_product(id)
+
+
+@router.get(f"{route}/{{id}}/input_ports")
+def get_data_product_input_ports(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+) -> GetDataProductInputPortsResponse:
+    return GetDataProductInputPortsResponse(
         input_ports=[
-            dataset_link.convert_to_output_port_link()
-            for dataset_link in data_product_old.dataset_links
-        ],
-        technical_assets=[tl.convert() for tl in data_product_old.data_outputs],
+            DatasetLinks.model_validate(input_port).convert()
+            for input_port in DataProductService(db).get_input_ports(id)
+        ]
+    )
+
+
+@router.get(f"{route}/{{id}}/output_ports")
+def get_data_product_output_ports(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> GetDataProductOutputPortsResponse:
+    return GetDataProductOutputPortsResponse(
+        output_ports=DataProductService(db).get_output_ports(id)
+    )
+
+
+@router.get(f"{route}/{{id}}/rolled_up_tags")
+def get_data_product_rolled_up_tags(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> GetDataProductRolledUpTagsResponse:
+    return GetDataProductRolledUpTagsResponse(
+        rolled_up_tags=DataProductService(db).get_rolled_up_tags(id)
     )
 
 
