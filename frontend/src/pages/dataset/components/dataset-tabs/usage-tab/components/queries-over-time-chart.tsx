@@ -49,10 +49,10 @@ export function QueriesOverTimeChart({ data, isLoading, hasData, colorScaleConfi
 
     return (
         <ChartCard
-            title={t('Usage Statistics - Last Month')}
+            title={t('Queries over time')}
             isLoading={isLoading}
             hasData={hasData}
-            emptyDescription={t('No usage data available for the last month')}
+            emptyDescription={t('No usage data available for this time range')}
         >
             <Area {...config} />
         </ChartCard>
