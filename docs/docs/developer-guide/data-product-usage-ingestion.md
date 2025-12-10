@@ -7,21 +7,19 @@ sidebar_position: 5
 
 # Data Product Usage Ingestion
 
-The Data Product Portal provides a **usage analytics** view that allows one to track how datasets are being consumed over time. This feature enables visibility into query patterns, data-consumer behavior, and usage trends.
+The Data Product Portal provides a **usage analytics** view that allows one to:
+- track how datasets are being consumed over time and by which data products
+- show some relevant queries for a given dataset
 
 ## Overview
 
-To enable the usage analytics, the usage related tables have to be populated with statistics from your data platform (e.g., Snowflake, Databricks, AWS). Once ingested, this data is displayed in the portal's usage dashboards, providing insights into:
-
-- **Query trends over time**: Track how query volumes change across different time periods
-- **Consumer distribution**: Understand which data products are consuming your datasets
-- **Usage patterns**: Identify peak usage periods and consumption trends
+To enable the usage analytics, the usage related tables have to be populated with statistics from your data platform (e.g., Snowflake, Databricks, AWS). Once ingested, this data is displayed in the portal's usage dashboards.
 
 A simple example is shown below:
 
 ![Usage Dashboard showing queries over time and queries per consumer](./img/usage.png)
 
-The dashboard above demonstrates how usage data is visualized, with filters for granularity (day, week, month) and time ranges (7 days, 30 days, 90 days, 1 year).
+The dashboard above demonstrates how usage data is visualized, with filters for granularity (day, week, month) and time ranges (30 days, 90 days, 1 year).
 
 ## API Endpoint
 
@@ -29,49 +27,28 @@ To ingest usage data, use the following REST API endpoint:
 
 ### Endpoint
 
+#### query statistics
+
 - [`PATCH /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/update_query_stats_api_datasets__id__query_stats_patch) - Update query statistics
 - [`DELETE /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/delete_query_stat_api_datasets__id__query_stats_delete) - Delete query statistics
 
-### Request Payload
 
-The endpoint accepts a JSON payload containing an array of daily query statistics:
+#### curated queries
 
-```json
-{
-  "dataset_query_stats_daily_updates": [
-    {
-      "date": "2025-01-15",
-      "consumer_data_product_id": "550e8400-e29b-41d4-a716-446655440000",
-      "query_count": 42
-    },
-    {
-      "date": "2025-01-15",
-      "consumer_data_product_id": "660e8400-e29b-41d4-a716-446655440001",
-      "query_count": 18
-    }
-  ]
-}
-```
-
-### Field Descriptions
-
-- **`date`** (string, required): The date for which the statistics apply, in `YYYY-MM-DD` format
-- **`consumer_data_product_id`** (UUID, required): The unique identifier of the consuming data product
-- **`query_count`** (integer, required): The number of queries executed on the specified date
+- [`GET /api/datasets/{id}/usage/curated_queries`](/docs/api/#tag/datasets/operation/get_dataset_curated_queries_api_datasets__id__usage_curated_queries_get) - Get curated queries
+- [`PUT /api/datasets/{id}/usage/curated_queries`](/docs/api/#tag/datasets/operation/replace_dataset_curated_queries_api_datasets__id__usage_curated_queries_put) - Replace curated queries
 
 
-## Responsibility and Implementation
+## Implementation
 
-**Implementation responsibility**: The ingestion of usage metrics is the responsibility of the data product owner or platform administrator. You are responsible for:
+To ingest usage data, you need to:
 
-- Extracting usage data from your data platform's query logs or access history
-- Aggregating the data by date and consumer
-- Implementing the HTTP client logic (authentication, request formatting, error handling, retries)
-- Scheduling the ingestion process (e.g., daily batch jobs)
+1. Extract usage data from your data platform's query logs or access history
+2. Aggregate the data by date and consumer
+3. Implement the HTTP client logic (authentication, request formatting, error handling, retries) to push the data to the API endpoint
+4. Schedule the ingestion process (e.g., daily batch jobs)
 
-The Data Product Portal provides the API endpoint and documentation, but the actual data extraction, transformation, and ingestion pipeline must be implemented within your infrastructure.
-
-## Snowflake Example
+### Snowflake Example
 
 For organizations using Snowflake, we provide a sample SQL query that can be used as a starting point to extract usage statistics from Snowflake's `ACCESS_HISTORY` view. This query identifies which schemas were accessed by specific roles and aggregates query counts by consumer.
 
