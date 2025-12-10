@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 from fastapi import status
@@ -95,18 +96,22 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     @pytest.mark.parametrize(
-        "permissions",
+        ("permissions", "should_update_casbin"),
         [
-            [
-                Action.DATASET__CREATE_USER,
-            ],
-            [
-                Action.DATASET__CREATE_USER,
-                Action.DATASET__APPROVE_USER_REQUEST,
-            ],
+            ([Action.DATASET__CREATE_USER], False),
+            ([Action.DATASET__CREATE_USER, Action.DATASET__APPROVE_USER_REQUEST], True),
         ],
     )
-    def test_create_assignment(self, permissions: list[Action], client: TestClient):
+    @patch(
+        "app.authorization.role_assignments.output_port.router.DatasetAuthAssignment"
+    )
+    def test_create_assignment(
+        self,
+        mock_dataset_auth_assignment,
+        permissions: list[Action],
+        should_update_casbin: bool,
+        client: TestClient,
+    ):
         dataset: Dataset = DatasetFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
@@ -133,6 +138,13 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["output_port"]["id"] == str(dataset.id)
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
+
+        # Verify Casbin update behavior
+        if should_update_casbin:
+            mock_dataset_auth_assignment.assert_called_once()
+            mock_dataset_auth_assignment.return_value.add.assert_called_once()
+        else:
+            mock_dataset_auth_assignment.assert_not_called()
 
     def test_request_assignment_old(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
