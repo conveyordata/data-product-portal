@@ -56,6 +56,7 @@ pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
+freezegun = "^1.5.5"
 
 [tool.poetry.group.dev]
 optional = true
