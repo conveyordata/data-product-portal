@@ -59,6 +59,7 @@ class DeviceFlowService:
             scope=scope,
             max_expiry=utc_now() + timedelta(seconds=1800),
             oidc_redirect_uri=get_oidc().redirect_uri,
+            last_checked=utc_now(),
         )
         db.add(device_flow)
         db.commit()
