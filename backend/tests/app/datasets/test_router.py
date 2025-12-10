@@ -332,27 +332,51 @@ class TestDatasetsRouter:
         assert response.json()["usage"] == "new usage"
 
     def test_get_graph_data(self, client):
-        ds = DatasetFactory()
+        dp = DataProductFactory()
+        ds = DatasetFactory(data_product=dp)
         response = client.get(f"{ENDPOINT}/{ds.id}/graph")
-        assert response.json() == {
-            "edges": [],
-            "nodes": [
-                {
-                    "data": {
-                        "icon_key": None,
-                        "id": str(ds.id),
-                        "link_to_id": None,
-                        "name": ds.name,
-                        "domain": None,
-                        "domain_id": None,
-                        "assignments": None,
-                        "description": None,
-                    },
-                    "id": str(ds.id),
-                    "isMain": True,
-                    "type": "datasetNode",
-                }
-            ],
+        assert response.json()["edges"] == [
+            {
+                "id": f"{str(dp.id)}-{str(ds.id)}-2",
+                "source": f"{str(dp.id)}_2",
+                "target": str(ds.id),
+                "animated": True,
+                "sourceHandle": "right_s",
+                "targetHandle": "left_t",
+            }
+        ]
+        nodes = response.json()["nodes"]
+        dp_node = [node for node in nodes if node["type"] == "dataProductNode"][0]
+        ds_node = [node for node in nodes if node["type"] == "datasetNode"][0]
+        assert dp_node == {
+            "data": {
+                "id": f"{str(dp.id)}",
+                "name": dp.name,
+                "description": None,
+                "icon_key": "default",
+                "domain": None,
+                "domain_id": None,
+                "assignments": None,
+                "link_to_id": None,
+            },
+            "id": f"{str(dp.id)}_2",
+            "isMain": False,
+            "type": "dataProductNode",
+        }
+        assert ds_node == {
+            "data": {
+                "icon_key": None,
+                "id": str(ds.id),
+                "link_to_id": None,
+                "name": ds.name,
+                "domain": None,
+                "domain_id": None,
+                "assignments": None,
+                "description": None,
+            },
+            "id": str(ds.id),
+            "isMain": True,
+            "type": "datasetNode",
         }
 
     def test_dataset_set_custom_setting_no_role(self, client):

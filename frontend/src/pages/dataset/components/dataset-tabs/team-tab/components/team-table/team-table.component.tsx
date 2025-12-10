@@ -143,7 +143,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
                 onChange={onChange}
                 pagination={{
                     ...pagination,
-                    position: ['topRight'],
+                    placement: ['topEnd'],
                     size: 'small',
                     showTotal: (total, range) =>
                         t('Showing {{range0}}-{{range1}} of {{total}} team members', {

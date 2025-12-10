@@ -1,9 +1,10 @@
 import copy
 import json
 from datetime import datetime
-from typing import Sequence
+from typing import Optional, Sequence
 from urllib import parse
 from uuid import UUID
+from warnings import deprecated
 
 import httpx
 import pytz
@@ -47,7 +48,11 @@ from app.data_products.schema_request import (
     DataProductUpdate,
     DataProductUsageUpdate,
 )
-from app.data_products.schema_response import DataProductGet, DataProductsGet
+from app.data_products.schema_response import (
+    DataProductGet,
+    DataProductsGet,
+    UpdateDataProductResponse,
+)
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
@@ -110,29 +115,35 @@ class DataProductService:
             data_product.lifecycle = default_lifecycle
         return data_product
 
-    def get_data_products(self) -> Sequence[DataProductsGet]:
+    def get_data_products(
+        self,
+        filter_to_user_with_assigment: Optional[UUID] = None,
+    ) -> Sequence[DataProductsGet]:
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
             )
         )
-        dps = (
-            self.db.scalars(
-                select(DataProductModel)
-                .options(
-                    selectinload(DataProductModel.dataset_links).raiseload("*"),
-                    selectinload(DataProductModel.assignments).raiseload("*"),
-                    selectinload(DataProductModel.data_outputs).raiseload("*"),
-                )
-                .order_by(asc(DataProductModel.name))
-            )
-            .unique()
-            .all()
+        query = select(DataProductModel).options(
+            selectinload(DataProductModel.dataset_links).raiseload("*"),
+            selectinload(DataProductModel.assignments).raiseload("*"),
+            selectinload(DataProductModel.data_outputs).raiseload("*"),
         )
+        if filter_to_user_with_assigment:
+            query = query.filter(
+                DataProductModel.assignments.any(
+                    user_id=filter_to_user_with_assigment,
+                    decision=DecisionStatus.APPROVED,
+                )
+            )
+        query = query.order_by(asc(DataProductModel.name))
+
+        dps = self.db.scalars(query).unique().all()
 
         for dp in dps:
             if not dp.lifecycle:
                 dp.lifecycle = default_lifecycle
+
         return dps
 
     def get_owners(self, id: UUID) -> Sequence[User]:
@@ -150,27 +161,6 @@ class DataProductService:
         return self.db.scalars(
             select(UserModel).filter(UserModel.id.in_(user_ids))
         ).all()
-
-    def get_user_data_products(self, user_id: UUID) -> Sequence[DataProductsGet]:
-        return (
-            self.db.scalars(
-                select(DataProductModel)
-                .options(
-                    selectinload(DataProductModel.dataset_links).raiseload("*"),
-                    selectinload(DataProductModel.assignments).raiseload("*"),
-                    selectinload(DataProductModel.datasets).raiseload("*"),
-                    selectinload(DataProductModel.data_outputs).raiseload("*"),
-                )
-                .filter(
-                    DataProductModel.assignments.any(
-                        user_id=user_id, decision=DecisionStatus.APPROVED
-                    )
-                )
-                .order_by(asc(DataProductModel.name))
-            )
-            .unique()
-            .all()
-        )
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         return [ensure_tag_exists(tag_id, self.db) for tag_id in tag_ids]
@@ -214,7 +204,7 @@ class DataProductService:
         self,
         id: UUID,
         data_product: DataProductUpdate,
-    ) -> dict[str, UUID]:
+    ) -> UpdateDataProductResponse:
         current_data_product = ensure_data_product_exists(id, self.db)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
@@ -240,7 +230,7 @@ class DataProductService:
                 setattr(current_data_product, k, v) if v else None
 
         self.db.commit()
-        return {"id": current_data_product.id}
+        return UpdateDataProductResponse(id=current_data_product.id)
 
     def update_data_product_about(
         self,
@@ -345,13 +335,12 @@ class DataProductService:
         *,
         actor: User,
     ) -> list[DataProductDatasetModel]:
-        dataset_links = []
-        for dataset_id in dataset_ids:
-            dataset_links.append(
-                self.link_dataset_to_data_product(
-                    id, dataset_id, justification, actor=actor
-                )
+        dataset_links = [
+            self.link_dataset_to_data_product(
+                id, dataset_id, justification, actor=actor
             )
+            for dataset_id in dataset_ids
+        ]
         self.db.commit()
         return dataset_links
 
@@ -382,7 +371,11 @@ class DataProductService:
         self.db.commit()
         return data_product_dataset
 
+    @deprecated("Should use generate_signin_url instead")
     def get_data_product_role_arn(self, id: UUID, environment: str) -> str:
+        return self._get_data_product_role_arn(id, environment)
+
+    def _get_data_product_role_arn(self, id: UUID, environment: str) -> str:
         environment_context = (
             self.db.execute(
                 select(EnvironmentModel).where(EnvironmentModel.name == environment)
@@ -413,7 +406,7 @@ class DataProductService:
         return AWSCredentials(**response.get("Credentials"))
 
     def generate_signin_url(self, id: UUID, environment: str, *, actor: User) -> str:
-        role = self.get_data_product_role_arn(id, environment)
+        role = self._get_data_product_role_arn(id, environment)
         json_credentials = self.get_aws_temporary_credentials(role, actor=actor)
 
         url_credentials = {
@@ -514,6 +507,7 @@ class DataProductService:
             DataProductModel,
             id,
             populate_existing=True,
+            options=[selectinload(DataProductModel.datasets)],
         )
         nodes = [
             Node(
@@ -637,6 +631,28 @@ class DataProductService:
                                     == DecisionStatus.APPROVED,
                                 )
                             )
+
+        # if no data outputs are present, still show the children datasets
+        if not data_outputs:
+            for downstream_dataset in product.datasets:
+                nodes.append(
+                    Node(
+                        id=downstream_dataset.id,
+                        data=NodeData(
+                            id=downstream_dataset.id,
+                            name=downstream_dataset.name,
+                        ),
+                        type=NodeType.datasetNode,
+                    )
+                )
+                edges.append(
+                    Edge(
+                        id=f"{product.id}-{downstream_dataset.id}-direct",
+                        source=product.id,
+                        target=downstream_dataset.id,
+                        animated=True,
+                    )
+                )
 
         return Graph(nodes=set(nodes), edges=set(edges))
 

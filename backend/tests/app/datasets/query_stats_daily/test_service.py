@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from uuid import uuid4
 
 import pytest
 from sqlalchemy.orm import Session
@@ -8,7 +9,12 @@ from app.datasets.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyDelete,
     DatasetQueryStatsDailyUpdate,
 )
+from app.datasets.query_stats_daily.schema_response import (
+    DatasetQueryStatsDailyResponse,
+)
 from app.datasets.query_stats_daily.service import (
+    OTHER_CONSUMER_DATA_PRODUCT_ID,
+    OTHER_CONSUMER_DATA_PRODUCT_NAME,
     DatasetQueryStatsDailyService,
     QueryStatsGranularity,
 )
@@ -177,11 +183,17 @@ class TestDatasetQueryStatsDailyService:
         )
         stats = response.dataset_query_stats_daily_responses
 
-        # Verify results
-        assert len(stats) == 2
+        # Verify buckets are filled (should have many entries due to bucket filling)
+        assert len(stats) > 2
+
+        # Filter to actual data points (non-zero query counts)
+        actual_stats = [stat for stat in stats if stat.query_count > 0]
+        assert len(actual_stats) == 2
 
         # Verify the correct records were returned
-        stats_by_consumer = {stat.consumer_data_product_id: stat for stat in stats}
+        stats_by_consumer = {
+            stat.consumer_data_product_id: stat for stat in actual_stats
+        }
         assert consumer1.id in stats_by_consumer
         assert consumer2.id in stats_by_consumer
         assert stats_by_consumer[consumer1.id].query_count == 100
@@ -214,17 +226,38 @@ class TestDatasetQueryStatsDailyService:
         session.commit()
 
         service = DatasetQueryStatsDailyService(session)
+        day_range = 14
         response = service.get_query_stats_daily(
             dataset.id,
             granularity=QueryStatsGranularity.WEEK,
-            day_range=365,
+            day_range=day_range,
         )
 
         stats = response.dataset_query_stats_daily_responses
-        assert len(stats) == 1
-        assert stats[0].date == start_of_week
-        assert stats[0].query_count == 300
-        assert stats[0].consumer_data_product_id == consumer.id
+
+        # Calculate expected number of week buckets: from (today - day_range) to today, aligned to weeks
+        # This matches the logic in _fill_missing_buckets -> _build_buckets
+        range_start = date.today() - timedelta(days=day_range)
+        start_week = QueryStatsGranularity.WEEK.align_date(range_start)
+        end_week = QueryStatsGranularity.WEEK.align_date(date.today())
+
+        # Count weeks from start_week to end_week (inclusive)
+        week_count = 0
+        current = start_week
+        while current <= end_week:
+            week_count += 1
+            current = QueryStatsGranularity.WEEK.increment_date(current)
+
+        # With 1 consumer, we expect week_count entries (one per week bucket)
+        expected_count = week_count
+        assert len(stats) == expected_count
+
+        # Find the actual data point (non-zero query count)
+        actual_stats = [stat for stat in stats if stat.query_count > 0]
+        assert len(actual_stats) == 1
+        assert actual_stats[0].date == start_of_week
+        assert actual_stats[0].query_count == 300
+        assert actual_stats[0].consumer_data_product_id == consumer.id
 
     def test_get_query_stats_daily_day_range_filter(self, session: Session):
         dataset = DatasetFactory()
@@ -255,9 +288,14 @@ class TestDatasetQueryStatsDailyService:
         )
 
         stats = response.dataset_query_stats_daily_responses
-        assert len(stats) == 1
-        assert stats[0].date == recent_date
-        assert stats[0].query_count == 50
+        # Today + 30 days ago = 31 days
+        assert len(stats) == 31
+
+        # Find the actual data point (non-zero query count)
+        actual_stats = [stat for stat in stats if stat.query_count > 0]
+        assert len(actual_stats) == 1
+        assert actual_stats[0].date == recent_date
+        assert actual_stats[0].query_count == 50
 
     def test_delete_query_stats_daily_existing_row(
         self, session: Session, dataset_with_two_stats
@@ -278,3 +316,143 @@ class TestDatasetQueryStatsDailyService:
 
         assert deleted_row is None
         assert remaining_row.consumer_data_product_id == consumer2.id
+
+
+class TestDatasetQueryStatsDailyServicePrivateMethods:
+    """Unit tests for private methods of DatasetQueryStatsDailyService."""
+
+    def test_consumer_totals(self, session: Session):
+        """Test _consumer_totals_and_names aggregates totals."""
+        service = DatasetQueryStatsDailyService(session)
+        consumer1_id = uuid4()
+        consumer2_id = uuid4()
+
+        stats = [
+            DatasetQueryStatsDailyResponse(
+                date=date.today(),
+                consumer_data_product_id=consumer1_id,
+                query_count=100,
+                consumer_data_product_name="Consumer 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date.today() - timedelta(days=1),
+                consumer_data_product_id=consumer1_id,
+                query_count=50,
+                consumer_data_product_name="Consumer 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date.today(),
+                consumer_data_product_id=consumer2_id,
+                query_count=200,
+                consumer_data_product_name="Consumer 2",
+            ),
+        ]
+
+        totals = service._consumer_totals(stats)
+
+        assert totals[consumer1_id] == 150
+        assert totals[consumer2_id] == 200
+
+    def test_top_consumer_ids(self):
+        """Test _top_consumer_ids selects top consumers by totals."""
+        consumer1_id = uuid4()
+        consumer2_id = uuid4()
+        consumer3_id = uuid4()
+        consumer4_id = uuid4()
+
+        consumer_totals = {
+            consumer1_id: 100,
+            consumer2_id: 300,
+            consumer3_id: 200,
+            consumer4_id: 50,
+        }
+
+        top_ids = DatasetQueryStatsDailyService._top_consumer_ids(
+            consumer_totals, limit=2
+        )
+
+        assert len(top_ids) == 2
+        assert consumer2_id in top_ids
+        assert consumer3_id in top_ids
+        assert consumer1_id not in top_ids
+        assert consumer4_id not in top_ids
+
+    def test_merge_other_consumers(self):
+        """Test _merge_other_consumers merges low-volume consumers into 'Other'."""
+        consumer1_id = uuid4()
+        consumer2_id = uuid4()
+        consumer3_id = uuid4()
+        top_consumer_ids = {consumer1_id}
+
+        stats = [
+            DatasetQueryStatsDailyResponse(
+                date=date(2024, 1, 1),
+                consumer_data_product_id=consumer1_id,
+                query_count=100,
+                consumer_data_product_name="Top Consumer",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date(2024, 1, 1),
+                consumer_data_product_id=consumer2_id,
+                query_count=50,
+                consumer_data_product_name="Low Volume 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=date(2024, 1, 1),
+                consumer_data_product_id=consumer3_id,
+                query_count=30,
+                consumer_data_product_name="Low Volume 2",
+            ),
+        ]
+
+        result = DatasetQueryStatsDailyService._merge_other_consumers(
+            stats, top_consumer_ids
+        )
+
+        assert len(result) == 2
+        top_entry = next(
+            s for s in result if s.consumer_data_product_id == consumer1_id
+        )
+        assert top_entry.query_count == 100
+        other_entry = next(
+            s
+            for s in result
+            if s.consumer_data_product_id == OTHER_CONSUMER_DATA_PRODUCT_ID
+        )
+        assert other_entry.query_count == 80
+        assert (
+            other_entry.consumer_data_product_name == OTHER_CONSUMER_DATA_PRODUCT_NAME
+        )
+
+    def test_fill_missing_buckets(self, session: Session):
+        """Test _fill_missing_buckets fills missing time buckets with zeros."""
+        service = DatasetQueryStatsDailyService(session)
+        consumer_id = uuid4()
+        start_date = date.today() - timedelta(days=5)
+
+        stats = [
+            DatasetQueryStatsDailyResponse(
+                date=start_date,
+                consumer_data_product_id=consumer_id,
+                query_count=100,
+                consumer_data_product_name="Consumer 1",
+            ),
+            DatasetQueryStatsDailyResponse(
+                date=start_date + timedelta(days=3),
+                consumer_data_product_id=consumer_id,
+                query_count=200,
+                consumer_data_product_name="Consumer 1",
+            ),
+        ]
+
+        result = service._fill_missing_buckets(
+            stats, start_date, QueryStatsGranularity.DAY
+        )
+
+        expected_days = (date.today() - start_date).days + 1
+        assert len(result) == expected_days
+        existing_by_date = {s.date: s for s in result if s.query_count > 0}
+        assert existing_by_date[start_date].query_count == 100
+        assert existing_by_date[start_date + timedelta(days=3)].query_count == 200
+        zero_entries = [s for s in result if s.query_count == 0]
+        assert len(zero_entries) == expected_days - 2

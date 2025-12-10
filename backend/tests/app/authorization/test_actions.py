@@ -18,7 +18,6 @@ class TestAction:
         )
 
         # Read the TypeScript file
-        print(ts_file_path)
         with open(ts_file_path, "r") as ts_file:
             ts_content = ts_file.read()
 

@@ -18,4 +18,5 @@ class OutputPort(ORMModel):
 
 @deprecated("use OutputPort instead")
 class Dataset(OutputPort):
-    pass
+    def convert(self) -> OutputPort:
+        return OutputPort(**self.model_dump())

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from pydantic import EmailStr
@@ -25,3 +25,11 @@ class UserGet(BaseUserGet):
 
 class UsersGet(BaseUserGet):
     global_role: Optional[RoleAssignmentResponse]
+
+
+class GetUsersResponse(ORMModel):
+    users: Sequence[UsersGet]
+
+
+class UserCreateResponse(ORMModel):
+    id: UUID

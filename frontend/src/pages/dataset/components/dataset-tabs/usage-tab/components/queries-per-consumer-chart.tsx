@@ -2,22 +2,25 @@ import { Bar } from '@ant-design/charts';
 import { useTranslation } from 'react-i18next';
 
 import { ChartCard } from './chart-card';
-import type { ConsumerTotal } from './chart-data.utils';
+import type { ColorScaleConfig, ConsumerTotal } from './chart-data.utils';
 
 type QueriesPerConsumerChartProps = {
     data: ConsumerTotal[];
     isLoading: boolean;
     hasData: boolean;
-    className?: string;
+    colorScaleConfig: ColorScaleConfig;
 };
 
-export function QueriesPerConsumerChart({ data, isLoading, hasData, className }: QueriesPerConsumerChartProps) {
+export function QueriesPerConsumerChart({ data, isLoading, hasData, colorScaleConfig }: QueriesPerConsumerChartProps) {
     const { t } = useTranslation();
+
+    // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
     const config = {
         data,
         xField: 'consumer',
         yField: 'totalQueries',
         colorField: 'consumer',
+        ...colorScaleConfig,
         coordinate: {
             actions: [['transpose']],
         },
@@ -36,7 +39,6 @@ export function QueriesPerConsumerChart({ data, isLoading, hasData, className }:
 
     return (
         <ChartCard
-            className={className}
             title={t('Queries per Consumer')}
             isLoading={isLoading}
             hasData={hasData}

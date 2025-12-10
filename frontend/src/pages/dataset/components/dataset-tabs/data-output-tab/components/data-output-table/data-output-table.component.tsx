@@ -106,7 +106,7 @@ export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
                 onChange={onChange}
                 pagination={{
                     ...pagination,
-                    position: ['topRight'],
+                    placement: ['topEnd'],
                     size: 'small',
                     showTotal: (total, range) =>
                         t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {

@@ -10,7 +10,7 @@ export function EnvironmentConfigCreate() {
     return (
         <Flex vertical className={styles.container}>
             <Typography.Title level={3}>{t('New Environment Configuration')}</Typography.Title>
-            <Space direction={'vertical'} size={'large'} className={styles.container}>
+            <Space orientation="vertical" size="large" className={styles.container}>
                 <EnvironmentConfigCreateForm />
             </Space>
         </Flex>

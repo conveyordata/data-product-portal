@@ -23,6 +23,7 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.database.database import get_db_session
+from app.datasets.curated_queries.router import router as curated_queries_router
 from app.datasets.query_stats_daily.router import router as query_stats_daily_router
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
@@ -35,7 +36,7 @@ from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
 from app.datasets.service import DatasetService
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
-from app.events.schema_response import EventGet
+from app.events.schema_response import GetEventHistoryResponseItem
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
@@ -98,7 +99,7 @@ def get_user_datasets(
 @router.get("/{id}/history")
 def get_event_history(
     id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[EventGet]:
+) -> Sequence[GetEventHistoryResponseItem]:
     return EventService(db).get_history(id, EventReferenceEntity.DATASET)
 
 
@@ -384,3 +385,4 @@ def set_value_for_dataset(
 
 
 router.include_router(query_stats_daily_router)
+router.include_router(curated_queries_router)

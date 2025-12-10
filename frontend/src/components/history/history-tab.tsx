@@ -83,7 +83,7 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
                 pagination={{
                     ...pagination,
                     size: 'small',
-                    position: ['topRight'],
+                    placement: ['topEnd'],
                     className: styles.pagination,
                     showTotal: (total, range) =>
                         t('Showing {{range0}}-{{range1}} of {{total}} history items', {

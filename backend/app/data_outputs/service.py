@@ -21,13 +21,13 @@ from app.core.namespace.validation import (
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_request import (
-    DataOutputCreate,
+    CreateTechnicalAssetRequest,
     DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
-from app.data_outputs.status import DataOutputStatus
+from app.data_outputs.status import TechnicalAssetStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -83,7 +83,7 @@ class DataOutputService:
         )
 
     def create_data_output(
-        self, id: UUID, data_output: DataOutputCreate
+        self, id: UUID, data_output: CreateTechnicalAssetRequest
     ) -> DataOutputModel:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -96,7 +96,7 @@ class DataOutputService:
             )
 
         if data_output.sourceAligned:
-            data_output.status = DataOutputStatus.PENDING
+            data_output.status = TechnicalAssetStatus.PENDING
         else:
             data_product = self.db.get(DataProductModel, id)
 

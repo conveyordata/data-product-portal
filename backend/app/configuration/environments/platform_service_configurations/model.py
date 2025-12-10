@@ -1,17 +1,14 @@
 import uuid
-from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.configuration.environments.model import Environment
+from app.configuration.platforms.model import Platform
+from app.configuration.platforms.platform_services.model import PlatformService
 from app.database.database import Base
 from app.shared.model import BaseORM
-
-if TYPE_CHECKING:
-    from app.configuration.platforms.model import Platform
-    from app.configuration.platforms.platform_services.model import PlatformService
 
 
 class EnvironmentPlatformServiceConfiguration(Base, BaseORM):
@@ -23,6 +20,6 @@ class EnvironmentPlatformServiceConfiguration(Base, BaseORM):
     service_id: Mapped[UUID] = mapped_column(ForeignKey("platform_services.id"))
     config = Column(String)
 
-    platform: Mapped["Platform"] = relationship()
-    service: Mapped["PlatformService"] = relationship()
-    environment: Mapped["Environment"] = relationship()
+    platform: Mapped[Platform] = relationship()
+    service: Mapped[PlatformService] = relationship()
+    environment: Mapped[Environment] = relationship()

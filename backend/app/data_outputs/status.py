@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DataOutputStatus(str, Enum):
+class TechnicalAssetStatus(str, Enum):
     PENDING = "pending"
     ACTIVE = "active"
     ARCHIVED = "archived"

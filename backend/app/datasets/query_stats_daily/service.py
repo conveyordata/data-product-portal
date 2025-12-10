@@ -1,11 +1,14 @@
+from collections import defaultdict
 from datetime import date, timedelta
 from enum import Enum
 from typing import Iterable
 from uuid import UUID
 
+from sqlalchemy import Date, delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
+from app.data_products.model import DataProduct
 from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
 from app.datasets.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyDelete,
@@ -21,6 +24,36 @@ class QueryStatsGranularity(str, Enum):
     DAY = "day"
     WEEK = "week"
     MONTH = "month"
+
+    def align_date(self, value: date) -> date:
+        """
+        Align a date to the start of the specified granularity period.
+        - DAY: returns the date as-is
+        - WEEK: returns Monday of the week
+        - MONTH: returns the first day of the month
+        """
+        if self == QueryStatsGranularity.DAY:
+            return value
+        if self == QueryStatsGranularity.WEEK:
+            return value - timedelta(days=value.weekday())
+        if self == QueryStatsGranularity.MONTH:
+            return value.replace(day=1)
+        raise ValueError(f"Unsupported granularity: {self}")
+
+    def increment_date(self, value: date) -> date:
+        """
+        Increment a date by one period according to the granularity.
+        """
+        if self == QueryStatsGranularity.DAY:
+            return value + timedelta(days=1)
+        if self == QueryStatsGranularity.WEEK:
+            return value + timedelta(weeks=1)
+        if self == QueryStatsGranularity.MONTH:
+            # Increment month, handling year rollover
+            if value.month == 12:
+                return value.replace(year=value.year + 1, month=1)
+            return value.replace(month=value.month + 1)
+        raise ValueError(f"This is currently not implemented for {self}")
 
 
 DEFAULT_GRANULARITY = QueryStatsGranularity.WEEK
@@ -41,37 +74,67 @@ class DatasetQueryStatsDailyService:
         granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
         day_range: int = DEFAULT_DAY_RANGE,
     ) -> DatasetQueryStatsDailyResponses:
-        try:
-            granularity_enum = (
-                granularity
-                if isinstance(granularity, QueryStatsGranularity)
-                else QueryStatsGranularity(granularity)
-            )
-        except ValueError:
-            granularity_enum = DEFAULT_GRANULARITY
+        start_date = date.today() - timedelta(days=day_range)
 
-        day_range_value = day_range if day_range > 0 else DEFAULT_DAY_RANGE
-
-        start_date = self._start_date_from_day_range(day_range_value)
-        stats = (
-            self.db.query(DatasetQueryStatsDaily)
-            .filter(
-                DatasetQueryStatsDaily.dataset_id == dataset_id,
-                DatasetQueryStatsDaily.date >= start_date,
+        # Build query with database-level aggregation if needed
+        if granularity == QueryStatsGranularity.DAY:
+            # No aggregation needed, fetch raw data
+            query = (
+                select(DatasetQueryStatsDaily)
+                .where(
+                    DatasetQueryStatsDaily.dataset_id == dataset_id,
+                    DatasetQueryStatsDaily.date >= start_date,
+                )
+                .order_by(DatasetQueryStatsDaily.date.asc())
             )
-            .order_by(DatasetQueryStatsDaily.date.asc())
-            .all()
-        )
-        response_stats = [
-            DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
-        ]
+            stats = self.db.execute(query).scalars().all()
+            response_stats = [
+                DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
+            ]
+        else:
+            # Aggregate in database using date_trunc
+            trunc_unit = granularity.value  # 'week' or 'month'
 
-        if granularity_enum != QueryStatsGranularity.DAY:
-            response_stats = self._aggregate_by_granularity(
-                response_stats, granularity_enum
+            # Build aggregated query with database-level aggregation
+            # Cast date_trunc result to date for cleaner handling
+            truncated_date = func.date_trunc(trunc_unit, DatasetQueryStatsDaily.date)
+            aggregated_query = (
+                select(
+                    func.cast(truncated_date, Date).label("date"),
+                    DatasetQueryStatsDaily.consumer_data_product_id,
+                    func.sum(DatasetQueryStatsDaily.query_count).label("query_count"),
+                    DataProduct.name.label("consumer_data_product_name"),
+                )
+                .join(
+                    DataProduct,
+                    DataProduct.id == DatasetQueryStatsDaily.consumer_data_product_id,
+                )
+                .where(
+                    DatasetQueryStatsDaily.dataset_id == dataset_id,
+                    DatasetQueryStatsDaily.date >= start_date,
+                )
+                .group_by(
+                    truncated_date,
+                    DatasetQueryStatsDaily.consumer_data_product_id,
+                    DataProduct.name,
+                )
+                .order_by(
+                    truncated_date.asc(),
+                    DataProduct.name.asc(),
+                    DatasetQueryStatsDaily.consumer_data_product_id.asc(),
+                )
             )
+
+            results = self.db.execute(aggregated_query).all()
+            response_stats = [
+                DatasetQueryStatsDailyResponse.model_validate(row) for row in results
+            ]
 
         response_stats = self._group_low_volume_consumers(response_stats)
+        response_stats = self._fill_missing_buckets(
+            response_stats, start_date, granularity
+        )
+        response_stats = self._sort_by_consumer_total_queries(response_stats)
 
         return DatasetQueryStatsDailyResponses(
             dataset_query_stats_daily_responses=response_stats
@@ -80,15 +143,21 @@ class DatasetQueryStatsDailyService:
     def update_query_stats_daily(
         self, dataset_id: UUID, updates: Iterable[DatasetQueryStatsDailyUpdate]
     ) -> None:
-        values = [
-            {
-                "date": update.date,
-                "dataset_id": dataset_id,
-                "consumer_data_product_id": update.consumer_data_product_id,
-                "query_count": update.query_count,
-            }
-            for update in updates
-        ]
+        values = []
+        for update in updates:
+            try:
+                parsed_date = date.fromisoformat(update.date)
+            except ValueError as e:
+                raise ValueError(f"Invalid date format: {update.date}") from e
+
+            values.append(
+                {
+                    "date": parsed_date,
+                    "dataset_id": dataset_id,
+                    "consumer_data_product_id": update.consumer_data_product_id,
+                    "query_count": update.query_count,
+                }
+            )
 
         if not values:
             return
@@ -104,52 +173,19 @@ class DatasetQueryStatsDailyService:
     def delete_query_stats_daily(
         self, dataset_id: UUID, delete_request: DatasetQueryStatsDailyDelete
     ) -> None:
-        target_date = date.fromisoformat(delete_request.date)
+        try:
+            target_date = date.fromisoformat(delete_request.date)
+        except ValueError as e:
+            raise ValueError(f"Invalid date format: {delete_request.date}") from e
 
-        (
-            self.db.query(DatasetQueryStatsDaily)
-            .filter(
-                DatasetQueryStatsDaily.dataset_id == dataset_id,
-                DatasetQueryStatsDaily.consumer_data_product_id
-                == delete_request.consumer_data_product_id,
-                DatasetQueryStatsDaily.date == target_date,
-            )
-            .delete(synchronize_session=False)
+        stmt = delete(DatasetQueryStatsDaily).where(
+            DatasetQueryStatsDaily.dataset_id == dataset_id,
+            DatasetQueryStatsDaily.consumer_data_product_id
+            == delete_request.consumer_data_product_id,
+            DatasetQueryStatsDaily.date == target_date,
         )
+        self.db.execute(stmt)
         self.db.commit()
-
-    @staticmethod
-    def _start_date_from_day_range(day_range: int) -> date:
-        return date.today() - timedelta(days=day_range)
-
-    def _aggregate_by_granularity(
-        self,
-        stats: list[DatasetQueryStatsDailyResponse],
-        granularity: QueryStatsGranularity,
-    ) -> list[DatasetQueryStatsDailyResponse]:
-        aggregated: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse] = {}
-        for stat in stats:
-            bucket_date = self._truncate_date(stat.date, granularity)
-            key = (bucket_date, stat.consumer_data_product_id)
-            existing = aggregated.get(key)
-            if existing:
-                existing.query_count += stat.query_count
-                continue
-            aggregated[key] = DatasetQueryStatsDailyResponse(
-                date=bucket_date,
-                consumer_data_product_id=stat.consumer_data_product_id,
-                query_count=stat.query_count,
-                consumer_data_product_name=stat.consumer_data_product_name,
-            )
-
-        return sorted(
-            aggregated.values(),
-            key=lambda stat: (
-                stat.date,
-                stat.consumer_data_product_name or "",
-                str(stat.consumer_data_product_id),
-            ),
-        )
 
     def _group_low_volume_consumers(
         self,
@@ -159,58 +195,44 @@ class DatasetQueryStatsDailyService:
         if not stats:
             return stats
 
-        consumer_totals, consumer_names = self._consumer_totals_and_names(stats)
+        consumer_totals = self._consumer_totals(stats)
 
         if len(consumer_totals) <= limit:
             return stats
 
-        top_consumer_ids = self._top_consumer_ids(
-            consumer_totals, consumer_names, limit
-        )
+        top_consumer_ids = self._top_consumer_ids(consumer_totals, limit)
         grouped_stats = self._merge_other_consumers(stats, top_consumer_ids)
-        return sorted(
-            grouped_stats,
-            key=lambda stat: (
-                stat.date,
-                stat.consumer_data_product_name or "",
-                str(stat.consumer_data_product_id),
-            ),
-        )
+        return grouped_stats
 
-    def _consumer_totals_and_names(
+    def _consumer_totals(
         self, stats: list[DatasetQueryStatsDailyResponse]
-    ) -> tuple[dict[UUID, int], dict[UUID, str | None]]:
+    ) -> dict[UUID, int]:
+        """
+        Calculate the total query count per consumer from a list of query stats.
+        """
         consumer_totals: dict[UUID, int] = {}
-        consumer_names: dict[UUID, str | None] = {}
 
         for stat in stats:
             consumer_totals[stat.consumer_data_product_id] = (
                 consumer_totals.get(stat.consumer_data_product_id, 0) + stat.query_count
             )
 
-            if (
-                stat.consumer_data_product_name is not None
-                and consumer_names.get(stat.consumer_data_product_id) is None
-            ):
-                consumer_names[stat.consumer_data_product_id] = (
-                    stat.consumer_data_product_name
-                )
-
-        return consumer_totals, consumer_names
+        return consumer_totals
 
     @staticmethod
     def _top_consumer_ids(
         consumer_totals: dict[UUID, int],
-        consumer_names: dict[UUID, str | None],
         limit: int,
     ) -> set[UUID]:
+        """
+        Return the consumer IDs with the highest totals.
+        """
         sorted_consumers = sorted(
             consumer_totals.items(),
             key=lambda item: (
                 -item[1],
-                consumer_names.get(item[0]) or "",
                 str(item[0]),
-            ),
+            ),  # Sort by total descending, UUID for stability
         )
         return {consumer_id for consumer_id, _ in sorted_consumers[:limit]}
 
@@ -241,15 +263,138 @@ class DatasetQueryStatsDailyService:
 
         return filtered_stats + list(other_by_date.values())
 
+    def _fill_missing_buckets(
+        self,
+        stats: list[DatasetQueryStatsDailyResponse],
+        range_start: date,
+        granularity: QueryStatsGranularity,
+    ) -> list[DatasetQueryStatsDailyResponse]:
+        """
+        Fill missing time buckets with zero values for all consumers.
+        This ensures the frontend receives complete time series data.
+        """
+        if not stats:
+            return stats
+
+        buckets = self._build_buckets(range_start, date.today(), granularity)
+        consumers = self._extract_unique_consumers(stats)
+        existing_data = self._build_existing_data_map(stats)
+
+        filled_stats = self._create_filled_buckets(buckets, consumers, existing_data)
+
+        return filled_stats
+
+    def _extract_unique_consumers(
+        self, stats: list[DatasetQueryStatsDailyResponse]
+    ) -> dict[UUID, str | None]:
+        """
+        Extract all unique consumers from stats.
+        """
+        consumers: dict[UUID, str | None] = {}
+        for stat in stats:
+            if stat.consumer_data_product_id not in consumers:
+                consumers[stat.consumer_data_product_id] = (
+                    stat.consumer_data_product_name
+                )
+        return consumers
+
+    def _build_existing_data_map(
+        self,
+        stats: list[DatasetQueryStatsDailyResponse],
+    ) -> dict[tuple[date, UUID], DatasetQueryStatsDailyResponse]:
+        """
+        Build a map of existing data indexed by date and consumer ID.
+        """
+        existing_data: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse] = {}
+        for stat in stats:
+            key = (stat.date, stat.consumer_data_product_id)
+            existing_data[key] = stat
+
+        return existing_data
+
+    def _create_filled_buckets(
+        self,
+        buckets: list[date],
+        consumers: dict[UUID, str | None],
+        existing_data: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse],
+    ) -> list[DatasetQueryStatsDailyResponse]:
+        """
+        Fill missing buckets with zero values for all consumers.
+        """
+        filled_stats: list[DatasetQueryStatsDailyResponse] = []
+        for bucket_date in buckets:
+            for consumer_id, consumer_name in consumers.items():
+                key = (bucket_date, consumer_id)
+                if key in existing_data:
+                    filled_stats.append(existing_data[key])
+                else:
+                    filled_stats.append(
+                        DatasetQueryStatsDailyResponse(
+                            date=bucket_date,
+                            consumer_data_product_id=consumer_id,
+                            query_count=0,
+                            consumer_data_product_name=consumer_name,
+                        )
+                    )
+        return filled_stats
+
     @staticmethod
-    def _truncate_date(value: date, granularity: QueryStatsGranularity) -> date:
-        if granularity == QueryStatsGranularity.DAY:
-            return value
+    def _build_buckets(
+        range_start: date, end_date: date, granularity: QueryStatsGranularity
+    ) -> list[date]:
+        """
+        Build all time buckets for the given range and granularity.
+        Returns a list of dates representing the start of each bucket period.
+        """
+        buckets: list[date] = []
+        start = granularity.align_date(range_start)
+        end = granularity.align_date(end_date)
 
-        if granularity == QueryStatsGranularity.WEEK:
-            return value - timedelta(days=value.weekday())
+        current = start
+        while current <= end:
+            buckets.append(current)
+            current = granularity.increment_date(current)
 
-        if granularity == QueryStatsGranularity.MONTH:
-            return value.replace(day=1)
+        return buckets
 
-        return value
+    @staticmethod
+    def _sort_by_consumer_total_queries(
+        stats: list[DatasetQueryStatsDailyResponse],
+    ) -> list[DatasetQueryStatsDailyResponse]:
+        """
+        Sort stats by date (ascending) and then by consumer total queries (descending).
+        Consumers with highest total queries appear first (at bottom of stacked chart).
+        "Other" category is always placed last regardless of total queries.
+        """
+        if not stats:
+            return stats
+
+        # Calculate total queries per consumer
+        consumer_totals: dict[UUID, int] = defaultdict(int)
+        for stat in stats:
+            consumer_totals[stat.consumer_data_product_id] += stat.query_count
+
+        # Sort consumers: highest totals first, "Other" always last
+        # Use a stable sort key: (is_other, -total_queries)
+        sorted_consumer_ids = sorted(
+            consumer_totals.keys(),
+            key=lambda consumer_id: (
+                consumer_id
+                == OTHER_CONSUMER_DATA_PRODUCT_ID,  # False (0) sorts before True (1)
+                -consumer_totals[consumer_id],  # Negative for descending order
+            ),
+        )
+
+        # Create order mapping: lower index = higher priority (rendered at bottom)
+        consumer_order = {
+            consumer_id: idx for idx, consumer_id in enumerate(sorted_consumer_ids)
+        }
+
+        # Sort stats: first by date, then by consumer order
+        return sorted(
+            stats,
+            key=lambda stat: (
+                stat.date,
+                consumer_order[stat.consumer_data_product_id],
+            ),
+        )

@@ -80,6 +80,7 @@ export enum ApiUrl {
     DatasetAbout = '/api/datasets/:datasetId/about',
     DatasetGraph = '/api/datasets/:datasetId/graph',
     DatasetHistory = '/api/datasets/:datasetId/history',
+    DatasetCuratedQueries = '/api/datasets/:datasetId/usage/curated_queries',
     DatasetNamespaceValidation = '/api/datasets/validate_namespace',
     DatasetNamespaceSuggestion = '/api/datasets/namespace_suggestion',
     DatasetNamespaceLimits = '/api/datasets/namespace_length_limits',

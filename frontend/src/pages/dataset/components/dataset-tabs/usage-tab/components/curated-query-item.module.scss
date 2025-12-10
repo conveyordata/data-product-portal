@@ -1,0 +1,13 @@
+@use '@/styles/globals';
+
+.sqlCode {
+    overflow: hidden;
+
+    &.collapsed {
+        max-height: 220px;
+    }
+}
+
+.syntaxHighlighter {
+    width: 100%;
+}
