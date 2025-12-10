@@ -29,10 +29,8 @@ To ingest usage data, use the following REST API endpoint:
 
 ### Endpoint
 
-```
-PATCH /api/datasets/{id}/query_stats
-DELETE /api/datasets/{id}/query_stats
-```
+- [`PATCH /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/update_query_stats_api_datasets__id__query_stats_patch) - Update query statistics
+- [`DELETE /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/delete_query_stat_api_datasets__id__query_stats_delete) - Delete query statistics
 
 ### Request Payload
 
@@ -61,19 +59,6 @@ The endpoint accepts a JSON payload containing an array of daily query statistic
 - **`consumer_data_product_id`** (UUID, required): The unique identifier of the consuming data product
 - **`query_count`** (integer, required): The number of queries executed on the specified date
 
-### Response
-
-- **200 OK**: The statistics have been successfully updated
-- **400 Bad Request**: Invalid payload format or missing required fields
-- **404 Not Found**: Dataset not found
-
-### Authentication
-
-This endpoint requires authentication. Include your authentication token in the request headers:
-
-```
-Authorization: Bearer <your-token>
-```
 
 ## Responsibility and Implementation
 
