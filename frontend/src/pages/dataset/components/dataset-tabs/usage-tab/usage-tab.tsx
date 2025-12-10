@@ -81,24 +81,22 @@ export function UsageTab({ datasetId }: Props) {
                     <Spin size="large" />
                 </Flex>
             ) : !isLoadingState && !hasAnyData ? (
-                <Flex vertical align="center" justify="center">
-                    <Empty
-                        description={
-                            <Typography.Text type="secondary">
-                                {t('Learn how to set up usage data ingestion in our')}{' '}
-                                <Link
-                                    href="https://docs.dataproductportal.com/docs/developer-guide/data-product-usage-ingestion"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {t('documentation')}
-                                </Link>
-                                .
-                            </Typography.Text>
-                        }
-                    />
-                </Flex>
-            ) : (
+                <Empty
+                    description={
+                        <Typography.Text type="secondary">
+                            {t('Learn how to set up usage data ingestion in our')}{' '}
+                            <Link
+                                href="https://docs.dataproductportal.com/docs/developer-guide/data-product-usage-ingestion"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {t('documentation')}
+                            </Link>
+                            .
+                        </Typography.Text>
+                    }
+                />
+            ) : hasUsageData ? (
                 <Row gutter={[32, 32]}>
                     <Col span={24}>
                         <Flex wrap gap="middle">
@@ -133,8 +131,8 @@ export function UsageTab({ datasetId }: Props) {
                         />
                     </Col>
                 </Row>
-            )}
-            {hasAnyData && (
+            ) : null}
+            {!isLoadingState && !hasAnyData ? null : (
                 <CuratedQueriesList
                     queries={curatedQueries?.dataset_curated_queries}
                     isLoading={areCuratedQueriesLoading}
