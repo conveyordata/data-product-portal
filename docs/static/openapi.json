@@ -1864,59 +1864,6 @@
         }
       }
     },
-    "/api/data_products/{id}/data_output/validate_namespace": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Validate Data Output Namespace",
-        "operationId": "validate_data_output_namespace_api_data_products__id__data_output_validate_namespace_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Namespace"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NamespaceValidation"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/data_products/{id}/about": {
       "put": {
         "tags": [
@@ -2107,175 +2054,6 @@
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_products/{id}/dataset/{dataset_id}": {
-      "delete": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Unlink Dataset From Data Product",
-        "operationId": "unlink_dataset_from_data_product_api_data_products__id__dataset__dataset_id__delete",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "400": {
-            "description": "Dataset not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Dataset not found"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Data Product not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Data Product id not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Link Dataset To Data Product",
-        "operationId": "link_dataset_to_data_product_api_data_products__id__dataset__dataset_id__post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Link Dataset To Data Product Api Data Products  Id  Dataset  Dataset Id  Post"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dataset not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Dataset not found"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Data Product not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Data Product id not found"
-                }
               }
             }
           },
@@ -2809,58 +2587,6 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/data_output/validate_namespace": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Validate Data Output Namespace",
-        "operationId": "validate_data_output_namespace_api_v2_data_products__id__data_output_validate_namespace_get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Namespace"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NamespaceValidation"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/data_products/{id}/about": {
       "put": {
         "tags": [
@@ -3064,87 +2790,6 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/dataset/{dataset_id}": {
-      "delete": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Unlink Dataset From Data Product",
-        "operationId": "unlink_dataset_from_data_product_api_v2_data_products__id__dataset__dataset_id__delete",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "400": {
-            "description": "Dataset not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Dataset not found"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Data Product not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Data Product id not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/data_products/{id}/graph": {
       "get": {
         "tags": [
@@ -3252,6 +2897,175 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data_products/{id}/dataset/{dataset_id}": {
+      "post": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Link Dataset To Data Product",
+        "operationId": "link_dataset_to_data_product_api_data_products__id__dataset__dataset_id__post",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": "Response Link Dataset To Data Product Api Data Products  Id  Dataset  Dataset Id  Post"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dataset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Dataset not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Unlink Dataset From Data Product",
+        "operationId": "unlink_dataset_from_data_product_api_data_products__id__dataset__dataset_id__delete",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Dataset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Dataset not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
               }
             }
           },
@@ -4333,6 +4147,192 @@
                 "schema": {
                   "type": "string",
                   "title": "Response Get Role Api Data Products  Id  Role Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/input_ports/{input_port_id}": {
+      "delete": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Unlink Input Port From Data Product",
+        "operationId": "unlink_input_port_from_data_product_api_v2_data_products__id__input_ports__input_port_id__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "dataset_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Output port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output port not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data_products/{id}/data_output/validate_namespace": {
+      "get": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Validate Data Output Namespace",
+        "operationId": "validate_data_output_namespace_api_data_products__id__data_output_validate_namespace_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Namespace"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceValidation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/technical_asset/validate_namespace": {
+      "get": {
+        "tags": [
+          "Data products"
+        ],
+        "summary": "Validate Technical Asset Namespace",
+        "operationId": "validate_technical_asset_namespace_api_v2_data_products__id__technical_asset_validate_namespace_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Namespace"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceValidation"
                 }
               }
             }
