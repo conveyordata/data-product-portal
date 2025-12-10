@@ -24,8 +24,8 @@ generator = emailgen.Generator(
 def send_mail(
     recipients: Sequence[User], action: emailgen.Table, url: str, subject: str
 ):
-    for recipient in recipients:
-        try:
+    try:
+        for recipient in recipients:
             email = emailgen.Email(f"{recipient.first_name}")
             email.greeting = "Hi"
             email.add_intro(
@@ -57,5 +57,5 @@ def send_mail(
                     settings.FROM_MAIL_ADDRESS, recipient.email, msg.as_string()
                 )
                 server.quit()
-        except Exception as e:
-            logger.error(f"Failed to send email: {e}")
+    except Exception as e:
+        logger.error(f"Failed to send email: {e}")

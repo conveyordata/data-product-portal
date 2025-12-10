@@ -153,15 +153,17 @@ class GraphService:
                 for dataset_link in data_product.dataset_links:
                     # If the data product has it's own dataset as children then we can show the link.
                     dataset = dataset_link.dataset
-                    for consumer in data_product.datasets:
-                        edges.append(
+                    edges.extend(
+                        [
                             Edge(
                                 id=f"{dataset.id}-{consumer.id}",
                                 source=dataset.id,
                                 target=consumer.id,
                                 animated=dataset_link.status == DecisionStatus.APPROVED,
                             )
-                        )
+                            for consumer in data_product.datasets
+                        ]
+                    )
         else:
             edges = []
         return Graph(nodes=set(nodes), edges=set(edges))
