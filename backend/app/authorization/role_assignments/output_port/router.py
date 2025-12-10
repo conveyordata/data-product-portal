@@ -240,7 +240,7 @@ def create_assignment_old(
         )
 
     if is_admin or authenticated_user.id in (approver.id for approver in approvers):
-        service.update_assignment(
+        assignment = service.update_assignment(
             UpdateRoleAssignment(
                 id=role_assignment.id,
                 role_id=role_assignment.role_id,
@@ -248,6 +248,7 @@ def create_assignment_old(
             ),
             actor=authenticated_user,
         )
+        DatasetAuthAssignment(assignment).add()
 
     return role_assignment
 
