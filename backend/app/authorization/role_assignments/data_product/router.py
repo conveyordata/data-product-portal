@@ -266,7 +266,7 @@ def create_assignment(
         )
 
     if is_admin or user.id in (approver.id for approver in approvers):
-        service.update_assignment(
+        assignment = service.update_assignment(
             UpdateRoleAssignment(
                 id=role_assignment.id,
                 role_id=role_assignment.role_id,
@@ -274,6 +274,7 @@ def create_assignment(
             ),
             actor=user,
         )
+        DataProductAuthAssignment(assignment).add()
     else:
         background_tasks.add_task(
             email.send_role_assignment_request_email,
