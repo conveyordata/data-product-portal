@@ -139,20 +139,30 @@ class DatasetService:
         load_options = get_dataset_load_options()
         web_ts = func.websearch_to_tsquery("english", query)
         prefix_query = self._build_prefix_tsquery(query)
-        # Keep ranking based on websearch_to_tsquery to preserve existing weights and tests
-        rank_expr = func.ts_rank_cd(
-            DatasetModel.search_vector,
-            web_ts,
-            32,  # normalize between 0-1
-        ).label("rank")
-
+        # Use the highest rank from websearch_to_tsquery and prefix to_tsquery
         if prefix_query:
             prefix_ts = func.to_tsquery("english", prefix_query)
+            web_rank_expr = func.ts_rank_cd(
+                DatasetModel.search_vector,
+                web_ts,
+                32,  # normalize between 0-1
+            )
+            prefix_rank_expr = func.ts_rank_cd(
+                DatasetModel.search_vector,
+                prefix_ts,
+                32,
+            )
+            rank_expr = func.greatest(web_rank_expr, prefix_rank_expr).label("rank")
             where_clause = (
                 DatasetModel.search_vector.op("@@")(web_ts)
                 | DatasetModel.search_vector.op("@@")(prefix_ts)
             )
         else:
+            rank_expr = func.ts_rank_cd(
+                DatasetModel.search_vector,
+                web_ts,
+                32,  # normalize between 0-1
+            ).label("rank")
             where_clause = DatasetModel.search_vector.op("@@")(web_ts)
 
         stmt = (
