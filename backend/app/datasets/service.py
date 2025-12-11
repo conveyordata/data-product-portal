@@ -1,4 +1,5 @@
 import copy
+import re
 from typing import Iterable, Sequence
 from uuid import UUID
 
@@ -74,6 +75,22 @@ class DatasetService:
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
 
+    @staticmethod
+    def _build_prefix_tsquery(query: str) -> str | None:
+        """Build a prefix tsquery string like 'foo:* & bar:*' from free text.
+
+        - Tokenizes on non-word characters
+        - Drops tokens shorter than 2 chars (noise)
+        - Appends ':*' to enable prefix matching
+        Returns None if no valid tokens remain.
+        """
+        tokens = [t for t in re.split(r"\W+", (query or "").lower()) if len(t) >= 2]
+        if not tokens:
+            return None
+        prefixed = [f"{re.sub(r'[^a-z0-9_]', '', t)}:*" for t in tokens if t]
+        prefixed = [t for t in prefixed if t and t != ':*']
+        return " & ".join(prefixed) if prefixed else None
+
     def get_dataset(self, id: UUID, user: UserModel) -> DatasetGet:
         dataset = self.db.get(
             DatasetModel,
@@ -115,21 +132,28 @@ class DatasetService:
         self, query: str, limit: int, user: UserModel
     ) -> Sequence[DatasetsSearch]:
         load_options = get_dataset_load_options()
+        web_ts = func.websearch_to_tsquery("english", query)
+        prefix_query = self._build_prefix_tsquery(query)
+        # Keep ranking based on websearch_to_tsquery to preserve existing weights and tests
+        rank_expr = func.ts_rank_cd(
+            DatasetModel.search_vector,
+            web_ts,
+            32,  # normalize between 0-1
+        ).label("rank")
+
+        if prefix_query:
+            prefix_ts = func.to_tsquery("english", prefix_query)
+            where_clause = (
+                DatasetModel.search_vector.op("@@")(web_ts)
+                | DatasetModel.search_vector.op("@@")(prefix_ts)
+            )
+        else:
+            where_clause = DatasetModel.search_vector.op("@@")(web_ts)
+
         stmt = (
-            select(
-                DatasetModel,
-                func.ts_rank_cd(
-                    DatasetModel.search_vector,
-                    func.websearch_to_tsquery("english", query),
-                    32,  # 32 normalizes all results between 0-1
-                ).label("rank"),
-            )
+            select(DatasetModel, rank_expr)
             .options(*load_options)
-            .where(
-                DatasetModel.search_vector.op("@@")(
-                    func.websearch_to_tsquery("english", query)
-                )
-            )
+            .where(where_clause)
             .order_by(desc("rank"))
         )
         results = self.db.execute(stmt).unique().all()
