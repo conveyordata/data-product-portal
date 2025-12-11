@@ -92,8 +92,8 @@ class DatasetService:
         tokens = [t for t in re.split(r"\W+", (query or "").lower()) if len(t) >= 2]
         if not tokens:
             return None
-        prefixed = [f"{re.sub(r'[^a-z0-9_]', '', t)}:*" for t in tokens if t]
-        prefixed = [t for t in prefixed if t and t != ':*']
+        prefixed = [f"{t}:*" for t in tokens]
+        prefixed = [t for t in prefixed if t != ':*']
         return " & ".join(prefixed) if prefixed else None
 
     def get_dataset(self, id: UUID, user: UserModel) -> DatasetGet:
