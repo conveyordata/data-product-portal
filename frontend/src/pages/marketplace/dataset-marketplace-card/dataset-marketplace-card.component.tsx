@@ -50,7 +50,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Domain')}
                     </Space>
                 ),
-                children: dataset.domain.name,
+                children: <Typography.Text ellipsis={{ tooltip: true }}>{dataset.domain.name}</Typography.Text>,
             },
             {
                 key: 'status',
@@ -70,7 +70,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Access type')}
                     </Space>
                 ),
-                children: dataset.access_type,
+                children: <Typography.Text ellipsis={{ tooltip: true }}>{dataset.access_type}</Typography.Text>,
             },
             {
                 key: 'technical assets',

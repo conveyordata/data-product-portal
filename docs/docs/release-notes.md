@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+### bugfixes
+
+- **[Marketplace]**: Fixed an issue where long domains could result in inconsistent sizing of the cards
+
 ## 0.4.2
 
 ### features
