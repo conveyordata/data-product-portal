@@ -77,12 +77,17 @@ class DatasetService:
 
     @staticmethod
     def _build_prefix_tsquery(query: str) -> str | None:
-        """Build a prefix tsquery string like 'foo:* & bar:*' from free text.
+        """
+        Build a prefix tsquery string like 'foo:* & bar:*' from free text.
 
-        - Tokenizes on non-word characters
-        - Drops tokens shorter than 2 chars (noise)
-        - Appends ':*' to enable prefix matching
-        Returns None if no valid tokens remain.
+        - Tokenizes on non-word characters.
+        - Filters out tokens shorter than 2 characters (e.g., single-character tokens are dropped).
+        - Appends ':*' to each token to enable prefix matching.
+        - Returns None if no valid tokens remain after filtering.
+
+        Example:
+            'Hello world!' becomes 'hello:* & world:*'
+            'a b' returns None (all tokens too short)
         """
         tokens = [t for t in re.split(r"\W+", (query or "").lower()) if len(t) >= 2]
         if not tokens:
