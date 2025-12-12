@@ -1,6 +1,5 @@
 import datetime
 
-import pytz
 from sqlalchemy import select
 
 from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
