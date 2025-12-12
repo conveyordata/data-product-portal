@@ -69,6 +69,9 @@ class Settings(BaseSettings):
     # Postgres FTS indexing
     SEARCH_INDEXING_DISABLED: bool = False
 
+    # Device flow cleanup buffer in minutes
+    DEVICE_FLOW_CLEANUP_BUFFER_MINUTES: int = 5
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

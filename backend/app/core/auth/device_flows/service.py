@@ -22,6 +22,7 @@ from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
 from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
 from app.core.logging import logger
+from app.settings import settings
 
 basic_auth = HTTPBasic()
 
@@ -51,9 +52,46 @@ class DeviceFlowService:
     def __init__(self):
         self.logger = logger
 
+    def clean_device_flows(self, db: Session):
+        """
+        Remove stale device flow records to prevent table growth.
+
+        Strategy:
+        - Delete records past their `max_expiry` by at least a small buffer.
+        - Also delete records already marked as terminal states (EXPIRED/DENIED/AUTHORIZED)
+          when their `max_expiry` has elapsed.
+        """
+        try:
+            now = utc_now()
+            buffer = timedelta(minutes=settings.DEVICE_FLOW_CLEANUP_BUFFER_MINUTES)
+            cutoff = now - buffer
+
+            # Fetch candidates for deletion
+            candidates = db.scalars(
+                select(DeviceFlowModel).where(
+                    (DeviceFlowModel.max_expiry <= cutoff)
+                )
+            ).all()
+
+            deleted = 0
+            for device in candidates:
+                # Any flow past max_expiry is safe to delete
+                db.delete(device)
+                deleted += 1
+
+            if deleted:
+                self.logger.info(f"Cleaned {deleted} stale device flow records")
+            db.commit()
+        except Exception as e:
+            # Best-effort cleanup; do not block auth flows
+            db.rollback()
+            self.logger.warning(f"Device flow cleanup skipped due to error: {e}")
+
     def generate_device_flow_codes(
         self, db: Session, client_id: str, scope: str = "openid"
     ) -> DeviceFlow:
+        # Best-effort cleanup before creating a new flow
+        self.clean_device_flows(db)
         device_flow = DeviceFlowModel(
             client_id=client_id,
             scope=scope,
