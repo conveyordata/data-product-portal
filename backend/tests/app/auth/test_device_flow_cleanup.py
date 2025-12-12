@@ -32,7 +32,7 @@ def test_device_flow_cleanup_removes_expired(db_session):
 
     # Verify expired records removed
     post = db_session.scalars(select(DeviceFlowModel)).all()
-    assert len(post) <= len(pre) - 3
+    assert len(post) == len(pre) - 3
 
 
 def test_device_flow_cleanup_does_not_remove_active(db_session):
