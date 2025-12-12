@@ -137,6 +137,18 @@ class TestDatasetsService:
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.5833333)
 
+    def test_search_dataset_partial_prefix_matches(self):
+        settings.SEARCH_INDEXING_DISABLED = False
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(name="Clinical dataset", description="Some details")
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        # Partial token 'clin' should match 'Clinical' via prefix search
+        results = DatasetService(test_session).search_datasets("clin", 10, user)
+
+        assert len(results) == 1
+        assert results[0].id == ds.id
+
     def test_search_dataset_matching_data_output_name(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
