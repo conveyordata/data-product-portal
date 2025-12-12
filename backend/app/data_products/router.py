@@ -1025,12 +1025,12 @@ def unlink_dataset_from_data_product(
 )
 def unlink_input_port_from_data_product(
     id: UUID,
-    dataset_id: UUID,
+    input_port_id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_product_dataset = DataProductService(db).unlink_dataset_from_data_product(
-        id, dataset_id
+        id, input_port_id
     )
 
     event_id = EventService(db).create_event(

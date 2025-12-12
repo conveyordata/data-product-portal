@@ -121,6 +121,7 @@ class DataProductService:
                 selectinload(DataProductModel.dataset_links)
                 .selectinload(DataProductDatasetModel.dataset)
                 .selectinload(DatasetModel.data_output_links),
+                selectinload(DataProductModel.datasets).selectinload(DatasetModel.tags),
                 selectinload(DataProductModel.datasets).raiseload("*"),
                 selectinload(DataProductModel.data_outputs).selectinload(
                     DataOutputModel.dataset_links

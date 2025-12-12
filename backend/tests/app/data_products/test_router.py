@@ -176,6 +176,7 @@ class TestDataProductsRouter:
 
     def test_get_data_product_by_id_old(self, client):
         data_product = DataProductFactory()
+        DatasetFactory(data_product=data_product)
 
         response = self.get_data_product_by_id_old(client, data_product.id)
         assert response.status_code == 200
