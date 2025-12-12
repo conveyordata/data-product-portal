@@ -229,9 +229,10 @@ ORDER BY organ, failure_count DESC;',
             'bdad0dec-19e6-4c85-a655-0960ca3a484c',
             'Latest monthly demand rollup',
             'Quick sanity-check of forecasted demand by month.',
-            'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
+            'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily where 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
             1
         );
+
 
     INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
         VALUES (
