@@ -11,7 +11,7 @@ def test_device_flow_cleanup_removes_expired(db_session):
     svc = DeviceFlowService()
 
     # Create expired records
-    expired_time = utc_now() - datetime.timedelta(hours=1)
+    expired_time = utc_now() - datetime.timedelta(hours=24)
     for _ in range(3):
         df = DeviceFlowModel(
             client_id="test-client",
