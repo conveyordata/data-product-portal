@@ -61,16 +61,6 @@
               ],
               "title": "Domain"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -110,19 +100,6 @@
         ],
         "summary": "Is Admin",
         "operationId": "is_admin_api_authz_admin_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -133,18 +110,9 @@
                 }
               }
             }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/authz/access/{action}": {
@@ -197,16 +165,6 @@
               ],
               "title": "Domain"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -246,18 +204,6 @@
         ],
         "summary": "Is Admin",
         "operationId": "is_admin_api_v2_authz_admin_get",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -265,16 +211,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/IsAdminResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -289,39 +225,17 @@
         ],
         "summary": "Get Datasets",
         "operationId": "get_datasets_api_datasets_get",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/DatasetsGet"
                   },
+                  "type": "array",
                   "title": "Response Get Datasets Api Datasets Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -334,27 +248,15 @@
         ],
         "summary": "Create Dataset",
         "operationId": "create_dataset_api_datasets_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DatasetCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -362,11 +264,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "additionalProperties": {
                     "type": "string",
                     "format": "uuid"
                   },
+                  "type": "object",
                   "title": "Response Create Dataset Api Datasets Post"
                 },
                 "example": {
@@ -426,16 +328,6 @@
               "minimum": 1,
               "default": 100,
               "title": "Limit"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -589,16 +481,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -639,16 +521,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -698,16 +570,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -871,16 +733,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -942,16 +794,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -1012,16 +854,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -1145,16 +977,6 @@
             "schema": {
               "type": "string",
               "title": "Value"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -1404,16 +1226,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -1576,18 +1388,6 @@
         "summary": "Create Data Product",
         "operationId": "create_data_product_api_data_products_post",
         "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1706,16 +1506,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -1765,16 +1555,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -1882,16 +1662,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -1954,16 +1724,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -2025,16 +1785,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -2160,16 +1910,6 @@
             "schema": {
               "type": "string",
               "title": "Value"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -2307,18 +2047,6 @@
         ],
         "summary": "Create Data Product",
         "operationId": "create_data_product_api_v2_data_products_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2431,16 +2159,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -2489,16 +2207,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -2604,16 +2312,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -2675,16 +2373,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -2745,16 +2433,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -2879,16 +2557,6 @@
               "type": "string",
               "title": "Value"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -2940,16 +2608,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -3028,16 +2686,6 @@
               "format": "uuid",
               "title": "Dataset Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -3099,16 +2747,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -3182,16 +2820,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -3358,16 +2986,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -3423,16 +3041,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -3500,16 +3108,6 @@
               "type": "string",
               "title": "Environment"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -3563,16 +3161,6 @@
               "type": "string",
               "title": "Environment"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -3617,16 +3205,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -3670,16 +3248,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -3734,16 +3302,6 @@
               "type": "string",
               "title": "Environment"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -3796,16 +3354,6 @@
             "schema": {
               "type": "string",
               "title": "Environment"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -3860,16 +3408,6 @@
               "type": "string",
               "title": "Environment"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -3922,16 +3460,6 @@
             "schema": {
               "type": "string",
               "title": "Environment"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -4256,16 +3784,6 @@
               "type": "string",
               "title": "Environment"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -4319,16 +3837,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -4539,16 +4047,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -4601,16 +4099,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -4636,34 +4124,45 @@
       }
     },
     "/api/data_product_types": {
+      "get": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Get Data Products Types Old",
+        "operationId": "get_data_products_types_old_api_data_product_types_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DataProductTypesGetItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Data Products Types Old Api Data Product Types Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
       "post": {
         "tags": [
           "Configuration - Data product types"
         ],
         "summary": "Create Data Product Type",
         "operationId": "create_data_product_type_api_data_product_types_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DataProductTypeCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -4699,31 +4198,8 @@
               }
             }
           }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Data product types"
-        ],
-        "summary": "Get Data Products Types Old",
-        "operationId": "get_data_products_types_old_api_data_product_types_get",
-        "deprecated": true,
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DataProductTypesGetItem"
-                  },
-                  "title": "Response Get Data Products Types Old Api Data Product Types Get"
-                }
-              }
-            }
-          }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_product_types/migrate/{from_id}/{to_id}": {
@@ -4753,16 +4229,6 @@
               "type": "string",
               "format": "uuid",
               "title": "To Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -4846,16 +4312,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -4907,16 +4363,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -4942,33 +4388,40 @@
       }
     },
     "/api/v2/configuration/data_product_types": {
+      "get": {
+        "tags": [
+          "Configuration - Data product types"
+        ],
+        "summary": "Get Data Products Types",
+        "operationId": "get_data_products_types_api_v2_configuration_data_product_types_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductTypesGet"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Configuration - Data product types"
         ],
         "summary": "Create Data Product Type",
         "operationId": "create_data_product_type_api_v2_configuration_data_product_types_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DataProductTypeCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -5005,25 +4458,6 @@
             }
           }
         }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Data product types"
-        ],
-        "summary": "Get Data Products Types",
-        "operationId": "get_data_products_types_api_v2_configuration_data_product_types_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DataProductTypesGet"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v2/configuration/data_product_types/migrate/{from_id}/{to_id}": {
@@ -5053,16 +4487,6 @@
               "format": "uuid",
               "title": "To Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -5088,34 +4512,45 @@
       }
     },
     "/api/data_product_lifecycles": {
+      "get": {
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
+        "summary": "Get Data Products Lifecycles Old",
+        "operationId": "get_data_products_lifecycles_old_api_data_product_lifecycles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DataProductLifeCyclesGetItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Data Products Lifecycles Old Api Data Product Lifecycles Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
       "post": {
         "tags": [
           "Configuration - Data product lifecycles"
         ],
         "summary": "Create Data Product Lifecycle",
         "operationId": "create_data_product_lifecycle_api_data_product_lifecycles_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DataProductLifeCycleCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -5151,31 +4586,8 @@
               }
             }
           }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Data product lifecycles"
-        ],
-        "summary": "Get Data Products Lifecycles Old",
-        "operationId": "get_data_products_lifecycles_old_api_data_product_lifecycles_get",
-        "deprecated": true,
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DataProductLifeCyclesGetItem"
-                  },
-                  "title": "Response Get Data Products Lifecycles Old Api Data Product Lifecycles Get"
-                }
-              }
-            }
-          }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_product_lifecycles/{id}": {
@@ -5195,16 +4607,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -5271,16 +4673,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -5306,33 +4698,40 @@
       }
     },
     "/api/v2/configuration/data_product_lifecycles": {
+      "get": {
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
+        "summary": "Get Data Products Lifecycles",
+        "operationId": "get_data_products_lifecycles_api_v2_configuration_data_product_lifecycles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductLifeCyclesGet"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Configuration - Data product lifecycles"
         ],
         "summary": "Create Data Product Lifecycle",
         "operationId": "create_data_product_lifecycle_api_v2_configuration_data_product_lifecycles_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DataProductLifeCycleCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -5369,25 +4768,6 @@
             }
           }
         }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Data product lifecycles"
-        ],
-        "summary": "Get Data Products Lifecycles",
-        "operationId": "get_data_products_lifecycles_api_v2_configuration_data_product_lifecycles_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DataProductLifeCyclesGet"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v2/configuration/data_product_lifecycles/{id}": {
@@ -5406,16 +4786,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -5481,16 +4851,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -5516,34 +4876,45 @@
       }
     },
     "/api/data_product_settings": {
+      "get": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Get Data Products Settings Old",
+        "operationId": "get_data_products_settings_old_api_data_product_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DataProductSettingsGetItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Data Products Settings Old Api Data Product Settings Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
       "post": {
         "tags": [
           "Configuration - Data product settings"
         ],
         "summary": "Create Data Product Setting",
         "operationId": "create_data_product_setting_api_data_product_settings_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DataProductSettingCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -5566,31 +4937,8 @@
               }
             }
           }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Data product settings"
-        ],
-        "summary": "Get Data Products Settings Old",
-        "operationId": "get_data_products_settings_old_api_data_product_settings_get",
-        "deprecated": true,
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DataProductSettingsGetItem"
-                  },
-                  "title": "Response Get Data Products Settings Old Api Data Product Settings Get"
-                }
-              }
-            }
-          }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_product_settings/namespace_suggestion": {
@@ -5727,16 +5075,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -5789,16 +5127,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -5824,33 +5152,40 @@
       }
     },
     "/api/v2/configuration/data_product_settings": {
+      "get": {
+        "tags": [
+          "Configuration - Data product settings"
+        ],
+        "summary": "Get Data Products Settings",
+        "operationId": "get_data_products_settings_api_v2_configuration_data_product_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductSettingsGet"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Configuration - Data product settings"
         ],
         "summary": "Create Data Product Setting",
         "operationId": "create_data_product_setting_api_v2_configuration_data_product_settings_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DataProductSettingCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -5869,25 +5204,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Data product settings"
-        ],
-        "summary": "Get Data Products Settings",
-        "operationId": "get_data_products_settings_api_v2_configuration_data_product_settings_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DataProductSettingsGet"
                 }
               }
             }
@@ -6025,16 +5341,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -6086,16 +5392,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -6136,16 +5432,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -6188,16 +5474,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -6239,16 +5515,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -6280,39 +5546,17 @@
         ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_data_product_dataset_links_actions_get",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/DataProductDatasetPendingAction"
                   },
+                  "type": "array",
                   "title": "Response Get User Pending Actions Api Data Product Dataset Links Actions Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -6336,16 +5580,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -6388,16 +5622,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -6439,16 +5663,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -6480,39 +5694,17 @@
         ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_data_output_dataset_links_actions_get",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/DataOutputDatasetPendingAction"
                   },
+                  "type": "array",
                   "title": "Response Get User Pending Actions Api Data Output Dataset Links Actions Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -6708,16 +5900,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -6766,16 +5948,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -6892,16 +6064,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -6972,16 +6134,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -7058,16 +6210,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Dataset Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -7167,34 +6309,45 @@
       }
     },
     "/api/domains": {
+      "get": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Get Domains Old",
+        "operationId": "get_domains_old_api_domains_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GetDomainsItemOld"
+                  },
+                  "type": "array",
+                  "title": "Response Get Domains Old Api Domains Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
       "post": {
         "tags": [
           "Configuration - Domains"
         ],
         "summary": "Create Domain",
         "operationId": "create_domain_api_domains_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DomainCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -7220,31 +6373,8 @@
               }
             }
           }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Domains"
-        ],
-        "summary": "Get Domains Old",
-        "operationId": "get_domains_old_api_domains_get",
-        "deprecated": true,
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetDomainsItemOld"
-                  },
-                  "title": "Response Get Domains Old Api Domains Get"
-                }
-              }
-            }
-          }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/domains/{id}": {
@@ -7264,16 +6394,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -7326,16 +6446,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -7431,16 +6541,6 @@
               "format": "uuid",
               "title": "To Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -7466,33 +6566,40 @@
       }
     },
     "/api/v2/configuration/domains": {
+      "get": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Get Domains",
+        "operationId": "get_domains_api_v2_configuration_domains_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDomainsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Configuration - Domains"
         ],
         "summary": "Create Domain",
         "operationId": "create_domain_api_v2_configuration_domains_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DomainCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -7519,25 +6626,6 @@
             }
           }
         }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Domains"
-        ],
-        "summary": "Get Domains",
-        "operationId": "get_domains_api_v2_configuration_domains_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDomainsResponse"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v2/configuration/domains/{id}": {
@@ -7556,16 +6644,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -7617,16 +6695,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -7720,16 +6788,6 @@
               "format": "uuid",
               "title": "To Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -7816,16 +6874,6 @@
               "format": "uuid",
               "title": "Config Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -7890,16 +6938,6 @@
               "format": "uuid",
               "title": "Service Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -7953,16 +6991,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Platform Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -8050,16 +7078,6 @@
               "format": "uuid",
               "title": "Config Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -8123,16 +7141,6 @@
               "format": "uuid",
               "title": "Service Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -8185,16 +7193,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Platform Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -8855,34 +7853,45 @@
       }
     },
     "/api/tags": {
+      "get": {
+        "tags": [
+          "Configuration - Tags"
+        ],
+        "summary": "Get Tags Old",
+        "operationId": "get_tags_old_api_tags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TagsGetItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Tags Old Api Tags Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
       "post": {
         "tags": [
           "Configuration - Tags"
         ],
         "summary": "Create Tag",
         "operationId": "create_tag_api_tags_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/TagCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -8905,31 +7914,8 @@
               }
             }
           }
-        }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Tags"
-        ],
-        "summary": "Get Tags Old",
-        "operationId": "get_tags_old_api_tags_get",
-        "deprecated": true,
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TagsGetItem"
-                  },
-                  "title": "Response Get Tags Old Api Tags Get"
-                }
-              }
-            }
-          }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/tags/{id}": {
@@ -8949,16 +7935,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -9012,16 +7988,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -9047,33 +8013,40 @@
       }
     },
     "/api/v2/configuration/tags": {
+      "get": {
+        "tags": [
+          "Configuration - Tags"
+        ],
+        "summary": "Get Tags",
+        "operationId": "get_tags_api_v2_configuration_tags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagsGet"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Configuration - Tags"
         ],
         "summary": "Create Tag",
         "operationId": "create_tag_api_v2_configuration_tags_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/TagCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9097,25 +8070,6 @@
             }
           }
         }
-      },
-      "get": {
-        "tags": [
-          "Configuration - Tags"
-        ],
-        "summary": "Get Tags",
-        "operationId": "get_tags_api_v2_configuration_tags_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TagsGet"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v2/configuration/tags/{id}": {
@@ -9134,16 +8088,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -9196,16 +8140,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -9248,16 +8182,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -9293,34 +8217,45 @@
       }
     },
     "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Users Old",
+        "operationId": "get_users_old_api_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsersGet"
+                  },
+                  "type": "array",
+                  "title": "Response Get Users Old Api Users Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
       "post": {
         "tags": [
           "Users"
         ],
         "summary": "Create User",
         "operationId": "create_user_api_users_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UserCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9346,31 +8281,8 @@
               }
             }
           }
-        }
-      },
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get Users Old",
-        "operationId": "get_users_old_api_users_get",
-        "deprecated": true,
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UsersGet"
-                  },
-                  "title": "Response Get Users Old Api Users Get"
-                }
-              }
-            }
-          }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/users/set_can_become_admin": {
@@ -9380,28 +8292,15 @@
         ],
         "summary": "Set Can Become Admin",
         "operationId": "set_can_become_admin_api_users_set_can_become_admin_put",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CanBecomeAdminUpdate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9422,7 +8321,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/users/{id}": {
@@ -9441,16 +8341,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -9487,33 +8377,40 @@
       }
     },
     "/api/v2/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Users",
+        "operationId": "get_users_api_v2_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Users"
         ],
         "summary": "Create User",
         "operationId": "create_user_api_v2_users_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UserCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9540,25 +8437,6 @@
             }
           }
         }
-      },
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get Users",
-        "operationId": "get_users_api_v2_users_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUsersResponse"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v2/users/set_can_become_admin": {
@@ -9568,27 +8446,15 @@
         ],
         "summary": "Set Can Become Admin",
         "operationId": "set_can_become_admin_api_v2_users_set_can_become_admin_put",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CanBecomeAdminUpdate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9619,19 +8485,6 @@
         ],
         "summary": "Mark Tour As Seen Old",
         "operationId": "mark_tour_as_seen_old_api_users_seen_tour_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9640,18 +8493,9 @@
                 "schema": {}
               }
             }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/users/current/seen_tour": {
@@ -9661,34 +8505,12 @@
         ],
         "summary": "Mark Tour As Seen",
         "operationId": "mark_tour_as_seen_api_v2_users_current_seen_tour_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
               }
             }
           }
@@ -9702,28 +8524,15 @@
         ],
         "summary": "Create Role",
         "operationId": "create_role_api_roles_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateRole"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9749,7 +8558,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "patch": {
         "tags": [
@@ -9757,27 +8567,15 @@
         ],
         "summary": "Update Role Old",
         "operationId": "update_role_old_api_roles_patch",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateRoleOld"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9824,16 +8622,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -9875,27 +8663,15 @@
         ],
         "summary": "Create Role",
         "operationId": "create_role_api_v2_authz_roles_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateRole"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -9940,16 +8716,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -9999,16 +8765,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -10143,28 +8899,15 @@
         ],
         "summary": "Become Admin",
         "operationId": "become_admin_api_role_assignments_global_become_admin_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/BecomeAdmin"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -10185,7 +8928,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/role_assignments/global/revoke_admin": {
@@ -10195,19 +8939,6 @@
         ],
         "summary": "Revoke Admin",
         "operationId": "revoke_admin_api_role_assignments_global_revoke_admin_post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -10216,18 +8947,9 @@
                 "schema": {}
               }
             }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/role_assignments/global": {
@@ -10238,18 +8960,6 @@
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_role_assignments_global_post",
         "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -10372,16 +9082,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -10413,27 +9113,15 @@
         ],
         "summary": "Become Admin",
         "operationId": "become_admin_api_v2_authz_role_assignments_global_become_admin_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/BecomeAdmin"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -10464,34 +9152,12 @@
         ],
         "summary": "Revoke Admin",
         "operationId": "revoke_admin_api_v2_authz_role_assignments_global_revoke_admin_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
               }
             }
           }
@@ -10505,18 +9171,6 @@
         ],
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_v2_authz_role_assignments_global_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -10633,16 +9287,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -10684,16 +9328,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -10747,16 +9381,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -10812,16 +9436,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -10874,16 +9488,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -10939,16 +9543,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -10988,16 +9582,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -11050,16 +9634,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -11114,16 +9688,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -11162,16 +9726,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -11419,18 +9973,6 @@
         ],
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_v2_authz_role_assignments_data_product_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -11483,16 +10025,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -11536,27 +10068,15 @@
         ],
         "summary": "Request Assignment",
         "operationId": "request_assignment_api_v2_authz_role_assignments_data_product_request_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RequestRoleAssignment"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -11599,16 +10119,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -11662,16 +10172,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -11727,16 +10227,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -11775,16 +10265,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -11837,16 +10317,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -11901,16 +10371,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "responses": {
@@ -11949,16 +10409,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -12206,18 +10656,6 @@
         ],
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_v2_authz_role_assignments_output_port_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -12270,16 +10708,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -12323,27 +10751,15 @@
         ],
         "summary": "Request Assignment",
         "operationId": "request_assignment_api_v2_authz_role_assignments_output_port_request_post",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RequestRoleAssignment"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -12386,16 +10802,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -12450,16 +10856,6 @@
               "format": "uuid",
               "title": "Id"
             }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
           }
         ],
         "requestBody": {
@@ -12503,7 +10899,6 @@
         ],
         "summary": "Get Settings",
         "operationId": "get_settings_api_theme_settings_get",
-        "deprecated": true,
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12515,7 +10910,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "put": {
         "tags": [
@@ -12523,28 +10919,15 @@
         ],
         "summary": "Update Settings",
         "operationId": "update_settings_api_theme_settings_put",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ThemeSettings"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -12565,7 +10948,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/configuration/theme_settings": {
@@ -12594,27 +10978,15 @@
         ],
         "summary": "Update Settings",
         "operationId": "update_settings_api_v2_configuration_theme_settings_put",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ThemeSettings"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -12708,39 +11080,17 @@
         ],
         "summary": "Get User Notifications",
         "operationId": "get_user_notifications_api_notifications_get",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/NotificationGet"
                   },
+                  "type": "array",
                   "title": "Response Get User Notifications Api Notifications Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -12755,34 +11105,12 @@
         ],
         "summary": "Remove All User Notifications",
         "operationId": "remove_all_user_notifications_api_notifications_all_delete",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
               }
             }
           }
@@ -12805,16 +11133,6 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
@@ -12847,25 +11165,12 @@
         ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_pending_actions_get",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
                     "anyOf": [
                       {
@@ -12879,17 +11184,8 @@
                       }
                     ]
                   },
+                  "type": "array",
                   "title": "Response Get User Pending Actions Api Pending Actions Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -13024,18 +11320,6 @@
         ],
         "summary": "Authorize",
         "operationId": "authorize_api_auth_user_get",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -13043,16 +11327,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -13084,16 +11358,6 @@
             "schema": {
               "type": "string",
               "title": "Environment"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Token"
             }
           }
         ],
