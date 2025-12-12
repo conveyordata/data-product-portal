@@ -126,7 +126,7 @@ begin
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc', 'Proteomics', 'Proteomics and Biomarker Discovery', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO proteomics_id;
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('623e6fbf-3a06-434e-995c-b0336e71806e', 'Manufacturing', 'Manufacturing and Supply Chain', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO manufacturing_id;
     INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('bec196cb-81df-4cfc-959f-b142c312861e', 'Medical and Safety', 'Medical and Safety', '2025-10-28 16:30:24.123498', NULL, NULL);
-    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'CRM', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
+    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'Commercial and Customer Relationship Management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
     -- DATA PRODUCT TYPES
     -- ...existing data product types code...
