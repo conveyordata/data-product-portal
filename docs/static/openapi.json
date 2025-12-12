@@ -4312,13 +4312,13 @@
             }
           },
           {
-            "name": "dataset_id",
-            "in": "query",
+            "name": "input_port_id",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "Dataset Id"
+              "title": "Input Port Id"
             }
           },
           {
