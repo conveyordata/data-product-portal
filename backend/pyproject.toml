@@ -46,7 +46,7 @@ greenlet = "^3.3.0"
 h11 = "^0.16.0"
 fastmcp = "2.14.0"
 posthog = "^7.0.1"
-authlib = "1.6.5"
+authlib = "1.6.6"
 
 [tool.poetry.group.test]
 optional = true
