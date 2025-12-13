@@ -160,7 +160,6 @@ class TestDatasetRoleAssignmentsRouter:
         response = client.post(
             f"{OLD_ENDPOINT}/request/{str(dataset.id)}",
             json={
-                "user_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
@@ -168,7 +167,7 @@ class TestDatasetRoleAssignmentsRouter:
 
         data = response.json()
         assert data["dataset"]["id"] == str(dataset.id)
-        assert data["user"]["id"] == str(user.id)
+        assert data["user"]["id"] == str(me.id)
         assert data["role"]["id"] == str(role.id)
 
     def test_request_assignment(self, client: TestClient):
@@ -186,7 +185,6 @@ class TestDatasetRoleAssignmentsRouter:
             f"{ENDPOINT}/request",
             json={
                 "output_port_id": str(dataset.id),
-                "user_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
@@ -194,7 +192,7 @@ class TestDatasetRoleAssignmentsRouter:
 
         data = response.json()
         assert data["output_port"]["id"] == str(dataset.id)
-        assert data["user"]["id"] == str(user.id)
+        assert data["user"]["id"] == str(me.id)
         assert data["role"]["id"] == str(role.id)
 
     def test_request_assignment_no_right(self, client: TestClient):
@@ -207,7 +205,6 @@ class TestDatasetRoleAssignmentsRouter:
         response = client.post(
             f"{OLD_ENDPOINT}/request/{str(dataset.id)}",
             json={
-                "user_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
