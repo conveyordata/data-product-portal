@@ -57,9 +57,8 @@ class DeviceFlowService:
         Remove stale device flow records to prevent table growth.
 
         Strategy:
-        - Delete records past their `max_expiry` by at least a small buffer.
-        - Also delete records already marked as terminal states (EXPIRED/DENIED/AUTHORIZED)
-          when their `max_expiry` has elapsed.
+        - Delete all records whose `max_expiry` has elapsed (plus a small buffer),
+          regardless of their status.
         """
         try:
             now = utc_now()
