@@ -22,6 +22,9 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 COPY requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
+COPY poetry.lock pyproject.toml /
+RUN poetry install --no-root
+
 FROM base-image
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
