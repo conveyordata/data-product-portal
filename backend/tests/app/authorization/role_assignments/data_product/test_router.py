@@ -112,7 +112,6 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request/{str(data_product.id)}",
             json={
-                "user_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
@@ -120,7 +119,7 @@ class TestDataProductRoleAssignmentsRouter:
 
         data = response.json()
         assert data["data_product"]["id"] == str(data_product.id)
-        assert data["user"]["id"] == str(user.id)
+        assert data["user"]["id"] == str(me.id)
         assert data["role"]["id"] == str(role.id)
 
     def test_request_assignment_no_right(self, client: TestClient):
@@ -133,7 +132,6 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request/{str(data_product.id)}",
             json={
-                "user_id": str(user.id),
                 "role_id": str(role.id),
             },
         )

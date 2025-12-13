@@ -26,7 +26,6 @@ class CreateRoleAssignment(BaseModel):
 
 
 class RequestRoleAssignment(BaseModel):
-    user_id: UUID
     role_id: UUID
     output_port_id: UUID
 

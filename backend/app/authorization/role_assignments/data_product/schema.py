@@ -28,7 +28,6 @@ class CreateRoleAssignment(BaseModel):
 
 
 class RequestRoleAssignment(BaseModel):
-    user_id: UUID
     role_id: UUID
     data_product_id: UUID
 
