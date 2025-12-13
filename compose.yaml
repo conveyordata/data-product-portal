@@ -30,7 +30,13 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
+  provisioner:
+    build: ./demo/provisioner
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6060"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   postgresql:
     image: postgres:17.6
     container_name: data-product-portal-postgresql
