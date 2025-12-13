@@ -169,3 +169,6 @@ state.tf
 
 # ASDF
 .tool-versions
+
+# Mac studd
+.DS_Store
