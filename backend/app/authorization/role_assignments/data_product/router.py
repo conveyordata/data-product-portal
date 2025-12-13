@@ -214,8 +214,8 @@ def create_assignment_old(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     return create_assignment(
-        RequestRoleAssignment(
-            data_product_id=id, role_id=request.role_id
+        CreateRoleAssignment(
+            data_product_id=id, role_id=request.role_id, user_id=user.id
         ),
         background_tasks,
         db,
