@@ -22,7 +22,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 COPY requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
-COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
+COPY poetry.lock pyproject.toml alembic.ini sample_data.sql sample_data2.sql /
 RUN poetry install --no-root
 
 FROM base-image
@@ -31,12 +31,14 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 COPY --from=build-stage /usr/local /usr/local
 COPY --from=build-stage alembic.ini .
 COPY --from=build-stage sample_data.sql .
+COPY --from=build-stage sample_data2.sql .
 
 COPY ./app ./app
 COPY ./templates ./templates
 COPY ./alembic.ini ./alembic.ini
 COPY ./VERSION ./VERSION
 COPY ./sample_data.sql ./sample_data.sql
+COPY ./sample_data2.sql ./sample_data2.sql
 
 EXPOSE 5050
 
