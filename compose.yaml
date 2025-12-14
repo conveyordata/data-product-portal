@@ -47,8 +47,6 @@ services:
     container_name: data-product-portal-postgresql-app
     ports:
       - ${POSTGRES_PORT:-5432}:5432
-    env_file:
-      - .env.docker
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -65,8 +63,6 @@ services:
     container_name: data-product-portal-postgresql-demo
     ports:
       - ${POSTGRES_PORT_DEMO:-5433}:5432
-    env_file:
-      - .env.docker
     environment:
       POSTGRES_DB: ${POSTGRES_DB_DEMO}
       POSTGRES_USER: ${POSTGRES_USER_DEMO}
@@ -75,7 +71,7 @@ services:
       - postgresql-demo-data:/var/lib/postgresql/data
       - ./demo/sources.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB_DEMO} -U $${POSTGRES_USER_DEMO}"]
       interval: 2s
       timeout: 1s
       retries: 120
