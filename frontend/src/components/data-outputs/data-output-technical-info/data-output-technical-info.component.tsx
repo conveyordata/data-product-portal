@@ -28,6 +28,8 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
                 return 'Schema';
             case DataOutputConfigurationTypes.SnowflakeDataOutput:
                 return 'Schema';
+            case DataOutputConfigurationTypes.PostgreSQLDataOutput:
+                return 'Schema';
             case DataOutputConfigurationTypes.RedshiftDataOutput:
                 return 'Schema';
             default:

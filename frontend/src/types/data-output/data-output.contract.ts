@@ -11,6 +11,7 @@ export enum DataOutputConfigurationTypes {
     DatabricksDataOutput = 'DatabricksDataOutput',
     SnowflakeDataOutput = 'SnowflakeDataOutput',
     RedshiftDataOutput = 'RedshiftDataOutput',
+    PostgreSQLDataOutput = 'PostgreSQLDataOutput',
 }
 
 export enum DataOutputStatus {

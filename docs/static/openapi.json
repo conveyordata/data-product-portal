@@ -11955,6 +11955,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -11963,6 +11966,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -12053,6 +12057,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -12061,6 +12068,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -12261,6 +12269,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -12269,6 +12280,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -12426,6 +12438,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -12434,6 +12449,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -12512,6 +12528,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -12520,6 +12539,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -12638,6 +12658,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -12646,6 +12669,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -15137,6 +15161,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/RedshiftConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/PostgreSQLConfig"
                 }
               ]
             },
@@ -15980,6 +16007,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -15988,6 +16018,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -16742,6 +16773,68 @@
           "config"
         ],
         "title": "PlatformServiceConfiguration"
+      },
+      "PostgreSQLConfig": {
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "title": "Identifier"
+          },
+          "database_name": {
+            "type": "string",
+            "title": "Database Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identifier",
+          "database_name"
+        ],
+        "title": "PostgreSQLConfig"
+      },
+      "PostgreSQLDataOutput": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "const": "PostgreSQLDataOutput",
+            "title": "Configuration Type"
+          },
+          "database": {
+            "type": "string",
+            "title": "Database"
+          },
+          "schema": {
+            "type": "string",
+            "title": "Schema",
+            "default": ""
+          },
+          "table": {
+            "type": "string",
+            "title": "Table",
+            "default": "*"
+          },
+          "bucket_identifier": {
+            "type": "string",
+            "title": "Bucket Identifier",
+            "default": ""
+          },
+          "database_path": {
+            "type": "string",
+            "title": "Database Path",
+            "default": ""
+          },
+          "table_path": {
+            "type": "string",
+            "title": "Table Path",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type",
+          "database"
+        ],
+        "title": "PostgreSQLDataOutput"
       },
       "Prototype": {
         "type": "integer",
@@ -18552,6 +18645,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -18560,6 +18656,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -18647,6 +18744,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -18655,6 +18755,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
@@ -18746,6 +18847,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLDataOutput"
               }
             ],
             "title": "Configuration",
@@ -18754,6 +18858,7 @@
               "mapping": {
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "PostgreSQLDataOutput": "#/components/schemas/PostgreSQLDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
                 "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"

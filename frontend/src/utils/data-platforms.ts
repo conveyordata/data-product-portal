@@ -5,6 +5,7 @@ import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
 import conveyorLogo from '@/assets/icons/conveyor-logo.svg?react';
 import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
 import glueLogo from '@/assets/icons/glue-logo.svg?react';
+import postgreSQLLogo from '@/assets/icons/postgresql-logo.svg?react';
 import s3Logo from '@/assets/icons/s3-logo.svg?react';
 import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
@@ -75,6 +76,14 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         icon: tableauLogo,
         disabled: true,
         hasConfig: false,
+        children: [],
+    },
+    {
+        label: t('PostgreSQL'),
+        value: DataPlatforms.PostgreSQL,
+        icon: postgreSQLLogo,
+        hasConfig: true,
+        hasMenu: true,
         children: [],
     },
 ];

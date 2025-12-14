@@ -172,3 +172,4 @@ state.tf
 
 # Mac studd
 .DS_Store
+venv_old

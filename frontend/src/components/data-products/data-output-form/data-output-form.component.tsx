@@ -32,6 +32,7 @@ import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import styles from './data-output-form.module.scss';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
+import { PostgreSQLDataOutputForm } from './postresql-data-output-form.component';
 import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
@@ -392,6 +393,15 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     case DataPlatforms.Snowflake:
                         return (
                             <SnowflakeDataOutputForm
+                                identifiers={identifiers}
+                                form={form}
+                                namespace={currentDataProduct.namespace}
+                                sourceAligned={sourceAligned}
+                            />
+                        );
+                    case DataPlatforms.PostgreSQL:
+                        return (
+                            <PostgreSQLDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
                                 namespace={currentDataProduct.namespace}

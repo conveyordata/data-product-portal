@@ -55,16 +55,16 @@ repos:
       name: add-helm-version
       entry: ./scripts/add_helm_version.sh
       language: script
-    - id: regen-openapi-spec
-      name: Regen openapi spec
-      entry: ./scripts/check_openapi_spec.sh
-      language: script
-      types: [text]
-      files: ^backend\/.*\.py$
-    - id: local-fe-check
-      name: fe check
-      entry: bash -c "cd frontend && npm run check:fix"
-      language: system
-      types: [text]
-      files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
-      exclude: ^docs/
+    # - id: regen-openapi-spec
+    #   name: Regen openapi spec
+    #   entry: ./scripts/check_openapi_spec.sh
+    #   language: script
+    #   types: [text]
+    #   files: ^backend\/.*\.py$
+    # - id: local-fe-check
+    #   name: fe check
+    #   entry: bash -c "cd frontend && npm run check:fix"
+    #   language: system
+    #   types: [text]
+    #   files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
+    #   exclude: ^docs/

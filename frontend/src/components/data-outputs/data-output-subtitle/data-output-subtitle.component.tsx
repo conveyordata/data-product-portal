@@ -20,6 +20,8 @@ function outputDescription(t: TFunction, data_output: DataOutputContract) {
             return t('Databricks schema');
         case DataOutputConfigurationTypes.SnowflakeDataOutput:
             return t('Snowflake schema');
+        case DataOutputConfigurationTypes.PostgreSQLDataOutput:
+            return t('PostgreSQL schema');
         case DataOutputConfigurationTypes.RedshiftDataOutput:
             return t('Redshift schema');
         default:

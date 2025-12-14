@@ -47,6 +47,8 @@ declare
     snowflake_id uuid;
     snowflake_service_id uuid;
     redshift_service_id uuid;
+    postgresql_id uuid;
+    postgresql_service_id uuid;
 
     -- DATA OUTPUTS
     glue_configuration_id uuid;
@@ -77,8 +79,10 @@ begin
     SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'Glue' INTO glue_service_id;
 
     -- ...existing platform configuration code...
+    INSERT INTO public.platforms (id, "name") VALUES ('99898d61-ba3b-4f30-a929-8356ccfe521f', 'PostgreSQL') returning id INTO postgresql_id;
     INSERT INTO public.platforms (id, "name") VALUES ('9be7613c-42fb-4b93-952d-1874ed1ddf77', 'Snowflake') returning id INTO snowflake_id;
     INSERT INTO public.platforms (id, "name") VALUES ('6be7613c-42fb-4b93-952d-1874ed1ddf76', 'Conveyor');
+    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('242d7e16-edd5-41e1-9e25-775ecc29706e', 'PostgreSQL', postgresql_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') returning id INTO postgresql_service_id;
     INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('a75189c1-fa42-4980-9497-4bea4c968a5b', 'Snowflake', snowflake_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') returning id INTO snowflake_service_id;
     INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('de328223-fd90-4170-a7a1-376e4ebe0594', 'Redshift', returned_platform_id,'{database}__{schema}.{table}', '{database}__{schema}.{table}') returning id INTO redshift_service_id;
     INSERT INTO public.platforms (id, "name") VALUES ('baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'Databricks') returning id INTO databricks_id;
@@ -88,6 +92,7 @@ begin
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('0b9a0e7f-8fee-4fd3-97e0-830e1612b77a', databricks_id, databricks_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('cc93437a-8d0e-4c1b-95b9-dae5886f45ab', snowflake_id, snowflake_service_id, '["products"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('38c320c3-8b66-439f-abab-6b78d225ae27', postgresql_id, postgresql_service_id, '["products"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES ('90ab1128-329f-47dd-9420-c9681bfc68c4', 'Processing', 'Processing', 'PROCESSING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO processing_type_id;
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES ('1b4a64b3-96fb-404c-a73c-294802dc9852', 'Reporting', 'Reporting', 'REPORTING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO reporting_type_id;
