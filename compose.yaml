@@ -73,6 +73,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEMO}
     volumes:
       - postgresql-demo-data:/var/lib/postgresql/data
+      - ./demo/sources.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 2s
