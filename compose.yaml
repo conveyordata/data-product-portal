@@ -11,7 +11,7 @@ services:
     depends_on:
       mailhog:
          condition: service_started
-      postgresql:
+      postgresql-app:
         condition: service_healthy
     command: >
       bash -c "python -m app.db_tool init --force sample_data.sql
@@ -32,18 +32,47 @@ services:
       retries: 10
   provisioner:
     build: ./demo/provisioner
+    env_file:
+      - .env.docker
+    depends_on:
+      postgresql-demo:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6060"]
       interval: 5s
       timeout: 3s
       retries: 10
-  postgresql:
+  postgresql-app:
     image: postgres:17.6
-    container_name: data-product-portal-postgresql
+    container_name: data-product-portal-postgresql-app
     ports:
       - ${POSTGRES_PORT:-5432}:5432
     env_file:
       - .env.docker
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgresql-app-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 2s
+      timeout: 1s
+      retries: 120
+  postgresql-demo:
+    image: postgres:17.6
+    container_name: data-product-portal-postgresql-demo
+    ports:
+      - ${POSTGRES_PORT_DEMO:-5433}:5432
+    env_file:
+      - .env.docker
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_DEMO}
+      POSTGRES_USER: ${POSTGRES_USER_DEMO}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEMO}
+    volumes:
+      - postgresql-demo-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 2s
@@ -54,6 +83,12 @@ services:
     ports:
       - "8080:80"
       - "5050:5050"
+      - "6060:6060"
     depends_on:
       - backend
       - frontend
+      - provisioner
+
+volumes:
+  postgresql-app-data:
+  postgresql-demo-data:
