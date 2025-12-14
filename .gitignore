@@ -172,4 +172,10 @@ state.tf
 
 # Mac studd
 .DS_Store
-venv_old
+
+# dbt
+target/
+dbt_packages/
+logs/
+# legacy -- renamed to dbt_packages in dbt v1
+dbt_modules/

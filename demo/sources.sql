@@ -56,6 +56,3 @@ ON CONFLICT (shipment_id) DO NOTHING;
 SELECT setval('sources.crm_customers_id_seq', (SELECT MAX(id) FROM sources.crm_customers));
 SELECT setval('sources.erp_orders_order_id_seq', (SELECT MAX(order_id) FROM sources.erp_orders));
 SELECT setval('sources.wms_shipments_shipment_id_seq', (SELECT MAX(shipment_id) FROM sources.wms_shipments));
-
--- Create schema for data products
-CREATE SCHEMA products;

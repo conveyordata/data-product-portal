@@ -42,6 +42,10 @@ declare
     sales_erp_orders_do_config_id uuid;
     logistics_wms_shipments_do_config_id uuid;
 
+    -- LIFECYLE
+    draft uuid;
+    ready uuid;
+
 begin
     TRUNCATE TABLE public.data_products_datasets CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
@@ -64,8 +68,8 @@ begin
     TRUNCATE TABLE public.data_product_lifecycles CASCADE;
 
     -- DATA PRODUCT LIFECYLCE
-    INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Draft', 0, 'grey', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Ready', 1, 'green', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Draft', 0, 'grey', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO draft;
+    INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Ready', 1, 'green', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO ready;
 
     -- DOMAINS
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
@@ -97,13 +101,9 @@ begin
     RETURNING id INTO admin_role_id;
 
     -- PLATFORMS
-    INSERT INTO public.platforms (id, "name") VALUES ('99898d61-ba3b-4f30-a929-8356ccfe521f', 'PostgreSQL') ON CONFLICT (id) DO NOTHING;
-    SELECT id into postgresql_id from public.platforms where name = 'PostgreSQL';
-
-    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('242d7e16-edd5-41e1-9e25-775ecc29706e', 'PostgreSQL', postgresql_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') ON CONFLICT (id) DO NOTHING;
-    SELECT id into postgresql_service_id from public.platform_services where name = 'PostgreSQL';
-
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('38c320c3-8b66-439f-abab-6b78d225ae27', postgresql_id, postgresql_service_id, '["sources", "products"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) ON CONFLICT(id) DO NOTHING;
+    INSERT INTO public.platforms (id, "name") VALUES ('99898d61-ba3b-4f30-a929-8356ccfe521f', 'PostgreSQL') returning id INTO postgresql_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('242d7e16-edd5-41e1-9e25-775ecc29706e', 'PostgreSQL', postgresql_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') returning id INTO postgresql_service_id;
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('38c320c3-8b66-439f-abab-6b78d225ae27', postgresql_id, postgresql_service_id, '["dpp_demo"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- GLOBAL ROLE ASSIGNMENTS
     -- Make john.scientist an admin
@@ -111,29 +111,36 @@ begin
     SELECT gen_random_uuid(), id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP)
     FROM public.users WHERE email = 'john.scientist@pharma.com';
 
-    -- -- DATA PRODUCTS
-    -- INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales CRM Customers', 'sales-crm-customers', 'Provides a clean, trusted view of customer account information, sourced directly from our CRM.', 'about', 'ACTIVE', source_aligned_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_crm_customers_dp_id;
-    -- INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales ERP Orders', 'sales-erp-orders', 'Provides real-time order data from our ERP system.', 'about', 'ACTIVE', source_aligned_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_erp_orders_dp_id;
-    -- INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics WMS Shipments', 'logistics-wms-shipments', 'Tracks order shipment and delivery status from the warehouse.', 'about', 'ACTIVE', source_aligned_type_id, logistics_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_wms_shipments_dp_id;
+    -- DATA PRODUCTS
+    INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'Sales CRM Customers', 'sales-crm-customers', 'Provides a clean, trusted view of customer account information, sourced directly from our CRM.', 'about', 'ACTIVE', source_aligned_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_dp_id;
+    INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'Sales ERP Orders', 'sales-erp-orders', 'Provides real-time order data from our ERP system.', 'about', 'ACTIVE', source_aligned_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_erp_orders_dp_id;
+    INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'Logistics WMS Shipments', 'logistics-wms-shipments', 'Tracks order shipment and delivery status from the warehouse.', 'about', 'ACTIVE', source_aligned_type_id, logistics_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO logistics_wms_shipments_dp_id;
 
-    -- -- DATASETS
-    -- INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', 'about', 'ACTIVE', 'PUBLIC', sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_crm_customers_ds_id;
-    -- INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', 'about', 'ACTIVE', 'PUBLIC', sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_erp_orders_ds_id;
-    -- INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'shipments', logistics_wms_shipments_dp_id, 'Shipments', 'Shipment and delivery status from the WMS', 'about', 'ACTIVE', 'PUBLIC', logistics_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_wms_shipments_ds_id;
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
-    -- -- DATA OUTPUT CONFIGURATIONS
-    -- INSERT INTO public.data_output_configurations (id, configuration_type, "database", "schema", "table", database_path, table_path, bucket_identifier) VALUES (gen_random_uuid(), 'PostgreSQLDataOutput', 'products', 'sales_crm_customers', 'customers', '', '', '') returning id INTO sales_crm_customers_do_config_id;
-    -- INSERT INTO public.data_output_configurations (id, configuration_type, "database", "schema", "table", database_path, table_path, bucket_identifier) VALUES (gen_random_uuid(), 'PostgreSQLDataOutput', 'products', 'sales_erp_orders', 'orders', '', '', '') returning id INTO sales_erp_orders_do_config_id;
-    -- INSERT INTO public.data_output_configurations (id, configuration_type, "database", "schema", "table", database_path, table_path, bucket_identifier) VALUES (gen_random_uuid(), 'PostgreSQLDataOutput', 'products', 'logistics_wms_shipments', 'shipments', '', '', '') returning id INTO logistics_wms_shipments_do_config_id;
+    -- DATA OUTPUT CONFIGURATIONS
+    INSERT INTO public.data_output_configurations (id, configuration_type, "database", "schema", "table", database_path, table_path, bucket_identifier) VALUES (gen_random_uuid(), 'PostgreSQLDataOutput', 'dpp_demo', 'sales_crm_customers', '*', 'dpp_demo', '*', '') returning id INTO sales_crm_customers_do_config_id;
+    INSERT INTO public.data_output_configurations (id, configuration_type, "database", "schema", "table", database_path, table_path, bucket_identifier) VALUES (gen_random_uuid(), 'PostgreSQLDataOutput', 'dpp_demo', 'sales_erp_orders', '*', 'dpp_demo', '*', '') returning id INTO sales_erp_orders_do_config_id;
+    INSERT INTO public.data_output_configurations (id, configuration_type, "database", "schema", "table", database_path, table_path, bucket_identifier) VALUES (gen_random_uuid(), 'PostgreSQLDataOutput', 'dpp_demo', 'logistics_wms_shipments', '*', 'dpp_demo', '*', '') returning id INTO logistics_wms_shipments_do_config_id;
 
-    -- -- DATA OUTPUTS
-    -- INSERT INTO public.data_outputs (id, configuration_id, "name", namespace, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_do_config_id, 'Sales CRM Customers', 'sales-crm-customers', 'Customer account information', 'ACTIVE', sales_crm_customers_dp_id, postgresql_id, postgresql_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_crm_customers_do_id;
-    -- INSERT INTO public.data_outputs (id, configuration_id, "name", namespace, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_do_config_id, 'Sales ERP Orders', 'sales-erp-orders', 'Order data', 'ACTIVE', sales_erp_orders_dp_id, postgresql_id, postgresql_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_erp_orders_do_id;
-    -- INSERT INTO public.data_outputs (id, configuration_id, "name", namespace, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_do_config_id, 'Logistics WMS Shipments', 'logistics-wms-shipments', 'Shipment and delivery status', 'ACTIVE', logistics_wms_shipments_dp_id, postgresql_id, postgresql_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_wms_shipments_do_id;
+    -- DATA OUTPUTS
+    INSERT INTO public.data_outputs (id, configuration_id, "name", namespace, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at, "sourceAligned") VALUES (gen_random_uuid(), sales_crm_customers_do_config_id, 'Sales CRM Customers', 'sales-crm-customers', 'Customer account information', 'ACTIVE', sales_crm_customers_dp_id, postgresql_id, postgresql_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, true) returning id INTO sales_crm_customers_do_id;
+    INSERT INTO public.data_outputs (id, configuration_id, "name", namespace, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at, "sourceAligned") VALUES (gen_random_uuid(), sales_erp_orders_do_config_id, 'Sales ERP Orders', 'sales-erp-orders', 'Order data', 'ACTIVE', sales_erp_orders_dp_id, postgresql_id, postgresql_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, true) returning id INTO sales_erp_orders_do_id;
+    INSERT INTO public.data_outputs (id, configuration_id, "name", namespace, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at, "sourceAligned") VALUES (gen_random_uuid(), logistics_wms_shipments_do_config_id, 'Logistics WMS Shipments', 'logistics-wms-shipments', 'Shipment and delivery status', 'ACTIVE', logistics_wms_shipments_dp_id, postgresql_id, postgresql_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, true) returning id INTO logistics_wms_shipments_do_id;
+
+    -- DATASETS
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', 'about', 'ACTIVE', 'RESTRICTED', sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', 'about', 'ACTIVE', 'RESTRICTED', sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_erp_orders_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'shipments', logistics_wms_shipments_dp_id, 'Shipments', 'Shipment and delivery status from the WMS', 'about', 'ACTIVE', 'RESTRICTED', logistics_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO logistics_wms_shipments_ds_id;
+
+    INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_ds_id, john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_ds_id, john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_ds_id, john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- DATA OUTPUTS - DATASETS
-    -- INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status) VALUES (gen_random_uuid(), sales_crm_customers_do_id, sales_crm_customers_ds_id, 'APPROVED');
-    -- INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status) VALUES (gen_random_uuid(), sales_erp_orders_do_id, sales_erp_orders_ds_id, 'APPROVED');
-    -- INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status) VALUES (gen_random_uuid(), logistics_wms_shipments_do_id, logistics_wms_shipments_ds_id, 'APPROVED');
-
+    INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_do_id, sales_crm_customers_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_do_id, sales_erp_orders_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_do_id, logistics_wms_shipments_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 end $$;
