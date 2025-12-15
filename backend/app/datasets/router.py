@@ -17,6 +17,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.logging import logger
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -92,6 +93,10 @@ def search_datasets_embeddings(
         DatasetEmbeddingResult.model_validate(ds)
         for ds in DatasetEmbeddingsService(db).search(query=query)
     ]
+    for r in results:
+        logger.info(f"Found {r}")
+    if not results:
+        return []
     return DatasetService(db).get_datasets_from_embeddings_search(user, results)
 
 
