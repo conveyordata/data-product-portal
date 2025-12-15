@@ -1,4 +1,5 @@
 import copy
+import json
 from typing import Iterable, Sequence
 from uuid import UUID
 
@@ -15,6 +16,7 @@ from app.configuration.data_product_lifecycles.model import (
 )
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
+from app.core.ai.search_agent import SearchAgent
 from app.core.authz import Authorization
 from app.core.logging import logger
 from app.core.namespace.validation import (
@@ -37,11 +39,19 @@ from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreate,
+    DatasetEmbed,
     DatasetStatusUpdate,
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
+from app.datasets.schema_response import (
+    DatasetEmbedReturn,
+    DatasetGet,
+    DatasetsAIGet,
+    DatasetsAISearch,
+    DatasetsGet,
+    DatasetsSearch,
+)
 from app.datasets.search_dataset import (
     recalculate_search_vector_dataset_statement,
     recalculate_search_vector_datasets_statement,
@@ -110,6 +120,44 @@ class DatasetService:
             dataset.lifecycle = default_lifecycle
 
         return dataset
+
+    def search_datasets_with_AI(
+        self, query: str, user: UserModel
+    ) -> Sequence[DatasetsAISearch]:
+        # Currently, this method just calls the regular search_datasets method.
+        # In the future, this can be extended to include AI-based search enhancements.
+
+        datasets = self.get_datasets(user)
+        full_datasets = [DatasetsAIGet.model_validate(dataset) for dataset in datasets]
+        embed_datasets = [DatasetEmbed.model_validate(dataset) for dataset in datasets]
+        search_agent = SearchAgent()
+        response = search_agent.converse(f"""Please find all the relevant datasets for the following query: {query}. These are the datasets: {", ".join([dataset.model_dump_json() for dataset in embed_datasets])}. You must add a rank and reason for each dataset in the output schema. Only include datasets that are relevant to the query.
+        The output must be a JSON array matching the following schema: {DatasetEmbedReturn.model_json_schema()}, make sure the output contains a rank and a reason for every selection.
+        If you return a dataset, make sure to include the full dataset information as per the schema, along with the rank and reason fields, each json objects need to have a reason and a rank. Ignore outputs that does not return a rank and reason.
+        """)
+        # Parse response into Sequence[DatasetsAISearch] object
+        # drop everything not between [ and ]
+        response = response[response.index("[") : response.rindex("]") + 1]
+        datasets = json.loads(response)
+        result: list[DatasetsAISearch] = []
+        for dataset in datasets:
+            matched_dataset = [d for d in full_datasets if d.id == UUID(dataset["id"])]
+            if len(matched_dataset) != 1:
+                logger.warning(
+                    f"Dataset with id {dataset['id']} not found in database. Or multiple returned!"
+                )
+            base = matched_dataset[0].model_dump()
+            result.append(
+                DatasetsAISearch.model_validate(
+                    {
+                        **base,
+                        "rank": dataset["rank"],
+                        "reason": dataset["reason"],
+                    }
+                )
+            )
+
+        return result
 
     def search_datasets(
         self, query: str, limit: int, user: UserModel

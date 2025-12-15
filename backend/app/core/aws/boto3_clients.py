@@ -14,6 +14,7 @@ if not settings.DISABLED_AWS:
             "s3": session.client("s3"),
             "sts": session.client("sts"),
             "lambda": session.client("lambda"),
+            "bedrock-runtime": session.client("bedrock-runtime"),
         }
     except (AttributeError, NoRegionError):
         logger.warning(
