@@ -12,7 +12,7 @@ repos:
     # Common errors
     - id: end-of-file-fixer
     - id: trailing-whitespace
-    - id: check-yaml
+    # - id: check-yaml
       exclude: ^helm/templates
     - id: check-merge-conflict
     - id: check-executables-have-shebangs

@@ -1,5 +1,6 @@
 import logging
 import re
+from cookiecutter.main import cookiecutter
 from fastapi import FastAPI, Request
 from typing import Callable, List, Tuple, Dict, Any
 import json
@@ -19,6 +20,18 @@ def handle_create_data_product(payload: Dict[str, Any]):
     logging.info(f"Creating data product with payload: {payload}")
     # Example: extract data from payload and create a resource
     # The response from the original webhook is in payload['response']
+
+    # use the payload to get more information regarding the product
+
+    # call the cookiecutter template
+    context = {"project_name": "test"}
+    cookiecutter(
+        "/Users/pascalknapen/Code/dataminded/data-product-portal/demo/provisioner/templates/dbt",
+        no_input=True,
+        extra_context=context,
+        output_dir="/Users/pascalknapen/Code/dataminded/data-product-portal/demo/products",
+    )
+
     return {
         "status": "success",
         "action": "create_data_product",
