@@ -141,7 +141,7 @@ class DatasetService:
             ],
             system=[
                 {
-                    "text": "Keep it short and simple, at most 2 short sentences.",
+                    "text": "Keep it short and simple, at most 2 short sentences. Do not use markdown",
                 }
             ],
         )
