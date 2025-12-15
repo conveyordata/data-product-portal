@@ -79,7 +79,7 @@ def search_datasets_embeddings(
         DatasetEmbeddingResult.model_validate(ds)
         for ds in DatasetEmbeddingsService(db).search(query=query)
     ]
-    return DatasetService(db).get_datasets(user, [rs.id for rs in results])
+    return DatasetService(db).get_datasets_from_embeddings_search(user, results)
 
 
 @router.get("/namespace_suggestion")

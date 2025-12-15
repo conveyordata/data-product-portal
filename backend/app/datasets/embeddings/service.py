@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from app.datasets.embeddings.model import DatasetEmbedding
 from app.datasets.schema_response import DatasetEmbed, DatasetEmbeddingResult
 
-model_id = "cohere.embed-english-v3"
+# model_id = "cohere.embed-english-v3"
+model_id = "cohere.embed-v4:0"
 max_distance = 0.4
 
 
@@ -16,27 +17,29 @@ class DatasetEmbeddingsService:
     def __init__(self, db: Session):
         self.db = db
 
-    def insert_embeddings_for_datasets(self, datasets: Sequence[DatasetEmbed]):
+    @staticmethod
+    def generate_embeddings(texts: list[str]) -> list[list[float]]:
         client = boto3.client("bedrock-runtime")
-
-        input_text = [ds.model_dump_json(exclude={"id"}) for ds in datasets]
         response = client.invoke_model(
             modelId=model_id,
-            body=json.dumps({"texts": input_text, "input_type": "search_document"}),
+            body=json.dumps({"texts": texts, "input_type": "search_document"}),
         )
         model_response = json.loads(response["body"].read())
-        for idx, embedding in enumerate(model_response["embeddings"]):
+        return model_response["embeddings"]["float"]
+        # return model_response["embeddings"]
+        # return DatasetEmbed(id=dataset_id)
+
+    def insert_embeddings_for_datasets(self, datasets: Sequence[DatasetEmbed]):
+        embeddings = self.generate_embeddings(
+            [ds.model_dump_json(exclude={"id"}) for ds in datasets]
+        )
+        for idx, embedding in enumerate(embeddings):
             self.db.add(DatasetEmbedding(id=datasets[idx].id, embeddings=embedding))
         self.db.commit()
 
     def search(self, query: str) -> Sequence[DatasetEmbeddingResult]:
-        client = boto3.client("bedrock-runtime")
-        response = client.invoke_model(
-            modelId=model_id,
-            body=json.dumps({"texts": [query], "input_type": "search_document"}),
-        )
-        query_vec = json.loads(response["body"].read())["embeddings"][0]
-        distance = DatasetEmbedding.embeddings.cosine_distance(query_vec)
+        embeddings = self.generate_embeddings([query])
+        distance = DatasetEmbedding.embeddings.cosine_distance(embeddings[0])
         stmt = (
             select(DatasetEmbedding.id, distance.label("distance"))
             .order_by(distance)

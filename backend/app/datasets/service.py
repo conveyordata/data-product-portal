@@ -1,9 +1,9 @@
 import copy
-from typing import Iterable, Optional, Sequence
+from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, desc, func, select
+from sqlalchemy import Float, Integer, asc, column, desc, func, select, values
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -43,6 +43,7 @@ from app.datasets.schema_request import (
 )
 from app.datasets.schema_response import (
     DatasetEmbed,
+    DatasetEmbeddingResult,
     DatasetGet,
     DatasetsGet,
     DatasetsSearch,
@@ -167,7 +168,8 @@ class DatasetService:
         return result.rowcount
 
     def get_datasets(
-        self, user: UserModel, ids: Optional[Sequence[UUID]] = None
+        self,
+        user: UserModel,
     ) -> Sequence[DatasetsGet]:
         load_options = get_dataset_load_options()
         default_lifecycle = self.db.scalar(
@@ -178,8 +180,49 @@ class DatasetService:
         query = (
             select(DatasetModel).options(*load_options).order_by(asc(DatasetModel.name))
         )
-        if ids:
-            query = query.where(DatasetModel.id.in_(ids))
+        datasets = [
+            dataset
+            for dataset in self.db.scalars(query).unique().all()
+            if self.is_visible_to_user(dataset, user)
+        ]
+
+        for dataset in datasets:
+            if not dataset.lifecycle:
+                dataset.lifecycle = default_lifecycle
+        return datasets
+
+    def get_datasets_from_embeddings_search(
+        self,
+        user: UserModel,
+        search_results: Sequence[DatasetEmbeddingResult],
+    ) -> Sequence[DatasetsGet]:
+        load_options = get_dataset_load_options()
+        default_lifecycle = self.db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
+        )
+        id_col = column("id", Integer)
+        distance_col = column("distance", Float)
+
+        search_data = [
+            (
+                r.id,
+                r.distance,
+            )
+            for r in search_results
+        ]
+        search_cte = (
+            values(id_col, distance_col, name="search_vals")
+            .data(search_data)
+            .cte("search_results_cte")
+        )
+        query = (
+            select(DatasetModel)
+            .options(*load_options)
+            .join(search_cte, DatasetModel.id == search_cte.c.id)
+            .order_by(asc(search_cte.c.distance))
+        )
         datasets = [
             dataset
             for dataset in self.db.scalars(query).unique().all()
