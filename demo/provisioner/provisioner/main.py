@@ -1,5 +1,7 @@
 import logging
 import re
+import os
+import requests
 from cookiecutter.main import cookiecutter
 from fastapi import FastAPI, Request
 from typing import Callable, List, Tuple, Dict, Any
@@ -22,9 +24,34 @@ def handle_create_data_product(payload: Dict[str, Any]):
     # The response from the original webhook is in payload['response']
 
     # use the payload to get more information regarding the product
+    response_data = json.loads(payload.get("response", "{}"))
+    data_product_id = response_data.get("id")
+
+    if not data_product_id:
+        logging.error("Could not find data product id in response")
+        return {
+            "status": "error",
+            "message": "Could not find data product id in response",
+        }
+
+    # get the namespace of the data product
+    portal_url = os.environ.get("DATA_PRODUCT_PORTAL_URL", "http://localhost:8080")
+
+    try:
+        response = requests.get(f"{portal_url}/api/data_products/{data_product_id}")
+        response.raise_for_status()
+        data_product_details = response.json()
+        namespace = data_product_details.get("namespace")
+        logging.info(f"Data product namespace: {namespace}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to get data product details: {e}")
+        return {
+            "status": "error",
+            "message": f"Failed to get data product details for id {data_product_id}",
+        }
 
     # call the cookiecutter template
-    context = {"project_name": "test"}
+    context = {"project_name": namespace}
     cookiecutter(
         "/Users/pascalknapen/Code/dataminded/data-product-portal/demo/provisioner/templates/dbt",
         no_input=True,
