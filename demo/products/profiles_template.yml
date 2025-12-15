@@ -1,11 +1,11 @@
-sales_crm_customer:
+NAME:
   outputs:
     dev:
       dbname: dpp_demo
       host: localhost
       pass: abc123
       port: 5433
-      schema: sales_crm_customer
+      schema: NAME
       threads: 1
       type: postgres
       user: postgres
