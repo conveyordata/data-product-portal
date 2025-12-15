@@ -19,6 +19,7 @@ from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.ai.search_agent import SearchAgent
 from app.core.authz import Authorization
+from app.core.aws.boto3_clients import get_client
 from app.core.logging import logger
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
@@ -84,6 +85,8 @@ class DatasetService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
+        self.client = get_client("bedrock-runtime")
+        self.model = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 
     def get_dataset(self, id: UUID, user: UserModel) -> DatasetGet:
         dataset = self.db.get(
@@ -121,6 +124,28 @@ class DatasetService:
             dataset.lifecycle = default_lifecycle
 
         return dataset
+
+    def explain_query_match_with_AI(self, query: str, id: UUID, user: User) -> str:
+        dataset = self.get_dataset(id, user)
+        response = self.client.converse(
+            modelId=self.model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "text": f"Explain the users why this search query: {query} matches the results: {DatasetGet.model_validate(dataset).model_dump_json()}"
+                        },
+                    ],
+                },
+            ],
+            system=[
+                {
+                    "text": "Keep it short and simple, at most 2 short sentences.",
+                }
+            ],
+        )
+        return response["output"]["message"]["content"][0]["text"]
 
     def search_datasets_with_AI(
         self, query: str, limit: int, user: UserModel

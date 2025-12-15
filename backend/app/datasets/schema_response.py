@@ -102,6 +102,10 @@ class DatasetsAISearch(DatasetsSearch):
     reason: Optional[str]
 
 
+class DatasetAIReason(ORMModel):
+    reason: str
+
+
 class DatasetEmbedReturn(ORMModel):
     id: UUID
     rank: float
