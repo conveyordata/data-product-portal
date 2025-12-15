@@ -34,6 +34,7 @@ from app.datasets.schema_request import (
     DatasetUsageUpdate,
 )
 from app.datasets.schema_response import (
+    DatasetEmbeddingResult,
     DatasetGet,
     DatasetsGet,
     DatasetsSearch,
@@ -74,10 +75,11 @@ def search_datasets_embeddings(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
-    ids = DatasetEmbeddingsService(db).search(query=query)
-    # results = [DatasetEmbeddingResult.model_validate(ds) for ds in ]
-    # print(results)
-    return DatasetService(db).get_datasets(user, ids)
+    results = [
+        DatasetEmbeddingResult.model_validate(ds)
+        for ds in DatasetEmbeddingsService(db).search(query=query)
+    ]
+    return DatasetService(db).get_datasets(user, [rs.id for rs in results])
 
 
 @router.get("/namespace_suggestion")

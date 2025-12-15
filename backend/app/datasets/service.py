@@ -199,6 +199,9 @@ class DatasetService:
                     select(DatasetModel)
                     .options(
                         selectinload(DatasetModel.data_product).raiseload("*"),
+                        selectinload(DatasetModel.data_output_links)
+                        .selectinload(DataOutputDatasetAssociationModel.data_output)
+                        .raiseload("*"),
                     )
                     .order_by(asc(DatasetModel.name))
                 )

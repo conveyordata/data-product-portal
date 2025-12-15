@@ -359,6 +359,53 @@
         }
       }
     },
+    "/api/datasets/search-embeddings": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Search Datasets Embeddings",
+        "operationId": "search_datasets_embeddings_api_datasets_search_embeddings_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "title": "Query"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatasetsGet"
+                  },
+                  "title": "Response Search Datasets Embeddings Api Datasets Search Embeddings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/datasets/namespace_suggestion": {
       "get": {
         "tags": [

@@ -68,21 +68,27 @@ class DatasetEmbeddingResult(ORMModel):
     distance: float
 
 
+class DataOutputEmbed(ORMModel):
+    name: str
+    namespace: str
+    description: str
+
+
+class DataOutputLinkEmbed(ORMModel):
+    data_output: DataOutputEmbed
+
+
+class DataProductEmbed(ORMModel):
+    name: str
+    description: str
+
+
 class DatasetEmbed(ORMModel):
     id: UUID
     name: str
     description: str
     about: Optional[str]
     status: OutputPortStatus
-
-    class DataProductEmbed(ORMModel):
-        name: str
-        description: str
-
+    domain: Domain
     data_product: DataProductEmbed
-
-    # class TechnicalAssetsEmbed(ORMModel):
-    #     name: str
-    #     description: str
-    #
-    # data_outputs: list[TechnicalAssetsEmbed]
+    data_output_links: list[DataOutputLinkEmbed]

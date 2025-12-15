@@ -18,7 +18,7 @@ export function Marketplace() {
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const { data: datasets = [] } = useGetAllDatasetsQuery();
 
-    const { data: datasetSearchResult = [] } = useSearchDatasetsQuery(
+    const { data: datasetSearchResult = [], isFetching: datasetSearchFetching } = useSearchDatasetsQuery(
         {
             query: debouncedSearchTerm,
         },
@@ -54,6 +54,7 @@ export function Marketplace() {
             title={t('Marketplace')}
             searchPlaceholder={t('Search output ports by name')}
             onSearch={handleSearchChange}
+            datasetSearchFetching={datasetSearchFetching}
         >
             <Flex wrap="wrap" gap={'small'}>
                 {paginatedOutputPorts.map((dataset) => (
