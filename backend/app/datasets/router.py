@@ -75,7 +75,7 @@ def search_datasets_with_AI(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsAISearch]:
-    return DatasetService(db).search_datasets_with_AI(query=query, user=user)
+    return DatasetService(db).search_datasets_with_AI(query=query, limit=limit, user=user)
 
 
 @router.get("/namespace_suggestion")

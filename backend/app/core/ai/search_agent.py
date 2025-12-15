@@ -8,7 +8,7 @@ from app.utils.singleton import Singleton
 class SearchAgent(metaclass=Singleton):
     def __init__(self):
         self.client = get_client("bedrock-runtime")
-        self.model = "anthropic.claude-3-haiku-20240307-v1:0"
+        self.model = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
         self.tool_list = [
             {
                 "toolSpec": {
@@ -38,6 +38,9 @@ class SearchAgent(metaclass=Singleton):
             #         }
             #     },
             # },
+            # performanceConfig={
+            #     "latency": "optimized"
+            # }
         )
         # Tools do not work as intended.
 

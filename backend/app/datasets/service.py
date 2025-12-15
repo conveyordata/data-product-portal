@@ -1,5 +1,6 @@
 import copy
 import json
+import time
 from typing import Iterable, Sequence
 from uuid import UUID
 
@@ -122,22 +123,28 @@ class DatasetService:
         return dataset
 
     def search_datasets_with_AI(
-        self, query: str, user: UserModel
+        self, query: str, limit: int, user: UserModel
     ) -> Sequence[DatasetsAISearch]:
         # Currently, this method just calls the regular search_datasets method.
         # In the future, this can be extended to include AI-based search enhancements.
+        # Profile the time taken for the AI search
+        start_time = time.time()
 
         datasets = self.get_datasets(user)
         full_datasets = [DatasetsAIGet.model_validate(dataset) for dataset in datasets]
         embed_datasets = [DatasetEmbed.model_validate(dataset) for dataset in datasets]
+        stop_time = time.time()
+        logger.info(f"Fetched and prepared {len(datasets)} datasets in {stop_time - start_time} seconds for AI search.")
+        start_time = time.time()
         search_agent = SearchAgent()
-        response = search_agent.converse(f"""Please find all the relevant datasets for the following query: {query}. These are the datasets: {", ".join([dataset.model_dump_json() for dataset in embed_datasets])}. You must add a rank and reason for each dataset in the output schema. Only include datasets that are relevant to the query.
-        The output must be a JSON array matching the following schema: {DatasetEmbedReturn.model_json_schema()}, make sure the output contains a rank and a reason for every selection.
-        If you return a dataset, make sure to include the full dataset information as per the schema, along with the rank and reason fields, each json objects need to have a reason and a rank. Ignore outputs that does not return a rank and reason.
-        """)
+        response = search_agent.converse(f"""Please find all the relevant datasets for the following query: {query}. These are the datasets: {", ".join([dataset.model_dump_json() for dataset in embed_datasets])}. You must add a rank and reason for each dataset in the output schema. Only include datasets that are relevant to the query. Use the following output schema: [{{"id": "UUID", "rank": float, "reason": "string"}}].
+        The output must be the UUID, rank and reason. Limit the output to the top {limit} most relevant datasets, but you can stop earlier if there are not enough relevant datasets.""")
         # Parse response into Sequence[DatasetsAISearch] object
         # drop everything not between [ and ]
         response = response[response.index("[") : response.rindex("]") + 1]
+        stop_time = time.time()
+        logger.info(f"AI search completed in {stop_time - start_time} seconds.")
+        start_time = time.time()
         datasets = json.loads(response)
         result: list[DatasetsAISearch] = []
         for dataset in datasets:
@@ -156,7 +163,8 @@ class DatasetService:
                     }
                 )
             )
-
+        stop_time = time.time()
+        logger.info(f"Processed AI search results in {stop_time - start_time} seconds.")
         return result
 
     def search_datasets(
