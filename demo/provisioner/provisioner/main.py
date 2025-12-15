@@ -12,9 +12,50 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+# get the namespace of the data product
+portal_url = os.environ.get("PROV_DPP_API_URL", "http://localhost:8080")
+template_path = os.environ.get(
+    "PROV_TEMPLATE_PATH",
+    "/Users/pascalknapen/Code/dataminded/data-product-portal/demo/provisioner/templates/dbt",
+)
+tempplate_output_path = os.environ.get(
+    "PROV_TEMPLATE_OUTPUT_PATH",
+    "/Users/pascalknapen/Code/dataminded/data-product-portal/demo/products",
+)
+
+# In-memory cache for data product lifecycles
+lifecycle_cache: Dict[str, Any] = {}
+
 # --- Route Handlers ---
 # These are example functions that will be called when a route matches.
 # They can be moved to different files as the application grows.
+
+
+def get_lifecycles() -> List[Dict[str, Any]]:
+    """
+    Fetches data product lifecycles from the API, with in-memory caching.
+    """
+    global lifecycle_cache
+    if "lifecycles" in lifecycle_cache:
+        logging.info("Returning cached lifecycles")
+        return lifecycle_cache["lifecycles"]
+
+    try:
+        url = f"{portal_url}/api/v2/configuration/data_product_lifecycles"
+        logging.info(f"Fetching lifecycles from {url}")
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        lifecycles = data.get("data_product_life_cycles", [])
+        lifecycle_cache["lifecycles"] = lifecycles
+        logging.info(f"Successfully fetched and cached {len(lifecycles)} lifecycles")
+        return lifecycles
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to get lifecycles: {e}")
+        return []
+    except json.JSONDecodeError:
+        logging.error("Failed to parse lifecycles JSON response")
+        return []
 
 
 def handle_create_data_product(payload: Dict[str, Any]):
@@ -34,9 +75,6 @@ def handle_create_data_product(payload: Dict[str, Any]):
             "message": "Could not find data product id in response",
         }
 
-    # get the namespace of the data product
-    portal_url = os.environ.get("DATA_PRODUCT_PORTAL_URL", "http://localhost:8080")
-
     try:
         response = requests.get(f"{portal_url}/api/data_products/{data_product_id}")
         response.raise_for_status()
@@ -53,11 +91,58 @@ def handle_create_data_product(payload: Dict[str, Any]):
     # call the cookiecutter template
     context = {"project_name": namespace}
     cookiecutter(
-        "/Users/pascalknapen/Code/dataminded/data-product-portal/demo/provisioner/templates/dbt",
+        template_path,
         no_input=True,
         extra_context=context,
-        output_dir="/Users/pascalknapen/Code/dataminded/data-product-portal/demo/products",
+        output_dir=tempplate_output_path,
     )
+
+    # get the lifecycles and find the "Ready" state
+    lifecycles = get_lifecycles()
+    ready_lifecycle = next((lc for lc in lifecycles if lc.get("name") == "Ready"), None)
+
+    if not ready_lifecycle:
+        logging.error("Could not find 'Ready' lifecycle state.")
+        return {
+            "status": "error",
+            "message": "Configuration error: 'Ready' lifecycle not found.",
+        }
+
+    ready_lifecycle_id = ready_lifecycle.get("id")
+
+    # Update the data product to the "Ready" state
+    try:
+        update_payload = {
+            "name": data_product_details.get("name"),
+            "namespace": data_product_details.get("namespace"),
+            "description": data_product_details.get("description"),
+            "type_id": data_product_details.get("type", {}).get("id"),
+            "lifecycle_id": ready_lifecycle_id,
+            "domain_id": data_product_details.get("domain", {}).get("id"),
+            "tag_ids": [tag["id"] for tag in data_product_details.get("tags", [])],
+        }
+
+        update_url = f"{portal_url}/api/data_products/{data_product_id}"
+        logging.info(
+            f"Updating data product to 'Ready' state at {update_url} with payload {update_payload}"
+        )
+
+        update_response = requests.put(update_url, json=update_payload)
+        update_response.raise_for_status()
+
+        logging.info(
+            f"Successfully updated data product {data_product_id} to 'Ready' state."
+        )
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to update data product state: {e}")
+        # Log the response text if available for more detailed error info
+        if e.response is not None:
+            logging.error(f"Response body: {e.response.text}")
+        return {
+            "status": "error",
+            "message": f"Failed to update data product state for id {data_product_id}",
+        }
 
     return {
         "status": "success",
