@@ -24,6 +24,7 @@ from app.core.namespace.validation import (
 )
 from app.database.database import get_db_session
 from app.datasets.curated_queries.router import router as curated_queries_router
+from app.datasets.embeddings.service import DatasetEmbeddingsService
 from app.datasets.query_stats_daily.router import router as query_stats_daily_router
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
@@ -32,7 +33,11 @@ from app.datasets.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
+from app.datasets.schema_response import (
+    DatasetGet,
+    DatasetsGet,
+    DatasetsSearch,
+)
 from app.datasets.service import DatasetService
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -61,6 +66,18 @@ def search_datasets(
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsSearch]:
     return DatasetService(db).search_datasets(query=query, limit=limit, user=user)
+
+
+@router.get("/search-embeddings")
+def search_datasets_embeddings(
+    query: str = Query(min_length=3),
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> Sequence[DatasetsGet]:
+    ids = DatasetEmbeddingsService(db).search(query=query)
+    # results = [DatasetEmbeddingResult.model_validate(ds) for ds in ]
+    # print(results)
+    return DatasetService(db).get_datasets(user, ids)
 
 
 @router.get("/namespace_suggestion")

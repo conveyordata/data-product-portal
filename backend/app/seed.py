@@ -5,6 +5,7 @@ from jinja2 import Template
 
 from app.authorization.service import AuthorizationService
 from app.database.database import get_db_session
+from app.datasets.embeddings.service import DatasetEmbeddingsService
 from app.datasets.service import DatasetService
 
 if TYPE_CHECKING:
@@ -29,3 +30,5 @@ def seed_db(path: str, **template_vars):
     raw_connection.commit()
     AuthorizationService(db).reload_enforcer()
     DatasetService(db).recalculate_search_vector_datasets()
+    datasets = DatasetService(db).get_datasets_for_embedding()
+    DatasetEmbeddingsService(db).insert_embeddings_for_datasets(datasets)

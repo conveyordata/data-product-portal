@@ -5,6 +5,7 @@ from alembic import command
 from alembic.config import Config
 from rich import print
 from rich.console import Console
+from sqlalchemy import create_engine, text
 from sqlalchemy_utils.functions import create_database, database_exists, drop_database
 
 from app.core.helpers.local import add_additional_env_vars
@@ -74,6 +75,10 @@ def init(
             print("Database does not exist, not deleting")
         print("Initializing database")
         create_database(get_url())
+        engine = create_engine(get_url())
+        with engine.connect() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            conn.commit()  # Ensure the transaction is committed
         migrate()
 
         if seed_path:

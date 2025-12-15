@@ -32,12 +32,17 @@ services:
       retries: 10
 
   postgresql:
-    image: postgres:17.6
+    # Change the image to the official pgvector image
+    # Make sure to use the tag corresponding to your Postgres version (pg17)
+    image: pgvector/pgvector:pg17
     container_name: data-product-portal-postgresql
     ports:
       - ${POSTGRES_PORT:-5432}:5432
     env_file:
       - .env.docker
+    # Mount a script to automatically enable the extension on startup
+#    volumes:
+#      - ./scripts/init-pgvector.sql:/docker-entrypoint-initdb.d/init-pgvector.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 2s

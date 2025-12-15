@@ -61,3 +61,28 @@ class DatasetsGet(BaseDatasetGet):
 
 class DatasetsSearch(DatasetsGet):
     rank: float
+
+
+class DatasetEmbeddingResult(ORMModel):
+    id: UUID
+    distance: float
+
+
+class DatasetEmbed(ORMModel):
+    id: UUID
+    name: str
+    description: str
+    about: Optional[str]
+    status: OutputPortStatus
+
+    class DataProductEmbed(ORMModel):
+        name: str
+        description: str
+
+    data_product: DataProductEmbed
+
+    # class TechnicalAssetsEmbed(ORMModel):
+    #     name: str
+    #     description: str
+    #
+    # data_outputs: list[TechnicalAssetsEmbed]

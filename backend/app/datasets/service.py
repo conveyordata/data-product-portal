@@ -1,5 +1,5 @@
 import copy
-from typing import Iterable, Sequence
+from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -41,7 +41,12 @@ from app.datasets.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
+from app.datasets.schema_response import (
+    DatasetEmbed,
+    DatasetGet,
+    DatasetsGet,
+    DatasetsSearch,
+)
 from app.datasets.search_dataset import (
     recalculate_search_vector_dataset_statement,
     recalculate_search_vector_datasets_statement,
@@ -161,22 +166,23 @@ class DatasetService:
         self.db.commit()
         return result.rowcount
 
-    def get_datasets(self, user: UserModel) -> Sequence[DatasetsGet]:
+    def get_datasets(
+        self, user: UserModel, ids: Optional[Sequence[UUID]] = None
+    ) -> Sequence[DatasetsGet]:
         load_options = get_dataset_load_options()
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
             )
         )
+        query = (
+            select(DatasetModel).options(*load_options).order_by(asc(DatasetModel.name))
+        )
+        if ids:
+            query = query.where(DatasetModel.id.in_(ids))
         datasets = [
             dataset
-            for dataset in self.db.scalars(
-                select(DatasetModel)
-                .options(*load_options)
-                .order_by(asc(DatasetModel.name))
-            )
-            .unique()
-            .all()
+            for dataset in self.db.scalars(query).unique().all()
             if self.is_visible_to_user(dataset, user)
         ]
 
@@ -184,6 +190,22 @@ class DatasetService:
             if not dataset.lifecycle:
                 dataset.lifecycle = default_lifecycle
         return datasets
+
+    def get_datasets_for_embedding(self) -> Sequence[DatasetEmbed]:
+        return [
+            DatasetEmbed.model_validate(ds)
+            for ds in (
+                self.db.scalars(
+                    select(DatasetModel)
+                    .options(
+                        selectinload(DatasetModel.data_product).raiseload("*"),
+                    )
+                    .order_by(asc(DatasetModel.name))
+                )
+                .unique()
+                .all()
+            )
+        ]
 
     def get_user_datasets(self, user_id: UUID) -> Sequence[DatasetsGet]:
         return (
