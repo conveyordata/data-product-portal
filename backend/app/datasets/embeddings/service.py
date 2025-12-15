@@ -10,7 +10,6 @@ from app.datasets.schema_response import DatasetEmbed, DatasetEmbeddingResult
 
 # model_id = "cohere.embed-english-v3"
 model_id = "cohere.embed-v4:0"
-max_distance = 0.4
 
 
 class DatasetEmbeddingsService:
@@ -37,12 +36,36 @@ class DatasetEmbeddingsService:
             self.db.add(DatasetEmbedding(id=datasets[idx].id, embeddings=embedding))
         self.db.commit()
 
-    def search(self, query: str) -> Sequence[DatasetEmbeddingResult]:
+    def search(
+        self, query: str, sensitivity: float = 0.04, max_distance: float = 0.75
+    ) -> Sequence[DatasetEmbeddingResult]:
         embeddings = self.generate_embeddings([query])
         distance = DatasetEmbedding.embeddings.cosine_distance(embeddings[0])
         stmt = (
             select(DatasetEmbedding.id, distance.label("distance"))
+            .where(distance <= max_distance)
             .order_by(distance)
-            .limit(10)
+            .limit(30)
         )
-        return self.db.execute(stmt).all()
+        results = self.db.execute(stmt).all()
+
+        # 2. Handle edge cases (empty or single result)
+        if len(results) < 2:
+            return results
+
+        # 3. The Elbow Logic (Adaptive Cutoff)
+        cutoff_index = len(results)  # Default to keeping all if no drop is found
+
+        for i in range(len(results) - 1):
+            current_score = results[i].distance
+            next_score = results[i + 1].distance
+
+            # Calculate the "jump" in distance
+            slope = next_score - current_score
+
+            # If the gap is wider than our sensitivity, stop here.
+            if slope > sensitivity:
+                cutoff_index = i + 1
+                break
+
+        return results[:cutoff_index]
