@@ -34,3 +34,23 @@ class DatasetStatusUpdate(ORMModel):
 
 class DatasetUsageUpdate(ORMModel):
     usage: str
+
+
+class DatasetEmbed(ORMModel):
+    id: UUID
+    name: str
+    description: str
+    about: Optional[str]
+    status: OutputPortStatus
+
+    class DataProductEmbed(ORMModel):
+        name: str
+        description: str
+
+    data_product: DataProductEmbed
+
+    class TechnicalAssetsEmbed(ORMModel):
+        name: str
+        description: str
+
+    # technical_assets: list[DataOutputLink]

@@ -92,3 +92,31 @@ class DatasetEmbed(ORMModel):
     domain: Domain
     data_product: DataProductEmbed
     data_output_links: list[DataOutputLinkEmbed]
+
+
+class DatasetsAIGet(DatasetsGet):
+    pass
+
+
+class DatasetsAISearch(DatasetsSearch):
+    reason: Optional[str]
+
+
+class DatasetEmbedReturn(ORMModel):
+    id: UUID
+    rank: float
+    reason: str
+    name: str
+    description: str
+    about: Optional[str]
+    status: OutputPortStatus
+
+    class DataProductEmbed(ORMModel):
+        name: str
+        description: str
+
+    data_product: DataProductEmbed
+
+    class TechnicalAssetsEmbed(ORMModel):
+        name: str
+        description: str
