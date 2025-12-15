@@ -2,9 +2,11 @@ import json
 from typing import Sequence
 
 import boto3
+from fastembed import TextEmbedding
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.logging import logger
 from app.datasets.embeddings.model import DatasetEmbedding
 from app.datasets.schema_response import DatasetEmbed, DatasetEmbeddingResult
 
@@ -17,7 +19,7 @@ class DatasetEmbeddingsService:
         self.db = db
 
     @staticmethod
-    def generate_embeddings(texts: list[str]) -> list[list[float]]:
+    def generate_embeddings_with_bedrock(texts: list[str]) -> list[list[float]]:
         client = boto3.client("bedrock-runtime")
         response = client.invoke_model(
             modelId=model_id,
@@ -27,6 +29,15 @@ class DatasetEmbeddingsService:
         return model_response["embeddings"]["float"]
         # return model_response["embeddings"]
         # return DatasetEmbed(id=dataset_id)
+
+    @staticmethod
+    def generate_embeddings_local(texts: list[str]) -> list[list[float]]:
+        model = TextEmbedding("BAAI/bge-large-en-v1.5")
+        return [bl.tolist() for bl in model.embed(texts)]
+
+    @staticmethod
+    def generate_embeddings(texts: list[str]) -> list[list[float]]:
+        return DatasetEmbeddingsService.generate_embeddings_local(texts)
 
     def insert_embeddings_for_datasets(self, datasets: Sequence[DatasetEmbed]):
         embeddings = self.generate_embeddings(
@@ -43,10 +54,11 @@ class DatasetEmbeddingsService:
         distance = DatasetEmbedding.embeddings.cosine_distance(embeddings[0])
         stmt = (
             select(DatasetEmbedding.id, distance.label("distance"))
-            .where(distance <= max_distance)
+            # .where(distance <= max_distance)
             .order_by(distance)
             .limit(30)
         )
+        return self.db.execute(stmt).all()
         results = self.db.execute(stmt).all()
 
         # 2. Handle edge cases (empty or single result)
@@ -65,6 +77,7 @@ class DatasetEmbeddingsService:
 
             # If the gap is wider than our sensitivity, stop here.
             if slope > sensitivity:
+                logger.info("Cutoff")
                 cutoff_index = i + 1
                 break
 

@@ -22,7 +22,7 @@ def upgrade() -> None:
     op.execute("""
 CREATE TABLE dataset_embeddings (
     id UUID PRIMARY KEY,
-    embeddings vector(1536)
+    embeddings vector(1024)
 )""")
     # op.create_table(
     #     "dataset_embeddings",
