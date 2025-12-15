@@ -46,7 +46,6 @@ from app.datasets.schema_request import (
     DatasetUsageUpdate,
 )
 from app.datasets.schema_response import (
-    DatasetEmbed,
     DatasetEmbeddingResult,
     DatasetGet,
     DatasetsAIGet,
@@ -141,7 +140,10 @@ class DatasetService:
         start_time = time.time()
         search_agent = SearchAgent()
         response = search_agent.converse(f"""Please find all the relevant datasets for the following query: {query}. These are the datasets: {", ".join([dataset.model_dump_json() for dataset in embed_datasets])}. You must add a rank and reason for each dataset in the output schema. Only include datasets that are relevant to the query. Use the following output schema: [{{"id": "UUID", "rank": float, "reason": "string"}}].
-        The output must be the UUID, rank and reason. Limit the output to the top {limit} most relevant datasets, but you can stop earlier if there are not enough relevant datasets.""")
+        The output must be the UUID, rank and reason. Limit the output to the top {limit} most relevant datasets, but you can stop earlier if there are not enough relevant datasets.
+        Please be very critical to what you return. Restrict too much irrelevant data.
+        Provide level of connectedness from High, Medium, Low in the reason field.
+        For high provide an actual reason. For the rest just provide the level of connectedness. Only return the ones with high level of connectedness. PLEASE DO NOT HALLUCINATE""")
         # Parse response into Sequence[DatasetsAISearch] object
         # drop everything not between [ and ]
         response = response[response.index("[") : response.rindex("]") + 1]

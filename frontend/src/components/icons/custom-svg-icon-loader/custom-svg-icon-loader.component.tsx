@@ -15,6 +15,7 @@ type Props = {
     hasSquareBorder?: boolean;
     color?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'light' | 'dark';
     inverted?: boolean;
+    style?: React.CSSProperties;
 };
 export const CustomSvgIconLoader = ({
     iconComponent,
@@ -23,6 +24,7 @@ export const CustomSvgIconLoader = ({
     size = 'default',
     color = 'primary',
     inverted = false,
+    style,
     ...otherProps
 }: Props) => {
     return (
@@ -33,6 +35,7 @@ export const CustomSvgIconLoader = ({
                 [styles.inverted]: inverted,
                 [styles.squareBorder]: hasSquareBorder,
             })}
+            style={style}
             {...otherProps}
         />
     );

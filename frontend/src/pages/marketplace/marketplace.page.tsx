@@ -52,7 +52,7 @@ export function Marketplace() {
     return (
         <SearchPage
             title={t('Marketplace')}
-            searchPlaceholder={t('Search output ports by name')}
+            searchPlaceholder={t('Ask a business question to find the relevant data')}
             onSearch={handleSearchChange}
             datasetSearchFetching={datasetSearchFetching}
         >

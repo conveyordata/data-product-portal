@@ -5,12 +5,25 @@ import {
     EyeOutlined,
     NumberOutlined,
     PlusOutlined,
+    QuestionCircleOutlined,
     ShareAltOutlined,
     ShoppingCartOutlined,
     TeamOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Descriptions, type DescriptionsProps, Space, Tag, Tooltip, Typography } from 'antd';
+import {
+    Button,
+    Card,
+    Descriptions,
+    type DescriptionsProps,
+    Flex,
+    Popover,
+    Space,
+    Tag,
+    Tooltip,
+    Typography,
+} from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
@@ -38,6 +51,15 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
         } else {
             dispatch(addDatasetToCart({ datasetId }));
         }
+    };
+
+    const [open, setOpen] = useState(false);
+    const hide = () => {
+        setOpen(false);
+    };
+    const handleOpenChange = (newOpen: boolean) => {
+        console.log('clicked');
+        setOpen(newOpen);
     };
 
     function createCardDetails(dataset: DatasetsGetContract[0]) {
@@ -166,11 +188,25 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
             ]}
         >
             <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-                <Link to={createDatasetIdPath(dataset.id)}>
-                    <Typography.Title level={5} style={{ marginBottom: 0 }}>
-                        {dataset.name}
-                    </Typography.Title>
-                </Link>
+                <Flex justify="space-between" align="center">
+                    <Link to={createDatasetIdPath(dataset.id)}>
+                        <Typography.Title level={5} style={{ marginBottom: 0 }}>
+                            {dataset.name}
+                        </Typography.Title>
+                    </Link>
+                    {dataset.reason && (
+                        <Popover
+                            content={<Button onClick={hide}>Close</Button>}
+                            title={dataset.reason}
+                            open={open}
+                            onOpenChange={handleOpenChange}
+                            trigger="click"
+                        >
+                            {/* <Button type="primary">Click me</Button> */}
+                            <QuestionCircleOutlined className={styles.questionTooltip} />
+                        </Popover>
+                    )}
+                </Flex>
                 <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '44px', marginBottom: 0 }}>
                     {dataset.description || 'No description available.'}
                 </Typography.Paragraph>

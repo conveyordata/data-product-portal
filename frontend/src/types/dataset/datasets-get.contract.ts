@@ -6,6 +6,7 @@ export type DatasetsGetContractSingle = Omit<DatasetContract, 'data_product_link
     tags: Omit<TagContract, 'id'>[];
     rolled_up_tags: Omit<TagContract, 'id'>[];
     data_product_name: string;
+    reason?: string;
 };
 
 export type DatasetsGetContract = DatasetsGetContractSingle[];
