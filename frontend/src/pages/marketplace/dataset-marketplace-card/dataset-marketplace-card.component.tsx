@@ -194,6 +194,18 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                             {dataset.name}
                         </Typography.Title>
                     </Link>
+                    {/* Make the color graded based on the ranking */}
+                    {dataset.rank && (
+                        <Typography.Title
+                            level={3}
+                            style={{
+                                marginBottom: 0,
+                                color: dataset.rank > 0.75 ? 'green' : dataset.rank > 0.5 ? 'orange' : 'red',
+                            }}
+                        >
+                            {(dataset.rank * 100).toFixed(0)} %
+                        </Typography.Title>
+                    )}
                     {dataset.reason && (
                         <Popover
                             content={<Button onClick={hide}>Close</Button>}
@@ -202,7 +214,6 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                             onOpenChange={handleOpenChange}
                             trigger="click"
                         >
-                            {/* <Button type="primary">Click me</Button> */}
                             <QuestionCircleOutlined className={styles.questionTooltip} />
                         </Popover>
                     )}
