@@ -31,6 +31,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 COPY --from=build-stage /usr/local /usr/local
 
 COPY ./provisioner ./provisioner
+COPY ./templates ./templates
 COPY ./VERSION ./VERSION
 
 EXPOSE 6060

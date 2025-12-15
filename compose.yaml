@@ -34,6 +34,8 @@ services:
     build: ./demo/provisioner
     env_file:
       - .env.docker
+    volumes:
+      - ${PWD:-.}/demo/products/:/products
     depends_on:
       postgresql-demo:
         condition: service_healthy
