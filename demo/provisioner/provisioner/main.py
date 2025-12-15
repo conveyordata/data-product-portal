@@ -26,6 +26,10 @@ tempplate_output_path = os.environ.get(
 # In-memory cache for data product lifecycles
 lifecycle_cache: Dict[str, Any] = {}
 
+# In-memory cache for platform service configurations
+platform_service_configurations_cache: Dict[str, Any] = {}
+
+
 # --- Route Handlers ---
 # These are example functions that will be called when a route matches.
 # They can be moved to different files as the application grows.
@@ -55,6 +59,37 @@ def get_lifecycles() -> List[Dict[str, Any]]:
         return []
     except json.JSONDecodeError:
         logging.error("Failed to parse lifecycles JSON response")
+        return []
+
+
+def get_platform_service_configurations() -> List[Dict[str, Any]]:
+    """
+    Fetches platform service configurations from the API, with in-memory caching.
+    """
+    global platform_service_configurations_cache
+    if "platform_service_configurations" in platform_service_configurations_cache:
+        logging.info("Returning cached platform service configurations")
+        return platform_service_configurations_cache["platform_service_configurations"]
+
+    try:
+        url = f"{portal_url}/api/v2/configuration/platforms/configs"
+        logging.info(f"Fetching platform service configurations from {url}")
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        configs = data.get("platform_service_configurations", [])
+        platform_service_configurations_cache["platform_service_configurations"] = (
+            configs
+        )
+        logging.info(
+            f"Successfully fetched and cached {len(configs)} platform service configurations"
+        )
+        return configs
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to get platform service configurations: {e}")
+        return []
+    except json.JSONDecodeError:
+        logging.error("Failed to parse platform service configurations JSON response")
         return []
 
 
@@ -142,6 +177,65 @@ def handle_create_data_product(payload: Dict[str, Any]):
         return {
             "status": "error",
             "message": f"Failed to update data product state for id {data_product_id}",
+        }
+
+    # Create the data output port
+    configs = get_platform_service_configurations()
+    postgres_config = next(
+        (c for c in configs if c.get("service", {}).get("name") == "PostgreSQL"), None
+    )
+
+    if not postgres_config:
+        logging.error("Could not find 'PostgreSQL' service configuration.")
+        return {
+            "status": "error",
+            "message": "Configuration error: 'PostgreSQL' service not found.",
+        }
+
+    platform_id = postgres_config.get("platform", {}).get("id")
+    service_id = postgres_config.get("service", {}).get("id")
+    schema_name = data_product_details.get("namespace", "").replace("-", "_")
+
+    output_port_payload = {
+        "name": data_product_details.get("name"),
+        "namespace": data_product_details.get("namespace"),
+        "description": data_product_details.get("description"),
+        "tag_ids": [],
+        "status": "active",
+        "sourceAligned": True,
+        "platform_id": platform_id,
+        "service_id": service_id,
+        "configuration": {
+            "configuration_type": "PostgreSQLDataOutput",
+            "database": "dpp_demo",
+            "schema": schema_name,
+            "entire_schema": True,
+        },
+        "result": f"dpp_demo.{schema_name}.*",
+    }
+
+    try:
+        output_port_url = (
+            f"{portal_url}/api/data_products/{data_product_id}/data_output"
+        )
+        logging.info(
+            f"Creating data output port at {output_port_url} with payload {output_port_payload}"
+        )
+
+        output_port_response = requests.post(output_port_url, json=output_port_payload)
+        output_port_response.raise_for_status()
+
+        logging.info(
+            f"Successfully created data output port for data product {data_product_id}."
+        )
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to create data output port: {e}")
+        if e.response is not None:
+            logging.error(f"Response body: {e.response.text}")
+        return {
+            "status": "error",
+            "message": f"Failed to create data output port for id {data_product_id}",
         }
 
     return {
