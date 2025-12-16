@@ -1,7 +1,6 @@
-import { StarFilled } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Flex, Pagination, Space, Typography } from 'antd';
-import { use, useEffect, useMemo, useState } from 'react';
+import { Flex, Pagination, Switch, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
@@ -20,59 +19,72 @@ export function Marketplace() {
     const { data: datasets = [] } = useGetAllDatasetsQuery();
 
     const [datasetSearchResultStream, setDatasets] = useState<any[]>([]);
-    const [reasoningStream, setReasoning] = useState<string>('');
     const [toggle, setToggle] = useState<boolean>(false);
 
     useEffect(() => {
         if (debouncedSearchTerm?.length < 3) return;
 
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
         const fetchStream = async () => {
-            setDatasets([]);
-            const res = await fetch(`http://localhost:5050/api/datasets/search_ai_stream?query=${debouncedSearchTerm}`);
-            const reader = res.body!.getReader();
-            const decoder = new TextDecoder();
+            try {
+                setDatasets([]);
 
-            let buffer = '';
+                const res = await fetch(
+                    `http://localhost:5050/api/datasets/search_ai_stream?query=${encodeURIComponent(debouncedSearchTerm)}`,
+                    { signal },
+                );
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
+                if (!res.body) return;
 
-                buffer += decoder.decode(value, { stream: true });
+                reader = res.body.getReader();
+                const decoder = new TextDecoder();
 
-                // assuming your backend streams JSONL (one JSON per line)
-                const lines = buffer.split('\n');
-                buffer = lines.pop()!; // keep the last partial line for next iteration
+                let buffer = '';
 
-                for (const line of lines) {
-                    if (!line.trim()) continue;
-                    const obj = JSON.parse(line);
-                    const dataset = JSON.parse(obj.payload);
-                    console.log('dataset:', dataset);
-                    setDatasets((prev) => [...prev, dataset]);
-                    // setReasoning(prev => prev + obj.reasoning); // append reasoning
+                while (!signal.aborted) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() ?? '';
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        const obj = JSON.parse(line);
+                        const dataset = JSON.parse(obj.payload);
+                        setDatasets((prev) => [...prev, dataset]);
+                    }
                 }
-            }
-
-            if (buffer.trim()) {
-                const obj = JSON.parse(buffer);
-                setDatasets((prev) => [...prev, ...obj.datasets]);
-                setReasoning((prev) => prev + obj.reasoning);
+            } catch (err: unknown) {
+                // Abort is expected when a new query starts
+                if (err instanceof DOMException && err.name === 'AbortError') return;
+                throw err;
             }
         };
 
-        fetchStream();
+        void fetchStream();
+
+        return () => {
+            controller.abort();
+            reader?.cancel().catch(() => {
+                // ignore: reader may already be closed
+            });
+        };
     }, [debouncedSearchTerm]);
 
-    const {
-        data: { datasets: datasetSearchResult, reasoning } = { datasets: [], reasoning: '' },
-        isFetching: datasetSearchFetching,
-    } = useSearchDatasetsQuery(
-        {
-            query: debouncedSearchTerm,
-        },
-        { skip: debouncedSearchTerm?.length < 3 },
-    );
+    const { data: { datasets: datasetSearchResult, reasoning } = { datasets: [], reasoning: '' } } =
+        useSearchDatasetsQuery(
+            {
+                query: debouncedSearchTerm,
+            },
+            { skip: debouncedSearchTerm?.length < 3 },
+        );
 
     const finalDatasetResults = useMemo(() => {
         if (toggle) {
@@ -109,18 +121,12 @@ export function Marketplace() {
             searchPlaceholder={t('Ask a business question to find the relevant data')}
             onSearch={handleSearchChange}
             actions={
-                <Button
-                    icon={<StarFilled />}
-                    onClick={() => setToggle(!toggle)}
-                    style={{
-                        background: 'linear-gradient(90deg, #7A5AF8 0%, #D6429A 100%)',
-                        borderColor: 'transparent',
-                        color: '#fff',
-                        fontWeight: 500,
-                    }}
-                >
-                    Deep search
-                </Button>
+                <Switch
+                    checkedChildren="Deep search"
+                    unCheckedChildren="Semantic search"
+                    defaultChecked={false}
+                    onChange={(checked: boolean) => setToggle(checked)}
+                />
             }
             // datasetSearchFetching={datasetSearchFetching}
         >

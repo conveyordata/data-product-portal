@@ -25,7 +25,7 @@ export default function SearchPage({
     return (
         <Flex vertical>
             <Typography.Title level={3}>{title}</Typography.Title>
-            <Row gutter={[16, 24]}>
+            <Row gutter={[16, 24]} align={'middle'}>
                 <Col span={10}>
                     <Input.Search
                         placeholder={searchPlaceholder}
