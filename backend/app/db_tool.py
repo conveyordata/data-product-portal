@@ -78,6 +78,7 @@ def init(
         engine = create_engine(get_url())
         with engine.connect() as conn:
             conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm;"))
             conn.commit()  # Ensure the transaction is committed
         migrate()
 

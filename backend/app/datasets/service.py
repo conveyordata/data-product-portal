@@ -5,7 +5,7 @@ from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import Float, Integer, asc, column, desc, func, select, values
+from sqlalchemy import Float, Integer, asc, column, desc, func, or_, select, values
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -237,22 +237,49 @@ Return JSON only. No commentary. No markdown.
         self, query: str, limit: int, user: UserModel
     ) -> Sequence[DatasetsSearch]:
         load_options = get_dataset_load_options()
+
+        clean_query = query.strip()
+        if not clean_query:
+            return []
+
+        # Split by whitespace and join with ' & ' while adding ':*' to each term
+        prefix_query_str = " & ".join([f"{term}:*" for term in clean_query.split()])
+        # 1. Full Text Rank (Your current method)
+        fts_rank = func.ts_rank_cd(
+            DatasetModel.search_vector,
+            func.to_tsquery(
+                "english", prefix_query_str
+            ),  # Changed from websearch_to_tsquery
+            32,
+        )
+
+        # 2. Fuzzy Similarity Rank (New method using pg_trgm)
+        # We assume 'DatasetModel.title' is the text field you want to fuzzy match against.
+        # similarity returns a float 0-1 (1 being exact match)
+        fuzzy_rank = func.similarity(
+            func.concat(DatasetModel.name, " ", DatasetModel.description), query
+        )
+
         stmt = (
             select(
                 DatasetModel,
-                func.ts_rank_cd(
-                    DatasetModel.search_vector,
-                    func.websearch_to_tsquery("english", query),
-                    32,  # 32 normalizes all results between 0-1
-                ).label("rank"),
+                # Combine ranks: We give FTS higher weight (e.g., 1.0)
+                # and add fuzzy score (e.g., 0.5) to break ties or boost close matches.
+                (fts_rank + fuzzy_rank).label("total_rank"),
             )
             .options(*load_options)
             .where(
-                DatasetModel.search_vector.op("@@")(
-                    func.websearch_to_tsquery("english", query)
+                or_(
+                    # Match if it passes the strict Full Text Search...
+                    DatasetModel.search_vector.op("@@")(
+                        func.to_tsquery("english", prefix_query_str)
+                    ),
+                    # ...OR if the fuzzy similarity is above a certain threshold (e.g., 0.3)
+                    DatasetModel.name.op("%")(query),
                 )
             )
-            .order_by(desc("rank"))
+            # Order by the combined score
+            .order_by(desc("total_rank"))
         )
         results = self.db.execute(stmt).unique().all()
         filtered_datasets: list[DatasetsSearch] = []
@@ -260,7 +287,7 @@ Return JSON only. No commentary. No markdown.
             if len(filtered_datasets) >= limit:
                 return filtered_datasets
             dataset = row[0]
-            rank = row[1]
+            rank = row[1]  # This is now total_rank
             if self.is_visible_to_user(dataset, user):
                 dataset.rank = rank
                 filtered_datasets.append(dataset)

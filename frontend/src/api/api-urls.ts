@@ -73,7 +73,7 @@ export enum ApiUrl {
     EnvPlatformServiceConfigNoId = '/api/envs/configs',
     EnvPlatformServiceConfigId = '/api/envs/platforms/:platformId/services/:serviceId/config',
     Datasets = '/api/datasets',
-    DatasetSearch = '/api/datasets/search-embeddings',
+    DatasetSearch = '/api/datasets/search',
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',
     DatasetSettingValue = '/api/datasets/:datasetId/settings/:settingId',
