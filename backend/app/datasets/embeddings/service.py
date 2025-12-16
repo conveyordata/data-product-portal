@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.logging import logger
 from app.datasets.embeddings.model import DatasetEmbedding
-from app.datasets.schema_response import DatasetEmbed, DatasetEmbeddingResult
+from app.datasets.schema_response import DatasetEmbed2, DatasetEmbeddingResult
 
 # model_id = "cohere.embed-english-v3"
 model_id = "cohere.embed-v4:0"
@@ -32,16 +32,49 @@ class DatasetEmbeddingsService:
 
     @staticmethod
     def generate_embeddings_local(texts: list[str]) -> list[list[float]]:
-        model = TextEmbedding("BAAI/bge-large-en-v1.5")
+        model = TextEmbedding()
         return [bl.tolist() for bl in model.embed(texts)]
 
     @staticmethod
     def generate_embeddings(texts: list[str]) -> list[list[float]]:
         return DatasetEmbeddingsService.generate_embeddings_local(texts)
 
-    def insert_embeddings_for_datasets(self, datasets: Sequence[DatasetEmbed]):
+    def serialize_dataset(self, dataset: DatasetEmbed2) -> str:
+        # 1. Start with the core identity
+        lines = [
+            f"Dataset: {dataset.name}",
+            f"Status: {dataset.status}",
+            f"Domain: {dataset.domain.name}Description: {dataset.description}",
+        ]
+
+        # 2. Add optional context
+        if dataset.about:
+            lines.append(f"About: {dataset.about}")
+
+        # 3. Integrate the Data Product context naturally
+        if dataset.data_product:
+            lines.append(f"Parent Data Product: {dataset.data_product.name}")
+            lines.append(f"Product Context: {dataset.data_product.description}")
+
+        # 4. Flatten the Data Outputs into a concise list
+        if dataset.data_output_links:
+            outputs = []
+            for link in dataset.data_output_links:
+                # We skip 'namespace' usually, unless it's critical for search differentiation
+                output_str = (
+                    f"- {link.data_output.name}: {link.data_output.description}"
+                )
+                outputs.append(output_str)
+
+            lines.append("Contains Data Outputs:")
+            lines.extend(outputs)
+
+        # 5. Join with newlines to create distinct "thoughts" for the model
+        return "\n".join(lines)
+
+    def insert_embeddings_for_datasets(self, datasets: Sequence[DatasetEmbed2]):
         embeddings = self.generate_embeddings(
-            [ds.model_dump_json(exclude={"id"}) for ds in datasets]
+            [self.serialize_dataset(ds) for ds in datasets]
         )
         for idx, embedding in enumerate(embeddings):
             self.db.add(DatasetEmbedding(id=datasets[idx].id, embeddings=embedding))

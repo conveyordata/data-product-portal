@@ -15,4 +15,4 @@ class DatasetEmbedding(Base):
     )
 
     # Vector Column: Dimension of 1024
-    embeddings = mapped_column(Vector(1024))
+    embeddings = mapped_column(Vector(384))

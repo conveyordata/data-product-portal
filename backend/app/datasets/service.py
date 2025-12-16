@@ -47,6 +47,7 @@ from app.datasets.schema_request import (
     DatasetUsageUpdate,
 )
 from app.datasets.schema_response import (
+    DatasetEmbed2,
     DatasetEmbeddingResult,
     DatasetGet,
     DatasetsAIGet,
@@ -377,9 +378,9 @@ Return JSON only. No commentary. No markdown.
                 dataset.lifecycle = default_lifecycle
         return datasets
 
-    def get_datasets_for_embedding(self) -> Sequence[DatasetEmbed]:
+    def get_datasets_for_embedding(self) -> Sequence[DatasetEmbed2]:
         return [
-            DatasetEmbed.model_validate(ds)
+            DatasetEmbed2.model_validate(ds)
             for ds in (
                 self.db.scalars(
                     select(DatasetModel)
@@ -388,6 +389,7 @@ Return JSON only. No commentary. No markdown.
                         selectinload(DatasetModel.data_output_links)
                         .selectinload(DataOutputDatasetAssociationModel.data_output)
                         .raiseload("*"),
+                        selectinload(DatasetModel.domain).raiseload("*"),
                     )
                     .order_by(asc(DatasetModel.name))
                 )

@@ -83,7 +83,7 @@ class DataProductEmbed(ORMModel):
     description: str
 
 
-class DatasetEmbed(ORMModel):
+class DatasetEmbed2(ORMModel):
     id: UUID
     name: str
     description: str

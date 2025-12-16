@@ -137,6 +137,18 @@ class TestDatasetsService:
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.5833333)
 
+    def test_get_datasets_for_embedding(self):
+        settings.SEARCH_INDEXING_DISABLED = False
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        do, ds = self.create_datasets_with_data_output(
+            data_output_name="Patient data", dataset_name="dataset name"
+        )
+        DataOutputService(test_session).link_dataset_to_data_output(
+            id=do.id, dataset_id=ds.id, actor=user
+        )
+        datasets = DatasetService(test_session).get_datasets_for_embedding()
+        assert [ds.domain.name for ds in datasets] == [ds.domain.name]
+
     def test_search_dataset_matching_data_output_name(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
