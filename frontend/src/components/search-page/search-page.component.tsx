@@ -10,7 +10,7 @@ type Props = {
     searchPlaceholder: string;
     createButton?: ReactNode;
     actions?: ReactNode;
-    datasetSearchFetching: boolean;
+    datasetSearchFetching?: boolean;
 };
 
 export default function SearchPage({

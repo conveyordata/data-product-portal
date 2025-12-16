@@ -62,7 +62,7 @@ export function Marketplace() {
             {reasoning && <Typography.Paragraph>{reasoning}</Typography.Paragraph>}
             <Flex wrap="wrap" gap={'small'}>
                 {paginatedOutputPorts.map((dataset) => (
-                    <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
+                    <DatasetMarketplaceCard key={dataset.id} dataset={dataset} query={searchTerm} />
                 ))}
             </Flex>
             {finalDatasetResults.length > pageSize && (

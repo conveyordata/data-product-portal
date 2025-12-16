@@ -9,6 +9,7 @@ import type {
     DatasetUpdateRequest,
     DatasetUpdateResponse,
 } from '@/types/dataset';
+import type { DatasetAIReasoningRequest, DatasetAIReasoningResponse } from '@/types/dataset/dataset-ai-reasoning.ts';
 import type {
     DatasetQueryStatsDailyResponses,
     DatasetQueryStatsGranularity,
@@ -61,6 +62,15 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 method: 'GET',
             }),
             providesTags: (_, __, datasetId) => [{ type: TagTypes.Dataset as const, id: datasetId }],
+        }),
+        getDatasetReasoningForQuery: builder.query<DatasetAIReasoningResponse, DatasetAIReasoningRequest>({
+            query: ({ datasetId, query }) => ({
+                url: buildUrl(ApiUrl.DatasetSearchReasonAI, { datasetId }),
+                method: 'GET',
+                params: {
+                    query,
+                },
+            }),
         }),
         getUserDatasets: builder.query<DatasetsGetContract, string>({
             query: (userId) => ({
@@ -226,4 +236,5 @@ export const {
     useLazyValidateDatasetNamespaceQuery,
     useGetDatasetNamespaceLengthLimitsQuery,
     useGetDatasetQueryStatsDailyQuery,
+    useGetDatasetReasoningForQueryQuery,
 } = datasetsApiSlice;

@@ -35,6 +35,7 @@ from app.datasets.schema_request import (
     DatasetUsageUpdate,
 )
 from app.datasets.schema_response import (
+    DatasetAIReason,
     DatasetEmbeddingResult,
     DatasetGet,
     DatasetsAISearchResult,
@@ -80,6 +81,18 @@ def search_datasets_with_AI(
 ) -> DatasetsAISearchResult:
     return DatasetService(db).search_datasets_with_AI(
         query=query, limit=limit, user=user
+    )
+
+
+@router.get("/{id}/search_reasoning_ai")
+def get_reasoning_for_search_results(
+    id: UUID,
+    query: str = Query(min_length=3),
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> DatasetAIReason:
+    return DatasetAIReason(
+        reason=DatasetService(db).explain_query_match_with_AI(query, id, user)
     )
 
 

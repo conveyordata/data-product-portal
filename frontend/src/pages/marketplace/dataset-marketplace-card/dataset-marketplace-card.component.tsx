@@ -29,6 +29,7 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { DatasetReason } from '@/pages/marketplace/dataset-marketplace-card/dataset-reason.tsx';
 import { useAppDispatch } from '@/store';
 import { addDatasetToCart, removeDatasetFromCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
@@ -38,9 +39,10 @@ import styles from './dataset-marketplace-card.module.scss';
 
 type Props = {
     dataset: DatasetsGetContract[0];
+    query: string;
 };
 
-export function DatasetMarketplaceCard({ dataset }: Props) {
+export function DatasetMarketplaceCard({ dataset, query }: Props) {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
@@ -206,10 +208,20 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                             {(dataset.rank * 100).toFixed(0)} %
                         </Typography.Title>
                     )}
-                    {dataset.reason && (
+                    {dataset.reason ? (
                         <Popover
                             content={<Button onClick={hide}>Close</Button>}
                             title={dataset.reason}
+                            open={open}
+                            onOpenChange={handleOpenChange}
+                            trigger="click"
+                        >
+                            <QuestionCircleOutlined className={styles.questionTooltip} />
+                        </Popover>
+                    ) : (
+                        <Popover
+                            content={<Button onClick={hide}>Close</Button>}
+                            title={<DatasetReason dataset_id={dataset.id} query={query} />}
                             open={open}
                             onOpenChange={handleOpenChange}
                             trigger="click"

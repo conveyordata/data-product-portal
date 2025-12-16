@@ -414,6 +414,59 @@
         }
       }
     },
+    "/api/datasets/{id}/search_reasoning_ai": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Reasoning For Search Results",
+        "operationId": "get_reasoning_for_search_results_api_datasets__id__search_reasoning_ai_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "title": "Query"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetAIReason"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/datasets/search-embeddings": {
       "get": {
         "tags": [
@@ -14170,6 +14223,19 @@
         ],
         "title": "Dataset",
         "deprecated": true
+      },
+      "DatasetAIReason": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "DatasetAIReason"
       },
       "DatasetAboutUpdate": {
         "properties": {
