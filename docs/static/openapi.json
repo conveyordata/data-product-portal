@@ -337,11 +337,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DatasetsSearch"
-                  },
-                  "title": "Response Search Datasets Api Datasets Search Get"
+                  "$ref": "#/components/schemas/DatasetsSearchResult"
                 }
               }
             }
@@ -492,11 +488,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DatasetsGet"
-                  },
-                  "title": "Response Search Datasets Embeddings Api Datasets Search Embeddings Get"
+                  "$ref": "#/components/schemas/DatasetsSearchResult"
                 }
               }
             }
@@ -15205,6 +15197,34 @@
           "rank"
         ],
         "title": "DatasetsSearch"
+      },
+      "DatasetsSearchResult": {
+        "properties": {
+          "datasets": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DatasetsSearch"
+                },
+                {
+                  "$ref": "#/components/schemas/DatasetsGet"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Datasets"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "datasets",
+          "reasoning"
+        ],
+        "title": "DatasetsSearchResult"
       },
       "DecisionStatus": {
         "type": "string",

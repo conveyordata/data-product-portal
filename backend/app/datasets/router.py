@@ -40,7 +40,7 @@ from app.datasets.schema_response import (
     DatasetGet,
     DatasetsAISearchResult,
     DatasetsGet,
-    DatasetsSearch,
+    DatasetsSearchResult,
 )
 from app.datasets.service import DatasetService
 from app.events.enums import EventReferenceEntity, EventType
@@ -68,8 +68,13 @@ def search_datasets(
     limit: int = Query(default=100, ge=1, le=100),
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> Sequence[DatasetsSearch]:
-    return DatasetService(db).search_datasets(query=query, limit=limit, user=user)
+) -> DatasetsSearchResult:
+    return DatasetsSearchResult(
+        datasets=DatasetService(db).search_datasets(
+            query=query, limit=limit, user=user
+        ),
+        reasoning="",
+    )
 
 
 @router.get("/search_ai")
@@ -101,7 +106,7 @@ def search_datasets_embeddings(
     query: str = Query(min_length=3),
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> Sequence[DatasetsGet]:
+) -> DatasetsSearchResult:
     results = [
         DatasetEmbeddingResult.model_validate(ds)
         for ds in DatasetEmbeddingsService(db).search(query=query)
@@ -109,8 +114,13 @@ def search_datasets_embeddings(
     for r in results:
         logger.info(f"Found {r}")
     if not results:
-        return []
-    return DatasetService(db).get_datasets_from_embeddings_search(user, results)
+        return DatasetsSearchResult(
+            datasets=[], reasoning="No datasets found matching the query."
+        )
+    return DatasetsSearchResult(
+        datasets=DatasetService(db).get_datasets_from_embeddings_search(user, results),
+        reasoning="",
+    )
 
 
 @router.get("/namespace_suggestion")

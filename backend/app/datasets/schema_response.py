@@ -129,3 +129,8 @@ class DatasetEmbedReturn(ORMModel):
 class DatasetsAISearchResult(ORMModel):
     datasets: Sequence[DatasetsAISearch]
     reasoning: str
+
+
+class DatasetsSearchResult(ORMModel):
+    datasets: Sequence[DatasetsSearch | DatasetsGet]
+    reasoning: str

@@ -65,7 +65,7 @@ export function Marketplace() {
                     <DatasetMarketplaceCard key={dataset.id} dataset={dataset} query={searchTerm} />
                 ))}
             </Flex>
-            {finalDatasetResults.length > pageSize && (
+            {finalDatasetResults && finalDatasetResults.length > pageSize && (
                 <Flex
                     key="pagination-container"
                     justify={'flex-end'}
