@@ -44,7 +44,8 @@ class DatasetEmbeddingsService:
         lines = [
             f"Dataset: {dataset.name}",
             f"Status: {dataset.status}",
-            f"Domain: {dataset.domain.name}Description: {dataset.description}",
+            f"Domain: {dataset.domain.name}",
+            f"Description: {dataset.description}",
         ]
 
         # 2. Add optional context
