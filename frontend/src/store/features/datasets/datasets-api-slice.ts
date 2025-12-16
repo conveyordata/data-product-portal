@@ -47,11 +47,11 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 params: query,
                 method: 'GET',
             }),
-            providesTags: (result = []) =>
-                result
+            providesTags: (result) =>
+                result && result.datasets
                     ? [
                           { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
-                          ...result.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
+                          ...result.datasets.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
                       ]
                     : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
         }),

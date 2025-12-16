@@ -50,6 +50,7 @@ from app.datasets.schema_response import (
     DatasetGet,
     DatasetsAIGet,
     DatasetsAISearch,
+    DatasetsAISearchResult,
     DatasetsGet,
     DatasetsSearch,
 )
@@ -124,7 +125,7 @@ class DatasetService:
 
     def search_datasets_with_AI(
         self, query: str, limit: int, user: UserModel
-    ) -> Sequence[DatasetsAISearch]:
+    ) -> DatasetsAISearchResult:
         # Currently, this method just calls the regular search_datasets method.
         # In the future, this can be extended to include AI-based search enhancements.
         # Profile the time taken for the AI search
@@ -168,6 +169,8 @@ Output constraints:
 - Return at most {limit} datasets
 - You may return fewer or an empty list
 - Output MUST be valid JSON
+- Output MUST have a single overlapping reasoning, that does not repeat the user query.
+- Output MUST be a descending order list by rank
 - Output MUST match this exact schema:
 
 [
@@ -179,9 +182,13 @@ Output constraints:
 ]
 
 Return JSON only. No commentary. No markdown.
+Before the JSON list, show a generic reply or summary of why you have added these datasets.
+Keep this reasoning brief (1-2 sentences). Don't repeat the query in the reasoning. Only add your reasoning.
 """)
         # Parse response into Sequence[DatasetsAISearch] object
         # drop everything not between [ and ]
+        reasoning = response[: response.index("[")].strip()
+        reasoning = reasoning.strip("```json").strip("```").strip()
         response = response[response.index("[") : response.rindex("]") + 1]
         stop_time = time.time()
         logger.info(f"AI search completed in {stop_time - start_time} seconds.")
@@ -206,7 +213,7 @@ Return JSON only. No commentary. No markdown.
             )
         stop_time = time.time()
         logger.info(f"Processed AI search results in {stop_time - start_time} seconds.")
-        return result
+        return DatasetsAISearchResult(datasets=result, reasoning=reasoning)
 
     def search_datasets(
         self, query: str, limit: int, user: UserModel

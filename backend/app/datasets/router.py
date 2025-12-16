@@ -37,7 +37,7 @@ from app.datasets.schema_request import (
 from app.datasets.schema_response import (
     DatasetEmbeddingResult,
     DatasetGet,
-    DatasetsAISearch,
+    DatasetsAISearchResult,
     DatasetsGet,
     DatasetsSearch,
 )
@@ -77,7 +77,7 @@ def search_datasets_with_AI(
     limit: int = Query(default=100, ge=1, le=100),
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> Sequence[DatasetsAISearch]:
+) -> DatasetsAISearchResult:
     return DatasetService(db).search_datasets_with_AI(
         query=query, limit=limit, user=user
     )

@@ -396,11 +396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DatasetsAISearch"
-                  },
-                  "title": "Response Search Datasets With Ai Api Datasets Search Ai Get"
+                  "$ref": "#/components/schemas/DatasetsAISearchResult"
                 }
               }
             }
@@ -14909,6 +14905,27 @@
           "reason"
         ],
         "title": "DatasetsAISearch"
+      },
+      "DatasetsAISearchResult": {
+        "properties": {
+          "datasets": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetsAISearch"
+            },
+            "type": "array",
+            "title": "Datasets"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "datasets",
+          "reasoning"
+        ],
+        "title": "DatasetsAISearchResult"
       },
       "DatasetsGet": {
         "properties": {

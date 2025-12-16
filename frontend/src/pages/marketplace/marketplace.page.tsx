@@ -1,5 +1,5 @@
 import { usePostHog } from '@posthog/react';
-import { Flex, Pagination } from 'antd';
+import { Flex, Pagination, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
@@ -18,7 +18,10 @@ export function Marketplace() {
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const { data: datasets = [] } = useGetAllDatasetsQuery();
 
-    const { data: datasetSearchResult = [], isFetching: datasetSearchFetching } = useSearchDatasetsQuery(
+    const {
+        data: { datasets: datasetSearchResult, reasoning } = { datasets: [], reasoning: '' },
+        isFetching: datasetSearchFetching,
+    } = useSearchDatasetsQuery(
         {
             query: debouncedSearchTerm,
         },
@@ -56,6 +59,7 @@ export function Marketplace() {
             onSearch={handleSearchChange}
             datasetSearchFetching={datasetSearchFetching}
         >
+            {reasoning && <Typography.Paragraph>{reasoning}</Typography.Paragraph>}
             <Flex wrap="wrap" gap={'small'}>
                 {paginatedOutputPorts.map((dataset) => (
                     <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />

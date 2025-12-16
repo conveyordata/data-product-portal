@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
@@ -120,3 +120,8 @@ class DatasetEmbedReturn(ORMModel):
     class TechnicalAssetsEmbed(ORMModel):
         name: str
         description: str
+
+
+class DatasetsAISearchResult(ORMModel):
+    datasets: Sequence[DatasetsAISearch]
+    reasoning: str
