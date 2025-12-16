@@ -1,5 +1,6 @@
 import { usePostHog } from '@posthog/react';
 import { Flex, Pagination } from 'antd';
+import { DeepChat } from 'deep-chat-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
@@ -56,6 +57,42 @@ export function Marketplace() {
             onSearch={handleSearchChange}
             datasetSearchFetching={datasetSearchFetching}
         >
+            <DeepChat
+                connect={{
+                    url: 'http://localhost:5050/api/chat',
+                    method: 'POST',
+                }}
+                requestInterceptor={(details) => {
+                    // Optional: You can inspect details.body here to see it sends the full array
+                    console.log('Sending history:', details.body.messages);
+                    return details;
+                }}
+                responseInterceptor={(response) => {
+                    let finalText = response.response;
+
+                    // If there were thoughts/steps, prepend them nicely
+                    if (response.thoughts && response.thoughts.length > 0) {
+                        const steps = response.thoughts.map((x: string) => `Requesting tool: ${x}`).join('\n');
+
+                        // Add a "Thought block" above the answer
+                        finalText = `*${steps}*\n\n---\n\n${finalText}`;
+                    }
+
+                    // Handle Sources (Side Panel)
+                    // if (response.tool_data) setSources(response.tool_data);
+
+                    return { text: finalText };
+                }}
+                // 4. visual customization
+                style={{
+                    borderRadius: '10px',
+                    width: '100%',
+                    height: '500px',
+                    border: '1px solid #ccc',
+                }}
+                introMessage={{ text: 'Hello! Ask me anything.' }}
+                textInput={{ placeholder: { text: 'Type your query here...' } }}
+            />
             <Flex wrap="wrap" gap={'small'}>
                 {paginatedOutputPorts.map((dataset) => (
                     <DatasetMarketplaceCard key={dataset.id} dataset={dataset} query={searchTerm} />

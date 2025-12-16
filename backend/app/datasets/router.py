@@ -100,7 +100,6 @@ def get_reasoning_for_search_results(
 def search_datasets_embeddings(
     query: str = Query(min_length=3),
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
     results = [
         DatasetEmbeddingResult.model_validate(ds)
@@ -110,7 +109,7 @@ def search_datasets_embeddings(
         logger.info(f"Found {r}")
     if not results:
         return []
-    return DatasetService(db).get_datasets_from_embeddings_search(user, results)
+    return DatasetService(db).get_datasets_from_embeddings_search(results)
 
 
 @router.get("/namespace_suggestion")

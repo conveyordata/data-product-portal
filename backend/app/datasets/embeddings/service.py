@@ -89,7 +89,7 @@ class DatasetEmbeddingsService:
             select(DatasetEmbedding.id, distance.label("distance"))
             # .where(distance <= max_distance)
             .order_by(distance)
-            .limit(30)
+            .limit(10)
         )
         return self.db.execute(stmt).all()
         results = self.db.execute(stmt).all()

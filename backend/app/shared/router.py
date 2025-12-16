@@ -3,6 +3,7 @@ from fastapi import APIRouter, Security
 from app.authorization.role_assignments.router import router as role_assignment
 from app.authorization.roles.router import router as role
 from app.authorization.router import router as authorization
+from app.chat.router import router as chat
 from app.configuration.data_product_lifecycles.router import (
     router as data_product_lifecycle,
 )
@@ -34,6 +35,7 @@ router = (
 )
 
 router.include_router(authorization)
+router.include_router(chat)
 router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)

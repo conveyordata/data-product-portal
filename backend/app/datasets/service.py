@@ -337,7 +337,7 @@ Return JSON only. No commentary. No markdown.
 
     def get_datasets_from_embeddings_search(
         self,
-        user: UserModel,
+        # user: UserModel,
         search_results: Sequence[DatasetEmbeddingResult],
     ) -> Sequence[DatasetsGet]:
         load_options = get_dataset_load_options()
@@ -367,11 +367,7 @@ Return JSON only. No commentary. No markdown.
             .join(search_cte, DatasetModel.id == search_cte.c.id)
             .order_by(asc(search_cte.c.distance))
         )
-        datasets = [
-            dataset
-            for dataset in self.db.scalars(query).unique().all()
-            if self.is_visible_to_user(dataset, user)
-        ]
+        datasets = list(self.db.scalars(query).unique().all())
 
         for dataset in datasets:
             if not dataset.lifecycle:
