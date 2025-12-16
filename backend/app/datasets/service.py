@@ -240,6 +240,129 @@ Keep this reasoning brief (1-2 sentences). Don't repeat the query in the reasoni
         logger.info(f"Processed AI search results in {stop_time - start_time} seconds.")
         return DatasetsAISearchResult(datasets=result, reasoning=reasoning)
 
+    def search_datasets_with_AI_stream(
+        self, query: str, limit: int, user: UserModel
+    ) -> DatasetsAISearchResult:
+        # Currently, this method just calls the regular search_datasets method.
+        # In the future, this can be extended to include AI-based search enhancements.
+        # Profile the time taken for the AI search
+        start_time = time.time()
+
+        datasets = self.get_datasets(user)
+        full_datasets = [DatasetsAIGet.model_validate(dataset) for dataset in datasets]
+        embed_datasets = [DatasetEmbed.model_validate(dataset) for dataset in datasets]
+        stop_time = time.time()
+        logger.info(
+            f"Fetched and prepared {len(datasets)} datasets in {stop_time - start_time} seconds for AI search."
+        )
+        start_time = time.time()
+        search_agent = SearchAgent()
+        response = search_agent.converse_stream(f"""
+You are a strict dataset relevance filter.
+
+Task:
+Select the most relevant datasets for the user query below.
+
+User query:
+"{query}"
+
+Candidate datasets (JSON, authoritative, do not invent new ones):
+{json.dumps([d.model_dump_json() for d in embed_datasets], indent=2)}
+
+Rules:
+- Only select datasets that are HIGHLY relevant to the query.
+- If a dataset is not clearly relevant, DO NOT include it.
+- NEVER hallucinate datasets or IDs.
+- NEVER modify dataset IDs.
+- Base your decision only on the provided dataset content.
+
+For each selected dataset, assign:
+- rank: a float between 0 and 1 indicating relevance confidence
+- reason:
+  - If relevance is HIGH → provide a concrete explanation
+  - Otherwise → do NOT include the dataset at all
+
+Output constraints:
+- Return at most {limit} datasets
+- You may return fewer or an empty list
+- Output MUST be valid JSON
+- Output MUST be a descending order list by rank
+- Return ONE dataset per line as JSON.
+- Do NOT wrap results in an array.
+- Each line must be valid JSON.
+
+Return JSON only. No commentary. No markdown.
+IMPORTANT:
+- Output ONE dataset per line
+- Each line MUST be valid JSON
+- DO NOT wrap results in an array
+- DO NOT use markdown
+- DO NOT add explanations
+- Emit nothing except JSON lines
+- DO NOT add any extra text
+
+e.g.
+{{"id": "123e4567-e89b-12d3-a456-426614174000", "rank": 0.95, "reason": "This dataset is highly relevant because..."}}
+""")
+        buffer = ""
+
+        for event in response:
+            if "contentBlockDelta" in event:
+                delta = event["contentBlockDelta"]
+
+                if "text" in delta["delta"]:
+                    text = delta["delta"]["text"]
+                    buffer += text
+
+                    # Process complete lines
+                    # Process anything between { and }
+                    while "}" in buffer:
+                        chunk, buffer = buffer.split("}", 1)
+                        chunk += "}"
+
+                        chunk = chunk.lstrip("```json\n")
+                        try:
+                            dataset = json.loads(chunk)
+                        except json.JSONDecodeError:
+                            buffer = chunk + buffer
+                            break
+
+                        # try:
+                        #     dataset = json.loads(line)
+                        # except json.JSONDecodeError:
+                        #     continue  # wait for more tokens
+                        matched = [
+                            d for d in full_datasets if d.id == UUID(dataset["id"])
+                        ]
+
+                        if len(matched) != 1:
+                            logger.warning(f"Dataset {dataset['id']} not found")
+                            continue
+
+                        base = matched[0].model_dump()
+
+                        result = DatasetsAISearch.model_validate(
+                            {
+                                **base,
+                                "rank": dataset["rank"],
+                                "reason": dataset["reason"],
+                            }
+                        )
+
+                        # 🔥 stream immediately
+                        yield (
+                            json.dumps(
+                                {
+                                    "type": "dataset",
+                                    "payload": result.model_dump_json(),
+                                }
+                            )
+                            + "\n"
+                        )
+
+            elif "messageStop" in event:
+                break
+
     def search_datasets(
         self, query: str, limit: int, user: UserModel
     ) -> Sequence[DatasetsSearch]:

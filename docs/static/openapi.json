@@ -410,6 +410,61 @@
         }
       }
     },
+    "/api/datasets/search_ai_stream": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Search Datasets With Ai Stream",
+        "operationId": "search_datasets_with_AI_stream_api_datasets_search_ai_stream_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "title": "Query"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetsAISearchResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/datasets/{id}/search_reasoning_ai": {
       "get": {
         "tags": [

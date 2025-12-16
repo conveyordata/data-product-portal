@@ -2,6 +2,7 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -86,6 +87,21 @@ def search_datasets_with_AI(
 ) -> DatasetsAISearchResult:
     return DatasetService(db).search_datasets_with_AI(
         query=query, limit=limit, user=user
+    )
+
+
+@router.get("/search_ai_stream")
+def search_datasets_with_AI_stream(
+    query: str = Query(min_length=3),
+    limit: int = Query(default=100, ge=1, le=100),
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> DatasetsAISearchResult:
+    return StreamingResponse(
+        DatasetService(db).search_datasets_with_AI_stream(
+            query=query, limit=limit, user=user
+        ),
+        media_type="application/x-ndjson",
     )
 
 
