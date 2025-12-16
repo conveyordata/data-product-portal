@@ -143,112 +143,125 @@ export function DatasetMarketplaceCard({ dataset, query }: Props) {
 
     if (!dataset) return <LoadingSpinner />;
     return (
-        <Card
-            key={dataset.id}
-            styles={{ body: { padding: 12 } }}
-            className={styles.marketplaceCardContainer}
-            actions={[
-                <Tooltip key="details" title={t('View details')}>
-                    <Link to={createDatasetIdPath(dataset.id)}>
-                        <Button type="text" icon={<UnorderedListOutlined />} />
-                    </Link>
-                </Tooltip>,
-                <Tooltip
-                    key="details"
-                    title={cartDatasetIds.includes(dataset.id) ? t('Remove from cart') : t('Add to cart')}
-                >
-                    <Button
-                        key="add to cart"
-                        type={'text'}
-                        size={'middle'}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            toggleCart(dataset.id);
-                        }}
+        <Tooltip title={t('Found what you are looking for, use the add to cart button below!')}>
+            <Card
+                key={dataset.id}
+                styles={{ body: { padding: 12 } }}
+                className={styles.marketplaceCardContainer}
+                actions={[
+                    <Tooltip key="details" title={t('View details')}>
+                        <Link to={createDatasetIdPath(dataset.id)}>
+                            <Button type="text" icon={<UnorderedListOutlined />} />
+                        </Link>
+                    </Tooltip>,
+                    <Tooltip
+                        key="details"
+                        title={cartDatasetIds.includes(dataset.id) ? t('Remove from cart') : t('Add to cart')}
                     >
-                        {cartDatasetIds.includes(dataset.id) ? (
-                            <>
-                                <CustomSvgIconLoader
-                                    size={'x-small'}
-                                    iconComponent={ShoppingCartOutlined}
-                                    color={'success'}
-                                />
-                                <CustomSvgIconLoader size={'x-small'} iconComponent={CheckOutlined} color={'success'} />
-                            </>
-                        ) : (
-                            <>
-                                <CustomSvgIconLoader
-                                    size={'x-small'}
-                                    iconComponent={ShoppingCartOutlined}
-                                    color={'primary'}
-                                />
-                                <CustomSvgIconLoader size={'x-small'} iconComponent={PlusOutlined} color={'primary'} />
-                            </>
-                        )}
-                    </Button>
-                </Tooltip>,
-            ]}
-        >
-            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-                <Flex justify="space-between" align="center">
-                    <Link to={createDatasetIdPath(dataset.id)}>
-                        <Typography.Title level={5} style={{ marginBottom: 0 }}>
-                            {dataset.name}
-                        </Typography.Title>
-                    </Link>
-                    {/* Make the color graded based on the ranking */}
-                    {dataset.rank && (
-                        <Typography.Title
-                            level={3}
-                            style={{
-                                marginBottom: 0,
-                                color: dataset.rank > 0.75 ? 'green' : dataset.rank > 0.5 ? 'orange' : 'red',
+                        <Button
+                            key="add to cart"
+                            type={'text'}
+                            size={'middle'}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleCart(dataset.id);
                             }}
                         >
-                            {(dataset.rank * 100).toFixed(0)} %
-                        </Typography.Title>
-                    )}
-                    {dataset.reason ? (
-                        <Popover
-                            content={<Button onClick={hide}>Close</Button>}
-                            title={dataset.reason}
-                            open={open}
-                            onOpenChange={handleOpenChange}
-                            trigger="click"
-                        >
-                            <QuestionCircleOutlined className={styles.questionTooltip} />
-                        </Popover>
-                    ) : (
-                        <Popover
-                            content={<Button onClick={hide}>Close</Button>}
-                            title={<DatasetReason dataset_id={dataset.id} query={query} />}
-                            open={open}
-                            onOpenChange={handleOpenChange}
-                            trigger="click"
-                        >
-                            <QuestionCircleOutlined className={styles.questionTooltip} />
-                        </Popover>
-                    )}
-                </Flex>
-                <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '44px', marginBottom: 0 }}>
-                    {dataset.description || 'No description available.'}
-                </Typography.Paragraph>
-                <div style={{ height: '22px' }}>
-                    {dataset.tags?.map((tag) => (
-                        <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.value}>
-                            {tag.value}
-                        </Tag>
-                    ))}
-                </div>
+                            {cartDatasetIds.includes(dataset.id) ? (
+                                <>
+                                    <CustomSvgIconLoader
+                                        size={'x-small'}
+                                        iconComponent={ShoppingCartOutlined}
+                                        color={'success'}
+                                    />
+                                    <CustomSvgIconLoader
+                                        size={'x-small'}
+                                        iconComponent={CheckOutlined}
+                                        color={'success'}
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <CustomSvgIconLoader
+                                        size={'x-small'}
+                                        iconComponent={ShoppingCartOutlined}
+                                        color={'primary'}
+                                    />
+                                    <CustomSvgIconLoader
+                                        size={'x-small'}
+                                        iconComponent={PlusOutlined}
+                                        color={'primary'}
+                                    />
+                                </>
+                            )}
+                        </Button>
+                    </Tooltip>,
+                ]}
+            >
+                <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                    <Flex justify="space-between" align="center">
+                        <Link to={createDatasetIdPath(dataset.id)}>
+                            <Typography.Title level={5} style={{ marginBottom: 0 }}>
+                                {dataset.name}
+                            </Typography.Title>
+                        </Link>
+                        {/* Make the color graded based on the ranking */}
+                        {dataset.rank && (
+                            <Typography.Title
+                                level={3}
+                                style={{
+                                    marginBottom: 0,
+                                    color: dataset.rank > 0.75 ? 'green' : dataset.rank > 0.5 ? 'orange' : 'red',
+                                }}
+                            >
+                                {(dataset.rank * 100).toFixed(0)} %
+                            </Typography.Title>
+                        )}
+                        {dataset.reason ? (
+                            <Popover
+                                content={<Button onClick={hide}>Close</Button>}
+                                title={dataset.reason}
+                                open={open}
+                                onOpenChange={handleOpenChange}
+                                trigger="click"
+                            >
+                                <QuestionCircleOutlined className={styles.questionTooltip} />
+                            </Popover>
+                        ) : (
+                            <Popover
+                                content={<Button onClick={hide}>Close</Button>}
+                                title={<DatasetReason dataset_id={dataset.id} query={query} />}
+                                open={open}
+                                onOpenChange={handleOpenChange}
+                                trigger="click"
+                            >
+                                <QuestionCircleOutlined className={styles.questionTooltip} />
+                            </Popover>
+                        )}
+                    </Flex>
+                    <Typography.Paragraph
+                        ellipsis={{ rows: 2, tooltip: true }}
+                        style={{ height: '44px', marginBottom: 0 }}
+                    >
+                        {dataset.description || 'No description available.'}
+                    </Typography.Paragraph>
+                    <div style={{ height: '22px' }}>
+                        {dataset.tags?.map((tag) => (
+                            <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.value}>
+                                {tag.value}
+                            </Tag>
+                        ))}
+                    </div>
 
-                <Descriptions
-                    layout="vertical"
-                    size={'small'}
-                    colon={false}
-                    column={2}
-                    items={createCardDetails(dataset)}
-                />
-            </Space>
-        </Card>
+                    <Descriptions
+                        layout="vertical"
+                        size={'small'}
+                        colon={false}
+                        column={2}
+                        items={createCardDetails(dataset)}
+                    />
+                </Space>
+            </Card>
+        </Tooltip>
     );
 }

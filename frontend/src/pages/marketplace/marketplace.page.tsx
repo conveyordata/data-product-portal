@@ -1,5 +1,5 @@
 import { usePostHog } from '@posthog/react';
-import { Flex, Pagination } from 'antd';
+import { Alert, Button, Flex, Pagination, Popover, Space, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
@@ -55,36 +55,50 @@ export function Marketplace() {
             searchPlaceholder={t('Ask a business question to find the relevant data')}
             onSearch={handleSearchChange}
             datasetSearchFetching={datasetSearchFetching}
+            actions={
+                <Popover title={'Try this alternative query'} content={'How is our ROI'}>
+                    <Button type={'primary'} disabled={debouncedSearchTerm === ''}>
+                        Can't find what you're looking for?
+                    </Button>
+                </Popover>
+            }
         >
-            <Flex wrap="wrap" gap={'small'}>
-                {paginatedOutputPorts.map((dataset) => (
-                    <DatasetMarketplaceCard key={dataset.id} dataset={dataset} query={searchTerm} />
-                ))}
-            </Flex>
-            {finalDatasetResults.length > pageSize && (
-                <Flex
-                    key="pagination-container"
-                    justify={'flex-end'}
-                    style={{
-                        marginTop: 12,
-                    }}
-                >
-                    <Pagination
-                        current={currentPage}
-                        pageSize={pageSize}
-                        total={finalDatasetResults.length}
-                        onChange={handlePageChange}
-                        showSizeChanger={false} // Disable page size changer
-                        showTotal={(total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
-                                range0: range[0],
-                                range1: range[1],
-                                total: total,
-                            })
-                        }
-                    />
+            <Flex gap={'small'} vertical>
+                {/*<Alert*/}
+                {/*    closable*/}
+                {/*    description={t("If you found what your were looking for add it to your cart!")}*/}
+                {/*    type="info"*/}
+                {/*/>*/}
+                <Flex wrap="wrap" gap={'small'}>
+                    {paginatedOutputPorts.map((dataset) => (
+                        <DatasetMarketplaceCard key={dataset.id} dataset={dataset} query={searchTerm} />
+                    ))}
                 </Flex>
-            )}
+                {finalDatasetResults.length > pageSize && (
+                    <Flex
+                        key="pagination-container"
+                        justify={'flex-end'}
+                        style={{
+                            marginTop: 12,
+                        }}
+                    >
+                        <Pagination
+                            current={currentPage}
+                            pageSize={pageSize}
+                            total={finalDatasetResults.length}
+                            onChange={handlePageChange}
+                            showSizeChanger={false} // Disable page size changer
+                            showTotal={(total, range) =>
+                                t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
+                                    range0: range[0],
+                                    range1: range[1],
+                                    total: total,
+                                })
+                            }
+                        />
+                    </Flex>
+                )}
+            </Flex>
         </SearchPage>
     );
 }
