@@ -6,7 +6,7 @@ pushd backend
   set -a
   source .test.env
   set +a
-  poetry run python -m app.open_api_export ../docs/static/openapi.json
+  uv run python -m app.open_api_export ../docs/static/openapi.json
 popd
 
 if [[ -n "${CI}" ]]; then

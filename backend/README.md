@@ -12,9 +12,9 @@
 
 - Install [Python 3.13](https://www.python.org/downloads) on your machine.
 
-### Poetry
+### UV
 
-- Install [Poetry](https://python-poetry.org/docs/#installation) on your machine.
+- Install [uv](https://docs.astral.sh/uv/getting-started/installation/) on your machine.
 - Make sure it is available on your PATH.
 
 ### Configuration (.env file)
@@ -40,11 +40,11 @@ HOST=http://localhost:3000/
 
 ### Installation
 
-In order to install all project dependencies using poetry,
+In order to install all project dependencies using uv,
 open the 'backend' directory as a workspace in your favorite IDE and execute the command below.
 
 ```sh
-poetry install
+uv sync
 ```
 
 ### Starting required services
@@ -60,7 +60,7 @@ docker compose up -d postgresql mailhog
 In order to initialize your database with the correct structure, execute the command below from the backend folder.
 
 ```sh
-poetry run python -m app.db_tool init "sample_data.sql"
+uv run python -m app.db_tool init "sample_data.sql"
 ```
 
 This populates the database with sample data from [sample_data.sql](sample_data.sql) .
@@ -72,7 +72,7 @@ the [sample_data.sql](sample_data.sql) file and reference that one in the comman
 In order to run the project in development mode, after initializing the database, execute the command below.
 
 ```sh
-poetry run python -m app.local_startup
+uv run python -m app.local_startup
 ```
 
 :tada:
@@ -84,16 +84,6 @@ The MCP server can work (locally or remotely) via Claude Desktop.
 Install Claude Desktop and run `poetry run fastmcp install claude-desktop app/remote_proxy.py -e $(pwd) --env-file ./.env --env DISABLED_AWS='true'` in the `backend` folder. Make sure the `HOST` in your .env file is either referring to your localhost backend or the remote deployed backend.
 
 ## Development utilities
-
-### Including the virtual environment in your IDE
-
-- Execute the command below to display the location of your virtual environment.
-
-```sh
-poetry env info --path
-```
-
-- You can use this location to pass in your IDE to be able to run the source code from your IDE and to resolve all imports.
 
 ### Data
 
@@ -108,7 +98,7 @@ If you want to completely destroy and recreate the database when performing the 
 you should specify the '--force' option.
 
 ```sh
-python -m app.db_tool init --force "sample_data.sql"
+uv run python -m app.db_tool init --force "sample_data.sql"
 ```
 
 ### Database migrations
@@ -120,7 +110,7 @@ This comes down to running `alembic revision -m "{your message}"` in the `/backe
 In order to apply this migration using the database CLI tool you need to execute the command below.
 
 ```sh
-python -m app.db_tool migrate
+uv run python -m app.db_tool migrate
 ```
 
 ## Testing
@@ -130,9 +120,8 @@ python -m app.db_tool migrate
 To run the integration tests, execute the following commands:
 
 ```sh
-poetry install --with test
 docker compose --file test-compose.yaml up
-poetry run pytest -v
+uv run pytest -v
 ```
 
 It will install test dependencies, boot up the test database and run the tests.
