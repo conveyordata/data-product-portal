@@ -3,7 +3,7 @@
 # Extract all router files and check their coverage
 cd ./../backend || exit
 
-if poetry run python -c "
+if uv run python -c "
 import xml.etree.ElementTree as ET
 
 tree = ET.parse('coverage.xml')

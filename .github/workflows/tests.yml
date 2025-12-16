@@ -4,8 +4,6 @@ on:
     branches: ['*']
 permissions:
   contents: read
-env:
-  POETRY_VERSION: '2.2.1'
 
 jobs:
   environment:
@@ -49,26 +47,17 @@ jobs:
       - name: Checkout github repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Install Poetry
-        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
-        with:
-          version: ${{ env.POETRY_VERSION }}
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      - name: Setup Python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
-        with:
-          cache: 'poetry'
-          cache-dependency-path: 'backend/poetry.lock'
-          python-version-file: 'backend/.python-version'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Install dependencies
         working-directory: ./backend
-        run: poetry install --no-interaction --with test
+        run: uv sync
 
       - name: Run the automated tests
         working-directory: ./backend
         id: run-test
-        run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
+        run: uv run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
         run: ./check_coverage.sh
@@ -102,21 +91,12 @@ jobs:
     - name: Git checkout
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-    - name: Install Poetry
-      uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
-      with:
-        version: ${{ env.POETRY_VERSION }}
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    - name: Setup Python
-      uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
-      with:
-        cache: 'poetry'
-        cache-dependency-path: 'backend/poetry.lock'
-        python-version-file: 'backend/.python-version'
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+
     - name: Install Python dependencies
       working-directory: backend
-      run: poetry install --no-interaction
+      run: uv sync
 
     - name: Setup Node.js
       uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
