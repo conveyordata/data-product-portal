@@ -29,6 +29,7 @@ from tests.factories import (
     TagFactory,
     UserFactory,
 )
+from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
 
 OLD_ENDPOINT = "/api/data_products"
 ENDPOINT = "/api/v2/data_products"
@@ -235,6 +236,20 @@ class TestDataProductsRouter:
         assert response.status_code == 200, f"Failed with response: {response.text}"
         assert len(response.json()) == 1
         assert response.json()["technical_assets"][0]["id"] == str(data_output.id)
+
+    def test_get_data_outputs_linked_with_output_port(self, client):
+        data_product = DataProductFactory()
+        output_port = DatasetFactory(data_product=data_product)
+        data_output = DataOutputFactory(owner=data_product)
+        DataOutputDatasetAssociationFactory(
+            dataset=output_port,
+            data_output=data_output,
+            status="approved",
+        )
+        response = self.get_data_outputs(client, data_product.id)
+        assert response.status_code == 200, f"Failed with response: {response.text}"
+        assert len(response.json()) == 1
+        assert response.json()[0]["id"] == str(data_output.id)
 
     def test_update_data_product_no_member(self, payload, client):
         data_product = DataProductFactory()

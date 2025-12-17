@@ -502,6 +502,7 @@ class DataProductService:
                     selectinload(DataOutputModel.environment_configurations),
                     selectinload(DataOutputModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DatasetModel.tags)
                     .raiseload("*"),
                 )
                 .filter(DataOutputModel.owner_id == id)
