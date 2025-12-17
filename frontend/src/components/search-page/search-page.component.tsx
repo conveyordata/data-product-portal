@@ -10,9 +10,18 @@ type Props = {
     searchPlaceholder: string;
     createButton?: ReactNode;
     actions?: ReactNode;
+    loadingResults?: boolean;
 };
 
-export default function SearchPage({ title, children, onSearch, createButton, searchPlaceholder, actions }: Props) {
+export default function SearchPage({
+    title,
+    children,
+    onSearch,
+    createButton,
+    searchPlaceholder,
+    actions,
+    loadingResults,
+}: Props) {
     return (
         <Flex vertical>
             <Typography.Title level={3}>{title}</Typography.Title>
@@ -22,6 +31,7 @@ export default function SearchPage({ title, children, onSearch, createButton, se
                         placeholder={searchPlaceholder}
                         allowClear
                         onChange={(e) => onSearch?.(e.target.value, undefined, undefined)}
+                        loading={loadingResults}
                     />
                 </Col>
                 <Col span={8}>{actions}</Col>
