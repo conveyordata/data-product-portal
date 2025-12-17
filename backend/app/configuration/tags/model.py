@@ -11,7 +11,7 @@ from app.shared.model import BaseORM, utcnow
 if TYPE_CHECKING:
     from app.data_outputs.model import DataOutput
     from app.data_products.model import DataProduct
-    from app.datasets.model import Dataset
+    from app.data_products.output_ports.model import Dataset
 
 
 tag_data_product_table = Table(

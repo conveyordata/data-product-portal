@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.events.schema_response import GetEventHistoryResponseItem
+from app.events.schema_response import GetEventHistoryResponseItemOld
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -12,5 +12,5 @@ class BaseNotificationGet(ORMModel):
 
 
 class NotificationGet(BaseNotificationGet):
-    event: GetEventHistoryResponseItem
+    event: GetEventHistoryResponseItemOld
     user: User

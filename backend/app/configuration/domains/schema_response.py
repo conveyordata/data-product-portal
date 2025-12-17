@@ -2,8 +2,8 @@ from typing import Sequence
 from uuid import UUID
 from warnings import deprecated
 
+from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.schema import DataProduct
-from app.datasets.schema import Dataset, OutputPort
 from app.shared.schema import ORMModel
 
 

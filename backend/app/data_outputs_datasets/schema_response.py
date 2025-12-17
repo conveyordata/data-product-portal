@@ -6,8 +6,8 @@ from warnings import deprecated
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
 from app.data_outputs.schema import TechnicalAsset as TechnicalAssetBaseSchema
+from app.data_products.output_ports.schema import Dataset
 from app.data_products.schema import DataProduct
-from app.datasets.schema import Dataset
 from app.shared.schema import ORMModel
 from app.users.schema import User
 

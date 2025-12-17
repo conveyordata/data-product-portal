@@ -13,7 +13,7 @@ from tests.factories import (
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.schema import RoleAssignment
-    from app.datasets.model import Dataset
+    from app.data_products.output_ports.model import Dataset
     from app.users.schema import User
 
 

@@ -19,12 +19,13 @@ from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
 from app.data_outputs.router import router as data_outputs
 from app.data_outputs_datasets.router import router as data_output_dataset
+from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
 from app.data_products_datasets.router import router as data_product_dataset
-from app.datasets.router import router as dataset
 from app.graph.router import router as graph
 from app.notifications.router import router as notification
 from app.pending_actions.router import router as pending_action
+from app.search_output_ports.router import router as search_output_ports
 from app.users.router import router as user
 
 router = (
@@ -34,6 +35,7 @@ router = (
 )
 
 router.include_router(authorization)
+router.include_router(search_output_ports)
 router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)

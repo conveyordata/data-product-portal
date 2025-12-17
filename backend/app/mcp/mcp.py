@@ -37,6 +37,8 @@ from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 
 # Import existing services
 from app.data_outputs.service import DataOutputService
+from app.data_products.output_ports.schema_response import DatasetGet, DatasetsGet
+from app.data_products.output_ports.service import DatasetService
 
 # Import enums - corrected paths
 from app.data_products.schema_response import (
@@ -45,8 +47,6 @@ from app.data_products.schema_response import (
 )
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
-from app.datasets.schema_response import DatasetGet, DatasetsGet
-from app.datasets.service import DatasetService
 from app.settings import settings
 
 

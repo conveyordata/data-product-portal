@@ -7,9 +7,11 @@ from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.service import DatasetService
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.events.enums import EventReferenceEntity
+from app.events.service import EventService
 from app.settings import settings
+from tests import test_session
 from tests.factories import (
     DataProductDatasetAssociationFactory,
     DataProductFactory,
@@ -23,7 +25,8 @@ from tests.factories import (
     UserFactory,
 )
 
-ENDPOINT = "/api/datasets"
+OLD_ENDPOINT = "/api/datasets"
+ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
 
 @pytest.fixture
@@ -142,14 +145,15 @@ class TestDatasetsRouter:
 
     def test_get_datasets(self, client):
         ds = DatasetFactory()
-        response = client.get(ENDPOINT)
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
         assert data[0]["id"] == str(ds.id)
 
     def test_get_user_datasets(self, client):
-        user_1, user_2 = UserFactory.create_batch(2)
+        user_1 = UserFactory()
+        user_2 = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds_1, ds_2 = DatasetFactory.create_batch(2)
         owner = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
         DatasetRoleAssignmentFactory(
@@ -159,27 +163,29 @@ class TestDatasetsRouter:
             dataset_id=ds_2.id, user_id=user_2.id, role_id=owner.id
         )
 
-        response = client.get(f"{ENDPOINT}/user/{user_2.id}")
+        response = client.get(f"{OLD_ENDPOINT}/user")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
         assert data[0]["id"] == str(ds_2.id)
 
-    def test_search_datasets(self, session, client):
-        RoleService(db=session).initialize_prototype_roles()
-        ds_1 = DatasetFactory(name="Customer Data")
-        ds_2 = DatasetFactory(name="Sales Data")
-        DatasetFactory(name="Internal Metrics")
-        service = DatasetService(db=session)
-        service.recalculate_search_vector_datasets()
+    def test_get_user_datasets_old(self, client):
+        user_1 = UserFactory()
+        user_2 = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds_1, ds_2 = DatasetFactory.create_batch(2)
+        owner = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        DatasetRoleAssignmentFactory(
+            dataset_id=ds_1.id, user_id=user_1.id, role_id=owner.id
+        )
+        DatasetRoleAssignmentFactory(
+            dataset_id=ds_2.id, user_id=user_2.id, role_id=owner.id
+        )
 
-        response = client.get(f"{ENDPOINT}/search", params={"query": "Data"})
+        response = client.get(f"{OLD_ENDPOINT}/user/{user_2.id}")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 2
-        returned_ids = {item["id"] for item in data}
-        expected_ids = {str(ds_1.id), str(ds_2.id)}
-        assert returned_ids == expected_ids
+        assert len(data) == 1
+        assert data[0]["id"] == str(ds_2.id)
 
     def test_update_dataset_no_role(self, client):
         ds = DatasetFactory()
@@ -253,9 +259,32 @@ class TestDatasetsRouter:
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 404
 
-    def test_get_dataset_by_id_with_invalid_dataset_id(self, client, session):
+    def test_get_dataset_with_invalid_dataset_id(self, client):
         dataset = self.get_dataset_by_id(client, self.invalid_id)
         assert dataset.status_code == 404
+
+    def test_get_dataset(
+        self,
+        client,
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        dataset = self.get_dataset_by_id(client, ds.id)
+        assert dataset.status_code == 200
+
+    def test_get_output_port(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        dataset = self.get_output_port(client, ds.id, ds.data_product.id)
+        assert dataset.status_code == 200
 
     def test_update_dataset_with_invalid_dataset_id(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -334,7 +363,7 @@ class TestDatasetsRouter:
     def test_get_graph_data(self, client):
         dp = DataProductFactory()
         ds = DatasetFactory(data_product=dp)
-        response = client.get(f"{ENDPOINT}/{ds.id}/graph")
+        response = client.get(f"{OLD_ENDPOINT}/{ds.id}/graph")
         assert response.json()["edges"] == [
             {
                 "id": f"{str(dp.id)}-{str(ds.id)}-2",
@@ -382,7 +411,7 @@ class TestDatasetsRouter:
     def test_dataset_set_custom_setting_no_role(self, client):
         ds = DatasetFactory()
         setting = DataProductSettingFactory(scope="dataset")
-        response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}")
+        response = client.post(f"{OLD_ENDPOINT}/{ds.id}/settings/{setting.id}")
         assert response.status_code == 403
 
     def test_dataset_set_custom_setting(self, client):
@@ -395,9 +424,11 @@ class TestDatasetsRouter:
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         setting = DataProductSettingFactory(scope="dataset")
 
-        response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}?value=false")
+        response = client.post(
+            f"{OLD_ENDPOINT}/{ds.id}/settings/{setting.id}?value=false"
+        )
         assert response.status_code == 200
-        response = client.get(f"{ENDPOINT}/{ds.id}")
+        response = client.get(f"{OLD_ENDPOINT}/{ds.id}")
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
     def test_get_private_dataset_not_allowed(self, client):
@@ -434,7 +465,7 @@ class TestDatasetsRouter:
 
     def test_get_private_datasets_not_allowed(self, client):
         DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
-        response = client.get(ENDPOINT)
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 0
 
@@ -443,14 +474,14 @@ class TestDatasetsRouter:
         role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        response = client.get(ENDPOINT)
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 1
 
     @pytest.mark.usefixtures("admin")
     def test_get_private_datasets_by_admin(self, client):
         DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
-        response = client.get(ENDPOINT)
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 1
 
@@ -464,7 +495,7 @@ class TestDatasetsRouter:
         )
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
 
-        response = client.get(ENDPOINT)
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 1
 
@@ -555,6 +586,28 @@ class TestDatasetsRouter:
         history = self.get_dataset_history(client, created_dataset.json().get("id"))
         assert len(history.json()) == 2
 
+    def test_get_output_port_history(self, session, dataset_payload, client):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        created_dataset = self.create_default_dataset(client, dataset_payload)
+        assert created_dataset.status_code == 200
+        assert "id" in created_dataset.json()
+
+        history = self.get_output_port_history(
+            client,
+            created_dataset.json().get("id"),
+            dataset_payload.get("data_product_id"),
+        )
+        assert history.status_code == 200
+        assert len(history.json()["events"]) == 2
+
     def test_history_event_created_on_update_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -619,8 +672,11 @@ class TestDatasetsRouter:
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
 
-        history = self.get_dataset_history(client, ds.id)
-        assert len(history.json()) == 1
+        events = EventService(db=test_session).get_history(
+            ds.id, EventReferenceEntity.DATASET
+        )
+        assert len(events) == 1
+        assert events[0].deleted_subject_identifier == ds.name
 
     def test_retain_deleted_dataset_name_in_history(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -635,51 +691,63 @@ class TestDatasetsRouter:
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
 
-        response = self.get_dataset_history(client, dataset_id)
-        assert len(response.json()) == 1
-        assert response.json()[0]["deleted_subject_identifier"] == dataset_name
+        events = EventService(db=test_session).get_history(
+            dataset_id, EventReferenceEntity.DATASET
+        )
+        assert len(events) == 1
+        assert events[0].deleted_subject_identifier == dataset_name
 
     @staticmethod
     def create_default_dataset(client, default_dataset_payload):
-        return client.post(ENDPOINT, json=default_dataset_payload)
+        return client.post(OLD_ENDPOINT, json=default_dataset_payload)
 
     @staticmethod
     def update_dataset_status(client, status, dataset_id):
-        return client.put(f"{ENDPOINT}/{dataset_id}/status", json=status)
+        return client.put(f"{OLD_ENDPOINT}/{dataset_id}/status", json=status)
 
     @staticmethod
     def update_dataset_usage(client, usage, dataset_id):
-        return client.put(f"{ENDPOINT}/{dataset_id}/usage", json=usage)
+        return client.put(f"{OLD_ENDPOINT}/{dataset_id}/usage", json=usage)
 
     @staticmethod
     def update_default_dataset(client, default_dataset_payload, dataset_id):
-        return client.put(f"{ENDPOINT}/{dataset_id}", json=default_dataset_payload)
+        return client.put(f"{OLD_ENDPOINT}/{dataset_id}", json=default_dataset_payload)
 
     @staticmethod
     def update_dataset_about(client, dataset_id):
         data = {"about": "Updated Dataset Description"}
-        return client.put(f"{ENDPOINT}/{dataset_id}/about", json=data)
+        return client.put(f"{OLD_ENDPOINT}/{dataset_id}/about", json=data)
 
     @staticmethod
     def delete_default_dataset(client, dataset_id):
-        return client.delete(f"{ENDPOINT}/{dataset_id}")
+        return client.delete(f"{OLD_ENDPOINT}/{dataset_id}")
 
     @staticmethod
     def get_dataset_by_id(client, dataset_id):
-        return client.get(f"{ENDPOINT}/{dataset_id}")
+        return client.get(f"{OLD_ENDPOINT}/{dataset_id}")
+
+    @staticmethod
+    def get_output_port(client, dataset_id, data_product_id):
+        return client.get(f"{ENDPOINT.format(data_product_id)}/{dataset_id}")
 
     @staticmethod
     def get_namespace_suggestion(client, name):
-        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+        return client.get(f"{OLD_ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
     def validate_namespace(client, namespace):
-        return client.get(f"{ENDPOINT}/validate_namespace?namespace={namespace}")
+        return client.get(f"{OLD_ENDPOINT}/validate_namespace?namespace={namespace}")
 
     @staticmethod
     def get_namespace_length_limits(client):
-        return client.get(f"{ENDPOINT}/namespace_length_limits")
+        return client.get(f"{OLD_ENDPOINT}/namespace_length_limits")
 
     @staticmethod
     def get_dataset_history(client, dataset_id):
-        return client.get(f"{ENDPOINT}/{dataset_id}/history")
+        return client.get(f"{OLD_ENDPOINT}/{dataset_id}/history")
+
+    @staticmethod
+    def get_output_port_history(client, output_port_id, data_product_id):
+        return client.get(
+            f"{ENDPOINT.format(data_product_id)}/{output_port_id}/history"
+        )

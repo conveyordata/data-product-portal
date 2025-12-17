@@ -1,6 +1,7 @@
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from fastapi import HTTPException, status
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID
@@ -8,9 +9,9 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.status import OutputPortStatus
 from app.database.database import Base, ensure_exists
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.status import OutputPortStatus
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -102,5 +103,16 @@ class Dataset(Base, BaseORM):
         return self.data_product.name
 
 
-def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> Dataset:
-    return ensure_exists(dataset_id, db, Dataset, **kwargs)
+def ensure_dataset_exists(
+    dataset_id: UUID,
+    db: Session,
+    data_product_id: Optional[UUID] = None,
+    **kwargs,
+) -> Dataset:
+    dataset: Dataset = ensure_exists(dataset_id, db, Dataset, **kwargs)
+    if data_product_id is not None and dataset.data_product_id != data_product_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Required item {dataset_id} does not exist",
+        )
+    return dataset

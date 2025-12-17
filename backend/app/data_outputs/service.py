@@ -32,11 +32,11 @@ from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.service import DatasetService
 from app.data_products.service import DataProductService
 from app.database.database import ensure_exists
-from app.datasets.model import Dataset as DatasetModel
-from app.datasets.model import ensure_dataset_exists
-from app.datasets.service import DatasetService
 from app.graph.graph import Graph
 from app.users.schema import User
 

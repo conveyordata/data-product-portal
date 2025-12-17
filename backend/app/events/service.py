@@ -8,10 +8,11 @@ from sqlalchemy.orm import Session
 
 from app.data_outputs.model import DataOutput
 from app.data_products.model import DataProduct
-from app.datasets.model import Dataset
+from app.data_products.output_ports.model import Dataset
 from app.events.enums import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
+from app.events.schema_response import GetEventHistoryResponseItemOld
 from app.users.model import User
 
 
@@ -127,7 +128,9 @@ class EventService:
         self.db.flush()
         return [event.id for event in created_events]
 
-    def get_history(self, id: UUID, type: EventReferenceEntity) -> Sequence[EventModel]:
+    def get_history(
+        self, id: UUID, type: EventReferenceEntity
+    ) -> Sequence[GetEventHistoryResponseItemOld]:
         return self.db.scalars(
             select(EventModel)
             .where(

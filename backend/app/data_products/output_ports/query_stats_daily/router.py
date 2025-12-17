@@ -3,19 +3,19 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.database.database import get_db_session
-from app.datasets.query_stats_daily.schema_request import (
+from app.data_products.output_ports.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyDelete,
     DatasetQueryStatsDailyUpdates,
 )
-from app.datasets.query_stats_daily.schema_response import (
+from app.data_products.output_ports.query_stats_daily.schema_response import (
     DatasetQueryStatsDailyResponses,
 )
-from app.datasets.query_stats_daily.service import (
+from app.data_products.output_ports.query_stats_daily.service import (
     DEFAULT_DAY_RANGE,
     DatasetQueryStatsDailyService,
     QueryStatsGranularity,
 )
+from app.database.database import get_db_session
 
 router = APIRouter(prefix="/{id}/query_stats", tags=["datasets"])
 

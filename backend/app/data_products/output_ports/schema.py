@@ -2,8 +2,8 @@ from uuid import UUID
 from warnings import deprecated
 
 from app.configuration.tags.schema import Tag
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.status import OutputPortStatus
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.status import OutputPortStatus
 from app.shared.schema import ORMModel
 
 

@@ -4,12 +4,16 @@ from uuid import UUID
 from sqlalchemy import asc, delete, select
 from sqlalchemy.orm import Session
 
-from app.datasets.curated_queries.model import (
+from app.data_products.output_ports.curated_queries.model import (
     DatasetCuratedQuery as DatasetCuratedQueryModel,
 )
-from app.datasets.curated_queries.schema_request import DatasetCuratedQueryInput
-from app.datasets.curated_queries.schema_response import DatasetCuratedQueries
-from app.datasets.model import ensure_dataset_exists
+from app.data_products.output_ports.curated_queries.schema_request import (
+    DatasetCuratedQueryInput,
+)
+from app.data_products.output_ports.curated_queries.schema_response import (
+    DatasetCuratedQueries,
+)
+from app.data_products.output_ports.model import ensure_dataset_exists
 
 
 class DatasetCuratedQueryService:

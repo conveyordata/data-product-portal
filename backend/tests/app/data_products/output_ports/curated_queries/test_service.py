@@ -1,5 +1,9 @@
-from app.datasets.curated_queries.schema_request import DatasetCuratedQueryInput
-from app.datasets.curated_queries.service import DatasetCuratedQueryService
+from app.data_products.output_ports.curated_queries.schema_request import (
+    DatasetCuratedQueryInput,
+)
+from app.data_products.output_ports.curated_queries.service import (
+    DatasetCuratedQueryService,
+)
 from tests.factories import DatasetFactory
 
 

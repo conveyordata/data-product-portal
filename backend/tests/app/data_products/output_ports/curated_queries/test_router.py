@@ -1,8 +1,12 @@
 from app.authorization.roles.schema import Scope
 from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
-from app.datasets.curated_queries.schema_request import DatasetCuratedQueryInput
-from app.datasets.curated_queries.service import DatasetCuratedQueryService
+from app.data_products.output_ports.curated_queries.schema_request import (
+    DatasetCuratedQueryInput,
+)
+from app.data_products.output_ports.curated_queries.service import (
+    DatasetCuratedQueryService,
+)
 from app.settings import settings
 from tests.factories import (
     DatasetFactory,
