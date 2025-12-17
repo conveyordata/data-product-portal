@@ -89,7 +89,7 @@ It is possible that a reboot of your MCP client is needed after logging in to re
 ### Available tools
 
 After logging in you should see the tools that are available in the MCP Server.
-With Claude Desktop you can verify this via `Settings > Connectors > Click on Configure for AuthenticatedProxyDataProductPortal`. 
+With Claude Desktop you can verify this via `Settings > Connectors > Click on Configure for AuthenticatedProxyDataProductPortal`.
 You should see the list of tools.
 
 ![Claude with tools access](./img/claude-desktop.png)
