@@ -11,4 +11,4 @@ import TabItem from '@theme/TabItem';
 # Local installation guide
 
 Take a look at the [backend documentation](https://github.com/conveyordata/data-product-portal/blob/main/backend/README.md)
-and the [frontend documentation](https://github.com/conveyordata/data-product-portal/blob/main/backend/README.md) to get started.
+and the [frontend documentation](https://github.com/conveyordata/data-product-portal/blob/main/frontend/README.md) to get started.
