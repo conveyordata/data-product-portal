@@ -536,7 +536,9 @@ class TestDatasetsRouter:
 
         assert response.status_code == 400
 
-    def history_event_created_on_create_dataset(self, session, dataset_payload, client):
+    def test_history_event_created_on_create_dataset(
+        self, session, dataset_payload, client
+    ):
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -550,10 +552,10 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-        history = self.get_dataset_history(client, created_dataset.get("id"))
-        assert len(history.json()) == 1
+        history = self.get_dataset_history(client, created_dataset.json().get("id"))
+        assert len(history.json()) == 2
 
-    def history_event_created_on_update_dataset(self, client):
+    def test_history_event_created_on_update_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -577,7 +579,7 @@ class TestDatasetsRouter:
         history = self.get_dataset_history(client, ds.id)
         assert len(history.json()) == 1
 
-    def history_event_created_on_update_about_dataset(self, client):
+    def test_history_event_created_on_update_about_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -591,7 +593,7 @@ class TestDatasetsRouter:
         history = self.get_dataset_history(client, ds.id)
         assert len(history.json()) == 1
 
-    def history_event_created_on_update_status_dataset(self, client):
+    def test_history_event_created_on_update_status_dataset(self, client):
         ds_owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -607,7 +609,7 @@ class TestDatasetsRouter:
         history = self.get_dataset_history(client, ds.id)
         assert len(history.json()) == 1
 
-    def history_event_created_on_removing_dataset(self, client):
+    def test_history_event_created_on_removing_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
