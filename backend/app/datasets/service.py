@@ -74,19 +74,22 @@ class DatasetService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
-
+    
+    # Modified the _build_prefix_tsquery function
     @staticmethod
     def _build_prefix_tsquery(query: str) -> str | None:
         """
         Build a prefix tsquery string like 'foo:* & bar:*' from free text.
-
+    
         - Tokenizes on non-word characters.
         - Filters out tokens shorter than 2 characters (e.g., single-character tokens are dropped).
         - Appends ':*' to each token to enable prefix matching.
+        - Also prepends '*' to each token to enable matching at the start of words (e.g., 'pple' matches 'apple').
         - Returns None if no valid tokens remain after filtering.
-
+    
         Example:
-            'Hello world!' becomes 'hello:* & world:*'
+            'Hello world!' becomes '*hello:* & *world:*'
+            'pple' can match 'apple' due to the leading '*'
             'a b' returns None (all tokens too short)
         """
         if not query:
@@ -94,7 +97,7 @@ class DatasetService:
         tokens = [t for t in re.split(r"\W+", query.lower()) if len(t) >= 2]
         if not tokens:
             return None
-        prefixed = [f"{t}:*" for t in tokens]
+        prefixed = [f"*{t}:*" for t in tokens]
         return " & ".join(prefixed)
 
     def get_dataset(self, id: UUID, user: UserModel) -> DatasetGet:
