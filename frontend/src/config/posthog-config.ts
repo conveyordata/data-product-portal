@@ -5,7 +5,6 @@ if (config.POSTHOG_ENABLED) {
         api_host: config.POSTHOG_HOST,
         autocapture: false,
         capture_pageview: false,
-        disable_session_recording: true,
         person_profiles: 'identified_only',
     });
     posthog.opt_in_capturing(); // technically redundant (is default)
