@@ -74,7 +74,7 @@ export const Breadcrumbs = () => {
         () => ({
             path: ApplicationPaths.Home,
             title: (
-                <Space classNames={{ item: styles.breadcrumbItem }}>
+                <Space>
                     <HomeOutlined />
                     {t('Home')}
                 </Space>
@@ -95,7 +95,7 @@ export const Breadcrumbs = () => {
                 case ApplicationPaths.DataProducts:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <DataProductOutlined />
                                 {t('Data Products')}
                             </Space>
@@ -104,14 +104,14 @@ export const Breadcrumbs = () => {
                     break;
                 case ApplicationPaths.DataProductNew:
                     Object.assign(breadcrumbItem, {
-                        title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('New Data Product')}</Space>,
+                        title: t('New Data Product'),
                     });
                     break;
                 case ApplicationPaths.Datasets:
                 case ApplicationPaths.Marketplace:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <ShopOutlined />
                                 {t('Marketplace')}
                             </Space>
@@ -121,7 +121,7 @@ export const Breadcrumbs = () => {
                 case ApplicationPaths.MarketplaceCart:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <ShoppingCartOutlined />
                                 {t('Cart')}
                             </Space>
@@ -131,7 +131,7 @@ export const Breadcrumbs = () => {
                 case ApplicationPaths.AuditLogs:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <UnorderedListOutlined />
                                 {t('Audit Logs')}
                             </Space>
@@ -141,7 +141,7 @@ export const Breadcrumbs = () => {
                 case ApplicationPaths.Explorer:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <CompassOutlined />
                                 {t('Explorer')}
                             </Space>
@@ -151,7 +151,7 @@ export const Breadcrumbs = () => {
                 case ApplicationPaths.PlatformsConfigs:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <SettingOutlined />
                                 {t('Platforms Configurations')}
                             </Space>
@@ -161,7 +161,7 @@ export const Breadcrumbs = () => {
                 case ApplicationPaths.Environments:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <SettingOutlined />
                                 {t('Environments')}
                             </Space>
@@ -170,32 +170,23 @@ export const Breadcrumbs = () => {
                     break;
                 case ApplicationPaths.EnvironmentNew:
                     Object.assign(breadcrumbItem, {
-                        title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('New Environment')}</Space>,
+                        title: t('New Environment'),
                     });
                     break;
                 case ApplicationPaths.Settings:
                     Object.assign(breadcrumbItem, {
-                        title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('Settings')}</Space>,
+                        title: t('Settings'),
                     });
                     break;
                 case ApplicationPaths.PlatformServiceConfigNew:
                     Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
-                                {t('New Platform Service Configuration')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.RoleConfiguration:
-                    Object.assign(breadcrumbItem, {
-                        title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('Role Management')}</Space>,
+                        title: t('New Platform Service Configuration'),
                     });
                     break;
                 case ApplicationPaths.People:
                     Object.assign(breadcrumbItem, {
                         title: (
-                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                            <Space>
                                 <TeamOutlined />
                                 {t('People')}
                             </Space>
@@ -218,7 +209,7 @@ export const Breadcrumbs = () => {
                             (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id))
                         ) {
                             Object.assign(breadcrumbItem, {
-                                title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('Edit')}</Space>,
+                                title: t('Edit'),
                             });
                         } else {
                             if (dataOutput && !isFetchingDataOutput && path.split('/').length === 4) {
@@ -255,7 +246,7 @@ export const Breadcrumbs = () => {
                     ) {
                         if (isDatasetEditPage(path, dataset.id)) {
                             Object.assign(breadcrumbItem, {
-                                title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('Edit')}</Space>,
+                                title: t('Edit'),
                             });
                         } else {
                             Object.assign(breadcrumbItem, {
@@ -271,11 +262,7 @@ export const Breadcrumbs = () => {
 
                     if (platformServiceConfig && !isFetchingPlatformServiceConfig) {
                         Object.assign(breadcrumbItem, {
-                            title: (
-                                <Space classNames={{ item: styles.breadcrumbItem }}>
-                                    {`${platformServiceConfig.platform.name} - ${platformServiceConfig.service.name}`}
-                                </Space>
-                            ),
+                            title: `${platformServiceConfig.platform.name} - ${platformServiceConfig.service.name}`,
                         });
                     }
 
@@ -285,16 +272,12 @@ export const Breadcrumbs = () => {
                         }
                         if (isEnvironmentConfigCreatePage(path, environment.id)) {
                             Object.assign(breadcrumbItem, {
-                                title: (
-                                    <Space classNames={{ item: styles.breadcrumbItem }}>
-                                        {t('New Environment Configuration')}
-                                    </Space>
-                                ),
+                                title: <Space>{t('New Environment Configuration')}</Space>,
                             });
                         } else {
                             Object.assign(breadcrumbItem, {
                                 path: createEnvironmentConfigsPath(environment.id),
-                                title: <Space classNames={{ item: styles.breadcrumbItem }}>{environment.name}</Space>,
+                                title: <Space>{environment.name}</Space>,
                             });
                         }
                     }
@@ -302,20 +285,12 @@ export const Breadcrumbs = () => {
                     if (envConfig && !isFetchingEnvConfig) {
                         if (isEnvConfigPage(path, envConfig.id)) {
                             Object.assign(breadcrumbItem, {
-                                title: (
-                                    <Space classNames={{ item: styles.breadcrumbItem }}>
-                                        {`${envConfig.platform.name}-${envConfig.service.name}`}
-                                    </Space>
-                                ),
+                                title: `${envConfig.platform.name}-${envConfig.service.name}`,
                             });
                         } else {
                             Object.assign(breadcrumbItem, {
                                 path: createEnvironmentConfigsPath(envConfig.environment.id),
-                                title: (
-                                    <Space classNames={{ item: styles.breadcrumbItem }}>
-                                        {envConfig.environment.name}
-                                    </Space>
-                                ),
+                                title: envConfig.environment.name,
                             });
                         }
                     }
@@ -356,7 +331,7 @@ export const Breadcrumbs = () => {
             {
                 path: ApplicationPaths.Home,
                 title: (
-                    <Space classNames={{ item: styles.breadcrumbItem }}>
+                    <Space>
                         <HomeOutlined />
                     </Space>
                 ),
@@ -367,13 +342,13 @@ export const Breadcrumbs = () => {
 
     return (
         <Breadcrumb
+            className={styles.breadcrumb}
             itemRender={(route, _params, routes) => {
                 const isLast = routes.indexOf(route) === routes.length - 1;
                 return <BreadcrumbLink to={route.path} isActive={isLast} title={route.title} />;
             }}
             items={items}
-            className={styles.breadcrumb}
-            separator={<Space classNames={{ item: styles.breadcrumbItem }}>/</Space>}
+            separator={'/'}
         />
     );
 };
