@@ -9,16 +9,16 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
-from app.data_products.output_ports.query_stats_daily.model import (
+from app.data_products.output_ports.query_stats.model import (
     DatasetQueryStatsDaily,
 )
-from app.data_products.output_ports.query_stats_daily.schema_request import (
-    DatasetQueryStatsDailyDelete,
-    DatasetQueryStatsDailyUpdate,
+from app.data_products.output_ports.query_stats.schema_request import (
+    OutputPortQueryStatsDelete,
+    OutputPortQueryStatsUpdate,
 )
-from app.data_products.output_ports.query_stats_daily.schema_response import (
-    DatasetQueryStatsDailyResponse,
-    DatasetQueryStatsDailyResponses,
+from app.data_products.output_ports.query_stats.schema_response import (
+    OutputPortQueryStatsResponse,
+    OutputPortQueryStatsResponses,
 )
 
 
@@ -66,16 +66,16 @@ OTHER_CONSUMER_DATA_PRODUCT_ID = UUID("00000000-0000-0000-0000-000000000000")
 OTHER_CONSUMER_DATA_PRODUCT_NAME = "Other"
 
 
-class DatasetQueryStatsDailyService:
+class OutputPortStatsService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_query_stats_daily(
+    def get_query_stats(
         self,
         dataset_id: UUID,
         granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
         day_range: int = DEFAULT_DAY_RANGE,
-    ) -> DatasetQueryStatsDailyResponses:
+    ) -> OutputPortQueryStatsResponses:
         start_date = date.today() - timedelta(days=day_range)
 
         # Build query with database-level aggregation if needed
@@ -91,7 +91,7 @@ class DatasetQueryStatsDailyService:
             )
             stats = self.db.execute(query).scalars().all()
             response_stats = [
-                DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
+                OutputPortQueryStatsResponse.model_validate(stat) for stat in stats
             ]
         else:
             # Aggregate in database using date_trunc
@@ -129,7 +129,7 @@ class DatasetQueryStatsDailyService:
 
             results = self.db.execute(aggregated_query).all()
             response_stats = [
-                DatasetQueryStatsDailyResponse.model_validate(row) for row in results
+                OutputPortQueryStatsResponse.model_validate(row) for row in results
             ]
 
         response_stats = self._group_low_volume_consumers(response_stats)
@@ -138,12 +138,12 @@ class DatasetQueryStatsDailyService:
         )
         response_stats = self._sort_by_consumer_total_queries(response_stats)
 
-        return DatasetQueryStatsDailyResponses(
-            dataset_query_stats_daily_responses=response_stats
+        return OutputPortQueryStatsResponses(
+            output_port_query_stats_responses=response_stats
         )
 
-    def update_query_stats_daily(
-        self, dataset_id: UUID, updates: Iterable[DatasetQueryStatsDailyUpdate]
+    def update_query_stats(
+        self, dataset_id: UUID, updates: Iterable[OutputPortQueryStatsUpdate]
     ) -> None:
         values = []
         for update in updates:
@@ -172,8 +172,8 @@ class DatasetQueryStatsDailyService:
         self.db.execute(stmt)
         self.db.commit()
 
-    def delete_query_stats_daily(
-        self, dataset_id: UUID, delete_request: DatasetQueryStatsDailyDelete
+    def delete_query_stats(
+        self, dataset_id: UUID, delete_request: OutputPortQueryStatsDelete
     ) -> None:
         try:
             target_date = date.fromisoformat(delete_request.date)
@@ -191,9 +191,9 @@ class DatasetQueryStatsDailyService:
 
     def _group_low_volume_consumers(
         self,
-        stats: list[DatasetQueryStatsDailyResponse],
+        stats: list[OutputPortQueryStatsResponse],
         limit: int = MAX_CONSUMER_DATA_PRODUCTS,
-    ) -> list[DatasetQueryStatsDailyResponse]:
+    ) -> list[OutputPortQueryStatsResponse]:
         if not stats:
             return stats
 
@@ -207,7 +207,7 @@ class DatasetQueryStatsDailyService:
         return grouped_stats
 
     def _consumer_totals(
-        self, stats: list[DatasetQueryStatsDailyResponse]
+        self, stats: list[OutputPortQueryStatsResponse]
     ) -> dict[UUID, int]:
         """
         Calculate the total query count per consumer from a list of query stats.
@@ -240,11 +240,11 @@ class DatasetQueryStatsDailyService:
 
     @staticmethod
     def _merge_other_consumers(
-        stats: list[DatasetQueryStatsDailyResponse],
+        stats: list[OutputPortQueryStatsResponse],
         top_consumer_ids: set[UUID],
-    ) -> list[DatasetQueryStatsDailyResponse]:
-        other_by_date: dict[date, DatasetQueryStatsDailyResponse] = {}
-        filtered_stats: list[DatasetQueryStatsDailyResponse] = []
+    ) -> list[OutputPortQueryStatsResponse]:
+        other_by_date: dict[date, OutputPortQueryStatsResponse] = {}
+        filtered_stats: list[OutputPortQueryStatsResponse] = []
 
         for stat in stats:
             if stat.consumer_data_product_id in top_consumer_ids:
@@ -256,7 +256,7 @@ class DatasetQueryStatsDailyService:
                 existing_other.query_count += stat.query_count
                 continue
 
-            other_by_date[stat.date] = DatasetQueryStatsDailyResponse(
+            other_by_date[stat.date] = OutputPortQueryStatsResponse(
                 date=stat.date,
                 consumer_data_product_id=OTHER_CONSUMER_DATA_PRODUCT_ID,
                 query_count=stat.query_count,
@@ -267,10 +267,10 @@ class DatasetQueryStatsDailyService:
 
     def _fill_missing_buckets(
         self,
-        stats: list[DatasetQueryStatsDailyResponse],
+        stats: list[OutputPortQueryStatsResponse],
         range_start: date,
         granularity: QueryStatsGranularity,
-    ) -> list[DatasetQueryStatsDailyResponse]:
+    ) -> list[OutputPortQueryStatsResponse]:
         """
         Fill missing time buckets with zero values for all consumers.
         This ensures the frontend receives complete time series data.
@@ -287,7 +287,7 @@ class DatasetQueryStatsDailyService:
         return filled_stats
 
     def _extract_unique_consumers(
-        self, stats: list[DatasetQueryStatsDailyResponse]
+        self, stats: list[OutputPortQueryStatsResponse]
     ) -> dict[UUID, str | None]:
         """
         Extract all unique consumers from stats.
@@ -302,12 +302,12 @@ class DatasetQueryStatsDailyService:
 
     def _build_existing_data_map(
         self,
-        stats: list[DatasetQueryStatsDailyResponse],
-    ) -> dict[tuple[date, UUID], DatasetQueryStatsDailyResponse]:
+        stats: list[OutputPortQueryStatsResponse],
+    ) -> dict[tuple[date, UUID], OutputPortQueryStatsResponse]:
         """
         Build a map of existing data indexed by date and consumer ID.
         """
-        existing_data: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse] = {}
+        existing_data: dict[tuple[date, UUID], OutputPortQueryStatsResponse] = {}
         for stat in stats:
             key = (stat.date, stat.consumer_data_product_id)
             existing_data[key] = stat
@@ -318,12 +318,12 @@ class DatasetQueryStatsDailyService:
         self,
         buckets: list[date],
         consumers: dict[UUID, str | None],
-        existing_data: dict[tuple[date, UUID], DatasetQueryStatsDailyResponse],
-    ) -> list[DatasetQueryStatsDailyResponse]:
+        existing_data: dict[tuple[date, UUID], OutputPortQueryStatsResponse],
+    ) -> list[OutputPortQueryStatsResponse]:
         """
         Fill missing buckets with zero values for all consumers.
         """
-        filled_stats: list[DatasetQueryStatsDailyResponse] = []
+        filled_stats: list[OutputPortQueryStatsResponse] = []
         for bucket_date in buckets:
             for consumer_id, consumer_name in consumers.items():
                 key = (bucket_date, consumer_id)
@@ -331,7 +331,7 @@ class DatasetQueryStatsDailyService:
                     filled_stats.append(existing_data[key])
                 else:
                     filled_stats.append(
-                        DatasetQueryStatsDailyResponse(
+                        OutputPortQueryStatsResponse(
                             date=bucket_date,
                             consumer_data_product_id=consumer_id,
                             query_count=0,
@@ -361,8 +361,8 @@ class DatasetQueryStatsDailyService:
 
     @staticmethod
     def _sort_by_consumer_total_queries(
-        stats: list[DatasetQueryStatsDailyResponse],
-    ) -> list[DatasetQueryStatsDailyResponse]:
+        stats: list[OutputPortQueryStatsResponse],
+    ) -> list[OutputPortQueryStatsResponse]:
         """
         Sort stats by date (ascending) and then by consumer total queries (descending).
         Consumers with highest total queries appear first (at bottom of stacked chart).

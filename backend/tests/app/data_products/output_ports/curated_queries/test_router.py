@@ -2,7 +2,7 @@ from app.authorization.roles.schema import Scope
 from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.curated_queries.schema_request import (
-    DatasetCuratedQueryInput,
+    OutputPortCuratedQueryInput,
 )
 from app.data_products.output_ports.curated_queries.service import (
     DatasetCuratedQueryService,
@@ -68,7 +68,7 @@ class TestCuratedQueriesRouter:
         service.replace_curated_queries(
             dataset.id,
             [
-                DatasetCuratedQueryInput(
+                OutputPortCuratedQueryInput(
                     title="Existing query",
                     description="Stored during setup",
                     query_text="SELECT 1",

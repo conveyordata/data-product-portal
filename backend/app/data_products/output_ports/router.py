@@ -26,8 +26,8 @@ from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
 from app.data_products.output_ports.model import ensure_dataset_exists
-from app.data_products.output_ports.query_stats_daily.router import (
-    router as query_stats_daily_router,
+from app.data_products.output_ports.query_stats.router import (
+    router as query_stats_router,
 )
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
@@ -98,8 +98,8 @@ def _assign_owner_role_assignments(
 router = APIRouter(tags=["Data Products - Output ports"])
 old_route = "/datasets"
 route = "/v2/data_products/{data_product_id}/output_ports"
-router.include_router(query_stats_daily_router, prefix=old_route)
-router.include_router(curated_queries_router, prefix=old_route)
+router.include_router(query_stats_router)
+router.include_router(curated_queries_router)
 
 
 @router.get(f"{old_route}/namespace_suggestion")

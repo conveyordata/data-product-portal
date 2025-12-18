@@ -4,26 +4,26 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.orm import Session
 
-from app.data_products.output_ports.query_stats_daily.model import (
+from app.data_products.output_ports.query_stats.model import (
     DatasetQueryStatsDaily,
 )
-from app.data_products.output_ports.query_stats_daily.schema_request import (
-    DatasetQueryStatsDailyDelete,
-    DatasetQueryStatsDailyUpdate,
+from app.data_products.output_ports.query_stats.schema_request import (
+    OutputPortQueryStatsDelete,
+    OutputPortQueryStatsUpdate,
 )
-from app.data_products.output_ports.query_stats_daily.schema_response import (
-    DatasetQueryStatsDailyResponse,
+from app.data_products.output_ports.query_stats.schema_response import (
+    OutputPortQueryStatsResponse,
 )
-from app.data_products.output_ports.query_stats_daily.service import (
+from app.data_products.output_ports.query_stats.service import (
     OTHER_CONSUMER_DATA_PRODUCT_ID,
     OTHER_CONSUMER_DATA_PRODUCT_NAME,
-    DatasetQueryStatsDailyService,
+    OutputPortStatsService,
     QueryStatsGranularity,
 )
 from tests.factories import (
     DataProductFactory,
     DatasetFactory,
-    DatasetQueryStatsDailyFactory,
+    DatasetQueryStatsFactory,
 )
 
 
@@ -37,13 +37,13 @@ def dataset_with_two_stats(session: Session):
 
     session.add_all(
         [
-            DatasetQueryStatsDailyFactory(
+            DatasetQueryStatsFactory(
                 date=today,
                 dataset_id=dataset.id,
                 consumer_data_product_id=consumer1.id,
                 query_count=50,
             ),
-            DatasetQueryStatsDailyFactory(
+            DatasetQueryStatsFactory(
                 date=today,
                 dataset_id=dataset.id,
                 consumer_data_product_id=consumer2.id,
@@ -67,13 +67,13 @@ def dataset_with_daily_history(session: Session):
 
     session.add_all(
         [
-            DatasetQueryStatsDailyFactory(
+            DatasetQueryStatsFactory(
                 date=today,
                 dataset_id=dataset.id,
                 consumer_data_product_id=consumer1.id,
                 query_count=100,
             ),
-            DatasetQueryStatsDailyFactory(
+            DatasetQueryStatsFactory(
                 date=yesterday,
                 dataset_id=dataset.id,
                 consumer_data_product_id=consumer2.id,
@@ -84,7 +84,7 @@ def dataset_with_daily_history(session: Session):
 
     other_dataset = DatasetFactory()
     session.add(
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=today,
             dataset_id=other_dataset.id,
             consumer_data_product_id=consumer1.id,
@@ -114,15 +114,15 @@ class TestDatasetQueryStatsDailyService:
         today = date.today()
 
         updates = [
-            DatasetQueryStatsDailyUpdate(
+            OutputPortQueryStatsUpdate(
                 date=today.isoformat(),
                 consumer_data_product_id=consumer.id,
                 query_count=100,
             )
         ]
 
-        service = DatasetQueryStatsDailyService(session)
-        service.update_query_stats_daily(dataset.id, updates)
+        service = OutputPortStatsService(session)
+        service.update_query_stats(dataset.id, updates)
 
         stats = self._fetch_stats(session, dataset.id, consumer.id, today)
 
@@ -140,20 +140,20 @@ class TestDatasetQueryStatsDailyService:
 
         # Patch with 2 updates: one overlapping (consumer1) and one new (consumer3)
         updates = [
-            DatasetQueryStatsDailyUpdate(
+            OutputPortQueryStatsUpdate(
                 date=today.isoformat(),
                 consumer_data_product_id=consumer1.id,
                 query_count=100,
             ),
-            DatasetQueryStatsDailyUpdate(
+            OutputPortQueryStatsUpdate(
                 date=today.isoformat(),
                 consumer_data_product_id=consumer3.id,
                 query_count=200,
             ),
         ]
 
-        service = DatasetQueryStatsDailyService(session)
-        service.update_query_stats_daily(dataset.id, updates)
+        service = OutputPortStatsService(session)
+        service.update_query_stats(dataset.id, updates)
 
         # Verify consumer1 was updated (not duplicated)
         stats_consumer1 = self._fetch_stats(
@@ -177,13 +177,13 @@ class TestDatasetQueryStatsDailyService:
         dataset, today, yesterday, consumer1, consumer2 = dataset_with_daily_history
 
         # Get stats for the dataset
-        service = DatasetQueryStatsDailyService(session)
-        response = service.get_query_stats_daily(
+        service = OutputPortStatsService(session)
+        response = service.get_query_stats(
             dataset.id,
             granularity=QueryStatsGranularity.DAY,
             day_range=365,
         )
-        stats = response.dataset_query_stats_daily_responses
+        stats = response.output_port_query_stats_responses
 
         # Verify buckets are filled (should have many entries due to bucket filling)
         assert len(stats) > 2
@@ -213,13 +213,13 @@ class TestDatasetQueryStatsDailyService:
         start_of_week = base_date - timedelta(days=base_date.weekday())
         middle_of_week = start_of_week + timedelta(days=2)
 
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=start_of_week,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=120,
         )
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=middle_of_week,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,
@@ -227,15 +227,15 @@ class TestDatasetQueryStatsDailyService:
         )
         session.commit()
 
-        service = DatasetQueryStatsDailyService(session)
+        service = OutputPortStatsService(session)
         day_range = 14
-        response = service.get_query_stats_daily(
+        response = service.get_query_stats(
             dataset.id,
             granularity=QueryStatsGranularity.WEEK,
             day_range=day_range,
         )
 
-        stats = response.dataset_query_stats_daily_responses
+        stats = response.output_port_query_stats_responses
 
         # Calculate expected number of week buckets: from (today - day_range) to today, aligned to weeks
         # This matches the logic in _fill_missing_buckets -> _build_buckets
@@ -268,13 +268,13 @@ class TestDatasetQueryStatsDailyService:
         recent_date = date.today() - timedelta(days=10)
         old_date = date.today() - timedelta(days=120)
 
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=recent_date,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=50,
         )
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=old_date,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,
@@ -282,14 +282,14 @@ class TestDatasetQueryStatsDailyService:
         )
         session.commit()
 
-        service = DatasetQueryStatsDailyService(session)
-        response = service.get_query_stats_daily(
+        service = OutputPortStatsService(session)
+        response = service.get_query_stats(
             dataset.id,
             granularity=QueryStatsGranularity.DAY,
             day_range=30,
         )
 
-        stats = response.dataset_query_stats_daily_responses
+        stats = response.output_port_query_stats_responses
         # Today + 30 days ago = 31 days
         assert len(stats) == 31
 
@@ -303,11 +303,11 @@ class TestDatasetQueryStatsDailyService:
         self, session: Session, dataset_with_two_stats
     ):
         dataset, today, consumer1, consumer2 = dataset_with_two_stats
-        service = DatasetQueryStatsDailyService(session)
+        service = OutputPortStatsService(session)
 
-        service.delete_query_stats_daily(
+        service.delete_query_stats(
             dataset.id,
-            DatasetQueryStatsDailyDelete(
+            OutputPortQueryStatsDelete(
                 date=today.isoformat(),
                 consumer_data_product_id=consumer1.id,
             ),
@@ -325,24 +325,24 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
 
     def test_consumer_totals(self, session: Session):
         """Test _consumer_totals_and_names aggregates totals."""
-        service = DatasetQueryStatsDailyService(session)
+        service = OutputPortStatsService(session)
         consumer1_id = uuid4()
         consumer2_id = uuid4()
 
         stats = [
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=date.today(),
                 consumer_data_product_id=consumer1_id,
                 query_count=100,
                 consumer_data_product_name="Consumer 1",
             ),
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=date.today() - timedelta(days=1),
                 consumer_data_product_id=consumer1_id,
                 query_count=50,
                 consumer_data_product_name="Consumer 1",
             ),
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=date.today(),
                 consumer_data_product_id=consumer2_id,
                 query_count=200,
@@ -369,9 +369,7 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
             consumer4_id: 50,
         }
 
-        top_ids = DatasetQueryStatsDailyService._top_consumer_ids(
-            consumer_totals, limit=2
-        )
+        top_ids = OutputPortStatsService._top_consumer_ids(consumer_totals, limit=2)
 
         assert len(top_ids) == 2
         assert consumer2_id in top_ids
@@ -387,19 +385,19 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
         top_consumer_ids = {consumer1_id}
 
         stats = [
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=date(2024, 1, 1),
                 consumer_data_product_id=consumer1_id,
                 query_count=100,
                 consumer_data_product_name="Top Consumer",
             ),
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=date(2024, 1, 1),
                 consumer_data_product_id=consumer2_id,
                 query_count=50,
                 consumer_data_product_name="Low Volume 1",
             ),
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=date(2024, 1, 1),
                 consumer_data_product_id=consumer3_id,
                 query_count=30,
@@ -407,9 +405,7 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
             ),
         ]
 
-        result = DatasetQueryStatsDailyService._merge_other_consumers(
-            stats, top_consumer_ids
-        )
+        result = OutputPortStatsService._merge_other_consumers(stats, top_consumer_ids)
 
         assert len(result) == 2
         top_entry = next(
@@ -428,18 +424,18 @@ class TestDatasetQueryStatsDailyServicePrivateMethods:
 
     def test_fill_missing_buckets(self, session: Session):
         """Test _fill_missing_buckets fills missing time buckets with zeros."""
-        service = DatasetQueryStatsDailyService(session)
+        service = OutputPortStatsService(session)
         consumer_id = uuid4()
         start_date = date.today() - timedelta(days=5)
 
         stats = [
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=start_date,
                 consumer_data_product_id=consumer_id,
                 query_count=100,
                 consumer_data_product_name="Consumer 1",
             ),
-            DatasetQueryStatsDailyResponse(
+            OutputPortQueryStatsResponse(
                 date=start_date + timedelta(days=3),
                 consumer_data_product_id=consumer_id,
                 query_count=200,

@@ -1,5 +1,5 @@
 from app.data_products.output_ports.curated_queries.schema_request import (
-    DatasetCuratedQueryInput,
+    OutputPortCuratedQueryInput,
 )
 from app.data_products.output_ports.curated_queries.service import (
     DatasetCuratedQueryService,
@@ -13,17 +13,17 @@ class TestCuratedQueriesService:
         service = DatasetCuratedQueryService(session)
 
         curated_queries = [
-            DatasetCuratedQueryInput(
+            OutputPortCuratedQueryInput(
                 title="First query",
                 description=None,
                 query_text="SELECT 1",
             ),
-            DatasetCuratedQueryInput(
+            OutputPortCuratedQueryInput(
                 title="Second query",
                 description="Focus on highest priority",
                 query_text="SELECT 2",
             ),
-            DatasetCuratedQueryInput(
+            OutputPortCuratedQueryInput(
                 title="Third query",
                 description=None,
                 query_text="SELECT 3",
@@ -31,7 +31,7 @@ class TestCuratedQueriesService:
         ]
 
         result = service.replace_curated_queries(dataset.id, curated_queries)
-        assert [item.title for item in result.dataset_curated_queries] == [
+        assert [item.title for item in result.output_port_curated_queries] == [
             "First query",
             "Second query",
             "Third query",
@@ -44,7 +44,7 @@ class TestCuratedQueriesService:
         service.replace_curated_queries(
             dataset.id,
             [
-                DatasetCuratedQueryInput(
+                OutputPortCuratedQueryInput(
                     title="Keep me",
                     description=None,
                     query_text="SELECT 1",
@@ -53,4 +53,4 @@ class TestCuratedQueriesService:
         )
 
         result_after_clear = service.replace_curated_queries(dataset.id, [])
-        assert result_after_clear.dataset_curated_queries == []
+        assert result_after_clear.output_port_curated_queries == []
