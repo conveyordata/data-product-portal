@@ -9,12 +9,14 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
-from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
-from app.datasets.query_stats_daily.schema_request import (
+from app.data_products.output_ports.query_stats_daily.model import (
+    DatasetQueryStatsDaily,
+)
+from app.data_products.output_ports.query_stats_daily.schema_request import (
     DatasetQueryStatsDailyDelete,
     DatasetQueryStatsDailyUpdate,
 )
-from app.datasets.query_stats_daily.schema_response import (
+from app.data_products.output_ports.query_stats_daily.schema_response import (
     DatasetQueryStatsDailyResponse,
     DatasetQueryStatsDailyResponses,
 )

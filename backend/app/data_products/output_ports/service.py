@@ -1,5 +1,5 @@
 import copy
-from typing import Iterable, Sequence
+from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -28,27 +28,33 @@ from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_products_datasets.model import (
-    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
-)
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.model import Dataset as DatasetModel
-from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema_request import (
+from app.data_products.model import ensure_data_product_exists
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.schema import OutputPort
+from app.data_products.output_ports.schema_request import (
+    CreateOutputPortRequest,
     DatasetAboutUpdate,
-    DatasetCreate,
     DatasetStatusUpdate,
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
-from app.datasets.search_dataset import (
+from app.data_products.output_ports.schema_response import (
+    DatasetGet,
+    DatasetsGet,
+)
+from app.data_products.output_ports.search_dataset import (
     recalculate_search_vector_dataset_statement,
     recalculate_search_vector_datasets_statement,
+)
+from app.data_products_datasets.model import (
+    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.search_output_ports.schema_response import SearchDatasets
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -74,14 +80,19 @@ class DatasetService:
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
 
-    def get_dataset(self, id: UUID, user: UserModel) -> DatasetGet:
-        dataset = self.db.get(
-            DatasetModel,
-            id,
-            options=[
+    def get_dataset(
+        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
+    ) -> DatasetGet:
+        query = select(DatasetModel).where(DatasetModel.id == id)
+
+        if data_product_id is not None:
+            query = query.where(DatasetModel.data_product_id == data_product_id)
+
+        dataset = self.db.scalar(
+            query.options(
                 selectinload(DatasetModel.data_product_links),
                 selectinload(DatasetModel.data_output_links),
-            ],
+            )
         )
 
         if not dataset:
@@ -113,7 +124,7 @@ class DatasetService:
 
     def search_datasets(
         self, query: str, limit: int, user: UserModel
-    ) -> Sequence[DatasetsSearch]:
+    ) -> Sequence[SearchDatasets]:
         load_options = get_dataset_load_options()
         stmt = (
             select(
@@ -133,7 +144,7 @@ class DatasetService:
             .order_by(desc("rank"))
         )
         results = self.db.execute(stmt).unique().all()
-        filtered_datasets: list[DatasetsSearch] = []
+        filtered_datasets: list[SearchDatasets] = []
         for row in results:
             if len(filtered_datasets) >= limit:
                 return filtered_datasets
@@ -161,22 +172,23 @@ class DatasetService:
         self.db.commit()
         return result.rowcount
 
-    def get_datasets(self, user: UserModel) -> Sequence[DatasetsGet]:
+    def get_datasets(
+        self, user: UserModel, check_user_assigned: bool = False
+    ) -> Sequence[DatasetsGet]:
         load_options = get_dataset_load_options()
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
             )
         )
+        query = (
+            select(DatasetModel).options(*load_options).order_by(asc(DatasetModel.name))
+        )
+        if check_user_assigned:
+            query = query.filter(DatasetModel.assignments.any(user_id=user.id))
         datasets = [
             dataset
-            for dataset in self.db.scalars(
-                select(DatasetModel)
-                .options(*load_options)
-                .order_by(asc(DatasetModel.name))
-            )
-            .unique()
-            .all()
+            for dataset in self.db.scalars(query).unique().all()
             if self.is_visible_to_user(dataset, user)
         ]
 
@@ -184,27 +196,6 @@ class DatasetService:
             if not dataset.lifecycle:
                 dataset.lifecycle = default_lifecycle
         return datasets
-
-    def get_user_datasets(self, user_id: UUID) -> Sequence[DatasetsGet]:
-        return (
-            self.db.scalars(
-                select(DatasetModel)
-                .options(
-                    selectinload(DatasetModel.data_product_links).raiseload("*"),
-                    selectinload(DatasetModel.data_output_links)
-                    .selectinload(DataOutputDatasetAssociationModel.data_output)
-                    .options(
-                        joinedload(DataOutput.configuration),
-                        joinedload(DataOutput.owner),
-                        raiseload("*"),
-                    ),
-                )
-                .filter(DatasetModel.assignments.any(user_id=user_id))
-                .order_by(asc(DatasetModel.name))
-            )
-            .unique()
-            .all()
-        )
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
@@ -214,7 +205,9 @@ class DatasetService:
 
         return tags
 
-    def create_dataset(self, dataset: DatasetCreate) -> DatasetModel:
+    def create_dataset(
+        self, data_product_id: UUID, dataset: CreateOutputPortRequest
+    ) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, self.db
@@ -226,6 +219,7 @@ class DatasetService:
             )
 
         dataset_schema = dataset.parse_pydantic_schema()
+        dataset_schema["data_product_id"] = data_product_id
         tags = self._fetch_tags(dataset_schema.pop("tag_ids", []))
         _ = dataset_schema.pop("owners", [])
         model = DatasetModel(**dataset_schema, tags=tags)
@@ -236,8 +230,8 @@ class DatasetService:
         self.db.commit()
         return model
 
-    def remove_dataset(self, id: UUID) -> DatasetModel:
-        dataset = self.db.get(DatasetModel, id)
+    def remove_dataset(self, id: UUID, data_product_id: UUID) -> DatasetModel:
+        dataset = ensure_dataset_exists(id, self.db, data_product_id=data_product_id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
@@ -248,8 +242,12 @@ class DatasetService:
         self.db.commit()
         return result
 
-    def update_dataset(self, id: UUID, dataset: DatasetUpdate) -> dict[str, UUID]:
-        current_dataset = ensure_dataset_exists(id, self.db)
+    def update_dataset(
+        self, id: UUID, data_product_id: UUID, dataset: DatasetUpdate
+    ) -> UUID:
+        current_dataset = ensure_dataset_exists(
+            id, self.db, data_product_id=data_product_id
+        )
         updated_dataset = dataset.model_dump(exclude_unset=True)
 
         if (
@@ -275,23 +273,29 @@ class DatasetService:
         self.db.flush()
         self.recalculate_search_vector_for(id)
         self.db.commit()
-        return {"id": current_dataset.id}
+        return current_dataset.id
 
     def update_dataset_about(
         self,
         id: UUID,
+        data_product_id: UUID,
         dataset: DatasetAboutUpdate,
     ) -> None:
-        current_dataset = ensure_dataset_exists(id, self.db)
+        current_dataset = ensure_dataset_exists(
+            id, self.db, data_product_id=data_product_id
+        )
         current_dataset.about = dataset.about
         self.db.commit()
 
     def update_dataset_status(
         self,
         id: UUID,
+        data_product_id: UUID,
         dataset: DatasetStatusUpdate,
     ) -> None:
-        current_dataset = ensure_dataset_exists(id, self.db)
+        current_dataset = ensure_dataset_exists(
+            id, self.db, data_product_id=data_product_id
+        )
         current_dataset.status = dataset.status
         self.db.commit()
 
@@ -305,14 +309,15 @@ class DatasetService:
         self.db.commit()
         return current_dataset
 
-    def get_graph_data(self, id: UUID, level: int) -> Graph:
-        dataset = self.db.get(
-            DatasetModel,
-            id,
-            options=[
+    def get_graph_data(self, id: UUID, data_product_id: UUID, level: int) -> Graph:
+        dataset = self.db.scalar(
+            select(DatasetModel)
+            .where(DatasetModel.id == id)
+            .where(DatasetModel.data_product_id == data_product_id)
+            .options(
                 selectinload(DatasetModel.data_product_links),
                 selectinload(DatasetModel.data_output_links),
-            ],
+            )
         )
         nodes = [
             Node(
@@ -445,3 +450,15 @@ class DatasetService:
         }
 
         return bool(consuming_data_products & user_data_products)
+
+    def get_output_ports(self, data_product_id: UUID) -> Sequence[OutputPort]:
+        ensure_data_product_exists(data_product_id, self.db)
+        return (
+            self.db.scalars(
+                select(DatasetModel).filter(
+                    DatasetModel.data_product_id == data_product_id
+                ),
+            )
+            .unique()
+            .all()
+        )

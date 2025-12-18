@@ -8,7 +8,7 @@ from httpx import Response
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
-from app.datasets.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
     DataProductDatasetAssociationFactory,

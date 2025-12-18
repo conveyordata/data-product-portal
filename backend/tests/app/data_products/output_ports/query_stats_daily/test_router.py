@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 
-from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
+from app.data_products.output_ports.query_stats_daily.model import (
+    DatasetQueryStatsDaily,
+)
 from tests.factories import (
     DataProductFactory,
     DatasetFactory,

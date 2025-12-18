@@ -4,10 +4,16 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization, DatasetResolver
+from app.data_products.output_ports.curated_queries.schema_request import (
+    DatasetCuratedQueriesUpdate,
+)
+from app.data_products.output_ports.curated_queries.schema_response import (
+    DatasetCuratedQueries,
+)
+from app.data_products.output_ports.curated_queries.service import (
+    DatasetCuratedQueryService,
+)
 from app.database.database import get_db_session
-from app.datasets.curated_queries.schema_request import DatasetCuratedQueriesUpdate
-from app.datasets.curated_queries.schema_response import DatasetCuratedQueries
-from app.datasets.curated_queries.service import DatasetCuratedQueryService
 
 router = APIRouter(prefix="/{id}/usage/curated_queries", tags=["datasets"])
 

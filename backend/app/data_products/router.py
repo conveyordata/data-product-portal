@@ -40,6 +40,7 @@ from app.data_outputs.schema_response import (
 )
 from app.data_outputs.service import DataOutputService
 from app.data_products import email
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -58,7 +59,6 @@ from app.data_products.schema_response import (
     GetConveyorIdeUrlResponse,
     GetDatabricksWorkspaceUrlResponse,
     GetDataProductInputPortsResponse,
-    GetDataProductOutputPortsResponse,
     GetDataProductResponse,
     GetDataProductRolledUpTagsResponse,
     GetDataProductsResponse,
@@ -71,12 +71,11 @@ from app.data_products.schema_response import (
 from app.data_products.service import DataProductService
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
-from app.datasets.enums import OutputPortAccessType
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
     GetEventHistoryResponse,
-    GetEventHistoryResponseItem,
+    GetEventHistoryResponseItemOld,
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
@@ -620,7 +619,7 @@ def get_data_products(
 @router.get(f"{old_route}/{{id}}/history", deprecated=True)
 def get_event_history_old(
     id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[GetEventHistoryResponseItem]:
+) -> Sequence[GetEventHistoryResponseItemOld]:
     return get_event_history(id, db).events
 
 
@@ -926,15 +925,6 @@ def get_data_product_input_ports(
             DatasetLinks.model_validate(input_port).convert()
             for input_port in DataProductService(db).get_input_ports(id)
         ]
-    )
-
-
-@router.get(f"{route}/{{id}}/output_ports")
-def get_data_product_output_ports(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> GetDataProductOutputPortsResponse:
-    return GetDataProductOutputPortsResponse(
-        output_ports=DataProductService(db).get_output_ports(id)
     )
 
 

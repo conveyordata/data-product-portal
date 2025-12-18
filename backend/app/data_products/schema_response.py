@@ -12,12 +12,12 @@ from app.data_outputs_datasets.schema_response import (
     BaseDataOutputDatasetAssociationGet,
     BaseTechnicalAssetOutputPortAssociationGet,
 )
+from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import (
     DataProductDatasetAssociation,
     DataProductOutputPortAssociation,
 )
-from app.datasets.schema import Dataset, OutputPort
 from app.shared.schema import ORMModel
 
 
@@ -89,10 +89,6 @@ class GetDataProductResponse(BaseDataProductGet):
 
 class GetDataProductInputPortsResponse(ORMModel):
     input_ports: Sequence[InputPort]
-
-
-class GetDataProductOutputPortsResponse(ORMModel):
-    output_ports: Sequence[OutputPort]
 
 
 class GetDataProductRolledUpTagsResponse(ORMModel):

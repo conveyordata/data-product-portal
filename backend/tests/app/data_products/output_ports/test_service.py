@@ -5,9 +5,9 @@ from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Prototype, Scope
 from app.data_outputs.model import DataOutput
 from app.data_outputs.service import DataOutputService
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.model import Dataset
-from app.datasets.service import DatasetService
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.service import DatasetService
 from app.settings import settings
 from tests import test_session
 from tests.factories import (
