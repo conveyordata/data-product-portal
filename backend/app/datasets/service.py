@@ -95,8 +95,7 @@ class DatasetService:
         if not tokens:
             return None
         prefixed = [f"{t}:*" for t in tokens]
-        prefixed = [t for t in prefixed if t != ':*']
-        return " & ".join(prefixed) if prefixed else None
+        return " & ".join(prefixed)
 
     def get_dataset(self, id: UUID, user: UserModel) -> DatasetGet:
         dataset = self.db.get(
