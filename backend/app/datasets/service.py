@@ -89,7 +89,9 @@ class DatasetService:
             'Hello world!' becomes 'hello:* & world:*'
             'a b' returns None (all tokens too short)
         """
-        tokens = [t for t in re.split(r"\W+", (query or "").lower()) if len(t) >= 2]
+        if not query:
+            return None
+        tokens = [t for t in re.split(r"\W+", query.lower()) if len(t) >= 2]
         if not tokens:
             return None
         prefixed = [f"{t}:*" for t in tokens]
