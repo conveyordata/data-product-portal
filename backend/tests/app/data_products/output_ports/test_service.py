@@ -3,11 +3,11 @@ from sqlalchemy.orm import selectinload
 
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Prototype, Scope
-from app.data_outputs.model import DataOutput
-from app.data_outputs.service import DataOutputService
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.service import DatasetService
+from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.service import DataOutputService
 from app.settings import settings
 from tests import test_session
 from tests.factories import (
@@ -144,7 +144,7 @@ class TestDatasetsService:
             data_output_name="Patient data", dataset_name="dataset name"
         )
         DataOutputService(test_session).link_dataset_to_data_output(
-            id=do.id, dataset_id=ds.id, actor=user
+            data_product_id=do.owner.id, id=do.id, dataset_id=ds.id, actor=user
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
@@ -164,7 +164,7 @@ class TestDatasetsService:
             data_output_description="patient info",
         )
         DataOutputService(test_session).link_dataset_to_data_output(
-            id=do.id, dataset_id=ds.id, actor=user
+            data_product_id=do.owner.id, id=do.id, dataset_id=ds.id, actor=user
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
