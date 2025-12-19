@@ -8,10 +8,10 @@ from app.data_products.output_ports.curated_queries.model import (
     DatasetCuratedQuery as DatasetCuratedQueryModel,
 )
 from app.data_products.output_ports.curated_queries.schema_request import (
-    DatasetCuratedQueryInput,
+    OutputPortCuratedQueryInput,
 )
 from app.data_products.output_ports.curated_queries.schema_response import (
-    DatasetCuratedQueries,
+    OutputPortCuratedQueries,
 )
 from app.data_products.output_ports.model import ensure_dataset_exists
 
@@ -20,7 +20,7 @@ class DatasetCuratedQueryService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_curated_queries(self, dataset_id: UUID) -> DatasetCuratedQueries:
+    def get_curated_queries(self, dataset_id: UUID) -> OutputPortCuratedQueries:
         ensure_dataset_exists(dataset_id, self.db)
         queries = self.db.scalars(
             select(DatasetCuratedQueryModel)
@@ -30,11 +30,11 @@ class DatasetCuratedQueryService:
                 asc(DatasetCuratedQueryModel.created_at),
             )
         ).all()
-        return DatasetCuratedQueries(dataset_curated_queries=queries)
+        return OutputPortCuratedQueries(output_port_curated_queries=queries)
 
     def replace_curated_queries(
-        self, dataset_id: UUID, curated_queries: Sequence[DatasetCuratedQueryInput]
-    ) -> DatasetCuratedQueries:
+        self, dataset_id: UUID, curated_queries: Sequence[OutputPortCuratedQueryInput]
+    ) -> OutputPortCuratedQueries:
         ensure_dataset_exists(dataset_id, self.db)
         self.db.execute(
             delete(DatasetCuratedQueryModel).where(

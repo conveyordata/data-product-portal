@@ -336,11 +336,10 @@
     "/api/datasets/{id}/query_stats": {
       "get": {
         "tags": [
-          "Data Products - Output ports",
-          "datasets"
+          "Data Products - Output ports"
         ],
-        "summary": "Get Query Stats",
-        "operationId": "get_query_stats",
+        "summary": "Get Dataset Query Stats",
+        "operationId": "get_dataset_query_stats",
         "parameters": [
           {
             "name": "id",
@@ -379,7 +378,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DatasetQueryStatsDailyResponses"
+                  "$ref": "#/components/schemas/DatasetQueryStatsResponses"
                 }
               }
             }
@@ -398,11 +397,11 @@
       },
       "patch": {
         "tags": [
-          "Data Products - Output ports",
-          "datasets"
+          "Data Products - Output ports"
         ],
-        "summary": "Update Query Stats",
-        "operationId": "update_query_stats",
+        "summary": "Update Dataset Query Stats",
+        "operationId": "update_dataset_query_stats",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -420,7 +419,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetQueryStatsDailyUpdates"
+                "$ref": "#/components/schemas/DatasetQueryStatsUpdates"
               }
             }
           }
@@ -448,11 +447,11 @@
       },
       "delete": {
         "tags": [
-          "Data Products - Output ports",
-          "datasets"
+          "Data Products - Output ports"
         ],
-        "summary": "Delete Query Stat",
-        "operationId": "delete_query_stat",
+        "summary": "Delete Dataset Query Stat",
+        "operationId": "delete_dataset_query_stat",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -470,7 +469,198 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetQueryStatsDailyDelete"
+                "$ref": "#/components/schemas/OutputPortQueryStatsDelete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Get Output Port Query Stats",
+        "operationId": "get_output_port_query_stats",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/QueryStatsGranularity",
+              "default": "week"
+            }
+          },
+          {
+            "name": "day_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 90,
+              "title": "Day Range"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortQueryStatsResponses"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Update Output Port Query Stats",
+        "operationId": "update_output_port_query_stats",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOutputPortQueryStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Delete Output Port Query Stat",
+        "operationId": "delete_output_port_query_stat",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortQueryStatsDelete"
               }
             }
           }
@@ -500,11 +690,11 @@
     "/api/datasets/{id}/usage/curated_queries": {
       "get": {
         "tags": [
-          "Data Products - Output ports",
-          "datasets"
+          "Data Products - Output ports"
         ],
         "summary": "Get Dataset Curated Queries",
         "operationId": "get_dataset_curated_queries",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -542,11 +732,11 @@
       },
       "put": {
         "tags": [
-          "Data Products - Output ports",
-          "datasets"
+          "Data Products - Output ports"
         ],
         "summary": "Replace Dataset Curated Queries",
         "operationId": "replace_dataset_curated_queries",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -564,7 +754,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetCuratedQueriesUpdate"
+                "$ref": "#/components/schemas/OutputPortCuratedQueriesUpdate"
               }
             }
           }
@@ -576,6 +766,130 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DatasetCuratedQueries"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Dataset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Dataset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Get Output Port Curated Queries",
+        "operationId": "get_output_port_curated_queries",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortCuratedQueries"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Replace Output Port Curated Queries",
+        "operationId": "replace_output_port_curated_queries",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortCuratedQueriesUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortCuratedQueries"
                 }
               }
             }
@@ -14913,7 +15227,7 @@
         "properties": {
           "dataset_curated_queries": {
             "items": {
-              "$ref": "#/components/schemas/DatasetCuratedQuery"
+              "$ref": "#/components/schemas/OutputPortCuratedQuery"
             },
             "type": "array",
             "title": "Dataset Curated Queries"
@@ -14923,112 +15237,8 @@
         "required": [
           "dataset_curated_queries"
         ],
-        "title": "DatasetCuratedQueries"
-      },
-      "DatasetCuratedQueriesUpdate": {
-        "properties": {
-          "curated_queries": {
-            "items": {
-              "$ref": "#/components/schemas/DatasetCuratedQueryInput"
-            },
-            "type": "array",
-            "title": "Curated Queries"
-          }
-        },
-        "type": "object",
-        "required": [
-          "curated_queries"
-        ],
-        "title": "DatasetCuratedQueriesUpdate"
-      },
-      "DatasetCuratedQuery": {
-        "properties": {
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "query_text": {
-            "type": "string",
-            "title": "Query Text"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "output_port_id",
-          "sort_order",
-          "title",
-          "description",
-          "query_text",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "DatasetCuratedQuery"
-      },
-      "DatasetCuratedQueryInput": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "query_text": {
-            "type": "string",
-            "title": "Query Text"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "query_text"
-        ],
-        "title": "DatasetCuratedQueryInput"
+        "title": "DatasetCuratedQueries",
+        "deprecated": true
       },
       "DatasetGet": {
         "properties": {
@@ -15229,66 +15439,11 @@
         "title": "DatasetLinks",
         "deprecated": true
       },
-      "DatasetQueryStatsDailyDelete": {
-        "properties": {
-          "date": {
-            "type": "string",
-            "title": "Date"
-          },
-          "consumer_data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Consumer Data Product Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "date",
-          "consumer_data_product_id"
-        ],
-        "title": "DatasetQueryStatsDailyDelete"
-      },
-      "DatasetQueryStatsDailyResponse": {
-        "properties": {
-          "date": {
-            "type": "string",
-            "format": "date",
-            "title": "Date"
-          },
-          "consumer_data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Consumer Data Product Id"
-          },
-          "query_count": {
-            "type": "integer",
-            "title": "Query Count"
-          },
-          "consumer_data_product_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Consumer Data Product Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "date",
-          "consumer_data_product_id",
-          "query_count"
-        ],
-        "title": "DatasetQueryStatsDailyResponse"
-      },
-      "DatasetQueryStatsDailyResponses": {
+      "DatasetQueryStatsResponses": {
         "properties": {
           "dataset_query_stats_daily_responses": {
             "items": {
-              "$ref": "#/components/schemas/DatasetQueryStatsDailyResponse"
+              "$ref": "#/components/schemas/OutputPortQueryStatsResponse"
             },
             "type": "array",
             "title": "Dataset Query Stats Daily Responses"
@@ -15298,37 +15453,14 @@
         "required": [
           "dataset_query_stats_daily_responses"
         ],
-        "title": "DatasetQueryStatsDailyResponses"
+        "title": "DatasetQueryStatsResponses",
+        "deprecated": true
       },
-      "DatasetQueryStatsDailyUpdate": {
-        "properties": {
-          "date": {
-            "type": "string",
-            "title": "Date"
-          },
-          "consumer_data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Consumer Data Product Id"
-          },
-          "query_count": {
-            "type": "integer",
-            "title": "Query Count"
-          }
-        },
-        "type": "object",
-        "required": [
-          "date",
-          "consumer_data_product_id",
-          "query_count"
-        ],
-        "title": "DatasetQueryStatsDailyUpdate"
-      },
-      "DatasetQueryStatsDailyUpdates": {
+      "DatasetQueryStatsUpdates": {
         "properties": {
           "dataset_query_stats_daily_updates": {
             "items": {
-              "$ref": "#/components/schemas/DatasetQueryStatsDailyUpdate"
+              "$ref": "#/components/schemas/OutputPortQueryStatsUpdate"
             },
             "type": "array",
             "title": "Dataset Query Stats Daily Updates"
@@ -15338,7 +15470,7 @@
         "required": [
           "dataset_query_stats_daily_updates"
         ],
-        "title": "DatasetQueryStatsDailyUpdates"
+        "title": "DatasetQueryStatsUpdates"
       },
       "DatasetSettingValue": {
         "properties": {
@@ -17502,6 +17634,127 @@
         ],
         "title": "OutputPortAccessType"
       },
+      "OutputPortCuratedQueries": {
+        "properties": {
+          "output_port_curated_queries": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortCuratedQuery"
+            },
+            "type": "array",
+            "title": "Output Port Curated Queries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_curated_queries"
+        ],
+        "title": "OutputPortCuratedQueries"
+      },
+      "OutputPortCuratedQueriesUpdate": {
+        "properties": {
+          "curated_queries": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortCuratedQueryInput"
+            },
+            "type": "array",
+            "title": "Curated Queries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "curated_queries"
+        ],
+        "title": "OutputPortCuratedQueriesUpdate"
+      },
+      "OutputPortCuratedQuery": {
+        "properties": {
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "query_text": {
+            "type": "string",
+            "title": "Query Text"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_id",
+          "sort_order",
+          "title",
+          "description",
+          "query_text",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "OutputPortCuratedQuery"
+      },
+      "OutputPortCuratedQueryInput": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "query_text": {
+            "type": "string",
+            "title": "Query Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "query_text"
+        ],
+        "title": "OutputPortCuratedQueryInput"
+      },
       "OutputPortLink": {
         "properties": {
           "id": {
@@ -17535,6 +17788,101 @@
           "output"
         ],
         "title": "OutputPortLink"
+      },
+      "OutputPortQueryStatsDelete": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "consumer_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consumer Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "consumer_data_product_id"
+        ],
+        "title": "OutputPortQueryStatsDelete"
+      },
+      "OutputPortQueryStatsResponse": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "consumer_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consumer Data Product Id"
+          },
+          "query_count": {
+            "type": "integer",
+            "title": "Query Count"
+          },
+          "consumer_data_product_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consumer Data Product Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "consumer_data_product_id",
+          "query_count"
+        ],
+        "title": "OutputPortQueryStatsResponse"
+      },
+      "OutputPortQueryStatsResponses": {
+        "properties": {
+          "output_port_query_stats_responses": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortQueryStatsResponse"
+            },
+            "type": "array",
+            "title": "Output Port Query Stats Responses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_query_stats_responses"
+        ],
+        "title": "OutputPortQueryStatsResponses"
+      },
+      "OutputPortQueryStatsUpdate": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "consumer_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consumer Data Product Id"
+          },
+          "query_count": {
+            "type": "integer",
+            "title": "Query Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "consumer_data_product_id",
+          "query_count"
+        ],
+        "title": "OutputPortQueryStatsUpdate"
       },
       "OutputPortSettingValue": {
         "properties": {
@@ -18682,6 +19030,22 @@
           "id"
         ],
         "title": "UpdateDomainResponse"
+      },
+      "UpdateOutputPortQueryStatus": {
+        "properties": {
+          "output_port_query_stats_updates": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortQueryStatsUpdate"
+            },
+            "type": "array",
+            "title": "Output Port Query Stats Updates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_query_stats_updates"
+        ],
+        "title": "UpdateOutputPortQueryStatus"
       },
       "UpdateOutputPortResponse": {
         "properties": {

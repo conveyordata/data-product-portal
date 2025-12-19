@@ -3,11 +3,11 @@ from typing import Optional
 from app.shared.schema import ORMModel
 
 
-class DatasetCuratedQueryInput(ORMModel):
+class OutputPortCuratedQueryInput(ORMModel):
     title: str
     description: Optional[str] = None
     query_text: str
 
 
-class DatasetCuratedQueriesUpdate(ORMModel):
-    curated_queries: list[DatasetCuratedQueryInput]
+class OutputPortCuratedQueriesUpdate(ORMModel):
+    curated_queries: list[OutputPortCuratedQueryInput]

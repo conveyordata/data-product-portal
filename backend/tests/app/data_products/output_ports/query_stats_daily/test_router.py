@@ -1,12 +1,12 @@
 from datetime import date, timedelta
 
-from app.data_products.output_ports.query_stats_daily.model import (
+from app.data_products.output_ports.query_stats.model import (
     DatasetQueryStatsDaily,
 )
 from tests.factories import (
     DataProductFactory,
     DatasetFactory,
-    DatasetQueryStatsDailyFactory,
+    DatasetQueryStatsFactory,
 )
 
 ENDPOINT = "/api/datasets"
@@ -53,13 +53,13 @@ class TestDatasetQueryStatsDailyRouter:
         today = date.today()
         yesterday = today - timedelta(days=1)
 
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=today,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer1.id,
             query_count=150,
         )
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=yesterday,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer2.id,
@@ -94,7 +94,7 @@ class TestDatasetQueryStatsDailyRouter:
         consumer = DataProductFactory()
         today = date.today()
 
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=today,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,
@@ -123,19 +123,19 @@ class TestDatasetQueryStatsDailyRouter:
         middle_of_week = start_of_week + timedelta(days=2)
         old_date = date.today() - timedelta(days=150)
 
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=start_of_week,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=50,
         )
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=middle_of_week,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=75,
         )
-        DatasetQueryStatsDailyFactory(
+        DatasetQueryStatsFactory(
             date=old_date,
             dataset_id=dataset.id,
             consumer_data_product_id=consumer.id,

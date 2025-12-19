@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
+from warnings import deprecated
 
 from app.shared.schema import ORMModel
 
 
-class DatasetCuratedQuery(ORMModel):
+class OutputPortCuratedQuery(ORMModel):
     output_port_id: UUID
     sort_order: int
     title: str
@@ -15,5 +16,10 @@ class DatasetCuratedQuery(ORMModel):
     updated_at: Optional[datetime]
 
 
+class OutputPortCuratedQueries(ORMModel):
+    output_port_curated_queries: Sequence[OutputPortCuratedQuery]
+
+
+@deprecated("Use OutputPortCuratedQueries instead")
 class DatasetCuratedQueries(ORMModel):
-    dataset_curated_queries: list[DatasetCuratedQuery]
+    dataset_curated_queries: Sequence[OutputPortCuratedQuery]
