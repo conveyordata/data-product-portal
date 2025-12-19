@@ -6,6 +6,9 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+- **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs.
+
 ### bugfixes
 
 - **[Marketplace]**: Fixed an issue where long domains could result in inconsistent sizing of the cards
