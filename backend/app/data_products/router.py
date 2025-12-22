@@ -85,19 +85,19 @@ from app.users.schema import User
 router = APIRouter()
 
 
-@router.get("/namespace_suggestion")
+@router.get("/namespace_suggestion", deprecated=True)
 def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
     return DataProductService.data_product_namespace_suggestion(name)
 
 
-@router.get("/validate_namespace")
+@router.get("/validate_namespace", deprecated=True)
 def validate_data_product_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
     return DataProductService(db).validate_data_product_namespace(namespace)
 
 
-@router.get("/namespace_length_limits")
+@router.get("/namespace_length_limits", deprecated=True)
 def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
     return DataProductService.data_product_namespace_length_limits()
 

@@ -261,18 +261,42 @@ class TestDataOutputsRouter:
                     "type": "dataProductNode",
                 }
 
+    def test_get_namespace_suggestion_substitution_old(self, client: TestClient):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion_old(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+
+    def test_get_namespace_length_limits_old(self, client):
+        response = self.get_namespace_length_limits_old(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
     def test_get_namespace_suggestion_substitution(self, client: TestClient):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
         body = response.json()
 
         assert response.status_code == 200
-        assert body["namespace"] == "test-with-spaces"
+        assert body["resource_name"] == "test-with-spaces"
 
     def test_get_namespace_length_limits(self, client):
         response = self.get_namespace_length_limits(client)
         assert response.status_code == 200
         assert response.json()["max_length"] > 1
+
+    def test_get_namespace_validation(self, client: TestClient):
+        namespace = "valid-namespace"
+        data_product = DataProductFactory()
+        response = self.get_namespace_validation(
+            client, namespace, str(data_product.id)
+        )
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["validity"] == "VALID"
 
     def test_create_data_output_duplicate_namespace(
         self, data_output_payload, client: TestClient
@@ -546,12 +570,33 @@ class TestDataOutputsRouter:
         return client.put(f"{ENDPOINT}/{data_output_id}/status", json=status)
 
     @staticmethod
-    def get_namespace_suggestion(client: TestClient, name) -> Response:
+    def get_namespace_suggestion_old(client: TestClient, name) -> Response:
         return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def get_namespace_length_limits(client: TestClient) -> Response:
+    def get_namespace_suggestion(client: TestClient, name) -> Response:
+        return client.post(f"/api/v2/resource_names/sanitize?name={name}")
+
+    @staticmethod
+    def get_namespace_validation(
+        client: TestClient, namespace, data_product_id
+    ) -> Response:
+        return client.post(
+            "/api/v2/resource_names/validate",
+            json={
+                "resource_name": namespace,
+                "model": "technical_asset",
+                "data_product_id": data_product_id,
+            },
+        )
+
+    @staticmethod
+    def get_namespace_length_limits_old(client: TestClient) -> Response:
         return client.get(f"{ENDPOINT}/namespace_length_limits")
+
+    @staticmethod
+    def get_namespace_length_limits(client: TestClient) -> Response:
+        return client.get("/api/v2/resource_names/constraints")
 
     @staticmethod
     def get_data_output_history(client, data_output_id):
