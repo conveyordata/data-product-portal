@@ -10,8 +10,8 @@ from starlette.routing import _DefaultLifespan
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz.authorization import Authorization
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.database.database import Base, get_db_session
-from app.datasets.enums import OutputPortAccessType
 from app.main import app
 from app.settings import settings
 from tests.factories.role import RoleFactory

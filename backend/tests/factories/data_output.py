@@ -1,7 +1,7 @@
 import factory
 
-from app.data_outputs.model import DataOutput
-from app.data_outputs.status import TechnicalAssetStatus
+from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.status import TechnicalAssetStatus
 from tests import test_session
 from tests.factories.data_product import DataProductFactory
 from tests.factories.platform_service import PlatformServiceFactory

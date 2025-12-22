@@ -7,7 +7,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.domains.model import Domain
 from app.core.logging import logger
 from app.data_products.model import DataProduct
-from app.datasets.model import Dataset
+from app.data_products.output_ports.model import Dataset
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
