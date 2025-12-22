@@ -177,7 +177,6 @@ class TestDatasetsService:
             description="Clinical information and medical history"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-    
         # Search for 'patient' - should match (in name)
         results_patient = DatasetService(test_session).search_datasets("patient", 10, user)
         assert len(results_patient) == 1
