@@ -155,14 +155,13 @@ class TestDatasetsService:
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(
-            name="Clinical dataset", 
+            name="Clinical dataset",
             description="Patient information and medical records"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-    
+
         # 'clin data' should match 'Clinical dataset' (both words present)
         results = DatasetService(test_session).search_datasets("clin data", 10, user)
-    
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].name == ds.name
