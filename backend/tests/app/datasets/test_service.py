@@ -314,4 +314,4 @@ class TestDatasetsService:
     def test_build_prefix_tsquery_hyphens_and_underscores(self):
         """Test that hyphens and underscores are treated as word boundaries."""
         result = DatasetService._build_prefix_tsquery("test-data_set")
-        assert result == "test:* & data:* & set:*"
+        assert result == "*test:* & *data:* & *set:*"
