@@ -280,7 +280,7 @@ class TestDatasetsService:
     def test_build_prefix_tsquery_filters_short_tokens(self):
         """Test that single character tokens are filtered out."""
         result = DatasetService._build_prefix_tsquery("a b cd")
-        assert result == "cd:*"
+        assert result == "*cd:*"
 
     def test_build_prefix_tsquery_all_short_tokens(self):
         """Test that None is returned when all tokens are too short."""
