@@ -35,12 +35,12 @@ def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutp
     return DataOutputService(db).get_data_outputs()
 
 
-@router.get("/namespace_suggestion")
+@router.get("/namespace_suggestion", deprecated=True)
 def get_data_output_namespace_suggestion(name: str) -> NamespaceSuggestion:
     return DataOutputService.data_output_namespace_suggestion(name)
 
 
-@router.get("/namespace_length_limits")
+@router.get("/namespace_length_limits", deprecated=True)
 def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
     return DataOutputService.data_output_namespace_length_limits()
 

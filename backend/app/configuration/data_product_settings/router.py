@@ -43,12 +43,12 @@ def create_data_product_setting(
     return DataProductSettingService(db).create_data_product_setting(setting)
 
 
-@router.get("/namespace_suggestion")
+@router.get("/namespace_suggestion", deprecated=True)
 def get_data_product_settings_namespace_suggestion(name: str) -> NamespaceSuggestion:
     return DataProductSettingService.data_product_settings_namespace_suggestion(name)
 
 
-@router.get("/validate_namespace")
+@router.get("/validate_namespace", deprecated=True)
 def validate_data_product_settings_namespace(
     namespace: str,
     scope: DataProductSettingScope,
@@ -59,7 +59,7 @@ def validate_data_product_settings_namespace(
     )
 
 
-@router.get("/namespace_length_limits")
+@router.get("/namespace_length_limits", deprecated=True)
 def get_data_product_settings_namespace_length_limits() -> NamespaceLengthLimits:
     return DataProductSettingService.data_product_settings_namespace_length_limits()
 

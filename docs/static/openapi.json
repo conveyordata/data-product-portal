@@ -6191,6 +6191,7 @@
         ],
         "summary": "Get Data Product Settings Namespace Suggestion",
         "operationId": "get_data_product_settings_namespace_suggestion",
+        "deprecated": true,
         "parameters": [
           {
             "name": "name",
@@ -6233,6 +6234,7 @@
         ],
         "summary": "Validate Data Product Settings Namespace",
         "operationId": "validate_data_product_settings_namespace",
+        "deprecated": true,
         "parameters": [
           {
             "name": "namespace",
@@ -6294,7 +6296,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/configuration/data_product_settings/{id}": {
@@ -6717,6 +6720,7 @@
         ],
         "summary": "Get Data Output Namespace Suggestion",
         "operationId": "get_data_output_namespace_suggestion",
+        "deprecated": true,
         "parameters": [
           {
             "name": "name",
@@ -6770,7 +6774,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_outputs/result_string": {
