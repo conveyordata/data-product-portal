@@ -180,7 +180,6 @@ class TestDatasetsService:
         results_patient = DatasetService(test_session).search_datasets("patient", 10, user)
         assert len(results_patient) == 1
         assert results_patient[0].id == ds.id
-    
         # Search for 'clinical' - should match (in description)
         results_clinical = DatasetService(test_session).search_datasets("clinical", 10, user)
         assert len(results_clinical) == 1
@@ -263,8 +262,6 @@ class TestDatasetsService:
             options=[selectinload(Dataset.data_product_links)],
             populate_existing=True,
         )
-
-    # Unit tests for _build_prefix_tsquery function
     def test_build_prefix_tsquery_basic(self):
         """Test basic query with two words."""
         result = DatasetService._build_prefix_tsquery("Hello world")
