@@ -170,7 +170,6 @@ class TestDatasetsService:
         """Test that query matches content in both title/name and description."""
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        
         # Dataset with 'patient' in name and 'clinical' in description
         ds = DatasetFactory(
             name="Patient data records", 
@@ -186,7 +185,6 @@ class TestDatasetsService:
         results_clinical = DatasetService(test_session).search_datasets("clinical", 10, user)
         assert len(results_clinical) == 1
         assert results_clinical[0].id == ds.id
-    
         # Search for 'patient clinical' - should match (one in name, one in description)
         results_both = DatasetService(test_session).search_datasets("patient clinical", 10, user)
         assert len(results_both) == 1
