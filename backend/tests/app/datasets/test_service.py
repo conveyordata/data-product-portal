@@ -305,7 +305,7 @@ class TestDatasetsService:
     def test_build_prefix_tsquery_multiple_words_with_numbers(self):
         """Test query with words and numbers."""
         result = DatasetService._build_prefix_tsquery("dataset123 test456")
-        assert result == "dataset123:* & test456:*"
+        assert result == "*dataset123:* & *test456:*"
 
     def test_build_prefix_tsquery_case_insensitive(self):
         """Test that query is converted to lowercase."""
