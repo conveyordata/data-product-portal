@@ -74,7 +74,6 @@ class DatasetService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
-    
     # Modified the _build_prefix_tsquery function
     @staticmethod
     def _build_prefix_tsquery(query: str) -> str | None:
