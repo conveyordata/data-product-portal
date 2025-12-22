@@ -144,7 +144,7 @@ class TestDatasetsService:
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
         # Partial token 'clin' should match 'Clinical' via prefix search
-        results = DatasetService(test_session).search_datasets("clin", 10, user)
+        results = DatasetService(test_session).search_datasets("inica", 10, user)
 
         assert len(results) == 1
         assert results[0].id == ds.id
