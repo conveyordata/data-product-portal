@@ -267,53 +267,52 @@ class TestDatasetsService:
             options=[selectinload(Dataset.data_product_links)],
             populate_existing=True,
         )
-        
+
     # Unit tests for _build_prefix_tsquery function
     def test_build_prefix_tsquery_basic(self):
         """Test basic query with two words."""
         result = DatasetService._build_prefix_tsquery("Hello world")
         assert result == "hello:* & world:*"
-    
+
     def test_build_prefix_tsquery_with_special_characters(self):
         """Test query with special characters."""
         result = DatasetService._build_prefix_tsquery("Hello, world!")
         assert result == "hello:* & world:*"
-    
+
     def test_build_prefix_tsquery_filters_short_tokens(self):
         """Test that single character tokens are filtered out."""
         result = DatasetService._build_prefix_tsquery("a b cd")
         assert result == "cd:*"
-    
+
     def test_build_prefix_tsquery_all_short_tokens(self):
         """Test that None is returned when all tokens are too short."""
         result = DatasetService._build_prefix_tsquery("a b c")
         assert result is None
-    
+
     def test_build_prefix_tsquery_empty_string(self):
         """Test that None is returned for empty string."""
         result = DatasetService._build_prefix_tsquery("")
         assert result is None
-    
+
     def test_build_prefix_tsquery_none_input(self):
         """Test that None is returned for None input."""
         result = DatasetService._build_prefix_tsquery(None)
         assert result is None
-    
+
     def test_build_prefix_tsquery_whitespace_only(self):
         """Test that None is returned for whitespace only."""
         result = DatasetService._build_prefix_tsquery("   ")
         assert result is None
-    
+
     def test_build_prefix_tsquery_multiple_words_with_numbers(self):
         """Test query with words and numbers."""
         result = DatasetService._build_prefix_tsquery("dataset123 test456")
         assert result == "dataset123:* & test456:*"
-    
+
     def test_build_prefix_tsquery_case_insensitive(self):
         """Test that query is converted to lowercase."""
         result = DatasetService._build_prefix_tsquery("Hello WORLD Test")
         assert result == "hello:* & world:* & test:*"
-    
     def test_build_prefix_tsquery_hyphens_and_underscores(self):
         """Test that hyphens and underscores are treated as word boundaries."""
         result = DatasetService._build_prefix_tsquery("test-data_set")
