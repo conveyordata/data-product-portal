@@ -191,7 +191,6 @@ class TestDatasetsService:
         results_both = DatasetService(test_session).search_datasets("patient clinical", 10, user)
         assert len(results_both) == 1
         assert results_both[0].id == ds.id
-        
     def test_search_dataset_matching_data_output_name(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
