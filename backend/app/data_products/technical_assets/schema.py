@@ -3,7 +3,7 @@ from uuid import UUID
 from warnings import deprecated
 
 from app.data_output_configuration.schema_union import DataOutputConfiguration
-from app.data_outputs.status import TechnicalAssetStatus
+from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
 
 

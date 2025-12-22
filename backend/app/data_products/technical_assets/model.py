@@ -1,14 +1,15 @@
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from fastapi import HTTPException, status
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, String, and_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, foreign, relationship
+from sqlalchemy.orm import Mapped, Session, foreign, relationship
 
 from app.configuration.environments.platform_service_configurations.model import (
     EnvironmentPlatformServiceConfiguration,
 )
-from app.data_outputs.status import TechnicalAssetStatus
+from app.data_products.technical_assets.status import TechnicalAssetStatus
 
 if TYPE_CHECKING:
     from app.configuration.platforms.model import Platform
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
 
 from app.configuration.tags.model import Tag, tag_data_output_table
-from app.database.database import Base
+from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 
@@ -67,3 +68,18 @@ class DataOutput(Base, BaseORM):
         lazy="raise",
         viewonly=True,
     )
+
+
+def ensure_data_output_exists(
+    data_output_id: UUID,
+    db: Session,
+    data_product_id: Optional[UUID] = None,
+    **kwargs,
+) -> DataOutput:
+    data_output: DataOutput = ensure_exists(data_output_id, db, DataOutput, **kwargs)
+    if data_product_id is not None and data_output.owner_id != data_product_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Required item {data_output_id} does not exist",
+        )
+    return data_output

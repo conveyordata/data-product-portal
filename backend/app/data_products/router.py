@@ -30,15 +30,6 @@ from app.core.namespace.validation import (
     NamespaceSuggestion,
     NamespaceValidation,
 )
-from app.data_outputs.schema_request import (
-    CreateTechnicalAssetRequest,
-    DataOutputCreate,
-)
-from app.data_outputs.schema_response import (
-    DataOutputGet,
-    GetTechnicalAssetsResponse,
-)
-from app.data_outputs.service import DataOutputService
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.schema_request import (
@@ -69,6 +60,15 @@ from app.data_products.schema_response import (
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
+from app.data_products.technical_assets.schema_request import (
+    CreateTechnicalAssetRequest,
+    DataOutputCreate,
+)
+from app.data_products.technical_assets.schema_response import (
+    DataOutputGet,
+    GetTechnicalAssetsResponse,
+)
+from app.data_products.technical_assets.service import DataOutputService
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType

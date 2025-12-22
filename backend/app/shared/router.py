@@ -17,10 +17,10 @@ from app.configuration.tags.router import router as tag
 from app.configuration.theme_settings.router import router as theme_settings
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
-from app.data_outputs.router import router as data_outputs
 from app.data_outputs_datasets.router import router as data_output_dataset
 from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
+from app.data_products.technical_assets.router import router as data_outputs
 from app.data_products_datasets.router import router as data_product_dataset
 from app.graph.router import router as graph
 from app.notifications.router import router as notification

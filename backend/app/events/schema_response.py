@@ -1,11 +1,12 @@
 from typing import Optional, Sequence
 from uuid import UUID
+from warnings import deprecated
 
 from pydantic import NaiveDatetime
 
-from app.data_outputs.schema import DataOutput, TechnicalAsset
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.schema import DataProduct
+from app.data_products.technical_assets.schema import DataOutput, TechnicalAsset
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -33,6 +34,7 @@ class GetEventHistoryResponseItem(BaseEventGet):
     technical_asset: Optional[TechnicalAsset] = None
 
 
+@deprecated("Use GetEventHistoryResponseItem instead")
 class GetEventHistoryResponseItemOld(BaseEventGet):
     deleted_subject_identifier: Optional[str] = None
     deleted_target_identifier: Optional[str] = None
