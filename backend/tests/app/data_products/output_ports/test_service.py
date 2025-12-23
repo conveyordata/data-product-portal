@@ -1,6 +1,5 @@
 import pytest
 from sqlalchemy.orm import selectinload
-
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Prototype, Scope
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -21,15 +20,12 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-
 class TestDatasetsService:
     def test_private_dataset_not_visible(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, user) is False
-
     def test_get_private_dataset_by_owner(self):
         owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
@@ -39,7 +35,6 @@ class TestDatasetsService:
         )
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, owner) is True
-
     def test_get_private_dataset_by_admin(self):
         admin = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
@@ -47,7 +42,6 @@ class TestDatasetsService:
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, admin) is True
-
     def test_get_private_dataset_by_member_of_consuming_data_product(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
@@ -59,41 +53,28 @@ class TestDatasetsService:
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, user) is True
-
     def test_create_search_vector_dataset(self):
         settings.SEARCH_INDEXING_DISABLED = False
         ds = DatasetFactory()
-
         updated_rows = DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         assert updated_rows == 1
-
     def test_create_search_vector_indexing_disabled(self):
         settings.SEARCH_INDEXING_DISABLED = True
         ds = DatasetFactory()
-
         updated_rows = DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         assert updated_rows == 0
-
     def test_create_search_vector_all_datasets(self):
         settings.SEARCH_INDEXING_DISABLED = False
         DatasetFactory()
         DatasetFactory()
-
         updated_rows = DatasetService(test_session).recalculate_search_vector_datasets()
-
         assert updated_rows == 2
-
     def test_create_search_vector_all_datasets_indexing_disabled(self):
         settings.SEARCH_INDEXING_DISABLED = True
         DatasetFactory()
         DatasetFactory()
-
         updated_rows = DatasetService(test_session).recalculate_search_vector_datasets()
-
         assert updated_rows == 0
-
     def test_search_dataset_matching_description(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -101,14 +82,11 @@ class TestDatasetsService:
             name="dataset name", description="Clinical dataset patient information"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         results = DatasetService(test_session).search_datasets("patient", 10, user)
-
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.2857143)
-
     def test_search_dataset_matching_name(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -116,40 +94,31 @@ class TestDatasetsService:
             name="Clinical dataset patient information", description="description"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         results = DatasetService(test_session).search_datasets("patient", 10, user)
-
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.5)
-
     def test_search_dataset_matching_name_and_description(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(name="Clinical dataset", description="clinical studies")
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         results = DatasetService(test_session).search_datasets("clinical", 10, user)
-
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.5833333)
-
     def test_search_dataset_infix_matches(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(name="Clinical dataset", description="Some details")
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         # Partial token 'inica' should match 'Clinical' via infix (substring) search
         results = DatasetService(test_session).search_datasets("inica", 10, user)
-
         assert len(results) == 1
         assert results[0].id == ds.id
-    
-    # Add test for multi-word matching and/or matching in both title and description    
+    # Add test for multi-word matching and/or matching in both title and description
     def test_search_dataset_multi_word_query_matches_multiple_words(self):
         """Test that multi-word query 'clin data' matches 'Clinical dataset'."""
         settings.SEARCH_INDEXING_DISABLED = False
@@ -159,20 +128,18 @@ class TestDatasetsService:
             description="Patient information and medical records"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         # 'clin data' should match 'Clinical dataset' (both words present)
         results = DatasetService(test_session).search_datasets("clin data", 10, user)
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].name == ds.name
-
     def test_search_dataset_query_matches_in_both_title_and_description(self):
         """Test that query matches content in both title/name and description."""
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         # Dataset with 'patient' in name and 'clinical' in description
         ds = DatasetFactory(
-            name="Patient data records", 
+            name="Patient data records",
             description="Clinical information and medical history"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
@@ -198,14 +165,11 @@ class TestDatasetsService:
             data_product_id=do.owner.id, id=do.id, dataset_id=ds.id, actor=user
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         results = DatasetService(test_session).search_datasets("patient", 10, user)
-
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.5)
-
     def test_search_dataset_matching_data_output_description(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -218,27 +182,19 @@ class TestDatasetsService:
             data_product_id=do.owner.id, id=do.id, dataset_id=ds.id, actor=user
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         results = DatasetService(test_session).search_datasets("patient", 10, user)
-
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.2857143)
-
     def test_search_dataset_unexisting_word(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(description="Clinical dataset for patient information")
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
-
         results = DatasetService(test_session).search_datasets("CRM details", 10, user)
-
         assert len(results) == 0
-
-    def create_datasets_with_data_output(
-        self, data_output_name, dataset_name, data_output_description=""
-    ) -> tuple[DataOutputFactory, DatasetFactory]:
+    def create_datasets_with_data_output(self, data_output_name, dataset_name, data_output_description="") -> tuple[DataOutputFactory, DatasetFactory]:
         data_product = DataProductFactory()
         do = DataOutputFactory(
             name=data_output_name,
@@ -253,7 +209,6 @@ class TestDatasetsService:
             populate_existing=True,
         )
         return do, ds
-
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:
         return test_session.get(
@@ -266,42 +221,34 @@ class TestDatasetsService:
         """Test basic query with two words."""
         result = DatasetService._build_prefix_tsquery("Hello world")
         assert result == "hello:* & world:*"
-
     def test_build_prefix_tsquery_with_special_characters(self):
         """Test query with special characters."""
         result = DatasetService._build_prefix_tsquery("Hello, world!")
         assert result == "hello:* & world:*"
-
     def test_build_prefix_tsquery_filters_short_tokens(self):
         """Test that single character tokens are filtered out."""
         result = DatasetService._build_prefix_tsquery("a b cd")
         assert result == "*cd:*"
-
     def test_build_prefix_tsquery_all_short_tokens(self):
         """Test that None is returned when all tokens are too short."""
         result = DatasetService._build_prefix_tsquery("a b c")
         assert result is None
-
     def test_build_prefix_tsquery_empty_string(self):
         """Test that None is returned for empty string."""
         result = DatasetService._build_prefix_tsquery("")
         assert result is None
-
     def test_build_prefix_tsquery_none_input(self):
         """Test that None is returned for None input."""
         result = DatasetService._build_prefix_tsquery(None)
         assert result is None
-
     def test_build_prefix_tsquery_whitespace_only(self):
         """Test that None is returned for whitespace only."""
         result = DatasetService._build_prefix_tsquery("   ")
         assert result is None
-
     def test_build_prefix_tsquery_multiple_words_with_numbers(self):
         """Test query with words and numbers."""
         result = DatasetService._build_prefix_tsquery("dataset123 test456")
         assert result == "*dataset123:* & *test456:*"
-
     def test_build_prefix_tsquery_case_insensitive(self):
         """Test that query is converted to lowercase."""
         result = DatasetService._build_prefix_tsquery("Hello WORLD Test")
