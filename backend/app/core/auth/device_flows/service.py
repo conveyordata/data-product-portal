@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Annotated
 from uuid import uuid4
-
+from sqlalchemy import delete, select, func
 import httpx
 import pytz
 from fastapi import Depends, HTTPException, Request, status
@@ -66,22 +66,19 @@ class DeviceFlowService:
             buffer = timedelta(minutes=settings.DEVICE_FLOW_CLEANUP_BUFFER_MINUTES)
             cutoff = now - buffer
 
-            # Fetch candidates for deletion
-            candidates = db.scalars(
-                select(DeviceFlowModel).where(
-                    (DeviceFlowModel.max_expiry <= cutoff)
+            # Count candidates for deletion
+            count_stmt = select(func.count()).select_from(DeviceFlowModel).where(
+                DeviceFlowModel.max_expiry <= cutoff
+            )
+            deleted = db.scalar(count_stmt)
+            
+            # Delete all candidates in a single query
+            if deleted > 0:
+                delete_stmt = delete(DeviceFlowModel).where(
+                    DeviceFlowModel.max_expiry <= cutoff
                 )
-            ).all()
-
-            deleted = 0
-            for device in candidates:
-                # Any flow past max_expiry is safe to delete
-                db.delete(device)
-                deleted += 1
-
-            if deleted:
+                db.execute(delete_stmt)
                 self.logger.info(f"Cleaned {deleted} stale device flow records")
-            db.commit()
         except Exception as e:
             # Best-effort cleanup; do not block auth flows
             db.rollback()
@@ -91,7 +88,6 @@ class DeviceFlowService:
         self, db: Session, client_id: str, scope: str = "openid"
     ) -> DeviceFlow:
         # Best-effort cleanup before creating a new flow
-        self.clean_device_flows(db)
         device_flow = DeviceFlowModel(
             client_id=client_id,
             scope=scope,
