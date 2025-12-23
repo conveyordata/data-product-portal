@@ -14,9 +14,6 @@ from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidator,
     NamespaceValidityType,
 )
 from app.data_outputs_datasets.model import (
@@ -252,14 +249,6 @@ class DataOutputService:
                 node.isMain = True
 
         return graph
-
-    @classmethod
-    def data_output_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
-        return NamespaceValidator.namespace_suggestion(name)
-
-    @classmethod
-    def data_output_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return NamespaceValidator.namespace_length_limits()
 
     def get_data_output_result_string(
         self,

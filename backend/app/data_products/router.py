@@ -31,6 +31,7 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.data_products import email
+from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -80,6 +81,10 @@ from app.events.schema_response import (
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.resource_names.service import (
+    DataOutputResourceNameValidator,
+    ResourceNameService,
+)
 from app.users.schema import User
 
 router = APIRouter()
@@ -87,19 +92,27 @@ router = APIRouter()
 
 @router.get("/namespace_suggestion", deprecated=True)
 def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataProductService.data_product_namespace_suggestion(name)
+    return NamespaceSuggestion(
+        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
+    )
 
 
 @router.get("/validate_namespace", deprecated=True)
 def validate_data_product_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return DataProductService(db).validate_data_product_namespace(namespace)
+    return NamespaceValidation(
+        validity=ResourceNameService(model=DataProductModel)
+        .validate_resource_name(namespace, db)
+        .validity
+    )
 
 
 @router.get("/namespace_length_limits", deprecated=True)
 def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataProductService.data_product_namespace_length_limits()
+    return NamespaceLengthLimits(
+        max_length=ResourceNameService.resource_name_length_limits().max_length
+    )
 
 
 @router.post(
@@ -1048,11 +1061,8 @@ def unlink_input_port_from_data_product(
 def validate_data_output_namespace(
     id: UUID, namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return validate_technical_asset_namespace(id, namespace, db)
-
-
-@router.get(f"{route}/{{id}}/technical_asset/validate_namespace")
-def validate_technical_asset_namespace(
-    id: UUID, namespace: str, db: Session = Depends(get_db_session)
-) -> NamespaceValidation:
-    return DataProductService(db).validate_data_output_namespace(namespace, id)
+    return NamespaceValidation(
+        validity=DataOutputResourceNameValidator()
+        .validate_resource_name(resource_name=namespace, db=db, scope=id)
+        .validity
+    )

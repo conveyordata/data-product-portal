@@ -25,9 +25,6 @@ from app.configuration.data_product_settings.schema_response import (
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     DataProductSettingNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
     NamespaceValidityType,
 )
 
@@ -138,18 +135,3 @@ class DataProductSettingService:
         )
         self.db.delete(data_product_setting)
         self.db.commit()
-
-    def validate_data_product_settings_namespace(
-        self, namespace: str, scope: DataProductSettingScope
-    ) -> NamespaceValidation:
-        return self.namespace_validator.validate_namespace(namespace, self.db, scope)
-
-    @classmethod
-    def data_product_settings_namespace_suggestion(
-        cls, name: str
-    ) -> NamespaceSuggestion:
-        return DataProductSettingNamespaceValidator.namespace_suggestion(name)
-
-    @classmethod
-    def data_product_settings_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return DataProductSettingNamespaceValidator.namespace_length_limits()

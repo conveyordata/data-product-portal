@@ -25,6 +25,7 @@ from app.core.namespace.validation import (
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
+from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_dataset_exists
 from app.data_products.output_ports.query_stats.router import (
     router as query_stats_router,
@@ -56,6 +57,7 @@ from app.events.schema_response import (
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.resource_names.service import ResourceNameService
 from app.users.model import User
 
 
@@ -102,21 +104,29 @@ router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
 
 
-@router.get(f"{old_route}/namespace_suggestion")
+@router.get(f"{old_route}/namespace_suggestion", deprecated=True)
 def get_dataset_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DatasetService.dataset_namespace_suggestion(name)
+    return NamespaceSuggestion(
+        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
+    )
 
 
-@router.get(f"{old_route}/validate_namespace")
+@router.get(f"{old_route}/validate_namespace", deprecated=True)
 def validate_dataset_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return DatasetService(db).validate_dataset_namespace(namespace)
+    return NamespaceValidation(
+        validity=ResourceNameService(model=OutputPortModel)
+        .validate_resource_name(namespace, db)
+        .validity
+    )
 
 
-@router.get(f"{old_route}/namespace_length_limits")
+@router.get(f"{old_route}/namespace_length_limits", deprecated=True)
 def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
-    return DatasetService.dataset_namespace_length_limits()
+    return NamespaceLengthLimits(
+        max_length=ResourceNameService.resource_name_length_limits().max_length
+    )
 
 
 @router.get(f"{old_route}/user/{{user_id}}", deprecated=True)

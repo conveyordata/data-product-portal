@@ -924,6 +924,7 @@
         ],
         "summary": "Get Dataset Namespace Suggestion",
         "operationId": "get_dataset_namespace_suggestion",
+        "deprecated": true,
         "parameters": [
           {
             "name": "name",
@@ -966,6 +967,7 @@
         ],
         "summary": "Validate Dataset Namespace",
         "operationId": "validate_dataset_namespace",
+        "deprecated": true,
         "parameters": [
           {
             "name": "namespace",
@@ -1019,7 +1021,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/datasets/user/{user_id}": {
@@ -4908,58 +4911,6 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/technical_asset/validate_namespace": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Validate Technical Asset Namespace",
-        "operationId": "validate_technical_asset_namespace",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Namespace"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NamespaceValidation"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/data_product_types/{id}": {
       "get": {
         "tags": [
@@ -6719,8 +6670,8 @@
         "tags": [
           "Data Products - Technical assets"
         ],
-        "summary": "Get Data Output Namespace Suggestion",
-        "operationId": "get_data_output_namespace_suggestion",
+        "summary": "Get Dataset Namespace Suggestion",
+        "operationId": "get_dataset_namespace_suggestion",
         "deprecated": true,
         "parameters": [
           {
@@ -6762,8 +6713,8 @@
         "tags": [
           "Data Products - Technical assets"
         ],
-        "summary": "Get Data Output Namespace Length Limits",
-        "operationId": "get_data_output_namespace_length_limits",
+        "summary": "Get Dataset Namespace Length Limits",
+        "operationId": "get_dataset_namespace_length_limits",
         "responses": {
           "200": {
             "description": "Successful Response",
