@@ -59,11 +59,11 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                 DatasetRoleAssignmentCreateContract
             >({
                 query: (request) => ({
-                    url: buildUrl(ApiUrl.RoleAssignmentsDatasetRequest, { datasetId: request.dataset_id }),
+                    url: ApiUrl.RoleAssignmentsDatasetRequest,
                     method: 'POST',
                     data: {
+                        output_port_id: request.dataset_id,
                         role_id: request.role_id,
-                        user_id: request.user_id,
                     },
                 }),
                 invalidatesTags: (_, _error, { dataset_id }) => [
