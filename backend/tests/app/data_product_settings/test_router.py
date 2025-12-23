@@ -185,6 +185,18 @@ class TestDataProductSettingsRouter:
         assert response.status_code == 200
         assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
 
+    def test_validate_namespace_duplicate_dataset(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATASET
+        )
+        response = self.validate_namespace_output_port(
+            client, namespace, DataProductSettingScope.DATASET
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+
     def test_validate_namespace_duplicate_scoped_to_data_product(self, client):
         namespace = "test"
         DataProductSettingFactory(
@@ -291,6 +303,19 @@ class TestDataProductSettingsRouter:
             json={
                 "resource_name": namespace,
                 "model": "data_product_setting",
+                "scope": scope.value,
+            },
+        )
+
+    @staticmethod
+    def validate_namespace_output_port(
+        client, namespace, scope: DataProductSettingScope
+    ):
+        return client.post(
+            "/api/v2/resource_names/validate",
+            json={
+                "resource_name": namespace,
+                "model": "output_port_setting",
                 "scope": scope.value,
             },
         )
