@@ -63,9 +63,8 @@ Visit http://localhost:8080
 You should see the **Data Product Portal** UI!
 
 :::danger[Warning]
-
-The Docker setup will **drop and recreate the PostgreSQL database** on startup. Do not connect this setup to any live production database.
-
+The Docker setup will **drop and recreate the PostgreSQL database** on startup.
+Do not connect this setup to any live production database.
 :::
 
 ### Limited Functionality
@@ -92,5 +91,5 @@ Open an [issue on GitHub](https://github.com/conveyordata/data-product-portal/is
 
 ## 🧱 Next Steps
 
-- Start [Creating Data Products](../user-guide/creating-products)
-- Install Portal in a production-like environment using the [following guide](../developer-guide/installation.md)
+- Start [Creating Data Products](../user-guide/creating-products.md).
+- Install Portal in a production-like environment using the [Installation guide](../developer-guide/installation.md).

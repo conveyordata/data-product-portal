@@ -42,7 +42,7 @@ export function QueriesPerConsumerChart({ data, isLoading, hasData, colorScaleCo
             title={t('Queries per Consumer')}
             isLoading={isLoading}
             hasData={hasData}
-            emptyDescription={t('No usage data available for this time range and granularity')}
+            emptyDescription={t('No usage data available for this time range')}
         >
             <Bar {...config} />
         </ChartCard>

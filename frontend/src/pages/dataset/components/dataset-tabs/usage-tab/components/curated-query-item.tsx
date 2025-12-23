@@ -22,38 +22,36 @@ type CuratedQueryItemProps = {
 export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: CuratedQueryItemProps) {
     const { t } = useTranslation();
     const hasLongSql = query.query_text.split('\n').length > SQL_LINES_THRESHOLD;
-    const shouldShowToggle = hasLongSql;
 
     return (
         <List.Item>
-            <Flex vertical gap={0}>
-                <List.Item.Meta title={query.title} description={query.description} />
-                <Flex vertical gap="small">
-                    <Flex gap="small" align="start">
-                        <Flex flex={1} className={`${styles.sqlCode} ${!isExpanded ? styles.collapsed : ''}`}>
-                            <SyntaxHighlighter
-                                language="sql"
-                                style={magula}
-                                className={styles.syntaxHighlighter}
-                                showLineNumbers={false}
-                            >
-                                {query.query_text}
-                            </SyntaxHighlighter>
-                        </Flex>
-                        <Button
-                            type="default"
-                            size="middle"
-                            icon={<CopyOutlined />}
-                            aria-label={t('Copy SQL')}
-                            onClick={() => onCopy(query.query_text)}
-                        />
+            <List.Item.Meta title={query.title} description={query.description} />
+            <Flex vertical gap="small">
+                <Flex gap="small">
+                    <Flex flex={1} className={`${styles.sqlCode} ${!isExpanded ? styles.collapsed : ''}`}>
+                        <SyntaxHighlighter
+                            language="sql"
+                            style={magula}
+                            className={styles.syntaxHighlighter}
+                            showLineNumbers={false}
+                            wrapLongLines={true}
+                        >
+                            {query.query_text}
+                        </SyntaxHighlighter>
                     </Flex>
-                    {shouldShowToggle && (
-                        <Button type="link" size="small" onClick={onToggle}>
-                            {isExpanded ? t('Show less') : t('Show more')}
-                        </Button>
-                    )}
+                    <Button
+                        type="default"
+                        size="middle"
+                        icon={<CopyOutlined />}
+                        aria-label={t('Copy SQL')}
+                        onClick={() => onCopy(query.query_text)}
+                    />
                 </Flex>
+                {hasLongSql && (
+                    <Button type="link" size="small" onClick={onToggle}>
+                        {isExpanded ? t('Show less') : t('Show more')}
+                    </Button>
+                )}
             </Flex>
         </List.Item>
     );

@@ -6,7 +6,7 @@ from .data_product_setting import DataProductSettingFactory
 from .data_product_type import DataProductTypeFactory
 from .data_products_datasets import DataProductDatasetAssociationFactory
 from .dataset import DatasetFactory
-from .dataset_query_stats_daily import DatasetQueryStatsDailyFactory
+from .dataset_query_stats_daily import DatasetQueryStatsFactory
 from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
@@ -35,7 +35,7 @@ factories = [
     DataProductDatasetAssociationFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
-    DatasetQueryStatsDailyFactory,
+    DatasetQueryStatsFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
     EnvPlatformConfigFactory,

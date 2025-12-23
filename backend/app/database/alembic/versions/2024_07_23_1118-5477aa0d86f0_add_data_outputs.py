@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import UUID
 
-from app.data_outputs.status import TechnicalAssetStatus
+from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.model import utcnow
 
 

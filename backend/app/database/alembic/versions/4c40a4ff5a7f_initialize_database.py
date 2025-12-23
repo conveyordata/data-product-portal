@@ -15,9 +15,9 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.configuration.data_product_types.enums import DataProductIconKey
 from app.core.auth.device_flows.schema import DeviceFlowStatus
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.status import DataProductStatus
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.status import OutputPortStatus
 from app.shared.model import utcnow
 
 

@@ -31,12 +31,8 @@ from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
-
-# Import Pydantic schemas - corrected paths
-from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
-
-# Import existing services
-from app.data_outputs.service import DataOutputService
+from app.data_products.output_ports.schema_response import DatasetGet, DatasetsGet
+from app.data_products.output_ports.service import DatasetService
 
 # Import enums - corrected paths
 from app.data_products.schema_response import (
@@ -44,9 +40,17 @@ from app.data_products.schema_response import (
     GetDataProductsResponseItem,
 )
 from app.data_products.service import DataProductService
+from app.data_products.technical_assets.model import ensure_data_output_exists
+
+# Import Pydantic schemas - corrected paths
+from app.data_products.technical_assets.schema_response import (
+    DataOutputGet,
+    DataOutputsGet,
+)
+
+# Import existing services
+from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
-from app.datasets.schema_response import DatasetGet, DatasetsGet
-from app.datasets.service import DatasetService
 from app.settings import settings
 
 
@@ -384,8 +388,10 @@ def get_data_output_details(data_output_id: str) -> Dict[str, Any]:
     """Get detailed information about a specific data output."""
     try:
         db = next(get_db_session())
+        do = ensure_data_output_exists(UUID(data_output_id), db=db)
         try:
             data_output = DataOutputService(db).get_data_output(
+                do.owner_id,
                 id=UUID(data_output_id),
             )
 

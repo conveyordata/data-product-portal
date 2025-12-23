@@ -1,8 +1,8 @@
 import factory
 
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.model import Dataset
-from app.datasets.status import OutputPortStatus
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.status import OutputPortStatus
 from tests import test_session
 
 from .data_product import DataProductFactory
