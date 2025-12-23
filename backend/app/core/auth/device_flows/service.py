@@ -51,41 +51,6 @@ def utc_now() -> datetime:
 class DeviceFlowService:
     def __init__(self):
         self.logger = logger
-
-    def clean_device_flows(self, db: Session):
-        """
-        Remove stale device flow records to prevent table growth.
-
-        Strategy:
-        - Delete all records whose `max_expiry` has elapsed (plus a small buffer),
-          regardless of their status.
-        """
-        try:
-            now = utc_now()
-            buffer = timedelta(minutes=settings.DEVICE_FLOW_CLEANUP_BUFFER_MINUTES)
-            cutoff = now - buffer
-
-            # Fetch candidates for deletion
-            candidates = db.scalars(
-                select(DeviceFlowModel).where(
-                    (DeviceFlowModel.max_expiry <= cutoff)
-                )
-            ).all()
-
-            deleted = 0
-            for device in candidates:
-                # Any flow past max_expiry is safe to delete
-                db.delete(device)
-                deleted += 1
-
-            if deleted:
-                self.logger.info(f"Cleaned {deleted} stale device flow records")
-            db.commit()
-        except Exception as e:
-            # Best-effort cleanup; do not block auth flows
-            db.rollback()
-            self.logger.warning(f"Device flow cleanup skipped due to error: {e}")
-
     def generate_device_flow_codes(
         self, db: Session, client_id: str, scope: str = "openid"
     ) -> DeviceFlow:
