@@ -12,17 +12,17 @@ type ChartCardProps = {
 };
 
 export function ChartCard({ title, isLoading, hasData, emptyDescription, children }: ChartCardProps) {
-    let content: ReactNode = children;
-
-    if (isLoading) {
-        content = <LoadingSpinner />;
-    } else if (!hasData) {
-        content = (
-            <Flex align="center" justify="center">
-                <Empty description={emptyDescription} />
-            </Flex>
-        );
-    }
-
-    return <Card title={title}>{content}</Card>;
+    return (
+        <Card title={title}>
+            {isLoading ? (
+                <LoadingSpinner />
+            ) : !hasData ? (
+                <Flex align="center" justify="center">
+                    <Empty description={emptyDescription} />
+                </Flex>
+            ) : (
+                children
+            )}
+        </Card>
+    );
 }

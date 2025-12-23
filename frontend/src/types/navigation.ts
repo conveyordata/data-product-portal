@@ -30,7 +30,6 @@ export enum ApplicationPaths {
     EnvironmentNew = '/environments/new',
     Settings = '/settings',
     DataProductLifecycles = '/data-product-lifecycles',
-    RoleConfiguration = '/configuration/roles',
     People = '/people',
 }
 

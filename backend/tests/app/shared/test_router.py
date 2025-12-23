@@ -1,5 +1,6 @@
 from typing import Any, Sequence, get_args, get_origin
 
+from fastapi.dependencies.models import Dependant
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
@@ -102,3 +103,46 @@ def test_no_old_names_in_request_or_response_schemas():
     error_msg += "\n".join(invalid_keys)
 
     assert not invalid_keys, error_msg
+
+
+def test_no_old_names_in_url():
+    """
+    Scans all FastAPI application routes to ensure that no key in the request
+    or response body contains the key 'dataset' or `data_output`
+    """
+
+    old_names = ["data_output", "dataset"]
+
+    def route_path_contains_old_name(path: str):
+        return any(old_name in path for old_name in old_names)
+
+    invalid_routes = [
+        f"- '{route.name}'/'{route.path}'"
+        for route in app.routes
+        if route.path.startswith("/api/v2/")
+        and route_path_contains_old_name(route.path)
+    ]
+
+    error_msg = "The following routes contain 'dataset' or 'data_output' in the URL:\n"
+    error_msg += "\n".join(invalid_routes)
+
+    assert not invalid_routes, error_msg
+
+
+def test_no_token_in_route_params():
+    def get_all_query_param_names(dependant: Dependant) -> set:
+        param_names = {param.name for param in dependant.query_params}
+        for sub_dependant in dependant.dependencies:
+            param_names.update(get_all_query_param_names(sub_dependant))
+        return param_names
+
+    routes_with_token = [
+        f"{route.path} [{route.name}]"
+        for route in app.routes
+        if isinstance(route, APIRoute)
+        and "token" in get_all_query_param_names(route.dependant)
+    ]
+
+    assert not routes_with_token, (
+        f"Found unwanted 'token' query parameter in the following routes: {routes_with_token}"
+    )

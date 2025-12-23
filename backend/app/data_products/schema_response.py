@@ -7,17 +7,20 @@ from app.configuration.data_product_settings.schema import DataProductSettingVal
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
-from app.data_outputs.schema_response import BaseDataOutputGet, BaseTechnicalAssetGet
 from app.data_outputs_datasets.schema_response import (
     BaseDataOutputDatasetAssociationGet,
     BaseTechnicalAssetOutputPortAssociationGet,
 )
+from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.status import DataProductStatus
+from app.data_products.technical_assets.schema_response import (
+    BaseDataOutputGet,
+    BaseTechnicalAssetGet,
+)
 from app.data_products_datasets.schema import (
     DataProductDatasetAssociation,
     DataProductOutputPortAssociation,
 )
-from app.datasets.schema import Dataset, OutputPort
 from app.shared.schema import ORMModel
 
 
@@ -86,10 +89,12 @@ class DataProductGet(BaseDataProductGet):
 class GetDataProductResponse(BaseDataProductGet):
     about: Optional[str]
 
-    # Nested schemas
-    input_ports: list[InputPort]
-    technical_assets: list[TechnicalAssetLinks]
-    output_ports: list[OutputPort]
+
+class GetDataProductInputPortsResponse(ORMModel):
+    input_ports: Sequence[InputPort]
+
+
+class GetDataProductRolledUpTagsResponse(ORMModel):
     rolled_up_tags: set[Tag]
 
 

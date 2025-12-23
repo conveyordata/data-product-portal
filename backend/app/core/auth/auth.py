@@ -91,7 +91,11 @@ else:
     def unvalidated_token(token: str = "") -> str:
         return token
 
-    def secured_call(token: str = "") -> JWTToken:
+    def dummy_token() -> str:
+        return ""
+
+    # The dummy_token dependency ensure no token query parameter is added to every route
+    def secured_call(token: str = Depends(dummy_token)) -> JWTToken:
         return generate_default_jwt_token()
 
     def generate_default_jwt_token(default_username=settings.DEFAULT_USERNAME):

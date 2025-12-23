@@ -11,10 +11,10 @@ from sqlalchemy.orm import Session
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.core.authz import Action, Authorization
+from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
-from app.datasets.model import Dataset as DatasetModel
 from app.pending_actions.schema import DataProductDatasetPendingAction
 from app.users.schema import User
 

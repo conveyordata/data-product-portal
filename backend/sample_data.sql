@@ -126,7 +126,7 @@ begin
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc', 'Proteomics', 'Proteomics and Biomarker Discovery', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO proteomics_id;
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('623e6fbf-3a06-434e-995c-b0336e71806e', 'Manufacturing', 'Manufacturing and Supply Chain', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO manufacturing_id;
     INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('bec196cb-81df-4cfc-959f-b142c312861e', 'Medical and Safety', 'Medical and Safety', '2025-10-28 16:30:24.123498', NULL, NULL);
-    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'CRM', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
+    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'Commercial and Customer Relationship Management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
     -- DATA PRODUCT TYPES
     -- ...existing data product types code...
@@ -229,9 +229,10 @@ ORDER BY organ, failure_count DESC;',
             'bdad0dec-19e6-4c85-a655-0960ca3a484c',
             'Latest monthly demand rollup',
             'Quick sanity-check of forecasted demand by month.',
-            'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
+            'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily where 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
             1
         );
+
 
     INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
         VALUES (

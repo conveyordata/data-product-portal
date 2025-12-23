@@ -13,7 +13,7 @@ from app.core.authz import Action, Authorization
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.datasets.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.pending_actions.schema import DataOutputDatasetPendingAction
 from app.users.schema import User
 

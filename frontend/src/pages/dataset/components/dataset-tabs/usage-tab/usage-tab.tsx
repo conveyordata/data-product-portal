@@ -1,12 +1,10 @@
-import { Col, Empty, Flex, Radio, type RadioChangeEvent, Row, Spin, Typography } from 'antd';
+import { Col, Empty, Flex, Radio, type RadioChangeEvent, Row, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import {
     useGetDatasetQueryCuratedQueriesQuery,
     useGetDatasetQueryStatsDailyQuery,
 } from '@/store/features/datasets/datasets-api-slice';
-
 import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
 import {
     aggregateQueriesPerConsumer,
@@ -16,8 +14,6 @@ import {
 import { CuratedQueriesList } from './components/curated-queries-list';
 import { QueriesOverTimeChart } from './components/queries-over-time-chart';
 import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
-
-const { Link } = Typography;
 
 type Props = {
     datasetId: string;
@@ -75,69 +71,60 @@ export function UsageTab({ datasetId }: Props) {
     const colorScaleConfig = useMemo(() => createColorScaleConfig(uniqueConsumers), [uniqueConsumers]);
 
     return (
-        <Flex vertical gap="large">
-            {isLoadingState && !hasUsageData ? (
-                <Flex vertical align="center" justify="center">
-                    <Spin size="large" />
+        <Row gutter={[32, 32]}>
+            <Col span={24}>
+                <Flex justify={'center'}>
+                    <Radio.Group
+                        optionType="button"
+                        value={dayRange}
+                        onChange={(e: RadioChangeEvent) => setDayRange(e.target.value)}
+                        options={[
+                            { label: t('Last 30 days'), value: 30 },
+                            { label: t('Last 90 days'), value: 90 },
+                            { label: t('Last year'), value: yearDayRange },
+                        ]}
+                    />
                 </Flex>
-            ) : !isLoadingState && !hasAnyData ? (
+            </Col>
+            {!hasAnyData && (
                 <Empty
                     description={
                         <Typography.Text type="secondary">
                             {t('Learn how to set up usage data ingestion in our')}{' '}
-                            <Link
+                            <Typography.Link
                                 href="https://docs.dataproductportal.com/docs/developer-guide/data-product-usage-ingestion"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
                                 {t('documentation')}
-                            </Link>
+                            </Typography.Link>
                             .
                         </Typography.Text>
                     }
                 />
-            ) : hasUsageData ? (
-                <Row gutter={[32, 32]}>
-                    <Col span={24}>
-                        <Flex wrap gap="middle">
-                            <Flex gap="large">
-                                <Typography.Text>{t('Time Range')}:</Typography.Text>
-                                <Radio.Group
-                                    value={dayRange}
-                                    onChange={(e: RadioChangeEvent) => setDayRange(e.target.value)}
-                                    options={[
-                                        { label: t('Last 30 days'), value: 30 },
-                                        { label: t('Last 90 days'), value: 90 },
-                                        { label: t('Last year'), value: yearDayRange },
-                                    ]}
-                                />
-                            </Flex>
-                        </Flex>
-                    </Col>
-                    <Col span={12}>
-                        <QueriesOverTimeChart
-                            data={chartData}
-                            isLoading={isLoadingState}
-                            hasData={hasUsageData}
-                            colorScaleConfig={colorScaleConfig}
-                        />
-                    </Col>
-                    <Col span={12}>
-                        <QueriesPerConsumerChart
-                            data={consumerTotals}
-                            isLoading={isLoadingState}
-                            hasData={hasUsageData}
-                            colorScaleConfig={colorScaleConfig}
-                        />
-                    </Col>
-                </Row>
-            ) : null}
-            {!isLoadingState && !hasAnyData ? null : (
+            )}
+            <Col span={12}>
+                <QueriesOverTimeChart
+                    data={chartData}
+                    isLoading={isLoadingState}
+                    hasData={hasUsageData}
+                    colorScaleConfig={colorScaleConfig}
+                />
+            </Col>
+            <Col span={12}>
+                <QueriesPerConsumerChart
+                    data={consumerTotals}
+                    isLoading={isLoadingState}
+                    hasData={hasUsageData}
+                    colorScaleConfig={colorScaleConfig}
+                />
+            </Col>
+            <Col span={24}>
                 <CuratedQueriesList
                     queries={curatedQueries?.dataset_curated_queries}
                     isLoading={areCuratedQueriesLoading}
                 />
-            )}
-        </Flex>
+            </Col>
+        </Row>
     );
 }

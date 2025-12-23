@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
@@ -12,10 +13,12 @@ from app.core.namespace.validation import NamespaceValidityType
 from app.settings import settings
 from tests.factories import (
     DataOutputFactory,
+    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DataProductTypeFactory,
+    DatasetFactory,
     DomainFactory,
     EnvironmentFactory,
     EnvPlatformConfigFactory,
@@ -26,6 +29,7 @@ from tests.factories import (
     TagFactory,
     UserFactory,
 )
+from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
 
 OLD_ENDPOINT = "/api/data_products"
 ENDPOINT = "/api/v2/data_products"
@@ -173,6 +177,7 @@ class TestDataProductsRouter:
 
     def test_get_data_product_by_id_old(self, client):
         data_product = DataProductFactory()
+        DatasetFactory(data_product=data_product)
 
         response = self.get_data_product_by_id_old(client, data_product.id)
         assert response.status_code == 200
@@ -222,6 +227,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert len(response.json()) == 1
         assert response.json()[0]["id"] == str(data_output.id)
+        assert len(response.json()[0]["tags"]) == 1
 
     def test_get_technical_assets(self, client):
         data_product = DataProductFactory()
@@ -230,6 +236,20 @@ class TestDataProductsRouter:
         assert response.status_code == 200, f"Failed with response: {response.text}"
         assert len(response.json()) == 1
         assert response.json()["technical_assets"][0]["id"] == str(data_output.id)
+
+    def test_get_data_outputs_linked_with_output_port(self, client):
+        data_product = DataProductFactory()
+        output_port = DatasetFactory(data_product=data_product)
+        data_output = DataOutputFactory(owner=data_product)
+        DataOutputDatasetAssociationFactory(
+            dataset=output_port,
+            data_output=data_output,
+            status="approved",
+        )
+        response = self.get_data_outputs(client, data_product.id)
+        assert response.status_code == 200, f"Failed with response: {response.text}"
+        assert len(response.json()) == 1
+        assert response.json()[0]["id"] == str(data_output.id)
 
     def test_update_data_product_no_member(self, payload, client):
         data_product = DataProductFactory()
@@ -765,6 +785,33 @@ class TestDataProductsRouter:
         assert len(response.json()) == 1
         assert response.json()[0]["deleted_subject_identifier"] == data_product_name
 
+    def test_get_output_ports(self, client: TestClient):
+        dataset = DatasetFactory()
+        response = self.get_output_ports(client, dataset.data_product.id)
+        assert response.status_code == 200, f"Response failed with: {response.text}"
+        assert len(response.json()["output_ports"]) == 1
+        assert response.json()["output_ports"][0]["id"] == dataset.id.__str__()
+
+    def test_get_rolled_up_tags(self, client: TestClient):
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
+        dataset = DatasetFactory(data_product=data_product)
+        response = self.get_rolled_up_tags(client, dataset.data_product.id)
+        assert response.status_code == 200, f"Response failed with: {response.text}"
+        assert len(response.json()["rolled_up_tags"]) == 2
+        assert dataset.tags[0].id.__str__() in [
+            tag["id"] for tag in response.json()["rolled_up_tags"]
+        ]
+        assert data_output.tags[0].id.__str__() in [
+            tag["id"] for tag in response.json()["rolled_up_tags"]
+        ]
+
+    def test_get_data_product_input_ports(self, client: TestClient):
+        link = DataProductDatasetAssociationFactory()
+        response = self.get_input_ports(client, link.data_product.id)
+        assert response.status_code == 200, f"Response failed with: {response.text}"
+        assert len(response.json()["input_ports"]) == 1
+
     @staticmethod
     def create_data_product(client: TestClient, default_data_product_payload):
         return client.post(OLD_ENDPOINT, json=default_data_product_payload)
@@ -836,3 +883,15 @@ class TestDataProductsRouter:
             f"{OLD_ENDPOINT}/{data_product_id}/data_output"
             f"/validate_namespace?namespace={namespace}"
         )
+
+    @staticmethod
+    def get_output_ports(client: TestClient, data_product_id: UUID):
+        return client.get(f"{ENDPOINT}/{data_product_id}/output_ports")
+
+    @staticmethod
+    def get_input_ports(client: TestClient, data_product_id: UUID):
+        return client.get(f"{ENDPOINT}/{data_product_id}/input_ports")
+
+    @staticmethod
+    def get_rolled_up_tags(client: TestClient, data_product_id: UUID):
+        return client.get(f"{ENDPOINT}/{data_product_id}/rolled_up_tags")

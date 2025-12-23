@@ -23,8 +23,8 @@
     "clsx": "^2.0.0",
     "posthog-docusaurus": "^2.0.5",
     "prism-react-renderer": "^2.3.0",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "redocusaurus": "^2.5.0"
   },
   "devDependencies": {

@@ -3,7 +3,7 @@ import pytest
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
-from app.datasets.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
@@ -55,7 +55,7 @@ class TestDataOutputsDatasetsRouter:
         ds = DatasetFactory()
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
-        assert response.status_code == 400
+        assert response.status_code == 404
 
     def test_request_already_exists(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
