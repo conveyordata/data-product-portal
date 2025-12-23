@@ -1,6 +1,6 @@
-import { Col, Empty, Flex, Radio, type RadioChangeEvent, Row, Typography } from 'antd';
+import { Alert, Col, Flex, Radio, type RadioChangeEvent, Row, Typography } from 'antd';
 import { useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import {
     useGetDatasetQueryCuratedQueriesQuery,
     useGetDatasetQueryStatsDailyQuery,
@@ -52,7 +52,6 @@ export function UsageTab({ datasetId }: Props) {
     const responses = data?.dataset_query_stats_daily_responses;
     const hasUsageData = Boolean(responses?.length);
     const hasCuratedQueries = Boolean(!areCuratedQueriesLoading && curatedQueries?.dataset_curated_queries?.length);
-    const hasAnyData = hasUsageData || hasCuratedQueries;
     const unknownLabel = t('Unknown');
 
     const chartData = useMemo(() => {
@@ -86,22 +85,26 @@ export function UsageTab({ datasetId }: Props) {
                     />
                 </Flex>
             </Col>
-            {!hasAnyData && (
-                <Empty
-                    description={
-                        <Typography.Text type="secondary">
-                            {t('Learn how to set up usage data ingestion in our')}{' '}
-                            <Typography.Link
-                                href="https://docs.dataproductportal.com/docs/developer-guide/data-product-usage-ingestion"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                {t('documentation')}
-                            </Typography.Link>
-                            .
-                        </Typography.Text>
-                    }
-                />
+
+            {!hasUsageData && !hasCuratedQueries && (
+                <Col span={24}>
+                    <Alert
+                        title={
+                            <Trans t={t}>
+                                No usage data available. Learn how to set up usage data ingestion in our{' '}
+                                <Typography.Link
+                                    href="https://docs.dataproductportal.com/docs/developer-guide/data-product-usage-ingestion"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    documentation.
+                                </Typography.Link>
+                            </Trans>
+                        }
+                        type="info"
+                        showIcon
+                    />
+                </Col>
             )}
             <Col span={12}>
                 <QueriesOverTimeChart

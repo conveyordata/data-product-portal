@@ -413,7 +413,7 @@
     "Last 30 days": "Last 30 days",
     "Last 90 days": "Last 90 days",
     "Last year": "Last year",
-    "Learn how to set up usage data ingestion in our": "Learn how to set up usage data ingestion in our",
+    "No usage data available. Learn how to set up usage data ingestion in our <2>documentation.</2>": "No usage data available. Learn how to set up usage data ingestion in our <2>documentation.</2>",
     "Edit output port": "Edit output port",
     "Output port Owners": "Output port Owners",
     "Environment Configuration": "Environment Configuration",
