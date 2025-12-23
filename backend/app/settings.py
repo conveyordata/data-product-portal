@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     SEARCH_INDEXING_DISABLED: bool = False
 
     # Device flow cleanup buffer in minutes
-    DEVICE_FLOW_CLEANUP_BUFFER_MINUTES: int = 5
+    DEVICE_FLOW_CLEANUP_BUFFER_MINUTES: int = 15
 
 
 class LogLevel(str, Enum):
