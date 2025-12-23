@@ -101,7 +101,7 @@ class DatasetService:
         tokens = [t for t in re.split(r"\W+", query.lower()) if len(t) >= 2]
         if not tokens:
             return None
-        prefixed = [f"*{t}:*" for t in tokens]
+        prefixed = [f"{t}:*" for t in tokens]
         return " & ".join(prefixed)
 
     def get_dataset(
