@@ -2,14 +2,13 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
-
+from app.core.auth.device_flows. background_tasks import cleanup_device_flows
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 from starlette.middleware.base import BaseHTTPMiddleware
-
 from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
@@ -69,9 +68,11 @@ async def lifespan(_: FastAPI):
         AuthorizationService(db).reload_enforcer()
 
     backend_analytics(API_VERSION)
-    task = asyncio.create_task(check_expired_admins())
+    admin_task = asyncio.create_task(check_expired_admins())
+    device_flow_cleanup_task = asyncio.create_task(cleanup_device_flows())
     yield
-    task.cancel()
+    admin_task. cancel()
+    device_flow_cleanup_task.cancel()
 
 
 # Combine both lifespans
