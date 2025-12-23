@@ -1,12 +1,14 @@
 import factory
 
-from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
+from app.data_products.output_ports.query_stats.model import (
+    DatasetQueryStatsDaily,
+)
 
 from .data_product import DataProductFactory
 from .dataset import DatasetFactory
 
 
-class DatasetQueryStatsDailyFactory(factory.alchemy.SQLAlchemyModelFactory):
+class DatasetQueryStatsFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = DatasetQueryStatsDaily
 

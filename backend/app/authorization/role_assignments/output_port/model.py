@@ -11,7 +11,7 @@ from ..enums import DecisionStatus
 
 if TYPE_CHECKING:
     from app.authorization.roles.model import Role
-    from app.datasets.model import Dataset
+    from app.data_products.output_ports.model import Dataset
     from app.users.model import User
 
 

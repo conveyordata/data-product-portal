@@ -10,7 +10,7 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.datasets.model import Dataset
+    from app.data_products.output_ports.model import Dataset
 
 
 class Domain(Base, BaseORM):

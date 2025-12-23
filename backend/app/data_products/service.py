@@ -37,11 +37,13 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.service import DatasetService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -56,14 +58,11 @@ from app.data_products.schema_response import (
     GetDataProductResponse,
     UpdateDataProductResponse,
 )
+from app.data_products.technical_assets.model import DataOutput as DataOutputModel
+from app.data_products.technical_assets.schema_response import DataOutputGet
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.model import Dataset as DatasetModel
-from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema import OutputPort
-from app.datasets.service import DatasetService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -77,18 +76,6 @@ class DataProductService:
         self.db = db
         self.namespace_validator = NamespaceValidator(DataProductModel)
         self.data_output_namespace_validator = DataOutputNamespaceValidator()
-
-    def get_output_ports(self, data_product_id: UUID) -> Sequence[OutputPort]:
-        ensure_data_product_exists(data_product_id, self.db)
-        return (
-            self.db.scalars(
-                select(DatasetModel).filter(
-                    DatasetModel.data_product_id == data_product_id
-                ),
-            )
-            .unique()
-            .all()
-        )
 
     def get_input_ports(self, data_product_id: UUID) -> Sequence[DatasetLinks]:
         ensure_data_product_exists(data_product_id, self.db)
@@ -107,7 +94,7 @@ class DataProductService:
     def get_rolled_up_tags(self, data_product_id: UUID) -> set[Tag]:
         ensure_data_product_exists(data_product_id, self.db)
         rolled_up_tags = set()
-        for output_ports in self.get_output_ports(data_product_id):
+        for output_ports in DatasetService(self.db).get_output_ports(data_product_id):
             rolled_up_tags.update(output_ports.tags)
         for technical_asset in self.get_data_outputs(data_product_id):
             rolled_up_tags.update(technical_asset.tags)
@@ -121,6 +108,7 @@ class DataProductService:
                 selectinload(DataProductModel.dataset_links)
                 .selectinload(DataProductDatasetModel.dataset)
                 .selectinload(DatasetModel.data_output_links),
+                selectinload(DataProductModel.datasets).selectinload(DatasetModel.tags),
                 selectinload(DataProductModel.datasets).raiseload("*"),
                 selectinload(DataProductModel.data_outputs).selectinload(
                     DataOutputModel.dataset_links
@@ -501,6 +489,7 @@ class DataProductService:
                     selectinload(DataOutputModel.environment_configurations),
                     selectinload(DataOutputModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DatasetModel.tags)
                     .raiseload("*"),
                 )
                 .filter(DataOutputModel.owner_id == id)

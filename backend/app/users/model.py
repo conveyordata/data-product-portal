@@ -19,8 +19,10 @@ if TYPE_CHECKING:
     )
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
-    from app.data_products_datasets.model import DataProductDatasetAssociation
-    from app.datasets.model import Dataset
+    from app.data_products.output_ports.model import (
+        DataProductDatasetAssociation,
+        Dataset,
+    )
     from app.notifications.model import Notification
 
 
