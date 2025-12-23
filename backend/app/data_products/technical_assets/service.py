@@ -1,6 +1,6 @@
 import copy
 from datetime import datetime
-from typing import Optional, Sequence
+from typing import Sequence
 from uuid import UUID
 
 import pytz
@@ -19,15 +19,6 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_outputs.schema_request import (
-    CreateTechnicalAssetRequest,
-    DataOutputResultStringRequest,
-    DataOutputStatusUpdate,
-    DataOutputUpdate,
-)
-from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
-from app.data_outputs.status import TechnicalAssetStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -36,7 +27,20 @@ from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
 from app.data_products.output_ports.service import DatasetService
 from app.data_products.service import DataProductService
-from app.database.database import ensure_exists
+from app.data_products.technical_assets.model import DataOutput as DataOutputModel
+from app.data_products.technical_assets.model import ensure_data_output_exists
+from app.data_products.technical_assets.schema_request import (
+    CreateTechnicalAssetRequest,
+    DataOutputResultStringRequest,
+    DataOutputStatusUpdate,
+    DataOutputUpdate,
+)
+from app.data_products.technical_assets.schema_response import (
+    DataOutputGet,
+    DataOutputsGet,
+    UpdateTechnicalAssetResponse,
+)
+from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -45,11 +49,6 @@ class DataOutputService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = DataOutputNamespaceValidator()
-
-    def ensure_data_output_exists(
-        self, data_output_id: UUID, **kwargs
-    ) -> DataOutputModel:
-        return ensure_exists(data_output_id, self.db, DataOutputModel, **kwargs)
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         tags = []
@@ -72,15 +71,23 @@ class DataOutputService:
             .all()
         )
 
-    def get_data_output(self, id: UUID) -> Optional[DataOutputGet]:
-        return self.db.get(
-            DataOutputModel,
-            id,
-            options=[
+    def get_data_output(self, data_product_id: UUID, id: UUID) -> DataOutputGet:
+        data_output = self.db.scalar(
+            (
+                select(DataOutputModel)
+                .where(DataOutputModel.id == id)
+                .where(DataOutputModel.owner_id == data_product_id)
+            ).options(
                 selectinload(DataOutputModel.dataset_links),
                 selectinload(DataOutputModel.environment_configurations),
-            ],
+            )
         )
+        if not data_output:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Technical asset not found",
+            )
+        return data_output
 
     def create_data_output(
         self, id: UUID, data_output: CreateTechnicalAssetRequest
@@ -109,8 +116,8 @@ class DataOutputService:
         self.db.commit()
         return model
 
-    def remove_data_output(self, id: UUID) -> DataOutputModel:
-        data_output = self.get_data_output_with_links(id)
+    def remove_data_output(self, data_product_id: UUID, id: UUID) -> DataOutputModel:
+        data_output = self.get_data_output_with_links(data_product_id, id)
 
         result = copy.deepcopy(data_output)
         self.db.delete(data_output)
@@ -120,8 +127,10 @@ class DataOutputService:
         self.db.commit()
         return result
 
-    def get_data_output_with_links(self, id: UUID) -> DataOutputModel:
-        data_output: DataOutputModel | None = self.get_data_output(id)
+    def get_data_output_with_links(
+        self, data_product_id: UUID, id: UUID
+    ) -> DataOutputModel:
+        data_output: DataOutputModel | None = self.get_data_output(data_product_id, id)
         if not data_output:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -135,9 +144,14 @@ class DataOutputService:
             dataset_service.recalculate_search_vector_for(dataset_link.dataset_id)
 
     def update_data_output_status(
-        self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
+        self,
+        data_product_id: UUID,
+        id: UUID,
+        data_output: DataOutputStatusUpdate,
+        *,
+        actor: User,
     ) -> None:
-        current_data_output = self.get_data_output_with_links(id)
+        current_data_output = self.get_data_output_with_links(data_product_id, id)
         current_data_output.status = data_output.status
         self.db.flush()
 
@@ -146,23 +160,19 @@ class DataOutputService:
 
     def link_dataset_to_data_output(
         self,
+        data_product_id: UUID,
         id: UUID,
         dataset_id: UUID,
         *,
         actor: User,
     ) -> DataOutputDatasetAssociationModel:
         dataset = ensure_dataset_exists(
-            dataset_id, self.db, options=[selectinload(DatasetModel.data_product_links)]
+            dataset_id,
+            self.db,
+            data_product_id=data_product_id,
+            options=[selectinload(DatasetModel.data_product_links)],
         )
-        data_output = self.ensure_data_output_exists(
-            id, options=[selectinload(DataOutputModel.dataset_links)]
-        )
-
-        if dataset.data_product_id != data_output.owner_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Dataset {dataset_id} does not belong to data product {id}",
-            )
+        data_output = self.get_data_output(data_product_id, id)
 
         if dataset.id in [
             link.dataset_id
@@ -188,12 +198,10 @@ class DataOutputService:
         return dataset_link
 
     def unlink_dataset_from_data_output(
-        self, id: UUID, dataset_id: UUID
+        self, data_product_id: UUID, id: UUID, dataset_id: UUID
     ) -> DataOutputModel:
         ensure_dataset_exists(dataset_id, self.db)
-        data_output = self.ensure_data_output_exists(
-            id, options=[selectinload(DataOutputModel.dataset_links)]
-        )
+        data_output = self.get_data_output(data_product_id, id)
 
         data_output_dataset = next(
             (
@@ -216,9 +224,11 @@ class DataOutputService:
         return data_output
 
     def update_data_output(
-        self, id: UUID, data_output: DataOutputUpdate
-    ) -> dict[str, UUID]:
-        current_data_output = self.ensure_data_output_exists(id)
+        self, data_product_id: UUID, id: UUID, data_output: DataOutputUpdate
+    ) -> UpdateTechnicalAssetResponse:
+        current_data_output = ensure_data_output_exists(
+            id, self.db, data_product_id=data_product_id
+        )
         update_data_output = data_output.model_dump(exclude_unset=True)
 
         for k, v in update_data_output.items():
@@ -229,11 +239,11 @@ class DataOutputService:
                 setattr(current_data_output, k, v) if v else None
 
         self.db.commit()
-        return {"id": current_data_output.id}
+        return UpdateTechnicalAssetResponse(id=current_data_output.id)
 
-    def get_graph_data(self, id: UUID, level: int) -> Graph:
-        data_output = self.db.get(DataOutputModel, id)
-        graph = DataProductService(self.db).get_graph_data(data_output.owner_id, level)
+    def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:
+        ensure_data_output_exists(id, self.db, data_product_id=data_product_id)
+        graph = DataProductService(self.db).get_graph_data(data_product_id, level)
 
         for node in graph.nodes:
             if node.isMain:

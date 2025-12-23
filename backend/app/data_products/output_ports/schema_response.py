@@ -9,8 +9,6 @@ from app.configuration.data_product_settings.schema import (
 )
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
-from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
-from app.data_outputs.schema import TechnicalAsset
 from app.data_outputs_datasets.schema import (
     DataOutputDatasetAssociation,
     TechnicalAssetOutputPortAssociation,
@@ -19,6 +17,8 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.schema import DataProduct
+from app.data_products.technical_assets.schema import DataOutput as DataOutputBaseSchema
+from app.data_products.technical_assets.schema import TechnicalAsset
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.shared.schema import ORMModel
 

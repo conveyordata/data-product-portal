@@ -10,7 +10,9 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.schema import S3DataOutput
-from app.data_outputs.schema_request import DataOutputResultStringRequest
+from app.data_products.technical_assets.schema_request import (
+    DataOutputResultStringRequest,
+)
 from app.settings import settings
 from tests.factories import (
     DataOutputFactory,
@@ -24,7 +26,8 @@ from tests.factories import (
 )
 from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
 
-ENDPOINT = "/api/data_outputs"
+OLD_ENDPOINT = "/api/data_outputs"
+ENDPOINT = "/api/v2/data_products/{}/technical_assets"
 
 
 @pytest.fixture
@@ -125,7 +128,7 @@ class TestDataOutputsRouter:
 
     def test_get_data_outputs(self, client):
         data_output = DataOutputFactory()
-        response = client.get(ENDPOINT)
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -135,6 +138,15 @@ class TestDataOutputsRouter:
         data_output = DataOutputFactory()
 
         response = self.get_data_output_by_id(client, data_output.id)
+        assert response.status_code == 200
+        assert response.json()["id"] == str(data_output.id)
+
+    def test_get_technical_asset(self, client: TestClient):
+        data_output = DataOutputFactory()
+
+        response = self.get_technical_asset(
+            client, data_output.owner.id, data_output.id
+        )
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
 
@@ -216,7 +228,7 @@ class TestDataOutputsRouter:
 
     def test_get_graph_data(self, client: TestClient):
         data_output = DataOutputFactory()
-        response = client.get(f"{ENDPOINT}/{data_output.id}/graph")
+        response = client.get(f"{OLD_ENDPOINT}/{data_output.id}/graph")
         assert response.json()["edges"] == [
             {
                 "animated": True,
@@ -379,6 +391,28 @@ class TestDataOutputsRouter:
         ).json()
         assert len(history) == 1
 
+    def test_get_technical_asset_history(self, data_output_payload, client):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
+        created_data_output = self.create_data_output(client, data_output_payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
+
+        history = self.get_technical_asset_history(
+            client,
+            data_output_payload["owner_id"],
+            created_data_output.json().get("id"),
+        )
+        assert history.status_code == 200, history.text
+        assert len(history.json()["events"]) == 1
+
     def test_history_event_created_on_data_output_status_update(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
@@ -480,7 +514,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 200
         assert response.json() == "bucket/suffix/path"
 
-    @patch("app.data_outputs.email.send_link_dataset_email")
+    @patch("app.data_products.technical_assets.email.send_link_dataset_email")
     def test_dataset_link_auto_approval_no_email_sent(
         self, mock_send_email, client: TestClient
     ):
@@ -508,14 +542,14 @@ class TestDataOutputsRouter:
         )
         # Mock auto-approval scenario (same data product owner)
         response = client.post(
-            f"{ENDPOINT}/{data_output.id}/dataset/{dataset.id}",
+            f"{OLD_ENDPOINT}/{data_output.id}/dataset/{dataset.id}",
         )
 
         assert response.status_code == 200
         # Verify no email was sent for auto-approved request
         mock_send_email.assert_not_called()
 
-    @patch("app.data_outputs.email.send_link_dataset_email")
+    @patch("app.data_products.technical_assets.email.send_link_dataset_email")
     def test_dataset_link_manual_approval_email_sent(
         self, mock_send_email, client: TestClient
     ):
@@ -536,7 +570,7 @@ class TestDataOutputsRouter:
 
         # Mock manual approval scenario (different data product owner)
         response = client.post(
-            f"{ENDPOINT}/{data_output.id}/dataset/{dataset.id}",
+            f"{OLD_ENDPOINT}/{data_output.id}/dataset/{dataset.id}",
         )
 
         assert response.status_code == 200
@@ -553,25 +587,31 @@ class TestDataOutputsRouter:
 
     @staticmethod
     def get_data_output_by_id(client: TestClient, data_output_id) -> Response:
-        return client.get(f"{ENDPOINT}/{data_output_id}")
+        return client.get(f"{OLD_ENDPOINT}/{data_output_id}")
+
+    @staticmethod
+    def get_technical_asset(
+        client: TestClient, data_product_id, technical_asset_id
+    ) -> Response:
+        return client.get(f"{ENDPOINT.format(data_product_id)}/{technical_asset_id}")
 
     @staticmethod
     def update_data_output(client: TestClient, payload, data_output_id) -> Response:
-        return client.put(f"{ENDPOINT}/{data_output_id}", json=payload)
+        return client.put(f"{OLD_ENDPOINT}/{data_output_id}", json=payload)
 
     @staticmethod
     def delete_data_output(client: TestClient, data_output_id) -> Response:
-        return client.delete(f"{ENDPOINT}/{data_output_id}")
+        return client.delete(f"{OLD_ENDPOINT}/{data_output_id}")
 
     @staticmethod
     def update_data_output_status(
         client: TestClient, status, data_output_id
     ) -> Response:
-        return client.put(f"{ENDPOINT}/{data_output_id}/status", json=status)
+        return client.put(f"{OLD_ENDPOINT}/{data_output_id}/status", json=status)
 
     @staticmethod
     def get_namespace_suggestion_old(client: TestClient, name) -> Response:
-        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+        return client.get(f"{OLD_ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
     def get_namespace_suggestion(client: TestClient, name) -> Response:
@@ -592,7 +632,7 @@ class TestDataOutputsRouter:
 
     @staticmethod
     def get_namespace_length_limits_old(client: TestClient) -> Response:
-        return client.get(f"{ENDPOINT}/namespace_length_limits")
+        return client.get(f"{OLD_ENDPOINT}/namespace_length_limits")
 
     @staticmethod
     def get_namespace_length_limits(client: TestClient) -> Response:
@@ -600,8 +640,14 @@ class TestDataOutputsRouter:
 
     @staticmethod
     def get_data_output_history(client, data_output_id):
-        return client.get(f"{ENDPOINT}/{data_output_id}/history")
+        return client.get(f"{OLD_ENDPOINT}/{data_output_id}/history")
+
+    @staticmethod
+    def get_technical_asset_history(client, data_product_id, data_output_id):
+        return client.get(
+            f"{ENDPOINT.format(data_product_id)}/{data_output_id}/history"
+        )
 
     @staticmethod
     def get_data_output_result_string(client, payload):
-        return client.post(f"{ENDPOINT}/result_string", json=payload)
+        return client.post(f"{OLD_ENDPOINT}/result_string", json=payload)

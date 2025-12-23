@@ -7,8 +7,8 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.database.database import Base
 
 if TYPE_CHECKING:
-    from app.data_outputs.model import DataOutput
     from app.data_products.output_ports.model import Dataset
+    from app.data_products.technical_assets.model import DataOutput
     from app.users.model import User
 
 import uuid

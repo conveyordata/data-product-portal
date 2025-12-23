@@ -12,8 +12,8 @@ from app.shared.model import BaseORM
 from .enums import EventReferenceEntity
 
 if TYPE_CHECKING:
-    from app.data_outputs.model import DataOutput
     from app.data_products.model import DataProduct
+    from app.data_products.technical_assets.model import DataOutput
     from app.datasets.model import Dataset
     from app.users.model import User
 

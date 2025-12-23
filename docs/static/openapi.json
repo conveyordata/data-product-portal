@@ -6691,7 +6691,7 @@
     "/api/data_outputs": {
       "get": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Get Data Outputs",
         "operationId": "get_data_outputs",
@@ -6710,13 +6710,14 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_outputs/namespace_suggestion": {
       "get": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Get Data Output Namespace Suggestion",
         "operationId": "get_data_output_namespace_suggestion",
@@ -6759,7 +6760,7 @@
     "/api/data_outputs/namespace_length_limits": {
       "get": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Get Data Output Namespace Length Limits",
         "operationId": "get_data_output_namespace_length_limits",
@@ -6781,7 +6782,7 @@
     "/api/data_outputs/result_string": {
       "post": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Get Data Output Result String",
         "operationId": "get_data_output_result_string",
@@ -6817,13 +6818,14 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_outputs/{id}": {
       "get": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Get Data Output",
         "operationId": "get_data_output",
@@ -6864,10 +6866,11 @@
       },
       "delete": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Remove Data Output",
         "operationId": "remove_data_output",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6913,10 +6916,11 @@
       },
       "put": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Update Data Output",
         "operationId": "update_data_output",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6945,12 +6949,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Update Data Output Api Data Outputs  Id  Put"
+                  "$ref": "#/components/schemas/UpdateTechnicalAssetResponse"
                 }
               }
             }
@@ -6978,13 +6977,198 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}": {
+      "get": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Get Technical Asset",
+        "operationId": "get_technical_asset",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Remove Technical Asset",
+        "operationId": "remove_technical_asset",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Technical asset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Technical asset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Update Technical Asset",
+        "operationId": "update_technical_asset",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataOutputUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTechnicalAssetResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Technical asset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Technical asset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_outputs/{id}/history": {
       "get": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
-        "summary": "Get Event History",
-        "operationId": "get_event_history",
+        "summary": "Get Data Output Event History",
+        "operationId": "get_data_output_event_history",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -7007,7 +7191,60 @@
                   "items": {
                     "$ref": "#/components/schemas/GetEventHistoryResponseItemOld"
                   },
-                  "title": "Response Get Event History Api Data Outputs  Id  History Get"
+                  "title": "Response Get Data Output Event History Api Data Outputs  Id  History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/history": {
+      "get": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Get Technical Asset Event History",
+        "operationId": "get_technical_asset_event_history",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEventHistoryResponse"
                 }
               }
             }
@@ -7028,7 +7265,7 @@
     "/api/data_outputs/{id}/status": {
       "put": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Update Data Output Status",
         "operationId": "update_data_output_status",
@@ -7086,13 +7323,85 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/status": {
+      "put": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Update Technical Asset Status",
+        "operationId": "update_technical_asset_status",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataOutputStatusUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Data Output not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Output id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_outputs/{id}/dataset/{dataset_id}": {
       "post": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Link Dataset To Data Output",
         "operationId": "link_dataset_to_data_output",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -7121,22 +7430,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "title": "Response Link Dataset To Data Output Api Data Outputs  Id  Dataset  Dataset Id  Post"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dataset not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Dataset not found"
+                  "$ref": "#/components/schemas/LinkTechnicalAssetsToOutputPortResponse"
                 }
               }
             }
@@ -7165,10 +7459,11 @@
       },
       "delete": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
         ],
         "summary": "Unlink Dataset From Data Output",
         "operationId": "unlink_dataset_from_data_output",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -7200,13 +7495,147 @@
               }
             }
           },
-          "400": {
-            "description": "Dataset not found",
+          "404": {
+            "description": "Data Product not found",
             "content": {
               "application/json": {
                 "example": {
-                  "detail": "Dataset not found"
+                  "detail": "Data Product id not found"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/link_output_port": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Link Output Port To Technical Asset",
+        "operationId": "link_output_port_to_technical_asset",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkTechnicalAssetToOutputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkTechnicalAssetsToOutputPortResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/unlink_output_port": {
+      "delete": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Unlink Output Port From Technical Asset",
+        "operationId": "unlink_output_port_from_technical_asset",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "dataset_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -7236,11 +7665,75 @@
     "/api/data_outputs/{id}/graph": {
       "get": {
         "tags": [
-          "data_outputs"
+          "Data Products - Technical assets"
+        ],
+        "summary": "Get Graph Data Old",
+        "operationId": "get_graph_data_old",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 3,
+              "title": "Level"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Graph"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/graph": {
+      "get": {
+        "tags": [
+          "Data Products - Technical assets"
         ],
         "summary": "Get Graph Data",
         "operationId": "get_graph_data",
         "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
           {
             "name": "id",
             "in": "path",
@@ -16870,7 +17363,7 @@
           "data_output": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/app__data_outputs__schema__DataOutput"
+                "$ref": "#/components/schemas/app__data_products__technical_assets__schema__DataOutput"
               },
               {
                 "type": "null"
@@ -16888,7 +17381,8 @@
           "created_on",
           "actor"
         ],
-        "title": "GetEventHistoryResponseItemOld"
+        "title": "GetEventHistoryResponseItemOld",
+        "deprecated": true
       },
       "GetOutputPortResponse": {
         "properties": {
@@ -17449,6 +17943,34 @@
           "input_port_links"
         ],
         "title": "LinkInputPortsToDataProductPost"
+      },
+      "LinkTechnicalAssetToOutputPortRequest": {
+        "properties": {
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_id"
+        ],
+        "title": "LinkTechnicalAssetToOutputPortRequest"
+      },
+      "LinkTechnicalAssetsToOutputPortResponse": {
+        "properties": {
+          "link_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Link Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "link_id"
+        ],
+        "title": "LinkTechnicalAssetsToOutputPortResponse"
       },
       "NamespaceLengthLimits": {
         "properties": {
@@ -19368,6 +19890,20 @@
         ],
         "title": "UpdateTagResponse"
       },
+      "UpdateTechnicalAssetResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateTechnicalAssetResponse"
+      },
       "User": {
         "properties": {
           "id": {
@@ -20348,101 +20884,6 @@
         ],
         "title": "RoleAssignmentResponse"
       },
-      "app__data_outputs__schema__DataOutput": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
-              }
-            }
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "sourceAligned",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration"
-        ],
-        "title": "DataOutput",
-        "deprecated": true
-      },
       "app__data_outputs_datasets__schema_response__DataOutput": {
         "properties": {
           "id": {
@@ -20637,6 +21078,101 @@
           "service_id",
           "configuration",
           "owner"
+        ],
+        "title": "DataOutput",
+        "deprecated": true
+      },
+      "app__data_products__technical_assets__schema__DataOutput": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TechnicalAssetStatus"
+          },
+          "sourceAligned": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcealigned"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Id"
+          },
+          "platform_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Platform Id"
+          },
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
+          },
+          "configuration": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/S3DataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/GlueDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/DatabricksDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
+              },
+              {
+                "$ref": "#/components/schemas/RedshiftDataOutput"
+              }
+            ],
+            "title": "Configuration",
+            "discriminator": {
+              "propertyName": "configuration_type",
+              "mapping": {
+                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
+                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
+                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
+                "S3DataOutput": "#/components/schemas/S3DataOutput",
+                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "status",
+          "sourceAligned",
+          "owner_id",
+          "platform_id",
+          "service_id",
+          "configuration"
         ],
         "title": "DataOutput",
         "deprecated": true

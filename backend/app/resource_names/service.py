@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapper, Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
-from app.data_outputs.model import DataOutput
+from app.data_products.technical_assets.model import DataOutput
 from app.settings import settings
 from app.shared.schema import ORMModel
 

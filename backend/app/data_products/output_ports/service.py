@@ -24,7 +24,6 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -48,6 +47,7 @@ from app.data_products.output_ports.search_dataset import (
     recalculate_search_vector_dataset_statement,
     recalculate_search_vector_datasets_statement,
 )
+from app.data_products.technical_assets.model import DataOutput
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )

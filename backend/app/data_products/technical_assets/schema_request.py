@@ -2,7 +2,7 @@ from uuid import UUID
 from warnings import deprecated
 
 from app.data_output_configuration.schema_union import DataOutputConfiguration
-from app.data_outputs.status import TechnicalAssetStatus
+from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
 
 
@@ -37,3 +37,7 @@ class DataOutputResultStringRequest(ORMModel):
     platform_id: UUID
     service_id: UUID
     configuration: DataOutputConfiguration
+
+
+class LinkTechnicalAssetToOutputPortRequest(ORMModel):
+    output_port_id: UUID
