@@ -40,7 +40,7 @@ export function DomainTable() {
 
     const handleRemove = async (domain: DomainsGetContract) => {
         try {
-            if (domain.dataset_count > 0 || domain.data_product_count > 0) {
+            if (domain.data_product_count > 0) {
                 setMigrateFrom(domain);
                 handleOpenMigrate();
             } else {

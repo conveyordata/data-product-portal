@@ -10,4 +10,4 @@ class TestGraphRouter:
         DataOutputFactory(owner=data_product)
         response = client.get(f"{ENDPOINT}")
         assert len(response.json()["edges"]) == 1
-        assert len(response.json()["nodes"]) == 4
+        assert len(response.json()["nodes"]) == 3
