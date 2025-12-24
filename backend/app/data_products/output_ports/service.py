@@ -80,6 +80,7 @@ class DatasetService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
+
     @staticmethod
     def _build_prefix_tsquery(query: str) -> str | None:
         """
@@ -167,7 +168,6 @@ class DatasetService:
         lowered = query.lower() if query else ""
         raw_tokens = re.split(r"[\W_]+", lowered) if lowered else []
         tokens = [t for t in raw_tokens if len(t) >= 2]
-        has_boundary_chars = ("-" in lowered) or ("_" in lowered)
         # Use the highest rank from websearch_to_tsquery and prefix to_tsquery
         if prefix_query:
             prefix_ts = func.to_tsquery("english", prefix_query)
@@ -182,10 +182,9 @@ class DatasetService:
                 32,
             )
             rank_expr = func.greatest(web_rank_expr, prefix_rank_expr).label("rank")
-            where_clause = (
-                DatasetModel.search_vector.op("@@")(web_ts)
-                | DatasetModel.search_vector.op("@@")(prefix_ts)
-            )
+            where_clause = DatasetModel.search_vector.op("@@")(
+                web_ts
+            ) | DatasetModel.search_vector.op("@@")(prefix_ts)
             # Fallback infix matching: require all tokens to appear (substring) in name or description
             # Apply whenever we have non-trivial tokens to support infix search like 'inica' -> 'Clinical'
             if tokens:
