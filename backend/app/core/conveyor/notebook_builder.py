@@ -43,6 +43,12 @@ class NotebookBuilderConveyor:
         return result.json().get("access_token")
 
     def test_and_reauth(self) -> None:
+        # If not configured, signal to client that integration isn't available
+        if not self.api_key or not self.api_secret:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Please contact us on how to integrate with Conveyor",
+            )
         result = requests.get(
             f"{self.conveyor_api}/environments",
             headers={"Authorization": f"Bearer {self.token}"},
