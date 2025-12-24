@@ -174,7 +174,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
-                    domain_id: dataProduct.domain.id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
@@ -208,7 +207,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     description: values.description,
                     data_product_id: currentDataset.data_product_id,
                     tag_ids: values.tag_ids,
-                    domain_id: currentDataset.domain.id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };

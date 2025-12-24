@@ -29,9 +29,6 @@ class GraphService:
         domains = (
             self.db.scalars(
                 select(Domain).options(
-                    selectinload(Domain.datasets).selectinload(
-                        Dataset.data_product_links
-                    ),
                     selectinload(Domain.data_products).selectinload(
                         DataProduct.datasets
                     ),
@@ -41,15 +38,11 @@ class GraphService:
                     selectinload(Domain.data_products).selectinload(
                         DataProduct.assignments
                     ),
-                    selectinload(Domain.datasets).selectinload(
-                        Dataset.data_product_links
-                    ),
                 )
             )
             .unique()
             .all()
         )
-        datasets = {d for domain in domains for d in domain.datasets}
         data_products = {dp for domain in domains for dp in domain.data_products}
 
         # Nodes are { data products + datasets + data outputs }
@@ -70,6 +63,18 @@ class GraphService:
             )
             for data_product_get in data_products
         ]
+        # get all datasets
+        datasets = (
+            self.db.scalars(
+                select(Dataset).options(
+                    selectinload(Dataset.data_product_links),
+                    selectinload(Dataset.data_output_links),
+                    selectinload(Dataset.data_product).selectinload(DataProduct.domain),
+                )
+            )
+            .unique()
+            .all()
+        )
         dataset_nodes = [
             Node(
                 id=dataset_get.id,
@@ -78,8 +83,8 @@ class GraphService:
                     name=dataset_get.name,
                     icon_key="dataset",
                     link_to_id=dataset_get.id,
-                    domain=dataset_get.domain.name,
-                    domain_id=dataset_get.domain.id,
+                    domain=dataset_get.data_product.domain.name,
+                    domain_id=dataset_get.data_product.domain.id,
                     # assignments=dataset_get.assignments,
                     description=dataset_get.description,
                 ),
