@@ -18,9 +18,6 @@ from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
 from app.core.logging import logger
 from app.core.namespace.validation import (
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
     NamespaceValidator,
     NamespaceValidityType,
 )
@@ -415,17 +412,6 @@ class DatasetService:
             )
 
         return Graph(nodes=set(nodes), edges=set(edges))
-
-    def validate_dataset_namespace(self, namespace: str) -> NamespaceValidation:
-        return self.namespace_validator.validate_namespace(namespace, self.db)
-
-    @classmethod
-    def dataset_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
-        return NamespaceValidator.namespace_suggestion(name)
-
-    @classmethod
-    def dataset_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return NamespaceValidator.namespace_length_limits()
 
     def is_visible_to_user(self, dataset: DatasetModel, user: User) -> bool:
         if (

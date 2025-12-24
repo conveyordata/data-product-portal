@@ -96,18 +96,68 @@ class TestDataProductSettingsRouter:
         assert response.status_code == 200
         assert response.json()["max_length"] > 1
 
-    def test_validate_namespace(self, client):
+    def test_validate_namespace_old(self, client):
         namespace = "test"
-        response = self.validate_namespace(
+        response = self.validate_namespace_old(
             client, namespace, DataProductSettingScope.DATAPRODUCT
         )
 
         assert response.status_code == 200
         assert response.json()["validity"] == NamespaceValidityType.VALID
 
+    def test_validate_namespace_old_invalid_characters(self, client):
+        namespace = "!"
+        response = self.validate_namespace_old(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
+
+    def test_validate_namespace_old_invalid_length(self, client):
+        namespace = "a" * 256
+        response = self.validate_namespace_old(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
+
+    def test_validate_namespace_old_duplicate(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
+        )
+        response = self.validate_namespace_old(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+
+    def test_validate_namespace_old_duplicate_scoped_to_data_product(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
+        )
+        response = self.validate_namespace_old(
+            client, namespace, DataProductSettingScope.DATASET
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
+
+    def test_validate_namespace(self, client):
+        namespace = "test"
+        response = self.validate_namespace(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
+
     def test_validate_namespace_invalid_characters(self, client):
         namespace = "!"
-        response = self.validate_namespace(
+        response = self.validate_namespace_old(
             client, namespace, DataProductSettingScope.DATAPRODUCT
         )
 
@@ -135,12 +185,24 @@ class TestDataProductSettingsRouter:
         assert response.status_code == 200
         assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
 
+    def test_validate_namespace_duplicate_dataset(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATASET
+        )
+        response = self.validate_namespace_output_port(
+            client, namespace, DataProductSettingScope.DATASET
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+
     def test_validate_namespace_duplicate_scoped_to_data_product(self, client):
         namespace = "test"
         DataProductSettingFactory(
             namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
         )
-        response = self.validate_namespace(
+        response = self.validate_namespace_old(
             client, namespace, DataProductSettingScope.DATASET
         )
 
@@ -229,9 +291,33 @@ class TestDataProductSettingsRouter:
         return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def validate_namespace(client, namespace, scope: DataProductSettingScope):
+    def validate_namespace_old(client, namespace, scope: DataProductSettingScope):
         return client.get(
             f"{ENDPOINT}/validate_namespace?namespace={namespace}&scope={scope.value}"
+        )
+
+    @staticmethod
+    def validate_namespace(client, namespace, scope: DataProductSettingScope):
+        return client.post(
+            "/api/v2/resource_names/validate",
+            json={
+                "resource_name": namespace,
+                "model": "data_product_setting",
+                "scope": scope.value,
+            },
+        )
+
+    @staticmethod
+    def validate_namespace_output_port(
+        client, namespace, scope: DataProductSettingScope
+    ):
+        return client.post(
+            "/api/v2/resource_names/validate",
+            json={
+                "resource_name": namespace,
+                "model": "output_port_setting",
+                "scope": scope.value,
+            },
         )
 
     @staticmethod

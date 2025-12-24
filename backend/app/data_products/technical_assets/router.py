@@ -36,6 +36,7 @@ from app.events.schema_response import (
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.resource_names.service import ResourceNameService
 from app.users.schema import User
 
 old_route = "/data_outputs"
@@ -49,13 +50,17 @@ def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutp
 
 
 @router.get(f"{old_route}/namespace_suggestion", deprecated=True)
-def get_data_output_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataOutputService.data_output_namespace_suggestion(name)
+def get_dataset_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return NamespaceSuggestion(
+        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
+    )
 
 
 @router.get(f"{old_route}/namespace_length_limits", deprecated=True)
-def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataOutputService.data_output_namespace_length_limits()
+def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
+    return NamespaceLengthLimits(
+        max_length=ResourceNameService.resource_name_length_limits().max_length
+    )
 
 
 @router.post(f"{old_route}/result_string", deprecated=True)
