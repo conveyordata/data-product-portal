@@ -6,7 +6,6 @@ from app.data_products.output_ports.status import OutputPortStatus
 from tests import test_session
 
 from .data_product import DataProductFactory
-from .domain import DomainFactory
 from .tags import TagFactory
 
 
@@ -21,7 +20,6 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     about = factory.Faker("text", max_nb_chars=20)
     status = OutputPortStatus.ACTIVE.value
     access_type = OutputPortAccessType.PUBLIC.value
-    domain = factory.SubFactory(DomainFactory)
     usage = factory.Faker("word")
     data_product = factory.SubFactory(DataProductFactory)
 

@@ -10,7 +10,6 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
 
 
 class Domain(Base, BaseORM):
@@ -20,17 +19,11 @@ class Domain(Base, BaseORM):
     name = Column(String)
     description = Column(String)
 
-    # Relationships
-    datasets: Mapped[list["Dataset"]] = relationship(lazy="raise")
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="raise")
 
     @property
     def data_product_count(self) -> int:
         return len(self.data_products)
-
-    @property
-    def dataset_count(self) -> int:
-        return len(self.datasets)
 
 
 def ensure_domain_exists(data_product_type_id: UUID, db: Session, **kwargs) -> Domain:

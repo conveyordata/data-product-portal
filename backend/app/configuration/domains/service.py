@@ -25,7 +25,6 @@ class DomainService:
             self.db.scalars(
                 select(DomainModel)
                 .options(
-                    selectinload(DomainModel.datasets),
                     selectinload(DomainModel.data_products),
                 )
                 .order_by(DomainModel.name)
@@ -39,7 +38,6 @@ class DomainService:
             DomainModel,
             id,
             options=[
-                selectinload(DomainModel.datasets),
                 selectinload(DomainModel.data_products),
             ],
         )
@@ -73,12 +71,11 @@ class DomainService:
             DomainModel,
             id,
             options=[
-                selectinload(DomainModel.datasets),
                 selectinload(DomainModel.data_products),
             ],
         )
 
-        if domain.data_products or domain.datasets:
+        if domain.data_products:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
@@ -95,14 +92,10 @@ class DomainService:
             from_id,
             self.db,
             options=[
-                selectinload(DomainModel.datasets),
                 selectinload(DomainModel.data_products),
             ],
         )
         new_domain = ensure_domain_exists(to_id, self.db)
-
-        for dataset in domain.datasets:
-            dataset.domain_id = new_domain.id
 
         for data_product in domain.data_products:
             data_product.domain_id = new_domain.id
