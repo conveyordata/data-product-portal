@@ -65,20 +65,15 @@ class DeviceFlowService:
             now = utc_now()
             buffer = timedelta(minutes=settings.DEVICE_FLOW_CLEANUP_BUFFER_MINUTES)
             cutoff = now - buffer
-
-            # Count candidates for deletion
-            count_stmt = select(func.count()).select_from(DeviceFlowModel).where(
+            # Delete all candidates in a single query and log affected rows
+            delete_stmt = delete(DeviceFlowModel).where(
                 DeviceFlowModel.max_expiry <= cutoff
             )
-            deleted = db.scalar(count_stmt)
-            
-            # Delete all candidates in a single query
-            if deleted > 0:
-                delete_stmt = delete(DeviceFlowModel).where(
-                    DeviceFlowModel.max_expiry <= cutoff
-                )
-                db.execute(delete_stmt)
-                self.logger.info(f"Cleaned {deleted} stale device flow records")
+            res = db.execute(delete_stmt)
+            db.commit()
+            self.logger.info(
+                f"Cleaned {res.rowcount} stale device flow records"
+            )
         except Exception as e:
             # Best-effort cleanup; do not block auth flows
             db.rollback()
