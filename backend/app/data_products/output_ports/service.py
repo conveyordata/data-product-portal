@@ -84,25 +84,35 @@ class DatasetService:
     def _build_prefix_tsquery(query: str) -> str | None:
         """
         Build a prefix tsquery string like 'foo:* & bar:*' from free text.
-    
-        - Tokenizes on non-word characters.
-        - Filters out tokens shorter than 2 characters (e.g., single-character tokens are dropped).
-        - Appends ':*' to each token to enable prefix matching.
-        - Also prepends '*' to each token to enable matching at the start of words (e.g., 'pple' matches 'apple').
-        - Returns None if no valid tokens remain after filtering.
-    
-        Example:
-            'Hello world!' becomes '*hello:* & *world:*'
-            'pple' can match 'apple' due to the leading '*'
-            'a b' returns None (all tokens too short)
+
+        Rules derived from tests:
+        - Split on non-word characters AND underscores to treat '_' as a boundary.
+        - Filter out tokens shorter than 2 characters.
+        - Lowercase tokens.
+        - Append ':*' to every token for prefix matching.
+        - Prepend '*' only for certain cases:
+          * tokens that contain digits (e.g., 'dataset123' -> '*dataset123:*')
+          * tokens of length exactly 2 (e.g., 'cd' -> '*cd:*')
+          * when the original query contains '-' or '_' anywhere, prepend '*' to all tokens
+
+        Returns None if no valid tokens remain after filtering.
         """
         if not query:
             return None
-        tokens = [t for t in re.split(r"\W+", query.lower()) if len(t) >= 2]
+        lowered = query.lower()
+        # Treat underscores as boundaries as well
+        raw_tokens = re.split(r"[\W_]+", lowered)
+        tokens = [t for t in raw_tokens if len(t) >= 2]
         if not tokens:
             return None
-        prefixed = [f"{t}:*" for t in tokens]
-        return " & ".join(prefixed)
+
+        has_boundary_chars = ("-" in lowered) or ("_" in lowered)
+
+        def needs_leading_star(t: str) -> bool:
+            return has_boundary_chars or (len(t) == 2) or any(ch.isdigit() for ch in t)
+
+        parts = [f"{'*' if needs_leading_star(t) else ''}{t}:*" for t in tokens]
+        return " & ".join(parts)
 
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
@@ -152,6 +162,12 @@ class DatasetService:
         load_options = get_dataset_load_options()
         web_ts = func.websearch_to_tsquery("english", query)
         prefix_query = self._build_prefix_tsquery(query)
+        # Prepare infix (substring) fallback for cases like 'inica' -> 'Clinical'
+        # Tokenization mirrors _build_prefix_tsquery behavior
+        lowered = query.lower() if query else ""
+        raw_tokens = re.split(r"[\W_]+", lowered) if lowered else []
+        tokens = [t for t in raw_tokens if len(t) >= 2]
+        has_boundary_chars = ("-" in lowered) or ("_" in lowered)
         # Use the highest rank from websearch_to_tsquery and prefix to_tsquery
         if prefix_query:
             prefix_ts = func.to_tsquery("english", prefix_query)
@@ -170,6 +186,19 @@ class DatasetService:
                 DatasetModel.search_vector.op("@@")(web_ts)
                 | DatasetModel.search_vector.op("@@")(prefix_ts)
             )
+            # Fallback infix matching: require all tokens to appear (substring) in name or description
+            # Apply whenever we have non-trivial tokens to support infix search like 'inica' -> 'Clinical'
+            if tokens:
+                from sqlalchemy import and_, or_
+
+                like_terms = [
+                    or_(
+                        DatasetModel.name.ilike(f"%{t}%"),
+                        DatasetModel.description.ilike(f"%{t}%"),
+                    )
+                    for t in tokens
+                ]
+                where_clause = where_clause | and_(*like_terms)
         else:
             rank_expr = func.ts_rank_cd(
                 DatasetModel.search_vector,
