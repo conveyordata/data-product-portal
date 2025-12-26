@@ -22,6 +22,7 @@ from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
 from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
 from app.core.logging import logger
+from app.settings import settings
 
 basic_auth = HTTPBasic()
 
@@ -50,10 +51,11 @@ def utc_now() -> datetime:
 class DeviceFlowService:
     def __init__(self):
         self.logger = logger
-
     def generate_device_flow_codes(
         self, db: Session, client_id: str, scope: str = "openid"
     ) -> DeviceFlow:
+        # Best-effort cleanup before creating a new flow
+        self.clean_device_flows(db)
         device_flow = DeviceFlowModel(
             client_id=client_id,
             scope=scope,

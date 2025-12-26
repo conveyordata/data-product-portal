@@ -168,7 +168,7 @@ def request_assignment(
     role_assignment = service.create_assignment(
         data_product_id=request.data_product_id,
         role_id=request.role_id,
-        user_id=request.user_id,
+        user_id=user.id,
         actor=user,
     )
     EventService(db).create_event(
@@ -215,7 +215,7 @@ def create_assignment_old(
 ) -> RoleAssignmentResponse:
     return create_assignment(
         CreateRoleAssignment(
-            data_product_id=id, user_id=request.user_id, role_id=request.role_id
+            data_product_id=id, role_id=request.role_id, user_id=user.id
         ),
         background_tasks,
         db,

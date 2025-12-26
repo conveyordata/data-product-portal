@@ -61,11 +61,11 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                 DataProductRoleAssignmentCreateContract
             >({
                 query: (request) => ({
-                    url: buildUrl(ApiUrl.RoleAssignmentsDataProductRequest, { dataProductId: request.data_product_id }),
+                    url: ApiUrl.RoleAssignmentsDataProductRequest,
                     method: 'POST',
                     data: {
+                        data_product_id: request.data_product_id,
                         role_id: request.role_id,
-                        user_id: request.user_id,
                     },
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [

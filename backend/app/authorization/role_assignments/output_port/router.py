@@ -187,14 +187,25 @@ def request_assignment(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return convert_to_role_assignment(
-        request_assignment_old(
-            request.output_port_id,
-            CreateRoleAssignmentOld(user_id=request.user_id, role_id=request.role_id),
-            db,
-            authenticated_user,
+    assignment = RoleAssignmentService(db).create_assignment(
+        dataset_id=request.output_port_id,
+        role_id=request.role_id,
+        user_id=authenticated_user.id,
+        actor=authenticated_user,
+    )
+
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED,
+            subject_id=assignment.dataset_id,
+            subject_type=EventReferenceEntity.DATASET,
+            target_id=assignment.user_id,
+            target_type=EventReferenceEntity.USER,
+            actor_id=authenticated_user.id,
         )
     )
+
+    return convert_to_role_assignment(assignment)
 
 
 @router.post(
