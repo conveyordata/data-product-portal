@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   VERSION_FILE: VERSION
@@ -31,7 +31,7 @@ tasks:
         fs.writeFileSync(file, updated);
         '
 
-  update:open-api-spec:
+  openapi-spec:update:
     desc: "Update OpenAPI spec with new version"
     cmds:
       - cd backend && poetry run python -m app.open_api_export
@@ -99,6 +99,28 @@ tasks:
     cmds:
       - task: bump:version-file
       - task: bump:release-notes
-      - task: update:open-api-spec
+      - task: update:openapi-spec
       - task: release:commit
       - task: release:pr
+
+  go-sdk:setup:
+    desc: "Setup Go SDK generation"
+    cmds:
+      - go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+
+  go-sdk:generate:
+    desc: "Generate the Go SDK from the OpenAPI spec"
+    cmds:
+      - cd sdk-go && oapi-codegen --package portal-sdk --generate types,client -o portal-sdk.go ../docs/static/openapi.json
+      - go mod tidy
+
+  dotenv:generate:
+    desc: "Generate .env file for local development, from .env.docker"
+    cmds:
+      - |
+        if [ ! -f .env ]; then
+          cp .env.docker .env
+          echo ".env file created"
+        else
+          echo ".env file already exists, skipping creation"
+        fi
