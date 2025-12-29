@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "info": {
     "title": "Data product portal",
     "summary": "Backend API implementation for Data product portal",
@@ -12,7 +12,9 @@
   "paths": {
     "/api/authz/access/{action}": {
       "get": {
-        "tags": ["Authorization"],
+        "tags": [
+          "Authorization"
+        ],
         "summary": "Check Access",
         "description": "Allows the requesting user to check whether an access check will fail or succeed.\nUseful to conditionally disable parts of the UI that are known to be inaccessible.",
         "operationId": "check_access_api_authz_access__action__get",
@@ -103,7 +105,9 @@
     },
     "/api/authz/admin": {
       "get": {
-        "tags": ["Authorization"],
+        "tags": [
+          "Authorization"
+        ],
         "summary": "Is Admin",
         "operationId": "is_admin_api_authz_admin_get",
         "deprecated": true,
@@ -145,7 +149,9 @@
     },
     "/api/v2/authz/access/{action}": {
       "get": {
-        "tags": ["Authorization"],
+        "tags": [
+          "Authorization"
+        ],
         "summary": "Check Access",
         "description": "Allows the requesting user to check whether an access check will fail or succeed.\nUseful to conditionally disable parts of the UI that are known to be inaccessible.",
         "operationId": "check_access_api_v2_authz_access__action__get",
@@ -235,7 +241,9 @@
     },
     "/api/v2/authz/admin": {
       "get": {
-        "tags": ["Authorization"],
+        "tags": [
+          "Authorization"
+        ],
         "summary": "Is Admin",
         "operationId": "is_admin_api_v2_authz_admin_get",
         "parameters": [
@@ -276,7 +284,9 @@
     },
     "/api/datasets": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Get Datasets",
         "operationId": "get_datasets_api_datasets_get",
         "parameters": [
@@ -319,7 +329,9 @@
         }
       },
       "post": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Create Dataset",
         "operationId": "create_dataset_api_datasets_post",
         "parameters": [
@@ -388,7 +400,9 @@
     },
     "/api/datasets/search": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Search Datasets",
         "operationId": "search_datasets_api_datasets_search_get",
         "parameters": [
@@ -455,7 +469,9 @@
     },
     "/api/datasets/namespace_suggestion": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Get Dataset Namespace Suggestion",
         "operationId": "get_dataset_namespace_suggestion_api_datasets_namespace_suggestion_get",
         "parameters": [
@@ -495,7 +511,9 @@
     },
     "/api/datasets/validate_namespace": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Validate Dataset Namespace",
         "operationId": "validate_dataset_namespace_api_datasets_validate_namespace_get",
         "parameters": [
@@ -535,7 +553,9 @@
     },
     "/api/datasets/namespace_length_limits": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Get Dataset Namespace Length Limits",
         "operationId": "get_dataset_namespace_length_limits_api_datasets_namespace_length_limits_get",
         "responses": {
@@ -554,7 +574,9 @@
     },
     "/api/datasets/{id}": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Get Dataset",
         "operationId": "get_dataset_api_datasets__id__get",
         "parameters": [
@@ -603,7 +625,9 @@
         }
       },
       "delete": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Remove Dataset",
         "operationId": "remove_dataset_api_datasets__id__delete",
         "parameters": [
@@ -660,7 +684,9 @@
         }
       },
       "put": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Update Dataset",
         "operationId": "update_dataset_api_datasets__id__put",
         "parameters": [
@@ -736,7 +762,9 @@
     },
     "/api/datasets/user/{user_id}": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Get User Datasets",
         "operationId": "get_user_datasets_api_datasets_user__user_id__get",
         "parameters": [
@@ -781,7 +809,9 @@
     },
     "/api/datasets/{id}/history": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Get Event History",
         "operationId": "get_event_history_api_datasets__id__history_get",
         "parameters": [
@@ -826,7 +856,9 @@
     },
     "/api/datasets/{id}/about": {
       "put": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Update Dataset About",
         "operationId": "update_dataset_about_api_datasets__id__about_put",
         "parameters": [
@@ -895,7 +927,9 @@
     },
     "/api/datasets/{id}/status": {
       "put": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Update Dataset Status",
         "operationId": "update_dataset_status_api_datasets__id__status_put",
         "parameters": [
@@ -964,7 +998,9 @@
     },
     "/api/datasets/{id}/usage": {
       "put": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Update Dataset Usage",
         "operationId": "update_dataset_usage_api_datasets__id__usage_put",
         "parameters": [
@@ -1023,7 +1059,9 @@
     },
     "/api/datasets/{id}/graph": {
       "get": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Get Graph Data",
         "operationId": "get_graph_data_api_datasets__id__graph_get",
         "parameters": [
@@ -1074,7 +1112,9 @@
     },
     "/api/datasets/{id}/settings/{setting_id}": {
       "post": {
-        "tags": ["datasets"],
+        "tags": [
+          "datasets"
+        ],
         "summary": "Set Value For Dataset",
         "operationId": "set_value_for_dataset_api_datasets__id__settings__setting_id__post",
         "parameters": [
@@ -1142,7 +1182,10 @@
     },
     "/api/datasets/{id}/query_stats": {
       "get": {
-        "tags": ["datasets", "datasets"],
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
         "summary": "Get Query Stats",
         "operationId": "get_query_stats_api_datasets__id__query_stats_get",
         "parameters": [
@@ -1181,7 +1224,10 @@
         }
       },
       "patch": {
-        "tags": ["datasets", "datasets"],
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
         "summary": "Update Query Stats",
         "operationId": "update_query_stats_api_datasets__id__query_stats_patch",
         "parameters": [
@@ -1228,7 +1274,10 @@
         }
       },
       "delete": {
-        "tags": ["datasets", "datasets"],
+        "tags": [
+          "datasets",
+          "datasets"
+        ],
         "summary": "Delete Query Stat",
         "operationId": "delete_query_stat_api_datasets__id__query_stats_delete",
         "parameters": [
@@ -1277,7 +1326,9 @@
     },
     "/api/data_products": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Data Products",
         "operationId": "get_data_products_api_data_products_get",
         "responses": {
@@ -1298,7 +1349,9 @@
         }
       },
       "post": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Create Data Product",
         "operationId": "create_data_product_api_data_products_post",
         "parameters": [
@@ -1367,7 +1420,9 @@
     },
     "/api/data_products/namespace_suggestion": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Data Product Namespace Suggestion",
         "operationId": "get_data_product_namespace_suggestion_api_data_products_namespace_suggestion_get",
         "parameters": [
@@ -1407,7 +1462,9 @@
     },
     "/api/data_products/validate_namespace": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Validate Data Product Namespace",
         "operationId": "validate_data_product_namespace_api_data_products_validate_namespace_get",
         "parameters": [
@@ -1447,7 +1504,9 @@
     },
     "/api/data_products/namespace_length_limits": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Data Product Namespace Length Limits",
         "operationId": "get_data_product_namespace_length_limits_api_data_products_namespace_length_limits_get",
         "responses": {
@@ -1466,7 +1525,9 @@
     },
     "/api/data_products/user/{user_id}": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get User Data Products",
         "operationId": "get_user_data_products_api_data_products_user__user_id__get",
         "parameters": [
@@ -1511,7 +1572,9 @@
     },
     "/api/data_products/{id}": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Data Product",
         "operationId": "get_data_product_api_data_products__id__get",
         "parameters": [
@@ -1550,7 +1613,9 @@
         }
       },
       "delete": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Remove Data Product",
         "operationId": "remove_data_product_api_data_products__id__delete",
         "parameters": [
@@ -1607,7 +1672,9 @@
         }
       },
       "put": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Update Data Product",
         "operationId": "update_data_product_api_data_products__id__put",
         "parameters": [
@@ -1683,7 +1750,9 @@
     },
     "/api/data_products/{id}/history": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Event History",
         "operationId": "get_event_history_api_data_products__id__history_get",
         "parameters": [
@@ -1728,7 +1797,9 @@
     },
     "/api/data_products/{id}/data_output": {
       "post": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Create Data Output",
         "operationId": "create_data_output_api_data_products__id__data_output_post",
         "parameters": [
@@ -1797,7 +1868,9 @@
     },
     "/api/data_products/{id}/data_output/validate_namespace": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Validate Data Output Namespace",
         "operationId": "validate_data_output_namespace_api_data_products__id__data_output_validate_namespace_get",
         "parameters": [
@@ -1847,7 +1920,9 @@
     },
     "/api/data_products/{id}/about": {
       "put": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Update Data Product About",
         "operationId": "update_data_product_about_api_data_products__id__about_put",
         "parameters": [
@@ -1916,7 +1991,9 @@
     },
     "/api/data_products/{id}/status": {
       "put": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Update Data Product Status",
         "operationId": "update_data_product_status_api_data_products__id__status_put",
         "parameters": [
@@ -1985,7 +2062,9 @@
     },
     "/api/data_products/{id}/usage": {
       "put": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Update Data Product Usage",
         "operationId": "update_data_product_usage_api_data_products__id__usage_put",
         "parameters": [
@@ -2044,7 +2123,9 @@
     },
     "/api/data_products/{id}/dataset/{dataset_id}": {
       "post": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Link Dataset To Data Product",
         "operationId": "link_dataset_to_data_product_api_data_products__id__dataset__dataset_id__post",
         "deprecated": true,
@@ -2129,7 +2210,9 @@
         }
       },
       "delete": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Unlink Dataset From Data Product",
         "operationId": "unlink_dataset_from_data_product_api_data_products__id__dataset__dataset_id__delete",
         "parameters": [
@@ -2208,7 +2291,9 @@
     },
     "/api/data_products/{id}/link_datasets": {
       "post": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Link Datasets To Data Product",
         "operationId": "link_datasets_to_data_product_api_data_products__id__link_datasets_post",
         "parameters": [
@@ -2289,7 +2374,9 @@
     },
     "/api/data_products/{id}/role": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Role",
         "operationId": "get_role_api_data_products__id__role_get",
         "parameters": [
@@ -2350,7 +2437,9 @@
     },
     "/api/data_products/{id}/signin_url": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Signin Url",
         "operationId": "get_signin_url_api_data_products__id__signin_url_get",
         "parameters": [
@@ -2411,7 +2500,9 @@
     },
     "/api/data_products/{id}/conveyor_ide_url": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Conveyor Ide Url",
         "operationId": "get_conveyor_ide_url_api_data_products__id__conveyor_ide_url_get",
         "parameters": [
@@ -2463,7 +2554,9 @@
     },
     "/api/data_products/{id}/databricks_workspace_url": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Databricks Workspace Url",
         "operationId": "get_databricks_workspace_url_api_data_products__id__databricks_workspace_url_get",
         "parameters": [
@@ -2524,7 +2617,9 @@
     },
     "/api/data_products/{id}/snowflake_url": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Snowflake Url",
         "operationId": "get_snowflake_url_api_data_products__id__snowflake_url_get",
         "parameters": [
@@ -2585,7 +2680,9 @@
     },
     "/api/data_products/{id}/data_outputs": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Data Outputs",
         "operationId": "get_data_outputs_api_data_products__id__data_outputs_get",
         "parameters": [
@@ -2630,7 +2727,9 @@
     },
     "/api/data_products/{id}/graph": {
       "get": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Get Graph Data",
         "operationId": "get_graph_data_api_data_products__id__graph_get",
         "parameters": [
@@ -2681,7 +2780,9 @@
     },
     "/api/data_products/{id}/settings/{setting_id}": {
       "post": {
-        "tags": ["data_products"],
+        "tags": [
+          "data_products"
+        ],
         "summary": "Set Value For Data Product",
         "operationId": "set_value_for_data_product_api_data_products__id__settings__setting_id__post",
         "parameters": [
@@ -2749,7 +2850,9 @@
     },
     "/api/data_product_types/{id}": {
       "get": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Get Data Product Type",
         "operationId": "get_data_product_type_api_data_product_types__id__get",
         "deprecated": true,
@@ -2789,7 +2892,9 @@
         }
       },
       "put": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Update Data Product Type",
         "operationId": "update_data_product_type_api_data_product_types__id__put",
         "deprecated": true,
@@ -2849,7 +2954,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Remove Data Product Type",
         "operationId": "remove_data_product_type_api_data_product_types__id__delete",
         "deprecated": true,
@@ -2899,7 +3006,9 @@
     },
     "/api/data_product_types": {
       "post": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Create Data Product Type",
         "operationId": "create_data_product_type_api_data_product_types_post",
         "deprecated": true,
@@ -2962,7 +3071,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Get Data Products Types Old",
         "operationId": "get_data_products_types_old_api_data_product_types_get",
         "deprecated": true,
@@ -2986,7 +3097,9 @@
     },
     "/api/data_product_types/migrate/{from_id}/{to_id}": {
       "put": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Migrate Data Product Type",
         "operationId": "migrate_data_product_type_api_data_product_types_migrate__from_id___to_id__put",
         "deprecated": true,
@@ -3046,7 +3159,9 @@
     },
     "/api/v2/configuration/data_product_types/{id}": {
       "get": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Get Data Product Type",
         "operationId": "get_data_product_type_api_v2_configuration_data_product_types__id__get",
         "parameters": [
@@ -3085,7 +3200,9 @@
         }
       },
       "put": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Update Data Product Type",
         "operationId": "update_data_product_type_api_v2_configuration_data_product_types__id__put",
         "parameters": [
@@ -3144,7 +3261,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Remove Data Product Type",
         "operationId": "remove_data_product_type_api_v2_configuration_data_product_types__id__delete",
         "parameters": [
@@ -3193,7 +3312,9 @@
     },
     "/api/v2/configuration/data_product_types": {
       "post": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Create Data Product Type",
         "operationId": "create_data_product_type_api_v2_configuration_data_product_types_post",
         "parameters": [
@@ -3255,7 +3376,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Get Data Products Types",
         "operationId": "get_data_products_types_api_v2_configuration_data_product_types_get",
         "responses": {
@@ -3274,7 +3397,9 @@
     },
     "/api/v2/configuration/data_product_types/migrate/{from_id}/{to_id}": {
       "put": {
-        "tags": ["Configuration - Data product types"],
+        "tags": [
+          "Configuration - Data product types"
+        ],
         "summary": "Migrate Data Product Type",
         "operationId": "migrate_data_product_type_api_v2_configuration_data_product_types_migrate__from_id___to_id__put",
         "parameters": [
@@ -3333,7 +3458,9 @@
     },
     "/api/data_product_lifecycles": {
       "post": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Create Data Product Lifecycle",
         "operationId": "create_data_product_lifecycle_api_data_product_lifecycles_post",
         "deprecated": true,
@@ -3396,7 +3523,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Get Data Products Lifecycles Old",
         "operationId": "get_data_products_lifecycles_old_api_data_product_lifecycles_get",
         "deprecated": true,
@@ -3420,7 +3549,9 @@
     },
     "/api/data_product_lifecycles/{id}": {
       "put": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Update Data Product Lifecycle",
         "operationId": "update_data_product_lifecycle_api_data_product_lifecycles__id__put",
         "deprecated": true,
@@ -3493,7 +3624,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Delete Data Product Lifecycle",
         "operationId": "delete_data_product_lifecycle_api_data_product_lifecycles__id__delete",
         "deprecated": true,
@@ -3543,7 +3676,9 @@
     },
     "/api/v2/configuration/data_product_lifecycles": {
       "post": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Create Data Product Lifecycle",
         "operationId": "create_data_product_lifecycle_api_v2_configuration_data_product_lifecycles_post",
         "parameters": [
@@ -3605,7 +3740,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Get Data Products Lifecycles",
         "operationId": "get_data_products_lifecycles_api_v2_configuration_data_product_lifecycles_get",
         "responses": {
@@ -3624,7 +3761,9 @@
     },
     "/api/v2/configuration/data_product_lifecycles/{id}": {
       "put": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Update Data Product Lifecycle",
         "operationId": "update_data_product_lifecycle_api_v2_configuration_data_product_lifecycles__id__put",
         "parameters": [
@@ -3696,7 +3835,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Data product lifecycles"],
+        "tags": [
+          "Configuration - Data product lifecycles"
+        ],
         "summary": "Delete Data Product Lifecycle",
         "operationId": "delete_data_product_lifecycle_api_v2_configuration_data_product_lifecycles__id__delete",
         "parameters": [
@@ -3745,7 +3886,9 @@
     },
     "/api/data_product_settings": {
       "post": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Create Data Product Setting",
         "operationId": "create_data_product_setting_api_data_product_settings_post",
         "deprecated": true,
@@ -3795,7 +3938,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Get Data Products Settings Old",
         "operationId": "get_data_products_settings_old_api_data_product_settings_get",
         "deprecated": true,
@@ -3819,7 +3964,9 @@
     },
     "/api/data_product_settings/namespace_suggestion": {
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Get Data Product Settings Namespace Suggestion",
         "operationId": "get_data_product_settings_namespace_suggestion_api_data_product_settings_namespace_suggestion_get",
         "deprecated": true,
@@ -3860,7 +4007,9 @@
     },
     "/api/data_product_settings/validate_namespace": {
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Validate Data Product Settings Namespace",
         "operationId": "validate_data_product_settings_namespace_api_data_product_settings_validate_namespace_get",
         "deprecated": true,
@@ -3909,7 +4058,9 @@
     },
     "/api/data_product_settings/namespace_length_limits": {
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Get Data Product Settings Namespace Length Limits",
         "operationId": "get_data_product_settings_namespace_length_limits_api_data_product_settings_namespace_length_limits_get",
         "responses": {
@@ -3929,7 +4080,9 @@
     },
     "/api/data_product_settings/{id}": {
       "put": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Update Data Product Setting",
         "operationId": "update_data_product_setting_api_data_product_settings__id__put",
         "deprecated": true,
@@ -3989,7 +4142,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Delete Data Product Setting",
         "operationId": "delete_data_product_setting_api_data_product_settings__id__delete",
         "deprecated": true,
@@ -4039,7 +4194,9 @@
     },
     "/api/v2/configuration/data_product_settings": {
       "post": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Create Data Product Setting",
         "operationId": "create_data_product_setting_api_v2_configuration_data_product_settings_post",
         "parameters": [
@@ -4088,7 +4245,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Get Data Products Settings",
         "operationId": "get_data_products_settings_api_v2_configuration_data_product_settings_get",
         "responses": {
@@ -4107,7 +4266,9 @@
     },
     "/api/v2/configuration/data_product_settings/namespace_suggestion": {
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Get Data Product Settings Namespace Suggestion",
         "operationId": "get_data_product_settings_namespace_suggestion_api_v2_configuration_data_product_settings_namespace_suggestion_get",
         "parameters": [
@@ -4147,7 +4308,9 @@
     },
     "/api/v2/configuration/data_product_settings/validate_namespace": {
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Validate Data Product Settings Namespace",
         "operationId": "validate_data_product_settings_namespace_api_v2_configuration_data_product_settings_validate_namespace_get",
         "parameters": [
@@ -4195,7 +4358,9 @@
     },
     "/api/v2/configuration/data_product_settings/namespace_length_limits": {
       "get": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Get Data Product Settings Namespace Length Limits",
         "operationId": "get_data_product_settings_namespace_length_limits_api_v2_configuration_data_product_settings_namespace_length_limits_get",
         "responses": {
@@ -4214,7 +4379,9 @@
     },
     "/api/v2/configuration/data_product_settings/{id}": {
       "put": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Update Data Product Setting",
         "operationId": "update_data_product_setting_api_v2_configuration_data_product_settings__id__put",
         "parameters": [
@@ -4273,7 +4440,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Data product settings"],
+        "tags": [
+          "Configuration - Data product settings"
+        ],
         "summary": "Delete Data Product Setting",
         "operationId": "delete_data_product_setting_api_v2_configuration_data_product_settings__id__delete",
         "parameters": [
@@ -4322,7 +4491,9 @@
     },
     "/api/data_product_dataset_links/approve/{id}": {
       "post": {
-        "tags": ["data_product_dataset_links"],
+        "tags": [
+          "data_product_dataset_links"
+        ],
         "summary": "Approve Data Product Link",
         "operationId": "approve_data_product_link_api_data_product_dataset_links_approve__id__post",
         "parameters": [
@@ -4371,7 +4542,9 @@
     },
     "/api/data_product_dataset_links/deny/{id}": {
       "post": {
-        "tags": ["data_product_dataset_links"],
+        "tags": [
+          "data_product_dataset_links"
+        ],
         "summary": "Deny Data Product Link",
         "operationId": "deny_data_product_link_api_data_product_dataset_links_deny__id__post",
         "parameters": [
@@ -4420,7 +4593,9 @@
     },
     "/api/data_product_dataset_links/remove/{id}": {
       "post": {
-        "tags": ["data_product_dataset_links"],
+        "tags": [
+          "data_product_dataset_links"
+        ],
         "summary": "Remove Data Product Link",
         "operationId": "remove_data_product_link_api_data_product_dataset_links_remove__id__post",
         "parameters": [
@@ -4469,7 +4644,9 @@
     },
     "/api/data_product_dataset_links/actions": {
       "get": {
-        "tags": ["data_product_dataset_links"],
+        "tags": [
+          "data_product_dataset_links"
+        ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_data_product_dataset_links_actions_get",
         "parameters": [
@@ -4514,7 +4691,9 @@
     },
     "/api/data_output_dataset_links/approve/{id}": {
       "post": {
-        "tags": ["data_output_dataset_links"],
+        "tags": [
+          "data_output_dataset_links"
+        ],
         "summary": "Approve Data Output Link",
         "operationId": "approve_data_output_link_api_data_output_dataset_links_approve__id__post",
         "parameters": [
@@ -4563,7 +4742,9 @@
     },
     "/api/data_output_dataset_links/deny/{id}": {
       "post": {
-        "tags": ["data_output_dataset_links"],
+        "tags": [
+          "data_output_dataset_links"
+        ],
         "summary": "Deny Data Output Link",
         "operationId": "deny_data_output_link_api_data_output_dataset_links_deny__id__post",
         "parameters": [
@@ -4612,7 +4793,9 @@
     },
     "/api/data_output_dataset_links/remove/{id}": {
       "post": {
-        "tags": ["data_output_dataset_links"],
+        "tags": [
+          "data_output_dataset_links"
+        ],
         "summary": "Remove Data Output Link",
         "operationId": "remove_data_output_link_api_data_output_dataset_links_remove__id__post",
         "parameters": [
@@ -4661,7 +4844,9 @@
     },
     "/api/data_output_dataset_links/actions": {
       "get": {
-        "tags": ["data_output_dataset_links"],
+        "tags": [
+          "data_output_dataset_links"
+        ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_data_output_dataset_links_actions_get",
         "parameters": [
@@ -4706,7 +4891,9 @@
     },
     "/api/data_outputs": {
       "get": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Get Data Outputs",
         "operationId": "get_data_outputs_api_data_outputs_get",
         "responses": {
@@ -4729,7 +4916,9 @@
     },
     "/api/data_outputs/namespace_suggestion": {
       "get": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Get Data Output Namespace Suggestion",
         "operationId": "get_data_output_namespace_suggestion_api_data_outputs_namespace_suggestion_get",
         "parameters": [
@@ -4769,7 +4958,9 @@
     },
     "/api/data_outputs/namespace_length_limits": {
       "get": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Get Data Output Namespace Length Limits",
         "operationId": "get_data_output_namespace_length_limits_api_data_outputs_namespace_length_limits_get",
         "responses": {
@@ -4788,7 +4979,9 @@
     },
     "/api/data_outputs/result_string": {
       "post": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Get Data Output Result String",
         "operationId": "get_data_output_result_string_api_data_outputs_result_string_post",
         "requestBody": {
@@ -4828,7 +5021,9 @@
     },
     "/api/data_outputs/{id}": {
       "get": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Get Data Output",
         "operationId": "get_data_output_api_data_outputs__id__get",
         "parameters": [
@@ -4867,7 +5062,9 @@
         }
       },
       "delete": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Remove Data Output",
         "operationId": "remove_data_output_api_data_outputs__id__delete",
         "parameters": [
@@ -4924,7 +5121,9 @@
         }
       },
       "put": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Update Data Output",
         "operationId": "update_data_output_api_data_outputs__id__put",
         "parameters": [
@@ -5000,7 +5199,9 @@
     },
     "/api/data_outputs/{id}/history": {
       "get": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Get Event History",
         "operationId": "get_event_history_api_data_outputs__id__history_get",
         "parameters": [
@@ -5045,7 +5246,9 @@
     },
     "/api/data_outputs/{id}/status": {
       "put": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Update Data Output Status",
         "operationId": "update_data_output_status_api_data_outputs__id__status_put",
         "parameters": [
@@ -5114,7 +5317,9 @@
     },
     "/api/data_outputs/{id}/dataset/{dataset_id}": {
       "post": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Link Dataset To Data Output",
         "operationId": "link_dataset_to_data_output_api_data_outputs__id__dataset__dataset_id__post",
         "parameters": [
@@ -5198,7 +5403,9 @@
         }
       },
       "delete": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Unlink Dataset From Data Output",
         "operationId": "unlink_dataset_from_data_output_api_data_outputs__id__dataset__dataset_id__delete",
         "parameters": [
@@ -5277,7 +5484,9 @@
     },
     "/api/data_outputs/{id}/graph": {
       "get": {
-        "tags": ["data_outputs"],
+        "tags": [
+          "data_outputs"
+        ],
         "summary": "Get Graph Data",
         "operationId": "get_graph_data_api_data_outputs__id__graph_get",
         "parameters": [
@@ -5328,7 +5537,9 @@
     },
     "/api/domains": {
       "post": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Create Domain",
         "operationId": "create_domain_api_domains_post",
         "deprecated": true,
@@ -5381,7 +5592,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Get Domains Old",
         "operationId": "get_domains_old_api_domains_get",
         "deprecated": true,
@@ -5405,7 +5618,9 @@
     },
     "/api/domains/{id}": {
       "put": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Update Domain",
         "operationId": "update_domain_api_domains__id__put",
         "deprecated": true,
@@ -5465,7 +5680,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Remove Domain",
         "operationId": "remove_domain_api_domains__id__delete",
         "deprecated": true,
@@ -5513,7 +5730,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Get Domain Old",
         "operationId": "get_domain_old_api_domains__id__get",
         "deprecated": true,
@@ -5555,7 +5774,9 @@
     },
     "/api/domains/migrate/{from_id}/{to_id}": {
       "put": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Migrate Domain",
         "operationId": "migrate_domain_api_domains_migrate__from_id___to_id__put",
         "deprecated": true,
@@ -5615,7 +5836,9 @@
     },
     "/api/v2/configuration/domains": {
       "post": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Create Domain",
         "operationId": "create_domain_api_v2_configuration_domains_post",
         "parameters": [
@@ -5667,7 +5890,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Get Domains",
         "operationId": "get_domains_api_v2_configuration_domains_get",
         "responses": {
@@ -5686,7 +5911,9 @@
     },
     "/api/v2/configuration/domains/{id}": {
       "put": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Update Domain",
         "operationId": "update_domain_api_v2_configuration_domains__id__put",
         "parameters": [
@@ -5745,7 +5972,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Remove Domain",
         "operationId": "remove_domain_api_v2_configuration_domains__id__delete",
         "parameters": [
@@ -5792,7 +6021,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Get Domain",
         "operationId": "get_domain_api_v2_configuration_domains__id__get",
         "parameters": [
@@ -5833,7 +6064,9 @@
     },
     "/api/v2/configuration/domains/migrate/{from_id}/{to_id}": {
       "put": {
-        "tags": ["Configuration - Domains"],
+        "tags": [
+          "Configuration - Domains"
+        ],
         "summary": "Migrate Domain",
         "operationId": "migrate_domain_api_v2_configuration_domains_migrate__from_id___to_id__put",
         "parameters": [
@@ -5892,7 +6125,9 @@
     },
     "/api/envs/{id}": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment",
         "operationId": "get_environment_api_envs__id__get",
         "deprecated": true,
@@ -5934,7 +6169,9 @@
     },
     "/api/envs/configs/{config_id}": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Configs By Id",
         "operationId": "get_environment_configs_by_id_api_envs_configs__config_id__get",
         "deprecated": true,
@@ -5986,7 +6223,9 @@
     },
     "/api/envs/{id}/platforms/{platform_id}/services/{service_id}/config": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Platform Service Config",
         "operationId": "get_environment_platform_service_config_api_envs__id__platforms__platform_id__services__service_id__config_get",
         "deprecated": true,
@@ -6058,7 +6297,9 @@
     },
     "/api/envs/{id}/platforms/{platform_id}/config": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Platform Config",
         "operationId": "get_environment_platform_config_api_envs__id__platforms__platform_id__config_get",
         "deprecated": true,
@@ -6120,7 +6361,9 @@
     },
     "/api/v2/configuration/environments/{id}": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment",
         "operationId": "get_environment_api_v2_configuration_environments__id__get",
         "parameters": [
@@ -6161,7 +6404,9 @@
     },
     "/api/v2/configuration/environments/configs/{config_id}": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Configs By Id",
         "operationId": "get_environment_configs_by_id_api_v2_configuration_environments_configs__config_id__get",
         "parameters": [
@@ -6212,7 +6457,9 @@
     },
     "/api/v2/configuration/environments/{id}/platforms/{platform_id}/services/{service_id}/config": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Platform Service Config",
         "operationId": "get_environment_platform_service_config_api_v2_configuration_environments__id__platforms__platform_id__services__service_id__config_get",
         "parameters": [
@@ -6283,7 +6530,9 @@
     },
     "/api/v2/configuration/environments/{id}/platforms/{platform_id}/config": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Platform Config",
         "operationId": "get_environment_platform_config_api_v2_configuration_environments__id__platforms__platform_id__config_get",
         "parameters": [
@@ -6344,7 +6593,9 @@
     },
     "/api/envs": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environments Old",
         "operationId": "get_environments_old_api_envs_get",
         "responses": {
@@ -6368,7 +6619,9 @@
     },
     "/api/v2/configuration/environments": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environments",
         "operationId": "get_environments_api_v2_configuration_environments_get",
         "responses": {
@@ -6387,7 +6640,9 @@
     },
     "/api/envs/{id}/configs": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Configs Old",
         "operationId": "get_environment_configs_old_api_envs__id__configs_get",
         "deprecated": true,
@@ -6433,7 +6688,9 @@
     },
     "/api/v2/configuration/environments/{id}/configs": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Configs",
         "operationId": "get_environment_configs_api_v2_configuration_environments__id__configs_get",
         "parameters": [
@@ -6474,7 +6731,9 @@
     },
     "/api/envs/platforms/{platform_id}/services/{service_id}/config": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Platform Service Config For All Envs Old",
         "operationId": "get_environment_platform_service_config_for_all_envs_old_api_envs_platforms__platform_id__services__service_id__config_get",
         "deprecated": true,
@@ -6530,7 +6789,9 @@
     },
     "/api/v2/configuration/environments/platforms/{platform_id}/services/{service_id}/config": {
       "get": {
-        "tags": ["Configuration - Environments"],
+        "tags": [
+          "Configuration - Environments"
+        ],
         "summary": "Get Environment Platform Service Config For All Envs",
         "operationId": "get_environment_platform_service_config_for_all_envs_api_v2_configuration_environments_platforms__platform_id__services__service_id__config_get",
         "parameters": [
@@ -6581,7 +6842,9 @@
     },
     "/api/platforms/{id}/services/{service_id}": {
       "get": {
-        "tags": ["Configuration - Platforms"],
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Platform Service Config",
         "description": "Get Platform Service config",
         "operationId": "get_platform_service_config_api_platforms__id__services__service_id__get",
@@ -6644,7 +6907,9 @@
     },
     "/api/platforms/configs/{config_id}": {
       "get": {
-        "tags": ["Configuration - Platforms"],
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Single Platform Service Configuration",
         "operationId": "get_single_platform_service_configuration_api_platforms_configs__config_id__get",
         "deprecated": true,
@@ -6686,7 +6951,9 @@
     },
     "/api/v2/configuration/platforms/{id}/services/{service_id}": {
       "get": {
-        "tags": ["Configuration - Platforms"],
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Platform Service Config",
         "description": "Get Platform Service config",
         "operationId": "get_platform_service_config_api_v2_configuration_platforms__id__services__service_id__get",
@@ -6748,7 +7015,9 @@
     },
     "/api/v2/configuration/platforms/configs/{config_id}": {
       "get": {
-        "tags": ["Configuration - Platforms"],
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Single Platform Service Configuration",
         "operationId": "get_single_platform_service_configuration_api_v2_configuration_platforms_configs__config_id__get",
         "parameters": [
@@ -6956,7 +7225,9 @@
     },
     "/api/tags": {
       "post": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Create Tag",
         "operationId": "create_tag_api_tags_post",
         "deprecated": true,
@@ -7006,7 +7277,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Get Tags Old",
         "operationId": "get_tags_old_api_tags_get",
         "deprecated": true,
@@ -7030,7 +7303,9 @@
     },
     "/api/tags/{id}": {
       "put": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Update Tag",
         "operationId": "update_tag_api_tags__id__put",
         "deprecated": true,
@@ -7090,7 +7365,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Remove Tag",
         "operationId": "remove_tag_api_tags__id__delete",
         "deprecated": true,
@@ -7140,7 +7417,9 @@
     },
     "/api/v2/configuration/tags": {
       "post": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Create Tag",
         "operationId": "create_tag_api_v2_configuration_tags_post",
         "parameters": [
@@ -7189,7 +7468,9 @@
         }
       },
       "get": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Get Tags",
         "operationId": "get_tags_api_v2_configuration_tags_get",
         "responses": {
@@ -7208,7 +7489,9 @@
     },
     "/api/v2/configuration/tags/{id}": {
       "put": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Update Tag",
         "operationId": "update_tag_api_v2_configuration_tags__id__put",
         "parameters": [
@@ -7267,7 +7550,9 @@
         }
       },
       "delete": {
-        "tags": ["Configuration - Tags"],
+        "tags": [
+          "Configuration - Tags"
+        ],
         "summary": "Remove Tag",
         "operationId": "remove_tag_api_v2_configuration_tags__id__delete",
         "parameters": [
@@ -7316,7 +7601,9 @@
     },
     "/api/users": {
       "get": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Get Users",
         "operationId": "get_users_api_users_get",
         "responses": {
@@ -7337,7 +7624,9 @@
         }
       },
       "post": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Create User",
         "operationId": "create_user_api_users_post",
         "parameters": [
@@ -7396,7 +7685,9 @@
     },
     "/api/users/{id}": {
       "delete": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Remove User",
         "operationId": "remove_user_api_users__id__delete",
         "parameters": [
@@ -7455,7 +7746,9 @@
     },
     "/api/users/seen_tour": {
       "post": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Mark Tour As Seen",
         "operationId": "mark_tour_as_seen_api_users_seen_tour_post",
         "parameters": [
@@ -7494,7 +7787,9 @@
     },
     "/api/users/set_can_become_admin": {
       "put": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Set Can Become Admin",
         "operationId": "set_can_become_admin_api_users_set_can_become_admin_put",
         "parameters": [
@@ -7543,7 +7838,9 @@
     },
     "/api/roles": {
       "post": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Create Role",
         "operationId": "create_role_api_roles_post",
         "deprecated": true,
@@ -7596,7 +7893,9 @@
         }
       },
       "patch": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Update Role Old",
         "operationId": "update_role_old_api_roles_patch",
         "parameters": [
@@ -7650,7 +7949,9 @@
     },
     "/api/roles/{id}": {
       "delete": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Remove Role",
         "operationId": "remove_role_api_roles__id__delete",
         "deprecated": true,
@@ -7710,7 +8011,9 @@
     },
     "/api/v2/authz/roles": {
       "post": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Create Role",
         "operationId": "create_role_api_v2_authz_roles_post",
         "parameters": [
@@ -7764,7 +8067,9 @@
     },
     "/api/v2/authz/roles/{id}": {
       "delete": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Remove Role",
         "operationId": "remove_role_api_v2_authz_roles__id__delete",
         "parameters": [
@@ -7821,7 +8126,9 @@
         }
       },
       "put": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Update Role",
         "operationId": "update_role_api_v2_authz_roles__id__put",
         "parameters": [
@@ -7885,7 +8192,9 @@
     },
     "/api/roles/{scope}": {
       "get": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Get Roles Old",
         "operationId": "get_roles_old_api_roles__scope__get",
         "deprecated": true,
@@ -7929,7 +8238,9 @@
     },
     "/api/v2/authz/roles/{scope}": {
       "get": {
-        "tags": ["Authorization - Roles"],
+        "tags": [
+          "Authorization - Roles"
+        ],
         "summary": "Get Roles",
         "operationId": "get_roles_api_v2_authz_roles__scope__get",
         "parameters": [
@@ -7968,7 +8279,9 @@
     },
     "/api/role_assignments/global/become_admin": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Become Admin",
         "operationId": "become_admin_api_role_assignments_global_become_admin_post",
         "deprecated": true,
@@ -8018,7 +8331,9 @@
     },
     "/api/role_assignments/global/revoke_admin": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Revoke Admin",
         "operationId": "revoke_admin_api_role_assignments_global_revoke_admin_post",
         "deprecated": true,
@@ -8058,7 +8373,9 @@
     },
     "/api/role_assignments/global": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_role_assignments_global_post",
         "deprecated": true,
@@ -8108,7 +8425,9 @@
         }
       },
       "get": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "List Assignments Old",
         "operationId": "list_assignments_old_api_role_assignments_global_get",
         "deprecated": true,
@@ -8178,7 +8497,9 @@
     },
     "/api/role_assignments/global/{id}": {
       "delete": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Delete Assignment",
         "operationId": "delete_assignment_api_role_assignments_global__id__delete",
         "deprecated": true,
@@ -8228,7 +8549,9 @@
     },
     "/api/v2/authz/role_assignments/global/become_admin": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Become Admin",
         "operationId": "become_admin_api_v2_authz_role_assignments_global_become_admin_post",
         "parameters": [
@@ -8277,7 +8600,9 @@
     },
     "/api/v2/authz/role_assignments/global/revoke_admin": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Revoke Admin",
         "operationId": "revoke_admin_api_v2_authz_role_assignments_global_revoke_admin_post",
         "parameters": [
@@ -8316,7 +8641,9 @@
     },
     "/api/v2/authz/role_assignments/global": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_v2_authz_role_assignments_global_post",
         "parameters": [
@@ -8365,7 +8692,9 @@
         }
       },
       "get": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "List Assignments",
         "operationId": "list_assignments_api_v2_authz_role_assignments_global_get",
         "parameters": [
@@ -8430,7 +8759,9 @@
     },
     "/api/v2/authz/role_assignments/global/{id}": {
       "delete": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Delete Assignment",
         "operationId": "delete_assignment_api_v2_authz_role_assignments_global__id__delete",
         "parameters": [
@@ -8479,7 +8810,9 @@
     },
     "/api/role_assignments/global/{id}/decide": {
       "patch": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Decide Assignment Old",
         "operationId": "decide_assignment_old_api_role_assignments_global__id__decide_patch",
         "deprecated": true,
@@ -8541,7 +8874,9 @@
     },
     "/api/v2/authz/role_assignments/global/{id}/decide": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Decide Assignment",
         "operationId": "decide_assignment_api_v2_authz_role_assignments_global__id__decide_post",
         "parameters": [
@@ -8602,7 +8937,9 @@
     },
     "/api/role_assignments/global/{id}/role": {
       "patch": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Modify Assigned Role Old",
         "operationId": "modify_assigned_role_old_api_role_assignments_global__id__role_patch",
         "deprecated": true,
@@ -8664,7 +9001,9 @@
     },
     "/api/v2/authz/role_assignments/global/{id}/role": {
       "put": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Modify Assigned Role",
         "operationId": "modify_assigned_role_api_v2_authz_role_assignments_global__id__role_put",
         "parameters": [
@@ -8725,7 +9064,9 @@
     },
     "/api/role_assignments/data_product/{id}": {
       "delete": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Delete Assignment",
         "operationId": "delete_assignment_api_role_assignments_data_product__id__delete",
         "deprecated": true,
@@ -8773,7 +9114,9 @@
         }
       },
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Create Assignment Old",
         "operationId": "create_assignment_old_api_role_assignments_data_product__id__post",
         "deprecated": true,
@@ -8833,7 +9176,9 @@
         }
       },
       "patch": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Modify Assigned Role Old",
         "operationId": "modify_assigned_role_old_api_role_assignments_data_product__id__patch",
         "deprecated": true,
@@ -8895,7 +9240,9 @@
     },
     "/api/v2/authz/role_assignments/data_product/{id}": {
       "delete": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Delete Assignment",
         "operationId": "delete_assignment_api_v2_authz_role_assignments_data_product__id__delete",
         "parameters": [
@@ -8942,7 +9289,9 @@
         }
       },
       "put": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Modify Assigned Role",
         "operationId": "modify_assigned_role_api_v2_authz_role_assignments_data_product__id__put",
         "parameters": [
@@ -9003,7 +9352,9 @@
     },
     "/api/role_assignments/data_product": {
       "get": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "List Assignments Old",
         "operationId": "list_assignments_old_api_role_assignments_data_product_get",
         "deprecated": true,
@@ -9106,7 +9457,9 @@
     },
     "/api/v2/authz/role_assignments/data_product": {
       "get": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "List Assignments",
         "operationId": "list_assignments_api_v2_authz_role_assignments_data_product_get",
         "parameters": [
@@ -9202,7 +9555,9 @@
         }
       },
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_v2_authz_role_assignments_data_product_post",
         "parameters": [
@@ -9253,7 +9608,9 @@
     },
     "/api/role_assignments/data_product/request/{id}": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Request Assignment Old",
         "operationId": "request_assignment_old_api_role_assignments_data_product_request__id__post",
         "deprecated": true,
@@ -9315,7 +9672,9 @@
     },
     "/api/v2/authz/role_assignments/data_product/request": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Request Assignment",
         "operationId": "request_assignment_api_v2_authz_role_assignments_data_product_request_post",
         "parameters": [
@@ -9366,7 +9725,9 @@
     },
     "/api/role_assignments/data_product/{id}/decide": {
       "patch": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Decide Assignment Old",
         "operationId": "decide_assignment_old_api_role_assignments_data_product__id__decide_patch",
         "deprecated": true,
@@ -9428,7 +9789,9 @@
     },
     "/api/v2/authz/role_assignments/data_product/{id}/decide": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Decide Assignment",
         "operationId": "decide_assignment_api_v2_authz_role_assignments_data_product__id__decide_post",
         "parameters": [
@@ -9489,7 +9852,9 @@
     },
     "/api/role_assignments/dataset/{id}": {
       "delete": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Delete Assignment",
         "operationId": "delete_assignment_api_role_assignments_dataset__id__delete",
         "deprecated": true,
@@ -9537,7 +9902,9 @@
         }
       },
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Create Assignment Old",
         "operationId": "create_assignment_old_api_role_assignments_dataset__id__post",
         "parameters": [
@@ -9596,7 +9963,9 @@
         }
       },
       "patch": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Modify Assigned Role Old",
         "operationId": "modify_assigned_role_old_api_role_assignments_dataset__id__patch",
         "deprecated": true,
@@ -9658,7 +10027,9 @@
     },
     "/api/v2/authz/role_assignments/output_port/{id}": {
       "delete": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Delete Assignment",
         "operationId": "delete_assignment_api_v2_authz_role_assignments_output_port__id__delete",
         "parameters": [
@@ -9705,7 +10076,9 @@
         }
       },
       "put": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Modify Assigned Role",
         "operationId": "modify_assigned_role_api_v2_authz_role_assignments_output_port__id__put",
         "parameters": [
@@ -9766,7 +10139,9 @@
     },
     "/api/role_assignments/dataset": {
       "get": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "List Assignments Old",
         "operationId": "list_assignments_old_api_role_assignments_dataset_get",
         "deprecated": true,
@@ -9869,7 +10244,9 @@
     },
     "/api/v2/authz/role_assignments/output_port": {
       "get": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "List Assignments",
         "operationId": "list_assignments_api_v2_authz_role_assignments_output_port_get",
         "parameters": [
@@ -9965,7 +10342,9 @@
         }
       },
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Create Assignment",
         "operationId": "create_assignment_api_v2_authz_role_assignments_output_port_post",
         "parameters": [
@@ -10016,7 +10395,9 @@
     },
     "/api/role_assignments/dataset/request/{id}": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Request Assignment Old",
         "operationId": "request_assignment_old_api_role_assignments_dataset_request__id__post",
         "deprecated": true,
@@ -10078,7 +10459,9 @@
     },
     "/api/v2/authz/role_assignments/output_port/request": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Request Assignment",
         "operationId": "request_assignment_api_v2_authz_role_assignments_output_port_request_post",
         "parameters": [
@@ -10129,7 +10512,9 @@
     },
     "/api/role_assignments/dataset/{id}/decide": {
       "patch": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Decide Assignment Old",
         "operationId": "decide_assignment_old_api_role_assignments_dataset__id__decide_patch",
         "deprecated": true,
@@ -10191,7 +10576,9 @@
     },
     "/api/v2/authz/role_assignments/output_port/{id}/decide": {
       "post": {
-        "tags": ["Authorization - Role assignments"],
+        "tags": [
+          "Authorization - Role assignments"
+        ],
         "summary": "Decide Assignment",
         "operationId": "decide_assignment_api_v2_authz_role_assignments_output_port__id__decide_post",
         "parameters": [
@@ -10252,7 +10639,9 @@
     },
     "/api/theme_settings": {
       "get": {
-        "tags": ["Configuration - Theme settings"],
+        "tags": [
+          "Configuration - Theme settings"
+        ],
         "summary": "Get Settings",
         "operationId": "get_settings_api_theme_settings_get",
         "deprecated": true,
@@ -10270,7 +10659,9 @@
         }
       },
       "put": {
-        "tags": ["Configuration - Theme settings"],
+        "tags": [
+          "Configuration - Theme settings"
+        ],
         "summary": "Update Settings",
         "operationId": "update_settings_api_theme_settings_put",
         "deprecated": true,
@@ -10320,7 +10711,9 @@
     },
     "/api/v2/configuration/theme_settings": {
       "get": {
-        "tags": ["Configuration - Theme settings"],
+        "tags": [
+          "Configuration - Theme settings"
+        ],
         "summary": "Get Settings",
         "operationId": "get_settings_api_v2_configuration_theme_settings_get",
         "responses": {
@@ -10337,7 +10730,9 @@
         }
       },
       "put": {
-        "tags": ["Configuration - Theme settings"],
+        "tags": [
+          "Configuration - Theme settings"
+        ],
         "summary": "Update Settings",
         "operationId": "update_settings_api_v2_configuration_theme_settings_put",
         "parameters": [
@@ -10386,7 +10781,9 @@
     },
     "/api/graph": {
       "get": {
-        "tags": ["graph"],
+        "tags": [
+          "graph"
+        ],
         "summary": "Get Graph Data",
         "operationId": "get_graph_data_api_graph_get",
         "parameters": [
@@ -10447,7 +10844,9 @@
     },
     "/api/notifications": {
       "get": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Get User Notifications",
         "operationId": "get_user_notifications_api_notifications_get",
         "parameters": [
@@ -10492,7 +10891,9 @@
     },
     "/api/notifications/all": {
       "delete": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Remove All User Notifications",
         "operationId": "remove_all_user_notifications_api_notifications_all_delete",
         "parameters": [
@@ -10531,7 +10932,9 @@
     },
     "/api/notifications/{id}": {
       "delete": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Remove User Notification",
         "operationId": "remove_user_notification_api_notifications__id__delete",
         "parameters": [
@@ -10580,7 +10983,9 @@
     },
     "/api/pending_actions": {
       "get": {
-        "tags": ["pending_actions"],
+        "tags": [
+          "pending_actions"
+        ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_pending_actions_get",
         "parameters": [
@@ -10635,7 +11040,10 @@
     },
     "/api/auth/device/device_token": {
       "post": {
-        "tags": ["auth", "device flow"],
+        "tags": [
+          "auth",
+          "device flow"
+        ],
         "summary": "Get Device Token",
         "operationId": "get_device_token_api_auth_device_device_token_post",
         "security": [
@@ -10688,7 +11096,10 @@
     },
     "/api/auth/device/jwt_token": {
       "post": {
-        "tags": ["auth", "device flow"],
+        "tags": [
+          "auth",
+          "device flow"
+        ],
         "summary": "Get Jwt Token",
         "operationId": "get_jwt_token_api_auth_device_jwt_token_post",
         "security": [
@@ -10749,7 +11160,9 @@
     },
     "/api/auth/user": {
       "get": {
-        "tags": ["auth"],
+        "tags": [
+          "auth"
+        ],
         "summary": "Authorize",
         "operationId": "authorize_api_auth_user_get",
         "parameters": [
@@ -10790,7 +11203,9 @@
     },
     "/api/auth/aws_credentials": {
       "get": {
-        "tags": ["auth"],
+        "tags": [
+          "auth"
+        ],
         "summary": "Get Aws Credentials",
         "operationId": "get_aws_credentials_api_auth_aws_credentials_get",
         "parameters": [
@@ -10849,7 +11264,9 @@
     },
     "/.well-known/oauth-authorization-server": {
       "get": {
-        "tags": ["mcp"],
+        "tags": [
+          "mcp"
+        ],
         "summary": "Oauth Metadata",
         "description": "OAuth 2.1 Authorization Server Metadata.",
         "operationId": "oauth_metadata__well_known_oauth_authorization_server_get",
@@ -10867,7 +11284,9 @@
     },
     "/.well-known/openid-configuration": {
       "get": {
-        "tags": ["mcp"],
+        "tags": [
+          "mcp"
+        ],
         "summary": "Openid Config",
         "description": "OpenID Connect Discovery endpoint.",
         "operationId": "openid_config__well_known_openid_configuration_get",
@@ -10885,7 +11304,9 @@
     },
     "/.well-known/oauth-protected-resource": {
       "get": {
-        "tags": ["mcp"],
+        "tags": [
+          "mcp"
+        ],
         "summary": "Oauth Protected Resource",
         "description": "OAuth 2.1 Protected Resource Metadata.",
         "operationId": "oauth_protected_resource__well_known_oauth_protected_resource_get",
@@ -10903,7 +11324,9 @@
     },
     "/api/register": {
       "post": {
-        "tags": ["mcp"],
+        "tags": [
+          "mcp"
+        ],
         "summary": "Register",
         "description": "OAuth 2.1 Dynamic Client Registration endpoint.",
         "operationId": "register_api_register_post",
@@ -11002,7 +11425,11 @@
           }
         },
         "type": "object",
-        "required": ["account_id", "region", "can_read_from"],
+        "required": [
+          "account_id",
+          "region",
+          "can_read_from"
+        ],
         "title": "AWSEnvironmentPlatformConfiguration"
       },
       "AWSGlueConfig": {
@@ -11074,15 +11501,49 @@
           }
         },
         "type": "object",
-        "required": ["allowed"],
+        "required": [
+          "allowed"
+        ],
         "title": "AccessResponse"
       },
       "AuthorizationAction": {
         "type": "integer",
         "enum": [
-          101, 102, 103, 104, 105, 106, 107, 301, 302, 303, 304, 305, 306, 307,
-          308, 309, 310, 311, 312, 313, 314, 315, 401, 402, 403, 404, 405, 406,
-          407, 408, 409, 410, 411, 412, 413
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307,
+          308,
+          309,
+          310,
+          311,
+          312,
+          313,
+          314,
+          315,
+          401,
+          402,
+          403,
+          404,
+          405,
+          406,
+          407,
+          408,
+          409,
+          410,
+          411,
+          412,
+          413
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
@@ -11191,7 +11652,9 @@
           }
         },
         "type": "object",
-        "required": ["expiry"],
+        "required": [
+          "expiry"
+        ],
         "title": "BecomeAdmin"
       },
       "CanBecomeAdminUpdate": {
@@ -11206,7 +11669,10 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "can_become_admin"],
+        "required": [
+          "user_id",
+          "can_become_admin"
+        ],
         "title": "CanBecomeAdminUpdate"
       },
       "CreateDataProductLifeCycleResponse": {
@@ -11218,7 +11684,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "CreateDataProductLifeCycleResponse"
       },
       "CreateDataProductSettingResponse": {
@@ -11230,7 +11698,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "CreateDataProductSettingResponse"
       },
       "CreateDataProductTypeResponse": {
@@ -11242,7 +11712,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "CreateDataProductTypeResponse"
       },
       "CreateDomainResponse": {
@@ -11254,7 +11726,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "CreateDomainResponse"
       },
       "CreateRole": {
@@ -11279,7 +11753,12 @@
           }
         },
         "type": "object",
-        "required": ["name", "scope", "description", "permissions"],
+        "required": [
+          "name",
+          "scope",
+          "description",
+          "permissions"
+        ],
         "title": "CreateRole"
       },
       "CreateTagResponse": {
@@ -11291,7 +11770,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "CreateTagResponse"
       },
       "DataOutputCreate": {
@@ -11784,12 +12265,20 @@
           }
         },
         "type": "object",
-        "required": ["platform_id", "service_id", "configuration"],
+        "required": [
+          "platform_id",
+          "service_id",
+          "configuration"
+        ],
         "title": "DataOutputResultStringRequest"
       },
       "DataOutputStatus": {
         "type": "string",
-        "enum": ["pending", "active", "archived"],
+        "enum": [
+          "pending",
+          "active",
+          "archived"
+        ],
         "title": "DataOutputStatus"
       },
       "DataOutputStatusUpdate": {
@@ -11799,7 +12288,9 @@
           }
         },
         "type": "object",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "title": "DataOutputStatusUpdate"
       },
       "DataOutputUpdate": {
@@ -11822,7 +12313,11 @@
           }
         },
         "type": "object",
-        "required": ["name", "description", "tag_ids"],
+        "required": [
+          "name",
+          "description",
+          "tag_ids"
+        ],
         "title": "DataOutputUpdate"
       },
       "DataOutputsGet": {
@@ -11987,7 +12482,9 @@
           }
         },
         "type": "object",
-        "required": ["about"],
+        "required": [
+          "about"
+        ],
         "title": "DataProductAboutUpdate"
       },
       "DataProductCreate": {
@@ -12305,7 +12802,13 @@
           }
         },
         "type": "object",
-        "required": ["id", "name", "value", "color", "is_default"],
+        "required": [
+          "id",
+          "name",
+          "value",
+          "color",
+          "is_default"
+        ],
         "title": "DataProductLifeCycle"
       },
       "DataProductLifeCycleCreate": {
@@ -12329,7 +12832,11 @@
           }
         },
         "type": "object",
-        "required": ["value", "name", "color"],
+        "required": [
+          "value",
+          "name",
+          "color"
+        ],
         "title": "DataProductLifeCycleCreate"
       },
       "DataProductLifeCycleUpdate": {
@@ -12353,7 +12860,11 @@
           }
         },
         "type": "object",
-        "required": ["value", "name", "color"],
+        "required": [
+          "value",
+          "name",
+          "color"
+        ],
         "title": "DataProductLifeCycleUpdate"
       },
       "DataProductLifeCyclesGet": {
@@ -12367,7 +12878,9 @@
           }
         },
         "type": "object",
-        "required": ["data_product_life_cycles"],
+        "required": [
+          "data_product_life_cycles"
+        ],
         "title": "DataProductLifeCyclesGet"
       },
       "DataProductLifeCyclesGetItem": {
@@ -12395,7 +12908,13 @@
           }
         },
         "type": "object",
-        "required": ["id", "value", "name", "color", "is_default"],
+        "required": [
+          "id",
+          "value",
+          "name",
+          "color",
+          "is_default"
+        ],
         "title": "DataProductLifeCyclesGetItem"
       },
       "DataProductLink": {
@@ -12628,12 +13147,19 @@
       },
       "DataProductSettingScope": {
         "type": "string",
-        "enum": ["dataproduct", "dataset"],
+        "enum": [
+          "dataproduct",
+          "dataset"
+        ],
         "title": "DataProductSettingScope"
       },
       "DataProductSettingType": {
         "type": "string",
-        "enum": ["checkbox", "tags", "input"],
+        "enum": [
+          "checkbox",
+          "tags",
+          "input"
+        ],
         "title": "DataProductSettingType"
       },
       "DataProductSettingUpdate": {
@@ -12746,7 +13272,9 @@
           }
         },
         "type": "object",
-        "required": ["data_product_settings"],
+        "required": [
+          "data_product_settings"
+        ],
         "title": "DataProductSettingsGet"
       },
       "DataProductSettingsGetItem": {
@@ -12803,7 +13331,11 @@
       },
       "DataProductStatus": {
         "type": "string",
-        "enum": ["pending", "active", "archived"],
+        "enum": [
+          "pending",
+          "active",
+          "archived"
+        ],
         "title": "DataProductStatus"
       },
       "DataProductStatusUpdate": {
@@ -12813,7 +13345,9 @@
           }
         },
         "type": "object",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "title": "DataProductStatusUpdate"
       },
       "DataProductType": {
@@ -12836,7 +13370,12 @@
           }
         },
         "type": "object",
-        "required": ["id", "name", "description", "icon_key"],
+        "required": [
+          "id",
+          "name",
+          "description",
+          "icon_key"
+        ],
         "title": "DataProductType"
       },
       "DataProductTypeCreate": {
@@ -12854,7 +13393,11 @@
           }
         },
         "type": "object",
-        "required": ["name", "description", "icon_key"],
+        "required": [
+          "name",
+          "description",
+          "icon_key"
+        ],
         "title": "DataProductTypeCreate"
       },
       "DataProductTypeGet": {
@@ -12884,7 +13427,13 @@
           }
         },
         "type": "object",
-        "required": ["id", "name", "description", "icon_key", "data_products"],
+        "required": [
+          "id",
+          "name",
+          "description",
+          "icon_key",
+          "data_products"
+        ],
         "title": "DataProductTypeGet"
       },
       "DataProductTypeUpdate": {
@@ -12902,7 +13451,11 @@
           }
         },
         "type": "object",
-        "required": ["name", "description", "icon_key"],
+        "required": [
+          "name",
+          "description",
+          "icon_key"
+        ],
         "title": "DataProductTypeUpdate"
       },
       "DataProductTypesGet": {
@@ -12916,7 +13469,9 @@
           }
         },
         "type": "object",
-        "required": ["data_product_types"],
+        "required": [
+          "data_product_types"
+        ],
         "title": "DataProductTypesGet"
       },
       "DataProductTypesGetItem": {
@@ -13021,7 +13576,9 @@
           }
         },
         "type": "object",
-        "required": ["usage"],
+        "required": [
+          "usage"
+        ],
         "title": "DataProductUsageUpdate"
       },
       "DataProductsGet": {
@@ -13128,7 +13685,9 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": ["identifier"],
+        "required": [
+          "identifier"
+        ],
         "title": "DatabricksConfig"
       },
       "DatabricksDataOutput": {
@@ -13169,7 +13728,10 @@
           }
         },
         "type": "object",
-        "required": ["configuration_type", "catalog"],
+        "required": [
+          "configuration_type",
+          "catalog"
+        ],
         "title": "DatabricksDataOutput"
       },
       "DatabricksEnvironmentPlatformConfiguration": {
@@ -13255,7 +13817,9 @@
           }
         },
         "type": "object",
-        "required": ["about"],
+        "required": [
+          "about"
+        ],
         "title": "DatasetAboutUpdate"
       },
       "DatasetCreate": {
@@ -13487,7 +14051,13 @@
           }
         },
         "type": "object",
-        "required": ["id", "dataset_id", "data_output_id", "status", "dataset"],
+        "required": [
+          "id",
+          "dataset_id",
+          "data_output_id",
+          "status",
+          "dataset"
+        ],
         "title": "DatasetLink"
       },
       "DatasetLinks": {
@@ -13542,7 +14112,10 @@
           }
         },
         "type": "object",
-        "required": ["date", "consumer_data_product_id"],
+        "required": [
+          "date",
+          "consumer_data_product_id"
+        ],
         "title": "DatasetQueryStatsDailyDelete"
       },
       "DatasetQueryStatsDailyResponse": {
@@ -13574,7 +14147,11 @@
           }
         },
         "type": "object",
-        "required": ["date", "consumer_data_product_id", "query_count"],
+        "required": [
+          "date",
+          "consumer_data_product_id",
+          "query_count"
+        ],
         "title": "DatasetQueryStatsDailyResponse"
       },
       "DatasetQueryStatsDailyResponses": {
@@ -13588,7 +14165,9 @@
           }
         },
         "type": "object",
-        "required": ["dataset_query_stats_daily_responses"],
+        "required": [
+          "dataset_query_stats_daily_responses"
+        ],
         "title": "DatasetQueryStatsDailyResponses"
       },
       "DatasetQueryStatsDailyUpdate": {
@@ -13608,7 +14187,11 @@
           }
         },
         "type": "object",
-        "required": ["date", "consumer_data_product_id", "query_count"],
+        "required": [
+          "date",
+          "consumer_data_product_id",
+          "query_count"
+        ],
         "title": "DatasetQueryStatsDailyUpdate"
       },
       "DatasetQueryStatsDailyUpdates": {
@@ -13622,7 +14205,9 @@
           }
         },
         "type": "object",
-        "required": ["dataset_query_stats_daily_updates"],
+        "required": [
+          "dataset_query_stats_daily_updates"
+        ],
         "title": "DatasetQueryStatsDailyUpdates"
       },
       "DatasetStatusUpdate": {
@@ -13632,7 +14217,9 @@
           }
         },
         "type": "object",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "title": "DatasetStatusUpdate"
       },
       "DatasetUpdate": {
@@ -13708,7 +14295,9 @@
           }
         },
         "type": "object",
-        "required": ["usage"],
+        "required": [
+          "usage"
+        ],
         "title": "DatasetUsageUpdate"
       },
       "DatasetsGet": {
@@ -13926,7 +14515,11 @@
       },
       "DecisionStatus": {
         "type": "string",
-        "enum": ["approved", "pending", "denied"],
+        "enum": [
+          "approved",
+          "pending",
+          "denied"
+        ],
         "title": "DecisionStatus"
       },
       "Domain": {
@@ -13946,7 +14539,11 @@
           }
         },
         "type": "object",
-        "required": ["id", "name", "description"],
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
         "title": "Domain"
       },
       "DomainCreate": {
@@ -13961,7 +14558,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "description"],
+        "required": [
+          "name",
+          "description"
+        ],
         "title": "DomainCreate"
       },
       "DomainGetOld": {
@@ -13995,7 +14595,13 @@
           }
         },
         "type": "object",
-        "required": ["id", "name", "description", "data_products", "datasets"],
+        "required": [
+          "id",
+          "name",
+          "description",
+          "data_products",
+          "datasets"
+        ],
         "title": "DomainGetOld",
         "deprecated": true
       },
@@ -14011,7 +14617,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "description"],
+        "required": [
+          "name",
+          "description"
+        ],
         "title": "DomainUpdate"
       },
       "Edge": {
@@ -14068,7 +14677,12 @@
           }
         },
         "type": "object",
-        "required": ["id", "source", "target", "animated"],
+        "required": [
+          "id",
+          "source",
+          "target",
+          "animated"
+        ],
         "title": "Edge"
       },
       "Environment": {
@@ -14097,7 +14711,12 @@
           }
         },
         "type": "object",
-        "required": ["id", "name", "acronym", "context"],
+        "required": [
+          "id",
+          "name",
+          "acronym",
+          "context"
+        ],
         "title": "Environment"
       },
       "EnvironmentConfigsGet": {
@@ -14111,7 +14730,9 @@
           }
         },
         "type": "object",
-        "required": ["environment_configs"],
+        "required": [
+          "environment_configs"
+        ],
         "title": "EnvironmentConfigsGet"
       },
       "EnvironmentConfigsGetItem": {
@@ -14155,7 +14776,13 @@
           }
         },
         "type": "object",
-        "required": ["config", "id", "platform", "environment", "service"],
+        "required": [
+          "config",
+          "id",
+          "platform",
+          "environment",
+          "service"
+        ],
         "title": "EnvironmentConfigsGetItem"
       },
       "EnvironmentGetItem": {
@@ -14184,7 +14811,12 @@
           }
         },
         "type": "object",
-        "required": ["id", "name", "acronym", "context"],
+        "required": [
+          "id",
+          "name",
+          "acronym",
+          "context"
+        ],
         "title": "EnvironmentGetItem"
       },
       "EnvironmentPlatformConfigGet": {
@@ -14213,7 +14845,12 @@
           }
         },
         "type": "object",
-        "required": ["config", "id", "environment", "platform"],
+        "required": [
+          "config",
+          "id",
+          "environment",
+          "platform"
+        ],
         "title": "EnvironmentPlatformConfigGet"
       },
       "EnvironmentsGet": {
@@ -14227,7 +14864,9 @@
           }
         },
         "type": "object",
-        "required": ["environments"],
+        "required": [
+          "environments"
+        ],
         "title": "EnvironmentsGet"
       },
       "EventGet": {
@@ -14361,7 +15000,12 @@
       },
       "EventReferenceEntity": {
         "type": "string",
-        "enum": ["data_product", "dataset", "data_output", "user"],
+        "enum": [
+          "data_product",
+          "dataset",
+          "data_output",
+          "user"
+        ],
         "title": "EventReferenceEntity"
       },
       "GetAllPlatformServiceConfigurationsResponse": {
@@ -14375,7 +15019,9 @@
           }
         },
         "type": "object",
-        "required": ["platform_service_configurations"],
+        "required": [
+          "platform_service_configurations"
+        ],
         "title": "GetAllPlatformServiceConfigurationsResponse"
       },
       "GetAllPlatformsResponse": {
@@ -14389,7 +15035,9 @@
           }
         },
         "type": "object",
-        "required": ["platforms"],
+        "required": [
+          "platforms"
+        ],
         "title": "GetAllPlatformsResponse"
       },
       "GetDomainResponse": {
@@ -14512,7 +15160,9 @@
           }
         },
         "type": "object",
-        "required": ["domains"],
+        "required": [
+          "domains"
+        ],
         "title": "GetDomainsResponse"
       },
       "GetPlatformServicesResponse": {
@@ -14526,7 +15176,9 @@
           }
         },
         "type": "object",
-        "required": ["platform_services"],
+        "required": [
+          "platform_services"
+        ],
         "title": "GetPlatformServicesResponse"
       },
       "GetRolesResponse": {
@@ -14540,7 +15192,9 @@
           }
         },
         "type": "object",
-        "required": ["roles"],
+        "required": [
+          "roles"
+        ],
         "title": "GetRolesResponse"
       },
       "GlueDataOutput": {
@@ -14581,7 +15235,10 @@
           }
         },
         "type": "object",
-        "required": ["configuration_type", "database"],
+        "required": [
+          "configuration_type",
+          "database"
+        ],
         "title": "GlueDataOutput"
       },
       "Graph": {
@@ -14604,7 +15261,10 @@
           }
         },
         "type": "object",
-        "required": ["edges", "nodes"],
+        "required": [
+          "edges",
+          "nodes"
+        ],
         "title": "Graph"
       },
       "HTTPValidationError": {
@@ -14639,7 +15299,9 @@
           }
         },
         "type": "object",
-        "required": ["is_admin"],
+        "required": [
+          "is_admin"
+        ],
         "title": "IsAdminResponse"
       },
       "LinkDatasetsToDataProduct": {
@@ -14658,7 +15320,10 @@
           }
         },
         "type": "object",
-        "required": ["dataset_ids", "justification"],
+        "required": [
+          "dataset_ids",
+          "justification"
+        ],
         "title": "LinkDatasetsToDataProduct"
       },
       "LinkDatasetsToDataProductPost": {
@@ -14673,7 +15338,9 @@
           }
         },
         "type": "object",
-        "required": ["dataset_links"],
+        "required": [
+          "dataset_links"
+        ],
         "title": "LinkDatasetsToDataProductPost"
       },
       "NamespaceLengthLimits": {
@@ -14684,7 +15351,9 @@
           }
         },
         "type": "object",
-        "required": ["max_length"],
+        "required": [
+          "max_length"
+        ],
         "title": "NamespaceLengthLimits"
       },
       "NamespaceSuggestion": {
@@ -14695,7 +15364,9 @@
           }
         },
         "type": "object",
-        "required": ["namespace"],
+        "required": [
+          "namespace"
+        ],
         "title": "NamespaceSuggestion"
       },
       "NamespaceValidation": {
@@ -14705,7 +15376,9 @@
           }
         },
         "type": "object",
-        "required": ["validity"],
+        "required": [
+          "validity"
+        ],
         "title": "NamespaceValidation"
       },
       "NamespaceValidityType": {
@@ -14745,7 +15418,11 @@
           }
         },
         "type": "object",
-        "required": ["id", "data", "type"],
+        "required": [
+          "id",
+          "data",
+          "type"
+        ],
         "title": "Node"
       },
       "NodeData": {
@@ -14852,7 +15529,10 @@
           }
         },
         "type": "object",
-        "required": ["id", "name"],
+        "required": [
+          "id",
+          "name"
+        ],
         "title": "NodeData"
       },
       "NodeType": {
@@ -14890,7 +15570,13 @@
           }
         },
         "type": "object",
-        "required": ["id", "event_id", "user_id", "event", "user"],
+        "required": [
+          "id",
+          "event_id",
+          "user_id",
+          "event",
+          "user"
+        ],
         "title": "NotificationGet"
       },
       "OutputPort": {
@@ -14938,12 +15624,20 @@
       },
       "OutputPortAccessType": {
         "type": "string",
-        "enum": ["public", "restricted", "private"],
+        "enum": [
+          "public",
+          "restricted",
+          "private"
+        ],
         "title": "OutputPortAccessType"
       },
       "OutputPortStatus": {
         "type": "string",
-        "enum": ["pending", "active", "archived"],
+        "enum": [
+          "pending",
+          "active",
+          "archived"
+        ],
         "title": "OutputPortStatus"
       },
       "Platform": {
@@ -14959,7 +15653,10 @@
           }
         },
         "type": "object",
-        "required": ["id", "name"],
+        "required": [
+          "id",
+          "name"
+        ],
         "title": "Platform"
       },
       "PlatformService": {
@@ -15017,12 +15714,22 @@
           }
         },
         "type": "object",
-        "required": ["id", "platform", "service", "config"],
+        "required": [
+          "id",
+          "platform",
+          "service",
+          "config"
+        ],
         "title": "PlatformServiceConfiguration"
       },
       "Prototype": {
         "type": "integer",
-        "enum": [0, 1, 2, 3],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
         "title": "Prototype"
       },
       "RedshiftConfig": {
@@ -15091,7 +15798,10 @@
           }
         },
         "type": "object",
-        "required": ["configuration_type", "database"],
+        "required": [
+          "configuration_type",
+          "database"
+        ],
         "title": "RedshiftDataOutput"
       },
       "Role": {
@@ -15379,12 +16089,21 @@
           }
         },
         "type": "object",
-        "required": ["configuration_type", "bucket", "path"],
+        "required": [
+          "configuration_type",
+          "bucket",
+          "path"
+        ],
         "title": "S3DataOutput"
       },
       "Scope": {
         "type": "string",
-        "enum": ["dataset", "data_product", "domain", "global"],
+        "enum": [
+          "dataset",
+          "data_product",
+          "domain",
+          "global"
+        ],
         "title": "Scope"
       },
       "SnowflakeConfig": {
@@ -15399,7 +16118,10 @@
           }
         },
         "type": "object",
-        "required": ["identifier", "database_name"],
+        "required": [
+          "identifier",
+          "database_name"
+        ],
         "title": "SnowflakeConfig"
       },
       "SnowflakeDataOutput": {
@@ -15440,7 +16162,10 @@
           }
         },
         "type": "object",
-        "required": ["configuration_type", "database"],
+        "required": [
+          "configuration_type",
+          "database"
+        ],
         "title": "SnowflakeDataOutput"
       },
       "Tag": {
@@ -15456,7 +16181,10 @@
           }
         },
         "type": "object",
-        "required": ["id", "value"],
+        "required": [
+          "id",
+          "value"
+        ],
         "title": "Tag"
       },
       "TagCreate": {
@@ -15467,7 +16195,9 @@
           }
         },
         "type": "object",
-        "required": ["value"],
+        "required": [
+          "value"
+        ],
         "title": "TagCreate"
       },
       "TagUpdate": {
@@ -15478,7 +16208,9 @@
           }
         },
         "type": "object",
-        "required": ["value"],
+        "required": [
+          "value"
+        ],
         "title": "TagUpdate"
       },
       "TagsGet": {
@@ -15492,7 +16224,9 @@
           }
         },
         "type": "object",
-        "required": ["tags"],
+        "required": [
+          "tags"
+        ],
         "title": "TagsGet"
       },
       "TagsGetItem": {
@@ -15508,7 +16242,10 @@
           }
         },
         "type": "object",
-        "required": ["id", "value"],
+        "required": [
+          "id",
+          "value"
+        ],
         "title": "TagsGetItem"
       },
       "TechnicalInfo": {
@@ -15535,7 +16272,11 @@
           }
         },
         "type": "object",
-        "required": ["environment_id", "environment", "info"],
+        "required": [
+          "environment_id",
+          "environment",
+          "info"
+        ],
         "title": "TechnicalInfo"
       },
       "ThemeSettings": {
@@ -15546,7 +16287,9 @@
           }
         },
         "type": "object",
-        "required": ["portal_name"],
+        "required": [
+          "portal_name"
+        ],
         "title": "ThemeSettings"
       },
       "UpdateDataProductLifeCycleResponse": {
@@ -15558,7 +16301,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "UpdateDataProductLifeCycleResponse"
       },
       "UpdateDataProductSettingResponse": {
@@ -15570,7 +16315,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "UpdateDataProductSettingResponse"
       },
       "UpdateDataProductTypeResponse": {
@@ -15582,7 +16329,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "UpdateDataProductTypeResponse"
       },
       "UpdateDomainResponse": {
@@ -15594,7 +16343,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "UpdateDomainResponse"
       },
       "UpdateRole": {
@@ -15684,7 +16435,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "UpdateRoleOld",
         "deprecated": true
       },
@@ -15697,7 +16450,9 @@
           }
         },
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "title": "UpdateTagResponse"
       },
       "User": {
@@ -15778,7 +16533,12 @@
           }
         },
         "type": "object",
-        "required": ["email", "external_id", "first_name", "last_name"],
+        "required": [
+          "email",
+          "external_id",
+          "first_name",
+          "last_name"
+        ],
         "title": "UserCreate"
       },
       "UsersGet": {
@@ -15875,7 +16635,11 @@
           }
         },
         "type": "object",
-        "required": ["loc", "msg", "type"],
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
         "title": "ValidationError"
       },
       "app__authorization__role_assignments__data_product__schema__CreateRoleAssignment": {
@@ -15897,7 +16661,11 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "role_id", "data_product_id"],
+        "required": [
+          "user_id",
+          "role_id",
+          "data_product_id"
+        ],
         "title": "CreateRoleAssignment"
       },
       "app__authorization__role_assignments__data_product__schema__ListRoleAssignmentsResponse": {
@@ -15911,7 +16679,9 @@
           }
         },
         "type": "object",
-        "required": ["role_assignments"],
+        "required": [
+          "role_assignments"
+        ],
         "title": "ListRoleAssignmentsResponse"
       },
       "app__authorization__role_assignments__data_product__schema__ModifyRoleAssignment": {
@@ -15923,7 +16693,9 @@
           }
         },
         "type": "object",
-        "required": ["role_id"],
+        "required": [
+          "role_id"
+        ],
         "title": "ModifyRoleAssignment"
       },
       "app__authorization__role_assignments__data_product__schema__RequestRoleAssignment": {
@@ -15945,7 +16717,11 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "role_id", "data_product_id"],
+        "required": [
+          "user_id",
+          "role_id",
+          "data_product_id"
+        ],
         "title": "RequestRoleAssignment"
       },
       "app__authorization__role_assignments__data_product__schema__RoleAssignment": {
@@ -16191,7 +16967,10 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "role_id"],
+        "required": [
+          "user_id",
+          "role_id"
+        ],
         "title": "CreateRoleAssignment"
       },
       "app__authorization__role_assignments__global___schema__ListRoleAssignmentsResponse": {
@@ -16205,7 +16984,9 @@
           }
         },
         "type": "object",
-        "required": ["role_assignments"],
+        "required": [
+          "role_assignments"
+        ],
         "title": "ListRoleAssignmentsResponse"
       },
       "app__authorization__role_assignments__global___schema__ModifyRoleAssignment": {
@@ -16225,7 +17006,9 @@
           }
         },
         "type": "object",
-        "required": ["role_id"],
+        "required": [
+          "role_id"
+        ],
         "title": "ModifyRoleAssignment"
       },
       "app__authorization__role_assignments__global___schema__RoleAssignmentResponse": {
@@ -16321,7 +17104,11 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "role_id", "output_port_id"],
+        "required": [
+          "user_id",
+          "role_id",
+          "output_port_id"
+        ],
         "title": "CreateRoleAssignment"
       },
       "app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld": {
@@ -16338,7 +17125,10 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "role_id"],
+        "required": [
+          "user_id",
+          "role_id"
+        ],
         "title": "CreateRoleAssignmentOld",
         "deprecated": true
       },
@@ -16349,7 +17139,9 @@
           }
         },
         "type": "object",
-        "required": ["decision"],
+        "required": [
+          "decision"
+        ],
         "title": "DecideRoleAssignment"
       },
       "app__authorization__role_assignments__output_port__schema__ListRoleAssignmentsResponse": {
@@ -16363,7 +17155,9 @@
           }
         },
         "type": "object",
-        "required": ["role_assignments"],
+        "required": [
+          "role_assignments"
+        ],
         "title": "ListRoleAssignmentsResponse"
       },
       "app__authorization__role_assignments__output_port__schema__ModifyRoleAssignment": {
@@ -16375,7 +17169,9 @@
           }
         },
         "type": "object",
-        "required": ["role_id"],
+        "required": [
+          "role_id"
+        ],
         "title": "ModifyRoleAssignment"
       },
       "app__authorization__role_assignments__output_port__schema__RequestRoleAssignment": {
@@ -16397,7 +17193,11 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "role_id", "output_port_id"],
+        "required": [
+          "user_id",
+          "role_id",
+          "output_port_id"
+        ],
         "title": "RequestRoleAssignment"
       },
       "app__authorization__role_assignments__output_port__schema__RoleAssignment": {
