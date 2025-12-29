@@ -166,6 +166,3 @@ tmp/
 .terraform*
 terraform.tfstate
 state.tf
-
-# ASDF
-.tool-versions
