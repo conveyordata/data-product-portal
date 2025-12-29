@@ -1,70 +1,71 @@
 repos:
-# Common git hooks
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
-  hooks:
-    # Git style
-    - id: check-added-large-files
-      exclude: ^frontend/src/assets/fonts/
-    - id: check-merge-conflict
-    - id: no-commit-to-branch
+  # Common git hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Git style
+      - id: check-added-large-files
+        exclude: ^frontend/src/assets/fonts/
+      - id: check-merge-conflict
+      - id: no-commit-to-branch
 
-    # Common errors
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
-    - id: check-yaml
-      exclude: ^helm/templates
-    - id: check-merge-conflict
-    - id: check-executables-have-shebangs
+      # Common errors
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+        exclude: ^helm/templates
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
 
-    # Cross-platform
-    - id: check-case-conflict
-    - id: mixed-line-ending
-      args: [--fix=lf]
-    - id: check-symlinks
+      # Cross-platform
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-symlinks
 
-    # Security
-    - id: detect-aws-credentials
-      args: ['--allow-missing-credentials']
-    - id: detect-private-key
+      # Security
+      - id: detect-aws-credentials
+        args: ["--allow-missing-credentials"]
+      - id: detect-private-key
 
-# Python
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.1
-  hooks:
-    - id: mypy
-      language_version: python3.13
-      additional_dependencies:
-      - types-cachetools
-      - types-requests
-      - types-pytz
-      - types-PyYAML
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.5
-  hooks:
-    - id: ruff-check
-      args: [ --fix ]
-    - id: ruff-format
-- repo: https://github.com/gitleaks/gitleaks
-  rev: v8.27.2
-  hooks:
-    - id: gitleaks
-- repo: local
-  hooks:
-    - id: add-helm-version
-      name: add-helm-version
-      entry: ./scripts/add_helm_version.sh
-      language: script
-    - id: regen-openapi-spec
-      name: Regen openapi spec
-      entry: ./scripts/check_openapi_spec.sh
-      language: script
-      types: [text]
-      files: ^backend\/.*\.py$
-    - id: local-fe-check
-      name: fe check
-      entry: bash -c "cd frontend && npm run check:fix"
-      language: system
-      types: [text]
-      files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
-      exclude: ^docs/
+  # Python
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.1
+    hooks:
+      - id: mypy
+        language_version: python3.13
+        additional_dependencies:
+          - types-cachetools
+          - types-requests
+          - types-pytz
+          - types-PyYAML
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.27.2
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: add-helm-version
+        name: add-helm-version
+        entry: ./scripts/add_helm_version.sh
+        language: script
+      - id: regen-openapi-spec
+        name: Regen openapi spec
+        entry: task openapi-spec:generate
+        language: system
+        types: [text]
+        files: ^backend\/.*\.py$
+        pass_filenames: false
+      - id: local-fe-check
+        name: fe check
+        entry: bash -c "cd frontend && npm run check:fix"
+        language: system
+        types: [text]
+        files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
+        exclude: ^docs/

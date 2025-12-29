@@ -31,11 +31,13 @@ tasks:
         fs.writeFileSync(file, updated);
         '
 
-  openapi-spec:update:
+  openapi-spec:generate:
     desc: "Update OpenAPI spec with new version"
+    generates:
+      - docs/static/openapi.json
+    dotenv: [backend/.test.env]
     cmds:
-      - cd backend && poetry run python -m app.open_api_export
-      - mv backend/openapi.json docs/static/openapi.json
+      - cd backend && poetry run python -m app.open_api_export ../docs/static/openapi.json --openapi-version 3.0.4
 
   docusaurus:version:
     desc: "Run Docusaurus versioning"
@@ -110,17 +112,9 @@ tasks:
 
   go-sdk:generate:
     desc: "Generate the Go SDK from the OpenAPI spec"
+    sources: [docs/static/openapi.json]
+    generates: [sdk-go/portal-sdk/portal-sdk.go]
     cmds:
+      - task: openapi-spec:generate
       - cd sdk-go && oapi-codegen --package portal-sdk --generate types,client -o portal-sdk.go ../docs/static/openapi.json
       - go mod tidy
-
-  dotenv:generate:
-    desc: "Generate .env file for local development, from .env.docker"
-    cmds:
-      - |
-        if [ ! -f .env ]; then
-          cp .env.docker .env
-          echo ".env file created"
-        else
-          echo ".env file already exists, skipping creation"
-        fi
