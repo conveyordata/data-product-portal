@@ -166,3 +166,6 @@ tmp/
 .terraform*
 terraform.tfstate
 state.tf
+
+# Taskfile cache
+.task
