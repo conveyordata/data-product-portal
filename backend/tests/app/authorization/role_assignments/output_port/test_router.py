@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 from fastapi import status
@@ -18,12 +19,12 @@ from tests.factories import (
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.schema import RoleAssignment
-    from app.datasets.model import Dataset
+    from app.data_products.output_ports.model import Dataset
     from app.users.schema import User
 
 OLD_ENDPOINT = "/api/role_assignments/dataset"
 ENDPOINT = "/api/v2/authz/role_assignments/output_port"
-ENDPOINT_DATASET = "/api/datasets"
+OLD_ENDPOINT_DATASET = "/api/datasets"
 
 
 class TestDatasetRoleAssignmentsRouter:
@@ -95,18 +96,22 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     @pytest.mark.parametrize(
-        "permissions",
+        ("permissions", "should_update_casbin"),
         [
-            [
-                Action.DATASET__CREATE_USER,
-            ],
-            [
-                Action.DATASET__CREATE_USER,
-                Action.DATASET__APPROVE_USER_REQUEST,
-            ],
+            ([Action.DATASET__CREATE_USER], False),
+            ([Action.DATASET__CREATE_USER, Action.DATASET__APPROVE_USER_REQUEST], True),
         ],
     )
-    def test_create_assignment(self, permissions: list[Action], client: TestClient):
+    @patch(
+        "app.authorization.role_assignments.output_port.router.DatasetAuthAssignment"
+    )
+    def test_create_assignment(
+        self,
+        mock_dataset_auth_assignment,
+        permissions: list[Action],
+        should_update_casbin: bool,
+        client: TestClient,
+    ):
         dataset: Dataset = DatasetFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
@@ -133,6 +138,13 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["output_port"]["id"] == str(dataset.id)
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
+
+        # Verify Casbin update behavior
+        if should_update_casbin:
+            mock_dataset_auth_assignment.assert_called_once()
+            mock_dataset_auth_assignment.return_value.add.assert_called_once()
+        else:
+            mock_dataset_auth_assignment.assert_not_called()
 
     def test_request_assignment_old(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
@@ -475,6 +487,29 @@ class TestDatasetRoleAssignmentsRouter:
         response = client.delete(f"{OLD_ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_history_event_old(self, client: TestClient):
+        dataset: Dataset = DatasetFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+
+        response = client.post(
+            f"{OLD_ENDPOINT}/request/{str(dataset.id)}",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+
+        history = self.get_dataset_history(client, dataset.id).json()
+        assert len(history) == 1
+
     def test_history_event_created_on_dataset_role_assignment_requested(
         self, client: TestClient
     ):
@@ -527,8 +562,9 @@ class TestDatasetRoleAssignmentsRouter:
         )
         assert response.status_code == 200
 
-        history = self.get_dataset_history(client, dataset.id).json()
-        assert len(history) == 1
+        response = self.get_dataset_history(client, dataset.id)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
 
     def test_history_event_created_on_dataset_role_assignment_modified(
         self, client: TestClient
@@ -594,8 +630,8 @@ class TestDatasetRoleAssignmentsRouter:
 
     @staticmethod
     def delete_dataset(client: TestClient, dataset_id):
-        return client.delete(f"{ENDPOINT_DATASET}/{dataset_id}")
+        return client.delete(f"{OLD_ENDPOINT_DATASET}/{dataset_id}")
 
     @staticmethod
     def get_dataset_history(client: TestClient, dataset_id):
-        return client.get(f"{ENDPOINT_DATASET}/{dataset_id}/history")
+        return client.get(f"{OLD_ENDPOINT_DATASET}/{dataset_id}/history")

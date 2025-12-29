@@ -169,3 +169,6 @@ state.tf
 
 # Taskfile cache
 .task
+
+# yarn
+yarn.lock

@@ -33,6 +33,9 @@ declare
     demand_forecast_dataset_id uuid;
     proteomics_dataset_id uuid;
 
+    month_offset integer;
+    day_offset integer;
+
     -- PLATFORMS
     returned_platform_id uuid;
     s3_service_id uuid;
@@ -66,6 +69,7 @@ begin
     TRUNCATE TABLE public.role_assignments_global CASCADE;
     TRUNCATE TABLE public.role_assignments_data_product CASCADE;
     TRUNCATE TABLE public.role_assignments_dataset CASCADE;
+    TRUNCATE TABLE public.dataset_curated_queries CASCADE;
 
     -- PLATFORMS
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
@@ -122,7 +126,7 @@ begin
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc', 'Proteomics', 'Proteomics and Biomarker Discovery', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO proteomics_id;
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('623e6fbf-3a06-434e-995c-b0336e71806e', 'Manufacturing', 'Manufacturing and Supply Chain', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO manufacturing_id;
     INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('bec196cb-81df-4cfc-959f-b142c312861e', 'Medical and Safety', 'Medical and Safety', '2025-10-28 16:30:24.123498', NULL, NULL);
-    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'CRM', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
+    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'Commercial and Customer Relationship Management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
     -- DATA PRODUCT TYPES
     -- ...existing data product types code...
@@ -191,6 +195,65 @@ begin
     INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('b8777d07-e042-445e-8965-89f71ddc76f5', 'sales-performance-by-week', 'Sales performance by week', 'Shows our sales information by week.', NULL, 'ACTIVE', 'PUBLIC', 'acaaaafe-cde9-4746-9835-f1e0c3c85b6c', '2025-10-28 18:20:47.895478', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '86b74246-734f-4cea-a984-3dd0d27fc565');
     INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', 'expose-patient-stratification-information', 'Expose patient stratification information', 'Combine all the anonymized patient data such that you can cluster them.', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:32:27.687291', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '58b837a5-33d0-41cf-bf95-eb9af846f4d0');
     INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d10fe76b-d39d-4028-909c-aea3fd8a1405', 'rnd-prioritization-information', 'RnD prioritization information', 'All data required to rank and score the different R&D programs', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:37:19.95164', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, 'ccdc13fa-4a1a-4dde-ad1c-efa0d58eafb7');
+
+    -- DATASET CURATED QUERIES
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'QC failure hot-spots',
+            'Highlights the organs and staining protocols that most often cause histology slide rejection.',
+            'WITH qc_events AS (
+    SELECT organ, stain_protocol, rejection_reason, collected_on, technician
+    FROM histology_slide_qc
+    WHERE collected_on >= DATE_TRUNC(''month'', CURRENT_DATE) - INTERVAL ''6 months''
+),
+ranked AS (
+    SELECT
+        organ,
+        stain_protocol,
+        rejection_reason,
+        COUNT(*) AS failure_count,
+        DENSE_RANK() OVER (PARTITION BY organ ORDER BY COUNT(*) DESC) AS organ_rank
+    FROM qc_events
+    GROUP BY organ, stain_protocol, rejection_reason
+)
+SELECT organ, stain_protocol, rejection_reason, failure_count
+FROM ranked
+WHERE organ_rank <= 3
+ORDER BY organ, failure_count DESC;',
+            0
+        );
+
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'Latest monthly demand rollup',
+            'Quick sanity-check of forecasted demand by month.',
+            'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily where 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
+            1
+        );
+
+
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'Top unresolved data quality issues',
+            'Surfaces the longest-running clinical data defects that still lack remediation owners.',
+            'SELECT
+    issue_id,
+    study_id,
+    domain,
+    detected_on,
+    severity,
+    assigned_team,
+    status,
+    NOW()::date - detected_on::date AS days_open
+FROM clinical_data_quality_issues
+WHERE status NOT IN (''Resolved'', ''Closed'')
+ORDER BY severity DESC, detected_on ASC
+LIMIT 25;',
+            2
+        );
 
     -- DATA PRODUCTS - DATASETS
     INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
@@ -432,13 +495,93 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('3d2fe240-1505-4de6-8302-771d7d157992', 'be182db6-5268-466c-ae48-e5d6899c6d05', '2025-10-28 18:18:37.476131', NULL);
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', '6578f7bd-aebe-433e-8732-999d36d34af6', '2025-10-28 18:32:27.687291', NULL);
 
-    -- Insert 4 example rows into dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert dynamic dataset query stats
+    -- ------------------------------------------------------------------------------------------------
+
+    -- 1. Histology Clinical dataset query stats (adding 7 to test the other category aggregation)
+
+    -- Single-query daily consumer over the last six months
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, prediction_model_id, 1
+    FROM generate_series((CURRENT_DATE - INTERVAL '6 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs;
+
+    -- Ten weekday queries for the last four months
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, rnd_program_pipeline_id, 10
+    FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) BETWEEN 1 AND 5;
+
+    -- Weekly Monday pings for Biomarker Discovery (consumer #3)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '81815c4c-f323-4cf1-b25b-f43f231f510f', 3
+    FROM generate_series((CURRENT_DATE - INTERVAL '5 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) = 1;
+
+    -- Mid-week bursts for Clinical Trial Performance (consumer #4)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '6e580d91-14ea-495e-a6d7-5db236a5c1d5', 8
+    FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) = 3;
+
+    -- Structured cadence (5th, 15th, 25th) for Clinical Data Quality Monitor (consumer #5)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT
+        (date_trunc('month', CURRENT_DATE) - make_interval(months => month_idx) + make_interval(days => day_idx))::date,
+        histology_clinical_dataset_id,
+        '9fa5e299-fcc4-45e0-b48d-cc3deb68eefe',
+        4
+    FROM generate_series(0, 4) AS gs_month(month_idx)
+    CROSS JOIN LATERAL unnest(ARRAY[5, 15, 25]) AS day_in_month(day_idx);
+
+    -- First-of-month spikes for Regulatory Submission Tracker (consumer #6)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT
+        (date_trunc('month', CURRENT_DATE) - make_interval(months => month_idx))::date,
+        histology_clinical_dataset_id,
+        'fbcd7899-2763-4659-bd28-2a278910ef85',
+        18
+    FROM generate_series(0, 5) AS month_span(month_idx);
+
+    -- Weekend monitoring for Safety Signal Detection (consumer #7)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '08039e5d-50a7-447a-b691-f5dc6b420dea', 6
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) IN (6, 7);
+
+    -- 2. Histology R&D dataset query stats
+    FOR month_offset IN 0..4 LOOP
+        INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+        VALUES (
+            (date_trunc('month', CURRENT_DATE) - make_interval(months => month_offset) + INTERVAL '5 days')::date,
+            histology_rnd_dataset_id,
+            rnd_program_pipeline_id,
+            5
+        );
+    END LOOP;
+
+    FOR month_offset IN 0..1 LOOP
+        FOR day_offset IN SELECT unnest(ARRAY[3, 12, 21]) LOOP
+            INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+            VALUES (
+                (date_trunc('month', CURRENT_DATE) - make_interval(months => month_offset) + make_interval(days => day_offset))::date,
+                histology_rnd_dataset_id,
+                ai_model_histology_images_id,
+                15
+            );
+        END LOOP;
+    END LOOP;
+
     INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count) VALUES
-        ('2025-10-21', histology_rnd_dataset_id, rnd_program_pipeline_id, 5),
-        ('2025-10-25', histology_rnd_dataset_id, rnd_program_pipeline_id, 15),
-        ('2025-10-26', histology_rnd_dataset_id, rnd_program_pipeline_id, 20),
-        ('2025-10-25', histology_rnd_dataset_id, ai_model_histology_images_id, 20),
-        ('2025-10-26', histology_rnd_dataset_id, ai_model_histology_images_id, 10);
+        ((CURRENT_DATE - INTERVAL '34 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 5),
+        ((CURRENT_DATE - INTERVAL '10 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 15),
+        ((CURRENT_DATE - INTERVAL '4 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 20),
+        ((CURRENT_DATE - INTERVAL '10 days')::date, demand_forecast_dataset_id, ai_model_histology_images_id, 20),
+        ((CURRENT_DATE - INTERVAL '4 days')::date, demand_forecast_dataset_id, ai_model_histology_images_id, 10);
+    -- ------------------------------------------------------------------------------------------------
+    -- END of Insert dynamic dataset query stats
+    -- ------------------------------------------------------------------------------------------------
 
 
 end $$;

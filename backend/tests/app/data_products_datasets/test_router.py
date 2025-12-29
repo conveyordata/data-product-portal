@@ -8,7 +8,7 @@ from httpx import Response
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
-from app.datasets.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
     DataProductDatasetAssociationFactory,
@@ -21,7 +21,8 @@ from tests.factories import (
 )
 
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
-DATA_PRODUCTS_ENDPOINT = "/api/data_products"
+OLD_DATA_PRODUCTS_ENDPOINT = "/api/data_products"
+DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 
 
 class TestDataProductsDatasetsRouter:
@@ -63,7 +64,7 @@ class TestDataProductsDatasetsRouter:
         ds = DatasetFactory()
 
         response = client.post(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product.id}/dataset/{str(ds.id)}",
+            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product.id}/dataset/{str(ds.id)}",
         )
         assert response.status_code == 200
         history = self.get_data_product_history(client, data_product.id).json()
@@ -144,7 +145,8 @@ class TestDataProductsDatasetsRouter:
         )
         assert response.status_code == 200
 
-    def test_request_data_product_remove(self, client):
+    def test_request_data_product_remove_old(self, client):
+        assoc = DataProductDatasetAssociationFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -153,21 +155,37 @@ class TestDataProductsDatasetsRouter:
                 Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
             ],
         )
-        data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        ds = DatasetFactory()
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+            data_product_id=assoc.data_product.id,
         )
 
+        response = self.request_data_product_dataset_unlink_old(
+            client, assoc.data_product.id, assoc.dataset.id
+        )
         assert response.status_code == 200
 
-        response = self.request_data_product_dataset_unlink(
-            client, data_product.id, ds.id
+    def test_request_data_product_remove(self, client):
+        assoc = DataProductDatasetAssociationFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=assoc.data_product.id,
+        )
+
+        response = self.request_data_product_input_port_unlink(
+            client,
+            assoc.data_product.id,
+            assoc.dataset.id,
         )
         assert response.status_code == 200
 
@@ -439,7 +457,7 @@ class TestDataProductsDatasetsRouter:
 
         assert response.status_code == 200
 
-        response = self.request_data_product_dataset_unlink(
+        response = self.request_data_product_dataset_unlink_old(
             client, data_product.id, ds.id
         )
         assert response.status_code == 200
@@ -469,7 +487,7 @@ class TestDataProductsDatasetsRouter:
         justification: str = "This is my birth right!",
     ) -> Response:
         return client.post(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
+            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
             json={
                 "dataset_ids": [str(dataset_id) for dataset_id in dataset_ids],
                 "justification": justification,
@@ -491,13 +509,21 @@ class TestDataProductsDatasetsRouter:
         return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/remove/{link_id}")
 
     @staticmethod
-    def request_data_product_dataset_unlink(
+    def request_data_product_dataset_unlink_old(
         client: TestClient, data_product_id, dataset_id
     ) -> Response:
         return client.delete(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
+            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
+        )
+
+    @staticmethod
+    def request_data_product_input_port_unlink(
+        client: TestClient, data_product_id, dataset_id
+    ) -> Response:
+        return client.delete(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports/{dataset_id}"
         )
 
     @staticmethod
     def get_data_product_history(client, data_product_id):
-        return client.get(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")
+        return client.get(f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")

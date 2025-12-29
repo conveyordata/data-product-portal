@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 from fastapi import status
@@ -42,18 +43,28 @@ class TestDataProductRoleAssignmentsRouter:
         assert data[0]["id"] == str(assignment.id)
 
     @pytest.mark.parametrize(
-        "permissions",
+        ("permissions", "should_update_casbin"),
         [
-            [
-                Action.DATA_PRODUCT__CREATE_USER,
-            ],
-            [
-                Action.DATA_PRODUCT__CREATE_USER,
-                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
-            ],
+            ([Action.DATA_PRODUCT__CREATE_USER], False),
+            (
+                [
+                    Action.DATA_PRODUCT__CREATE_USER,
+                    Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                ],
+                True,
+            ),
         ],
     )
-    def test_create_assignment(self, permissions: list[Action], client: TestClient):
+    @patch(
+        "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
+    )
+    def test_create_assignment(
+        self,
+        mock_data_product_auth_assignment,
+        permissions: list[Action],
+        should_update_casbin: bool,
+        client: TestClient,
+    ):
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
@@ -79,6 +90,13 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["data_product"]["id"] == str(data_product.id)
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
+
+        # Verify Casbin update behavior
+        if should_update_casbin:
+            mock_data_product_auth_assignment.assert_called_once()
+            mock_data_product_auth_assignment.return_value.add.assert_called_once()
+        else:
+            mock_data_product_auth_assignment.assert_not_called()
 
     def test_request_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()

@@ -19,9 +19,11 @@ if TYPE_CHECKING:
     )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
-    from app.data_outputs.model import DataOutput
-    from app.data_products_datasets.model import DataProductDatasetAssociation
-    from app.datasets.model import Dataset
+    from app.data_products.output_ports.model import (
+        DataProductDatasetAssociation,
+        Dataset,
+    )
+    from app.data_products.technical_assets.model import DataOutput
 
 
 class DataProduct(Base, BaseORM):

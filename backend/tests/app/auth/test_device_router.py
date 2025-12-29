@@ -1,5 +1,7 @@
 from base64 import b64encode
-from time import sleep
+from datetime import timedelta
+
+from freezegun import freeze_time
 
 ENDPOINT = "/api/auth/device"
 
@@ -17,16 +19,17 @@ class TestAuthDeviceRouter:
         assert response.json()["status"] == "authorization_pending"
 
     def test_get_jwt_token(self, client):
-        response = client.post(f"{ENDPOINT}/device_token?client_id=test")
-        device_code = response.json()["device_code"]
-        sleep(5)  # Avoids hitting the SlowdownException
-        response = client.post(
-            f"{ENDPOINT}/jwt_token?"
-            f"client_id=test&device_code={device_code}"
-            "&grant_type=urn:ietf:params:oauth:"
-            "grant-type:device_code"
-        )
-        assert response.status_code == 400  # user has not yet authorized
+        with freeze_time("2023-01-01 12:00:00") as frozen_datetime:
+            response = client.post(f"{ENDPOINT}/device_token?client_id=test")
+            device_code = response.json()["device_code"]
+            frozen_datetime.tick(delta=timedelta(seconds=6))
+            response = client.post(
+                f"{ENDPOINT}/jwt_token?"
+                f"client_id=test&device_code={device_code}"
+                "&grant_type=urn:ietf:params:oauth:"
+                "grant-type:device_code"
+            )
+            assert response.status_code == 400  # user has not yet authorized
 
     def test_get_root(self, client):
         response = client.post(f"{ENDPOINT}/device_token?client_id=test")

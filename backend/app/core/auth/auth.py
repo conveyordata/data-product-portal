@@ -66,11 +66,14 @@ if settings.OIDC_ENABLED:
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
     ):
-        if not (api_key or jwt_token):
+        if not api_key and not jwt_token:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Unauthenticated"
             )
-        return JWTToken(sub="systemaccount_bot", token="")
+        if not api_key:
+            return secured_call(jwt_token)
+        else:
+            return JWTToken(sub="systemaccount_bot", token="")
 
     def get_authenticated_user(
         token: JWTToken = Depends(api_key_authenticated),
@@ -88,7 +91,11 @@ else:
     def unvalidated_token(token: str = "") -> str:
         return token
 
-    def secured_call(token: str = "") -> JWTToken:
+    def dummy_token() -> str:
+        return ""
+
+    # The dummy_token dependency ensure no token query parameter is added to every route
+    def secured_call(token: str = Depends(dummy_token)) -> JWTToken:
         return generate_default_jwt_token()
 
     def generate_default_jwt_token(default_username=settings.DEFAULT_USERNAME):

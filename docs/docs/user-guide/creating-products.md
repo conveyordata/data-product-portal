@@ -5,9 +5,9 @@ title: Creating Data Products
 
 # Creating your first data Product
 
-In this guide we will walk you through the creation flow of your product as well as connecting it with other products
-and describing the data that it will product.
-If you do not know what a Data product is, take a look at the page describing [data products](../concepts/data-products).
+In this guide we will walk you through the creation flow of your product as well as connecting it with other Products
+and describing the data that it will produce.
+If you do not know what a Data Product is, take a look at the page describing [Data Products](../concepts/data-products.md).
 
 ## How to Create a Data Product
 
@@ -51,7 +51,7 @@ Technical assets are linked to and owned by a single **Data Product**.
 4. **Specify Metadata**: Include necessary metadata such as:
    - **Name**
    - **Description**
-   - **Alignment** Choose between *Product aligned* and *Source aligned*. See [below](#alignment)
+   - **Alignment** Choose between *Product aligned* and *Source aligned* (see [Alignment](#alignment) below).
    - **Technology** Choose from one of the enabled technologies within your organization.
    - **Technology specific information** Add some technical information such as database name and schema, prefix paths, ... This depends on the chosen technology.
 5. **Save Your Data Output**: Click **Create** to add the data output to your product.
@@ -71,22 +71,23 @@ When in doubt, choose **Product aligned**.
 
 The output port describes which technical assets your data product exposes through a common interface.
 It is the missing link when you want to share the data-product's data with other data products.
-For more information about output ports, take a look at the concept page describing [Output ports](../concepts/output-ports.md).
+For more information about output ports, take a look at the concept page describing [Output Ports](../concepts/output-ports.md).
 
 ### How to Create an output port
 
-1. **Navigate to the Output ports Section**.
+1. **Navigate to the Output Ports Section**.
 2. **Click 'Add Output Port'**.
 3. **Specify Metadata**: Include necessary metadata such as:
    - **Name**
    - **Owners**
    - **Domain**
-   - **Status**: identifying the lifecycle stage of this output port.
-   - **Access Type**: identifying who can see and request access to this output port. For more information, see [below](#access-types).
+   - **Status**: Identifying the lifecycle stage of this output port.
+   - **Access Type**: Identifying who can see and request access to this Output Port (see [Access Types](#access-types) below).
    - **Description**
-4. **Submit**: Once your dataset is configured, click **Create Dataset**.
+4. **Submit**: Once your Output Port is configured, click **Create Output Port**.
 
 ### Access Types
+
 There are currently 3 possible access types.
 
 - Public: All access requests are immediately approved. Any Data Product can use your dataset as input.
@@ -95,31 +96,39 @@ There are currently 3 possible access types.
 
 ![Creating an output port](./img/output-port-modal.png)
 
-## Adding the technical assets to your output port
-Now that you have created both technical assets and an output port, it is time to link them together.
+## Adding the Technical Assets to your Output Port
+
+Now that you have created both Technical Assets and an Output Port, it is time to link them together.
+
 1. **Go to the Data Product that will expose your data**.
 2. **Go to the Output Ports Tab**.
-3. **Link the technical assets to your output port**. You can drag the technical assets from the right side to the output port on the left side or use the Link technical asset link.
+3. **Link the Technical Assets to your Output Port**.
+   You can drag the Technical Assets from the right side to the Output Port on the left side or use the 'Link Technical Asset' link.
 
 ![Linking technical assets to an output port](./img/linking-assets-to-output-ports.png)
 
-## (Optional) Creating an input port for your product
-If your data product needs to consume data from other data products, you will need to create an input port.
-For more information about input ports, take a look at the concept page describing [Input ports](../concepts/input-ports.md).
+## (Optional) Creating an Input Port for your Product
 
-### How to Create an input port
+If your data product needs to consume data from other data products, you will need to create an Input Port.
+For more information about input ports, take a look at the concept page describing [Input Ports](../concepts/input-ports.md).
+
+### How to Create an Input Port
+
 1. **Navigate to the Data Product that will consume data**.
 2. **Go to the Input Ports Section**.
 3. **Click the 'Link Output Port' button**.
-4. **Request access to the Output Ports that you need**. You can only use them after your request has been approved by the owners of the output port.
+4. **Request access to the Output Ports that you need**.
+   You can only use them after your request has been approved by the owners of the Output Port.
 
 ![Linking an Output port to an Input port](./img/linking-output-input-port.png)
 
 ## Conclusion
 
-Congratulations :tada:! you succeeded in creating your first data product and made it discoverable and consumable through:
+Congratulations :tada:! you succeeded in creating your first Data Product and made it discoverable and consumable through:
 
-- A clear description and an about page
-- Identifies the technical assets that will be produced
-- Provides at least 1 interface that other data products can use to consume the data
-- Optionally, consumes data from other data products through input ports
+- Writing a clear description and an about page
+- Identifying the Technical assets that will be produced
+- Providing at least one interface that other Data Products can use to consume the data
+- Optionally, consuming data from other Data Products through Input Ports
+
+Well done!

@@ -5,7 +5,7 @@ import emailgen
 
 from app.core.email.send_mail import send_mail
 from app.data_products.model import DataProduct
-from app.datasets.model import Dataset
+from app.data_products.output_ports.model import Dataset
 from app.settings import settings
 from app.users.schema import User
 

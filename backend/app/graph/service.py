@@ -7,7 +7,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.domains.model import Domain
 from app.core.logging import logger
 from app.data_products.model import DataProduct
-from app.datasets.model import Dataset
+from app.data_products.output_ports.model import Dataset
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -153,15 +153,17 @@ class GraphService:
                 for dataset_link in data_product.dataset_links:
                     # If the data product has it's own dataset as children then we can show the link.
                     dataset = dataset_link.dataset
-                    for consumer in data_product.datasets:
-                        edges.append(
+                    edges.extend(
+                        [
                             Edge(
                                 id=f"{dataset.id}-{consumer.id}",
                                 source=dataset.id,
                                 target=consumer.id,
                                 animated=dataset_link.status == DecisionStatus.APPROVED,
                             )
-                        )
+                            for consumer in data_product.datasets
+                        ]
+                    )
         else:
             edges = []
         return Graph(nodes=set(nodes), edges=set(edges))

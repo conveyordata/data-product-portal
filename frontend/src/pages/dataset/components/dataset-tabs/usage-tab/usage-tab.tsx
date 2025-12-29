@@ -1,12 +1,133 @@
-import { useGetDatasetQueryStatsDailyQuery } from '@/store/features/datasets/datasets-api-slice';
-import { UsageChart } from './usage-chart';
+import { Alert, Col, Flex, Radio, type RadioChangeEvent, Row, Typography } from 'antd';
+import { useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+    useGetDatasetQueryCuratedQueriesQuery,
+    useGetDatasetQueryStatsDailyQuery,
+} from '@/store/features/datasets/datasets-api-slice';
+import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
+import {
+    aggregateQueriesPerConsumer,
+    createColorScaleConfig,
+    transformDataForChart,
+} from './components/chart-data.utils';
+import { CuratedQueriesList } from './components/curated-queries-list';
+import { QueriesOverTimeChart } from './components/queries-over-time-chart';
+import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
 
 type Props = {
     datasetId: string;
 };
 
-export function UsageTab({ datasetId }: Props) {
-    const { data, isLoading } = useGetDatasetQueryStatsDailyQuery(datasetId);
+function getGranularityFromDayRange(dayRange: number): DatasetQueryStatsGranularity {
+    if (dayRange === 365) {
+        return 'month';
+    }
+    if (dayRange === 90) {
+        return 'week';
+    }
+    return 'day';
+}
 
-    return <UsageChart data={data} isLoading={isLoading} />;
+export function UsageTab({ datasetId }: Props) {
+    const { t } = useTranslation();
+    const yearDayRange = 365;
+    const [dayRange, setDayRange] = useState<number>(yearDayRange);
+    const granularity = useMemo(() => getGranularityFromDayRange(dayRange), [dayRange]);
+
+    const { data, isLoading, isFetching } = useGetDatasetQueryStatsDailyQuery({
+        datasetId,
+        granularity,
+        dayRange,
+    });
+
+    const { data: curatedQueries, isLoading: areCuratedQueriesLoading } = useGetDatasetQueryCuratedQueriesQuery(
+        datasetId,
+        {
+            skip: !datasetId,
+        },
+    );
+
+    const isLoadingState = isLoading || isFetching;
+    const responses = data?.dataset_query_stats_daily_responses;
+    const hasUsageData = Boolean(responses?.length);
+    const hasCuratedQueries = Boolean(!areCuratedQueriesLoading && curatedQueries?.dataset_curated_queries?.length);
+    const unknownLabel = t('Unknown');
+
+    const chartData = useMemo(() => {
+        if (!responses?.length) {
+            return [];
+        }
+        return transformDataForChart(responses, granularity, unknownLabel);
+    }, [responses, granularity, unknownLabel]);
+
+    const consumerTotals = useMemo(() => aggregateQueriesPerConsumer(chartData), [chartData]);
+
+    // Use the sorted order from consumerTotals (which is already sorted by total queries descending)
+    // This ensures areas with highest total queries are at the bottom of the stacked chart
+    // Note: Data is now sorted by consumer total queries in the backend
+    const uniqueConsumers = useMemo(() => consumerTotals.map((ct) => ct.consumer), [consumerTotals]);
+    const colorScaleConfig = useMemo(() => createColorScaleConfig(uniqueConsumers), [uniqueConsumers]);
+
+    return (
+        <Row gutter={[32, 32]}>
+            <Col span={24}>
+                <Flex justify={'center'}>
+                    <Radio.Group
+                        optionType="button"
+                        value={dayRange}
+                        onChange={(e: RadioChangeEvent) => setDayRange(e.target.value)}
+                        options={[
+                            { label: t('Last 30 days'), value: 30 },
+                            { label: t('Last 90 days'), value: 90 },
+                            { label: t('Last year'), value: yearDayRange },
+                        ]}
+                    />
+                </Flex>
+            </Col>
+
+            {!hasUsageData && !hasCuratedQueries && (
+                <Col span={24}>
+                    <Alert
+                        title={
+                            <Trans t={t}>
+                                No usage data available. Learn how to set up usage data ingestion in our{' '}
+                                <Typography.Link
+                                    href="https://docs.dataproductportal.com/docs/developer-guide/data-product-usage-ingestion"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    documentation.
+                                </Typography.Link>
+                            </Trans>
+                        }
+                        type="info"
+                        showIcon
+                    />
+                </Col>
+            )}
+            <Col span={12}>
+                <QueriesOverTimeChart
+                    data={chartData}
+                    isLoading={isLoadingState}
+                    hasData={hasUsageData}
+                    colorScaleConfig={colorScaleConfig}
+                />
+            </Col>
+            <Col span={12}>
+                <QueriesPerConsumerChart
+                    data={consumerTotals}
+                    isLoading={isLoadingState}
+                    hasData={hasUsageData}
+                    colorScaleConfig={colorScaleConfig}
+                />
+            </Col>
+            <Col span={24}>
+                <CuratedQueriesList
+                    queries={curatedQueries?.dataset_curated_queries}
+                    isLoading={areCuratedQueriesLoading}
+                />
+            </Col>
+        </Row>
+    );
 }

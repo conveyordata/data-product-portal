@@ -1,5 +1,5 @@
 import { usePostHog } from '@posthog/react';
-import { Flex, Pagination } from 'antd';
+import { Empty, Flex, Pagination } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
@@ -18,7 +18,7 @@ export function Marketplace() {
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const { data: datasets = [] } = useGetAllDatasetsQuery();
 
-    const { data: datasetSearchResult = [] } = useSearchDatasetsQuery(
+    const { data: datasetSearchResult = [], isFetching: datasetSearchResultLoading } = useSearchDatasetsQuery(
         {
             query: debouncedSearchTerm,
         },
@@ -48,18 +48,25 @@ export function Marketplace() {
             search_term: debouncedSearchTerm,
         });
     }, [posthog, debouncedSearchTerm]);
-
     return (
         <SearchPage
             title={t('Marketplace')}
             searchPlaceholder={t('Search output ports by name')}
             onSearch={handleSearchChange}
+            loadingResults={datasetSearchResultLoading}
         >
-            <Flex wrap="wrap" gap={'small'}>
-                {paginatedOutputPorts.map((dataset) => (
-                    <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
-                ))}
-            </Flex>
+            {paginatedOutputPorts?.length > 0 ? (
+                <Flex wrap="wrap" gap={'small'}>
+                    {paginatedOutputPorts.map((dataset) => (
+                        <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
+                    ))}
+                </Flex>
+            ) : (
+                <Flex justify={'center'}>
+                    <Empty description={t('No results match you search')} />
+                </Flex>
+            )}
+
             {finalDatasetResults.length > pageSize && (
                 <Flex
                     key="pagination-container"

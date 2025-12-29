@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.authorization.roles.schema import Role
-from app.datasets.schema import Dataset, OutputPort
+from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.shared.schema import ORMModel
 from app.users.schema import User
 

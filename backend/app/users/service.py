@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
-from app.users.schema_response import UsersGet
+from app.users.schema_response import UserCreateResponse, UsersGet
 
 SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
 
@@ -32,11 +32,11 @@ class UserService:
         self.db.delete(user)
         self.db.commit()
 
-    def create_user(self, user: UserCreate) -> dict[str, UUID]:
+    def create_user(self, user: UserCreate) -> UserCreateResponse:
         user = UserModel(**user.parse_pydantic_schema())
         self.db.add(user)
         self.db.commit()
-        return {"id": user.id}
+        return UserCreateResponse(id=user.id)
 
     def mark_tour_as_seen(self, user_id: UUID) -> None:
         user = ensure_user_exists(user_id, self.db)
