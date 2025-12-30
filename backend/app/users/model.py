@@ -17,8 +17,10 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.model import (
         DatasetRoleAssignment,
     )
-    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
+    from app.data_products.output_port_technical_assets_link.model import (
+        DataOutputDatasetAssociation,
+    )
     from app.data_products.output_ports.model import (
         DataProductDatasetAssociation,
         Dataset,

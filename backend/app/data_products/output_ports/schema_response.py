@@ -9,7 +9,7 @@ from app.configuration.data_product_settings.schema import (
 )
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
-from app.data_outputs_datasets.schema import (
+from app.data_products.output_port_technical_assets_link.schema import (
     DataOutputDatasetAssociation,
     TechnicalAssetOutputPortAssociation,
 )

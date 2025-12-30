@@ -3,7 +3,9 @@ from typing import Literal, Union
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignmentResponse,
 )
-from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
+from app.data_products.output_port_technical_assets_link.schema_response import (
+    DataOutputDatasetAssociationsGet,
+)
 from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.pending_actions.enums import PendingActionTypes
 

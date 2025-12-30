@@ -37,7 +37,3 @@ class DataOutputResultStringRequest(ORMModel):
     platform_id: UUID
     service_id: UUID
     configuration: DataOutputConfiguration
-
-
-class LinkTechnicalAssetToOutputPortRequest(ORMModel):
-    output_port_id: UUID

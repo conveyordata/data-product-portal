@@ -16,11 +16,14 @@ from tests.factories import (
     UserFactory,
 )
 
-DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
+OLD_DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
+DATA_OUTPUTS_DATASETS_ENDPOINT = (
+    "api/v2/data_products/{}/output_ports/{}/technical_assets"
+)
 DATA_OUTPUTS_ENDPOINT = "/api/data_outputs"
 
 
-class TestDataOutputsDatasetsRouter:
+class TestOutputPortsTechnicalAssetsLinkRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_request_data_output_link(self, client):
@@ -148,7 +151,24 @@ class TestDataOutputsDatasetsRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_default_data_output_dataset_link(client, link.id)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
+
+    def test_approve_link_between_technical_asset_and_output_port(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds, status=DecisionStatus.PENDING
+        )
+        response = self.approve_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
+        assert response.status_code == 200, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_approve_data_output_link_by_admin(self, client):
@@ -187,6 +207,23 @@ class TestDataOutputsDatasetsRouter:
         response = self.deny_default_data_output_dataset_link(client, link.id)
         assert response.status_code == 200
 
+    def test_deny_link_between_technical_asset_and_output_port(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds, status=DecisionStatus.PENDING
+        )
+        response = self.deny_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
+        assert response.status_code == 200
+
     @pytest.mark.usefixtures("admin")
     def test_deny_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
@@ -218,15 +255,17 @@ class TestDataOutputsDatasetsRouter:
             permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataOutputDatasetAssociationFactory(dataset=ds)
+        data_output = DataOutputFactory(owner=ds.data_product)
+        link = DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
 
         response = self.remove_data_output_dataset_link(client, link.id)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_remove_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
-        link = DataOutputDatasetAssociationFactory(dataset=ds)
+        data_output = DataOutputFactory(owner=ds.data_product)
+        link = DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
 
         response = self.remove_data_output_dataset_link(client, link.id)
         assert response.status_code == 200
@@ -253,9 +292,7 @@ class TestDataOutputsDatasetsRouter:
         assert len(response.json()["dataset_links"]) == 0
 
     def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory()
-        DataOutputDatasetAssociationFactory(dataset=ds)
-        response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
+        response = client.get(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
 
     def test_get_pending_actions(self, client):
@@ -279,7 +316,7 @@ class TestDataOutputsDatasetsRouter:
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
-        response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
+        response = client.get(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
         assert response.json()[0]["data_output_id"] == str(data_output.id)
         assert response.json()[0]["status"] == "pending"
 
@@ -311,7 +348,10 @@ class TestDataOutputsDatasetsRouter:
             permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataOutputDatasetAssociationFactory(dataset=ds)
+        technical_asset = DataOutputFactory(owner=ds.data_product)
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds, data_output=technical_asset
+        )
 
         response = self.remove_data_output_dataset_link(client, link.id)
         assert response.status_code == 200
@@ -389,15 +429,33 @@ class TestDataOutputsDatasetsRouter:
 
     @staticmethod
     def approve_default_data_output_dataset_link(client, link_id):
-        return client.post(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/approve/{link_id}")
+        return client.post(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/approve/{link_id}")
+
+    @staticmethod
+    def approve_link_between_technical_asset_and_output_port(
+        client, data_product_id, technical_asset_id, output_port_id
+    ):
+        return client.post(
+            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve_link_request",
+            json={"technical_asset_id": f"{technical_asset_id}"},
+        )
+
+    @staticmethod
+    def deny_link_between_technical_asset_and_output_port(
+        client, data_product_id, technical_asset_id, output_port_id
+    ):
+        return client.post(
+            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/deny_link_request",
+            json={"technical_asset_id": f"{technical_asset_id}"},
+        )
 
     @staticmethod
     def deny_default_data_output_dataset_link(client, link_id):
-        return client.post(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/deny/{link_id}")
+        return client.post(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/deny/{link_id}")
 
     @staticmethod
     def remove_data_output_dataset_link(client, link_id):
-        return client.post(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/remove/{link_id}")
+        return client.post(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/remove/{link_id}")
 
     @staticmethod
     def request_data_output_dataset_unlink(client, data_output_id, dataset_id):

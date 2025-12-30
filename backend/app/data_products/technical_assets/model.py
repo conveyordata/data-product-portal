@@ -15,8 +15,10 @@ if TYPE_CHECKING:
     from app.configuration.platforms.model import Platform
     from app.configuration.platforms.platform_services.model import PlatformService
     from app.data_output_configuration.base_model import BaseDataOutputConfiguration
-    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
+    from app.data_products.output_port_technical_assets_link.model import (
+        DataOutputDatasetAssociation,
+    )
 
 from app.configuration.tags.model import Tag, tag_data_output_table
 from app.database.database import Base, ensure_exists
