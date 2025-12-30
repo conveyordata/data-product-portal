@@ -67,7 +67,7 @@ def revoke_admin(
         )
     ],
 )
-def create_assignment(
+def create_global_assignment(
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
@@ -87,7 +87,7 @@ def create_assignment(
         )
     ],
 )
-def delete_assignment(
+def delete_global_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
 ) -> None:
@@ -119,11 +119,13 @@ def list_assignments_old(
     role_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
 ) -> Sequence[RoleAssignmentResponse]:
-    return list_assignments(user_id=user_id, role_id=role_id, db=db).role_assignments
+    return list_global_assignments(
+        user_id=user_id, role_id=role_id, db=db
+    ).role_assignments
 
 
 @router.get(route)
-def list_assignments(
+def list_global_assignments(
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
@@ -150,7 +152,7 @@ def decide_assignment_old(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return decide_assignment(id, request, db, user)
+    return decide_global_assignment(id, request, db, user)
 
 
 @router.post(
@@ -161,7 +163,7 @@ def decide_assignment_old(
         )
     ],
 )
-def decide_assignment(
+def decide_global_assignment(
     id: UUID,
     request: DecideRoleAssignment,
     db: Session = Depends(get_db_session),
@@ -201,7 +203,7 @@ def modify_assigned_role_old(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return modify_assigned_role(id, request, db, user)
+    return modify_global_assigned_role(id, request, db, user)
 
 
 @router.put(
@@ -212,7 +214,7 @@ def modify_assigned_role_old(
         )
     ],
 )
-def modify_assigned_role(
+def modify_global_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,
     db: Session = Depends(get_db_session),

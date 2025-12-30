@@ -146,3 +146,18 @@ def test_no_token_in_route_params():
     assert not routes_with_token, (
         f"Found unwanted 'token' query parameter in the following routes: {routes_with_token}"
     )
+
+
+def test_openapi_no_duplicate_operation_ids():
+    openapi_schema = app.openapi()
+    operation_ids = set()
+    duplicates = set()
+
+    for methods in openapi_schema.get("paths", {}).values():
+        for config in methods.values():
+            if operation_id := config.get("operationId"):
+                if operation_id in operation_ids:
+                    duplicates.add(operation_id)
+                operation_ids.add(operation_id)
+
+    assert not duplicates, f"Duplicate operationIds found in OpenAPI spec: {duplicates}"
