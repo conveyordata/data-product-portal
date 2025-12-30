@@ -16,7 +16,6 @@ class DatasetUpdate(ORMModel):
     access_type: OutputPortAccessType
     about: Optional[str] = None
     lifecycle_id: Optional[UUID] = None
-    domain_id: UUID
     tag_ids: list[UUID]
 
 

@@ -96,7 +96,7 @@ class DataProductDatasetService:
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.dataset.domain),
+                dom=str(a.dataset.data_product.domain),
                 obj=str(a.dataset_id),
                 act=Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )

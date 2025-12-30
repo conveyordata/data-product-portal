@@ -1,4 +1,3 @@
-import uuid
 from copy import deepcopy
 
 import pytest
@@ -195,7 +194,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tags": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -217,7 +215,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -301,7 +298,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tags": [],
             "access_type": "public",
-            "domain_id": str(uuid.uuid4()),
         }
         dataset = self.update_default_dataset(client, update_payload, self.invalid_id)
         assert dataset.status_code == 403

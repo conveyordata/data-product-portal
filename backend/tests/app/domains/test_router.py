@@ -1,6 +1,6 @@
 import pytest
 
-from tests.factories import DataProductFactory, DatasetFactory, DomainFactory
+from tests.factories import DataProductFactory, DomainFactory
 
 OLD_ENDPOINT = "/api/domains"
 ENDPOINT = "/api/v2/configuration/domains"
@@ -64,22 +64,13 @@ class TestDomainsRouter:
         assert response.status_code == 400
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_domain_coupled_dataset(self, client):
-        domain = DomainFactory()
-        DatasetFactory(domain=domain)
-        response = self.remove_domain(client, domain.id)
-        assert response.status_code == 400
-
-    @pytest.mark.usefixtures("admin")
     def test_migrate_domains(self, client):
         domain = DomainFactory()
         new_domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
-        dataset = DatasetFactory(domain=domain)
         response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 200
         assert data_product.domain.id == new_domain.id
-        assert dataset.domain.id == new_domain.id
 
     def test_create_domain_admin_only(self, domain_payload, client):
         response = self.create_domain(client, domain_payload)

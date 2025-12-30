@@ -119,7 +119,7 @@ class DatasetService:
                 )
             )
             dataset.lifecycle = default_lifecycle
-
+        dataset.domain = dataset.data_product.domain
         return dataset
 
     def search_datasets(
@@ -152,6 +152,7 @@ class DatasetService:
             rank = row[1]
             if self.is_visible_to_user(dataset, user):
                 dataset.rank = rank
+                dataset.domain = dataset.data_product.domain
                 filtered_datasets.append(dataset)
         return filtered_datasets
 
@@ -195,6 +196,7 @@ class DatasetService:
         for dataset in datasets:
             if not dataset.lifecycle:
                 dataset.lifecycle = default_lifecycle
+            dataset.domain = dataset.data_product.domain
         return datasets
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
