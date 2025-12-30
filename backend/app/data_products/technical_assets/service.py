@@ -16,9 +16,6 @@ from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.model import (
-    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
-)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
@@ -38,6 +35,9 @@ from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
+from app.data_products.technical_assets_output_port_link.model import (
+    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+)
 from app.graph.graph import Graph
 from app.users.schema import User
 
