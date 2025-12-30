@@ -170,5 +170,8 @@ state.tf
 # Taskfile cache
 .task
 
+# ruff cache
+.ruff_cache/
+
 # yarn
 yarn.lock
