@@ -31,9 +31,6 @@ from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
     NamespaceValidator,
     NamespaceValidityType,
 )
@@ -66,6 +63,7 @@ from app.data_products_datasets.model import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.resource_names.service import ResourceNameService
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -212,9 +210,9 @@ class DataProductService:
         data_product: DataProductCreate,
     ) -> DataProductModel:
         if (
-            validity := self.namespace_validator.validate_namespace(
-                data_product.namespace, self.db
-            ).validity
+            validity := ResourceNameService(model=DataProductModel)
+            .validate_resource_name(data_product.namespace, self.db)
+            .validity
         ) != NamespaceValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -253,9 +251,9 @@ class DataProductService:
         if (
             current_data_product.namespace != data_product.namespace
             and (
-                validity := self.namespace_validator.validate_namespace(
-                    data_product.namespace, self.db
-                ).validity
+                validity := ResourceNameService(model=DataProductModel)
+                .validate_resource_name(data_product.namespace, self.db)
+                .validity
             )
             != NamespaceValidityType.VALID
         ):
@@ -698,21 +696,3 @@ class DataProductService:
                 )
 
         return Graph(nodes=set(nodes), edges=set(edges))
-
-    def validate_data_product_namespace(self, namespace: str) -> NamespaceValidation:
-        return self.namespace_validator.validate_namespace(namespace, self.db)
-
-    @classmethod
-    def data_product_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
-        return NamespaceValidator.namespace_suggestion(name)
-
-    @classmethod
-    def data_product_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return NamespaceValidator.namespace_length_limits()
-
-    def validate_data_output_namespace(
-        self, namespace: str, data_product_id: UUID
-    ) -> NamespaceValidation:
-        return self.data_output_namespace_validator.validate_namespace(
-            namespace, self.db, data_product_id
-        )

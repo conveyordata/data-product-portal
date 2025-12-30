@@ -559,6 +559,13 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["max_length"] > 1
 
+    def test_validate_namespace_old(self, client):
+        namespace = "test"
+        response = self.validate_namespace_old(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
+
     def test_validate_namespace(self, client):
         namespace = "test"
         response = self.validate_namespace(client, namespace)
@@ -870,8 +877,15 @@ class TestDataProductsRouter:
         return client.get(f"{OLD_ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def validate_namespace(client: TestClient, namespace):
+    def validate_namespace_old(client: TestClient, namespace):
         return client.get(f"{OLD_ENDPOINT}/validate_namespace?namespace={namespace}")
+
+    @staticmethod
+    def validate_namespace(client: TestClient, namespace):
+        return client.post(
+            "api/v2/resource_names/validate",
+            json={"resource_name": namespace, "model": "data_product"},
+        )
 
     @staticmethod
     def get_namespace_length_limits(client: TestClient):

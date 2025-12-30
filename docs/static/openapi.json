@@ -924,6 +924,7 @@
         ],
         "summary": "Get Dataset Namespace Suggestion",
         "operationId": "get_dataset_namespace_suggestion",
+        "deprecated": true,
         "parameters": [
           {
             "name": "name",
@@ -966,6 +967,7 @@
         ],
         "summary": "Validate Dataset Namespace",
         "operationId": "validate_dataset_namespace",
+        "deprecated": true,
         "parameters": [
           {
             "name": "namespace",
@@ -1019,7 +1021,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/datasets/user/{user_id}": {
@@ -2955,6 +2958,7 @@
         ],
         "summary": "Get Data Product Namespace Suggestion",
         "operationId": "get_data_product_namespace_suggestion",
+        "deprecated": true,
         "parameters": [
           {
             "name": "name",
@@ -2997,6 +3001,7 @@
         ],
         "summary": "Validate Data Product Namespace",
         "operationId": "validate_data_product_namespace",
+        "deprecated": true,
         "parameters": [
           {
             "name": "namespace",
@@ -3050,7 +3055,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/data_products": {
@@ -4905,58 +4911,6 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/technical_asset/validate_namespace": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Validate Technical Asset Namespace",
-        "operationId": "validate_technical_asset_namespace",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Namespace"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NamespaceValidation"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/data_product_types/{id}": {
       "get": {
         "tags": [
@@ -6188,6 +6142,7 @@
         ],
         "summary": "Get Data Product Settings Namespace Suggestion",
         "operationId": "get_data_product_settings_namespace_suggestion",
+        "deprecated": true,
         "parameters": [
           {
             "name": "name",
@@ -6230,6 +6185,7 @@
         ],
         "summary": "Validate Data Product Settings Namespace",
         "operationId": "validate_data_product_settings_namespace",
+        "deprecated": true,
         "parameters": [
           {
             "name": "namespace",
@@ -6291,7 +6247,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/configuration/data_product_settings/{id}": {
@@ -6713,8 +6670,8 @@
         "tags": [
           "Data Products - Technical assets"
         ],
-        "summary": "Get Data Output Namespace Suggestion",
-        "operationId": "get_data_output_namespace_suggestion",
+        "summary": "Get Dataset Namespace Suggestion",
+        "operationId": "get_dataset_namespace_suggestion",
         "deprecated": true,
         "parameters": [
           {
@@ -6756,8 +6713,8 @@
         "tags": [
           "Data Products - Technical assets"
         ],
-        "summary": "Get Data Output Namespace Length Limits",
-        "operationId": "get_data_output_namespace_length_limits",
+        "summary": "Get Dataset Namespace Length Limits",
+        "operationId": "get_dataset_namespace_length_limits",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12651,6 +12608,110 @@
                   },
                   "type": "array",
                   "title": "Response Get User Pending Actions Api Pending Actions Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/resource_names/sanitize": {
+      "post": {
+        "tags": [
+          "Resource names"
+        ],
+        "summary": "Sanitize Resource Name",
+        "operationId": "sanitize_resource_name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNameSuggestion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/resource_names/validate": {
+      "post": {
+        "tags": [
+          "Resource names"
+        ],
+        "summary": "Validate Resource Name",
+        "operationId": "validate_resource_name",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceNameValidationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNameValidation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/resource_names/constraints": {
+      "get": {
+        "tags": [
+          "Resource names"
+        ],
+        "summary": "Resource Name Constraints",
+        "operationId": "resource_name_constraints",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNameLengthLimits"
                 }
               }
             }
@@ -18624,6 +18685,94 @@
           "database"
         ],
         "title": "RedshiftDataOutput"
+      },
+      "ResourceNameLengthLimits": {
+        "properties": {
+          "max_length": {
+            "type": "integer",
+            "title": "Max Length"
+          }
+        },
+        "type": "object",
+        "required": [
+          "max_length"
+        ],
+        "title": "ResourceNameLengthLimits"
+      },
+      "ResourceNameModel": {
+        "type": "string",
+        "enum": [
+          "data_product",
+          "technical_asset",
+          "output_port",
+          "data_product_setting",
+          "output_port_setting"
+        ],
+        "title": "ResourceNameModel"
+      },
+      "ResourceNameSuggestion": {
+        "properties": {
+          "resource_name": {
+            "type": "string",
+            "title": "Resource Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource_name"
+        ],
+        "title": "ResourceNameSuggestion"
+      },
+      "ResourceNameValidation": {
+        "properties": {
+          "validity": {
+            "$ref": "#/components/schemas/ResourceNameValidityType"
+          }
+        },
+        "type": "object",
+        "required": [
+          "validity"
+        ],
+        "title": "ResourceNameValidation"
+      },
+      "ResourceNameValidationRequest": {
+        "properties": {
+          "resource_name": {
+            "type": "string",
+            "title": "Resource Name"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ResourceNameModel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource_name",
+          "model"
+        ],
+        "title": "ResourceNameValidationRequest"
+      },
+      "ResourceNameValidityType": {
+        "type": "string",
+        "enum": [
+          "VALID",
+          "INVALID_LENGTH",
+          "INVALID_CHARACTERS",
+          "DUPLICATE_NAMESPACE"
+        ],
+        "title": "ResourceNameValidityType"
       },
       "Role": {
         "properties": {
