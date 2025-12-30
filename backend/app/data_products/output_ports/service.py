@@ -21,9 +21,6 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.model import (
-    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
-)
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset as DatasetModel
@@ -45,6 +42,9 @@ from app.data_products.output_ports.search_dataset import (
     recalculate_search_vector_datasets_statement,
 )
 from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets_output_port_link.model import (
+    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+)
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )

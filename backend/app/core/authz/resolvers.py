@@ -9,10 +9,12 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
-from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.model import Dataset
 from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets_output_port_link.model import (
+    DataOutputDatasetAssociation,
+)
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 
@@ -156,19 +158,28 @@ class DataOutputDatasetAssociationResolver(SubjectResolver):
     async def resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await DataProductResolver.resolve(request, key, db)
+        obj = await SubjectResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
-            data_output_dataset = (
-                db.scalars(
-                    select(DataOutputDatasetAssociation).where(
-                        DataOutputDatasetAssociation.id == obj
-                    )
+            data_output_dataset = db.scalar(
+                select(DataOutputDatasetAssociation).where(
+                    DataOutputDatasetAssociation.id == obj
                 )
-                .unique()
-                .one_or_none()
             )
             if data_output_dataset:
                 return data_output_dataset.dataset_id
+        return cls.DEFAULT
+
+
+class TechnicalAssetOutputPortLinkResolver(SubjectResolver):
+    model: Model = Dataset
+
+    @classmethod
+    async def resolve(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ):
+        obj = await SubjectResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT and (ds := db.get(Dataset, obj)):
+            return ds.id
         return cls.DEFAULT
 
 

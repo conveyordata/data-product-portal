@@ -7,15 +7,15 @@ from app.configuration.data_product_settings.schema import DataProductSettingVal
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
-from app.data_outputs_datasets.schema_response import (
-    BaseDataOutputDatasetAssociationGet,
-    BaseTechnicalAssetOutputPortAssociationGet,
-)
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.status import DataProductStatus
 from app.data_products.technical_assets.schema_response import (
     BaseDataOutputGet,
     BaseTechnicalAssetGet,
+)
+from app.data_products.technical_assets_output_port_link.schema_response import (
+    BaseDataOutputDatasetAssociationGet,
+    BaseTechnicalAssetOutputPortAssociationGet,
 )
 from app.data_products_datasets.schema import (
     DataProductDatasetAssociation,
