@@ -62,7 +62,7 @@ freezegun = "^1.5.5"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.38.0"
+poethepoet = "^0.39.0"
 
 [tool.poe.tasks]
 lint = "ruff check --fix"
