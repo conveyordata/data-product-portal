@@ -1,5 +1,4 @@
 import copy
-import re
 from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
@@ -81,39 +80,8 @@ class DatasetService:
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
 
-    @staticmethod
-    def _build_prefix_tsquery(query: str) -> str | None:
-        """
-        Build a prefix tsquery string like 'foo:* & bar:*' from free text.
-
-        Rules derived from tests:
-        - Split on non-word characters AND underscores to treat '_' as a boundary.
-        - Filter out tokens shorter than 2 characters.
-        - Lowercase tokens.
-        - Append ':*' to every token for prefix matching.
-        - Prepend '*' only for certain cases:
-          * tokens that contain digits (e.g., 'dataset123' -> '*dataset123:*')
-          * tokens of length exactly 2 (e.g., 'cd' -> '*cd:*')
-          * when the original query contains '-' or '_' anywhere, prepend '*' to all tokens
-
-        Returns None if no valid tokens remain after filtering.
-        """
-        if not query:
-            return None
-        lowered = query.lower()
-        # Treat underscores as boundaries as well
-        raw_tokens = re.split(r"[\W_]+", lowered)
-        tokens = [t for t in raw_tokens if len(t) >= 2]
-        if not tokens:
-            return None
-
-        has_boundary_chars = ("-" in lowered) or ("_" in lowered)
-
-        def needs_leading_star(t: str) -> bool:
-            return has_boundary_chars or (len(t) == 2) or any(ch.isdigit() for ch in t)
-
-        parts = [f"{'*' if needs_leading_star(t) else ''}{t}:*" for t in tokens]
-        return " & ".join(parts)
+    # Keep search simple and consistent with upstream behavior:
+    # use PostgreSQL websearch_to_tsquery and rank with ts_rank_cd.
 
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
@@ -161,55 +129,21 @@ class DatasetService:
         self, query: str, limit: int, user: UserModel
     ) -> Sequence[SearchDatasets]:
         load_options = get_dataset_load_options()
-        web_ts = func.websearch_to_tsquery("english", query)
-        prefix_query = self._build_prefix_tsquery(query)
-        # Prepare infix (substring) fallback for cases like 'inica' -> 'Clinical'
-        # Tokenization mirrors _build_prefix_tsquery behavior
-        lowered = query.lower() if query else ""
-        raw_tokens = re.split(r"[\W_]+", lowered) if lowered else []
-        tokens = [t for t in raw_tokens if len(t) >= 2]
-        # Use the highest rank from websearch_to_tsquery and prefix to_tsquery
-        if prefix_query:
-            prefix_ts = func.to_tsquery("english", prefix_query)
-            web_rank_expr = func.ts_rank_cd(
-                DatasetModel.search_vector,
-                web_ts,
-                32,  # normalize between 0-1
-            )
-            prefix_rank_expr = func.ts_rank_cd(
-                DatasetModel.search_vector,
-                prefix_ts,
-                32,
-            )
-            rank_expr = func.greatest(web_rank_expr, prefix_rank_expr).label("rank")
-            where_clause = DatasetModel.search_vector.op("@@")(
-                web_ts
-            ) | DatasetModel.search_vector.op("@@")(prefix_ts)
-            # Fallback infix matching: require all tokens to appear (substring) in name or description
-            # Apply whenever we have non-trivial tokens to support infix search like 'inica' -> 'Clinical'
-            if tokens:
-                from sqlalchemy import and_, or_
-
-                like_terms = [
-                    or_(
-                        DatasetModel.name.ilike(f"%{t}%"),
-                        DatasetModel.description.ilike(f"%{t}%"),
-                    )
-                    for t in tokens
-                ]
-                where_clause = where_clause | and_(*like_terms)
-        else:
-            rank_expr = func.ts_rank_cd(
-                DatasetModel.search_vector,
-                web_ts,
-                32,  # normalize between 0-1
-            ).label("rank")
-            where_clause = DatasetModel.search_vector.op("@@")(web_ts)
-
         stmt = (
-            select(DatasetModel, rank_expr)
+            select(
+                DatasetModel,
+                func.ts_rank_cd(
+                    DatasetModel.search_vector,
+                    func.websearch_to_tsquery("english", query),
+                    32,  # normalize results between 0-1
+                ).label("rank"),
+            )
             .options(*load_options)
-            .where(where_clause)
+            .where(
+                DatasetModel.search_vector.op("@@")(
+                    func.websearch_to_tsquery("english", query)
+                )
+            )
             .order_by(desc("rank"))
         )
         results = self.db.execute(stmt).unique().all()

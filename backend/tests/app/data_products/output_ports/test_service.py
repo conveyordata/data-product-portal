@@ -63,27 +63,35 @@ class TestDatasetsService:
     def test_create_search_vector_dataset(self):
         settings.SEARCH_INDEXING_DISABLED = False
         ds = DatasetFactory()
+
         updated_rows = DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         assert updated_rows == 1
 
     def test_create_search_vector_indexing_disabled(self):
         settings.SEARCH_INDEXING_DISABLED = True
         ds = DatasetFactory()
+
         updated_rows = DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         assert updated_rows == 0
 
     def test_create_search_vector_all_datasets(self):
         settings.SEARCH_INDEXING_DISABLED = False
         DatasetFactory()
         DatasetFactory()
+
         updated_rows = DatasetService(test_session).recalculate_search_vector_datasets()
+
         assert updated_rows == 2
 
     def test_create_search_vector_all_datasets_indexing_disabled(self):
         settings.SEARCH_INDEXING_DISABLED = True
         DatasetFactory()
         DatasetFactory()
+
         updated_rows = DatasetService(test_session).recalculate_search_vector_datasets()
+
         assert updated_rows == 0
 
     def test_search_dataset_matching_description(self):
@@ -93,7 +101,9 @@ class TestDatasetsService:
             name="dataset name", description="Clinical dataset patient information"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         results = DatasetService(test_session).search_datasets("patient", 10, user)
+
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
@@ -106,7 +116,9 @@ class TestDatasetsService:
             name="Clinical dataset patient information", description="description"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         results = DatasetService(test_session).search_datasets("patient", 10, user)
+
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
@@ -117,7 +129,9 @@ class TestDatasetsService:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(name="Clinical dataset", description="clinical studies")
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         results = DatasetService(test_session).search_datasets("clinical", 10, user)
+
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
@@ -188,7 +202,9 @@ class TestDatasetsService:
             data_product_id=do.owner.id, id=do.id, dataset_id=ds.id, actor=user
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         results = DatasetService(test_session).search_datasets("patient", 10, user)
+
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
@@ -206,7 +222,9 @@ class TestDatasetsService:
             data_product_id=do.owner.id, id=do.id, dataset_id=ds.id, actor=user
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         results = DatasetService(test_session).search_datasets("patient", 10, user)
+
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
@@ -217,7 +235,9 @@ class TestDatasetsService:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(description="Clinical dataset for patient information")
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
         results = DatasetService(test_session).search_datasets("CRM details", 10, user)
+
         assert len(results) == 0
 
     def create_datasets_with_data_output(
@@ -247,52 +267,5 @@ class TestDatasetsService:
             populate_existing=True,
         )
 
-    def test_build_prefix_tsquery_basic(self):
-        """Test basic query with two words."""
-        result = DatasetService._build_prefix_tsquery("Hello world")
-        assert result == "hello:* & world:*"
-
-    def test_build_prefix_tsquery_with_special_characters(self):
-        """Test query with special characters."""
-        result = DatasetService._build_prefix_tsquery("Hello, world!")
-        assert result == "hello:* & world:*"
-
-    def test_build_prefix_tsquery_filters_short_tokens(self):
-        """Test that single character tokens are filtered out."""
-        result = DatasetService._build_prefix_tsquery("a b cd")
-        assert result == "*cd:*"
-
-    def test_build_prefix_tsquery_all_short_tokens(self):
-        """Test that None is returned when all tokens are too short."""
-        result = DatasetService._build_prefix_tsquery("a b c")
-        assert result is None
-
-    def test_build_prefix_tsquery_empty_string(self):
-        """Test that None is returned for empty string."""
-        result = DatasetService._build_prefix_tsquery("")
-        assert result is None
-
-    def test_build_prefix_tsquery_none_input(self):
-        """Test that None is returned for None input."""
-        result = DatasetService._build_prefix_tsquery(None)
-        assert result is None
-
-    def test_build_prefix_tsquery_whitespace_only(self):
-        """Test that None is returned for whitespace only."""
-        result = DatasetService._build_prefix_tsquery("   ")
-        assert result is None
-
-    def test_build_prefix_tsquery_multiple_words_with_numbers(self):
-        """Test query with words and numbers."""
-        result = DatasetService._build_prefix_tsquery("dataset123 test456")
-        assert result == "*dataset123:* & *test456:*"
-
-    def test_build_prefix_tsquery_case_insensitive(self):
-        """Test that query is converted to lowercase."""
-        result = DatasetService._build_prefix_tsquery("Hello WORLD Test")
-        assert result == "hello:* & world:* & test:*"
-
-    def test_build_prefix_tsquery_hyphens_and_underscores(self):
-        """Test that hyphens and underscores are treated as word boundaries."""
-        result = DatasetService._build_prefix_tsquery("test-data_set")
-        assert result == "*test:* & *data:* & *set:*"
+    # Keep only upstream tests; remove helper-specific tests to
+    # keep the diff focused on the functional bug fix.
