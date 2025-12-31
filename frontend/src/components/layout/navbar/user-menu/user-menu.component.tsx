@@ -9,9 +9,9 @@ import { AdminButton } from '@/components/buttons/admin-button.tsx';
 import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import { Notifications } from '@/components/notifications/notifications';
 import { AppConfig } from '@/config/app-config.ts';
+import { useRevokeAdminMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useIsAdminQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRevokeAdminMutation } from '@/store/features/role-assignments/global-roles-api-slice';
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 import styles from './user-menu.module.scss';
 
@@ -44,7 +44,7 @@ export function UserMenu() {
 
             if (diff <= 0) {
                 if (user) {
-                    await revokeAdmin({ user_id: user.id }).unwrap();
+                    await revokeAdmin().unwrap();
                 }
                 window.location.reload(); // Refetch to update admin status
                 return;

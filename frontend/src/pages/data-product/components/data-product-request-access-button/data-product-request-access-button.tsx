@@ -4,12 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
+import { useRequestDataProductRoleAssignmentMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useRequestDataProductRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import type { UserContract } from '@/types/users';
-
 import styles from './data-product-request-access-button.module.scss';
 
 type Props = {

@@ -13,29 +13,29 @@ from app.shared.schema import ORMModel
 from app.users.schema import User
 
 
-@deprecated("Use RequestRoleAssignment or CreateRoleAssignment instead")
+@deprecated("Use RequestRoleAssignment or CreateOutputPortRoleAssignment instead")
 class CreateRoleAssignmentOld(BaseModel):
     user_id: UUID
     role_id: UUID
 
 
-class CreateRoleAssignment(BaseModel):
+class CreateOutputPortRoleAssignment(BaseModel):
     user_id: UUID
     role_id: UUID
     output_port_id: UUID
 
 
-class RequestRoleAssignment(BaseModel):
+class RequestOutputPortRoleAssignment(BaseModel):
     user_id: UUID
     role_id: UUID
     output_port_id: UUID
 
 
-class DecideRoleAssignment(BaseModel):
+class DecideOutputPortRoleAssignment(BaseModel):
     decision: DecisionStatus
 
 
-class ModifyRoleAssignment(BaseModel):
+class ModifyOutputPortRoleAssignment(BaseModel):
     role_id: UUID
 
 
@@ -55,7 +55,7 @@ class RoleAssignmentResponseOld(ORMModel):
         orm_model = DatasetRoleAssignment
 
 
-class RoleAssignmentResponse(ORMModel):
+class OutputPortRoleAssignmentResponse(ORMModel):
     id: UUID
     output_port: OutputPort
     user: User
@@ -68,7 +68,7 @@ class RoleAssignmentResponse(ORMModel):
 
 
 class ListRoleAssignmentsResponse(ORMModel):
-    role_assignments: Sequence[RoleAssignmentResponse]
+    role_assignments: Sequence[OutputPortRoleAssignmentResponse]
 
 
 @deprecated("Use RoleAssignment instead")
@@ -80,7 +80,7 @@ class RoleAssignmentOld(RoleAssignmentResponseOld):
     decided_by_id: Optional[UUID]
 
 
-class RoleAssignment(RoleAssignmentResponse):
+class RoleAssignment(OutputPortRoleAssignmentResponse):
     output_port_id: UUID
     user_id: UUID
     role_id: Optional[UUID]
@@ -92,3 +92,8 @@ class UpdateRoleAssignment(BaseModel):
     id: UUID
     role_id: Optional[UUID] = None
     decision: Optional[DecisionStatus] = None
+
+
+class DeleteOutputPortRoleAssignmentResponse(ORMModel):
+    id: UUID
+    output_port_id: UUID

@@ -3,15 +3,16 @@ import type { TFunction } from 'i18next';
 
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form.tsx';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
+import type { OutputPortRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DecisionStatus } from '@/types/roles';
-import { type DatasetRoleAssignmentContract, Prototype, type RoleContract } from '@/types/roles/role.contract.ts';
+import { Prototype, type RoleContract } from '@/types/roles/role.contract.ts';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    datasetUsers: DatasetRoleAssignmentContract[];
+    datasetUsers: OutputPortRoleAssignmentResponse[];
     onRemoveUserAccess: (userId: string) => void;
     onAcceptAccessRequest: (assignmentId: string) => void;
     onRejectAccessRequest: (assignmentId: string) => void;
@@ -35,9 +36,9 @@ export const getDatasetTeamColumns = ({
     canApprove,
     canEdit,
     canRemove,
-}: Props): TableColumnsType<DatasetRoleAssignmentContract> => {
-    const sorter = new Sorter<DatasetRoleAssignmentContract>();
-    const numberOfOwners = datasetUsers.filter((assignment) => assignment.role.prototype === Prototype.OWNER).length;
+}: Props): TableColumnsType<OutputPortRoleAssignmentResponse> => {
+    const sorter = new Sorter<OutputPortRoleAssignmentResponse>();
+    const numberOfOwners = datasetUsers.filter((assignment) => assignment.role?.prototype === Prototype.OWNER).length;
     const lockOwners = numberOfOwners <= 1;
 
     return [
@@ -62,7 +63,7 @@ export const getDatasetTeamColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { id, decision }: DatasetRoleAssignmentContract) => {
+            render: (role: RoleContract, { id, decision }: OutputPortRoleAssignmentResponse) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 const disabled = role.prototype === Prototype.OWNER && lockOwners;
 
@@ -76,8 +77,8 @@ export const getDatasetTeamColumns = ({
                 );
             },
             width: '25%',
-            ...new FilterSettings(datasetUsers, (assignment) => assignment.role.name),
-            sorter: sorter.stringSorter((assignment) => assignment.role.name),
+            ...new FilterSettings(datasetUsers, (assignment) => assignment.role?.name ?? ''),
+            sorter: sorter.stringSorter((assignment) => assignment.role?.name),
         },
         {
             title: t('Status'),
@@ -98,7 +99,7 @@ export const getDatasetTeamColumns = ({
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { user, id, decision }: DatasetRoleAssignmentContract) => (
+            render: (_, { user, id, decision }: OutputPortRoleAssignmentResponse) => (
                 <Space>
                     {decision === DecisionStatus.Pending ? (
                         <Space>

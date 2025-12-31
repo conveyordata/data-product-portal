@@ -15,13 +15,13 @@ from sqlalchemy.orm import Session
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.authorization.role_assignments.global_.router import (
-    create_global_assignment,
-    decide_global_assignment,
-    delete_global_assignment,
+    create_global_role_assignment,
+    decide_global_role_assignment,
+    delete_global_role_assignment,
 )
 from app.authorization.role_assignments.global_.schema import (
-    CreateRoleAssignment,
-    DecideRoleAssignment,
+    CreateGlobalRoleAssignment,
+    DecideGlobalRoleAssignment,
 )
 from app.authorization.roles import ADMIN_UUID
 from app.users.model import User
@@ -51,17 +51,17 @@ def upgrade() -> None:
 
         if not existing_assignments:
             # Assign the role to the user
-            assignment = create_global_assignment(
-                request=CreateRoleAssignment(
+            assignment = create_global_role_assignment(
+                request=CreateGlobalRoleAssignment(
                     user_id=api_bot.id,
                     role_id=ADMIN_UUID,
                 ),
                 db=session,
                 user=api_bot,
             )
-            decide_global_assignment(
+            decide_global_role_assignment(
                 id=assignment.id,
-                request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+                request=DecideGlobalRoleAssignment(decision=DecisionStatus.APPROVED),
                 db=session,
                 user=api_bot,
             )
@@ -87,6 +87,6 @@ def downgrade() -> None:
 
         for assignment in existing_assignments:
             # Delete the role assignment
-            delete_global_assignment(assignment.id, db=session, user=api_bot)
+            delete_global_role_assignment(assignment.id, db=session, user=api_bot)
 
         session.commit()
