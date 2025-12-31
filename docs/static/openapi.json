@@ -17,7 +17,7 @@
         ],
         "summary": "Check Access",
         "description": "Allows the requesting user to check whether an access check will fail or succeed.\nUseful to conditionally disable parts of the UI that are known to be inaccessible.",
-        "operationId": "check_access",
+        "operationId": "check_access_api_authz_access__action__get",
         "deprecated": true,
         "parameters": [
           {
@@ -99,7 +99,7 @@
           "Authorization"
         ],
         "summary": "Is Admin",
-        "operationId": "is_admin",
+        "operationId": "is_admin_api_authz_admin_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -279,7 +279,7 @@
           "Search Output ports"
         ],
         "summary": "Search Data Sets",
-        "operationId": "search_data_sets",
+        "operationId": "search_data_sets_api_datasets_search_get",
         "deprecated": true,
         "parameters": [
           {
@@ -339,7 +339,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Dataset Query Stats",
-        "operationId": "get_dataset_query_stats",
+        "operationId": "get_dataset_query_stats_api_datasets__id__query_stats_get",
         "parameters": [
           {
             "name": "id",
@@ -400,7 +400,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Update Dataset Query Stats",
-        "operationId": "update_dataset_query_stats",
+        "operationId": "update_dataset_query_stats_api_datasets__id__query_stats_patch",
         "deprecated": true,
         "parameters": [
           {
@@ -450,7 +450,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Delete Dataset Query Stat",
-        "operationId": "delete_dataset_query_stat",
+        "operationId": "delete_dataset_query_stat_api_datasets__id__query_stats_delete",
         "deprecated": true,
         "parameters": [
           {
@@ -693,7 +693,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Dataset Curated Queries",
-        "operationId": "get_dataset_curated_queries",
+        "operationId": "get_dataset_curated_queries_api_datasets__id__usage_curated_queries_get",
         "deprecated": true,
         "parameters": [
           {
@@ -735,7 +735,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Replace Dataset Curated Queries",
-        "operationId": "replace_dataset_curated_queries",
+        "operationId": "replace_dataset_curated_queries_api_datasets__id__usage_curated_queries_put",
         "deprecated": true,
         "parameters": [
           {
@@ -923,7 +923,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Dataset Namespace Suggestion",
-        "operationId": "get_dataset_namespace_suggestion",
+        "operationId": "get_dataset_namespace_suggestion_api_datasets_namespace_suggestion_get",
         "deprecated": true,
         "parameters": [
           {
@@ -966,7 +966,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Validate Dataset Namespace",
-        "operationId": "validate_dataset_namespace",
+        "operationId": "validate_dataset_namespace_api_datasets_validate_namespace_get",
         "deprecated": true,
         "parameters": [
           {
@@ -1009,7 +1009,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Dataset Namespace Length Limits",
-        "operationId": "get_dataset_namespace_length_limits",
+        "operationId": "get_dataset_namespace_length_limits_api_datasets_namespace_length_limits_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1031,7 +1031,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get User Datasets Old",
-        "operationId": "get_user_datasets_old",
+        "operationId": "get_user_datasets_old_api_datasets_user__user_id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -1079,7 +1079,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get User Datasets",
-        "operationId": "get_user_datasets",
+        "operationId": "get_user_datasets_api_datasets_user_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1105,7 +1105,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Datasets",
-        "operationId": "get_datasets",
+        "operationId": "get_datasets_api_datasets_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1129,7 +1129,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Create Dataset Old",
-        "operationId": "create_dataset_old",
+        "operationId": "create_dataset_old_api_datasets_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1288,7 +1288,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Dataset",
-        "operationId": "get_dataset",
+        "operationId": "get_dataset_api_datasets__id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -1330,7 +1330,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Remove Dataset Old",
-        "operationId": "remove_dataset_old",
+        "operationId": "remove_dataset_old_api_datasets__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -1380,7 +1380,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Update Dataset",
-        "operationId": "update_dataset",
+        "operationId": "update_dataset_api_datasets__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -1627,7 +1627,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Event History Old",
-        "operationId": "get_event_history_old",
+        "operationId": "get_event_history_old_api_datasets__id__history_get",
         "deprecated": true,
         "parameters": [
           {
@@ -1728,7 +1728,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Update Dataset About",
-        "operationId": "update_dataset_about",
+        "operationId": "update_dataset_about_api_datasets__id__about_put",
         "deprecated": true,
         "parameters": [
           {
@@ -1861,7 +1861,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Update Dataset Status",
-        "operationId": "update_dataset_status",
+        "operationId": "update_dataset_status_api_datasets__id__status_put",
         "deprecated": true,
         "parameters": [
           {
@@ -1994,7 +1994,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Update Dataset Usage",
-        "operationId": "update_dataset_usage",
+        "operationId": "update_dataset_usage_api_datasets__id__usage_put",
         "deprecated": true,
         "parameters": [
           {
@@ -2046,7 +2046,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Get Graph Data Old",
-        "operationId": "get_graph_data_old",
+        "operationId": "get_graph_data_old_api_datasets__id__graph_get",
         "deprecated": true,
         "parameters": [
           {
@@ -2099,8 +2099,8 @@
         "tags": [
           "Data Products - Output ports"
         ],
-        "summary": "Get Graph Data",
-        "operationId": "get_graph_data",
+        "summary": "Get Output Port Graph Data",
+        "operationId": "get_output_port_graph_data",
         "parameters": [
           {
             "name": "data_product_id",
@@ -2163,7 +2163,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Set Value For Dataset",
-        "operationId": "set_value_for_dataset",
+        "operationId": "set_value_for_dataset_api_datasets__id__settings__setting_id__post",
         "deprecated": true,
         "parameters": [
           {
@@ -2294,7 +2294,7 @@
           "Data products"
         ],
         "summary": "Get Data Product Namespace Suggestion",
-        "operationId": "get_data_product_namespace_suggestion",
+        "operationId": "get_data_product_namespace_suggestion_api_data_products_namespace_suggestion_get",
         "deprecated": true,
         "parameters": [
           {
@@ -2337,7 +2337,7 @@
           "Data products"
         ],
         "summary": "Validate Data Product Namespace",
-        "operationId": "validate_data_product_namespace",
+        "operationId": "validate_data_product_namespace_api_data_products_validate_namespace_get",
         "deprecated": true,
         "parameters": [
           {
@@ -2380,7 +2380,7 @@
           "Data products"
         ],
         "summary": "Get Data Product Namespace Length Limits",
-        "operationId": "get_data_product_namespace_length_limits",
+        "operationId": "get_data_product_namespace_length_limits_api_data_products_namespace_length_limits_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -2402,7 +2402,7 @@
           "Data products"
         ],
         "summary": "Create Data Product",
-        "operationId": "create_data_product",
+        "operationId": "create_data_product_api_data_products_post",
         "deprecated": true,
         "requestBody": {
           "required": true,
@@ -2455,7 +2455,7 @@
           "Data products"
         ],
         "summary": "Get Data Products Old",
-        "operationId": "get_data_products_old",
+        "operationId": "get_data_products_old_api_data_products_get",
         "deprecated": true,
         "parameters": [
           {
@@ -2510,7 +2510,7 @@
           "Data products"
         ],
         "summary": "Remove Data Product",
-        "operationId": "remove_data_product",
+        "operationId": "remove_data_product_api_data_products__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -2560,7 +2560,7 @@
           "Data products"
         ],
         "summary": "Update Data Product",
-        "operationId": "update_data_product",
+        "operationId": "update_data_product_api_data_products__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -2622,7 +2622,7 @@
           "Data products"
         ],
         "summary": "Get Data Product Old",
-        "operationId": "get_data_product_old",
+        "operationId": "get_data_product_old_api_data_products__id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -2666,7 +2666,7 @@
           "Data products"
         ],
         "summary": "Update Data Product About",
-        "operationId": "update_data_product_about",
+        "operationId": "update_data_product_about_api_data_products__id__about_put",
         "deprecated": true,
         "parameters": [
           {
@@ -2728,7 +2728,7 @@
           "Data products"
         ],
         "summary": "Update Data Product Status",
-        "operationId": "update_data_product_status",
+        "operationId": "update_data_product_status_api_data_products__id__status_put",
         "deprecated": true,
         "parameters": [
           {
@@ -2790,7 +2790,7 @@
           "Data products"
         ],
         "summary": "Update Data Product Usage",
-        "operationId": "update_data_product_usage",
+        "operationId": "update_data_product_usage_api_data_products__id__usage_put",
         "deprecated": true,
         "parameters": [
           {
@@ -2841,8 +2841,8 @@
         "tags": [
           "Data products"
         ],
-        "summary": "Get Graph Data",
-        "operationId": "get_graph_data",
+        "summary": "Get Data Product Graph Data",
+        "operationId": "get_data_product_graph_data_api_data_products__id__graph_get",
         "deprecated": true,
         "parameters": [
           {
@@ -2896,7 +2896,7 @@
           "Data products"
         ],
         "summary": "Set Value For Data Product",
-        "operationId": "set_value_for_data_product",
+        "operationId": "set_value_for_data_product_api_data_products__id__settings__setting_id__post",
         "deprecated": true,
         "parameters": [
           {
@@ -3492,8 +3492,8 @@
         "tags": [
           "Data products"
         ],
-        "summary": "Get Graph Data",
-        "operationId": "get_graph_data",
+        "summary": "Get Data Product Graph Data",
+        "operationId": "get_data_product_graph_data",
         "parameters": [
           {
             "name": "id",
@@ -3606,7 +3606,7 @@
           "Data products"
         ],
         "summary": "Link Dataset To Data Product",
-        "operationId": "link_dataset_to_data_product",
+        "operationId": "link_dataset_to_data_product_api_data_products__id__dataset__dataset_id__post",
         "deprecated": true,
         "parameters": [
           {
@@ -3683,7 +3683,7 @@
           "Data products"
         ],
         "summary": "Unlink Dataset From Data Product",
-        "operationId": "unlink_dataset_from_data_product",
+        "operationId": "unlink_dataset_from_data_product_api_data_products__id__dataset__dataset_id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -3755,7 +3755,7 @@
           "Data products"
         ],
         "summary": "Link Datasets To Data Product",
-        "operationId": "link_datasets_to_data_product",
+        "operationId": "link_datasets_to_data_product_api_data_products__id__link_datasets_post",
         "deprecated": true,
         "parameters": [
           {
@@ -3902,7 +3902,7 @@
           "Data products"
         ],
         "summary": "Get Event History Old",
-        "operationId": "get_event_history_old",
+        "operationId": "get_event_history_old_api_data_products__id__history_get",
         "deprecated": true,
         "parameters": [
           {
@@ -3950,7 +3950,7 @@
           "Data products"
         ],
         "summary": "Get Event History",
-        "operationId": "get_event_history",
+        "operationId": "get_event_history_api__id__history_get",
         "parameters": [
           {
             "name": "id",
@@ -3993,7 +3993,7 @@
           "Data products"
         ],
         "summary": "Create Data Output",
-        "operationId": "create_data_output",
+        "operationId": "create_data_output_api_data_products__id__data_output_post",
         "deprecated": true,
         "parameters": [
           {
@@ -4106,7 +4106,7 @@
           "Data products"
         ],
         "summary": "Get Signin Url Old",
-        "operationId": "get_signin_url_old",
+        "operationId": "get_signin_url_old_api_data_products__id__signin_url_get",
         "deprecated": true,
         "parameters": [
           {
@@ -4212,7 +4212,7 @@
           "Data products"
         ],
         "summary": "Get Conveyor Ide Url Old",
-        "operationId": "get_conveyor_ide_url_old",
+        "operationId": "get_conveyor_ide_url_old_api_data_products__id__conveyor_ide_url_get",
         "deprecated": true,
         "parameters": [
           {
@@ -4300,7 +4300,7 @@
           "Data products"
         ],
         "summary": "Get Databricks Workspace Url Old",
-        "operationId": "get_databricks_workspace_url_old",
+        "operationId": "get_databricks_workspace_url_old_api_data_products__id__databricks_workspace_url_get",
         "deprecated": true,
         "parameters": [
           {
@@ -4406,7 +4406,7 @@
           "Data products"
         ],
         "summary": "Get Snowflake Url Old",
-        "operationId": "get_snowflake_url_old",
+        "operationId": "get_snowflake_url_old_api_data_products__id__snowflake_url_get",
         "deprecated": true,
         "parameters": [
           {
@@ -4512,7 +4512,7 @@
           "Data products"
         ],
         "summary": "Get Data Outputs Old",
-        "operationId": "get_data_outputs_old",
+        "operationId": "get_data_outputs_old_api_data_products__id__data_outputs_get",
         "deprecated": true,
         "parameters": [
           {
@@ -4604,7 +4604,7 @@
         ],
         "summary": "Get User Data Products",
         "description": "**DEPRECATED:** Please use get_data_products with a user filter instead",
-        "operationId": "get_user_data_products",
+        "operationId": "get_user_data_products_api_data_products_user__user_id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -4739,7 +4739,7 @@
         ],
         "summary": "Get Role",
         "description": "**DEPRECATED:** Please use get_signin_url instead",
-        "operationId": "get_role",
+        "operationId": "get_role_api_data_products__id__role_get",
         "deprecated": true,
         "parameters": [
           {
@@ -4864,7 +4864,7 @@
           "Data products"
         ],
         "summary": "Validate Data Output Namespace",
-        "operationId": "validate_data_output_namespace",
+        "operationId": "validate_data_output_namespace_api_data_products__id__data_output_validate_namespace_get",
         "deprecated": true,
         "parameters": [
           {
@@ -4917,7 +4917,7 @@
           "Configuration - Data product types"
         ],
         "summary": "Get Data Product Type",
-        "operationId": "get_data_product_type",
+        "operationId": "get_data_product_type_api_data_product_types__id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -4959,7 +4959,7 @@
           "Configuration - Data product types"
         ],
         "summary": "Update Data Product Type",
-        "operationId": "update_data_product_type",
+        "operationId": "update_data_product_type_api_data_product_types__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -5011,7 +5011,7 @@
           "Configuration - Data product types"
         ],
         "summary": "Remove Data Product Type",
-        "operationId": "remove_data_product_type",
+        "operationId": "remove_data_product_type_api_data_product_types__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -5053,7 +5053,7 @@
           "Configuration - Data product types"
         ],
         "summary": "Get Data Products Types Old",
-        "operationId": "get_data_products_types_old",
+        "operationId": "get_data_products_types_old_api_data_product_types_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5077,7 +5077,7 @@
           "Configuration - Data product types"
         ],
         "summary": "Create Data Product Type",
-        "operationId": "create_data_product_type",
+        "operationId": "create_data_product_type_api_data_product_types_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -5132,7 +5132,7 @@
           "Configuration - Data product types"
         ],
         "summary": "Migrate Data Product Type",
-        "operationId": "migrate_data_product_type",
+        "operationId": "migrate_data_product_type_api_data_product_types_migrate__from_id___to_id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -5441,7 +5441,7 @@
           "Configuration - Data product lifecycles"
         ],
         "summary": "Get Data Products Lifecycles Old",
-        "operationId": "get_data_products_lifecycles_old",
+        "operationId": "get_data_products_lifecycles_old_api_data_product_lifecycles_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5465,7 +5465,7 @@
           "Configuration - Data product lifecycles"
         ],
         "summary": "Create Data Product Lifecycle",
-        "operationId": "create_data_product_lifecycle",
+        "operationId": "create_data_product_lifecycle_api_data_product_lifecycles_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -5520,7 +5520,7 @@
           "Configuration - Data product lifecycles"
         ],
         "summary": "Update Data Product Lifecycle",
-        "operationId": "update_data_product_lifecycle",
+        "operationId": "update_data_product_lifecycle_api_data_product_lifecycles__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -5585,7 +5585,7 @@
           "Configuration - Data product lifecycles"
         ],
         "summary": "Delete Data Product Lifecycle",
-        "operationId": "delete_data_product_lifecycle",
+        "operationId": "delete_data_product_lifecycle_api_data_product_lifecycles__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -5805,7 +5805,7 @@
           "Configuration - Data product settings"
         ],
         "summary": "Get Data Products Settings Old",
-        "operationId": "get_data_products_settings_old",
+        "operationId": "get_data_products_settings_old_api_data_product_settings_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5829,7 +5829,7 @@
           "Configuration - Data product settings"
         ],
         "summary": "Create Data Product Setting",
-        "operationId": "create_data_product_setting",
+        "operationId": "create_data_product_setting_api_data_product_settings_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -5871,7 +5871,7 @@
           "Configuration - Data product settings"
         ],
         "summary": "Get Data Product Settings Namespace Suggestion",
-        "operationId": "get_data_product_settings_namespace_suggestion",
+        "operationId": "get_data_product_settings_namespace_suggestion_api_data_product_settings_namespace_suggestion_get",
         "deprecated": true,
         "parameters": [
           {
@@ -5914,7 +5914,7 @@
           "Configuration - Data product settings"
         ],
         "summary": "Validate Data Product Settings Namespace",
-        "operationId": "validate_data_product_settings_namespace",
+        "operationId": "validate_data_product_settings_namespace_api_data_product_settings_validate_namespace_get",
         "deprecated": true,
         "parameters": [
           {
@@ -5965,7 +5965,7 @@
           "Configuration - Data product settings"
         ],
         "summary": "Get Data Product Settings Namespace Length Limits",
-        "operationId": "get_data_product_settings_namespace_length_limits",
+        "operationId": "get_data_product_settings_namespace_length_limits_api_data_product_settings_namespace_length_limits_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5987,7 +5987,7 @@
           "Configuration - Data product settings"
         ],
         "summary": "Update Data Product Setting",
-        "operationId": "update_data_product_setting",
+        "operationId": "update_data_product_setting_api_data_product_settings__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -6039,7 +6039,7 @@
           "Configuration - Data product settings"
         ],
         "summary": "Delete Data Product Setting",
-        "operationId": "delete_data_product_setting",
+        "operationId": "delete_data_product_setting_api_data_product_settings__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -6349,7 +6349,7 @@
           "data_product_dataset_links"
         ],
         "summary": "Approve Data Product Link",
-        "operationId": "approve_data_product_link",
+        "operationId": "approve_data_product_link_api_data_product_dataset_links_approve__id__post",
         "parameters": [
           {
             "name": "id",
@@ -6390,7 +6390,7 @@
           "data_product_dataset_links"
         ],
         "summary": "Deny Data Product Link",
-        "operationId": "deny_data_product_link",
+        "operationId": "deny_data_product_link_api_data_product_dataset_links_deny__id__post",
         "parameters": [
           {
             "name": "id",
@@ -6431,7 +6431,7 @@
           "data_product_dataset_links"
         ],
         "summary": "Remove Data Product Link",
-        "operationId": "remove_data_product_link",
+        "operationId": "remove_data_product_link_api_data_product_dataset_links_remove__id__post",
         "parameters": [
           {
             "name": "id",
@@ -6472,7 +6472,7 @@
           "data_product_dataset_links"
         ],
         "summary": "Get User Pending Actions",
-        "operationId": "get_user_pending_actions",
+        "operationId": "get_user_pending_actions_api_data_product_dataset_links_actions_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6497,7 +6497,7 @@
           "data_output_dataset_links"
         ],
         "summary": "Approve Data Output Link",
-        "operationId": "approve_data_output_link",
+        "operationId": "approve_data_output_link_api_data_output_dataset_links_approve__id__post",
         "parameters": [
           {
             "name": "id",
@@ -6538,7 +6538,7 @@
           "data_output_dataset_links"
         ],
         "summary": "Deny Data Output Link",
-        "operationId": "deny_data_output_link",
+        "operationId": "deny_data_output_link_api_data_output_dataset_links_deny__id__post",
         "parameters": [
           {
             "name": "id",
@@ -6579,7 +6579,7 @@
           "data_output_dataset_links"
         ],
         "summary": "Remove Data Output Link",
-        "operationId": "remove_data_output_link",
+        "operationId": "remove_data_output_link_api_data_output_dataset_links_remove__id__post",
         "parameters": [
           {
             "name": "id",
@@ -6620,7 +6620,7 @@
           "data_output_dataset_links"
         ],
         "summary": "Get User Pending Actions",
-        "operationId": "get_user_pending_actions",
+        "operationId": "get_user_pending_actions_api_data_output_dataset_links_actions_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6645,7 +6645,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Get Data Outputs",
-        "operationId": "get_data_outputs",
+        "operationId": "get_data_outputs_api_data_outputs_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6671,7 +6671,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Get Dataset Namespace Suggestion",
-        "operationId": "get_dataset_namespace_suggestion",
+        "operationId": "get_dataset_namespace_suggestion_api_data_outputs_namespace_suggestion_get",
         "deprecated": true,
         "parameters": [
           {
@@ -6714,7 +6714,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Get Dataset Namespace Length Limits",
-        "operationId": "get_dataset_namespace_length_limits",
+        "operationId": "get_dataset_namespace_length_limits_api_data_outputs_namespace_length_limits_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6736,7 +6736,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Get Data Output Result String",
-        "operationId": "get_data_output_result_string",
+        "operationId": "get_data_output_result_string_api_data_outputs_result_string_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -6779,7 +6779,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Get Data Output",
-        "operationId": "get_data_output",
+        "operationId": "get_data_output_api_data_outputs__id__get",
         "parameters": [
           {
             "name": "id",
@@ -6820,7 +6820,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Remove Data Output",
-        "operationId": "remove_data_output",
+        "operationId": "remove_data_output_api_data_outputs__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -6870,7 +6870,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Update Data Output",
-        "operationId": "update_data_output",
+        "operationId": "update_data_output_api_data_outputs__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -7118,7 +7118,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Get Data Output Event History",
-        "operationId": "get_data_output_event_history",
+        "operationId": "get_data_output_event_history_api_data_outputs__id__history_get",
         "deprecated": true,
         "parameters": [
           {
@@ -7219,7 +7219,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Update Data Output Status",
-        "operationId": "update_data_output_status",
+        "operationId": "update_data_output_status_api_data_outputs__id__status_put",
         "parameters": [
           {
             "name": "id",
@@ -7351,7 +7351,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Link Dataset To Data Output",
-        "operationId": "link_dataset_to_data_output",
+        "operationId": "link_dataset_to_data_output_api_data_outputs__id__dataset__dataset_id__post",
         "deprecated": true,
         "parameters": [
           {
@@ -7413,7 +7413,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Unlink Dataset From Data Output",
-        "operationId": "unlink_dataset_from_data_output",
+        "operationId": "unlink_dataset_from_data_output_api_data_outputs__id__dataset__dataset_id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -7619,7 +7619,7 @@
           "Data Products - Technical assets"
         ],
         "summary": "Get Graph Data Old",
-        "operationId": "get_graph_data_old",
+        "operationId": "get_graph_data_old_api_data_outputs__id__graph_get",
         "deprecated": true,
         "parameters": [
           {
@@ -7672,8 +7672,8 @@
         "tags": [
           "Data Products - Technical assets"
         ],
-        "summary": "Get Graph Data",
-        "operationId": "get_graph_data",
+        "summary": "Get Technical Asset Graph Data",
+        "operationId": "get_technical_asset_graph_data",
         "parameters": [
           {
             "name": "data_product_id",
@@ -7736,7 +7736,7 @@
           "Configuration - Domains"
         ],
         "summary": "Get Domains Old",
-        "operationId": "get_domains_old",
+        "operationId": "get_domains_old_api_domains_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7760,7 +7760,7 @@
           "Configuration - Domains"
         ],
         "summary": "Create Domain",
-        "operationId": "create_domain",
+        "operationId": "create_domain_api_domains_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -7805,7 +7805,7 @@
           "Configuration - Domains"
         ],
         "summary": "Update Domain",
-        "operationId": "update_domain",
+        "operationId": "update_domain_api_domains__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -7857,7 +7857,7 @@
           "Configuration - Domains"
         ],
         "summary": "Remove Domain",
-        "operationId": "remove_domain",
+        "operationId": "remove_domain_api_domains__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -7897,7 +7897,7 @@
           "Configuration - Domains"
         ],
         "summary": "Get Domain Old",
-        "operationId": "get_domain_old",
+        "operationId": "get_domain_old_api_domains__id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -7941,7 +7941,7 @@
           "Configuration - Domains"
         ],
         "summary": "Migrate Domain",
-        "operationId": "migrate_domain",
+        "operationId": "migrate_domain_api_domains_migrate__from_id___to_id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -8240,7 +8240,7 @@
           "Configuration - Environments"
         ],
         "summary": "Get Environment",
-        "operationId": "get_environment",
+        "operationId": "get_environment_api_envs__id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -8284,7 +8284,7 @@
           "Configuration - Environments"
         ],
         "summary": "Get Environment Configs By Id",
-        "operationId": "get_environment_configs_by_id",
+        "operationId": "get_environment_configs_by_id_api_envs_configs__config_id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -8328,7 +8328,7 @@
           "Configuration - Environments"
         ],
         "summary": "Get Environment Platform Service Config",
-        "operationId": "get_environment_platform_service_config",
+        "operationId": "get_environment_platform_service_config_api_envs__id__platforms__platform_id__services__service_id__config_get",
         "deprecated": true,
         "parameters": [
           {
@@ -8392,7 +8392,7 @@
           "Configuration - Environments"
         ],
         "summary": "Get Environment Platform Config",
-        "operationId": "get_environment_platform_config",
+        "operationId": "get_environment_platform_config_api_envs__id__platforms__platform_id__config_get",
         "deprecated": true,
         "parameters": [
           {
@@ -8648,7 +8648,7 @@
           "Configuration - Environments"
         ],
         "summary": "Get Environments Old",
-        "operationId": "get_environments_old",
+        "operationId": "get_environments_old_api_envs_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -8695,7 +8695,7 @@
           "Configuration - Environments"
         ],
         "summary": "Get Environment Configs Old",
-        "operationId": "get_environment_configs_old",
+        "operationId": "get_environment_configs_old_api_envs__id__configs_get",
         "deprecated": true,
         "parameters": [
           {
@@ -8786,7 +8786,7 @@
           "Configuration - Environments"
         ],
         "summary": "Get Environment Platform Service Config For All Envs Old",
-        "operationId": "get_environment_platform_service_config_for_all_envs_old",
+        "operationId": "get_environment_platform_service_config_for_all_envs_old_api_envs_platforms__platform_id__services__service_id__config_get",
         "deprecated": true,
         "parameters": [
           {
@@ -8898,7 +8898,7 @@
         ],
         "summary": "Get Platform Service Config",
         "description": "Get Platform Service config",
-        "operationId": "get_platform_service_config",
+        "operationId": "get_platform_service_config_api_platforms__id__services__service_id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -8962,7 +8962,7 @@
           "Configuration - Platforms"
         ],
         "summary": "Get Single Platform Service Configuration",
-        "operationId": "get_single_platform_service_configuration",
+        "operationId": "get_single_platform_service_configuration_api_platforms_configs__config_id__get",
         "deprecated": true,
         "parameters": [
           {
@@ -9110,7 +9110,7 @@
     "/api/platforms/configs": {
       "get": {
         "summary": "Get All Platform Service Configurations Old",
-        "operationId": "get_all_platform_service_configurations_old",
+        "operationId": "get_all_platform_service_configurations_old_api_platforms_configs_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9151,7 +9151,7 @@
     "/api/platforms": {
       "get": {
         "summary": "Get All Platforms Old",
-        "operationId": "get_all_platforms_old",
+        "operationId": "get_all_platforms_old_api_platforms_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9192,7 +9192,7 @@
     "/api/platforms/{id}/services": {
       "get": {
         "summary": "Get Platform Services Old",
-        "operationId": "get_platform_services_old",
+        "operationId": "get_platform_services_old_api_platforms__id__services_get",
         "deprecated": true,
         "parameters": [
           {
@@ -9280,7 +9280,7 @@
           "Configuration - Tags"
         ],
         "summary": "Get Tags Old",
-        "operationId": "get_tags_old",
+        "operationId": "get_tags_old_api_tags_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9304,7 +9304,7 @@
           "Configuration - Tags"
         ],
         "summary": "Create Tag",
-        "operationId": "create_tag",
+        "operationId": "create_tag_api_tags_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -9346,7 +9346,7 @@
           "Configuration - Tags"
         ],
         "summary": "Update Tag",
-        "operationId": "update_tag",
+        "operationId": "update_tag_api_tags__id__put",
         "deprecated": true,
         "parameters": [
           {
@@ -9398,7 +9398,7 @@
           "Configuration - Tags"
         ],
         "summary": "Remove Tag",
-        "operationId": "remove_tag",
+        "operationId": "remove_tag_api_tags__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -9592,7 +9592,7 @@
           "Users"
         ],
         "summary": "Remove User",
-        "operationId": "remove_user",
+        "operationId": "remove_user_api_users__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -9644,7 +9644,7 @@
           "Users"
         ],
         "summary": "Get Users Old",
-        "operationId": "get_users_old",
+        "operationId": "get_users_old_api_users_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9668,7 +9668,7 @@
           "Users"
         ],
         "summary": "Create User",
-        "operationId": "create_user",
+        "operationId": "create_user_api_users_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -9713,7 +9713,7 @@
           "Users"
         ],
         "summary": "Set Can Become Admin",
-        "operationId": "set_can_become_admin",
+        "operationId": "set_can_become_admin_api_users_set_can_become_admin_put",
         "requestBody": {
           "content": {
             "application/json": {
@@ -9906,7 +9906,7 @@
           "Users"
         ],
         "summary": "Mark Tour As Seen Old",
-        "operationId": "mark_tour_as_seen_old",
+        "operationId": "mark_tour_as_seen_old_api_users_seen_tour_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9945,7 +9945,7 @@
           "Authorization - Roles"
         ],
         "summary": "Create Role",
-        "operationId": "create_role",
+        "operationId": "create_role_api_roles_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -9988,7 +9988,7 @@
           "Authorization - Roles"
         ],
         "summary": "Update Role Old",
-        "operationId": "update_role_old",
+        "operationId": "update_role_old_api_roles_patch",
         "requestBody": {
           "content": {
             "application/json": {
@@ -10032,7 +10032,7 @@
           "Authorization - Roles"
         ],
         "summary": "Remove Role",
-        "operationId": "remove_role",
+        "operationId": "remove_role_api_roles__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -10233,7 +10233,7 @@
           "Authorization - Roles"
         ],
         "summary": "Get Roles Old",
-        "operationId": "get_roles_old",
+        "operationId": "get_roles_old_api_roles__scope__get",
         "deprecated": true,
         "parameters": [
           {
@@ -10320,7 +10320,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Become Admin",
-        "operationId": "become_admin",
+        "operationId": "become_admin_api_role_assignments_global_become_admin_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -10360,7 +10360,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Revoke Admin",
-        "operationId": "revoke_admin",
+        "operationId": "revoke_admin_api_role_assignments_global_revoke_admin_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -10379,8 +10379,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Create Assignment",
-        "operationId": "create_assignment",
+        "summary": "Create Global Assignment",
+        "operationId": "create_global_assignment_api_role_assignments_global_post",
         "deprecated": true,
         "requestBody": {
           "required": true,
@@ -10420,7 +10420,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "List Assignments Old",
-        "operationId": "list_assignments_old",
+        "operationId": "list_assignments_old_api_role_assignments_global_get",
         "deprecated": true,
         "parameters": [
           {
@@ -10491,8 +10491,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Delete Assignment",
-        "operationId": "delete_assignment",
+        "summary": "Delete Global Assignment",
+        "operationId": "delete_global_assignment_api_role_assignments_global__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -10591,8 +10591,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Create Assignment",
-        "operationId": "create_assignment",
+        "summary": "Create Global Assignment",
+        "operationId": "create_global_assignment",
         "requestBody": {
           "required": true,
           "content": {
@@ -10630,8 +10630,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "List Assignments",
-        "operationId": "list_assignments",
+        "summary": "List Global Assignments",
+        "operationId": "list_global_assignments",
         "parameters": [
           {
             "name": "user_id",
@@ -10697,8 +10697,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Delete Assignment",
-        "operationId": "delete_assignment",
+        "summary": "Delete Global Assignment",
+        "operationId": "delete_global_assignment",
         "parameters": [
           {
             "name": "id",
@@ -10739,7 +10739,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Decide Assignment Old",
-        "operationId": "decide_assignment_old",
+        "operationId": "decide_assignment_old_api_role_assignments_global__id__decide_patch",
         "deprecated": true,
         "parameters": [
           {
@@ -10792,8 +10792,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Decide Assignment",
-        "operationId": "decide_assignment",
+        "summary": "Decide Global Assignment",
+        "operationId": "decide_global_assignment",
         "parameters": [
           {
             "name": "id",
@@ -10846,7 +10846,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Modify Assigned Role Old",
-        "operationId": "modify_assigned_role_old",
+        "operationId": "modify_assigned_role_old_api_role_assignments_global__id__role_patch",
         "deprecated": true,
         "parameters": [
           {
@@ -10899,8 +10899,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Modify Assigned Role",
-        "operationId": "modify_assigned_role",
+        "summary": "Modify Global Assigned Role",
+        "operationId": "modify_global_assigned_role",
         "parameters": [
           {
             "name": "id",
@@ -10952,8 +10952,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Delete Assignment",
-        "operationId": "delete_assignment",
+        "summary": "Delete Data Product Assignment",
+        "operationId": "delete_data_product_assignment_api_role_assignments_data_product__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -10993,7 +10993,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Create Assignment Old",
-        "operationId": "create_assignment_old",
+        "operationId": "create_assignment_old_api_role_assignments_data_product__id__post",
         "deprecated": true,
         "parameters": [
           {
@@ -11045,7 +11045,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Modify Assigned Role Old",
-        "operationId": "modify_assigned_role_old",
+        "operationId": "modify_assigned_role_old_api_role_assignments_data_product__id__patch",
         "deprecated": true,
         "parameters": [
           {
@@ -11098,8 +11098,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Delete Assignment",
-        "operationId": "delete_assignment",
+        "summary": "Delete Data Product Assignment",
+        "operationId": "delete_data_product_assignment",
         "parameters": [
           {
             "name": "id",
@@ -11137,8 +11137,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Modify Assigned Role",
-        "operationId": "modify_assigned_role",
+        "summary": "Modify Data Product Assigned Role",
+        "operationId": "modify_data_product_assigned_role",
         "parameters": [
           {
             "name": "id",
@@ -11191,7 +11191,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "List Assignments Old",
-        "operationId": "list_assignments_old",
+        "operationId": "list_assignments_old_api_role_assignments_data_product_get",
         "deprecated": true,
         "parameters": [
           {
@@ -11295,8 +11295,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "List Assignments",
-        "operationId": "list_assignments",
+        "summary": "List Data Product Assignments",
+        "operationId": "list_data_product_assignments",
         "parameters": [
           {
             "name": "data_product_id",
@@ -11393,8 +11393,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Create Assignment",
-        "operationId": "create_assignment",
+        "summary": "Create Data Product Assignment",
+        "operationId": "create_data_product_assignment",
         "requestBody": {
           "required": true,
           "content": {
@@ -11435,7 +11435,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Request Assignment Old",
-        "operationId": "request_assignment_old",
+        "operationId": "request_assignment_old_api_role_assignments_data_product_request__id__post",
         "deprecated": true,
         "parameters": [
           {
@@ -11488,8 +11488,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Request Assignment",
-        "operationId": "request_assignment",
+        "summary": "Request Data Product Assignment",
+        "operationId": "request_data_product_assignment",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11530,7 +11530,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Decide Assignment Old",
-        "operationId": "decide_assignment_old",
+        "operationId": "decide_assignment_old_api_role_assignments_data_product__id__decide_patch",
         "deprecated": true,
         "parameters": [
           {
@@ -11583,8 +11583,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Decide Assignment",
-        "operationId": "decide_assignment",
+        "summary": "Decide Data Product Assignment",
+        "operationId": "decide_data_product_assignment",
         "parameters": [
           {
             "name": "id",
@@ -11636,8 +11636,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Delete Assignment",
-        "operationId": "delete_assignment",
+        "summary": "Delete Output Port Assignment",
+        "operationId": "delete_output_port_assignment_api_role_assignments_dataset__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -11677,7 +11677,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Create Assignment Old",
-        "operationId": "create_assignment_old",
+        "operationId": "create_assignment_old_api_role_assignments_dataset__id__post",
         "parameters": [
           {
             "name": "id",
@@ -11728,7 +11728,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Modify Assigned Role Old",
-        "operationId": "modify_assigned_role_old",
+        "operationId": "modify_assigned_role_old_api_role_assignments_dataset__id__patch",
         "deprecated": true,
         "parameters": [
           {
@@ -11781,8 +11781,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Delete Assignment",
-        "operationId": "delete_assignment",
+        "summary": "Delete Output Port Assignment",
+        "operationId": "delete_output_port_assignment",
         "parameters": [
           {
             "name": "id",
@@ -11820,8 +11820,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Modify Assigned Role",
-        "operationId": "modify_assigned_role",
+        "summary": "Modify Output Port Assigned Role",
+        "operationId": "modify_output_port_assigned_role",
         "parameters": [
           {
             "name": "id",
@@ -11874,7 +11874,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "List Assignments Old",
-        "operationId": "list_assignments_old",
+        "operationId": "list_assignments_old_api_role_assignments_dataset_get",
         "deprecated": true,
         "parameters": [
           {
@@ -11978,8 +11978,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "List Assignments",
-        "operationId": "list_assignments",
+        "summary": "List Output Port Assignments",
+        "operationId": "list_output_port_assignments",
         "parameters": [
           {
             "name": "output_port_id",
@@ -12076,8 +12076,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Create Assignment",
-        "operationId": "create_assignment",
+        "summary": "Create Output Port Assignment",
+        "operationId": "create_output_port_assignment",
         "requestBody": {
           "required": true,
           "content": {
@@ -12118,7 +12118,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Request Assignment Old",
-        "operationId": "request_assignment_old",
+        "operationId": "request_assignment_old_api_role_assignments_dataset_request__id__post",
         "deprecated": true,
         "parameters": [
           {
@@ -12171,8 +12171,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Request Assignment",
-        "operationId": "request_assignment",
+        "summary": "Request Output Port Assignment",
+        "operationId": "request_output_port_assignment",
         "requestBody": {
           "content": {
             "application/json": {
@@ -12213,7 +12213,7 @@
           "Authorization - Role assignments"
         ],
         "summary": "Decide Assignment Old",
-        "operationId": "decide_assignment_old",
+        "operationId": "decide_assignment_old_api_role_assignments_dataset__id__decide_patch",
         "deprecated": true,
         "parameters": [
           {
@@ -12266,8 +12266,8 @@
         "tags": [
           "Authorization - Role assignments"
         ],
-        "summary": "Decide Assignment",
-        "operationId": "decide_assignment",
+        "summary": "Decide Output Port Assignment",
+        "operationId": "decide_output_port_assignment",
         "parameters": [
           {
             "name": "id",
@@ -12320,7 +12320,7 @@
           "Configuration - Theme settings"
         ],
         "summary": "Get Settings",
-        "operationId": "get_settings",
+        "operationId": "get_settings_api_theme_settings_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12340,7 +12340,7 @@
           "Configuration - Theme settings"
         ],
         "summary": "Update Settings",
-        "operationId": "update_settings",
+        "operationId": "update_settings_api_theme_settings_put",
         "requestBody": {
           "content": {
             "application/json": {
@@ -12438,7 +12438,7 @@
           "graph"
         ],
         "summary": "Get Graph Data",
-        "operationId": "get_graph_data",
+        "operationId": "get_graph_data_api_graph_get",
         "parameters": [
           {
             "name": "domain_nodes_enabled",
@@ -12501,7 +12501,7 @@
           "notifications"
         ],
         "summary": "Get User Notifications",
-        "operationId": "get_user_notifications",
+        "operationId": "get_user_notifications_api_notifications_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12526,7 +12526,7 @@
           "notifications"
         ],
         "summary": "Remove All User Notifications",
-        "operationId": "remove_all_user_notifications",
+        "operationId": "remove_all_user_notifications_api_notifications_all_delete",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12545,7 +12545,7 @@
           "notifications"
         ],
         "summary": "Remove User Notification",
-        "operationId": "remove_user_notification",
+        "operationId": "remove_user_notification_api_notifications__id__delete",
         "parameters": [
           {
             "name": "id",
@@ -12586,7 +12586,7 @@
           "pending_actions"
         ],
         "summary": "Get User Pending Actions",
-        "operationId": "get_user_pending_actions",
+        "operationId": "get_user_pending_actions_api_pending_actions_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12726,7 +12726,7 @@
           "device flow"
         ],
         "summary": "Get Device Token",
-        "operationId": "get_device_token",
+        "operationId": "get_device_token_api_auth_device_device_token_post",
         "security": [
           {
             "HTTPBasic": []
@@ -12782,7 +12782,7 @@
           "device flow"
         ],
         "summary": "Get Jwt Token",
-        "operationId": "get_jwt_token",
+        "operationId": "get_jwt_token_api_auth_device_jwt_token_post",
         "security": [
           {
             "HTTPBasic": []
@@ -12845,7 +12845,7 @@
           "auth"
         ],
         "summary": "Authorize",
-        "operationId": "authorize",
+        "operationId": "authorize_api_auth_user_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12866,7 +12866,7 @@
           "auth"
         ],
         "summary": "Get Aws Credentials",
-        "operationId": "get_aws_credentials",
+        "operationId": "get_aws_credentials_api_auth_aws_credentials_get",
         "parameters": [
           {
             "name": "data_product_name",
@@ -12918,7 +12918,7 @@
         ],
         "summary": "Oauth Metadata",
         "description": "OAuth 2.1 Authorization Server Metadata.",
-        "operationId": "oauth_metadata",
+        "operationId": "oauth_metadata__well_known_oauth_authorization_server_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12938,7 +12938,7 @@
         ],
         "summary": "Openid Config",
         "description": "OpenID Connect Discovery endpoint.",
-        "operationId": "openid_config",
+        "operationId": "openid_config__well_known_openid_configuration_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12958,7 +12958,7 @@
         ],
         "summary": "Oauth Protected Resource",
         "description": "OAuth 2.1 Protected Resource Metadata.",
-        "operationId": "oauth_protected_resource",
+        "operationId": "oauth_protected_resource__well_known_oauth_protected_resource_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12978,7 +12978,7 @@
         ],
         "summary": "Register",
         "description": "OAuth 2.1 Dynamic Client Registration endpoint.",
-        "operationId": "register",
+        "operationId": "register_api_register_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12994,7 +12994,7 @@
     "/": {
       "get": {
         "summary": "Root",
-        "operationId": "root",
+        "operationId": "root__get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -13010,7 +13010,7 @@
     "/api/version": {
       "get": {
         "summary": "Get Version",
-        "operationId": "get_version",
+        "operationId": "get_version_api_version_get",
         "responses": {
           "200": {
             "description": "Successful Response",

@@ -47,7 +47,7 @@ router = APIRouter()
         )
     ],
 )
-def delete_assignment(
+def delete_output_port_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
@@ -114,7 +114,7 @@ def convert_to_role_assignment(
 
 
 @router.get(route)
-def list_assignments(
+def list_output_port_assignments(
     output_port_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
@@ -182,7 +182,7 @@ def request_assignment_old(
         )
     ],
 )
-def request_assignment(
+def request_output_port_assignment(
     request: RequestRoleAssignment,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
@@ -265,7 +265,7 @@ def create_assignment_old(
         )
     ],
 )
-def create_assignment(
+def create_output_port_assignment(
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
@@ -356,7 +356,7 @@ def decide_assignment_old(
         )
     ],
 )
-def decide_assignment(
+def decide_output_port_assignment(
     id: UUID,
     request: DecideRoleAssignment,
     db: Session = Depends(get_db_session),
@@ -424,7 +424,7 @@ def modify_assigned_role_old(
         )
     ],
 )
-def modify_assigned_role(
+def modify_output_port_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,
     db: Session = Depends(get_db_session),

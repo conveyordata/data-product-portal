@@ -503,11 +503,13 @@ def get_graph_data_old(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
     do = ensure_data_output_exists(id, db)
-    return get_graph_data(data_product_id=do.owner_id, id=id, db=db, level=level)
+    return get_technical_asset_graph_data(
+        data_product_id=do.owner_id, id=id, db=db, level=level
+    )
 
 
 @router.get(f"{route}/{{id}}/graph")
-def get_graph_data(
+def get_technical_asset_graph_data(
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session),

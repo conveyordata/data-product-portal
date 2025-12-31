@@ -562,11 +562,11 @@ def get_graph_data_old(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
     ds = ensure_dataset_exists(id, db)
-    return get_graph_data(ds.data_product_id, id, db, level)
+    return get_output_port_graph_data(ds.data_product_id, id, db, level)
 
 
 @router.get(f"{route}/{{id}}/graph")
-def get_graph_data(
+def get_output_port_graph_data(
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session),

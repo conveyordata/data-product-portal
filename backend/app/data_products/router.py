@@ -400,7 +400,7 @@ def _send_dataset_link_emails(
 
 
 @router.get("/{id}/graph")
-def get_graph_data(
+def get_data_product_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
     return DataProductService(db).get_graph_data(id, level)
