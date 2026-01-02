@@ -77,6 +77,9 @@ class DatasetService:
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
 
+    # Keep search simple and consistent with upstream behavior:
+    # use PostgreSQL websearch_to_tsquery and rank with ts_rank_cd.
+
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
     ) -> DatasetGet:
@@ -129,7 +132,7 @@ class DatasetService:
                 func.ts_rank_cd(
                     DatasetModel.search_vector,
                     func.websearch_to_tsquery("english", query),
-                    32,  # 32 normalizes all results between 0-1
+                    32,  # normalize results between 0-1
                 ).label("rank"),
             )
             .options(*load_options)

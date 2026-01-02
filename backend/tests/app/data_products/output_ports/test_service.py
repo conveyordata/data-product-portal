@@ -137,6 +137,61 @@ class TestDatasetsService:
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.5833333)
 
+    def test_search_dataset_infix_matches(self):
+        settings.SEARCH_INDEXING_DISABLED = False
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(name="Clinical dataset", description="Some details")
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+        # Partial token 'inica' should match 'Clinical' via infix (substring) search
+        results = DatasetService(test_session).search_datasets("inica", 10, user)
+        assert len(results) == 1
+        assert results[0].id == ds.id
+
+    # Add test for multi-word matching and/or matching in both title and description
+    def test_search_dataset_multi_word_query_matches_multiple_words(self):
+        """Test that multi-word query 'clin data' matches 'Clinical dataset'."""
+        settings.SEARCH_INDEXING_DISABLED = False
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(
+            name="Clinical dataset",
+            description="Patient information and medical records",
+        )
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+        # 'clin data' should match 'Clinical dataset' (both words present)
+        results = DatasetService(test_session).search_datasets("clin data", 10, user)
+        assert len(results) == 1
+        assert results[0].id == ds.id
+        assert results[0].name == ds.name
+
+    def test_search_dataset_query_matches_in_both_title_and_description(self):
+        """Test that query matches content in both title/name and description."""
+        settings.SEARCH_INDEXING_DISABLED = False
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        # Dataset with 'patient' in name and 'clinical' in description
+        ds = DatasetFactory(
+            name="Patient data records",
+            description="Clinical information and medical history",
+        )
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+        # Search for 'patient' - should match (in name)
+        results_patient = DatasetService(test_session).search_datasets(
+            "patient", 10, user
+        )
+        assert len(results_patient) == 1
+        assert results_patient[0].id == ds.id
+        # Search for 'clinical' - should match (in description)
+        results_clinical = DatasetService(test_session).search_datasets(
+            "clinical", 10, user
+        )
+        assert len(results_clinical) == 1
+        assert results_clinical[0].id == ds.id
+        # Search for 'patient clinical' - should match (one in name, one in description)
+        results_both = DatasetService(test_session).search_datasets(
+            "patient clinical", 10, user
+        )
+        assert len(results_both) == 1
+        assert results_both[0].id == ds.id
+
     def test_search_dataset_matching_data_output_name(self):
         settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -211,3 +266,6 @@ class TestDatasetsService:
             options=[selectinload(Dataset.data_product_links)],
             populate_existing=True,
         )
+
+    # Keep only upstream tests; remove helper-specific tests to
+    # keep the diff focused on the functional bug fix.

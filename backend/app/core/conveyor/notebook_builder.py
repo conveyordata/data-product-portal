@@ -43,6 +43,7 @@ class NotebookBuilderConveyor:
         return result.json().get("access_token")
 
     def test_and_reauth(self) -> None:
+        # Follow upstream behavior: probe environments and re-auth if needed
         result = requests.get(
             f"{self.conveyor_api}/environments",
             headers={"Authorization": f"Bearer {self.token}"},
