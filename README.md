@@ -129,12 +129,12 @@ It contains more detailed information about concepts, how-to guides, installatio
 
 - In order to set up a local 'production-like' server with a connection to a database, run the command below in the root of this project.
   ```sh
-  docker compose --env-file .env.docker up
+  docker compose up
   ```
 
 - If you want to make sure recent changes in the repository are reflected, run the command below instead.
   ```sh
-  docker compose --env-file .env.docker up --build
+  docker compose up --build
   ```
 - Now visit http://localhost:8080 to check it out!
 
