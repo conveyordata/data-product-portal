@@ -979,14 +979,14 @@ standard-no-fastapi-cloud-cli = ["email-validator (>=2.0.0)", "fastapi-cli[stand
 
 [[package]]
 name = "fastmcp"
-version = "2.14.1"
+version = "2.14.2"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp-2.14.1-py3-none-any.whl", hash = "sha256:fb3e365cc1d52573ab89caeba9944dd4b056149097be169bce428e011f0a57e5"},
-    {file = "fastmcp-2.14.1.tar.gz", hash = "sha256:132725cbf77b68fa3c3d165eff0cfa47e40c1479457419e6a2cfda65bd84c8d6"},
+    {file = "fastmcp-2.14.2-py3-none-any.whl", hash = "sha256:e33cd622e1ebd5110af6a981804525b6cd41072e3c7d68268ed69ef3be651aca"},
+    {file = "fastmcp-2.14.2.tar.gz", hash = "sha256:bd23d1b808b6f446444f10114dac468b11bfb9153ed78628f5619763d0cf573e"},
 ]
 
 [package.dependencies]
@@ -995,12 +995,12 @@ cyclopts = ">=4.0.0"
 exceptiongroup = ">=1.2.2"
 httpx = ">=0.28.1"
 jsonschema-path = ">=0.3.4"
-mcp = ">=1.24.0"
+mcp = ">=1.24.0,<2.0"
 openapi-pydantic = ">=0.5.1"
 platformdirs = ">=4.0.0"
 py-key-value-aio = {version = ">=0.3.0,<0.4.0", extras = ["disk", "keyring", "memory"]}
 pydantic = {version = ">=2.11.7", extras = ["email"]}
-pydocket = ">=0.15.5"
+pydocket = ">=0.16.3"
 pyperclip = ">=1.9.0"
 python-dotenv = ">=1.1.0"
 rich = ">=13.9.4"
@@ -2309,14 +2309,14 @@ yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
 name = "pydocket"
-version = "0.15.6"
+version = "0.16.3"
 description = "A distributed background task system for Python functions"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pydocket-0.15.6-py3-none-any.whl", hash = "sha256:3192dfdb9ad772cc1481dc39194f474863f073266399795584dc7262e7510f94"},
-    {file = "pydocket-0.15.6.tar.gz", hash = "sha256:3cf7030941f175f073cf05fc6fdf0ceede0af640f786de7dd22556d08025799f"},
+    {file = "pydocket-0.16.3-py3-none-any.whl", hash = "sha256:e2b50925356e7cd535286255195458ac7bba15f25293356651b36d223db5dd7c"},
+    {file = "pydocket-0.16.3.tar.gz", hash = "sha256:78e9da576de09e9f3f410d2471ef1c679b7741ddd21b586c97a13872b69bd265"},
 ]
 
 [package.dependencies]
@@ -3410,4 +3410,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "560fe80bf3a15184d2703726148c7e37a09f81b79c116bf666d14a78629b1de2"
+content-hash = "02b1d73f02918fc1484d2a978939cd5b49814ecca3fe8559d3aa6f6fddc77bf3"
