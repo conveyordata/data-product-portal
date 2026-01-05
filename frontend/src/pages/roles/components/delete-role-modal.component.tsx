@@ -5,21 +5,21 @@ import { Link } from 'react-router';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice.ts';
-import { useGetDatasetRoleAssignmentsQuery } from '@/store/features/role-assignments/dataset-roles-api-slice.ts';
-import { useGetGlobalRoleAssignmentsQuery } from '@/store/features/role-assignments/global-roles-api-slice.ts';
+import {
+    type DataProduct,
+    type OutputPort,
+    useListDataProductRoleAssignmentsQuery,
+    useListGlobalRoleAssignmentsQuery,
+    useListOutputPortRoleAssignmentsQuery,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useDeleteRoleMutation } from '@/store/features/roles/roles-api-slice.ts';
-import type { DataProductContract } from '@/types/data-product';
-import type { DatasetContract } from '@/types/dataset';
 import { ApplicationPaths, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import { type RoleContract, Scope } from '@/types/roles';
 import styles from './delete-role-modal.module.scss';
 
 const { Text } = Typography;
 
-function uniqueOrderedWithCount<T extends DataProductContract | DatasetContract>(
-    array: T[] | undefined,
-): (T & { count: number })[] {
+function uniqueOrderedWithCount<T extends DataProduct | OutputPort>(array: T[] | undefined): (T & { count: number })[] {
     if (array === undefined) {
         return [];
     }
@@ -51,27 +51,27 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
     } = theme.useToken();
 
     const [deleteRole, { isLoading: deleteInProgress }] = useDeleteRoleMutation();
-    const { data: dataProductAssignments, isLoading: dataProductLoading } = useGetDataProductRoleAssignmentsQuery(
-        { role_id: role.id },
+    const { data: dataProductAssignments, isLoading: dataProductLoading } = useListDataProductRoleAssignmentsQuery(
+        { roleId: role.id },
         { skip: role.scope !== Scope.DATA_PRODUCT },
     );
-    const { data: datasetAssignments, isLoading: datasetLoading } = useGetDatasetRoleAssignmentsQuery(
-        { role_id: role.id },
+    const { data: datasetAssignments, isLoading: datasetLoading } = useListOutputPortRoleAssignmentsQuery(
+        { roleId: role.id },
         { skip: role.scope !== Scope.DATASET },
     );
-    const { data: globalAssignments, isLoading: globalLoading } = useGetGlobalRoleAssignmentsQuery(
-        { role_id: role.id },
+    const { data: globalAssignments, isLoading: globalLoading } = useListGlobalRoleAssignmentsQuery(
+        { roleId: role.id },
         { skip: role.scope !== Scope.GLOBAL },
     );
 
     const assignments = (() => {
         switch (role.scope) {
             case Scope.GLOBAL:
-                return globalAssignments;
+                return globalAssignments?.role_assignments;
             case Scope.DATA_PRODUCT:
-                return dataProductAssignments;
+                return dataProductAssignments?.role_assignments;
             case Scope.DATASET:
-                return datasetAssignments;
+                return datasetAssignments?.role_assignments;
         }
     })();
 
@@ -116,9 +116,9 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                         <List
                             bordered
                             dataSource={uniqueOrderedWithCount(
-                                dataProductAssignments?.map((assignment) => assignment.data_product),
+                                dataProductAssignments?.role_assignments?.map((assignment) => assignment.data_product),
                             )}
-                            renderItem={(item: DataProductContract & { count: number }) => (
+                            renderItem={(item: DataProduct & { count: number }) => (
                                 <List.Item>
                                     <Link to={createDataProductIdPath(item.id, DataProductTabKeys.Team)}>
                                         {item.name}
@@ -136,9 +136,9 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                         <List
                             bordered
                             dataSource={uniqueOrderedWithCount(
-                                datasetAssignments?.map((assignment) => assignment.dataset),
+                                datasetAssignments?.role_assignments?.map((assignment) => assignment.output_port),
                             )}
-                            renderItem={(item: DatasetContract & { count: number }) => (
+                            renderItem={(item: OutputPort & { count: number }) => (
                                 <List.Item>
                                     <Link to={createDatasetIdPath(item.id, DatasetTabKeys.Team)}>{item.name}</Link>
                                     <Badge count={item.count} color={badgeColor} />

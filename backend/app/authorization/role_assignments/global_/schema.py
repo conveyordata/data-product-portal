@@ -11,7 +11,7 @@ from app.shared.schema import ORMModel
 from app.users.schema import User
 
 
-class CreateRoleAssignment(BaseModel):
+class CreateGlobalRoleAssignment(BaseModel):
     user_id: UUID
     role_id: Union[UUID, Literal["admin"]]
 
@@ -20,11 +20,11 @@ class BecomeAdmin(BaseModel):
     expiry: str
 
 
-class DecideRoleAssignment(BaseModel):
+class DecideGlobalRoleAssignment(BaseModel):
     decision: DecisionStatus
 
 
-class ModifyRoleAssignment(BaseModel):
+class ModifyGlobalRoleAssignment(BaseModel):
     role_id: Union[UUID, Literal["admin"]]
 
 
@@ -33,7 +33,7 @@ class RoleAssignmentRequest(BaseModel):
     role_id: UUID
 
 
-class RoleAssignmentResponse(ORMModel):
+class GlobalRoleAssignmentResponse(ORMModel):
     id: UUID
     user: User
     role: Role
@@ -48,10 +48,10 @@ class RoleAssignmentResponse(ORMModel):
 
 
 class ListRoleAssignmentsResponse(ORMModel):
-    role_assignments: Sequence[RoleAssignmentResponse]
+    role_assignments: Sequence[GlobalRoleAssignmentResponse]
 
 
-class RoleAssignment(RoleAssignmentResponse):
+class RoleAssignment(GlobalRoleAssignmentResponse):
     user_id: UUID
     role_id: UUID
     requested_by_id: Optional[UUID]
@@ -62,3 +62,7 @@ class UpdateRoleAssignment(BaseModel):
     id: UUID
     role_id: Optional[UUID] = None
     decision: Optional[DecisionStatus] = None
+
+
+class DeleteGlobalRoleAssignmentResponse(ORMModel):
+    id: UUID

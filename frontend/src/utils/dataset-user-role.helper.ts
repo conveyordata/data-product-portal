@@ -1,19 +1,19 @@
-import { useGetDatasetRoleAssignmentsQuery } from '@/store/features/role-assignments/dataset-roles-api-slice';
+import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DecisionStatus } from '@/types/roles';
 import { Prototype } from '@/types/roles/role.contract';
 import type { UserContract } from '@/types/users';
 
 export function useGetDatasetOwners(datasetId: string | undefined): UserContract[] | undefined {
-    const { data: roleAssignments } = useGetDatasetRoleAssignmentsQuery(
+    const { data: roleAssignments } = useListOutputPortRoleAssignmentsQuery(
         {
-            dataset_id: datasetId,
+            outputPortId: datasetId,
             decision: DecisionStatus.Approved,
         },
         { skip: !datasetId },
     );
 
-    return roleAssignments
-        ?.filter((assignment) => assignment.role.prototype === Prototype.OWNER)
+    return roleAssignments?.role_assignments
+        ?.filter((assignment) => assignment.role?.prototype === Prototype.OWNER)
         .map((assignment) => assignment.user);
 }
 

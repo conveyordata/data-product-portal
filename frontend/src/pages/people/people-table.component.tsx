@@ -2,14 +2,15 @@ import { Table } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
+    type GlobalRoleAssignmentResponse,
     useCreateGlobalRoleAssignmentMutation,
     useDecideGlobalRoleAssignmentMutation,
     useDeleteGlobalRoleAssignmentMutation,
-    useUpdateGlobalRoleAssignmentMutation,
-} from '@/store/features/role-assignments/global-roles-api-slice.ts';
+    useModifyGlobalRoleAssignmentMutation,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
 import { useCanBecomeAdminMutation, useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -39,7 +40,7 @@ export function PeoplePage() {
 
     const filteredUsers = useMemo(() => filterUsers(users, searchTerm), [users, searchTerm]);
     const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
-    const [updateGlobalRoleAssignment] = useUpdateGlobalRoleAssignmentMutation();
+    const [updateGlobalRoleAssignment] = useModifyGlobalRoleAssignmentMutation();
     const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRoleAssignment] = useDeleteGlobalRoleAssignmentMutation();
     const [canBecomeAdmin] = useCanBecomeAdminMutation();
@@ -50,9 +51,7 @@ export function PeoplePage() {
                 return;
             }
             if (original !== null && !value) {
-                deleteGlobalRoleAssignment({
-                    role_assignment_id: original.id,
-                })
+                deleteGlobalRoleAssignment(original.id)
                     .unwrap()
                     .then(() => {
                         dispatchMessage({
@@ -66,8 +65,10 @@ export function PeoplePage() {
             }
             if (original !== null && value) {
                 updateGlobalRoleAssignment({
-                    role_assignment_id: original.id,
-                    role_id: value,
+                    id: original.id,
+                    modifyGlobalRoleAssignment: {
+                        role_id: value,
+                    },
                 })
                     .unwrap()
                     .then(() => {
@@ -86,10 +87,12 @@ export function PeoplePage() {
                     role_id: value,
                 })
                     .unwrap()
-                    .then((result: GlobalRoleAssignmentContract) => {
+                    .then((result: GlobalRoleAssignmentResponse) => {
                         decideGlobalRoleAssignment({
-                            role_assignment_id: result.id,
-                            decision_status: 'approved',
+                            id: result.id,
+                            decideGlobalRoleAssignment: {
+                                decision: 'approved',
+                            },
                         })
                             .unwrap()
                             .then(() => {

@@ -1,6 +1,9 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import {
+    useDecideDataProductRoleAssignmentMutation,
+    useDecideOutputPortRoleAssignmentMutation,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import {
     useApproveDataOutputLinkMutation,
     useRejectDataOutputLinkMutation,
@@ -10,8 +13,6 @@ import {
     useRejectDataProductLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useDecideDataProductRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
-import { useDecideDatasetRoleAssignmentMutation } from '@/store/features/role-assignments/dataset-roles-api-slice';
 import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DecisionStatus } from '@/types/roles';
@@ -27,7 +28,7 @@ export const usePendingActionHandlers = () => {
     const [decideDataProductRoleAssignment, { isLoading: isDecidingDataProductRoleAssignment }] =
         useDecideDataProductRoleAssignmentMutation();
     const [decideDatasetRoleAssignment, { isLoading: isDecidingDatasetRoleAssignment }] =
-        useDecideDatasetRoleAssignmentMutation();
+        useDecideOutputPortRoleAssignmentMutation();
 
     const handleAcceptDataProductDatasetLink = useCallback(
         async (request: DataProductDatasetLinkRequest) => {
@@ -105,9 +106,10 @@ export const usePendingActionHandlers = () => {
         async (request: DataProductRoleRequest) => {
             try {
                 await decideDataProductRoleAssignment({
-                    role_assignment_id: request.assignment_id,
-                    data_product_id: request.data_product_id,
-                    decision_status: DecisionStatus.Approved,
+                    id: request.assignment_id,
+                    decideDataProductRoleAssignment: {
+                        decision: DecisionStatus.Approved,
+                    },
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
@@ -121,9 +123,10 @@ export const usePendingActionHandlers = () => {
         async (request: DataProductRoleRequest) => {
             try {
                 await decideDataProductRoleAssignment({
-                    role_assignment_id: request.assignment_id,
-                    data_product_id: request.data_product_id,
-                    decision_status: DecisionStatus.Denied,
+                    id: request.assignment_id,
+                    decideDataProductRoleAssignment: {
+                        decision: DecisionStatus.Denied,
+                    },
                 }).unwrap();
                 dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
             } catch (_error) {
@@ -137,9 +140,10 @@ export const usePendingActionHandlers = () => {
         async (request: DatasetRoleRequest) => {
             try {
                 await decideDatasetRoleAssignment({
-                    role_assignment_id: request.assignment_id,
-                    dataset_id: request.dataset_id,
-                    decision_status: DecisionStatus.Approved,
+                    id: request.assignment_id,
+                    decideOutputPortRoleAssignment: {
+                        decision: DecisionStatus.Approved,
+                    },
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
@@ -153,9 +157,10 @@ export const usePendingActionHandlers = () => {
         async (request: DatasetRoleRequest) => {
             try {
                 await decideDatasetRoleAssignment({
-                    role_assignment_id: request.assignment_id,
-                    dataset_id: request.dataset_id,
-                    decision_status: DecisionStatus.Denied,
+                    id: request.assignment_id,
+                    decideOutputPortRoleAssignment: {
+                        decision: DecisionStatus.Denied,
+                    },
                 }).unwrap();
                 dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
             } catch (_error) {
