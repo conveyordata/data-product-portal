@@ -1,16 +1,14 @@
 # Data Products
 
-# Manual initialization
+# Running the demo
 
-- `poetry run dbt init NAME --skip-profile-setup`
-- Create `profiles.yml` within the folder
+Run the following command to prepare the demo
 
-# Running the dataproduct
+```bash
+make prepare-demo
+```
 
-- `poetry run dbt run --project-dir sales_crm_customers --profiles-dir sales_crm_customers`
-- `poetry run dbt run --project-dir sales_erp_orders --profiles-dir sales_erp_orders`
-- `poetry run dbt run --project-dir logistics_wms_shipments --profiles-dir logistics_wms_shipments`
-
-# Demo case
-
-- `poetry run dbt run --project-dir marketing_customer_360 --profiles-dir marketing_customer_360`
+To run the demo case:
+```bash
+poetry run dbt run --project-dir marketing_customer_360 --profiles-dir marketing_customer_360
+```
