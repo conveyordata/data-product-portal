@@ -1,8 +1,12 @@
 # Demo Scenario: E-Commerce Analytics
 
-This document outlines a demo scenario for the Data Product Portal. The goal is to showcase how the portal can help a company adopt data product thinking. We'll start with raw, operational data sources and use the portal to expose them as well-governed, discoverable data products. Finally, we'll create a new, consumer-aligned data product by combining existing ones.
+This document outlines a demo scenario for the Data Product Portal. The goal is to showcase how the portal can help a
+company adopt data product thinking. We'll start with raw, operational data sources and use the portal to expose them
+as well-governed, discoverable data products. Finally, we'll create a new, consumer-aligned data product by combining
+existing ones.
 
-The demo uses a simple e-commerce model that is easy to recognize. All source data resides in a PostgreSQL database in the `sources` schema. Each data product will be materialized in its own dedicated schema.
+The demo uses a simple e-commerce model that is easy to recognize. All source data resides in a PostgreSQL database in
+the `sources` schema. Each data product will be materialized in its own dedicated schema.
 
 ## Prerequisites
 
