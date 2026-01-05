@@ -1012,6 +1012,18 @@ anthropic = ["anthropic (>=0.40.0)"]
 openai = ["openai (>=1.102.0)"]
 
 [[package]]
+name = "filelock"
+version = "3.20.1"
+description = "A platform independent file lock."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "filelock-3.20.1-py3-none-any.whl", hash = "sha256:15d9e9a67306188a44baa72f569d2bfd803076269365fdea0934385da4dc361a"},
+    {file = "filelock-3.20.1.tar.gz", hash = "sha256:b8360948b351b80f420878d8516519a2204b07aefcdcfd24912a5d33127f188c"},
+]
+
+[[package]]
 name = "freezegun"
 version = "1.5.5"
 description = "Let your Python tests travel through time"
