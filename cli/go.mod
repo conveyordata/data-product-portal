@@ -9,7 +9,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
-	github.com/labstack/echo/v4 v4.14.0
+	github.com/labstack/echo/v4 v4.15.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/oapi-codegen/oapi-codegen/v2 v2.5.1
 	github.com/oapi-codegen/runtime v1.1.2
