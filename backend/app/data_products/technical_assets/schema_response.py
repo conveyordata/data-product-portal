@@ -10,7 +10,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.tags.schema import Tag
 from app.data_output_configuration.schema_union import DataOutputConfiguration
-from app.data_outputs_datasets.schema import (
+from app.data_products.output_port_technical_assets_link.schema import (
     DataOutputDatasetAssociation,
     TechnicalAssetOutputPortAssociation,
 )
@@ -124,10 +124,6 @@ class DataOutputsGet(DataOutputGet):
 
 class GetTechnicalAssetsResponse(ORMModel):
     technical_assets: Sequence[GetTechnicalAssetsResponseItem]
-
-
-class LinkTechnicalAssetsToOutputPortResponse(ORMModel):
-    link_id: UUID
 
 
 class UpdateTechnicalAssetResponse(ORMModel):

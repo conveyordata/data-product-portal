@@ -6494,10 +6494,11 @@
     "/api/data_output_dataset_links/approve/{id}": {
       "post": {
         "tags": [
-          "data_output_dataset_links"
+          "Data Products - Technical assets"
         ],
         "summary": "Approve Data Output Link",
         "operationId": "approve_data_output_link_api_data_output_dataset_links_approve__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6510,6 +6511,67 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/approve_link_request": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Approve Output Port Technical Asset Link",
+        "operationId": "approve_output_port_technical_asset_link",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6535,10 +6597,11 @@
     "/api/data_output_dataset_links/deny/{id}": {
       "post": {
         "tags": [
-          "data_output_dataset_links"
+          "Data Products - Technical assets"
         ],
         "summary": "Deny Data Output Link",
         "operationId": "deny_data_output_link_api_data_output_dataset_links_deny__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6573,13 +6636,76 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/deny_link_request": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Deny Output Port Technical Asset Link",
+        "operationId": "deny_output_port_technical_asset_link",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyLinkBetweenTechnicalAssetAndOutputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_output_dataset_links/remove/{id}": {
       "post": {
         "tags": [
-          "data_output_dataset_links"
+          "Data Products - Technical assets"
         ],
         "summary": "Remove Data Output Link",
+        "description": "**DEPRECATED:** Please use unlink_output_port_from_technical_asset instead",
         "operationId": "remove_data_output_link_api_data_output_dataset_links_remove__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6617,9 +6743,10 @@
     "/api/data_output_dataset_links/actions": {
       "get": {
         "tags": [
-          "data_output_dataset_links"
+          "Data Products - Technical assets"
         ],
         "summary": "Get User Pending Actions",
+        "description": "**DEPRECATED:** Please use get user actions globally instead",
         "operationId": "get_user_pending_actions_api_data_output_dataset_links_actions_get",
         "responses": {
           "200": {
@@ -6632,6 +6759,151 @@
                   },
                   "type": "array",
                   "title": "Response Get User Pending Actions Api Data Output Dataset Links Actions Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/add": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Link Output Port To Technical Asset",
+        "operationId": "link_output_port_to_technical_asset",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkTechnicalAssetToOutputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkTechnicalAssetsToOutputPortResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/remove": {
+      "delete": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Unlink Output Port From Technical Asset",
+        "operationId": "unlink_output_port_from_technical_asset",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnLinkTechnicalAssetToOutputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -7429,150 +7701,6 @@
           {
             "name": "dataset_id",
             "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Dataset Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "404": {
-            "description": "Data Product not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Data Product id not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/link_output_port": {
-      "post": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Link Output Port To Technical Asset",
-        "operationId": "link_output_port_to_technical_asset",
-        "parameters": [
-          {
-            "name": "data_product_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Data Product Id"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LinkTechnicalAssetToOutputPortRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LinkTechnicalAssetsToOutputPortResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Data Product not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Data Product id not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/unlink_output_port": {
-      "delete": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Unlink Output Port From Technical Asset",
-        "operationId": "unlink_output_port_from_technical_asset",
-        "parameters": [
-          {
-            "name": "data_product_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Data Product Id"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "dataset_id",
-            "in": "query",
             "required": true,
             "schema": {
               "type": "string",
@@ -13167,6 +13295,20 @@
         ],
         "title": "AccessResponse"
       },
+      "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest": {
+        "properties": {
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technical_asset_id"
+        ],
+        "title": "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest"
+      },
       "AuthorizationAction": {
         "type": "integer",
         "enum": [
@@ -13262,7 +13404,7 @@
             "$ref": "#/components/schemas/Dataset"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput"
+            "$ref": "#/components/schemas/app__data_products__output_port_technical_assets_link__schema_response__DataOutput"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -13855,7 +13997,7 @@
             "$ref": "#/components/schemas/Dataset"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput"
+            "$ref": "#/components/schemas/app__data_products__output_port_technical_assets_link__schema_response__DataOutput"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -16535,6 +16677,20 @@
         ],
         "title": "DeleteOutputPortRoleAssignmentResponse"
       },
+      "DenyLinkBetweenTechnicalAssetAndOutputPortRequest": {
+        "properties": {
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technical_asset_id"
+        ],
+        "title": "DenyLinkBetweenTechnicalAssetAndOutputPortRequest"
+      },
       "Domain": {
         "properties": {
           "id": {
@@ -18238,15 +18394,15 @@
       },
       "LinkTechnicalAssetToOutputPortRequest": {
         "properties": {
-          "output_port_id": {
+          "technical_asset_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Output Port Id"
+            "title": "Technical Asset Id"
           }
         },
         "type": "object",
         "required": [
-          "output_port_id"
+          "technical_asset_id"
         ],
         "title": "LinkTechnicalAssetToOutputPortRequest"
       },
@@ -20162,6 +20318,20 @@
         ],
         "title": "ThemeSettings"
       },
+      "UnLinkTechnicalAssetToOutputPortRequest": {
+        "properties": {
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technical_asset_id"
+        ],
+        "title": "UnLinkTechnicalAssetToOutputPortRequest"
+      },
       "UpdateDataProductLifeCycleResponse": {
         "properties": {
           "id": {
@@ -20925,7 +21095,7 @@
         ],
         "title": "RoleAssignment"
       },
-      "app__data_outputs_datasets__schema_response__DataOutput": {
+      "app__data_products__output_port_technical_assets_link__schema_response__DataOutput": {
         "properties": {
           "id": {
             "type": "string",

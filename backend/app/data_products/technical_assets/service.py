@@ -16,10 +16,10 @@ from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.model import (
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
 from app.data_products.output_ports.service import DatasetService

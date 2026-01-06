@@ -1,28 +1,34 @@
-from copy import deepcopy
 from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
-from app.authorization.role_assignments.output_port.service import RoleAssignmentService
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
-from app.data_products.technical_assets import email
+from app.data_products.output_port_technical_assets_link.router import (
+    link_output_port_to_technical_asset,
+    unlink_output_port_from_technical_asset,
+)
+from app.data_products.output_port_technical_assets_link.schema_request import (
+    LinkTechnicalAssetToOutputPortRequest,
+    UnLinkTechnicalAssetToOutputPortRequest,
+)
+from app.data_products.output_port_technical_assets_link.schema_response import (
+    LinkTechnicalAssetsToOutputPortResponse,
+)
 from app.data_products.technical_assets.model import ensure_data_output_exists
 from app.data_products.technical_assets.schema_request import (
     DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
-    LinkTechnicalAssetToOutputPortRequest,
 )
 from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
     GetTechnicalAssetsResponseItem,
-    LinkTechnicalAssetsToOutputPortResponse,
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.service import DataOutputService
@@ -354,70 +360,12 @@ def link_dataset_to_data_output(
     do = ensure_data_output_exists(id, db)
     return link_output_port_to_technical_asset(
         do.owner_id,
-        do.id,
-        LinkTechnicalAssetToOutputPortRequest(output_port_id=dataset_id),
+        dataset_id,
+        LinkTechnicalAssetToOutputPortRequest(technical_asset_id=do.id),
         background_tasks,
         db,
         authenticated_user,
     )
-
-
-@router.post(
-    f"{route}/{{id}}/link_output_port",
-    responses={
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                DataOutputResolver,
-            )
-        ),
-    ],
-)
-def link_output_port_to_technical_asset(
-    data_product_id: UUID,
-    id: UUID,
-    request: LinkTechnicalAssetToOutputPortRequest,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> LinkTechnicalAssetsToOutputPortResponse:
-    dataset_link = DataOutputService(db).link_dataset_to_data_output(
-        data_product_id, id, request.output_port_id, actor=authenticated_user
-    )
-
-    EventService(db).create_event(
-        CreateEvent(
-            name=EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED,
-            subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
-            target_id=request.output_port_id,
-            target_type=EventReferenceEntity.DATASET,
-            actor_id=authenticated_user.id,
-        ),
-    )
-    RefreshInfrastructureLambda().trigger()
-
-    approvers = RoleAssignmentService(db).users_with_authz_action(
-        dataset_link.dataset_id, Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST
-    )
-    if authenticated_user not in approvers:
-        background_tasks.add_task(
-            email.send_link_dataset_email(
-                dataset_link.dataset,
-                dataset_link.data_output,
-                requester=deepcopy(authenticated_user),
-                approvers=[deepcopy(approver) for approver in approvers],
-            )
-        )
-    return LinkTechnicalAssetsToOutputPortResponse(link_id=dataset_link.id)
 
 
 @router.delete(
@@ -448,54 +396,12 @@ def unlink_dataset_from_data_output(
 ) -> None:
     do = ensure_data_output_exists(id, db)
     return unlink_output_port_from_technical_asset(
-        do.owner_id, id, dataset_id, db, authenticated_user
+        data_product_id=do.owner_id,
+        output_port_id=dataset_id,
+        request=UnLinkTechnicalAssetToOutputPortRequest(technical_asset_id=id),
+        db=db,
+        authenticated_user=authenticated_user,
     )
-
-
-@router.delete(
-    f"{route}/{{id}}/unlink_output_port",
-    responses={
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
-                DataOutputResolver,
-            )
-        ),
-    ],
-)
-def unlink_output_port_from_technical_asset(
-    data_product_id: UUID,
-    id: UUID,
-    dataset_id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    data_output = DataOutputService(db).unlink_dataset_from_data_output(
-        data_product_id, id, dataset_id
-    )
-
-    event_id = EventService(db).create_event(
-        CreateEvent(
-            name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
-            subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
-            target_id=dataset_id,
-            target_type=EventReferenceEntity.DATASET,
-            actor_id=authenticated_user.id,
-        ),
-    )
-    NotificationService(db).create_data_product_notifications(
-        data_product_id=data_output.owner_id, event_id=event_id
-    )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.get(f"{old_route}/{{id}}/graph", deprecated=True)
