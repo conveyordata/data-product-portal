@@ -19,7 +19,7 @@ from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype, Scope
 from app.core.authz import Action
 from app.database.database import ensure_exists
-from app.pending_actions.schema import DataProductRoleAssignmentPendingAction
+from app.pending_actions.schema import DataProductRoleAssignmentPendingActionOld
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -144,7 +144,7 @@ class RoleAssignmentService:
 
     def get_pending_data_product_role_assignments(
         self, user: User
-    ) -> Sequence[DataProductRoleAssignmentPendingAction]:
+    ) -> Sequence[DataProductRoleAssignmentPendingActionOld]:
         data_product_ids = (
             select(DataProductRoleAssignment.data_product_id)
             .join(DataProductRoleAssignment.role)

@@ -141,7 +141,7 @@ class DataOutputDatasetService:
 
         authorizer = Authorization()
         return [
-            a
+            DataOutputDatasetPendingAction.model_validate(a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),

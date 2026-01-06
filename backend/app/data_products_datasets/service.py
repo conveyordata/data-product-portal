@@ -92,7 +92,7 @@ class DataProductDatasetService:
 
         authorizer = Authorization()
         return [
-            a
+            DataProductDatasetPendingAction.model_validate(a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),

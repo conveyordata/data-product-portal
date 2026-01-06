@@ -10067,6 +10067,27 @@
         }
       }
     },
+    "/api/v2/users/current/pending_actions": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Pending Actions",
+        "operationId": "get_user_pending_actions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/roles": {
       "post": {
         "tags": [
@@ -12742,7 +12763,7 @@
                         "$ref": "#/components/schemas/DataOutputDatasetPendingAction"
                       },
                       {
-                        "$ref": "#/components/schemas/DataProductRoleAssignmentPendingAction"
+                        "$ref": "#/components/schemas/DataProductRoleAssignmentPendingActionOld"
                       }
                     ]
                   },
@@ -15074,6 +15095,87 @@
         "title": "DataProductLink",
         "deprecated": true
       },
+      "DataProductOutputPortPendingAction": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested On"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
+          "requested_by": {
+            "$ref": "#/components/schemas/User"
+          },
+          "denied_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending_action_type": {
+            "type": "string",
+            "const": "DataProductOutputPort",
+            "title": "Pending Action Type",
+            "default": "DataProductOutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "data_product_id",
+          "output_port_id",
+          "status",
+          "requested_on",
+          "output_port",
+          "data_product",
+          "requested_by",
+          "denied_by",
+          "approved_by"
+        ],
+        "title": "DataProductOutputPortPendingAction"
+      },
       "DataProductRoleAssignmentPendingAction": {
         "properties": {
           "id": {
@@ -15164,6 +15266,97 @@
           "decided_by"
         ],
         "title": "DataProductRoleAssignmentPendingAction"
+      },
+      "DataProductRoleAssignmentPendingActionOld": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending_action_type": {
+            "type": "string",
+            "const": "DataProductRoleAssignment",
+            "title": "Pending Action Type",
+            "default": "DataProductRoleAssignment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by"
+        ],
+        "title": "DataProductRoleAssignmentPendingActionOld"
       },
       "DataProductRoleAssignmentResponse": {
         "properties": {
@@ -19145,6 +19338,32 @@
         ],
         "title": "OutputPortStatus"
       },
+      "PendingActionResponse": {
+        "properties": {
+          "pending_actions": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DataProductOutputPortPendingAction"
+                },
+                {
+                  "$ref": "#/components/schemas/TechnicalAssetOutputPortPendingAction"
+                },
+                {
+                  "$ref": "#/components/schemas/DataProductRoleAssignmentPendingAction"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Pending Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pending_actions"
+        ],
+        "title": "PendingActionResponse"
+      },
       "Platform": {
         "properties": {
           "id": {
@@ -20264,6 +20483,100 @@
           "technical_asset"
         ],
         "title": "TechnicalAssetLink"
+      },
+      "TechnicalAssetOutputPortPendingAction": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested On"
+          },
+          "denied_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Denied On"
+          },
+          "approved_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved On"
+          },
+          "requested_by": {
+            "$ref": "#/components/schemas/User"
+          },
+          "denied_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending_action_type": {
+            "type": "string",
+            "const": "TechnicalAssetOutputPort",
+            "title": "Pending Action Type",
+            "default": "TechnicalAssetOutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "technical_asset_id",
+          "status",
+          "requested_on",
+          "denied_on",
+          "approved_on",
+          "requested_by",
+          "denied_by",
+          "approved_by"
+        ],
+        "title": "TechnicalAssetOutputPortPendingAction"
       },
       "TechnicalAssetStatus": {
         "type": "string",

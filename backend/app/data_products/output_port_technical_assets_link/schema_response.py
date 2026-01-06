@@ -77,5 +77,11 @@ class DataOutputDatasetAssociationsGet(BaseDataOutputDatasetAssociationGet):
     pass
 
 
+class TechnicalAssetOutputPortAssociationsGet(
+    BaseTechnicalAssetOutputPortAssociationGet
+):
+    pass
+
+
 class LinkTechnicalAssetsToOutputPortResponse(ORMModel):
     link_id: UUID
