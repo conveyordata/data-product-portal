@@ -4,25 +4,36 @@ from fastapi.testclient import TestClient
 from app.settings import settings
 from tests.factories import NotificationFactory, UserFactory
 
-ENDPOINT = "/api/notifications"
+OLD_ENDPOINT = "/api/notifications"
+ENDPOINT = "/api/v2/users/current/notifications"
 
 
 class TestNotificationsRouter:
-    def test_get_notifications(self, client: TestClient):
+    def test_get_notifications_old(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         notification = NotificationFactory(user=user)
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
         assert data[0]["id"] == str(notification.id)
 
+    def test_get_notifications(self, client: TestClient):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        notification = NotificationFactory(user=user)
+
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data["events"]) == 1
+        assert data["events"][0]["id"] == str(notification.id)
+
     def test_delete_notification(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         notification = NotificationFactory(user=user)
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -30,7 +41,7 @@ class TestNotificationsRouter:
         response = self.delete_notification(client, notification.id)
         assert response.status_code == 200
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 0
 
@@ -52,18 +63,18 @@ class TestNotificationsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         NotificationFactory(user=user)
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
 
-        response = client.delete(f"{ENDPOINT}/all")
+        response = client.delete(f"{OLD_ENDPOINT}/all")
         assert response.status_code == 200
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 0
 
     @staticmethod
     def delete_notification(client: TestClient, notification_id):
-        return client.delete(f"{ENDPOINT}/{notification_id}")
+        return client.delete(f"{OLD_ENDPOINT}/{notification_id}")

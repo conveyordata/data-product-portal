@@ -1,6 +1,6 @@
 import factory
 
-from app.notifications.model import Notification
+from app.users.notifications.model import Notification
 from tests.factories.event import EventFactory
 from tests.factories.user import UserFactory
 

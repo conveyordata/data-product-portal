@@ -41,8 +41,8 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.notifications.service import NotificationService
 from app.resource_names.service import ResourceNameService
+from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 old_route = "/data_outputs"
