@@ -35,17 +35,13 @@ export function GenericDataOutputForm({
 
     // Get all unique field names that have dependencies
     const fieldsToWatch = Array.from(
-        new Set(
-            (uiMetadata || [])
-                .filter((field) => field.depends_on)
-                .map((field) => field.depends_on!.fieldName)
-        )
+        new Set((uiMetadata || []).filter((field) => field.depends_on).map((field) => field.depends_on!.fieldName)),
     );
 
     // Watch each field individually - hooks must be called unconditionally
     // We watch all potential fields that might be dependencies
     const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
-    
+
     // Build the watched fields map
     const watchedFields: Record<string, any> = {
         entire_schema: entireSchema,
