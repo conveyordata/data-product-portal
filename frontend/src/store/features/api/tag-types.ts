@@ -10,7 +10,6 @@ export enum TagTypes {
     Role = 'Role',
     Environment = 'Environment',
     Dataset = 'Dataset',
-    Domain = 'Domain',
     DataOutput = 'DataOutput',
     Graph = 'Graph',
     Platform = 'Platform',

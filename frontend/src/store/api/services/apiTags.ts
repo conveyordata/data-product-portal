@@ -201,7 +201,7 @@ api.enhanceEndpoints({
         },
         getDataProductType: {
             providesTags: (response) => {
-                return response?.id ? [{ type: TagTypes.DataProductType as const, id: response.id }] : [];
+                return response?.id ? [{ type: TagTypes.DataProductType, id: response.id }] : [];
             },
         },
         createDataProductType: {
@@ -214,6 +214,38 @@ api.enhanceEndpoints({
             invalidatesTags: (response) => [
                 { type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductType, id: response?.id },
+            ],
+        },
+
+        getDomains: {
+            providesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
+        },
+        getDomain: {
+            providesTags: (result) => [{ type: TagTypes.Domain, id: result?.id }],
+        },
+        createDomain: {
+            invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDomain: {
+            invalidatesTags: [
+                { type: TagTypes.Domain, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct },
+                { type: TagTypes.UserDataProducts },
+                { type: TagTypes.OutputPort },
+                { type: TagTypes.UserOutputPorts },
+            ],
+        },
+        removeDomain: {
+            invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
+        },
+        migrateDomain: {
+            invalidatesTags: (_, __, { fromId, toId }) => [
+                { type: TagTypes.Domain, id: fromId },
+                { type: TagTypes.Domain, id: toId },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.UserDataProducts as const },
+                { type: TagTypes.OutputPort as const },
+                { type: TagTypes.UserOutputPorts as const },
             ],
         },
 
