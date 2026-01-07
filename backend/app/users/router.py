@@ -8,6 +8,8 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
+from app.pending_actions.schema_response import PendingActionResponse
+from app.pending_actions.service import PendingActionsService
 from app.users.schema import User
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import GetUsersResponse, UserCreateResponse, UsersGet
@@ -103,11 +105,9 @@ def mark_tour_as_seen(
     UserService(db).mark_tour_as_seen(user.id)
 
 
-# @router.get("/v2/users/current/pending_actions")
-# def get_user_pending_actions(
-#     db: Session = Depends(get_db_session),
-#     authenticated_user: User = Depends(get_authenticated_user),
-# ) -> PendingActionsResponse:
-#     return PendingActionsResponse(
-#         pending_actions=PendingActionsService(db).get_user_pending_actions(authenticated_user)
-#     )
+@router.get("/v2/users/current/pending_actions")
+def get_user_pending_actions(
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> PendingActionResponse:
+    return PendingActionsService(db).get_user_pending_actions(authenticated_user)
