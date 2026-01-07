@@ -1,6 +1,8 @@
 from enum import Enum
+from warnings import deprecated
 
 
+@deprecated("Use PendingActionTypes instead")
 class PendingActionTypesOld(str, Enum):
     DataProductDataset = "DataProductDataset"
     DataOutputDataset = "DataOutputDataset"

@@ -14065,7 +14065,8 @@
           "denied_by",
           "approved_by"
         ],
-        "title": "DataOutputDatasetPendingAction"
+        "title": "DataOutputDatasetPendingAction",
+        "deprecated": true
       },
       "DataOutputGet": {
         "properties": {
@@ -14774,7 +14775,8 @@
           "denied_by",
           "approved_by"
         ],
-        "title": "DataProductDatasetPendingAction"
+        "title": "DataProductDatasetPendingAction",
+        "deprecated": true
       },
       "DataProductGet": {
         "properties": {
@@ -15356,7 +15358,8 @@
           "decided_on",
           "decided_by"
         ],
-        "title": "DataProductRoleAssignmentPendingActionOld"
+        "title": "DataProductRoleAssignmentPendingActionOld",
+        "deprecated": true
       },
       "DataProductRoleAssignmentResponse": {
         "properties": {

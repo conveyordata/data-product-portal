@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
+from warnings import deprecated
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.schema import Dataset, OutputPort
@@ -25,6 +26,7 @@ class BaseDataProductOutputPortAssociationGet(ORMModel):
     approved_by: Optional[User]
 
 
+@deprecated("Use BaseDataProductOutputPortAssociationGet instead")
 class BaseDataProductDatasetAssociationGet(ORMModel):
     id: UUID
     justification: str

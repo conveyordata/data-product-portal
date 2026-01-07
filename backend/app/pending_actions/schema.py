@@ -1,4 +1,5 @@
 from typing import Literal, Union
+from warnings import deprecated
 
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignmentResponse,
@@ -14,6 +15,7 @@ from app.data_products_datasets.schema_response import (
 from app.pending_actions.enums import PendingActionTypes, PendingActionTypesOld
 
 
+@deprecated("Use DataProductOutputPortPendingAction instead")
 class DataProductDatasetPendingAction(DataProductDatasetAssociationsGet):
     pending_action_type: Literal[PendingActionTypesOld.DataProductDataset] = (
         PendingActionTypesOld.DataProductDataset
@@ -26,6 +28,7 @@ class DataProductOutputPortPendingAction(DataProductOutputPortAssociationsGet):
     )
 
 
+@deprecated("Use TechnicalAssetOutputPortPendingAction instead")
 class DataOutputDatasetPendingAction(DataOutputDatasetAssociationsGet):
     pending_action_type: Literal[PendingActionTypesOld.DataOutputDataset] = (
         PendingActionTypesOld.DataOutputDataset
@@ -38,6 +41,7 @@ class TechnicalAssetOutputPortPendingAction(TechnicalAssetOutputPortAssociations
     )
 
 
+@deprecated("Use DataProductRoleAssignmentPendingAction instead")
 class DataProductRoleAssignmentPendingActionOld(DataProductRoleAssignmentResponse):
     pending_action_type: Literal[PendingActionTypesOld.DataProductRoleAssignment] = (
         PendingActionTypesOld.DataProductRoleAssignment
