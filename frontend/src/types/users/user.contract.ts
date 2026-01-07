@@ -1,4 +1,4 @@
-import type { GlobalRoleAssignmentContract } from '../roles/role.contract';
+import type { GlobalRoleAssignment } from '@/types/roles';
 
 export interface UserContract {
     id: string;
@@ -12,6 +12,6 @@ export interface UserContract {
 
 export type UsersGetContract = Array<
     UserContract & {
-        global_role: GlobalRoleAssignmentContract;
+        global_role: GlobalRoleAssignment;
     }
 >;

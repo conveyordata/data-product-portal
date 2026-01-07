@@ -2,13 +2,13 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Flex, Tooltip } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DeleteRoleModal } from '@/pages/roles/components/delete-role-modal.component.tsx';
-import { ModifyRoleModal } from '@/pages/roles/components/modify-role-modal.component.tsx';
-import type { RoleContract } from '@/types/roles';
+import { DeleteRoleModal } from '@/pages/roles/components/delete-role-modal.component';
+import { ModifyRoleModal } from '@/pages/roles/components/modify-role-modal.component';
+import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { Prototype } from '@/types/roles';
 
 type Props = {
-    role: RoleContract;
+    role: Role;
 };
 export function RoleDetailsMenu({ role }: Props) {
     const { t } = useTranslation();

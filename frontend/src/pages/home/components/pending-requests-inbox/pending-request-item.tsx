@@ -171,7 +171,7 @@ export function PendingItem({ pendingAction }: Props) {
                     message: (
                         <Typography.Text>
                             {t('Accepting will grant the user the role of {{role}} in the ', {
-                                role: pendingAction.role.name,
+                                role: pendingAction.role?.name,
                             })}
                             <Link
                                 onClick={(e) => e.stopPropagation()}

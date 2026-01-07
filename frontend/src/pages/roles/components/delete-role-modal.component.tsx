@@ -2,7 +2,7 @@ import { Alert, Badge, Button, List, Skeleton, Space, Typography, theme } from '
 import { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
+import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import {
@@ -11,10 +11,10 @@ import {
     useListDataProductRoleAssignmentsQuery,
     useListGlobalRoleAssignmentsQuery,
     useListOutputPortRoleAssignmentsQuery,
-} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { useDeleteRoleMutation } from '@/store/features/roles/roles-api-slice.ts';
-import { ApplicationPaths, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
-import { type RoleContract, Scope } from '@/types/roles';
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
+import { type Role, useRemoveRoleMutation } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import { ApplicationPaths, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+import { Scope } from '@/types/roles';
 import styles from './delete-role-modal.module.scss';
 
 const { Text } = Typography;
@@ -40,7 +40,7 @@ function uniqueOrderedWithCount<T extends DataProduct | OutputPort>(array: T[] |
 }
 
 type Props = {
-    role: RoleContract;
+    role: Role;
     isOpen: boolean;
     onClose: () => void;
 };
@@ -50,7 +50,7 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
         token: { colorIcon: badgeColor },
     } = theme.useToken();
 
-    const [deleteRole, { isLoading: deleteInProgress }] = useDeleteRoleMutation();
+    const [deleteRole, { isLoading: deleteInProgress }] = useRemoveRoleMutation();
     const { data: dataProductAssignments, isLoading: dataProductLoading } = useListDataProductRoleAssignmentsQuery(
         { roleId: role.id },
         { skip: role.scope !== Scope.DATA_PRODUCT },

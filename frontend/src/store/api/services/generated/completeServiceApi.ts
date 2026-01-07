@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { api } from "@/store/api/services/generated/authorizationRoleAssignmentsApi";
+import { api } from "@/store/api/services/generated/authorizationRolesApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({}),
   overrideExisting: false,
