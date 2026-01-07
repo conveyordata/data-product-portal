@@ -13,8 +13,8 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
-from app.notifications.model import Notification as NotificationModel
-from app.notifications.schema_response import NotificationGet
+from app.users.notifications.model import Notification as NotificationModel
+from app.users.notifications.schema_response import NotificationGet
 from app.users.schema import User
 
 

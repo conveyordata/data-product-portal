@@ -12842,35 +12842,10 @@
         }
       }
     },
-    "/api/notifications": {
-      "get": {
-        "tags": [
-          "notifications"
-        ],
-        "summary": "Get User Notifications",
-        "operationId": "get_user_notifications_api_notifications_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationGet"
-                  },
-                  "type": "array",
-                  "title": "Response Get User Notifications Api Notifications Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/notifications/all": {
       "delete": {
         "tags": [
-          "notifications"
+          "Users - Notifications"
         ],
         "summary": "Remove All User Notifications",
         "operationId": "remove_all_user_notifications_api_notifications_all_delete",
@@ -12883,16 +12858,18 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/notifications/{id}": {
       "delete": {
         "tags": [
-          "notifications"
+          "Users - Notifications"
         ],
         "summary": "Remove User Notification",
         "operationId": "remove_user_notification_api_notifications__id__delete",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -12920,6 +12897,113 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/notifications/all": {
+      "delete": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Remove All User Notifications",
+        "operationId": "remove_all_user_notifications",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/notifications/{id}": {
+      "delete": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Remove User Notification",
+        "operationId": "remove_user_notification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Get User Notifications Old",
+        "operationId": "get_user_notifications_old_api_notifications_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationGet"
+                  },
+                  "type": "array",
+                  "title": "Response Get User Notifications Old Api Notifications Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/users/current/notifications": {
+      "get": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Get User Notifications",
+        "operationId": "get_user_notifications",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserNotificationsResponse"
                 }
               }
             }
@@ -18485,6 +18569,56 @@
           "technical_info"
         ],
         "title": "GetTechnicalAssetsResponseItem"
+      },
+      "GetUserNotificationsResponse": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/GetUserNotificationsResponseItem"
+            },
+            "type": "array",
+            "title": "Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "title": "GetUserNotificationsResponse"
+      },
+      "GetUserNotificationsResponseItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Event Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "event": {
+            "$ref": "#/components/schemas/GetEventHistoryResponseItem"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "event_id",
+          "user_id",
+          "event",
+          "user"
+        ],
+        "title": "GetUserNotificationsResponseItem"
       },
       "GetUsersResponse": {
         "properties": {
