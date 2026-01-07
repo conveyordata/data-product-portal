@@ -134,3 +134,9 @@ class UpdateTechnicalAssetResponse(ORMModel):
 class UIElementMetadataResponse(ORMModel):
     ui_metadata: Sequence[UIElementMetadata]
     plugin: str
+    result_label: str = "Resulting path"
+    result_tooltip: str = "The path you can access through this technical asset"
+    platform: str  # e.g., "s3", "redshift", "snowflake"
+    display_name: str  # Display name for the platform tile
+    icon_name: str  # Icon filename (e.g., "s3-logo.svg")
+    parent_platform: Optional[str] = None  # e.g., "aws" for s3, redshift, glue

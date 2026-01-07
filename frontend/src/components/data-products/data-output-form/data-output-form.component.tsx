@@ -5,6 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
+import awsLogo from '@/assets/icons/aws-logo.svg?react';
+import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
+import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
+import glueLogo from '@/assets/icons/glue-logo.svg?react';
+import s3Logo from '@/assets/icons/s3-logo.svg?react';
+import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
@@ -24,7 +30,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
-import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
@@ -53,6 +59,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const navigate = useNavigate();
 
     // Data
+    const { data: uiMetadataGroups, isLoading: isLoadingMetadata } = useGetDataOutputUIElementMetadataQuery();
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
@@ -87,7 +94,82 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
-    const dataPlatforms = useMemo(
+    // Build platform tiles dynamically from metadata
+    const dataPlatforms = useMemo(() => {
+        if (!uiMetadataGroups || !platformConfig) {
+            return [];
+        }
+
+        // Icon mapping
+        const iconMap: Record<string, any> = {
+            's3-logo.svg': s3Logo,
+            'aws-redshift-logo.svg': redshiftLogo,
+            'glue-logo.svg': glueLogo,
+            'snowflake-logo.svg': snowflakeLogo,
+            'databricks-logo.svg': databricksLogo,
+            'aws-logo.svg': awsLogo,
+        };
+
+        // Group by parent platform
+        const parentPlatforms = new Map<string, CustomDropdownItemProps<DataPlatform>>();
+        const childPlatforms = new Map<string, CustomDropdownItemProps<DataPlatform>[]>();
+
+        uiMetadataGroups.forEach((meta) => {
+            // Only include platforms that have config
+            const hasConfig = platformConfig.some(
+                (config) => config.service.name.toLowerCase() === meta.display_name.toLowerCase(),
+            );
+
+            if (!hasConfig) {
+                return;
+            }
+
+            const platformItem: CustomDropdownItemProps<DataPlatform> = {
+                label: t(meta.display_name),
+                value: meta.platform as DataPlatform,
+                icon: iconMap[meta.icon_name] || iconMap['s3-logo.svg'],
+                hasMenu: true,
+                hasConfig: true,
+                children: [],
+            };
+
+            if (meta.parent_platform) {
+                // This is a child platform
+                if (!childPlatforms.has(meta.parent_platform)) {
+                    childPlatforms.set(meta.parent_platform, []);
+                }
+                childPlatforms.get(meta.parent_platform)!.push(platformItem);
+
+                // Ensure parent exists
+                if (!parentPlatforms.has(meta.parent_platform)) {
+                    parentPlatforms.set(meta.parent_platform, {
+                        label: t(meta.parent_platform.toUpperCase()),
+                        value: meta.parent_platform as DataPlatform,
+                        icon: iconMap[`${meta.parent_platform}-logo.svg`] || iconMap['aws-logo.svg'],
+                        hasMenu: true,
+                        hasConfig: true,
+                        children: [],
+                    });
+                }
+            } else {
+                // This is a top-level platform
+                if (!parentPlatforms.has(meta.platform)) {
+                    parentPlatforms.set(meta.platform, platformItem);
+                }
+            }
+        });
+
+        // Attach children to parents
+        parentPlatforms.forEach((parent, key) => {
+            if (childPlatforms.has(key)) {
+                parent.children = childPlatforms.get(key);
+            }
+        });
+
+        return Array.from(parentPlatforms.values());
+    }, [uiMetadataGroups, platformConfig, t]);
+
+    const dataPlatformsOld = useMemo(
         () =>
             getDataPlatforms(t)
                 // Configured platforms
@@ -229,7 +311,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             setResultString(values);
         }
     };
-    const { data: uiMetadataGroups, isLoading: isLoadingMetadata } = useGetDataOutputUIElementMetadataQuery();
 
     return (
         <Form
@@ -347,92 +428,31 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 </Radio.Group>
             </Form.Item>
             {(() => {
-                if (!currentDataProduct) {
+                if (!currentDataProduct || !selectedConfiguration || !uiMetadataGroups) {
                     return null;
                 }
-                switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3:
-                    case DataPlatforms.S3:
-                        return (
-                            <GenericDataOutputForm
-                                form={form}
-                                uiMetadataGroups={
-                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'S3DataOutput')[0]
-                                        ?.ui_metadata
-                                }
-                                namespace={currentDataProduct.namespace}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                platform={DataPlatforms.S3}
-                            />
-                        );
-                    case DataPlatforms.Redshift:
-                        return (
-                            <GenericDataOutputForm
-                                form={form}
-                                uiMetadataGroups={
-                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'RedshiftDataOutput')[0]
-                                        ?.ui_metadata
-                                }
-                                namespace={currentDataProduct.namespace}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                platform={DataPlatforms.Redshift}
-                                resultLabel="Resulting table"
-                                resultTooltip="The table you can access through this technical asset"
-                            />
-                        );
-                    case DataPlatforms.Glue:
-                        return (
-                            <GenericDataOutputForm
-                                form={form}
-                                uiMetadataGroups={
-                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'GlueDataOutput')[0]
-                                        ?.ui_metadata
-                                }
-                                namespace={currentDataProduct.namespace}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                platform={DataPlatforms.Glue}
-                                resultLabel="Resulting table"
-                                resultTooltip="The table you can access through this technical asset"
-                            />
-                        );
-                    case DataPlatforms.Databricks:
-                        return (
-                            <GenericDataOutputForm
-                                form={form}
-                                uiMetadataGroups={
-                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'DatabricksDataOutput')[0]
-                                        ?.ui_metadata
-                                }
-                                namespace={currentDataProduct.namespace}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                platform={DataPlatforms.Databricks}
-                                resultLabel="Resulting table"
-                                resultTooltip="The table you can access through this technical asset"
-                            />
-                        );
-                    case DataPlatforms.Snowflake:
-                        return (
-                            <GenericDataOutputForm
-                                form={form}
-                                uiMetadataGroups={
-                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'SnowflakeDataOutput')[0]
-                                        ?.ui_metadata
-                                }
-                                namespace={currentDataProduct.namespace}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                platform={DataPlatforms.Snowflake}
-                                resultLabel="Resulting table"
-                                resultTooltip="The table you can access through this technical asset"
-                            />
-                        );
-                    default:
-                        return null;
+
+                // Find the metadata for the selected platform
+                const pluginMetadata = uiMetadataGroups.find(
+                    (meta) => meta.platform === selectedConfiguration.value.toLowerCase(),
+                );
+
+                if (!pluginMetadata) {
+                    return null;
                 }
+
+                return (
+                    <GenericDataOutputForm
+                        form={form}
+                        uiMetadataGroups={pluginMetadata.ui_metadata}
+                        namespace={currentDataProduct.namespace}
+                        identifiers={identifiers}
+                        sourceAligned={sourceAligned}
+                        configurationType={pluginMetadata.plugin}
+                        resultLabel={pluginMetadata.result_label}
+                        resultTooltip={pluginMetadata.result_tooltip}
+                    />
+                );
             })()}
         </Form>
     );

@@ -98,3 +98,11 @@ class SnowflakeDataOutput(BaseDataOutputConfiguration):
             ]
         )
         return base_metadata
+
+    @classmethod
+    def get_result_label(cls) -> str:
+        return "Resulting table"
+
+    @classmethod
+    def get_result_tooltip(cls) -> str:
+        return "The table you can access through this technical asset"

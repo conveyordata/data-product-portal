@@ -46,5 +46,18 @@ class BaseDataOutputConfiguration(ORMModel):
     def get_UI_metadata(cls) -> Sequence[UIElementMetadata]:
         return []
 
-    def get_logo(self) -> str:
-        return f"{self.__class__.__name__.removesuffix('DataOutput')}-logo.svg"
+    @classmethod
+    def get_result_label(cls) -> str:
+        return "Resulting output"
+
+    @classmethod
+    def get_result_tooltip(cls) -> str:
+        return "The output you can access through this technical asset"
+
+    @classmethod
+    def get_parent_platform(cls) -> Optional[str]:
+        return None
+
+    @classmethod
+    def get_logo(cls) -> str:
+        return f"{cls.__class__.__name__.removesuffix('DataOutput')}-logo.svg"

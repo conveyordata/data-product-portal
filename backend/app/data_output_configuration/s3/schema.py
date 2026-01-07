@@ -65,3 +65,15 @@ class S3DataOutput(BaseDataOutputConfiguration):
             ]
         )
         return base_metadata
+
+    @classmethod
+    def get_result_label(cls) -> str:
+        return "Resulting path"
+
+    @classmethod
+    def get_result_tooltip(cls) -> str:
+        return "The path you can access through this technical asset"
+
+    @classmethod
+    def get_parent_platform(cls) -> Optional[str]:
+        return "aws"

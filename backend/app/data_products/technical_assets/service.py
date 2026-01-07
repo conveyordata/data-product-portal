@@ -281,9 +281,18 @@ class DataOutputService:
         ui_metadata_list = []
         for plugin in data_output_configurations:
             ui_metadata = plugin.get_UI_metadata()
+            plugin_name = plugin.__name__
+
             ui_metadata_list.append(
                 UIElementMetadataResponse(
-                    ui_metadata=ui_metadata, plugin=plugin.__name__
+                    ui_metadata=ui_metadata,
+                    plugin=plugin_name,
+                    platform=plugin_name.lower().replace("dataoutput", ""),
+                    display_name=plugin_name.replace("DataOutput", ""),
+                    icon_name=f"{plugin_name.lower().replace('dataoutput', '')}-logo.svg",
+                    parent_platform=plugin.get_parent_platform(),
+                    result_label=plugin.get_result_label(),
+                    result_tooltip=plugin.get_result_tooltip(),
                 )
             )
         return ui_metadata_list

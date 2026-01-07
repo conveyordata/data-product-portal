@@ -14,7 +14,7 @@ type Props = {
     namespace: string;
     identifiers?: string[];
     sourceAligned: boolean;
-    platform?: DataPlatforms;
+    configurationType: string;
     uiMetadataGroups: UIElementMetadata[];
     resultLabel?: string;
     resultTooltip?: string;
@@ -26,17 +26,12 @@ export function GenericDataOutputForm({
     identifiers = [],
     sourceAligned,
     uiMetadataGroups,
-    platform = DataPlatforms.S3,
+    configurationType,
     resultLabel,
     resultTooltip,
 }: Props) {
     const { t } = useTranslation();
     const uiMetadata = uiMetadataGroups as UIElementMetadata[] | undefined;
-
-    // Get all unique field names that have dependencies
-    const fieldsToWatch = Array.from(
-        new Set((uiMetadata || []).filter((field) => field.depends_on).map((field) => field.depends_on!.fieldName)),
-    );
 
     // Watch each field individually - hooks must be called unconditionally
     // We watch all potential fields that might be dependencies
@@ -56,7 +51,7 @@ export function GenericDataOutputForm({
             }
 
             // Handle fields that should auto-populate from namespace when not source-aligned
-            if (field.useNamespaceWhenNotSourceAligned) {
+            if (field.use_namespace_when_not_source_aligned) {
                 if (!sourceAligned) {
                     form.setFieldValue(configurationFieldName(field.name), namespace);
                 } else {
@@ -184,7 +179,7 @@ export function GenericDataOutputForm({
     return (
         <ConfigurationSubForm
             form={form}
-            platform={platform}
+            configurationType={configurationType}
             resultLabel={resultLabel ? t(resultLabel) : t('Resulting path')}
             resultTooltip={resultTooltip ? t(resultTooltip) : t('The path you can access through this technical asset')}
         >

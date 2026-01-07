@@ -20861,12 +20861,48 @@
           "plugin": {
             "type": "string",
             "title": "Plugin"
+          },
+          "result_label": {
+            "type": "string",
+            "title": "Result Label",
+            "default": "Resulting path"
+          },
+          "result_tooltip": {
+            "type": "string",
+            "title": "Result Tooltip",
+            "default": "The path you can access through this technical asset"
+          },
+          "platform": {
+            "type": "string",
+            "title": "Platform"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "icon_name": {
+            "type": "string",
+            "title": "Icon Name"
+          },
+          "parent_platform": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Platform"
           }
         },
         "type": "object",
         "required": [
           "ui_metadata",
-          "plugin"
+          "plugin",
+          "platform",
+          "display_name",
+          "icon_name"
         ],
         "title": "UIElementMetadataResponse"
       },
