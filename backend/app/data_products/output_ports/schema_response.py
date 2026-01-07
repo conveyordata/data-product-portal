@@ -14,12 +14,14 @@ from app.data_products.output_port_technical_assets_link.schema import (
     TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.schema import (
+    DataProductDatasetAssociation,
+)
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import DataOutput as DataOutputBaseSchema
 from app.data_products.technical_assets.schema import TechnicalAsset
-from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.shared.schema import ORMModel
 
 

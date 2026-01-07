@@ -40,6 +40,9 @@ from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation as DataProductDatasetModel,
+)
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
 from app.data_products.output_ports.service import DatasetService
@@ -59,9 +62,6 @@ from app.data_products.schema_response import (
 )
 from app.data_products.technical_assets.model import DataOutput as DataOutputModel
 from app.data_products.technical_assets.schema_response import DataOutputGet
-from app.data_products_datasets.model import (
-    DataProductDatasetAssociation as DataProductDatasetModel,
-)
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
