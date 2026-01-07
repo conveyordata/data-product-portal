@@ -12,6 +12,7 @@ import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-
 import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
+    useGetDataOutputUIElementMetadataQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
@@ -30,11 +31,7 @@ import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 import styles from './data-output-form.module.scss';
-import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
-import { GlueDataOutputForm } from './glue-data-output-form.component';
-import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
-import { S3DataOutputForm } from './s3-data-output-form.component';
-import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
+import { GenericDataOutputForm } from './generic-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -232,6 +229,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             setResultString(values);
         }
     };
+    const { data: uiMetadataGroups, isLoading: isLoadingMetadata } = useGetDataOutputUIElementMetadataQuery();
 
     return (
         <Form
@@ -354,48 +352,82 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 }
                 switch (selectedConfiguration?.value) {
                     case DataPlatforms.S3:
+                    case DataPlatforms.S3:
                         return (
-                            <S3DataOutputForm
+                            <GenericDataOutputForm
                                 form={form}
+                                uiMetadataGroups={
+                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'S3DataOutput')[0]
+                                        ?.ui_metadata
+                                }
+                                namespace={currentDataProduct.namespace}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
-                                namespace={currentDataProduct.namespace}
+                                platform={DataPlatforms.S3}
                             />
                         );
                     case DataPlatforms.Redshift:
                         return (
-                            <RedshiftDataOutputForm
-                                identifiers={identifiers}
+                            <GenericDataOutputForm
                                 form={form}
+                                uiMetadataGroups={
+                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'RedshiftDataOutput')[0]
+                                        ?.ui_metadata
+                                }
                                 namespace={currentDataProduct.namespace}
+                                identifiers={identifiers}
                                 sourceAligned={sourceAligned}
+                                platform={DataPlatforms.Redshift}
+                                resultLabel="Resulting table"
+                                resultTooltip="The table you can access through this technical asset"
                             />
                         );
                     case DataPlatforms.Glue:
                         return (
-                            <GlueDataOutputForm
-                                identifiers={identifiers}
+                            <GenericDataOutputForm
                                 form={form}
+                                uiMetadataGroups={
+                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'GlueDataOutput')[0]
+                                        ?.ui_metadata
+                                }
                                 namespace={currentDataProduct.namespace}
+                                identifiers={identifiers}
                                 sourceAligned={sourceAligned}
+                                platform={DataPlatforms.Glue}
+                                resultLabel="Resulting table"
+                                resultTooltip="The table you can access through this technical asset"
                             />
                         );
                     case DataPlatforms.Databricks:
                         return (
-                            <DatabricksDataOutputForm
-                                identifiers={identifiers}
+                            <GenericDataOutputForm
                                 form={form}
+                                uiMetadataGroups={
+                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'DatabricksDataOutput')[0]
+                                        ?.ui_metadata
+                                }
                                 namespace={currentDataProduct.namespace}
+                                identifiers={identifiers}
                                 sourceAligned={sourceAligned}
+                                platform={DataPlatforms.Databricks}
+                                resultLabel="Resulting table"
+                                resultTooltip="The table you can access through this technical asset"
                             />
                         );
                     case DataPlatforms.Snowflake:
                         return (
-                            <SnowflakeDataOutputForm
-                                identifiers={identifiers}
+                            <GenericDataOutputForm
                                 form={form}
+                                uiMetadataGroups={
+                                    uiMetadataGroups?.filter((plugin) => plugin.plugin === 'SnowflakeDataOutput')[0]
+                                        ?.ui_metadata
+                                }
                                 namespace={currentDataProduct.namespace}
+                                identifiers={identifiers}
                                 sourceAligned={sourceAligned}
+                                platform={DataPlatforms.Snowflake}
+                                resultLabel="Resulting table"
+                                resultTooltip="The table you can access through this technical asset"
                             />
                         );
                     default:

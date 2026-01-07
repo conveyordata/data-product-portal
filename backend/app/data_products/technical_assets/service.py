@@ -16,6 +16,9 @@ from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceValidityType,
 )
+from app.data_output_configuration.base_schema import (
+    BaseDataOutputConfiguration,
+)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
@@ -35,6 +38,7 @@ from app.data_products.technical_assets.schema_request import (
 from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
+    UIElementMetadataResponse,
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
@@ -268,3 +272,18 @@ class DataOutputService:
             )
 
         return request.configuration.render_template(template)
+
+    def get_technical_asset_ui_metadata(
+        self,
+    ) -> Sequence[UIElementMetadataResponse]:
+        # Get all subtypes of BaseDataOutputConfiguration
+        data_output_configurations = BaseDataOutputConfiguration.__subclasses__()
+        ui_metadata_list = []
+        for plugin in data_output_configurations:
+            ui_metadata = plugin.get_UI_metadata()
+            ui_metadata_list.append(
+                UIElementMetadataResponse(
+                    ui_metadata=ui_metadata, plugin=plugin.__name__
+                )
+            )
+        return ui_metadata_list

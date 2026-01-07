@@ -12,6 +12,9 @@ class DatabricksDataOutput(BaseDataOutputConfiguration):
     catalog_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
     table: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
     table_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
+    entire_schema: Mapped[bool] = mapped_column(
+        nullable=True, use_existing_column=True, default=False
+    )
 
     __mapper_args__ = {
         "polymorphic_identity": "DatabricksDataOutput",

@@ -1,9 +1,15 @@
 from typing import Literal, Optional
 
+from sqlalchemy import Sequence
+
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSS3Config,
 )
-from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
+from app.data_output_configuration.base_schema import (
+    BaseDataOutputConfiguration,
+    UIElementMetadata,
+    UIElementType,
+)
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputModel
 from app.data_products.schema import DataProduct
@@ -37,3 +43,25 @@ class S3DataOutput(BaseDataOutputConfiguration):
         return next(
             (config for config in configs if config.identifier == self.bucket), None
         )
+
+    @classmethod
+    def get_UI_metadata(cls) -> Sequence[UIElementMetadata]:
+        base_metadata = super().get_UI_metadata()
+        base_metadata.extend(
+            [
+                UIElementMetadata(
+                    name="bucket",
+                    type=UIElementType.Select,
+                    label="Bucket",
+                    required=True,
+                ),
+                UIElementMetadata(
+                    name="path",
+                    label="Path",
+                    type=UIElementType.String,
+                    tooltip="The name of the path to give write access to",
+                    required=True,
+                ),
+            ]
+        )
+        return base_metadata

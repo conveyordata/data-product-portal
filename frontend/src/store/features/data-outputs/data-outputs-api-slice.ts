@@ -185,6 +185,12 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 data,
             }),
         }),
+        getDataOutputUIElementMetadata: builder.query<{ [plugin: string]: UIElementMetadata[] }, void>({
+            query: () => ({
+                url: ApiUrl.DataOutputUIElementMetadata,
+                method: 'GET',
+            }),
+        }),
     }),
 
     overrideExisting: false,
@@ -203,4 +209,5 @@ export const {
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,
+    useGetDataOutputUIElementMetadataQuery,
 } = dataOutputsApiSlice;

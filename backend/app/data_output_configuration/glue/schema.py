@@ -1,11 +1,15 @@
-from typing import Literal, Optional, Self
+from typing import Literal, Optional, Self, Sequence
 
 from pydantic import model_validator
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSGlueConfig,
 )
-from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
+from app.data_output_configuration.base_schema import (
+    BaseDataOutputConfiguration,
+    UIElementMetadata,
+    UIElementType,
+)
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.glue.model import (
     GlueDataOutput as GlueDataOutputModel,
@@ -21,6 +25,7 @@ class GlueDataOutput(BaseDataOutputConfiguration):
     database_path: str = ""
     table_path: str = ""
     configuration_type: Literal[DataOutputTypes.GlueDataOutput]
+    entire_schema: bool = False
 
     class Meta:
         orm_model = GlueDataOutputModel
@@ -54,3 +59,46 @@ class GlueDataOutput(BaseDataOutputConfiguration):
         return next(
             (config for config in configs if config.identifier == self.database), None
         )
+
+    @classmethod
+    def get_UI_metadata(cls) -> Sequence[UIElementMetadata]:
+        base_metadata = super().get_UI_metadata()
+        base_metadata.extend(
+            [
+                UIElementMetadata(
+                    name="database",
+                    type=UIElementType.Select,
+                    label="Database",
+                    required=True,
+                    use_namespace_when_not_source_aligned=True,
+                    select_mode="tags",
+                    max_count=1,
+                    normalize_array=True,
+                ),
+                UIElementMetadata(
+                    name="database_suffix",
+                    label="Database suffix",
+                    type=UIElementType.String,
+                    tooltip="The name of the database to give write access to. Defaults to data product namespace",
+                    required=False,
+                ),
+                UIElementMetadata(
+                    name="entire_schema",
+                    label="Entire schema",
+                    type=UIElementType.Checkbox,
+                    tooltip="Give write access to the entire schema instead of a single table",
+                    required=False,
+                    initial_value=True,
+                    value_prop_name="checked",
+                ),
+                UIElementMetadata(
+                    name="table",
+                    label="Table",
+                    type=UIElementType.String,
+                    tooltip="The name of the table to give write access to",
+                    required=True,
+                    depends_on={"fieldName": "entire_schema", "value": False},
+                ),
+            ]
+        )
+        return base_metadata

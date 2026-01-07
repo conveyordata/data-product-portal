@@ -29,6 +29,7 @@ from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
     GetTechnicalAssetsResponseItem,
+    UIElementMetadataResponse,
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.service import DataOutputService
@@ -422,3 +423,10 @@ def get_technical_asset_graph_data(
     level: int = 3,
 ) -> Graph:
     return DataOutputService(db).get_graph_data(data_product_id, id, level)
+
+
+@router.get("/v2/technical_assets/ui-metadata")
+def get_technical_asset_ui_metadata(
+    db: Session = Depends(get_db_session),
+) -> Sequence[UIElementMetadataResponse]:
+    return DataOutputService(db).get_technical_asset_ui_metadata()
