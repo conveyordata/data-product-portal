@@ -251,7 +251,7 @@ def remove_output_port_as_input_port(
     RefreshInfrastructureLambda().trigger()
 
 
-@router.get(f"{old_route}/actions")
+@router.get(f"{old_route}/actions", deprecated=True)
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),

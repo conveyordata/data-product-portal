@@ -635,11 +635,11 @@ def get_data_products(
 def get_event_history_old(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[GetEventHistoryResponseItemOld]:
-    return get_event_history(id, db).events
+    return get_data_product_event_history(id, db).events
 
 
-@router.get("/{id}/history")
-def get_event_history(
+@router.get(f"{route}/{{id}}/history")
+def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
     return GetEventHistoryResponse(

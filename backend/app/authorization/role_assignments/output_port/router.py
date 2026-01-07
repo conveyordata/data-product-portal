@@ -209,6 +209,7 @@ def request_output_port_role_assignment(
             Authorization.enforce(Action.DATASET__CREATE_USER, resolver=DatasetResolver)
         )
     ],
+    deprecated=True,
 )
 def create_assignment_old(
     id: UUID,
