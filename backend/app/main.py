@@ -25,6 +25,7 @@ from app.mcp.middleware import LoggingMiddleware
 from app.mcp.router import router as mcp_router
 from app.settings import settings
 from app.shared.router import router
+from app.shared.schema import ORMModel
 
 with open(Path(__file__).parent.parent / "VERSION", "r") as f:
     API_VERSION = f.read().strip()
@@ -150,14 +151,23 @@ async def send_response_to_webhook(request: Request, call_next):
 
 
 # K8S health and liveness check
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
     return {"message": "Hello World"}
 
 
-@app.get("/api/version")
-def get_version():
+@app.get("/api/version", deprecated=True, tags=["Version"])
+def get_version_old():
     return {"version": app.version}
+
+
+class VersionResponse(ORMModel):
+    version: str
+
+
+@app.get("/api/v2/version", tags=["Version"])
+def get_version():
+    return VersionResponse(version=app.version)
 
 
 def use_route_names_as_operation_ids(app: FastAPI) -> None:

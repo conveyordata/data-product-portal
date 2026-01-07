@@ -340,6 +340,7 @@
         ],
         "summary": "Get Dataset Query Stats",
         "operationId": "get_dataset_query_stats_api_datasets__id__query_stats_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -1674,8 +1675,8 @@
         "tags": [
           "Data Products - Output ports"
         ],
-        "summary": "Get Event History",
-        "operationId": "get_event_history",
+        "summary": "Get Output Ports Event History",
+        "operationId": "get_output_ports_event_history",
         "parameters": [
           {
             "name": "data_product_id",
@@ -3944,13 +3945,13 @@
         }
       }
     },
-    "/api/{id}/history": {
+    "/api/v2/data_products/{id}/history": {
       "get": {
         "tags": [
           "Data products"
         ],
-        "summary": "Get Event History",
-        "operationId": "get_event_history_api__id__history_get",
+        "summary": "Get Data Product Event History",
+        "operationId": "get_data_product_event_history",
         "parameters": [
           {
             "name": "id",
@@ -6674,7 +6675,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_output_dataset_links/approve/{id}": {
@@ -7238,6 +7240,7 @@
         ],
         "summary": "Get Data Output",
         "operationId": "get_data_output_api_data_outputs__id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -7678,6 +7681,7 @@
         ],
         "summary": "Update Data Output Status",
         "operationId": "update_data_output_status_api_data_outputs__id__status_put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -9423,6 +9427,9 @@
     },
     "/api/platforms/configs": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platform Service Configurations Old",
         "operationId": "get_all_platform_service_configurations_old_api_platforms_configs_get",
         "responses": {
@@ -9446,6 +9453,9 @@
     },
     "/api/v2/configuration/platforms/configs": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platform Service Configurations",
         "operationId": "get_all_platform_service_configurations",
         "responses": {
@@ -9464,6 +9474,9 @@
     },
     "/api/platforms": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platforms Old",
         "operationId": "get_all_platforms_old_api_platforms_get",
         "responses": {
@@ -9487,6 +9500,9 @@
     },
     "/api/v2/configuration/platforms": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platforms",
         "operationId": "get_all_platforms",
         "responses": {
@@ -9505,6 +9521,9 @@
     },
     "/api/platforms/{id}/services": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Platform Services Old",
         "operationId": "get_platform_services_old_api_platforms__id__services_get",
         "deprecated": true,
@@ -9550,6 +9569,9 @@
     },
     "/api/v2/configuration/platforms/{id}/services": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Platform Services",
         "operationId": "get_platform_services",
         "parameters": [
@@ -10358,7 +10380,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/roles/{id}": {
@@ -12023,6 +12046,7 @@
         ],
         "summary": "Create Assignment Old",
         "operationId": "create_assignment_old_api_role_assignments_dataset__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -12782,10 +12806,74 @@
     "/api/graph": {
       "get": {
         "tags": [
-          "graph"
+          "Graph"
         ],
         "summary": "Get Graph Data",
         "operationId": "get_graph_data_api_graph_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "domain_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Domain Nodes Enabled"
+            }
+          },
+          {
+            "name": "data_product_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Data Product Nodes Enabled"
+            }
+          },
+          {
+            "name": "dataset_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Dataset Nodes Enabled"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Graph"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/graph": {
+      "get": {
+        "tags": [
+          "Graph"
+        ],
+        "summary": "Get Graph Data",
+        "operationId": "get_graph_data",
         "parameters": [
           {
             "name": "domain_nodes_enabled",
@@ -13014,7 +13102,7 @@
     "/api/pending_actions": {
       "get": {
         "tags": [
-          "pending_actions"
+          "Users - Pending Actions"
         ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_pending_actions_get",
@@ -13043,7 +13131,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/resource_names/sanitize": {
@@ -13153,11 +13242,11 @@
     "/api/auth/device/device_token": {
       "post": {
         "tags": [
-          "auth",
-          "device flow"
+          "Authentication"
         ],
         "summary": "Get Device Token",
         "operationId": "get_device_token_api_auth_device_device_token_post",
+        "deprecated": true,
         "security": [
           {
             "HTTPBasic": []
@@ -13209,11 +13298,11 @@
     "/api/auth/device/jwt_token": {
       "post": {
         "tags": [
-          "auth",
-          "device flow"
+          "Authentication"
         ],
         "summary": "Get Jwt Token",
         "operationId": "get_jwt_token_api_auth_device_jwt_token_post",
+        "deprecated": true,
         "security": [
           {
             "HTTPBasic": []
@@ -13273,7 +13362,7 @@
     "/api/auth/user": {
       "get": {
         "tags": [
-          "auth"
+          "Authentication"
         ],
         "summary": "Authorize",
         "operationId": "authorize_api_auth_user_get",
@@ -13288,16 +13377,18 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/auth/aws_credentials": {
       "get": {
         "tags": [
-          "auth"
+          "Authentication"
         ],
         "summary": "Get Aws Credentials",
         "operationId": "get_aws_credentials_api_auth_aws_credentials_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "data_product_name",
@@ -13342,74 +13433,39 @@
         }
       }
     },
-    "/.well-known/oauth-authorization-server": {
-      "get": {
-        "tags": [
-          "mcp"
-        ],
-        "summary": "Oauth Metadata",
-        "description": "OAuth 2.1 Authorization Server Metadata.",
-        "operationId": "oauth_metadata__well_known_oauth_authorization_server_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/.well-known/openid-configuration": {
-      "get": {
-        "tags": [
-          "mcp"
-        ],
-        "summary": "Openid Config",
-        "description": "OpenID Connect Discovery endpoint.",
-        "operationId": "openid_config__well_known_openid_configuration_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/.well-known/oauth-protected-resource": {
-      "get": {
-        "tags": [
-          "mcp"
-        ],
-        "summary": "Oauth Protected Resource",
-        "description": "OAuth 2.1 Protected Resource Metadata.",
-        "operationId": "oauth_protected_resource__well_known_oauth_protected_resource_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/register": {
+    "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
-          "mcp"
+          "Authentication"
         ],
-        "summary": "Register",
-        "description": "OAuth 2.1 Dynamic Client Registration endpoint.",
-        "operationId": "register_api_register_post",
+        "summary": "Get Device Token",
+        "operationId": "get_device_token",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "openid",
+              "title": "Scope"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -13418,20 +13474,149 @@
                 "schema": {}
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/": {
-      "get": {
-        "summary": "Root",
-        "operationId": "root__get",
+    "/api/v2/authn/device/jwt_token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Jwt Token",
+        "operationId": "get_jwt_token",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "device_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Device Code"
+            }
+          },
+          {
+            "name": "grant_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Grant Type"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authn/user": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authorize",
+        "operationId": "authorize",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authn/aws_credentials": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Aws Credentials",
+        "operationId": "get_aws_credentials",
+        "parameters": [
+          {
+            "name": "data_product_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Data Product Name"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Environment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AWSCredentials"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -13440,8 +13625,31 @@
     },
     "/api/version": {
       "get": {
+        "tags": [
+          "Version"
+        ],
+        "summary": "Get Version Old",
+        "operationId": "get_version_old_api_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/version": {
+      "get": {
+        "tags": [
+          "Version"
+        ],
         "summary": "Get Version",
-        "operationId": "get_version_api_version_get",
+        "operationId": "get_version",
         "responses": {
           "200": {
             "description": "Successful Response",

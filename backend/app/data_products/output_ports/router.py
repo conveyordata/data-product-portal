@@ -194,7 +194,7 @@ def get_event_history_old(
 
 
 @router.get(f"{route}/{{id}}/history")
-def get_event_history(
+def get_output_ports_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
     ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
