@@ -33,14 +33,23 @@ export function GenericDataOutputForm({
     const { t } = useTranslation();
     const uiMetadata = uiMetadataGroups as UIElementMetadata[] | undefined;
 
-    // Watch for conditional field dependencies
-    const watchedFields: Record<string, any> = {};
-    uiMetadata?.forEach((field) => {
-        if (field.dependsOn) {
-            const value = Form.useWatch(configurationFieldName(field.dependsOn.fieldName), form);
-            watchedFields[field.dependsOn.fieldName] = value;
-        }
-    });
+    // Get all unique field names that have dependencies
+    const fieldsToWatch = Array.from(
+        new Set(
+            (uiMetadata || [])
+                .filter((field) => field.depends_on)
+                .map((field) => field.depends_on!.fieldName)
+        )
+    );
+
+    // Watch each field individually - hooks must be called unconditionally
+    // We watch all potential fields that might be dependencies
+    const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
+    
+    // Build the watched fields map
+    const watchedFields: Record<string, any> = {
+        entire_schema: entireSchema,
+    };
 
     // Auto-populate fields based on sourceAligned and namespace
     useEffect(() => {
@@ -136,7 +145,7 @@ export function GenericDataOutputForm({
         let inputComponent;
         switch (type) {
             case 'checkbox':
-                inputComponent = <Checkbox checked={initial_value}>{t(label)}</Checkbox>;
+                inputComponent = <Checkbox>{t(label)}</Checkbox>;
                 break;
 
             case 'select':
