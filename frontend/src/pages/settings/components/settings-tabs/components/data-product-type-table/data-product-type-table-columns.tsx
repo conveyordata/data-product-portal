@@ -2,6 +2,7 @@ import { Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import type { DataProductTypesGetItem } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import type { DataProductIcon, DataProductTypesGetContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -18,8 +19,8 @@ export const getDataProductTypeTableColumns = ({
     t,
     handleRemove,
     handleEdit,
-}: Props): TableColumnsType<DataProductTypesGetContract> => {
-    const sorter = new Sorter<DataProductTypesGetContract>();
+}: Props): TableColumnsType<DataProductTypesGetItem> => {
+    const sorter = new Sorter<DataProductTypesGetItem>();
     return [
         {
             title: t('Id'),

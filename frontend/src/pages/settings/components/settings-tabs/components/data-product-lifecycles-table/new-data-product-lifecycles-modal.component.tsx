@@ -6,10 +6,9 @@ import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductLifecycleMutation,
     useUpdateDataProductLifecycleMutation,
-} from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+} from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-
 import styles from './data-product-lifecycles-table.module.scss';
 
 interface CreateLifecycleModalProps {
@@ -52,7 +51,15 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
             if (mode === 'create') {
                 await createDataProductLifecycle(lifeCycle);
             } else {
-                await editDataProductLifecycle(lifeCycle);
+                await editDataProductLifecycle({
+                    id: lifeCycle.id,
+                    dataProductLifeCycleUpdate: {
+                        name: lifeCycle.name,
+                        value: lifeCycle.value,
+                        color: lifeCycle.color,
+                        is_default: lifeCycle.is_default,
+                    },
+                });
             }
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
             form.resetFields();

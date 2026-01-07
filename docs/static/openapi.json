@@ -5585,8 +5585,8 @@
         "tags": [
           "Configuration - Data product lifecycles"
         ],
-        "summary": "Delete Data Product Lifecycle",
-        "operationId": "delete_data_product_lifecycle_api_data_product_lifecycles__id__delete",
+        "summary": "Remove Data Product Lifecycle",
+        "operationId": "remove_data_product_lifecycle_api_data_product_lifecycles__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -5764,8 +5764,8 @@
         "tags": [
           "Configuration - Data product lifecycles"
         ],
-        "summary": "Delete Data Product Lifecycle",
-        "operationId": "delete_data_product_lifecycle",
+        "summary": "Remove Data Product Lifecycle",
+        "operationId": "remove_data_product_lifecycle",
         "parameters": [
           {
             "name": "id",
@@ -6039,8 +6039,8 @@
         "tags": [
           "Configuration - Data product settings"
         ],
-        "summary": "Delete Data Product Setting",
-        "operationId": "delete_data_product_setting_api_data_product_settings__id__delete",
+        "summary": "Remove Data Product Setting",
+        "operationId": "remove_data_product_setting_api_data_product_settings__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -6308,8 +6308,8 @@
         "tags": [
           "Configuration - Data product settings"
         ],
-        "summary": "Delete Data Product Setting",
-        "operationId": "delete_data_product_setting",
+        "summary": "Remove Data Product Setting",
+        "operationId": "remove_data_product_setting",
         "parameters": [
           {
             "name": "id",

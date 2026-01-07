@@ -4,6 +4,9 @@ const services = [
     { name: 'empty', file: 'empty' },
     { name: 'Authorization - Role assignments', file: 'authorizationRoleAssignments' },
     { name: 'Authorization - Roles', file: 'authorizationRoles' },
+    { name: 'Configuration - Data product lifecycles', file: 'configurationDataProductLifecycles' },
+    { name: 'Configuration - Data product settings', file: 'configurationDataProductSettings' },
+    { name: 'Configuration - Data product types', file: 'configurationDataProductTypes' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
 ];
 
@@ -40,7 +43,7 @@ const config: ConfigFile = {
     apiImport: 'emptyApi',
     outputFiles,
     flattenArg: true,
-    hooks: { queries: true, lazyQueries: false, mutations: true },
+    hooks: { queries: true, lazyQueries: true, mutations: true },
 };
 
 export default config;

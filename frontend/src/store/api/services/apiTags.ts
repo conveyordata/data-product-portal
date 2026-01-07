@@ -165,5 +165,56 @@ api.enhanceEndpoints({
                 { type: TagTypes.History, id: result?.output_port_id },
             ],
         },
+
+        getDataProductsLifecycles: {
+            providesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+        createDataProductLifecycle: {
+            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+        removeDataProductLifecycle: {
+            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductLifecycle: {
+            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+
+        getDataProductsSettings: {
+            providesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+        createDataProductSetting: {
+            invalidatesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+        removeDataProductSetting: {
+            invalidatesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductSetting: {
+            invalidatesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+
+        getDataProductsTypes: {
+            providesTags: (response) => {
+                return response?.data_product_types
+                    ? [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }]
+                    : [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }];
+            },
+        },
+        getDataProductType: {
+            providesTags: (response) => {
+                return response?.id ? [{ type: TagTypes.DataProductType as const, id: response.id }] : [];
+            },
+        },
+        createDataProductType: {
+            invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+        },
+        removeDataProductType: {
+            invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductType: {
+            invalidatesTags: (response) => [
+                { type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProductType, id: response?.id },
+            ],
+        },
     },
 });

@@ -115,4 +115,5 @@ export const {
   useRemoveRoleMutation,
   useUpdateRoleMutation,
   useGetRolesQuery,
+  useLazyGetRolesQuery,
 } = injectedRtkApi;
