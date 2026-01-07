@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from app.data_products.output_port_technical_assets_link.model import (
         DataOutputDatasetAssociation,
     )
-    from app.data_products_datasets.model import DataProductDatasetAssociation
+    from app.data_products.output_ports.links.model import DataProductDatasetAssociation
 
 
 class Dataset(Base, BaseORM):

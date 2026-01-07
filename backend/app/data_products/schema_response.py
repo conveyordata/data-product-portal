@@ -11,15 +11,15 @@ from app.data_products.output_port_technical_assets_link.schema_response import 
     BaseDataOutputDatasetAssociationGet,
     BaseTechnicalAssetOutputPortAssociationGet,
 )
+from app.data_products.output_ports.links.schema import (
+    DataProductDatasetAssociation,
+    DataProductOutputPortAssociation,
+)
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.status import DataProductStatus
 from app.data_products.technical_assets.schema_response import (
     BaseDataOutputGet,
     BaseTechnicalAssetGet,
-)
-from app.data_products_datasets.schema import (
-    DataProductDatasetAssociation,
-    DataProductOutputPortAssociation,
 )
 from app.shared.schema import ORMModel
 

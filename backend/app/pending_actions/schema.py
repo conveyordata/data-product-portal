@@ -6,7 +6,9 @@ from app.authorization.role_assignments.data_product.schema import (
 from app.data_products.output_port_technical_assets_link.schema_response import (
     DataOutputDatasetAssociationsGet,
 )
-from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
+from app.data_products.output_ports.links.schema_response import (
+    DataProductDatasetAssociationsGet,
+)
 from app.pending_actions.enums import PendingActionTypes
 
 

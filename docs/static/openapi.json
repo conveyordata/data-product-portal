@@ -6346,10 +6346,11 @@
     "/api/data_product_dataset_links/approve/{id}": {
       "post": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Links"
         ],
         "summary": "Approve Data Product Link",
         "operationId": "approve_data_product_link_api_data_product_dataset_links_approve__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6362,6 +6363,67 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/links/approve": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Links"
+        ],
+        "summary": "Approve Output Port As Input Port",
+        "operationId": "approve_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6387,10 +6449,11 @@
     "/api/data_product_dataset_links/deny/{id}": {
       "post": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Links"
         ],
         "summary": "Deny Data Product Link",
         "operationId": "deny_data_product_link_api_data_product_dataset_links_deny__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6403,6 +6466,67 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/links/deny": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Links"
+        ],
+        "summary": "Deny Output Port As Input Port",
+        "operationId": "deny_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6428,10 +6552,11 @@
     "/api/data_product_dataset_links/remove/{id}": {
       "post": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Links"
         ],
         "summary": "Remove Data Product Link",
         "operationId": "remove_data_product_link_api_data_product_dataset_links_remove__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6466,10 +6591,71 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/links/remove": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Links"
+        ],
+        "summary": "Remove Output Port As Input Port",
+        "operationId": "remove_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_product_dataset_links/actions": {
       "get": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Links"
         ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_data_product_dataset_links_actions_get",
@@ -13309,6 +13495,20 @@
         ],
         "title": "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest"
       },
+      "ApproveOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "ApproveOutputPortAsInputPortRequest"
+      },
       "AuthorizationAction": {
         "type": "integer",
         "enum": [
@@ -16691,6 +16891,20 @@
         ],
         "title": "DenyLinkBetweenTechnicalAssetAndOutputPortRequest"
       },
+      "DenyOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "DenyOutputPortAsInputPortRequest"
+      },
       "Domain": {
         "properties": {
           "id": {
@@ -19317,6 +19531,20 @@
           "database"
         ],
         "title": "RedshiftDataOutput"
+      },
+      "RemoveOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "RemoveOutputPortAsInputPortRequest"
       },
       "RequestDataProductRoleAssignment": {
         "properties": {

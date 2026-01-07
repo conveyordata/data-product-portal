@@ -33,6 +33,7 @@ from app.core.namespace.validation import (
 from app.data_products import email
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.links.model import DataProductDatasetAssociation
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -70,7 +71,6 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponse,
 )
 from app.data_products.technical_assets.service import DataOutputService
-from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent

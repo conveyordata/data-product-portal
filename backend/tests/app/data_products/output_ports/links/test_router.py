@@ -20,7 +20,8 @@ from tests.factories import (
     UserFactory,
 )
 
-DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
+OLD_DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
+DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/v2/data_products/{}/output_ports/{}/links"
 OLD_DATA_PRODUCTS_ENDPOINT = "/api/data_products"
 DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 
@@ -198,19 +199,16 @@ class TestDataProductsDatasetsRouter:
         assert link.status_code == 200
 
     def test_approve_data_product_link(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
-        )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
-        )
+        link = self.create_link_with_status()
         response = self.approve_default_data_product_dataset_link(client, link.id)
         assert response.status_code == 200
+
+    def test_approve_output_port_as_input_port(self, client):
+        link = self.create_link_with_status()
+        response = self.approve_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
+        assert response.status_code == 200, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_approve_data_product_link_by_admin(self, client):
@@ -235,19 +233,34 @@ class TestDataProductsDatasetsRouter:
             == "You don't have permission to perform this action"
         )
 
-    def test_deny_data_product_link(self, client):
+    @staticmethod
+    def create_link_with_status(status: DecisionStatus = DecisionStatus.PENDING):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+            permissions=[
+                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+            ],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
+        return DataProductDatasetAssociationFactory(
+            dataset=ds,
+            status=status,
         )
+
+    def test_deny_data_product_link(self, client):
+        link = self.create_link_with_status()
         response = self.deny_default_data_product_dataset_link(client, link.id)
         assert response.status_code == 200
+
+    def test_deny_output_port_as_input_port(self, client):
+        link = self.create_link_with_status()
+        response = self.deny_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
+        assert response.status_code == 200, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_deny_data_product_link_by_admin(self, client):
@@ -273,16 +286,15 @@ class TestDataProductsDatasetsRouter:
         )
 
     def test_remove_data_product_link(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.DATASET__REVOKE_DATAPRODUCT_ACCESS],
-        )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataProductDatasetAssociationFactory(dataset=ds)
-
+        link = self.create_link_with_status()
         response = self.remove_data_product_dataset_link(client, link.id)
+        assert response.status_code == 200, response.text
+
+    def test_remove_output_port_as_input_port(self, client):
+        link = self.create_link_with_status()
+        response = self.remove_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
@@ -326,7 +338,7 @@ class TestDataProductsDatasetsRouter:
     def test_get_pending_actions_no_action(self, client):
         ds = DatasetFactory()
         DataProductDatasetAssociationFactory(dataset=ds)
-        response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
+        response = client.get(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
 
     def test_get_pending_actions(self, client):
@@ -355,7 +367,7 @@ class TestDataProductsDatasetsRouter:
             client, data_product_id=data_product.id, dataset_id=ds.id
         )
         assert response.status_code == 200
-        response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
+        response = client.get(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
         assert response.json()[0]["data_product_id"] == str(data_product.id)
         assert response.json()[0]["status"] == "pending"
         assert response.json()[0]["justification"] == "This is my birth right!"
@@ -381,7 +393,7 @@ class TestDataProductsDatasetsRouter:
             client, data_product.id, ds.id
         )
         assert response.status_code == 200
-        response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
+        response = client.get(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
 
     def test_history_event_created_on_remove_link(self, client):
@@ -498,15 +510,42 @@ class TestDataProductsDatasetsRouter:
     def approve_default_data_product_dataset_link(
         client: TestClient, link_id
     ) -> Response:
-        return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/approve/{link_id}")
+        return client.post(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/approve/{link_id}")
+
+    @staticmethod
+    def approve_output_port_as_input_port(
+        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve",
+            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+        )
 
     @staticmethod
     def deny_default_data_product_dataset_link(client: TestClient, link_id) -> Response:
-        return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/deny/{link_id}")
+        return client.post(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/deny/{link_id}")
+
+    @staticmethod
+    def deny_output_port_as_input_port(
+        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/deny",
+            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+        )
 
     @staticmethod
     def remove_data_product_dataset_link(client: TestClient, link_id) -> Response:
-        return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/remove/{link_id}")
+        return client.post(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/remove/{link_id}")
+
+    @staticmethod
+    def remove_output_port_as_input_port(
+        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/remove",
+            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+        )
 
     @staticmethod
     def request_data_product_dataset_unlink_old(

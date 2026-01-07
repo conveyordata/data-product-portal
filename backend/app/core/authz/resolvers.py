@@ -13,9 +13,9 @@ from app.data_products.model import DataProduct
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
+from app.data_products.output_ports.links.model import DataProductDatasetAssociation
 from app.data_products.output_ports.model import Dataset
 from app.data_products.technical_assets.model import DataOutput
-from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 
 Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], None]
