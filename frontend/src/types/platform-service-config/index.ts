@@ -1,7 +1,1 @@
-export type {
-    PlatformServiceConfigContract,
-    PlatformServiceConfigCreateFormSchema,
-    PlatformServiceConfigCreateRequest,
-    PlatformServiceConfigGetResponse,
-    PlatformServiceConfigMapping,
-} from './platform-service-config.ts';
+export type { PlatformServiceConfigGetResponse } from './platform-service-config.ts';
