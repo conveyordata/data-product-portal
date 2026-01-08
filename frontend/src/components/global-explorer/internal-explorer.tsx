@@ -19,7 +19,7 @@ import { useNodeEditor } from './use-node-editor';
 
 function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void): Node[] {
     // Parse regular nodes
-    const regularNodes = nodes
+    return nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .map((node) => {
             let extra_attributes = {};
@@ -56,9 +56,7 @@ function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void):
             }
             // For now perma disable domains
             return parseRegularNode(node, setNodeId, false, true, extra_attributes);
-        });
-
-    return regularNodes; // Skip domain nodes for clarity and reduced clutter
+        }); // Skip domain nodes for clarity and reduced clutter
 }
 
 function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | null) {
@@ -117,10 +115,10 @@ function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | nu
 export default function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
     // Also includes a sidebar to select nodes
-
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout } = useNodeEditor();
-    const currentInstance = useReactFlow();
     const { token } = theme.useToken();
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout } = useNodeEditor();
+    const { fitView } = useReactFlow();
+
     const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
         dataProductsEnabled: true,
         datasetsEnabled: true,
@@ -135,9 +133,7 @@ export default function InternalFullExplorer() {
             includeDatasets: sidebarFilters.datasetsEnabled,
             includeDomains: sidebarFilters.domainsEnabled,
         },
-        {
-            skip: false,
-        },
+        { skip: false },
     );
 
     // Helper function to apply highlighting logic
@@ -147,7 +143,7 @@ export default function InternalFullExplorer() {
             const nodes = parseFullNodes(graph.nodes, setNodeId);
             const edges = parseEdges(graph.edges, token);
 
-            // Explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
+            // Explicitly specify straight edge so it doesn't default to default edge (which is a Bézier curve)
             const straightEdges = edges.map((edge) => ({
                 ...edge,
                 type: CustomEdgeTypes.StraightEdge,
@@ -174,50 +170,51 @@ export default function InternalFullExplorer() {
     useEffect(() => {
         // Give React Flow time to update its internals
         const timeout = setTimeout(() => {
-            currentInstance.fitView();
+            fitView();
             setNodeId(null); // Reset nodeId when the graph is updated
         }, 50); // 50ms is usually enough
 
         return () => clearTimeout(timeout);
-    }, [currentInstance]);
+    }, [fitView]);
 
     // Custom node click handler
-    function handleNodeClick(_event: MouseEvent | undefined, node: Node) {
-        if (node) {
-            setNodeId(node.id);
+    const handleNodeClick = useCallback(
+        (_event: MouseEvent | undefined, node: Node) => {
+            if (node) {
+                setNodeId(node.id);
 
-            setTimeout(() => {
-                // Get connected nodes for fitting view
-                const connectedNodeIds = new Set<string>();
-                connectedNodeIds.add(node.id);
+                setTimeout(() => {
+                    // Get connected nodes for fitting view
+                    const connectedNodeIds = new Set<string>();
+                    connectedNodeIds.add(node.id);
 
-                edges.forEach((edge) => {
-                    if (edge.source === node.id) {
-                        connectedNodeIds.add(edge.target);
-                    }
-                    if (edge.target === node.id) {
-                        connectedNodeIds.add(edge.source);
-                    }
-                });
+                    edges.forEach((edge) => {
+                        if (edge.source === node.id) {
+                            connectedNodeIds.add(edge.target);
+                        }
+                        if (edge.target === node.id) {
+                            connectedNodeIds.add(edge.source);
+                        }
+                    });
 
-                const connectedNodes = nodes.filter((n) => connectedNodeIds.has(n.id));
+                    const connectedNodes = nodes.filter((n) => connectedNodeIds.has(n.id));
 
-                currentInstance.fitView({
-                    ...defaultFitViewOptions,
-                    nodes: connectedNodes,
-                    padding: 0.3,
-                });
-            }, 150);
-        }
-    }
+                    fitView({
+                        ...defaultFitViewOptions,
+                        nodes: connectedNodes,
+                        padding: 0.3,
+                    });
+                }, 150);
+            }
+        },
+        [fitView, nodes, edges],
+    );
 
     // Function to clear selection
     const handleBackgroundClick = useCallback(() => {
         setNodeId(null);
-        setTimeout(() => {
-            currentInstance.fitView(defaultFitViewOptions);
-        }, 50);
-    }, [currentInstance]);
+        setTimeout(() => fitView(defaultFitViewOptions), 50);
+    }, [fitView]);
 
     if (isFetching) {
         return <LoadingSpinner />;

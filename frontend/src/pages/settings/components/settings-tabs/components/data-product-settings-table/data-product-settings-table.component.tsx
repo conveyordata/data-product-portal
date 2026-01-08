@@ -21,7 +21,7 @@ type Props = {
 export function DataProductSettingsTable({ scope }: Props) {
     const { t } = useTranslation();
     const { data: dataProductSettings = undefined, isFetching } = useGetDataProductsSettingsQuery();
-    console.log(isFetching);
+
     const filteredSettings = useMemo(() => {
         return dataProductSettings?.data_product_settings.filter((setting) => setting.scope === scope) ?? [];
     }, [dataProductSettings, scope]);

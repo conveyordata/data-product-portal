@@ -61,11 +61,9 @@ export const AuthLayout = () => {
 
     useEffect(() => {
         if (!isOidcEnabled && !user) {
-            handleAuthorizeUser().then(() => {
-                navigate({ search: '' });
-            });
+            handleAuthorizeUser();
         }
-    }, [handleAuthorizeUser, navigate, user]);
+    }, [handleAuthorizeUser, user]);
 
     useEffect(() => {
         // This gets called when the user is authenticated

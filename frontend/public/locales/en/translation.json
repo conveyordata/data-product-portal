@@ -189,6 +189,7 @@
     "{{first_name}} {{last_name}} as {{role_name}}": "{{first_name}} {{last_name}} as {{role_name}}",
     "Data Products": "Data Products",
     "Output ports": "Output ports",
+    "Select a node": "Select a node",
     "Search event history": "Search event history",
     "Showing {{range0}}-{{range1}} of {{total}} history items": "Showing {{range0}}-{{range1}} of {{total}} history items",
     "Event description": "Event description",
