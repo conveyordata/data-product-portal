@@ -98,7 +98,7 @@ def update_data_product_setting(
         ),
     ],
 )
-def delete_data_product_setting(
+def remove_data_product_setting(
     id: UUID,
     db: Session = Depends(get_db_session),
 ) -> None:

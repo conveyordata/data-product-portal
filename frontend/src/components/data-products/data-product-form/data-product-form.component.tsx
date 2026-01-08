@@ -9,10 +9,10 @@ import { useDebouncedCallback } from 'use-debounce';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
+import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import {
     useCreateDataProductMutation,
     useGetDataProductByIdQuery,
@@ -53,9 +53,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         dataProductId || '',
         { skip: mode === 'create' || !dataProductId },
     );
-    const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
+    const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
-    const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
+    const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
+        useGetDataProductsTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags = [], isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
@@ -100,7 +101,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         isFetchingTags ||
         isFetchingLifecycles;
 
-    const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
+    const dataProductTypeSelectOptions = dataProductTypes?.data_product_types.map((type) => ({
+        label: type.name,
+        value: type.id,
+    }));
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
@@ -327,7 +331,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     loading={isFetchingLifecycles}
                     allowClear
                     showSearch
-                    options={lifecycles.map((lifecycle) => ({ value: lifecycle.id, label: lifecycle.name }))}
+                    options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
+                        value: lifecycle.id,
+                        label: lifecycle.name,
+                    }))}
                     filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>

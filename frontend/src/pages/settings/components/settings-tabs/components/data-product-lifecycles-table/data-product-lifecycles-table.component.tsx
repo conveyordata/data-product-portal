@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
-    useGetAllDataProductLifecyclesQuery,
+    useGetDataProductsLifecyclesQuery,
     useRemoveDataProductLifecycleMutation,
-} from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+} from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import styles from './data-product-lifecycles-table.module.scss';
@@ -15,7 +15,7 @@ import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.compon
 
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
-    const { data: dataProductLifecycles = [], isFetching } = useGetAllDataProductLifecyclesQuery();
+    const { data: dataProductLifecycles = undefined, isFetching } = useGetDataProductsLifecyclesQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductLifeCycleContract | undefined>(undefined);
@@ -62,7 +62,7 @@ export function DataProductLifecyclesTable() {
                 </Button>
             </Flex>
             <Table<DataProductLifeCycleContract>
-                dataSource={dataProductLifecycles}
+                dataSource={dataProductLifecycles?.data_product_life_cycles}
                 columns={columns}
                 rowKey={(record) => record.id}
                 loading={isFetching}

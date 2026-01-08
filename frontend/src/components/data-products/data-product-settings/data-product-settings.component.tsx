@@ -4,22 +4,20 @@ import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'reac
 import { useTranslation } from 'react-i18next';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
+import {
+    type DataProductSettingsGetItem,
+    useGetDataProductsSettingsQuery,
+} from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useCreateDataProductSettingValueMutation,
     useCreateDatasetSettingValueMutation,
-    useGetAllDataProductSettingsQuery,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type {
-    DataProductSettingContract,
-    DataProductSettingValueCreateRequest,
-    DataProductSettingValueForm,
-} from '@/types/data-product-setting';
-
+import type { DataProductSettingValueCreateRequest, DataProductSettingValueForm } from '@/types/data-product-setting';
 import styles from './data-product-settings.module.scss';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
@@ -36,9 +34,9 @@ export function DataProductSettings({ id, scope }: Props) {
     const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(id || '', {
         skip: !id || scope !== 'dataset',
     });
-    const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
+    const { data: settings, isFetching } = useGetDataProductsSettingsQuery();
     const filteredSettings = useMemo(() => {
-        return settings?.filter((setting) => setting.scope === scope);
+        return settings?.data_product_settings.filter((setting) => setting.scope === scope);
     }, [scope, settings]);
 
     const { data: product_access } = useCheckAccessQuery(
@@ -66,7 +64,7 @@ export function DataProductSettings({ id, scope }: Props) {
     const [form] = Form.useForm();
     const timeoutRef = useRef<Timeout | null>(null);
 
-    const updatedSettings: (DataProductSettingContract & { value: string })[] = useMemo(() => {
+    const updatedSettings: (DataProductSettingsGetItem & { value: string })[] = useMemo(() => {
         if (filteredSettings) {
             if (scope === 'dataproduct') {
                 return filteredSettings.map((setting) => {
@@ -158,7 +156,7 @@ export function DataProductSettings({ id, scope }: Props) {
             {} as Record<string, typeof updatedSettings>,
         );
 
-        const renderSetting = (setting: DataProductSettingContract): ReactElement | null => {
+        const renderSetting = (setting: DataProductSettingsGetItem): ReactElement | null => {
             switch (setting.type) {
                 case 'checkbox':
                     return (
