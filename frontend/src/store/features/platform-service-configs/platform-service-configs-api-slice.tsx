@@ -1,15 +1,7 @@
-import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
+import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import type {
-    PlatformServiceConfigCreateRequest,
-    PlatformServiceConfigGetResponse,
-} from '@/types/platform-service-config';
-
-type PlatformServiceConfigRequest = {
-    platformId: string;
-    serviceId: string;
-};
+import type { PlatformServiceConfigGetResponse } from '@/types/platform-service-config';
 
 export const platformServiceConfigTags: string[] = [TagTypes.PlatformServiceConfig];
 export const platformServiceConfigsApiSlice = baseApiSlice
@@ -29,39 +21,10 @@ export const platformServiceConfigsApiSlice = baseApiSlice
                           ]
                         : [{ type: TagTypes.PlatformServiceConfig as const, id: STATIC_TAG_ID.LIST }],
             }),
-            getPlatformServiceConfig: builder.query<PlatformServiceConfigGetResponse, PlatformServiceConfigRequest>({
-                query: ({ platformId, serviceId }) => ({
-                    url: buildUrl(ApiUrl.PlatformServiceConfig, { platformId, serviceId }),
-                    method: 'GET',
-                }),
-                providesTags: (result) =>
-                    result ? [{ type: TagTypes.PlatformServiceConfig as const, id: result.id }] : [],
-            }),
-            getPlatformServiceConfigById: builder.query<PlatformServiceConfigGetResponse, string>({
-                query: (configId) => ({
-                    url: buildUrl(ApiUrl.PlatformServiceConfigById, { configId }),
-                    method: 'GET',
-                }),
-                providesTags: (result) =>
-                    result ? [{ type: TagTypes.PlatformServiceConfig as const, id: result.id }] : [],
-            }),
-            createPlatformServiceConfig: builder.mutation<void, PlatformServiceConfigCreateRequest>({
-                query: ({ platformId, serviceId, config }) => ({
-                    url: buildUrl(ApiUrl.PlatformServiceConfig, { platformId, serviceId }),
-                    method: 'POST',
-                    data: config,
-                }),
-                invalidatesTags: [{ type: TagTypes.PlatformServiceConfig as const, id: STATIC_TAG_ID.LIST }],
-            }),
         }),
         overrideExisting: false,
     });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const {
-    useCreatePlatformServiceConfigMutation,
-    useGetAllPlatformsConfigsQuery,
-    useGetPlatformServiceConfigByIdQuery,
-    useGetPlatformServiceConfigQuery,
-} = platformServiceConfigsApiSlice;
+export const { useGetAllPlatformsConfigsQuery } = platformServiceConfigsApiSlice;
