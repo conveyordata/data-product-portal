@@ -47,7 +47,6 @@ h11 = "^0.16.0"
 fastmcp = "2.14.2"
 posthog = "^7.5.0"
 authlib = "1.6.6"
-filelock = "^3.20.2"
 
 [tool.poetry.group.test]
 optional = true
