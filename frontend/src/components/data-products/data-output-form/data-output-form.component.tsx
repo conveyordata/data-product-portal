@@ -136,7 +136,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 await createDataOutput({ id: dataProductId, dataOutput: values }).unwrap();
                 dispatchMessage({ content: t('Technical asset created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
-                navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+                navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
 
                 form.resetFields();
             }
@@ -291,7 +291,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     placeholder={t('Select technical asset tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
-                    filterOption={selectFilterOptionByLabel}
+                    showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>

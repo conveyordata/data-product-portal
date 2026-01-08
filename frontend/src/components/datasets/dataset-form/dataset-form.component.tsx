@@ -15,7 +15,7 @@ import {
     Tooltip,
 } from 'antd';
 import type { TFunction } from 'i18next';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type Ref, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
@@ -64,7 +64,7 @@ type Props = {
     dataProductId?: string;
     dataOutputId?: string;
     modalCallbackOnSubmit?: () => void;
-    formRef?: React.Ref<FormInstance<DatasetCreateFormSchema>>;
+    formRef?: Ref<FormInstance<DatasetCreateFormSchema>>;
 };
 
 const { TextArea } = Input;
@@ -191,7 +191,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     navigate(createDataOutputIdPath(dataOutputId, dataProductId));
                 } else {
                     if (dataProductId) {
-                        navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+                        navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
                     } else {
                         navigate(createDatasetIdPath(response.id));
                     }
@@ -354,7 +354,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                         loading={isFetchingUsers}
                         mode={'multiple'}
                         options={userSelectOptions}
-                        filterOption={selectFilterOptionByLabelAndValue}
+                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                         tokenSeparators={[',']}
                         allowClear
                     />
@@ -373,12 +373,11 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 <Select
                     loading={isFetchingLifecycles}
                     allowClear
-                    showSearch
+                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
                         value: lifecycle.id,
                         label: lifecycle.name,
                     }))}
-                    filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
@@ -400,7 +399,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     placeholder={t('Select output port tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
-                    filterOption={selectFilterOptionByLabel}
+                    showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
