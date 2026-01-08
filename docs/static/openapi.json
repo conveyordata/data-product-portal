@@ -7883,6 +7883,31 @@
         }
       }
     },
+    "/api/v2/technical_assets/platform-tiles": {
+      "get": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Get Platform Tiles",
+        "operationId": "get_platform_tiles",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformTile"
+                  },
+                  "type": "array",
+                  "title": "Response Get Platform Tiles Api V2 Technical Assets Platform Tiles Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/domains": {
       "get": {
         "tags": [
@@ -19484,6 +19509,48 @@
         ],
         "title": "PlatformServiceConfiguration"
       },
+      "PlatformTile": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "icon_name": {
+            "type": "string",
+            "title": "Icon Name"
+          },
+          "has_menu": {
+            "type": "boolean",
+            "title": "Has Menu",
+            "default": true
+          },
+          "has_config": {
+            "type": "boolean",
+            "title": "Has Config",
+            "default": true
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformTile"
+            },
+            "type": "array",
+            "title": "Children",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value",
+          "icon_name"
+        ],
+        "title": "PlatformTile",
+        "description": "Represents a platform tile in the UI"
+      },
       "Prototype": {
         "type": "integer",
         "enum": [
@@ -20894,6 +20961,16 @@
               }
             ],
             "title": "Parent Platform"
+          },
+          "platform_tile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlatformTile"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

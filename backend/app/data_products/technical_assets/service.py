@@ -38,6 +38,7 @@ from app.data_products.technical_assets.schema_request import (
 from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
+    PlatformTile,
     UIElementMetadataResponse,
     UpdateTechnicalAssetResponse,
 )
@@ -296,3 +297,60 @@ class DataOutputService:
                 )
             )
         return ui_metadata_list
+
+    def get_platform_tiles(self, configs: Sequence) -> Sequence[PlatformTile]:
+        """Build the complete platform tile structure for the UI"""
+
+        # Get all metadata
+        all_metadata = self.get_technical_asset_ui_metadata()
+
+        # Group by parent
+        parent_tiles: dict[str, PlatformTile] = {}
+        child_tiles: dict[str, list[PlatformTile]] = {}
+
+        for meta in all_metadata:
+            # Check if this platform has configuration
+            has_config = any(
+                config.service.name.lower() == meta.display_name.lower()
+                for config in configs
+            )
+
+            if not has_config:
+                continue
+
+            tile = PlatformTile(
+                label=meta.display_name,
+                value=meta.platform,
+                icon_name=meta.icon_name,
+                has_menu=True,
+                has_config=True,
+                children=[],
+            )
+
+            if meta.parent_platform:
+                # This is a child tile
+                if meta.parent_platform not in child_tiles:
+                    child_tiles[meta.parent_platform] = []
+                child_tiles[meta.parent_platform].append(tile)
+
+                # Ensure parent exists
+                if meta.parent_platform not in parent_tiles:
+                    parent_tiles[meta.parent_platform] = PlatformTile(
+                        label=meta.parent_platform.upper(),
+                        value=meta.parent_platform,
+                        icon_name=f"{meta.parent_platform}-logo.svg",
+                        has_menu=True,
+                        has_config=True,
+                        children=[],
+                    )
+            else:
+                # This is a top-level tile
+                if meta.platform not in parent_tiles:
+                    parent_tiles[meta.platform] = tile
+
+        # Attach children to parents
+        for parent_key, children in child_tiles.items():
+            if parent_key in parent_tiles:
+                parent_tiles[parent_key].children = children
+
+        return list(parent_tiles.values())

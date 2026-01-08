@@ -131,6 +131,17 @@ class UpdateTechnicalAssetResponse(ORMModel):
     id: UUID
 
 
+class PlatformTile(ORMModel):
+    """Represents a platform tile in the UI"""
+
+    label: str
+    value: str  # platform identifier
+    icon_name: str
+    has_menu: bool = True
+    has_config: bool = True
+    children: list["PlatformTile"] = []
+
+
 class UIElementMetadataResponse(ORMModel):
     ui_metadata: Sequence[UIElementMetadata]
     plugin: str
@@ -140,3 +151,4 @@ class UIElementMetadataResponse(ORMModel):
     display_name: str  # Display name for the platform tile
     icon_name: str  # Icon filename (e.g., "s3-logo.svg")
     parent_platform: Optional[str] = None  # e.g., "aws" for s3, redshift, glue
+    platform_tile: Optional[PlatformTile] = None  # Complete tile structure

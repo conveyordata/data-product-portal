@@ -5,12 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
-import awsLogo from '@/assets/icons/aws-logo.svg?react';
-import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
-import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
-import glueLogo from '@/assets/icons/glue-logo.svg?react';
-import s3Logo from '@/assets/icons/s3-logo.svg?react';
-import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
@@ -19,6 +13,7 @@ import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useGetDataOutputUIElementMetadataQuery,
+    useGetPlatformTilesQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
@@ -30,11 +25,11 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
-import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import type { DataPlatform } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
-import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
+import { getIcon } from '@/utils/icon-loader';
 
 import styles from './data-output-form.module.scss';
 import { GenericDataOutputForm } from './generic-data-output-form.component';
@@ -94,99 +89,26 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
-    // Build platform tiles dynamically from metadata
+    // Get platform tiles from backend
+    const { data: platformTilesData } = useGetPlatformTilesQuery();
+
+    // Transform backend tiles to frontend format with icon components
     const dataPlatforms = useMemo(() => {
-        if (!uiMetadataGroups || !platformConfig) {
+        if (!platformTilesData) {
             return [];
         }
 
-        // Icon mapping
-        const iconMap: Record<string, any> = {
-            's3-logo.svg': s3Logo,
-            'aws-redshift-logo.svg': redshiftLogo,
-            'glue-logo.svg': glueLogo,
-            'snowflake-logo.svg': snowflakeLogo,
-            'databricks-logo.svg': databricksLogo,
-            'aws-logo.svg': awsLogo,
-        };
-
-        // Group by parent platform
-        const parentPlatforms = new Map<string, CustomDropdownItemProps<DataPlatform>>();
-        const childPlatforms = new Map<string, CustomDropdownItemProps<DataPlatform>[]>();
-
-        uiMetadataGroups.forEach((meta) => {
-            // Only include platforms that have config
-            const hasConfig = platformConfig.some(
-                (config) => config.service.name.toLowerCase() === meta.display_name.toLowerCase(),
-            );
-
-            if (!hasConfig) {
-                return;
-            }
-
-            const platformItem: CustomDropdownItemProps<DataPlatform> = {
-                label: t(meta.display_name),
-                value: meta.platform as DataPlatform,
-                icon: iconMap[meta.icon_name] || iconMap['s3-logo.svg'],
-                hasMenu: true,
-                hasConfig: true,
-                children: [],
-            };
-
-            if (meta.parent_platform) {
-                // This is a child platform
-                if (!childPlatforms.has(meta.parent_platform)) {
-                    childPlatforms.set(meta.parent_platform, []);
-                }
-                childPlatforms.get(meta.parent_platform)!.push(platformItem);
-
-                // Ensure parent exists
-                if (!parentPlatforms.has(meta.parent_platform)) {
-                    parentPlatforms.set(meta.parent_platform, {
-                        label: t(meta.parent_platform.toUpperCase()),
-                        value: meta.parent_platform as DataPlatform,
-                        icon: iconMap[`${meta.parent_platform}-logo.svg`] || iconMap['aws-logo.svg'],
-                        hasMenu: true,
-                        hasConfig: true,
-                        children: [],
-                    });
-                }
-            } else {
-                // This is a top-level platform
-                if (!parentPlatforms.has(meta.platform)) {
-                    parentPlatforms.set(meta.platform, platformItem);
-                }
-            }
+        const transformTile = (tile: any): CustomDropdownItemProps<DataPlatform> => ({
+            label: t(tile.label),
+            value: tile.value as DataPlatform,
+            icon: getIcon(tile.icon_name),
+            hasMenu: tile.has_menu,
+            hasConfig: tile.has_config,
+            children: tile.children?.map(transformTile) || [],
         });
 
-        // Attach children to parents
-        parentPlatforms.forEach((parent, key) => {
-            if (childPlatforms.has(key)) {
-                parent.children = childPlatforms.get(key);
-            }
-        });
-
-        return Array.from(parentPlatforms.values());
-    }, [uiMetadataGroups, platformConfig, t]);
-
-    const dataPlatformsOld = useMemo(
-        () =>
-            getDataPlatforms(t)
-                // Configured platforms
-                .filter(
-                    (platform) =>
-                        platform.hasConfig && platformConfig?.some((config) => config.platform.name === platform.label),
-                )
-                // Configured services
-                .map((platform) => {
-                    const platformConfigs = platformConfig?.filter((config) => config.platform.name === platform.label);
-                    platform.children = platform.children?.filter((child) =>
-                        platformConfigs?.some((config) => config.service.name === child.label),
-                    );
-                    return platform;
-                }),
-        [platformConfig, t],
-    );
+        return platformTilesData.map(transformTile);
+    }, [platformTilesData, t]);
 
     const platformServiceConfigMap = useMemo(() => {
         const map = new Map<DataPlatform, ServiceConfig>();

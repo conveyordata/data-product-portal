@@ -191,6 +191,12 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 method: 'GET',
             }),
         }),
+        getPlatformTiles: builder.query<any[], void>({
+            query: () => ({
+                url: '/api/v2/technical_assets/platform-tiles',
+                method: 'GET',
+            }),
+        }),
     }),
 
     overrideExisting: false,
@@ -210,4 +216,5 @@ export const {
     useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,
     useGetDataOutputUIElementMetadataQuery,
+    useGetPlatformTilesQuery,
 } = dataOutputsApiSlice;

@@ -1,6 +1,4 @@
-from typing import Literal, Optional
-
-from sqlalchemy import Sequence
+from typing import List, Literal, Optional
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSS3Config,
@@ -45,25 +43,23 @@ class S3DataOutput(BaseDataOutputConfiguration):
         )
 
     @classmethod
-    def get_UI_metadata(cls) -> Sequence[UIElementMetadata]:
+    def get_UI_metadata(cls) -> List[UIElementMetadata]:
         base_metadata = super().get_UI_metadata()
-        base_metadata.extend(
-            [
-                UIElementMetadata(
-                    name="bucket",
-                    type=UIElementType.Select,
-                    label="Bucket",
-                    required=True,
-                ),
-                UIElementMetadata(
-                    name="path",
-                    label="Path",
-                    type=UIElementType.String,
-                    tooltip="The name of the path to give write access to",
-                    required=True,
-                ),
-            ]
-        )
+        base_metadata += [
+            UIElementMetadata(
+                name="bucket",
+                type=UIElementType.Select,
+                label="Bucket",
+                required=True,
+            ),
+            UIElementMetadata(
+                name="path",
+                label="Path",
+                type=UIElementType.String,
+                tooltip="The name of the path to give write access to",
+                required=True,
+            ),
+        ]
         return base_metadata
 
     @classmethod

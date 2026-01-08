@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Self, Sequence
+from typing import List, Literal, Optional, Self
 
 from pydantic import model_validator
 
@@ -62,46 +62,44 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
         )
 
     @classmethod
-    def get_UI_metadata(cls) -> Sequence[UIElementMetadata]:
+    def get_UI_metadata(cls) -> List[UIElementMetadata]:
         base_metadata = super().get_UI_metadata()
-        base_metadata.extend(
-            [
-                UIElementMetadata(
-                    name="database",
-                    type=UIElementType.Select,
-                    label="Database",
-                    required=True,
-                    use_namespace_when_not_source_aligned=True,
-                    select_mode="tags",
-                    max_count=1,
-                    normalize_array=True,
-                ),
-                UIElementMetadata(
-                    name="schema",
-                    label="Schema suffix",
-                    type=UIElementType.String,
-                    tooltip="The name of the schema to give write access to. Defaults to data product namespace",
-                    required=False,
-                ),
-                UIElementMetadata(
-                    name="entire_schema",
-                    label="Entire schema",
-                    type=UIElementType.Checkbox,
-                    tooltip="Give write access to the entire schema instead of a single table",
-                    required=False,
-                    initial_value=True,
-                    value_prop_name="checked",
-                ),
-                UIElementMetadata(
-                    name="table",
-                    label="Table",
-                    type=UIElementType.String,
-                    tooltip="The name of the table to give write access to",
-                    required=True,
-                    depends_on={"fieldName": "entire_schema", "value": False},
-                ),
-            ]
-        )
+        base_metadata += [
+            UIElementMetadata(
+                name="database",
+                type=UIElementType.Select,
+                label="Database",
+                required=True,
+                use_namespace_when_not_source_aligned=True,
+                select_mode="tags",
+                max_count=1,
+                normalize_array=True,
+            ),
+            UIElementMetadata(
+                name="schema",
+                label="Schema suffix",
+                type=UIElementType.String,
+                tooltip="The name of the schema to give write access to. Defaults to data product namespace",
+                required=False,
+            ),
+            UIElementMetadata(
+                name="entire_schema",
+                label="Entire schema",
+                type=UIElementType.Checkbox,
+                tooltip="Give write access to the entire schema instead of a single table",
+                required=False,
+                initial_value=True,
+                value_prop_name="checked",
+            ),
+            UIElementMetadata(
+                name="table",
+                label="Table",
+                type=UIElementType.String,
+                tooltip="The name of the table to give write access to",
+                required=True,
+                depends_on={"fieldName": "entire_schema", "value": False},
+            ),
+        ]
         return base_metadata
 
     @classmethod

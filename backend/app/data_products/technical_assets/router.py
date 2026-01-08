@@ -29,6 +29,7 @@ from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
     GetTechnicalAssetsResponseItem,
+    PlatformTile,
     UIElementMetadataResponse,
     UpdateTechnicalAssetResponse,
 )
@@ -43,6 +44,9 @@ from app.events.schema_response import (
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.platform_service_configurations.service import (
+    PlatformServiceConfigurationService,
+)
 from app.resource_names.service import ResourceNameService
 from app.users.schema import User
 
@@ -430,3 +434,13 @@ def get_technical_asset_ui_metadata(
     db: Session = Depends(get_db_session),
 ) -> Sequence[UIElementMetadataResponse]:
     return DataOutputService(db).get_technical_asset_ui_metadata()
+
+
+@router.get("/v2/technical_assets/platform-tiles")
+def get_platform_tiles(
+    db: Session = Depends(get_db_session),
+) -> Sequence[PlatformTile]:
+    configs = PlatformServiceConfigurationService(
+        db
+    ).get_all_platform_service_configurations()
+    return DataOutputService(db).get_platform_tiles(configs)

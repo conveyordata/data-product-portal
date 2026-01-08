@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Sequence
+from typing import List, Optional
 
 from app.configuration.environments.platform_service_configurations.schema_response import (
     ConfigType,
@@ -43,7 +43,7 @@ class BaseDataOutputConfiguration(ORMModel):
         raise NotImplementedError
 
     @classmethod
-    def get_UI_metadata(cls) -> Sequence[UIElementMetadata]:
+    def get_UI_metadata(cls) -> List[UIElementMetadata]:
         return []
 
     @classmethod
