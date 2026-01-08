@@ -1,24 +1,23 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-
-import { authApiSlice } from '@/store/features/auth/auth-api-slice.ts';
-import type { UserContract } from '@/types/users';
+import { api } from '@/store/api/services/generated/completeServiceApi.ts';
+import type { User } from '@/store/api/services/generated/usersApi.ts';
 
 type AuthState = {
-    user: UserContract | null;
+    user?: User;
     isLoading: boolean;
 };
 
 const authSlice = createSlice({
     name: 'auth',
-    initialState: { user: null, isLoading: true } as AuthState,
+    initialState: { user: undefined, isLoading: true } as AuthState,
     reducers: {
         setCredentials: (
             state,
             {
                 payload: { user },
             }: PayloadAction<{
-                user: UserContract | null;
+                user?: User;
             }>,
         ) => {
             state.user = user;
@@ -26,7 +25,7 @@ const authSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addMatcher(authApiSlice.endpoints.authorize.matchFulfilled, (state, { payload }) => {
+        builder.addMatcher(api.endpoints.getCurrentUser.matchFulfilled, (state, { payload }) => {
             state.user = payload;
             state.isLoading = false;
         });

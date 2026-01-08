@@ -244,3 +244,9 @@ class TestUsersRouter:
             data_output.id
         )
         assert response.json()["pending_actions"][0]["status"] == "pending"
+
+    def test_get_current_user(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        response = client.get("/api/v2/users/current")
+        assert response.status_code == 200, response.text
+        assert response.json()["id"] == str(user.id)

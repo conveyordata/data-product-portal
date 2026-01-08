@@ -25,10 +25,10 @@ import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useMarkTourAsSeenMutation } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
-import { useSeenTourMutation } from '@/store/features/users/users-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import styles from './data-product-tabs.module.scss';
@@ -73,7 +73,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         setOpen(openTour);
     }, [openTour, dataProductId, posthog]);
 
-    const [setSeenTour] = useSeenTourMutation();
+    const [setSeenTour] = useMarkTourAsSeenMutation();
     const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
         dataProductId,
         { skip: !dataProductId },

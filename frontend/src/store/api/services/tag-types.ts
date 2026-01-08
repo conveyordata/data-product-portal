@@ -31,4 +31,5 @@ export enum TagTypes {
 
 export const STATIC_TAG_ID = {
     LIST: 'LIST',
+    CURRENT_USER: 'CURRENT_USER',
 } as const;

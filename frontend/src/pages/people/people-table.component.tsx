@@ -10,16 +10,19 @@ import {
     useModifyGlobalRoleAssignmentMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import {
+    type UsersGet,
+    useGetUsersQuery,
+    useSetCanBecomeAdminMutation,
+} from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useCanBecomeAdminMutation, useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
-import type { UsersGetContract } from '@/types/users/user.contract';
 import styles from './people-table.module.scss';
 import { getPeopleTableColumns } from './people-table-columns';
 
-function filterUsers(users: UsersGetContract, searchTerm?: string) {
+function filterUsers(users: UsersGet[], searchTerm?: string) {
     if (!searchTerm) {
         return users;
     }
@@ -32,7 +35,7 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
 
 export function PeoplePage() {
     const { t } = useTranslation();
-    const { data: users = [], isFetching } = useGetAllUsersQuery();
+    const { data: { users = [] } = {}, isFetching } = useGetUsersQuery();
     const { data: rolesResponse } = useGetRolesQuery(Scope.GLOBAL);
     const roles = rolesResponse?.roles ?? [];
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
@@ -44,7 +47,7 @@ export function PeoplePage() {
     const [updateGlobalRoleAssignment] = useModifyGlobalRoleAssignmentMutation();
     const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRoleAssignment] = useDeleteGlobalRoleAssignmentMutation();
-    const [canBecomeAdmin] = useCanBecomeAdminMutation();
+    const [canBecomeAdmin] = useSetCanBecomeAdminMutation();
 
     const onChangeGlobalRole = useCallback(
         (user_id: string, value: string, original: GlobalRoleAssignment | null) => {
@@ -137,7 +140,7 @@ export function PeoplePage() {
 
     return (
         <SearchPage title={t('People')} onSearch={setSearchTerm} searchPlaceholder={t('Search people by name')}>
-            <Table<UsersGetContract[0]>
+            <Table<UsersGet>
                 columns={columns}
                 dataSource={filteredUsers}
                 pagination={{

@@ -6,8 +6,8 @@ import { useSelector } from 'react-redux';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,

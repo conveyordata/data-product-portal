@@ -25,7 +25,7 @@ import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import {
     useGetDataProductByIdQuery,

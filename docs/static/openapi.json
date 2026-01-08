@@ -10296,6 +10296,27 @@
         }
       }
     },
+    "/api/v2/users/current": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User",
+        "operationId": "get_current_user",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/roles": {
       "post": {
         "tags": [
@@ -13359,28 +13380,6 @@
         }
       }
     },
-    "/api/auth/user": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Authorize",
-        "operationId": "authorize_api_auth_user_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/api/auth/aws_credentials": {
       "get": {
         "tags": [
@@ -13551,27 +13550,6 @@
         }
       }
     },
-    "/api/v2/authn/user": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Authorize",
-        "operationId": "authorize",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/authn/aws_credentials": {
       "get": {
         "tags": [
@@ -13621,6 +13599,29 @@
             }
           }
         }
+      }
+    },
+    "/api/auth/user": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authorize",
+        "description": "**DEPRECATED:** Please use current user endpoint instead",
+        "operationId": "authorize_api_auth_user_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/api/version": {

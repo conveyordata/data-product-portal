@@ -4,6 +4,7 @@ const services = [
     { name: 'empty', file: 'empty' },
     { name: 'Authorization - Role assignments', file: 'authorizationRoleAssignments' },
     { name: 'Authorization - Roles', file: 'authorizationRoles' },
+    { name: 'Users', file: 'users' },
     { name: 'Configuration - Data product lifecycles', file: 'configurationDataProductLifecycles' },
     { name: 'Configuration - Data product settings', file: 'configurationDataProductSettings' },
     { name: 'Configuration - Data product types', file: 'configurationDataProductTypes' },

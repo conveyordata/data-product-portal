@@ -1,5 +1,3 @@
-import type { GlobalRoleAssignment } from '@/types/roles';
-
 export interface UserContract {
     id: string;
     email: string;
@@ -9,9 +7,3 @@ export interface UserContract {
     has_seen_tour: boolean;
     can_become_admin: boolean;
 }
-
-export type UsersGetContract = Array<
-    UserContract & {
-        global_role: GlobalRoleAssignment;
-    }
->;
