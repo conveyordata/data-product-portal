@@ -3,6 +3,7 @@ import type { ConfigFile } from '@rtk-query/codegen-openapi';
 const services = [
     { name: 'empty', file: 'empty' },
     { name: 'Authorization - Role assignments', file: 'authorizationRoleAssignments' },
+    { name: 'Authorization - Roles', file: 'authorizationRoles' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
 ];
 

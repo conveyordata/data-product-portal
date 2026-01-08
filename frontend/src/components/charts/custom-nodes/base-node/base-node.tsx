@@ -6,8 +6,7 @@ import type { ComponentType, ForwardRefExoticComponent, ReactNode, SVGProps } fr
 
 import { DefaultHandle } from '@/components/charts/custom-handles/default-handle.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
-
+import type { DataProductRoleAssignment } from '@/types/roles';
 import styles from './base-node.module.scss';
 
 export type BaseNodeProps = Node<{
@@ -24,7 +23,7 @@ export type BaseNodeProps = Node<{
     sourceHandlePosition?: Position;
     isActive?: boolean;
     domain?: string;
-    assignments?: Array<DataProductRoleAssignmentContract>;
+    assignments?: DataProductRoleAssignment[];
     description?: string;
     centeredHandles?: boolean;
     onClick?: () => void;

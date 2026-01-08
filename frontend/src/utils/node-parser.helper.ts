@@ -1,6 +1,7 @@
 import type { Node, Position, XYPosition } from '@xyflow/react';
+import type { ReactNode } from 'react';
 import type { NodeContract } from '@/types/graph/graph-contract';
-import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { DataProductRoleAssignment } from '@/types/roles';
 
 export function sharedAttributes(
     node: NodeContract,
@@ -14,11 +15,7 @@ export function sharedAttributes(
         draggable: true,
         deletable: false,
         type: node.type,
-        ...(domainsEnabled && node.data.domain_id
-            ? {
-                  parentId: node.data.domain_id,
-              }
-            : {}),
+        ...(domainsEnabled && node.data.domain_id ? { parentId: node.data.domain_id } : {}),
         data: {
             name: node.data.name,
             id: node.data.id,
@@ -26,9 +23,7 @@ export function sharedAttributes(
             centeredHandles: centeredHandles,
             isMainNode: node.isMain,
             description: node.data.description,
-            onClick: () => {
-                setNodeId(node.id);
-            },
+            onClick: () => setNodeId(node.id),
         },
     };
 }
@@ -39,12 +34,12 @@ export function parseRegularNode(
     domainsEnabled: boolean,
     centeredHandles: boolean,
     extra_attributes: {
-        nodeToolbarActions?: React.ReactNode;
+        nodeToolbarActions?: ReactNode;
         targetHandlePosition?: Position;
         sourceHandlePosition?: Position;
         isActive?: boolean;
         targetHandleId?: string;
-        assignments?: DataProductRoleAssignmentContract[];
+        assignments?: DataProductRoleAssignment[];
     },
 ): Node {
     const parsedNode = sharedAttributes(node, setNodeId, domainsEnabled, centeredHandles);

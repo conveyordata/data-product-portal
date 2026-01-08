@@ -11,13 +11,14 @@ import {
     type DataProductRoleAssignmentResponse,
     useCreateDataProductRoleAssignmentMutation,
     useListDataProductRoleAssignmentsQuery,
-} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { Scope } from '@/types/roles';
 import type { SearchForm } from '@/types/shared';
 import type { UserContract } from '@/types/users';
 import styles from './team-tab.module.scss';
@@ -54,7 +55,8 @@ export function TeamTab({ dataProductId }: Props) {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
+    const { data: response } = useGetRolesQuery(Scope.DATA_PRODUCT);
+    const DATA_PRODUCT_ROLES = response?.roles ?? [];
 
     const filteredUsers = useMemo(() => {
         return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
@@ -115,7 +117,7 @@ export function TeamTab({ dataProductId }: Props) {
                     onClose={handleClose}
                     isLoading={isFetching || isAddingUser}
                     userIdsToHide={dataProductUserIds}
-                    roles={DATA_PRODUCT_ROLES || []}
+                    roles={DATA_PRODUCT_ROLES}
                     item={{
                         action: handleGrantAccessToDataProduct,
                         label: t('Grant Access'),

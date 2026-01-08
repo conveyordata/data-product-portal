@@ -8,16 +8,16 @@ import {
     useDecideGlobalRoleAssignmentMutation,
     useDeleteGlobalRoleAssignmentMutation,
     useModifyGlobalRoleAssignmentMutation,
-} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
-import { useCanBecomeAdminMutation, useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { type GlobalRoleAssignmentContract, Prototype, Scope } from '@/types/roles/role.contract.ts';
-import type { UsersGetContract } from '@/types/users/user.contract.ts';
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { useCanBecomeAdminMutation, useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
+import type { UsersGetContract } from '@/types/users/user.contract';
 import styles from './people-table.module.scss';
-import { getPeopleTableColumns } from './people-table-columns.tsx';
+import { getPeopleTableColumns } from './people-table-columns';
 
 function filterUsers(users: UsersGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -33,11 +33,12 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
 export function PeoplePage() {
     const { t } = useTranslation();
     const { data: users = [], isFetching } = useGetAllUsersQuery();
-    const { data: roles = [] } = useGetRolesQuery(Scope.GLOBAL);
+    const { data: rolesResponse } = useGetRolesQuery(Scope.GLOBAL);
+    const roles = rolesResponse?.roles ?? [];
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
-    const [searchTerm, setSearchTerm] = useState('');
 
+    const [searchTerm, setSearchTerm] = useState('');
     const filteredUsers = useMemo(() => filterUsers(users, searchTerm), [users, searchTerm]);
     const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
     const [updateGlobalRoleAssignment] = useModifyGlobalRoleAssignmentMutation();
@@ -46,7 +47,7 @@ export function PeoplePage() {
     const [canBecomeAdmin] = useCanBecomeAdminMutation();
 
     const onChangeGlobalRole = useCallback(
-        (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
+        (user_id: string, value: string, original: GlobalRoleAssignment | null) => {
             if (original?.role.id === value) {
                 return;
             }

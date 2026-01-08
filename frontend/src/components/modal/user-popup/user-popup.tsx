@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { Searchbar } from '@/components/form';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
+import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import type { RoleContract } from '@/types/roles';
 import type { SearchForm } from '@/types/shared';
 import type { UserContract } from '@/types/users';
-
 import styles from './user-popup.module.scss';
 
 type Props = {
@@ -16,7 +15,7 @@ type Props = {
     isOpen: boolean;
     isLoading: boolean;
     userIdsToHide?: string[];
-    roles: RoleContract[];
+    roles: Role[];
     item: {
         action: (user: UserContract, role_id: string) => void;
         label: string;
@@ -75,7 +74,7 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
                                     loading={isLoading || isFetchingUsers}
                                     onSelect={(roleId: string) => item.action(user, roleId)} // Pass user and selected roleId
                                 >
-                                    {roles.map((role: RoleContract) => (
+                                    {roles.map((role: Role) => (
                                         <Select.Option key={role.id} value={role.id}>
                                             {role.name}
                                         </Select.Option>

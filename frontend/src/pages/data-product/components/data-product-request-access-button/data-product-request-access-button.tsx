@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
 import { useRequestDataProductRoleAssignmentMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
+import { Scope } from '@/types/roles';
 import type { UserContract } from '@/types/users';
 import styles from './data-product-request-access-button.module.scss';
 
@@ -21,7 +22,8 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
     const { t } = useTranslation();
     const [requestAccessToDataProduct, { isLoading: isRequestingAccess }] =
         useRequestDataProductRoleAssignmentMutation();
-    const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
+    const { data: response } = useGetRolesQuery(Scope.DATA_PRODUCT);
+    const DATA_PRODUCT_ROLES = response?.roles ?? [];
 
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const isLoading = isFetchingUsers || isRequestingAccess;
@@ -60,7 +62,7 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
                     onClose={handleClose}
                     isLoading={isLoading}
                     userIdsToHide={userIdsToHide}
-                    roles={DATA_PRODUCT_ROLES || []}
+                    roles={DATA_PRODUCT_ROLES}
                     item={{
                         action: handleRequestAccessToDataProduct,
                         label: t('Request Role'),

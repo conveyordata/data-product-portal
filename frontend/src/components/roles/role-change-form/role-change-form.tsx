@@ -1,20 +1,19 @@
 import { Flex, Select } from 'antd';
 
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
-import type { RoleContract } from '@/types/roles';
+import { type Role, type Scope, useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
 
 import styles from './role-change-form.module.scss';
 
 type Props = {
-    initialRole: RoleContract;
-    onRoleChange: (role: RoleContract) => void;
+    initialRole: Role;
+    onRoleChange: (role: Role) => void;
     disabled?: boolean;
-    scope: 'data_product' | 'dataset';
+    scope: Scope;
 };
 export function RoleChangeForm({ initialRole, onRoleChange, disabled = true, scope }: Props) {
-    const { data: roles, isLoading } = useGetRolesQuery(scope);
+    const { data: response, isLoading } = useGetRolesQuery(scope);
 
-    const options = roles?.map((role) => ({ label: role.name, value: role.id }));
+    const options = response?.roles.map((role) => ({ label: role.name, value: role.id }));
     return (
         <Flex className={styles.selectRoleWrapper}>
             <Select
@@ -24,7 +23,7 @@ export function RoleChangeForm({ initialRole, onRoleChange, disabled = true, sco
                 options={options}
                 defaultValue={initialRole.id}
                 onChange={(id: string) => {
-                    const selectedRole = roles?.find((role) => role.id === id);
+                    const selectedRole = response?.roles?.find((role) => role.id === id);
                     if (selectedRole) {
                         onRoleChange(selectedRole);
                     }

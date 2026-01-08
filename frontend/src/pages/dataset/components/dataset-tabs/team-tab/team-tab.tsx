@@ -11,11 +11,11 @@ import {
     useCreateOutputPortRoleAssignmentMutation,
     useListOutputPortRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { SearchForm } from '@/types/shared';
 import type { UserContract } from '@/types/users';
@@ -57,7 +57,8 @@ export function TeamTab({ datasetId }: Props) {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { data: DATASET_ROLES, isFetching: isLoadingRoles } = useGetRolesQuery('dataset');
+    const { data: response, isFetching: isLoadingRoles } = useGetRolesQuery('dataset');
+    const DATASET_ROLES = response?.roles ?? [];
 
     const filteredUsers = useMemo(() => {
         return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
@@ -117,7 +118,7 @@ export function TeamTab({ datasetId }: Props) {
                     onClose={handleClose}
                     isLoading={isFetching || isAddingUser || isLoadingRoles}
                     userIdsToHide={datasetUserIds}
-                    roles={DATASET_ROLES || []}
+                    roles={DATASET_ROLES}
                     item={{
                         action: handleGrantAccessToDataset,
                         label: t('Grant Access'),

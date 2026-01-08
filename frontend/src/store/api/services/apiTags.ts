@@ -20,6 +20,19 @@ api.enhanceEndpoints({
             ],
         },
 
+        getRoles: {
+            providesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+        createRole: {
+            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+        removeRole: {
+            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+        updateRole: {
+            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+
         listGlobalRoleAssignments: {
             providesTags: (response) => {
                 const individual = (response?.role_assignments || []).map((assignment) => ({
