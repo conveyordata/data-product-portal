@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next';
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form.tsx';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
-import { DecisionStatus, type OutputPortRoleAssignment, Prototype } from '@/types/roles';
+import { DecisionStatus, type OutputPortRoleAssignment, Prototype, Scope } from '@/types/roles';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -71,7 +71,7 @@ export const getDatasetTeamColumns = ({
                         initialRole={role}
                         onRoleChange={(role) => onRoleChange(role, id)}
                         disabled={disabled || !canEdit || !isApproved}
-                        scope={'dataset'}
+                        scope={Scope.DATASET}
                     />
                 );
             },

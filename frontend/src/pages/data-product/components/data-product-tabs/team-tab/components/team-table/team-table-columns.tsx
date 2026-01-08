@@ -5,7 +5,7 @@ import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component';
 import type { DataProductRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi';
-import { DecisionStatus, Prototype } from '@/types/roles';
+import { DecisionStatus, Prototype, Scope } from '@/types/roles';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -73,7 +73,7 @@ export const getDataProductUsersTableColumns = ({
                         initialRole={role}
                         onRoleChange={(role) => onRoleChange(role, id)}
                         disabled={disabled || !canEdit || !isApproved}
-                        scope={'data_product'}
+                        scope={Scope.DATA_PRODUCT}
                     />
                 );
             },

@@ -18,6 +18,7 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { Scope } from '@/types/roles';
 import type { SearchForm } from '@/types/shared';
 import type { UserContract } from '@/types/users';
 import styles from './team-tab.module.scss';
@@ -54,7 +55,7 @@ export function TeamTab({ dataProductId }: Props) {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { data: response } = useGetRolesQuery('data_product');
+    const { data: response } = useGetRolesQuery(Scope.DATA_PRODUCT);
     const DATA_PRODUCT_ROLES = response?.roles ?? [];
 
     const filteredUsers = useMemo(() => {

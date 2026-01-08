@@ -14,7 +14,7 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useCanBecomeAdminMutation, useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { type GlobalRoleAssignment, Prototype } from '@/types/roles';
+import { type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
 import type { UsersGetContract } from '@/types/users/user.contract';
 import styles from './people-table.module.scss';
 import { getPeopleTableColumns } from './people-table-columns';
@@ -33,7 +33,7 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
 export function PeoplePage() {
     const { t } = useTranslation();
     const { data: users = [], isFetching } = useGetAllUsersQuery();
-    const { data: rolesResponse } = useGetRolesQuery('global');
+    const { data: rolesResponse } = useGetRolesQuery(Scope.GLOBAL);
     const roles = rolesResponse?.roles ?? [];
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
