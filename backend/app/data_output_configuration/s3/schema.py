@@ -5,6 +5,7 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 )
 from app.data_output_configuration.base_schema import (
     BaseDataOutputConfiguration,
+    PlatformMetadata,
     UIElementMetadata,
     UIElementType,
 )
@@ -18,6 +19,15 @@ class S3DataOutput(BaseDataOutputConfiguration):
     suffix: str = ""
     path: str
     configuration_type: Literal[DataOutputTypes.S3DataOutput]
+
+    _platform_metadata = PlatformMetadata(
+        display_name="S3",
+        icon_name="s3-logo.svg",
+        platform_key="s3",
+        parent_platform="aws",
+        result_label="Resulting path",
+        result_tooltip="The path you can access through this technical asset",
+    )
 
     class Meta:
         orm_model = S3DataOutputModel
@@ -61,15 +71,3 @@ class S3DataOutput(BaseDataOutputConfiguration):
             ),
         ]
         return base_metadata
-
-    @classmethod
-    def get_result_label(cls) -> str:
-        return "Resulting path"
-
-    @classmethod
-    def get_result_tooltip(cls) -> str:
-        return "The path you can access through this technical asset"
-
-    @classmethod
-    def get_parent_platform(cls) -> Optional[str]:
-        return "aws"

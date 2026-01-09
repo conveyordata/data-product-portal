@@ -7,6 +7,8 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 )
 from app.data_output_configuration.base_schema import (
     BaseDataOutputConfiguration,
+    FieldDependency,
+    PlatformMetadata,
     UIElementMetadata,
     UIElementType,
 )
@@ -26,6 +28,15 @@ class GlueDataOutput(BaseDataOutputConfiguration):
     table_path: str = ""
     configuration_type: Literal[DataOutputTypes.GlueDataOutput]
     entire_schema: bool = False
+
+    _platform_metadata = PlatformMetadata(
+        display_name="Glue",
+        icon_name="glue-logo.svg",
+        platform_key="glue",
+        parent_platform="aws",
+        result_label="Resulting table",
+        result_tooltip="The table you can access through this technical asset",
+    )
 
     class Meta:
         orm_model = GlueDataOutputModel
@@ -96,18 +107,10 @@ class GlueDataOutput(BaseDataOutputConfiguration):
                 type=UIElementType.String,
                 tooltip="The name of the table to give write access to",
                 required=True,
-                depends_on={"fieldName": "entire_schema", "value": False},
+                depends_on=FieldDependency(field_name="entire_schema", value=False),
             ),
         ]
         return base_metadata
-
-    @classmethod
-    def get_result_label(cls) -> str:
-        return "Resulting table"
-
-    @classmethod
-    def get_result_tooltip(cls) -> str:
-        return "The table you can access through this technical asset"
 
     @classmethod
     def get_parent_platform(cls) -> Optional[str]:

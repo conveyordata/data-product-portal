@@ -17299,6 +17299,24 @@
         ],
         "title": "EventReferenceEntity"
       },
+      "FieldDependency": {
+        "properties": {
+          "field_name": {
+            "type": "string",
+            "title": "Field Name"
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field_name",
+          "value"
+        ],
+        "title": "FieldDependency",
+        "description": "Represents a field dependency for conditional visibility"
+      },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
           "platform_service_configurations": {
@@ -20842,14 +20860,12 @@
           "depends_on": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/components/schemas/FieldDependency"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Depends On"
+            ]
           },
           "select_mode": {
             "anyOf": [

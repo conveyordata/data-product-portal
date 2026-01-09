@@ -7,6 +7,8 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 )
 from app.data_output_configuration.base_schema import (
     BaseDataOutputConfiguration,
+    FieldDependency,
+    PlatformMetadata,
     UIElementMetadata,
     UIElementType,
 )
@@ -26,6 +28,15 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
     database_path: str = ""
     table_path: str = ""
     entire_schema: bool = False
+
+    _platform_metadata = PlatformMetadata(
+        display_name="Redshift",
+        icon_name="aws-redshift-logo.svg",
+        platform_key="redshift",
+        parent_platform="aws",
+        result_label="Resulting table",
+        result_tooltip="The table you can access through this technical asset",
+    )
 
     class Meta:
         orm_model = RedshiftDataOutputModel
@@ -97,15 +108,7 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
                 type=UIElementType.String,
                 tooltip="The name of the table to give write access to",
                 required=True,
-                depends_on={"fieldName": "entire_schema", "value": False},
+                depends_on=FieldDependency(field_name="entire_schema", value=False),
             ),
         ]
         return base_metadata
-
-    @classmethod
-    def get_result_label(cls) -> str:
-        return "Resulting table"
-
-    @classmethod
-    def get_result_tooltip(cls) -> str:
-        return "The table you can access through this technical asset"

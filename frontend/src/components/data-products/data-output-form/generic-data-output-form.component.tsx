@@ -88,7 +88,7 @@ export function GenericDataOutputForm({
         // Check if field should be hidden based on dependencies
         let isHidden = hidden;
         if (depends_on) {
-            const dependentValue = watchedFields[depends_on.fieldName];
+            const dependentValue = watchedFields[depends_on.field_name];
             isHidden = dependentValue !== depends_on.value;
         }
 

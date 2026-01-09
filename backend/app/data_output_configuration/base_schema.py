@@ -1,5 +1,6 @@
+from abc import ABC
 from enum import Enum
-from typing import List, Optional
+from typing import Any, ClassVar, List, Optional
 
 from app.configuration.environments.platform_service_configurations.schema_response import (
     ConfigType,
@@ -14,6 +15,13 @@ class UIElementType(str, Enum):
     Checkbox = "checkbox"
 
 
+class FieldDependency(ORMModel):
+    """Represents a field dependency for conditional visibility"""
+
+    field_name: str
+    value: Any
+
+
 class UIElementMetadata(ORMModel):
     label: str
     type: UIElementType
@@ -25,7 +33,7 @@ class UIElementMetadata(ORMModel):
     pattern: Optional[str] = None
     initial_value: Optional[str | int | float | bool] = None
     value_prop_name: Optional[str] = None
-    depends_on: Optional[dict] = None  # {"fieldName": str, "value": any}
+    depends_on: Optional[FieldDependency] = None
     select_mode: Optional[str] = None  # "tags", "multiple", None
     max_count: Optional[int] = None
     disabled: Optional[bool] = None
@@ -33,8 +41,22 @@ class UIElementMetadata(ORMModel):
     normalize_array: Optional[bool] = None
 
 
-class BaseDataOutputConfiguration(ORMModel):
+class PlatformMetadata(ORMModel):
+    """Metadata describing how a platform should be displayed in the UI"""
+
+    display_name: str
+    icon_name: str
+    platform_key: str
+    parent_platform: Optional[str] = None
+    result_label: str = "Resulting output"
+    result_tooltip: str = "The output you can access through this technical asset"
+
+
+class BaseDataOutputConfiguration(ORMModel, ABC):
     configuration_type: DataOutputTypes
+
+    # Platform metadata - should be overridden in subclasses
+    _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 
     def render_template(self, template: str, **context) -> str:
         return template.format(**self.model_dump(), **context)
@@ -44,19 +66,22 @@ class BaseDataOutputConfiguration(ORMModel):
 
     @classmethod
     def get_UI_metadata(cls) -> List[UIElementMetadata]:
+        """Returns the UI metadata for form generation"""
         return []
 
     @classmethod
-    def get_result_label(cls) -> str:
-        return "Resulting output"
-
-    @classmethod
-    def get_result_tooltip(cls) -> str:
-        return "The output you can access through this technical asset"
-
-    @classmethod
-    def get_parent_platform(cls) -> Optional[str]:
-        return None
+    def get_platform_metadata(cls) -> PlatformMetadata:
+        """Returns platform display metadata"""
+        if cls._platform_metadata is None:
+            # Fallback to auto-generation from class name
+            class_name = cls.__name__
+            platform_key = class_name.lower().replace("dataoutput", "")
+            return PlatformMetadata(
+                display_name=class_name.replace("DataOutput", ""),
+                icon_name=f"{platform_key}-logo.svg",
+                platform_key=platform_key,
+            )
+        return cls._platform_metadata
 
     @classmethod
     def get_logo(cls) -> str:
