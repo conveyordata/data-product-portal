@@ -56,7 +56,7 @@ The system needs a more scalable and maintainable way to define data output conf
 
 We introduce a plugin-based architecture where each data output integration is defined as a self-contained Python class. These classes:
 
-* Inherit from a common base (`DataOutputConfigurationPlugin`)
+* Inherit from a common base (`AssetProviderPlugin`)
 * Use Pydantic for schema validation
 * Expose UI-relevant metadata
 * Are automatically discovered and registered (Optional)
