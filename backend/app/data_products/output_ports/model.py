@@ -20,8 +20,6 @@ if TYPE_CHECKING:
     )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
-    from app.configuration.domains.model import Domain
-    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
         DataOutputDatasetAssociation,
