@@ -43,6 +43,11 @@ The system needs a more scalable and maintainable way to define data output conf
 
 * **Option 2:** Free column choice, JSON blobs in database. Makes migrations almost impossible because JSON content is arbitrary. Makes mapping easier and does not require migration script creation at plugin creation.
 
+## Second discussion: Plugin provisioning
+
+* **Option 1:** Plugins are only an internal system to extend
+* **Option 2:** Users can deliver plugins from a different source, e.g. through volume mounts
+
 ---
 
 ## Decision Outcome
@@ -59,6 +64,8 @@ We introduce a plugin-based architecture where each data output integration is d
 
 This replaces the previously hardcoded approach and removes the need for YAML-based registries.
 The JSON blob storage allows for extensible design without the limitation of our current column names.
+
+TODO: Pick option for plugin provisioning
 
 ### Confirmation
 
@@ -90,3 +97,15 @@ This decision is reflected in the application by:
 * **Good, because** No migrations are needed for new integrations
 * **Good, because** One-on-one mapping of technology terminology to database content.
 * **Bad, because** Near impossible to do proper migrations of configurations later on.
+
+## Pros and Cons of the Plugin Options
+
+### Option 1:
+* **Good, because** Easier to implement
+* **Good, because** We have explicit control over what code gets admitted and which code does not.
+* **Bad, because** Risk of forks if people want to use obscure or proprietary integrations.
+
+### Option 2:
+* **Good, because** Addition of plugins is possible on the go, without needing to merge or rebuild code.
+* **Bad, because** More complex system to implement
+* **Bad, because** Risk of running unsafe plugins in the codebase or reuse classnames etc
