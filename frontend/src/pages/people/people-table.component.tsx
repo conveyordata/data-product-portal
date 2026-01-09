@@ -36,8 +36,7 @@ function filterUsers(users: UsersGet[], searchTerm?: string) {
 export function PeoplePage() {
     const { t } = useTranslation();
     const { data: { users = [] } = {}, isFetching } = useGetUsersQuery();
-    const { data: rolesResponse } = useGetRolesQuery(Scope.GLOBAL);
-    const roles = rolesResponse?.roles ?? [];
+    const { data: { roles = [] } = {} } = useGetRolesQuery(Scope.GLOBAL);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
 

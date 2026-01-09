@@ -21,8 +21,7 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
     const { t } = useTranslation();
     const [requestAccessToDataProduct, { isLoading: isRequestingAccess }] =
         useRequestDataProductRoleAssignmentMutation();
-    const { data: response } = useGetRolesQuery(Scope.DATA_PRODUCT);
-    const DATA_PRODUCT_ROLES = response?.roles ?? [];
+    const { data: { roles: DATA_PRODUCT_ROLES = [] } = {} } = useGetRolesQuery(Scope.DATA_PRODUCT);
 
     const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const isLoading = isFetchingUsers || isRequestingAccess;

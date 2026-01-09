@@ -55,8 +55,7 @@ export function TeamTab({ dataProductId }: Props) {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { data: response } = useGetRolesQuery(Scope.DATA_PRODUCT);
-    const DATA_PRODUCT_ROLES = response?.roles ?? [];
+    const { data: { roles: DATA_PRODUCT_ROLES = [] } = {} } = useGetRolesQuery(Scope.DATA_PRODUCT);
 
     const filteredUsers = useMemo(() => {
         return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);

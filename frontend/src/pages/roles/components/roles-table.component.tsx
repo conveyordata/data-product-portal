@@ -78,10 +78,10 @@ type RolesTableProps = {
     scope: Scope;
 };
 export function RolesTable({ scope }: RolesTableProps) {
-    const { data: globalRolesResponse, isFetching: isFetchingGlobalRoles } = useGetRolesQuery(Scope.GLOBAL);
-    const globalRoles = globalRolesResponse?.roles ?? [];
-    const { data: rawRolesResponse, isFetching: isFetchingRoles } = useGetRolesQuery(scope);
-    const rawRoles = rawRolesResponse?.roles ?? [];
+    const { data: { roles: globalRoles = [] } = {}, isFetching: isFetchingGlobalRoles } = useGetRolesQuery(
+        Scope.GLOBAL,
+    );
+    const { data: { roles: rawRoles = [] } = {}, isFetching: isFetchingRoles } = useGetRolesQuery(scope);
     const isFetching = isFetchingGlobalRoles || isFetchingRoles;
     const [updateRole, { isLoading }] = useUpdateRoleMutation();
 
