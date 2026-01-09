@@ -11,9 +11,9 @@ type Props = {
     scope: Scope;
 };
 export function RoleChangeForm({ initialRole, onRoleChange, disabled = true, scope }: Props) {
-    const { data: response, isLoading } = useGetRolesQuery(scope);
+    const { data: { roles = [] } = {}, isLoading } = useGetRolesQuery(scope);
 
-    const options = response?.roles.map((role) => ({ label: role.name, value: role.id }));
+    const options = roles.map((role) => ({ label: role.name, value: role.id }));
     return (
         <Flex className={styles.selectRoleWrapper}>
             <Select
@@ -23,7 +23,7 @@ export function RoleChangeForm({ initialRole, onRoleChange, disabled = true, sco
                 options={options}
                 defaultValue={initialRole.id}
                 onChange={(id: string) => {
-                    const selectedRole = response?.roles?.find((role) => role.id === id);
+                    const selectedRole = roles.find((role) => role.id === id);
                     if (selectedRole) {
                         onRoleChange(selectedRole);
                     }

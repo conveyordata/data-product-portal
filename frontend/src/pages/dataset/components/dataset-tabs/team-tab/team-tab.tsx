@@ -18,6 +18,7 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { Scope } from '@/types/roles';
 import type { SearchForm } from '@/types/shared';
 import { TeamTable } from './components/team-table/team-table.component.tsx';
 import styles from './team-tab.module.scss';
@@ -57,8 +58,7 @@ export function TeamTab({ datasetId }: Props) {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { data: response, isFetching: isLoadingRoles } = useGetRolesQuery('dataset');
-    const DATASET_ROLES = response?.roles ?? [];
+    const { data: { roles: DATASET_ROLES = [] } = {}, isFetching: isLoadingRoles } = useGetRolesQuery(Scope.DATASET);
 
     const filteredUsers = useMemo(() => {
         return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
