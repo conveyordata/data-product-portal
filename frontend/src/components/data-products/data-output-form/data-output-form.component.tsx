@@ -9,6 +9,7 @@ import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-pl
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
@@ -21,14 +22,12 @@ import {
 } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
-
 import styles from './data-output-form.module.scss';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
@@ -57,7 +56,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     // Data
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
 
     // Mutations
@@ -88,7 +87,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const isLoading = platformsLoading || isCreating || isFetchingInitialValues || isFetchingTags;
 
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const dataPlatforms = useMemo(
         () =>

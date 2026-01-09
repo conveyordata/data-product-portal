@@ -24,6 +24,7 @@ import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
+import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -37,7 +38,6 @@ import {
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import {
@@ -112,7 +112,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     });
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [requestDatasetsAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
@@ -162,7 +162,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
         value: owner.id,
     }));
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
         try {

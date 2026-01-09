@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useGetDataOutputByIdQuery,
@@ -13,13 +14,11 @@ import {
 } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 import type { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
-
 import styles from './data-output-form.module.scss';
 
 type Props = {
@@ -37,7 +36,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
         skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
     });
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
@@ -61,7 +60,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
 
     const isLoading = isFetchingInitialValues || isFetchingTags;
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
     const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
 
     const handleDeleteDataOutput = async () => {

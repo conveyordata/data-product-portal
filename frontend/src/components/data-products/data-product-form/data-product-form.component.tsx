@@ -11,6 +11,7 @@ import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constant
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
+import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
@@ -24,7 +25,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
@@ -58,7 +58,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
         useGetDataProductsTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
-    const { data: availableTags = [], isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
@@ -111,7 +111,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         value: owner.id,
         disabled: owner.id === currentUser?.id,
     }));
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
+    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
         try {

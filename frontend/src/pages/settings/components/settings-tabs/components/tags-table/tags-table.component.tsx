@@ -3,16 +3,19 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal';
-import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/tags-api-slice';
+import {
+    type TagsGetItem,
+    useGetTagsQuery,
+    useRemoveTagMutation,
+} from '@/store/api/services/generated/configurationTagsApi.ts';
 import type { TagContract } from '@/types/tag/tag';
-
 import { CreateTagsModal } from './tags-form-modal.component';
 import styles from './tags-table.module.scss';
 import { getTagsTableColumns } from './tags-table-columns';
 
 export function TagsTable() {
     const { t } = useTranslation();
-    const { data: tags = [], isFetching } = useGetAllTagsQuery();
+    const { data: tags, isFetching } = useGetTagsQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const [onRemoveTag, { isLoading: isRemoving }] = useRemoveTagMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
@@ -42,8 +45,8 @@ export function TagsTable() {
                     </Button>
                 </Space>
             </Flex>
-            <Table<TagContract>
-                dataSource={tags}
+            <Table<TagsGetItem>
+                dataSource={tags?.tags ?? []}
                 columns={columns}
                 rowKey={(record) => record.id}
                 loading={isFetching || isRemoving}
