@@ -3,7 +3,7 @@ from typing import Type, TypeAlias, Union, cast
 
 from fastapi import Depends, Request
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
@@ -114,9 +114,9 @@ class DatasetResolver(SubjectResolver):
 
     @classmethod
     async def resolve_domain(
-            cls,
-            db: Session,
-            id_: str,
+        cls,
+        db: Session,
+        id_: str,
     ) -> str:
         if id_ == cls.DEFAULT or cls.model is None:
             return cls.DEFAULT
@@ -165,7 +165,6 @@ class DataOutputResolver(SubjectResolver):
 
 
 class DataOutputDatasetAssociationResolver(DatasetResolver):
-
     @classmethod
     async def resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
@@ -183,7 +182,6 @@ class DataOutputDatasetAssociationResolver(DatasetResolver):
 
 
 class DataProductDatasetAssociationResolver(DatasetResolver):
-
     @classmethod
     async def resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)

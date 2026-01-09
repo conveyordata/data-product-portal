@@ -58,7 +58,9 @@ def init(
         ),
         help="Force deletion of the database without confirmation.",
     ),
-    seed_path: Optional[str] = typer.Argument(default=None, help="Path to a seed script"),
+    seed_path: Optional[str] = typer.Argument(
+        default=None, help="Path to a seed script"
+    ),
 ):
     """
     Delete an existing database.
