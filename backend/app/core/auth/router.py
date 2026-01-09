@@ -14,13 +14,6 @@ router = APIRouter()
 router.include_router(device)
 
 
-@router.get("/user")
-def authorize(
-    authorized_user: User = Depends(authorize_user),
-) -> User:
-    return authorized_user
-
-
 @router.get(
     "/aws_credentials",
     dependencies=[
@@ -48,3 +41,14 @@ _router = router
 router = APIRouter(tags=["Authentication"])
 router.include_router(_router, prefix="/auth", deprecated=True)
 router.include_router(_router, prefix="/v2/authn")
+
+
+@router.get(
+    "/auth/user",
+    deprecated=True,
+    description="**DEPRECATED:** Please use current user endpoint instead",
+)
+def authorize(
+    authorized_user: User = Depends(authorize_user),
+) -> User:
+    return authorized_user

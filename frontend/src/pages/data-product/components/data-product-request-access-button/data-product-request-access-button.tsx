@@ -6,10 +6,9 @@ import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
 import { useRequestDataProductRoleAssignmentMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import { Scope } from '@/types/roles';
-import type { UserContract } from '@/types/users';
 import styles from './data-product-request-access-button.module.scss';
 
 type Props = {
@@ -25,15 +24,15 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
     const { data: response } = useGetRolesQuery(Scope.DATA_PRODUCT);
     const DATA_PRODUCT_ROLES = response?.roles ?? [];
 
-    const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const isLoading = isFetchingUsers || isRequestingAccess;
 
     const userIdsToHide = useMemo(() => {
-        return users.filter((user) => user.id !== userId).map((user) => user.id);
+        return users.filter((user) => user.id !== userId).map((user) => user.id) ?? [];
     }, [users, userId]);
 
     const handleRequestAccessToDataProduct = useCallback(
-        async (user: UserContract, role_id: string) => {
+        async (user: UsersGet, role_id: string) => {
             try {
                 await requestAccessToDataProduct({
                     data_product_id: dataProductId,

@@ -25,6 +25,7 @@ import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constant
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -38,7 +39,6 @@ import {
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import {
     DatasetAccess,
@@ -111,7 +111,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         skip: mode === 'edit' || !dataProductId,
     });
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
-    const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [requestDatasetsAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();

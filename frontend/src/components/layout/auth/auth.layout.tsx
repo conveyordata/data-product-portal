@@ -7,8 +7,8 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { AppConfig } from '@/config/app-config.ts';
 import { useAppDispatch } from '@/store';
-import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
-import { selectAuthState, setCredentials } from '@/store/features/auth/auth-slice.ts';
+import { selectAuthState, setCredentials } from '@/store/api/services/auth-slice.ts';
+import { useLazyGetCurrentUserQuery } from '@/store/api/services/generated/usersApi.ts';
 
 const isOidcEnabled = AppConfig.isOidcEnabled();
 const oidcCognitoParams = AppConfig.getOidcCognitoLogoutParams();
@@ -19,7 +19,7 @@ export const AuthLayout = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
 
-    const [authorizeUser] = useAuthorizeMutation();
+    const [getCurrentUser] = useLazyGetCurrentUserQuery();
     const { isAuthenticated, isLoading, signinRedirect, events, activeNavigator, signoutRedirect, signinSilent } =
         useAuth();
     const { isLoading: isSettingUserCredentialsInStore, user } = useSelector(selectAuthState);
@@ -32,14 +32,14 @@ export const AuthLayout = () => {
 
     const handleAuthorizeUser = useCallback(async () => {
         try {
-            const authorizedUser = await authorizeUser().unwrap();
+            const authorizedUser = await getCurrentUser().unwrap();
             if (authorizedUser) {
                 dispatch(setCredentials({ user: authorizedUser }));
             }
         } catch (e) {
             console.error('Failed to authorize user', e);
         }
-    }, [authorizeUser, dispatch]);
+    }, [getCurrentUser, dispatch]);
 
     useEffect(() => {
         if (isOidcEnabled && !isLoading) {

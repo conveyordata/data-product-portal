@@ -217,6 +217,25 @@ api.enhanceEndpoints({
             ],
         },
 
+        getUsers: {
+            providesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        createUser: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        removeUser: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        setCanBecomeAdmin: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        markTourAsSeen: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.CURRENT_USER }],
+        },
+        getCurrentUser: {
+            providesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.CURRENT_USER }],
+        },
+
         getTags: {
             providesTags: [{ type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST }],
         },

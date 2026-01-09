@@ -5,9 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Searchbar } from '@/components/form';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
+import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import type { SearchForm } from '@/types/shared';
-import type { UserContract } from '@/types/users';
 import styles from './user-popup.module.scss';
 
 type Props = {
@@ -17,12 +16,12 @@ type Props = {
     userIdsToHide?: string[];
     roles: Role[];
     item: {
-        action: (user: UserContract, role_id: string) => void;
+        action: (user: UsersGet, role_id: string) => void;
         label: string;
     };
 };
 
-const handleUserListFilter = (users: UserContract[], searchTerm: string) => {
+const handleUserListFilter = (users: UsersGet[], searchTerm: string) => {
     return users.filter((user) => {
         return (
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,12 +32,12 @@ const handleUserListFilter = (users: UserContract[], searchTerm: string) => {
 
 export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHide }: Props) {
     const { t } = useTranslation();
-    const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const [searchUsersForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchUsersForm);
 
     const filteredUsers = useMemo(() => {
-        const filteredOutHiddenUsers = users.filter((user) => !userIdsToHide?.includes(user.id));
+        const filteredOutHiddenUsers = users.filter((user) => !userIdsToHide?.includes(user.id)) ?? [];
         return searchTerm ? handleUserListFilter(filteredOutHiddenUsers, searchTerm) : filteredOutHiddenUsers;
     }, [userIdsToHide, users, searchTerm]);
 

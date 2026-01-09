@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import authorize_user, get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
@@ -111,3 +111,8 @@ def get_user_pending_actions(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> PendingActionResponse:
     return PendingActionsService(db).get_user_pending_actions(authenticated_user)
+
+
+@router.get("/v2/users/current")
+def get_current_user(authorized_user: User = Depends(authorize_user)) -> User:
+    return authorized_user

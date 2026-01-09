@@ -7,20 +7,20 @@ import { Searchbar } from '@/components/form';
 import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     type DataProductRoleAssignmentResponse,
     useCreateDataProductRoleAssignmentMutation,
     useListDataProductRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';
 import type { SearchForm } from '@/types/shared';
-import type { UserContract } from '@/types/users';
 import styles from './team-tab.module.scss';
 
 function filterUsers(
@@ -74,7 +74,7 @@ export function TeamTab({ dataProductId }: Props) {
     const canAddUser = access?.allowed || false;
 
     const handleGrantAccessToDataProduct = useCallback(
-        async (user: UserContract, role_id: string) => {
+        async (user: UsersGet, role_id: string) => {
             try {
                 await addUserToDataProduct({
                     data_product_id: dataProductId,

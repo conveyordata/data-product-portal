@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/authorizationRolesApi";
+import { api } from "@/store/api/services/generated/usersApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getDataProductsLifecycles: build.query<

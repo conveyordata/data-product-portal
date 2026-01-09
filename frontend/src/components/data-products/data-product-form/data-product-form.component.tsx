@@ -9,10 +9,11 @@ import { useDebouncedCallback } from 'use-debounce';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useCreateDataProductMutation,
@@ -25,7 +26,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
@@ -57,7 +57,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
         useGetDataProductsTypesQuery();
-    const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: { users: dataProductOwners = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
