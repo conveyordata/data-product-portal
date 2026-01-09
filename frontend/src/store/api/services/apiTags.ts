@@ -217,6 +217,29 @@ api.enhanceEndpoints({
             ],
         },
 
+        getTags: {
+            providesTags: [{ type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST }],
+        },
+        createTag: {
+            invalidatesTags: [{ type: TagTypes.Tags, id: STATIC_TAG_ID.LIST }],
+        },
+        updateTag: {
+            invalidatesTags: [
+                { type: TagTypes.Tags, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.OutputPort as const },
+                { type: TagTypes.TechnicalAsset as const },
+            ],
+        },
+        removeTag: {
+            invalidatesTags: [
+                { type: TagTypes.Tags, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.OutputPort as const },
+                { type: TagTypes.TechnicalAsset as const },
+            ],
+        },
+
         getThemeSettings: {
             providesTags: [{ type: TagTypes.ThemeSettings }],
         },

@@ -1,8 +1,8 @@
 import { Button, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
+import { useCreateTagMutation, useUpdateTagMutation } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useCreateTagMutation, useUpdateTagMutation } from '@/store/features/tags/tags-api-slice';
 import type { TagContract } from '@/types/tag';
 
 interface TagsFormText {
@@ -45,7 +45,7 @@ export function CreateTagsModal({ isOpen, onClose, mode, initial }: Props) {
             if (mode === 'create') {
                 await createTag(values);
             } else {
-                await editTag({ tag: values, tagId: initial?.id || '' });
+                await editTag({ id: initial?.id ?? '', tagUpdate: { ...values } });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
