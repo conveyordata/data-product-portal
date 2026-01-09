@@ -216,5 +216,12 @@ api.enhanceEndpoints({
                 { type: TagTypes.DataProductType, id: response?.id },
             ],
         },
+
+        getThemeSettings: {
+            providesTags: [{ type: TagTypes.ThemeSettings }],
+        },
+        updateThemeSettings: {
+            invalidatesTags: [{ type: TagTypes.ThemeSettings }],
+        },
     },
 });

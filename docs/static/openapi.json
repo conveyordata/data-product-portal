@@ -12690,8 +12690,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Get Settings",
-        "operationId": "get_settings_api_theme_settings_get",
+        "summary": "Get Theme Settings",
+        "operationId": "get_theme_settings_api_theme_settings_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12710,8 +12710,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Update Settings",
-        "operationId": "update_settings_api_theme_settings_put",
+        "summary": "Update Theme Settings",
+        "operationId": "update_theme_settings_api_theme_settings_put",
         "requestBody": {
           "content": {
             "application/json": {
@@ -12750,8 +12750,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Get Settings",
-        "operationId": "get_settings",
+        "summary": "Get Theme Settings",
+        "operationId": "get_theme_settings",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12769,8 +12769,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Update Settings",
-        "operationId": "update_settings",
+        "summary": "Update Theme Settings",
+        "operationId": "update_theme_settings",
         "requestBody": {
           "content": {
             "application/json": {
