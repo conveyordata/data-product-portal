@@ -563,7 +563,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         response = self.update_default_dataset(client, update_payload, ds.id)
@@ -626,7 +625,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)

@@ -50,7 +50,7 @@ class Dataset(Base, BaseORM):
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
-    data_product_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_products.id"))
+    data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
 
     # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(

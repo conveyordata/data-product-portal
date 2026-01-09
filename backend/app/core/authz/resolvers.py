@@ -3,7 +3,7 @@ from typing import Type, TypeAlias, Union, cast
 
 from fastapi import Depends, Request
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
@@ -42,16 +42,14 @@ class SubjectResolver(ABC):
         return cls.DEFAULT
 
     @classmethod
-    def resolve_domain(
+    async def resolve_domain(
         cls,
         db: Session,
         id_: str,
     ) -> str:
         if id_ == cls.DEFAULT or cls.model is None:
             return cls.DEFAULT
-        domain = db.scalars(
-            select(cls.model.domain_id).where(cls.model.id == id_)
-        ).one_or_none()
+        domain = db.scalar(select(cls.model.domain_id).where(cls.model.id == id_))
         return cls.DEFAULT if domain is None else str(domain)
 
 
@@ -114,6 +112,19 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
 class DatasetResolver(SubjectResolver):
     model: Model = Dataset
 
+    @classmethod
+    async def resolve_domain(
+            cls,
+            db: Session,
+            id_: str,
+    ) -> str:
+        if id_ == cls.DEFAULT or cls.model is None:
+            return cls.DEFAULT
+        domain = db.scalar(
+            select(DataProduct.domain_id).join(cls.model).where(cls.model.id == id_)
+        )
+        return cls.DEFAULT if domain is None else str(domain)
+
 
 class DataProductNameResolver(SubjectResolver):
     model: Model = DataProduct
@@ -153,8 +164,7 @@ class DataOutputResolver(SubjectResolver):
         return cls.DEFAULT
 
 
-class DataOutputDatasetAssociationResolver(SubjectResolver):
-    model: Model = Dataset
+class DataOutputDatasetAssociationResolver(DatasetResolver):
 
     @classmethod
     async def resolve(
@@ -172,8 +182,7 @@ class DataOutputDatasetAssociationResolver(SubjectResolver):
         return cls.DEFAULT
 
 
-class DataProductDatasetAssociationResolver(SubjectResolver):
-    model: Model = Dataset
+class DataProductDatasetAssociationResolver(DatasetResolver):
 
     @classmethod
     async def resolve(
