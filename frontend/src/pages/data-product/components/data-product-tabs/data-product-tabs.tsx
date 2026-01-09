@@ -9,10 +9,9 @@ import Icon, {
 import { usePostHog } from '@posthog/react';
 import type { TourProps } from 'antd';
 import { Badge, Flex, Tabs, Tour, Typography } from 'antd';
-import { type ReactElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
@@ -20,6 +19,7 @@ import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
 import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
@@ -34,19 +34,20 @@ import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 
+const { Paragraph, Link } = Typography;
+
 type Props = {
     dataProductId: string;
     isLoading: boolean;
 };
 
 type Tab = {
-    label: string | ReactElement;
+    label: ReactNode;
     key: TabKeys;
-    ref?: React.RefObject<null>;
+    ref?: RefObject<null>;
     icon?: ReactNode;
     children: ReactNode;
 };
-const { Paragraph, Link } = Typography;
 
 export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
@@ -61,7 +62,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         resource: dataProductId,
     });
     const [open, setOpen] = useState<boolean>(false);
-    const openTour = !currentUser?.has_seen_tour && access?.allowed;
+    const openTour = !currentUser?.has_seen_tour && (access?.allowed ?? false);
 
     useEffect(() => {
         if (openTour) {
@@ -69,30 +70,22 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 data_product_id: dataProductId,
             });
         }
-        setOpen(openTour || false);
+        setOpen(openTour);
     }, [openTour, dataProductId, posthog]);
 
     const [setSeenTour] = useSeenTourMutation();
-    const location = useLocation();
-    const navigate = useNavigate();
     const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
         dataProductId,
         { skip: !dataProductId },
     );
-    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
     useEffect(() => {
         posthog.capture(PosthogEvents.DATA_PRODUCTS_TAB_CLICKED, {
             tab_name: activeTab,
         });
     }, [activeTab, posthog]);
-
-    useEffect(() => {
-        const hash = location.hash.slice(1);
-        if (hash) {
-            setActiveTab(hash);
-        }
-    }, [location]);
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -115,13 +108,13 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             },
             {
                 label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
-                key: TabKeys.Datasets,
+                key: TabKeys.InputPorts,
                 icon: <Icon component={datasetOutlineIcon} />,
                 children: <DatasetTab dataProductId={dataProductId} />,
             },
             {
                 label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
-                key: TabKeys.DataOutputs,
+                key: TabKeys.OutputPorts,
                 icon: <Icon component={dataOutputOutlineIcon} />,
                 children: <DataOutputTab dataProductId={dataProductId} />,
             },
@@ -231,14 +224,11 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         return <LoadingSpinner />;
     }
 
-    const onTabChange = (key: string) => {
-        navigate(`#${key}`);
-    };
-
     return (
         <>
             <Tabs
                 activeKey={activeTab}
+                onChange={onTabChange}
                 items={tabs.map(({ key, label, icon, children }) => {
                     return {
                         label,
@@ -251,7 +241,6 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 })}
                 size={'middle'}
                 rootClassName={styles.tabContainer}
-                onChange={onTabChange}
             />
             <Tour
                 open={open}
@@ -261,19 +250,19 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                         case 0:
                         case 1:
                         case 5:
-                            setActiveTab(TabKeys.About);
+                            onTabChange(TabKeys.About);
                             break;
                         case 2:
-                            setActiveTab(TabKeys.Datasets);
+                            onTabChange(TabKeys.InputPorts);
                             break;
                         case 3:
-                            setActiveTab(TabKeys.DataOutputs);
+                            onTabChange(TabKeys.OutputPorts);
                             break;
                         case 4:
-                            setActiveTab(TabKeys.Team);
+                            onTabChange(TabKeys.Team);
                             break;
                         default:
-                            setActiveTab(TabKeys.Settings);
+                            onTabChange(TabKeys.Settings);
                     }
                 }}
                 onClose={async (current) => {
@@ -281,7 +270,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                         current_step: current,
                     });
                     setOpen(false);
-                    setActiveTab(TabKeys.About);
+                    onTabChange(TabKeys.About);
                     await setSeenTour();
                 }}
                 onFinish={() => {

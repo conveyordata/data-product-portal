@@ -294,7 +294,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     loading={isFetchingUsers}
                     mode={'multiple'}
                     options={userSelectOptions}
-                    filterOption={selectFilterOptionByLabelAndValue}
+                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     disabled={mode !== 'create'}
                     tokenSeparators={[',']}
                 />
@@ -312,9 +312,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 <Select
                     loading={isFetchingDataProductTypes}
                     allowClear
-                    showSearch
+                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     options={dataProductTypeSelectOptions}
-                    filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>
@@ -329,13 +328,12 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <Select
                     loading={isFetchingLifecycles}
-                    allowClear
-                    showSearch
                     options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
                         value: lifecycle.id,
                         label: lifecycle.name,
                     }))}
-                    filterOption={selectFilterOptionByLabelAndValue}
+                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                    allowClear
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>
@@ -351,9 +349,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 <Select
                     loading={isFetchingDomains}
                     options={domainSelectOptions}
-                    filterOption={selectFilterOptionByLabelAndValue}
+                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
-                    showSearch
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
@@ -362,7 +359,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     placeholder={t('Select data product tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
-                    filterOption={selectFilterOptionByLabel}
+                    showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>

@@ -25,10 +25,10 @@ type Props = {
 };
 
 export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeClick }: Props) {
-    const { getNode, setNodes } = useReactFlow();
     const { t } = useTranslation();
-    const currentInstance = useReactFlow();
-    useMemo(() => {
+    const { getNode, setNodes, fitView } = useReactFlow();
+
+    useEffect(() => {
         setNodes((nodes: Node[]) =>
             nodes.map((node) => ({
                 ...node,
@@ -44,14 +44,14 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
     useEffect(() => {
         if (!nodeId) return;
         const timeout = setTimeout(() => {
-            currentInstance.fitView({
+            fitView({
                 ...defaultFitViewOptions,
                 nodes: [{ id: nodeId }],
             });
         }, 50);
 
         return () => clearTimeout(timeout);
-    }, [nodeId, currentInstance]);
+    }, [nodeId, fitView]);
 
     function getNodeDataForSideBar(nodeId: string) {
         const node = getNode(nodeId);
@@ -124,16 +124,16 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
                 {t('Output ports')}
             </Tag.CheckableTag>
             <Select
+                placeholder={t('Select a node')}
+                value={nodeId ?? undefined}
                 className={styles.select}
-                showSearch
-                placeholder={String('Select a node')}
+                showSearch={{
+                    filterOption: (input: string, option?: { value: string; label: string }) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+                }}
                 onSelect={(value: string) => {
                     nodeClick(undefined, { id: value } as Node); // Use the setNodeId function from the parent
                 }}
-                value={nodeId ?? undefined}
-                filterOption={(input: string, option?: { value: string; label: string }) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
             >
                 {Object.entries(groupedNodes).map(
                     ([groupName, nodes]) =>

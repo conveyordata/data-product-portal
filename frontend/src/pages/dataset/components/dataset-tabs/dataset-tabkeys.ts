@@ -1,8 +1,8 @@
 export enum TabKeys {
     About = 'about',
     Usage = 'usage',
-    DataProduct = 'data-product',
-    DataOutput = 'data-output',
+    Consumers = 'consumers',
+    Producers = 'producers',
     Team = 'team',
     Explorer = 'explorer',
     Settings = 'settings',
