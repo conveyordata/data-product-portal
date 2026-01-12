@@ -23,10 +23,10 @@ The "Curated Queries" feature allows data producers to manually define a list of
 Table: output_port_curated_queries
 Schema:
 * output_port_id (UUID, PK, FK)
-* sort_order (SMALLINT, PK) - To allow producers to order the queries
-* title (VARCHAR(255))
+* title (TEXT)
 * description (TEXT)
 * query_text (TEXT)
+* sort_order (SMALLINT, PK) - To allow producers to order the queries
 * created_at (TIMESTAMPZ)
 * updated_at (TIMESTAMPZ)
 
