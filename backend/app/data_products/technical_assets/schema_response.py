@@ -152,3 +152,15 @@ class UIElementMetadataResponse(ORMModel):
     icon_name: str  # Icon filename (e.g., "s3-logo.svg")
     parent_platform: Optional[str] = None  # e.g., "aws" for s3, redshift, glue
     platform_tile: Optional[PlatformTile] = None  # Complete tile structure
+
+
+class PluginResponse(ORMModel):
+    """Response model for listing available plugins"""
+
+    plugins: Sequence[UIElementMetadataResponse]
+
+
+class PlatformTileResponse(ORMModel):
+    """Response model for platform tiles"""
+
+    platform_tiles: Sequence[PlatformTile]

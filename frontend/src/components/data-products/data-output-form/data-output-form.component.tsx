@@ -54,7 +54,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const navigate = useNavigate();
 
     // Data
-    const { data: uiMetadataGroups, isLoading: isLoadingMetadata } = useGetDataOutputUIElementMetadataQuery();
+    const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } =
+        useGetDataOutputUIElementMetadataQuery();
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
@@ -90,7 +91,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
     // Get platform tiles from backend
-    const { data: platformTilesData } = useGetPlatformTilesQuery();
+    const { data: { platform_tiles: platformTilesData } = {} } = useGetPlatformTilesQuery();
 
     // Transform backend tiles to frontend format with icon components
     const dataPlatforms = useMemo(() => {

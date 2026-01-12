@@ -8048,31 +8048,6 @@
         }
       }
     },
-    "/api/v2/technical_assets/ui-metadata": {
-      "get": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Get Technical Asset Ui Metadata",
-        "operationId": "get_technical_asset_ui_metadata",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/UIElementMetadataResponse"
-                  },
-                  "type": "array",
-                  "title": "Response Get Technical Asset Ui Metadata Api V2 Technical Assets Ui Metadata Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/technical_assets/platform-tiles": {
       "get": {
         "tags": [
@@ -8086,11 +8061,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/PlatformTile"
-                  },
-                  "type": "array",
-                  "title": "Response Get Platform Tiles Api V2 Technical Assets Platform Tiles Get"
+                  "$ref": "#/components/schemas/PlatformTileResponse"
                 }
               }
             }
@@ -8098,25 +8069,21 @@
         }
       }
     },
-    "/api/api/v2/plugins": {
+    "/api/v2/plugins": {
       "get": {
         "tags": [
           "Data Products - Technical assets"
         ],
         "summary": "List Plugins",
         "description": "List all available plugins with their metadata (ADR-compliant endpoint)",
-        "operationId": "list_plugins_api_api_v2_plugins_get",
+        "operationId": "list_plugins",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/UIElementMetadataResponse"
-                  },
-                  "type": "array",
-                  "title": "Response List Plugins Api Api V2 Plugins Get"
+                  "$ref": "#/components/schemas/PluginResponse"
                 }
               }
             }
@@ -8124,14 +8091,14 @@
         }
       }
     },
-    "/api/api/v2/plugins/{plugin_name}/form": {
+    "/api/v2/plugins/{plugin_name}/form": {
       "get": {
         "tags": [
           "Data Products - Technical assets"
         ],
         "summary": "Get Plugin Form",
         "description": "Get form metadata for a specific plugin (ADR-compliant endpoint)",
-        "operationId": "get_plugin_form_api_api_v2_plugins__plugin_name__form_get",
+        "operationId": "get_plugin_form",
         "parameters": [
           {
             "name": "plugin_name",
@@ -20194,6 +20161,40 @@
         ],
         "title": "PlatformTile",
         "description": "Represents a platform tile in the UI"
+      },
+      "PlatformTileResponse": {
+        "properties": {
+          "platform_tiles": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformTile"
+            },
+            "type": "array",
+            "title": "Platform Tiles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "platform_tiles"
+        ],
+        "title": "PlatformTileResponse",
+        "description": "Response model for platform tiles"
+      },
+      "PluginResponse": {
+        "properties": {
+          "plugins": {
+            "items": {
+              "$ref": "#/components/schemas/UIElementMetadataResponse"
+            },
+            "type": "array",
+            "title": "Plugins"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plugins"
+        ],
+        "title": "PluginResponse",
+        "description": "Response model for listing available plugins"
       },
       "Prototype": {
         "type": "integer",

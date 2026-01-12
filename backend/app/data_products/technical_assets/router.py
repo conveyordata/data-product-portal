@@ -29,7 +29,8 @@ from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
     GetTechnicalAssetsResponseItem,
-    PlatformTile,
+    PlatformTileResponse,
+    PluginResponse,
     UIElementMetadataResponse,
     UpdateTechnicalAssetResponse,
 )
@@ -430,33 +431,30 @@ def get_technical_asset_graph_data(
     return DataOutputService(db).get_graph_data(data_product_id, id, level)
 
 
-@router.get("/v2/technical_assets/ui-metadata")
-def get_technical_asset_ui_metadata(
-    db: Session = Depends(get_db_session),
-) -> Sequence[UIElementMetadataResponse]:
-    return DataOutputService(db).get_technical_asset_ui_metadata()
-
-
 @router.get("/v2/technical_assets/platform-tiles")
 def get_platform_tiles(
     db: Session = Depends(get_db_session),
-) -> Sequence[PlatformTile]:
+) -> PlatformTileResponse:
     configs = PlatformServiceConfigurationService(
         db
     ).get_all_platform_service_configurations()
-    return DataOutputService(db).get_platform_tiles(configs)
+    return PlatformTileResponse(
+        platform_tiles=DataOutputService(db).get_platform_tiles(configs)
+    )
 
 
 # ADR-compliant endpoints
-@router.get("/api/v2/plugins")
+@router.get("/v2/plugins")
 def list_plugins(
     db: Session = Depends(get_db_session),
-) -> Sequence[UIElementMetadataResponse]:
+) -> PluginResponse:
     """List all available plugins with their metadata (ADR-compliant endpoint)"""
-    return DataOutputService(db).get_technical_asset_ui_metadata()
+    return PluginResponse(
+        plugins=DataOutputService(db).get_technical_asset_ui_metadata()
+    )
 
 
-@router.get("/api/v2/plugins/{plugin_name}/form")
+@router.get("/v2/plugins/{plugin_name}/form")
 def get_plugin_form(
     plugin_name: str,
     db: Session = Depends(get_db_session),

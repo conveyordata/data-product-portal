@@ -187,11 +187,11 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
         }),
         getDataOutputUIElementMetadata: builder.query<{ [plugin: string]: UIElementMetadata[] }, void>({
             query: () => ({
-                url: ApiUrl.DataOutputUIElementMetadata,
+                url: ApiUrl.Plugins,
                 method: 'GET',
             }),
         }),
-        getPlatformTiles: builder.query<any[], void>({
+        getPlatformTiles: builder.query<{ platform_tiles: any[] }, void>({
             query: () => ({
                 url: '/api/v2/technical_assets/platform-tiles',
                 method: 'GET',
