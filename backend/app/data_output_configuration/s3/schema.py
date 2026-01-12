@@ -1,10 +1,10 @@
-from typing import List, Literal, Optional
+from typing import ClassVar, List, Literal, Optional
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSS3Config,
 )
 from app.data_output_configuration.base_schema import (
-    BaseDataOutputConfiguration,
+    AssetProviderPlugin,
     PlatformMetadata,
     UIElementMetadata,
     UIElementType,
@@ -14,7 +14,10 @@ from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputM
 from app.data_products.schema import DataProduct
 
 
-class S3DataOutput(BaseDataOutputConfiguration):
+class S3DataOutput(AssetProviderPlugin):
+    name: ClassVar[str] = "S3DataOutput"
+    version: ClassVar[str] = "1.0"
+
     bucket: str
     suffix: str = ""
     path: str
@@ -53,8 +56,8 @@ class S3DataOutput(BaseDataOutputConfiguration):
         )
 
     @classmethod
-    def get_UI_metadata(cls) -> List[UIElementMetadata]:
-        base_metadata = super().get_UI_metadata()
+    def get_ui_metadata(cls) -> List[UIElementMetadata]:
+        base_metadata = super().get_ui_metadata()
         base_metadata += [
             UIElementMetadata(
                 name="bucket",

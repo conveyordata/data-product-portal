@@ -17,7 +17,7 @@ from app.core.namespace.validation import (
     NamespaceValidityType,
 )
 from app.data_output_configuration.base_schema import (
-    BaseDataOutputConfiguration,
+    AssetProviderPlugin,
 )
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
@@ -278,7 +278,7 @@ class DataOutputService:
         self,
     ) -> Sequence[UIElementMetadataResponse]:
         """Generate UI metadata for all registered data output types"""
-        data_output_configurations = BaseDataOutputConfiguration.__subclasses__()
+        data_output_configurations = AssetProviderPlugin.__subclasses__()
 
         return [
             self._build_metadata_response(plugin)
@@ -286,12 +286,12 @@ class DataOutputService:
         ]
 
     def _build_metadata_response(
-        self, plugin_class: type[BaseDataOutputConfiguration]
+        self, plugin_class: type[AssetProviderPlugin]
     ) -> UIElementMetadataResponse:
         """Build a complete metadata response for a plugin"""
         platform_meta = plugin_class.get_platform_metadata()
         return UIElementMetadataResponse(
-            ui_metadata=plugin_class.get_UI_metadata(),
+            ui_metadata=plugin_class.get_ui_metadata(),
             plugin=plugin_class.__name__,
             platform=platform_meta.platform_key,
             display_name=platform_meta.display_name,

@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Self
+from typing import ClassVar, List, Literal, Optional, Self
 
 from pydantic import model_validator
 
@@ -6,7 +6,7 @@ from app.configuration.environments.platform_service_configurations.schemas impo
     AWSGlueConfig,
 )
 from app.data_output_configuration.base_schema import (
-    BaseDataOutputConfiguration,
+    AssetProviderPlugin,
     FieldDependency,
     PlatformMetadata,
     UIElementMetadata,
@@ -19,7 +19,10 @@ from app.data_output_configuration.glue.model import (
 from app.data_products.schema import DataProduct
 
 
-class GlueDataOutput(BaseDataOutputConfiguration):
+class GlueDataOutput(AssetProviderPlugin):
+    name: ClassVar[str] = "GlueDataOutput"
+    version: ClassVar[str] = "1.0"
+
     database: str
     database_suffix: str = ""
     table: str = "*"
@@ -72,8 +75,8 @@ class GlueDataOutput(BaseDataOutputConfiguration):
         )
 
     @classmethod
-    def get_UI_metadata(cls) -> List[UIElementMetadata]:
-        base_metadata = super().get_UI_metadata()
+    def get_ui_metadata(cls) -> List[UIElementMetadata]:
+        base_metadata = super().get_ui_metadata()
         base_metadata += [
             UIElementMetadata(
                 name="database",

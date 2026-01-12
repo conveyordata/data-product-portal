@@ -52,20 +52,30 @@ class PlatformMetadata(ORMModel):
     result_tooltip: str = "The output you can access through this technical asset"
 
 
-class BaseDataOutputConfiguration(ORMModel, ABC):
+class AssetProviderPlugin(ORMModel, ABC):
+    """Base class for all data output provider plugins"""
+
+    name: ClassVar[str]
+    version: ClassVar[str] = "1.0"
     configuration_type: DataOutputTypes
 
     # Platform metadata - should be overridden in subclasses
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 
     def render_template(self, template: str, **context) -> str:
+        """Render a template with configuration values"""
         return template.format(**self.model_dump(), **context)
 
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
+        """Get platform and environment specific configuration"""
         raise NotImplementedError
 
+    def validate(self) -> None:
+        """Validate the configuration (e.g., no illegal names in identifiers)"""
+        pass
+
     @classmethod
-    def get_UI_metadata(cls) -> List[UIElementMetadata]:
+    def get_ui_metadata(cls) -> List[UIElementMetadata]:
         """Returns the UI metadata for form generation"""
         return []
 
@@ -85,4 +95,15 @@ class BaseDataOutputConfiguration(ORMModel, ABC):
 
     @classmethod
     def get_logo(cls) -> str:
-        return f"{cls.__class__.__name__.removesuffix('DataOutput')}-logo.svg"
+        """Get the logo filename for this plugin"""
+        platform_meta = cls.get_platform_metadata()
+        return platform_meta.icon_name
+
+    def get_url(self, environment: str) -> Optional[str]:
+        """Get the URL for accessing this resource in the given environment"""
+        return None
+
+    @classmethod
+    def has_environnments(cls) -> bool:
+        """Whether this plugin supports multiple environments"""
+        return True

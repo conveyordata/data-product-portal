@@ -13,6 +13,10 @@ export enum ApiUrl {
     DataOutputNamespaceLimits = '/api/data_outputs/namespace_length_limits',
     DataOutputResultString = '/api/data_outputs/result_string',
     DataOutputUIElementMetadata = '/api/v2/technical_assets/ui-metadata',
+    // ADR-compliant plugin endpoints
+    Plugins = '/api/v2/plugins',
+    PluginForm = '/api/v2/plugins/:pluginName/form',
+    PlatformTiles = '/api/v2/technical_assets/platform-tiles',
     DataProducts = '/api/data_products',
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',

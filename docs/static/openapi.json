@@ -8098,6 +8098,75 @@
         }
       }
     },
+    "/api/api/v2/plugins": {
+      "get": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "List Plugins",
+        "description": "List all available plugins with their metadata (ADR-compliant endpoint)",
+        "operationId": "list_plugins_api_api_v2_plugins_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UIElementMetadataResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Plugins Api Api V2 Plugins Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/api/v2/plugins/{plugin_name}/form": {
+      "get": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Get Plugin Form",
+        "description": "Get form metadata for a specific plugin (ADR-compliant endpoint)",
+        "operationId": "get_plugin_form_api_api_v2_plugins__plugin_name__form_get",
+        "parameters": [
+          {
+            "name": "plugin_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plugin Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UIElementMetadataResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/domains": {
       "get": {
         "tags": [

@@ -445,3 +445,33 @@ def get_platform_tiles(
         db
     ).get_all_platform_service_configurations()
     return DataOutputService(db).get_platform_tiles(configs)
+
+
+# ADR-compliant endpoints
+@router.get("/api/v2/plugins")
+def list_plugins(
+    db: Session = Depends(get_db_session),
+) -> Sequence[UIElementMetadataResponse]:
+    """List all available plugins with their metadata (ADR-compliant endpoint)"""
+    return DataOutputService(db).get_technical_asset_ui_metadata()
+
+
+@router.get("/api/v2/plugins/{plugin_name}/form")
+def get_plugin_form(
+    plugin_name: str,
+    db: Session = Depends(get_db_session),
+) -> UIElementMetadataResponse:
+    """Get form metadata for a specific plugin (ADR-compliant endpoint)"""
+    all_plugins = DataOutputService(db).get_technical_asset_ui_metadata()
+
+    # Find the plugin by name
+    plugin = next((p for p in all_plugins if p.plugin == plugin_name), None)
+    if plugin is None:
+        from fastapi import HTTPException, status
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Plugin '{plugin_name}' not found",
+        )
+
+    return plugin

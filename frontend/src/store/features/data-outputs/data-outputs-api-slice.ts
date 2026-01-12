@@ -196,6 +196,18 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 url: '/api/v2/technical_assets/platform-tiles',
                 method: 'GET',
             }),
+        }), // ADR-compliant plugin endpoints
+        getPlugins: builder.query<any[], void>({
+            query: () => ({
+                url: ApiUrl.Plugins,
+                method: 'GET',
+            }),
+        }),
+        getPluginForm: builder.query<any, string>({
+            query: (pluginName) => ({
+                url: buildUrl(ApiUrl.PluginForm, { pluginName }),
+                method: 'GET',
+            }),
         }),
     }),
 
@@ -217,4 +229,8 @@ export const {
     useLazyGetDataOutputResultStringQuery,
     useGetDataOutputUIElementMetadataQuery,
     useGetPlatformTilesQuery,
+    // ADR-compliant hooks
+    useGetPluginsQuery,
+    useGetPluginFormQuery,
+    useLazyGetPluginFormQuery,
 } = dataOutputsApiSlice;
