@@ -19,11 +19,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.drop_constraint(
-        "fk_datasets_data_product_id_data_products",
-        "datasets",
-        type_="foreignkey",
-    )
     op.drop_column(
         "datasets",
         "domain_id",
@@ -45,12 +40,4 @@ def downgrade() -> None:
             LIMIT 1
             )
         """
-    )
-
-    op.create_foreign_key(
-        "fk_datasets_data_product_id_data_products",
-        "datasets",
-        "domains",
-        ["domain_id"],
-        ["id"],
     )
