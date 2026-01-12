@@ -8,8 +8,13 @@ const ProtectedRoute = () => {
     const { data: access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION,
     });
-    const canAccess = access?.allowed ?? false;
-    return canAccess ? <Outlet /> : <Navigate to={ApplicationPaths.Home} replace />;
+
+    if (access === undefined) {
+        // Don't navigate until the request has resolved
+        return null;
+    }
+
+    return access.allowed ? <Outlet /> : <Navigate to={ApplicationPaths.Home} replace />;
 };
 
 export default ProtectedRoute;

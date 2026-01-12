@@ -16,20 +16,10 @@ interface AWSS3Config {
     kms_key_arn: string;
 }
 
-interface Config {
-    [key: string]: AWSS3Config;
-}
-
 export type EnvironmentConfigContract = Omit<EnvironmentConfig, 'platform' | 'service'> & {
     platformName: string;
     serviceName: string;
 };
-
-export interface EnvironmentConfigCreateRequest {
-    platform_id: string;
-    service_id: string;
-    config: Config;
-}
 
 export interface EnvironmentConfigCreateFormSchema {
     platformId: string;

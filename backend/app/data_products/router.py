@@ -33,6 +33,9 @@ from app.core.namespace.validation import (
 from app.data_products import email
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation,
+)
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -70,7 +73,6 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponse,
 )
 from app.data_products.technical_assets.service import DataOutputService
-from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -80,11 +82,11 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.notifications.service import NotificationService
 from app.resource_names.service import (
     DataOutputResourceNameValidator,
     ResourceNameService,
 )
+from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 router = APIRouter()
@@ -633,11 +635,11 @@ def get_data_products(
 def get_event_history_old(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[GetEventHistoryResponseItemOld]:
-    return get_event_history(id, db).events
+    return get_data_product_event_history(id, db).events
 
 
-@router.get("/{id}/history")
-def get_event_history(
+@router.get(f"{route}/{{id}}/history")
+def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
     return GetEventHistoryResponse(

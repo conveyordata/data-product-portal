@@ -103,7 +103,7 @@ def update_data_product_lifecycle(
         ),
     ],
 )
-def delete_data_product_lifecycle(
+def remove_data_product_lifecycle(
     id: UUID,
     db: Session = Depends(get_db_session),
 ) -> None:

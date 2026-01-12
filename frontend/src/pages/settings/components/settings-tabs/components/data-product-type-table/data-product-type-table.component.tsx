@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal';
 import {
-    useGetAllDataProductTypesQuery,
+    type DataProductTypesGetItem,
+    useGetDataProductsTypesQuery,
     useRemoveDataProductTypeMutation,
-} from '@/store/features/data-product-types/data-product-types-api-slice';
+} from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DataProductTypesGetContract } from '@/types/data-product-type';
-
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
 import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
 import styles from './data-product-type-table.module.scss';
@@ -17,7 +17,7 @@ import { getDataProductTypeTableColumns } from './data-product-type-table-column
 
 export function DataProductTypeTable() {
     const { t } = useTranslation();
-    const { data = [], isFetching } = useGetAllDataProductTypesQuery();
+    const { data = undefined, isFetching } = useGetDataProductsTypesQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -65,8 +65,8 @@ export function DataProductTypeTable() {
                     {t('Add Type')}
                 </Button>
             </Flex>
-            <Table<DataProductTypesGetContract>
-                dataSource={data}
+            <Table<DataProductTypesGetItem>
+                dataSource={data?.data_product_types ?? []}
                 columns={columns}
                 rowKey={(record) => record.id}
                 loading={isFetching}

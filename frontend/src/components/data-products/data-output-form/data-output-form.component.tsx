@@ -9,6 +9,7 @@ import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-pl
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
@@ -23,7 +24,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import type { DataPlatform } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
@@ -56,7 +56,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     // Data
     const { data: uiMetadataGroups, isLoading: isLoadingMetadata } = useGetDataOutputUIElementMetadataQuery();
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
 
     // Mutations
@@ -87,7 +87,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const isLoading = platformsLoading || isCreating || isFetchingInitialValues || isFetchingTags;
 
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
     // Get platform tiles from backend
     const { data: platformTilesData } = useGetPlatformTilesQuery();
@@ -137,7 +137,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 await createDataOutput({ id: dataProductId, dataOutput: values }).unwrap();
                 dispatchMessage({ content: t('Technical asset created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
-                navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+                navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
 
                 form.resetFields();
             }
@@ -292,7 +292,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     placeholder={t('Select technical asset tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
-                    filterOption={selectFilterOptionByLabel}
+                    showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>

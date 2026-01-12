@@ -8,7 +8,7 @@ from app.data_products.output_port_technical_assets_link.schema_response import 
     DataOutputDatasetAssociationsGet,
     TechnicalAssetOutputPortAssociationsGet,
 )
-from app.data_products_datasets.schema_response import (
+from app.data_products.output_ports.input_ports.schema_response import (
     DataProductDatasetAssociationsGet,
     DataProductOutputPortAssociationsGet,
 )

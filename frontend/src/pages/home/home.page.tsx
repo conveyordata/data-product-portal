@@ -2,7 +2,7 @@ import { Col, Row } from 'antd';
 import { useSelector } from 'react-redux';
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { PendingRequestsInbox } from './components/pending-requests-inbox/pending-requests-inbox';
 import styles from './home.module.scss';
 

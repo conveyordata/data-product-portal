@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.device_flows.service import DeviceFlowService, verify_auth_header
 from app.database.database import get_db_session
 
-router = APIRouter(prefix="/device", tags=["device flow"])
+router = APIRouter(prefix="/device")
 
 
 @router.post("/device_token")

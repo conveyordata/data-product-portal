@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
-import { useCreateRoleMutation } from '@/store/features/roles/roles-api-slice';
-import type { Scope } from '@/types/roles';
+import { type Scope, useCreateRoleMutation } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import styles from './create-role-modal.module.scss';
 
 type Props = {

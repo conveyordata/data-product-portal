@@ -26,7 +26,6 @@ const { width: defaultNodeWidth, height: defaultNodeHeight } = getNodeDimensions
 export function useNodeEditor() {
     const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
-    // const { fitView } = useReactFlow();
 
     const applyLayout = useCallback(
         (nodes: Node[], edges: Edge[], direction: Position = defaultDirection) => {

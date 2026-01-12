@@ -20,15 +20,17 @@ from app.core.config.env_var_parser import get_boolean_variable
 from app.data_products.output_port_technical_assets_link.router import (
     router as data_output_dataset,
 )
+from app.data_products.output_ports.input_ports.router import (
+    router as data_product_dataset,
+)
 from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as data_outputs
-from app.data_products_datasets.router import router as data_product_dataset
 from app.graph.router import router as graph
-from app.notifications.router import router as notification
 from app.pending_actions.router import router as pending_action
 from app.resource_names.router import router as resource_name
 from app.search_output_ports.router import router as search_output_ports
+from app.users.notifications.router import router as notification
 from app.users.router import router as user
 
 router = (

@@ -12,10 +12,13 @@ import {
 } from 'antd';
 import { type ReactElement, useCallback, useMemo } from 'react';
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
-import { RoleDetailsMenu } from '@/pages/roles/components/role-details-menu.component.tsx';
-import { useGetRolesQuery, useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice';
+import { RoleDetailsMenu } from '@/pages/roles/components/role-details-menu.component';
+import {
+    type Role,
+    useGetRolesQuery,
+    useUpdateRoleMutation,
+} from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { RoleContract } from '@/types/roles';
 import { Prototype, Scope } from '@/types/roles';
 import styles from './roles-table.module.scss';
 
@@ -25,13 +28,13 @@ type PermissionType = 'Group' | 'Instance';
 
 type PermissionBase = {
     type: PermissionType;
-    id: number | string;
+    id: AuthorizationAction | string;
     name: string;
 };
 
 type PermissionInstance = PermissionBase & {
     type: 'Instance';
-    id: number;
+    id: AuthorizationAction;
     description: string;
     access?: object;
 };
@@ -43,7 +46,7 @@ type PermissionGroup = PermissionBase & {
 
 type Permission = PermissionInstance | PermissionGroup;
 
-function prototypePrecedence(role_a: RoleContract, role_b: RoleContract) {
+function prototypePrecedence(role_a: Role, role_b: Role) {
     const a = role_a.prototype;
     const b = role_b.prototype;
 
@@ -75,8 +78,10 @@ type RolesTableProps = {
     scope: Scope;
 };
 export function RolesTable({ scope }: RolesTableProps) {
-    const { data: globalRoles = [], isFetching: isFetchingGlobalRoles } = useGetRolesQuery(Scope.GLOBAL);
-    const { data: rawRoles = [], isFetching: isFetchingRoles } = useGetRolesQuery(scope);
+    const { data: { roles: globalRoles = [] } = {}, isFetching: isFetchingGlobalRoles } = useGetRolesQuery(
+        Scope.GLOBAL,
+    );
+    const { data: { roles: rawRoles = [] } = {}, isFetching: isFetchingRoles } = useGetRolesQuery(scope);
     const isFetching = isFetchingGlobalRoles || isFetchingRoles;
     const [updateRole, { isLoading }] = useUpdateRoleMutation();
 
@@ -105,7 +110,7 @@ export function RolesTable({ scope }: RolesTableProps) {
                 permissions.splice(index, 1);
             }
 
-            updateRole({ id: role.id, permissions });
+            updateRole({ id: role.id, updateRole: { permissions } });
         },
         [roles, updateRole],
     );
@@ -212,7 +217,7 @@ export function RolesTable({ scope }: RolesTableProps) {
     );
 }
 
-function determinePermissionsForScope(scope: Scope, roles: RoleContract[]): Permission[] {
+function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[] {
     let permissions: Permission[] = [];
 
     switch (scope) {
@@ -511,7 +516,7 @@ function determinePermissionsForScope(scope: Scope, roles: RoleContract[]): Perm
             break;
     }
 
-    const determineAccess = (permission: number) => {
+    const determineAccess = (permission: AuthorizationAction) => {
         return Object.fromEntries(roles.map((role) => [role.id, role.permissions.includes(permission)]));
     };
 

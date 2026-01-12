@@ -1,6 +1,5 @@
 import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { DecisionStatus } from '@/types/roles';
-import { Prototype } from '@/types/roles/role.contract';
+import { DecisionStatus, Prototype } from '@/types/roles';
 import type { UserContract } from '@/types/users';
 
 export function useGetDatasetOwners(datasetId: string | undefined): UserContract[] | undefined {

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { CreateRoleButton } from '@/pages/roles/components/roles-button.component';
 import { RolesTable } from '@/pages/roles/components/roles-table.component';
-import { Scope } from '@/types/roles/role.contract';
+import { Scope } from '@/types/roles';
 
 const { Paragraph } = Typography;
 

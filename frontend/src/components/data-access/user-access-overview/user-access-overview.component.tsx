@@ -4,7 +4,6 @@ import { type ReactNode, useMemo } from 'react';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import type { UserContract } from '@/types/users';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
-
 import styles from './user-access-overview.module.scss';
 
 const { useToken } = theme;

@@ -2,10 +2,10 @@ import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
-    useGetAllDataProductTypesQuery,
+    useGetDataProductsTypesQuery,
     useMigrateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
-} from '@/store/features/data-product-types/data-product-types-api-slice';
+} from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { DataProductTypeContract } from '@/types/data-product-type';
 
@@ -23,7 +23,7 @@ type Props = {
 export function CreateDataProductTypeMigrateModal({ isOpen, onClose, migrateFrom }: Props) {
     const { t } = useTranslation();
     const [form] = Form.useForm();
-    const { data: dataProductTypes = [] } = useGetAllDataProductTypesQuery();
+    const { data: dataProductTypes = undefined } = useGetDataProductsTypesQuery();
     const [migrateDataProductType] = useMigrateDataProductTypeMutation();
     const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
 
@@ -79,7 +79,7 @@ export function CreateDataProductTypeMigrateModal({ isOpen, onClose, migrateFrom
                     rules={[{ required: true, message: t('Please provide a value') }]}
                 >
                     <Select>
-                        {dataProductTypes
+                        {dataProductTypes?.data_product_types
                             .filter((dataProductType) => dataProductType.id !== migrateFrom?.id)
                             .map((dataProductType) => (
                                 <Option key={dataProductType.id} value={dataProductType.id}>

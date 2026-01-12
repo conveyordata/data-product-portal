@@ -2,12 +2,11 @@ import Icon, { InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-de
 import { Tabs } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import chipIcon from '@/assets/icons/chip-icon.svg?react';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-
+import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { DataOutputTab } from './data-output-tab/data-output-tab.component';
 import { DataProductTab } from './data-product-tab/data-product-tab.component';
 import { DatasetTab } from './dataset-tab/dataset-tab.component';
@@ -20,7 +19,7 @@ import styles from './settings-tabs.module.scss';
 enum TabKeys {
     General = 'general',
     DataProduct = 'data-product',
-    DataSet = 'dataset',
+    Dataset = 'dataset',
     DataOutput = 'data-output',
     Platform = 'platform',
     Roles = 'roles',
@@ -37,6 +36,7 @@ type Tab = {
 
 export function SettingsTabs() {
     const { t } = useTranslation();
+    const { activeTab, onTabChange } = useTabParam(TabKeys.General, Object.values(TabKeys));
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -54,7 +54,7 @@ export function SettingsTabs() {
             },
             {
                 label: t('Output port'),
-                key: TabKeys.DataSet,
+                key: TabKeys.Dataset,
                 children: <DatasetTab />,
                 icon: <Icon component={datasetOutlineIcon} />,
             },
@@ -89,7 +89,8 @@ export function SettingsTabs() {
 
     return (
         <Tabs
-            defaultActiveKey={TabKeys.General}
+            activeKey={activeTab}
+            onChange={onTabChange}
             items={tabs
                 .filter((tab) => !tab.hidden)
                 .map(({ key, label, icon, children }) => {

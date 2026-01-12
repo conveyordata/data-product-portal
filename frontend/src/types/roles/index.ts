@@ -1,4 +1,11 @@
-export type { RoleContract, RoleUpdate } from './role.contract.ts';
-export { Prototype, Scope } from './role.contract.ts';
-export type { DataProductRoleRequest, DatasetRoleRequest } from './role-assignment-request.ts';
-export { DecisionStatus } from './role-assignment-status.ts';
+import type {
+    DataProductRoleAssignmentResponse,
+    GlobalRoleAssignmentResponse,
+    OutputPortRoleAssignmentResponse,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+
+export type DataProductRoleAssignment = DataProductRoleAssignmentResponse;
+export type GlobalRoleAssignment = GlobalRoleAssignmentResponse;
+export type OutputPortRoleAssignment = OutputPortRoleAssignmentResponse;
+
+export { DecisionStatus, Prototype, Scope } from './enums.ts';

@@ -340,6 +340,7 @@
         ],
         "summary": "Get Dataset Query Stats",
         "operationId": "get_dataset_query_stats_api_datasets__id__query_stats_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -1674,8 +1675,8 @@
         "tags": [
           "Data Products - Output ports"
         ],
-        "summary": "Get Event History",
-        "operationId": "get_event_history",
+        "summary": "Get Output Ports Event History",
+        "operationId": "get_output_ports_event_history",
         "parameters": [
           {
             "name": "data_product_id",
@@ -3944,13 +3945,13 @@
         }
       }
     },
-    "/api/{id}/history": {
+    "/api/v2/data_products/{id}/history": {
       "get": {
         "tags": [
           "Data products"
         ],
-        "summary": "Get Event History",
-        "operationId": "get_event_history_api__id__history_get",
+        "summary": "Get Data Product Event History",
+        "operationId": "get_data_product_event_history",
         "parameters": [
           {
             "name": "id",
@@ -5584,8 +5585,8 @@
         "tags": [
           "Configuration - Data product lifecycles"
         ],
-        "summary": "Delete Data Product Lifecycle",
-        "operationId": "delete_data_product_lifecycle_api_data_product_lifecycles__id__delete",
+        "summary": "Remove Data Product Lifecycle",
+        "operationId": "remove_data_product_lifecycle_api_data_product_lifecycles__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -5763,8 +5764,8 @@
         "tags": [
           "Configuration - Data product lifecycles"
         ],
-        "summary": "Delete Data Product Lifecycle",
-        "operationId": "delete_data_product_lifecycle",
+        "summary": "Remove Data Product Lifecycle",
+        "operationId": "remove_data_product_lifecycle",
         "parameters": [
           {
             "name": "id",
@@ -6038,8 +6039,8 @@
         "tags": [
           "Configuration - Data product settings"
         ],
-        "summary": "Delete Data Product Setting",
-        "operationId": "delete_data_product_setting_api_data_product_settings__id__delete",
+        "summary": "Remove Data Product Setting",
+        "operationId": "remove_data_product_setting_api_data_product_settings__id__delete",
         "deprecated": true,
         "parameters": [
           {
@@ -6307,8 +6308,8 @@
         "tags": [
           "Configuration - Data product settings"
         ],
-        "summary": "Delete Data Product Setting",
-        "operationId": "delete_data_product_setting",
+        "summary": "Remove Data Product Setting",
+        "operationId": "remove_data_product_setting",
         "parameters": [
           {
             "name": "id",
@@ -6346,10 +6347,11 @@
     "/api/data_product_dataset_links/approve/{id}": {
       "post": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Input ports"
         ],
         "summary": "Approve Data Product Link",
         "operationId": "approve_data_product_link_api_data_product_dataset_links_approve__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6362,6 +6364,67 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/approve": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Approve Output Port As Input Port",
+        "operationId": "approve_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6387,10 +6450,11 @@
     "/api/data_product_dataset_links/deny/{id}": {
       "post": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Input ports"
         ],
         "summary": "Deny Data Product Link",
         "operationId": "deny_data_product_link_api_data_product_dataset_links_deny__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6403,6 +6467,67 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/deny": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Deny Output Port As Input Port",
+        "operationId": "deny_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6428,10 +6553,11 @@
     "/api/data_product_dataset_links/remove/{id}": {
       "post": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Input ports"
         ],
         "summary": "Remove Data Product Link",
         "operationId": "remove_data_product_link_api_data_product_dataset_links_remove__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -6466,10 +6592,71 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/remove": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Remove Output Port As Input Port",
+        "operationId": "remove_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_product_dataset_links/actions": {
       "get": {
         "tags": [
-          "data_product_dataset_links"
+          "Data Products - Output ports - Input ports"
         ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_data_product_dataset_links_actions_get",
@@ -6488,7 +6675,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/data_output_dataset_links/approve/{id}": {
@@ -7052,6 +7240,7 @@
         ],
         "summary": "Get Data Output",
         "operationId": "get_data_output_api_data_outputs__id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -7492,6 +7681,7 @@
         ],
         "summary": "Update Data Output Status",
         "operationId": "update_data_output_status_api_data_outputs__id__status_put",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -9287,6 +9477,9 @@
     },
     "/api/platforms/configs": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platform Service Configurations Old",
         "operationId": "get_all_platform_service_configurations_old_api_platforms_configs_get",
         "responses": {
@@ -9310,6 +9503,9 @@
     },
     "/api/v2/configuration/platforms/configs": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platform Service Configurations",
         "operationId": "get_all_platform_service_configurations",
         "responses": {
@@ -9328,6 +9524,9 @@
     },
     "/api/platforms": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platforms Old",
         "operationId": "get_all_platforms_old_api_platforms_get",
         "responses": {
@@ -9351,6 +9550,9 @@
     },
     "/api/v2/configuration/platforms": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get All Platforms",
         "operationId": "get_all_platforms",
         "responses": {
@@ -9369,6 +9571,9 @@
     },
     "/api/platforms/{id}/services": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Platform Services Old",
         "operationId": "get_platform_services_old_api_platforms__id__services_get",
         "deprecated": true,
@@ -9414,6 +9619,9 @@
     },
     "/api/v2/configuration/platforms/{id}/services": {
       "get": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
         "summary": "Get Platform Services",
         "operationId": "get_platform_services",
         "parameters": [
@@ -10138,6 +10346,27 @@
         }
       }
     },
+    "/api/v2/users/current": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User",
+        "operationId": "get_current_user",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/roles": {
       "post": {
         "tags": [
@@ -10222,7 +10451,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/roles/{id}": {
@@ -11887,6 +12117,7 @@
         ],
         "summary": "Create Assignment Old",
         "operationId": "create_assignment_old_api_role_assignments_dataset__id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -12530,8 +12761,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Get Settings",
-        "operationId": "get_settings_api_theme_settings_get",
+        "summary": "Get Theme Settings",
+        "operationId": "get_theme_settings_api_theme_settings_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12550,8 +12781,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Update Settings",
-        "operationId": "update_settings_api_theme_settings_put",
+        "summary": "Update Theme Settings",
+        "operationId": "update_theme_settings_api_theme_settings_put",
         "requestBody": {
           "content": {
             "application/json": {
@@ -12590,8 +12821,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Get Settings",
-        "operationId": "get_settings",
+        "summary": "Get Theme Settings",
+        "operationId": "get_theme_settings",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -12609,8 +12840,8 @@
         "tags": [
           "Configuration - Theme settings"
         ],
-        "summary": "Update Settings",
-        "operationId": "update_settings",
+        "summary": "Update Theme Settings",
+        "operationId": "update_theme_settings",
         "requestBody": {
           "content": {
             "application/json": {
@@ -12646,10 +12877,11 @@
     "/api/graph": {
       "get": {
         "tags": [
-          "graph"
+          "Graph"
         ],
         "summary": "Get Graph Data",
         "operationId": "get_graph_data_api_graph_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "domain_nodes_enabled",
@@ -12706,24 +12938,62 @@
         }
       }
     },
-    "/api/notifications": {
+    "/api/v2/graph": {
       "get": {
         "tags": [
-          "notifications"
+          "Graph"
         ],
-        "summary": "Get User Notifications",
-        "operationId": "get_user_notifications_api_notifications_get",
+        "summary": "Get Graph Data",
+        "operationId": "get_graph_data",
+        "parameters": [
+          {
+            "name": "domain_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Domain Nodes Enabled"
+            }
+          },
+          {
+            "name": "data_product_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Data Product Nodes Enabled"
+            }
+          },
+          {
+            "name": "dataset_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Dataset Nodes Enabled"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationGet"
-                  },
-                  "type": "array",
-                  "title": "Response Get User Notifications Api Notifications Get"
+                  "$ref": "#/components/schemas/Graph"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -12734,7 +13004,7 @@
     "/api/notifications/all": {
       "delete": {
         "tags": [
-          "notifications"
+          "Users - Notifications"
         ],
         "summary": "Remove All User Notifications",
         "operationId": "remove_all_user_notifications_api_notifications_all_delete",
@@ -12747,16 +13017,18 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/notifications/{id}": {
       "delete": {
         "tags": [
-          "notifications"
+          "Users - Notifications"
         ],
         "summary": "Remove User Notification",
         "operationId": "remove_user_notification_api_notifications__id__delete",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -12791,10 +13063,117 @@
         }
       }
     },
+    "/api/v2/users/current/notifications/all": {
+      "delete": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Remove All User Notifications",
+        "operationId": "remove_all_user_notifications",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/notifications/{id}": {
+      "delete": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Remove User Notification",
+        "operationId": "remove_user_notification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Get User Notifications Old",
+        "operationId": "get_user_notifications_old_api_notifications_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationGet"
+                  },
+                  "type": "array",
+                  "title": "Response Get User Notifications Old Api Notifications Get"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/users/current/notifications": {
+      "get": {
+        "tags": [
+          "Users - Notifications"
+        ],
+        "summary": "Get User Notifications",
+        "operationId": "get_user_notifications",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserNotificationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/pending_actions": {
       "get": {
         "tags": [
-          "pending_actions"
+          "Users - Pending Actions"
         ],
         "summary": "Get User Pending Actions",
         "operationId": "get_user_pending_actions_api_pending_actions_get",
@@ -12823,7 +13202,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/resource_names/sanitize": {
@@ -12933,11 +13313,11 @@
     "/api/auth/device/device_token": {
       "post": {
         "tags": [
-          "auth",
-          "device flow"
+          "Authentication"
         ],
         "summary": "Get Device Token",
         "operationId": "get_device_token_api_auth_device_device_token_post",
+        "deprecated": true,
         "security": [
           {
             "HTTPBasic": []
@@ -12989,11 +13369,11 @@
     "/api/auth/device/jwt_token": {
       "post": {
         "tags": [
-          "auth",
-          "device flow"
+          "Authentication"
         ],
         "summary": "Get Jwt Token",
         "operationId": "get_jwt_token_api_auth_device_jwt_token_post",
+        "deprecated": true,
         "security": [
           {
             "HTTPBasic": []
@@ -13050,34 +13430,14 @@
         }
       }
     },
-    "/api/auth/user": {
-      "get": {
-        "tags": [
-          "auth"
-        ],
-        "summary": "Authorize",
-        "operationId": "authorize_api_auth_user_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/auth/aws_credentials": {
       "get": {
         "tags": [
-          "auth"
+          "Authentication"
         ],
         "summary": "Get Aws Credentials",
         "operationId": "get_aws_credentials_api_auth_aws_credentials_get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "data_product_name",
@@ -13122,90 +13482,102 @@
         }
       }
     },
-    "/.well-known/oauth-authorization-server": {
-      "get": {
-        "tags": [
-          "mcp"
-        ],
-        "summary": "Oauth Metadata",
-        "description": "OAuth 2.1 Authorization Server Metadata.",
-        "operationId": "oauth_metadata__well_known_oauth_authorization_server_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/.well-known/openid-configuration": {
-      "get": {
-        "tags": [
-          "mcp"
-        ],
-        "summary": "Openid Config",
-        "description": "OpenID Connect Discovery endpoint.",
-        "operationId": "openid_config__well_known_openid_configuration_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/.well-known/oauth-protected-resource": {
-      "get": {
-        "tags": [
-          "mcp"
-        ],
-        "summary": "Oauth Protected Resource",
-        "description": "OAuth 2.1 Protected Resource Metadata.",
-        "operationId": "oauth_protected_resource__well_known_oauth_protected_resource_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/register": {
+    "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
-          "mcp"
+          "Authentication"
         ],
-        "summary": "Register",
-        "description": "OAuth 2.1 Dynamic Client Registration endpoint.",
-        "operationId": "register_api_register_post",
+        "summary": "Get Device Token",
+        "operationId": "get_device_token",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "openid",
+              "title": "Scope"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
         }
       }
     },
-    "/": {
-      "get": {
-        "summary": "Root",
-        "operationId": "root__get",
+    "/api/v2/authn/device/jwt_token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Jwt Token",
+        "operationId": "get_jwt_token",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "device_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Device Code"
+            }
+          },
+          {
+            "name": "grant_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Grant Type"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -13214,14 +13586,121 @@
                 "schema": {}
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
         }
+      }
+    },
+    "/api/v2/authn/aws_credentials": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Aws Credentials",
+        "operationId": "get_aws_credentials",
+        "parameters": [
+          {
+            "name": "data_product_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Data Product Name"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Environment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AWSCredentials"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/user": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authorize",
+        "description": "**DEPRECATED:** Please use current user endpoint instead",
+        "operationId": "authorize_api_auth_user_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/api/version": {
       "get": {
+        "tags": [
+          "Version"
+        ],
+        "summary": "Get Version Old",
+        "operationId": "get_version_old_api_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/version": {
+      "get": {
+        "tags": [
+          "Version"
+        ],
         "summary": "Get Version",
-        "operationId": "get_version_api_version_get",
+        "operationId": "get_version",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -13379,6 +13858,20 @@
           "technical_asset_id"
         ],
         "title": "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest"
+      },
+      "ApproveOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "ApproveOutputPortAsInputPortRequest"
       },
       "AuthorizationAction": {
         "type": "integer",
@@ -16942,6 +17435,20 @@
         ],
         "title": "DenyLinkBetweenTechnicalAssetAndOutputPortRequest"
       },
+      "DenyOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "DenyOutputPortAsInputPortRequest"
+      },
       "Domain": {
         "properties": {
           "id": {
@@ -18345,6 +18852,56 @@
         ],
         "title": "GetTechnicalAssetsResponseItem"
       },
+      "GetUserNotificationsResponse": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/GetUserNotificationsResponseItem"
+            },
+            "type": "array",
+            "title": "Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "title": "GetUserNotificationsResponse"
+      },
+      "GetUserNotificationsResponseItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Event Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "event": {
+            "$ref": "#/components/schemas/GetEventHistoryResponseItem"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "event_id",
+          "user_id",
+          "event",
+          "user"
+        ],
+        "title": "GetUserNotificationsResponseItem"
+      },
       "GetUsersResponse": {
         "properties": {
           "users": {
@@ -19664,6 +20221,20 @@
           "database"
         ],
         "title": "RedshiftDataOutput"
+      },
+      "RemoveOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "RemoveOutputPortAsInputPortRequest"
       },
       "RequestDataProductRoleAssignment": {
         "properties": {
