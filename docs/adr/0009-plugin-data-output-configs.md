@@ -134,7 +134,7 @@ Needed to know the structure of the different plugins, e.g. grouping them in tem
   }
 ```
 
-#### Example response GET /api/v2/plugins/<GLUE_ID>
+#### Example response GET /api/v2/plugins/<GLUE_ID>/form
 
 Single plugin content to generate the needed form.
 
