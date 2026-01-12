@@ -34,10 +34,12 @@ The system needs a more scalable and maintainable way to define data output conf
 
 ## Considered Options
 
-* **Shared option: Python Plugin Architecture (Chosen)**
+* Python Plugin Architecture
   Define each integration as a Python class using a shared base class.
   Frontend configuration is generated dynamically over REST.
   Plugins are discovered through code-level registration.
+
+### Database organization
 
 * **Option 1:** Strict columns and fields for configurations in the database, single table.
   Current approach. Easier migrations but requires schema changes for every new integration. Encourages artificial mappings between technologies and database columns.
@@ -48,7 +50,7 @@ The system needs a more scalable and maintainable way to define data output conf
 * **Option 3:** Strict columns and fields for configurations in the database, table per plugin.
   Each plugin has their own table, with strict column mappings.
 
-### Second discussion: Plugin provisioning
+### Plugin provisioning
 
 * **Option 1:** Plugins are an internal extension mechanism only
   Integrations live in the portal codebase and require a rebuild to be added.
@@ -60,8 +62,9 @@ The system needs a more scalable and maintainable way to define data output conf
 
 ## Decision Outcome
 
-**Chosen option:**
-*Python Plugin Architecture* combined with *Option 3: Table per plugin*
+**Chosen options:**
+Database organization: option 3
+Plugin provisioning: option 2
 
 We introduce a plugin-based architecture where each data output integration is defined as a self-contained Python class. These classes:
 
@@ -206,19 +209,15 @@ Single plugin content to generate the needed form.
 
 #### Database representation
 
-```json
-{
-  "plugin": "aws_glue",
-  "version": "1.0",
-  "configuration": {
-    "database": "pharma_research",
-    "database_suffix": "analytics",
-    "table": "*",
-    "database_path": "pharma_research",
-    "table_path": "*",
-    "bucket_identifier": "datalake"
-  }
-}
+```
+aws_glue_table
+- config_identifier: id
+- version: 1.0
+- database_suffix: analytics
+- table: *
+- database_path: pharma_research
+- table_path: *
+- bucket_identifier: datalake
 ```
 
 ---
@@ -261,14 +260,19 @@ class AssetProviderPlugin(BaseModel):
         raise NotImplementedError
 
     def validate(self):
+        # Can check whether the content is valid. e.g. no illegal names used in identifiers. Namespace present if required, if table_path is not provided it takes table_name, etc etc
         pass
 
     def render_template(self, template, **context) -> str:
+        # Method used to fill in the technical details screen in the frontend. The template is a jinja string saved per technology in the database.
+        # e.g. S3 template might be <BUCKET_ARN>/<namespace>/<path>. But another user might want to add an extra prefix etc
         pass
 
     def get_configuration(
         self, configs
-    ): # Returns platform specific information
+    ):
+        # Returns platform and environment specific information on the technology. e.g. KMS keys, s3 bucket arns, ...
+        # which might be used in the render_template function as context
         pass
 
     def get_url(self, environment):
