@@ -25,7 +25,7 @@ if TYPE_CHECKING:
         DataProductDatasetAssociation,
         Dataset,
     )
-    from app.notifications.model import Notification
+    from app.users.notifications.model import Notification
 
 
 class User(Base, BaseORM):

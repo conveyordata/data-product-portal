@@ -56,9 +56,9 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.notifications.service import NotificationService
 from app.resource_names.service import ResourceNameService
 from app.users.model import User
+from app.users.notifications.service import NotificationService
 
 
 def _assign_owner_role_assignments(
@@ -194,7 +194,7 @@ def get_event_history_old(
 
 
 @router.get(f"{route}/{{id}}/history")
-def get_event_history(
+def get_output_ports_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
     ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)

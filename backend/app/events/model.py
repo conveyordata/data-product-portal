@@ -6,15 +6,15 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
-from app.notifications.model import Notification
 from app.shared.model import BaseORM
+from app.users.notifications.model import Notification
 
 from .enums import EventReferenceEntity
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
+    from app.data_products.output_ports.model import Dataset
     from app.data_products.technical_assets.model import DataOutput
-    from app.datasets.model import Dataset
     from app.users.model import User
 
 

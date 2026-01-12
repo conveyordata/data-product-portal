@@ -1,7 +1,9 @@
 import factory
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.data_products_datasets.model import DataProductDatasetAssociation
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation,
+)
 
 from .data_product import DataProductFactory
 from .dataset import DatasetFactory

@@ -3,10 +3,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal';
-import { useGetAllDomainsQuery, useRemoveDomainMutation } from '@/store/features/domains/domains-api-slice';
+import {
+    type GetDomainsItem,
+    useGetDomainsQuery,
+    useRemoveDomainMutation,
+} from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DomainsGetContract } from '@/types/domain';
-
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
 import styles from './domain-table.module.scss';
@@ -14,7 +17,7 @@ import { getDomainTableColumns } from './domain-table-columns';
 
 export function DomainTable() {
     const { t } = useTranslation();
-    const { data = [], isFetching } = useGetAllDomainsQuery();
+    const { data: { domains = [] } = {}, isFetching } = useGetDomainsQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -62,8 +65,8 @@ export function DomainTable() {
                     {t('Add Domain')}
                 </Button>
             </Flex>
-            <Table<DomainsGetContract>
-                dataSource={data}
+            <Table<GetDomainsItem>
+                dataSource={domains}
                 columns={columns}
                 rowKey={(record) => record.id}
                 loading={isFetching}

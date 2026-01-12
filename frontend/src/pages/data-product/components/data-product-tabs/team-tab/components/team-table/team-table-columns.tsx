@@ -2,10 +2,10 @@ import { Badge, Button, Popconfirm, Space, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form';
-import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
-import type { DataProductRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { DecisionStatus, type RoleContract } from '@/types/roles';
-import { Prototype } from '@/types/roles/role.contract';
+import { UserAvatar } from '@/components/user-avatar/user-avatar.component';
+import type { DataProductRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
+import type { Role } from '@/store/api/services/generated/authorizationRolesApi';
+import { DecisionStatus, Prototype, Scope } from '@/types/roles';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -16,7 +16,7 @@ type Props = {
     onRemoveUserAccess: (assignmentId: string) => void;
     onAcceptAccessRequest: (assignmentId: string) => void;
     onRejectAccessRequest: (assignmentId: string) => void;
-    onRoleChange: (role: RoleContract, assignmentId: string) => void;
+    onRoleChange: (role: Role, assignmentId: string) => void;
     isRemovingUser: boolean;
     isLoading: boolean;
     canApprove: boolean;
@@ -64,7 +64,7 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { id, decision }: DataProductRoleAssignmentResponse) => {
+            render: (role: Role, { id, decision }: DataProductRoleAssignmentResponse) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 const disabled = role.prototype === Prototype.OWNER && lockOwners;
 
@@ -73,7 +73,7 @@ export const getDataProductUsersTableColumns = ({
                         initialRole={role}
                         onRoleChange={(role) => onRoleChange(role, id)}
                         disabled={disabled || !canEdit || !isApproved}
-                        scope={'data_product'}
+                        scope={Scope.DATA_PRODUCT}
                     />
                 );
             },

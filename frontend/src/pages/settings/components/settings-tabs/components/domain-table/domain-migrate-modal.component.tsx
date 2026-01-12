@@ -2,10 +2,10 @@ import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
-    useGetAllDomainsQuery,
+    useGetDomainsQuery,
     useMigrateDomainMutation,
     useRemoveDomainMutation,
-} from '@/store/features/domains/domains-api-slice';
+} from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { DomainContract } from '@/types/domain';
 
@@ -23,7 +23,7 @@ type Props = {
 export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props) {
     const { t } = useTranslation();
     const [form] = Form.useForm();
-    const { data: domains = [] } = useGetAllDomainsQuery();
+    const { data: { domains = [] } = {} } = useGetDomainsQuery();
     const [migrateDomain] = useMigrateDomainMutation();
     const [onRemoveDomain] = useRemoveDomainMutation();
 

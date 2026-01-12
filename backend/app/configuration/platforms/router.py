@@ -22,7 +22,7 @@ from app.platform_service_configurations.service import (
 from .platform_services.schema_response import GetPlatformServicesResponse
 from .service import PlatformService as PlatformsService
 
-router = APIRouter(tags=["Configuration - Platforms"])
+router = APIRouter()
 
 
 @router.get(
@@ -65,7 +65,7 @@ def get_single_platform_service_configuration(
 
 
 _router = router
-router = APIRouter()
+router = APIRouter(tags=["Configuration - Platforms"])
 router.include_router(_router, prefix="/platforms", deprecated=True)
 router.include_router(_router, prefix="/v2/configuration/platforms")
 

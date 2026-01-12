@@ -10,11 +10,11 @@ import {
     useDeleteDataProductRoleAssignmentMutation,
     useModifyDataProductRoleAssignmentMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { RoleContract } from '@/types/roles';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './team-table.module.scss';
 
@@ -80,7 +80,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     );
 
     const handleRoleChange = useCallback(
-        async (role: RoleContract, assignmentId: string) => {
+        async (role: Role, assignmentId: string) => {
             if (!dataProduct) return;
             try {
                 await updateRoleAssignment({

@@ -6,19 +6,20 @@ import { useSelector } from 'react-redux';
 import { Searchbar } from '@/components/form';
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     type OutputPortRoleAssignmentResponse,
     useCreateOutputPortRoleAssignmentMutation,
     useListOutputPortRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { Scope } from '@/types/roles';
 import type { SearchForm } from '@/types/shared';
-import type { UserContract } from '@/types/users';
 import { TeamTable } from './components/team-table/team-table.component.tsx';
 import styles from './team-tab.module.scss';
 
@@ -57,7 +58,7 @@ export function TeamTab({ datasetId }: Props) {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { data: DATASET_ROLES, isFetching: isLoadingRoles } = useGetRolesQuery('dataset');
+    const { data: { roles: DATASET_ROLES = [] } = {}, isFetching: isLoadingRoles } = useGetRolesQuery(Scope.DATASET);
 
     const filteredUsers = useMemo(() => {
         return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
@@ -74,7 +75,7 @@ export function TeamTab({ datasetId }: Props) {
     const canAddUser = access?.allowed || false;
 
     const handleGrantAccessToDataset = useCallback(
-        async (user: UserContract, role_id: string) => {
+        async (user: UsersGet, role_id: string) => {
             try {
                 await addUserToDataset({
                     output_port_id: datasetId,
@@ -117,7 +118,7 @@ export function TeamTab({ datasetId }: Props) {
                     onClose={handleClose}
                     isLoading={isFetching || isAddingUser || isLoadingRoles}
                     userIdsToHide={datasetUserIds}
-                    roles={DATASET_ROLES || []}
+                    roles={DATASET_ROLES}
                     item={{
                         action: handleGrantAccessToDataset,
                         label: t('Grant Access'),

@@ -35,7 +35,11 @@ export function UsageTab({ datasetId }: Props) {
     const [dayRange, setDayRange] = useState<number>(yearDayRange);
     const granularity = useMemo(() => getGranularityFromDayRange(dayRange), [dayRange]);
 
-    const { data, isLoading, isFetching } = useGetDatasetQueryStatsDailyQuery({
+    const {
+        data: { dataset_query_stats_daily_responses: responses = [] } = {},
+        isLoading,
+        isFetching,
+    } = useGetDatasetQueryStatsDailyQuery({
         datasetId,
         granularity,
         dayRange,
@@ -43,19 +47,16 @@ export function UsageTab({ datasetId }: Props) {
 
     const { data: curatedQueries, isLoading: areCuratedQueriesLoading } = useGetDatasetQueryCuratedQueriesQuery(
         datasetId,
-        {
-            skip: !datasetId,
-        },
+        { skip: !datasetId },
     );
 
     const isLoadingState = isLoading || isFetching;
-    const responses = data?.dataset_query_stats_daily_responses;
-    const hasUsageData = Boolean(responses?.length);
+    const hasUsageData = Boolean(responses.length);
     const hasCuratedQueries = Boolean(!areCuratedQueriesLoading && curatedQueries?.dataset_curated_queries?.length);
     const unknownLabel = t('Unknown');
 
     const chartData = useMemo(() => {
-        if (!responses?.length) {
+        if (!responses.length) {
             return [];
         }
         return transformDataForChart(responses, granularity, unknownLabel);

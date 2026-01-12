@@ -1,7 +1,10 @@
 import { Button, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { useCreateDomainMutation, useUpdateDomainMutation } from '@/store/features/domains/domains-api-slice';
+import {
+    useCreateDomainMutation,
+    useUpdateDomainMutation,
+} from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { DomainContract, DomainCreateRequest } from '@/types/domain';
 
@@ -45,7 +48,12 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
             if (mode === 'create') {
                 await createDomain(values);
             } else {
-                await editDomain({ domain: values, domainId: initial?.id || '' });
+                await editDomain({
+                    id: initial?.id as string,
+                    domainUpdate: {
+                        ...values,
+                    },
+                });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });

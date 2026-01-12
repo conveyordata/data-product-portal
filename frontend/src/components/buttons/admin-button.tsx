@@ -4,11 +4,11 @@ import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     useBecomeAdminMutation,
     useRevokeAdminMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 
 type Props = {
     onAdminAction?: () => void;

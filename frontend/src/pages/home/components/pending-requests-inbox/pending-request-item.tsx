@@ -2,7 +2,7 @@ import { UserOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Avatar, Button, Flex, List, Typography, theme } from 'antd';
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
@@ -96,32 +96,36 @@ export function PendingItem({ pendingAction }: Props) {
                     color: datasetColor,
                     description: (
                         <Typography.Text>
-                            {t('Request for read access from the data product ')}
-                            <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to={createDataProductIdPath(pendingAction.data_product_id)}
-                            >
-                                {pendingAction.data_product.name}
-                            </Link>
+                            <Trans t={t}>
+                                Request for read access from the data product{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDataProductIdPath(pendingAction.data_product_id)}
+                                >
+                                    {pendingAction.data_product.name}
+                                </Link>
+                            </Trans>
                         </Typography.Text>
                     ),
                     message: (
                         <Flex vertical>
                             <Justification justification={pendingAction.justification} />
                             <Typography.Text>
-                                {t('Accepting will grant the data product read access on the ')}
-                                <Link
-                                    onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(pendingAction.dataset_id)}
-                                >
-                                    {pendingAction.dataset.name}
-                                </Link>
-                                {t(' output port.')}
+                                <Trans t={t}>
+                                    Accepting will grant the data product read access on the{' '}
+                                    <Link
+                                        onClick={(e) => e.stopPropagation()}
+                                        to={createDatasetIdPath(pendingAction.dataset_id)}
+                                    >
+                                        {pendingAction.dataset.name}
+                                    </Link>{' '}
+                                    output port.
+                                </Trans>
                             </Typography.Text>
                         </Flex>
                     ),
-                    tag: t('{{name}} Output port', { name: pendingAction.dataset.name }),
-                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.DataProduct),
+                    tag: t('{{name}} Output Port', { name: pendingAction.dataset.name }),
+                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.Producers),
                 };
 
             case PendingActionTypes.DataOutputDataset:
@@ -130,32 +134,36 @@ export function PendingItem({ pendingAction }: Props) {
                     color: datasetColor,
                     description: (
                         <Typography.Text strong>
-                            {t('Request for the creation of a link coming from the technical asset ')}
-                            <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to={createDataOutputIdPath(
-                                    pendingAction.data_output_id,
-                                    pendingAction.data_output.owner_id,
-                                )}
-                            >
-                                {pendingAction.data_output.name}
-                            </Link>
+                            <Trans t={t}>
+                                Request for the creation of a link coming from the technical asset{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDataOutputIdPath(
+                                        pendingAction.data_output_id,
+                                        pendingAction.data_output.owner_id,
+                                    )}
+                                >
+                                    {pendingAction.data_output.name}
+                                </Link>
+                            </Trans>
                         </Typography.Text>
                     ),
                     message: (
                         <Typography.Text>
-                            {t('Accepting will create a link from the technical asset to the ')}
-                            <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to={createDatasetIdPath(pendingAction.dataset_id)}
-                            >
-                                {pendingAction.dataset.name}
-                            </Link>
-                            {t(' output port.')}
+                            <Trans t={t}>
+                                Accepting will create a link from the technical asset to the{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDatasetIdPath(pendingAction.dataset_id)}
+                                >
+                                    {pendingAction.dataset.name}
+                                </Link>{' '}
+                                output port.
+                            </Trans>
                         </Typography.Text>
                     ),
-                    tag: t('{{name}} Output port', { name: pendingAction.dataset.name }),
-                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.DataOutput),
+                    tag: t('{{name}} Output Port', { name: pendingAction.dataset.name }),
+                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.Consumers),
                 };
 
             case PendingActionTypes.DataProductRoleAssignment:
@@ -164,22 +172,24 @@ export function PendingItem({ pendingAction }: Props) {
                     color: dataProductColor,
                     description: (
                         <Typography.Text strong>
-                            {t('Request for team membership from ')}
-                            {pendingAction.user.first_name} {pendingAction.user.last_name}
+                            {t('Request for team membership from {{first_name}} {{last_name}}', {
+                                first_name: pendingAction.user.first_name,
+                                last_name: pendingAction.user.last_name,
+                            })}
                         </Typography.Text>
                     ),
                     message: (
                         <Typography.Text>
-                            {t('Accepting will grant the user the role of {{role}} in the ', {
-                                role: pendingAction.role.name,
-                            })}
-                            <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to={createDataProductIdPath(pendingAction.data_product.id)}
-                            >
-                                {pendingAction.data_product.name}
-                            </Link>
-                            {t(' data product.')}
+                            <Trans t={t}>
+                                Accepting will grant the user the role of {pendingAction.role?.name} in the{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDataProductIdPath(pendingAction.data_product.id)}
+                                >
+                                    {pendingAction.data_product.name}
+                                </Link>{' '}
+                                data product.
+                            </Trans>
                         </Typography.Text>
                     ),
                     tag: t('{{name}} Data Product', { name: pendingAction.data_product.name }),

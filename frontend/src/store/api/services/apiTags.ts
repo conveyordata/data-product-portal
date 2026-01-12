@@ -20,6 +20,19 @@ api.enhanceEndpoints({
             ],
         },
 
+        getRoles: {
+            providesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+        createRole: {
+            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+        removeRole: {
+            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+        updateRole: {
+            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+        },
+
         listGlobalRoleAssignments: {
             providesTags: (response) => {
                 const individual = (response?.role_assignments || []).map((assignment) => ({
@@ -151,6 +164,138 @@ api.enhanceEndpoints({
                 { type: TagTypes.OutputPort, id: result?.output_port_id },
                 { type: TagTypes.History, id: result?.output_port_id },
             ],
+        },
+
+        getDataProductsLifecycles: {
+            providesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+        createDataProductLifecycle: {
+            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+        removeDataProductLifecycle: {
+            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductLifecycle: {
+            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
+        },
+
+        getDataProductsSettings: {
+            providesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+        createDataProductSetting: {
+            invalidatesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+        removeDataProductSetting: {
+            invalidatesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductSetting: {
+            invalidatesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
+        },
+
+        getDataProductsTypes: {
+            providesTags: (response) => {
+                return response?.data_product_types
+                    ? [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }]
+                    : [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }];
+            },
+        },
+        getDataProductType: {
+            providesTags: (response) => {
+                return response?.id ? [{ type: TagTypes.DataProductType, id: response.id }] : [];
+            },
+        },
+        createDataProductType: {
+            invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+        },
+        removeDataProductType: {
+            invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductType: {
+            invalidatesTags: (response) => [
+                { type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProductType, id: response?.id },
+            ],
+        },
+
+        getDomains: {
+            providesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
+        },
+        getDomain: {
+            providesTags: (result) => [{ type: TagTypes.Domain, id: result?.id }],
+        },
+        createDomain: {
+            invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDomain: {
+            invalidatesTags: [
+                { type: TagTypes.Domain, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct },
+                { type: TagTypes.UserDataProducts },
+                { type: TagTypes.OutputPort },
+                { type: TagTypes.UserOutputPorts },
+            ],
+        },
+        removeDomain: {
+            invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
+        },
+        migrateDomain: {
+            invalidatesTags: (_, __, { fromId, toId }) => [
+                { type: TagTypes.Domain, id: fromId },
+                { type: TagTypes.Domain, id: toId },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.UserDataProducts as const },
+                { type: TagTypes.OutputPort as const },
+                { type: TagTypes.UserOutputPorts as const },
+            ],
+        },
+
+        getUsers: {
+            providesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        createUser: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        removeUser: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        setCanBecomeAdmin: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
+        },
+        markTourAsSeen: {
+            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.CURRENT_USER }],
+        },
+        getCurrentUser: {
+            providesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.CURRENT_USER }],
+        },
+
+        getTags: {
+            providesTags: [{ type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST }],
+        },
+        createTag: {
+            invalidatesTags: [{ type: TagTypes.Tags, id: STATIC_TAG_ID.LIST }],
+        },
+        updateTag: {
+            invalidatesTags: [
+                { type: TagTypes.Tags, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.OutputPort as const },
+                { type: TagTypes.TechnicalAsset as const },
+            ],
+        },
+        removeTag: {
+            invalidatesTags: [
+                { type: TagTypes.Tags, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.OutputPort as const },
+                { type: TagTypes.TechnicalAsset as const },
+            ],
+        },
+
+        getThemeSettings: {
+            providesTags: [{ type: TagTypes.ThemeSettings }],
+        },
+        updateThemeSettings: {
+            invalidatesTags: [{ type: TagTypes.ThemeSettings }],
         },
     },
 });

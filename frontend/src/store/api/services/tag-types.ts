@@ -17,7 +17,7 @@ export enum TagTypes {
     OutputPort = 'OutputPort',
     OutputPortRoleAssignments = 'OutputPortRoleAssignments',
     Domain = 'Domain',
-    DataOutput = 'DataOutput',
+    TechnicalAsset = 'TechnicalAsset',
     Graph = 'Graph',
     Platform = 'Platform',
     PlatformService = 'PlatformService',
@@ -31,4 +31,5 @@ export enum TagTypes {
 
 export const STATIC_TAG_ID = {
     LIST: 'LIST',
+    CURRENT_USER: 'CURRENT_USER',
 } as const;

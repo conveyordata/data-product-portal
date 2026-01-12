@@ -41,8 +41,8 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.notifications.service import NotificationService
 from app.resource_names.service import ResourceNameService
+from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 old_route = "/data_outputs"
@@ -76,7 +76,7 @@ def get_data_output_result_string(
     return DataOutputService(db).get_data_output_result_string(request)
 
 
-@router.get(f"{old_route}/{{id}}")
+@router.get(f"{old_route}/{{id}}", deprecated=True)
 def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutputGet:
     do = ensure_data_output_exists(id, db)
     return DataOutputService(db).get_data_output(do.owner_id, id)
@@ -278,6 +278,7 @@ def update_technical_asset(
             )
         ),
     ],
+    deprecated=True,
 )
 def update_data_output_status(
     id: UUID,

@@ -16,7 +16,16 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DecisionStatus } from '@/types/roles';
-import type { DataProductRoleRequest, DatasetRoleRequest } from '@/types/roles/role-assignment-request.ts';
+
+export interface DataProductRoleRequest {
+    assignment_id: string;
+    data_product_id: string;
+}
+
+export interface DatasetRoleRequest {
+    assignment_id: string;
+    dataset_id: string;
+}
 
 export const usePendingActionHandlers = () => {
     const { t } = useTranslation();

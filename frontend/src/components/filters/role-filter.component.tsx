@@ -5,13 +5,13 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     type DataProductRoleAssignmentResponse,
     type OutputPortRoleAssignmentResponse,
     useListDataProductRoleAssignmentsQuery,
     useListOutputPortRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import styles from './role-filter.component.module.scss';
 
 interface RoleFilterProps {

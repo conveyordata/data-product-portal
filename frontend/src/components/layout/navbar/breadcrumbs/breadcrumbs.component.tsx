@@ -1,7 +1,6 @@
 import {
     CompassOutlined,
     HomeOutlined,
-    SettingOutlined,
     ShopOutlined,
     ShoppingCartOutlined,
     TeamOutlined,
@@ -20,20 +19,8 @@ import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-ta
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import {
-    useGetEnvConfigByIdQuery,
-    useGetEnvironmentByIdQuery,
-} from '@/store/features/environments/environments-api-slice';
-import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { ApplicationPaths, createEnvironmentConfigsPath, type DynamicPathParams } from '@/types/navigation.ts';
-import {
-    isDataOutputEditPage,
-    isDataProductEditPage,
-    isDatasetEditPage,
-    isEnvConfigPage,
-    isEnvironmentConfigCreatePage,
-    isEnvironmentConfigsPage,
-} from '@/utils/routes.helper.ts';
+import { ApplicationPaths, type DynamicPathParams } from '@/types/navigation.ts';
+import { isDataOutputEditPage, isDataProductEditPage, isDatasetEditPage } from '@/utils/routes.helper.ts';
 import styles from './breadcrumbs.module.scss';
 
 type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
@@ -46,14 +33,7 @@ export const Breadcrumbs = () => {
         () => (pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x)),
         [pathname],
     );
-    const {
-        dataProductId = '',
-        datasetId = '',
-        platformServiceConfigId = '',
-        environmentId = '',
-        envConfigId = '',
-        dataOutputId = '',
-    } = params;
+    const { dataProductId = '', datasetId = '', dataOutputId = '' } = params;
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId, {
         skip: !dataProductId,
     });
@@ -61,14 +41,6 @@ export const Breadcrumbs = () => {
         skip: !dataOutputId,
     });
     const { data: dataset, isFetching: isFetchingDataset } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
-    const { data: platformServiceConfig, isFetching: isFetchingPlatformServiceConfig } =
-        useGetPlatformServiceConfigByIdQuery(platformServiceConfigId, { skip: !platformServiceConfigId });
-    const { data: environment, isFetching: isFetchingEnvironment } = useGetEnvironmentByIdQuery(environmentId, {
-        skip: !environmentId,
-    });
-    const { data: envConfig, isFetching: isFetchingEnvConfig } = useGetEnvConfigByIdQuery(envConfigId, {
-        skip: !envConfigId,
-    });
 
     const homeItem: BreadcrumbItemType = useMemo(
         () => ({
@@ -148,39 +120,9 @@ export const Breadcrumbs = () => {
                         ),
                     });
                     break;
-                case ApplicationPaths.PlatformsConfigs:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <SettingOutlined />
-                                {t('Platforms Configurations')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.Environments:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <SettingOutlined />
-                                {t('Environments')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.EnvironmentNew:
-                    Object.assign(breadcrumbItem, {
-                        title: t('New Environment'),
-                    });
-                    break;
                 case ApplicationPaths.Settings:
                     Object.assign(breadcrumbItem, {
                         title: t('Settings'),
-                    });
-                    break;
-                case ApplicationPaths.PlatformServiceConfigNew:
-                    Object.assign(breadcrumbItem, {
-                        title: t('New Platform Service Configuration'),
                     });
                     break;
                 case ApplicationPaths.People:
@@ -259,42 +201,6 @@ export const Breadcrumbs = () => {
                             });
                         }
                     }
-
-                    if (platformServiceConfig && !isFetchingPlatformServiceConfig) {
-                        Object.assign(breadcrumbItem, {
-                            title: `${platformServiceConfig.platform.name} - ${platformServiceConfig.service.name}`,
-                        });
-                    }
-
-                    if (environment && !isFetchingEnvironment) {
-                        if (isEnvironmentConfigsPage(path, environment.id)) {
-                            break;
-                        }
-                        if (isEnvironmentConfigCreatePage(path, environment.id)) {
-                            Object.assign(breadcrumbItem, {
-                                title: <Space>{t('New Environment Configuration')}</Space>,
-                            });
-                        } else {
-                            Object.assign(breadcrumbItem, {
-                                path: createEnvironmentConfigsPath(environment.id),
-                                title: <Space>{environment.name}</Space>,
-                            });
-                        }
-                    }
-
-                    if (envConfig && !isFetchingEnvConfig) {
-                        if (isEnvConfigPage(path, envConfig.id)) {
-                            Object.assign(breadcrumbItem, {
-                                title: `${envConfig.platform.name}-${envConfig.service.name}`,
-                            });
-                        } else {
-                            Object.assign(breadcrumbItem, {
-                                path: createEnvironmentConfigsPath(envConfig.environment.id),
-                                title: envConfig.environment.name,
-                            });
-                        }
-                    }
-
                     break;
             }
 
@@ -309,16 +215,10 @@ export const Breadcrumbs = () => {
             dataset,
             dataProduct,
             dataOutput,
-            envConfig,
-            environment,
             pathnames,
-            platformServiceConfig,
             isFetchingDataset,
             isFetchingDataProduct,
             isFetchingDataOutput,
-            isFetchingEnvConfig,
-            isFetchingEnvironment,
-            isFetchingPlatformServiceConfig,
         ],
     );
 

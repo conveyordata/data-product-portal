@@ -1,14 +1,14 @@
 import { Button, Form, Input } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { FormModal } from '@/components/modal/form-modal/form-modal.component';
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import styles from '@/pages/roles/components/create-role-modal.module.scss';
-import { useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice.ts';
-import type { RoleContract } from '@/types/roles';
+import { type Role, useUpdateRoleMutation } from '@/store/api/services/generated/authorizationRolesApi';
+import { Scope } from '@/types/roles';
 
 type Props = {
-    role: RoleContract;
+    role: Role;
     isOpen: boolean;
     onClose: () => void;
 };
@@ -20,11 +20,11 @@ export function ModifyRoleModal({ role, isOpen, onClose }: Props) {
 
     const title = useMemo(() => {
         switch (role.scope) {
-            case 'global':
+            case Scope.GLOBAL:
                 return t('Update {{ name }} global role', { name: role.name });
-            case 'data_product':
+            case Scope.DATA_PRODUCT:
                 return t('Update {{ name }} data product role', { name: role.name });
-            case 'dataset':
+            case Scope.DATASET:
                 return t('Update {{ name }} output port role', { name: role.name });
         }
     }, [role, t]);
@@ -39,8 +39,10 @@ export function ModifyRoleModal({ role, isOpen, onClose }: Props) {
             .then(() => {
                 const request = {
                     id: role.id,
-                    name: form.getFieldValue('name'),
-                    description: form.getFieldValue('description'),
+                    updateRole: {
+                        name: form.getFieldValue('name'),
+                        description: form.getFieldValue('description'),
+                    },
                 };
                 return updateRole(request);
             })

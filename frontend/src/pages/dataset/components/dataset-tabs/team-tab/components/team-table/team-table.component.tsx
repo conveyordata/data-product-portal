@@ -9,12 +9,12 @@ import {
     useDeleteOutputPortRoleAssignmentMutation,
     useModifyOutputPortRoleAssignmentMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { RoleContract } from '@/types/roles/role.contract';
-import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
+import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './team-table.module.scss';
 import { getDatasetTeamColumns } from './team-table-columns';
 
@@ -43,9 +43,9 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
         action: AuthorizationAction.DATASET__DELETE_USER,
     });
 
-    const canApproveUser = approve_access?.allowed || false;
-    const canEditUser = edit_access?.allowed || false;
-    const canRemoveUser = remove_access?.allowed || false;
+    const canApproveUser = approve_access?.allowed ?? false;
+    const canEditUser = edit_access?.allowed ?? false;
+    const canRemoveUser = remove_access?.allowed ?? false;
 
     const { pagination, handlePaginationChange } = useTablePagination(datasetUsers, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
@@ -70,7 +70,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
     );
 
     const handleRoleChange = useCallback(
-        async (role: RoleContract, assignmentId: string) => {
+        async (role: Role, assignmentId: string) => {
             if (!dataset) return;
             try {
                 await updateRoleAssignment({

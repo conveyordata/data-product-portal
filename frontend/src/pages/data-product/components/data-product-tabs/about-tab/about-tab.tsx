@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,
