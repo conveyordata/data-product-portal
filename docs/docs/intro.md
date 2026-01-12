@@ -22,8 +22,8 @@ Whether you're a data engineer, product owner, or business analyst, this portal 
 
 ## 🚀 Eager to get started?
 
-1. Start by taking a look at the [Data Portal concepts](/docs/category/concepts).
-2. After understanding the concepts, visit the [Quickstart tutorial](./getting-started/quickstart).
+1. Start by taking a look at the [Data Portal concepts](./concepts/concept-linking.md).
+2. After understanding the concepts, visit the [Quickstart tutorial](./getting-started/quickstart.md).
 
 ---
 

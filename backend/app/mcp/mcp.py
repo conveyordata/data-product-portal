@@ -7,7 +7,7 @@ from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
 from app.authorization.role_assignments.data_product.schema import (
-    RoleAssignmentResponse as DataProductRoleAssignmentResponse,
+    DataProductRoleAssignmentResponse as DataProductRoleAssignmentResponse,
 )
 
 # Add role assignment imports
@@ -15,13 +15,13 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
 from app.authorization.role_assignments.global_.schema import (
-    RoleAssignmentResponse as GlobalRoleAssignmentResponse,
+    GlobalRoleAssignmentResponse as GlobalRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
 from app.authorization.role_assignments.output_port.schema import (
-    RoleAssignmentResponse as DatasetRoleAssignmentResponse,
+    OutputPortRoleAssignmentResponse as DatasetRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
@@ -30,19 +30,27 @@ from app.configuration.domains.schema_response import DomainGetOld
 from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
-
-# Import Pydantic schemas - corrected paths
-from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
-
-# Import existing services
-from app.data_outputs.service import DataOutputService
+from app.core.logging import logger
+from app.data_products.output_ports.schema_response import DatasetGet, DatasetsGet
+from app.data_products.output_ports.service import DatasetService
 
 # Import enums - corrected paths
-from app.data_products.schema_response import DataProductGet, DataProductsGet
+from app.data_products.schema_response import (
+    DataProductGet,
+    GetDataProductsResponseItem,
+)
 from app.data_products.service import DataProductService
+from app.data_products.technical_assets.model import ensure_data_output_exists
+
+# Import Pydantic schemas - corrected paths
+from app.data_products.technical_assets.schema_response import (
+    DataOutputGet,
+    DataOutputsGet,
+)
+
+# Import existing services
+from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
-from app.datasets.schema_response import DatasetGet, DatasetsGet
-from app.datasets.service import DatasetService
 from app.settings import settings
 
 
@@ -51,7 +59,7 @@ def initialize_models():
     try:
         configure_mappers()
     except Exception as e:
-        print(f"Warning during model initialization: {e}")
+        logger.warn(f"Warning during model initialization: {e}")
 
 
 initialize_models()
@@ -137,7 +145,7 @@ def universal_search(
                             break
 
                 result_data_products = [
-                    DataProductsGet.model_validate(dp).model_dump()
+                    GetDataProductsResponseItem.model_validate(dp).model_dump()
                     for dp in filtered_data_products
                 ]
                 query_results.update({"data_products": result_data_products})
@@ -250,7 +258,7 @@ def search_data_products(
 
             return {
                 "data_products": [
-                    DataProductsGet.model_validate(dp).model_dump()
+                    GetDataProductsResponseItem.model_validate(dp).model_dump()
                     for dp in filtered_data_products
                 ],
                 "count": len(filtered_data_products),
@@ -338,7 +346,7 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
     try:
         db = next(get_db_session())
         try:
-            data_product = DataProductService(db).get_data_product(
+            data_product = DataProductService(db).get_data_product_old(
                 id=UUID(data_product_id),
             )
 
@@ -380,8 +388,10 @@ def get_data_output_details(data_output_id: str) -> Dict[str, Any]:
     """Get detailed information about a specific data output."""
     try:
         db = next(get_db_session())
+        do = ensure_data_output_exists(UUID(data_output_id), db=db)
         try:
             data_output = DataOutputService(db).get_data_output(
+                do.owner_id,
                 id=UUID(data_output_id),
             )
 
@@ -449,7 +459,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                 },
                 "featured_content": {
                     "popular_data_products": [
-                        DataProductsGet.model_validate(dp).model_dump()
+                        GetDataProductsResponseItem.model_validate(dp).model_dump()
                         for dp in popular_data_products
                     ],
                     "popular_datasets": [
@@ -478,7 +488,7 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
             # Get the data product using service
-            data_product = DataProductService(db).get_data_product(
+            data_product = DataProductService(db).get_data_product_old(
                 id=UUID(data_product_id),
             )
 
@@ -504,7 +514,7 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
             ]
 
             return {
-                "data_product": DataProductsGet.model_validate(
+                "data_product": GetDataProductsResponseItem.model_validate(
                     data_product
                 ).model_dump(),
                 "analytics": {
@@ -538,7 +548,7 @@ def get_data_product_resource(data_product_id: str) -> str:
     try:
         db = next(get_db_session())
         try:
-            data_product = DataProductService(db).get_data_product(
+            data_product = DataProductService(db).get_data_product_old(
                 id=UUID(data_product_id),
             )
 

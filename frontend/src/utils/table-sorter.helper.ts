@@ -1,6 +1,15 @@
 export class Sorter<T> {
-    stringSorter(accessor: (record: T) => string): (a: T, b: T) => number {
-        return (a, b) => accessor(a).localeCompare(accessor(b));
+    stringSorter(accessor: (record: T) => string | undefined): (a: T, b: T) => number {
+        return (a, b) => {
+            const valA = accessor(a);
+            const valB = accessor(b);
+
+            if (valA === undefined && valB === undefined) return 0;
+            if (valA === undefined) return 1;
+            if (valB === undefined) return -1;
+
+            return valA.localeCompare(valB);
+        };
     }
 
     numberSorter(accessor: (record: T) => number): (a: T, b: T) => number {

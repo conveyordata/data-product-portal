@@ -4,12 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
+import { useRequestDataProductRoleAssignmentMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useRequestDataProductRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
-import type { UserContract } from '@/types/users';
-
+import { Scope } from '@/types/roles';
 import styles from './data-product-request-access-button.module.scss';
 
 type Props = {
@@ -22,17 +21,17 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
     const { t } = useTranslation();
     const [requestAccessToDataProduct, { isLoading: isRequestingAccess }] =
         useRequestDataProductRoleAssignmentMutation();
-    const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
+    const { data: { roles: DATA_PRODUCT_ROLES = [] } = {} } = useGetRolesQuery(Scope.DATA_PRODUCT);
 
-    const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const isLoading = isFetchingUsers || isRequestingAccess;
 
     const userIdsToHide = useMemo(() => {
-        return users.filter((user) => user.id !== userId).map((user) => user.id);
+        return users.filter((user) => user.id !== userId).map((user) => user.id) ?? [];
     }, [users, userId]);
 
     const handleRequestAccessToDataProduct = useCallback(
-        async (user: UserContract, role_id: string) => {
+        async (user: UsersGet, role_id: string) => {
             try {
                 await requestAccessToDataProduct({
                     data_product_id: dataProductId,
@@ -61,7 +60,7 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
                     onClose={handleClose}
                     isLoading={isLoading}
                     userIdsToHide={userIdsToHide}
-                    roles={DATA_PRODUCT_ROLES || []}
+                    roles={DATA_PRODUCT_ROLES}
                     item={{
                         action: handleRequestAccessToDataProduct,
                         label: t('Request Role'),

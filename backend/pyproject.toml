@@ -2,6 +2,10 @@
 name = "app"
 version = "0.0.1"
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "app"
 version = "0.0.1"
@@ -12,24 +16,24 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.13"
 python-dotenv = "^1.2.1"
-fastapi = "0.122.0"
+fastapi = "0.127.0"
 gunicorn = "^23.0.0"
-uvicorn = "^0.38.0"
+uvicorn = "^0.40.0"
 pydantic = { version = "^2.12.5", extras = ['email'] }
 pydantic-settings = "^2.12.0"
-typer = "^0.20.0"
+typer = "^0.21.1"
 requests = "^2.32.5"
 httpx = "^0.28.1"
-alembic = "^1.17.2"
-sqlalchemy = { version = "^2.0.44", extras = ['asyncio'] }
-sqlalchemy-utils = "^0.42.0"
+alembic = "^1.18.0"
+sqlalchemy = { version = "^2.0.45", extras = ['asyncio'] }
+sqlalchemy-utils = "^0.42.1"
 sqlalchemy-easy-softdelete = "^0.8.3"
 psycopg2-binary = "^2.9.11"
 pyyaml = "^6.0.3"
 pyjwt = "^2.10.1"
 shortuuid = "^1.0.13"
 pytz = "^2025.2"
-boto3 = "^1.41.5"
+boto3 = "^1.42.25"
 jinja2 = "^3.1.6"
 asgi-correlation-id = "^4.3.4"
 cryptography = "^46.0.3"
@@ -37,39 +41,38 @@ emailgen = "^0.1.1"
 casbin = "^1.43.0"
 casbin_sqlalchemy_adapter = "^1.4.0"
 asyncpg = "^0.31.0"
-cachetools = "^6.2.2"
-greenlet = "^3.2.4"
+cachetools = "^6.2.4"
+greenlet = "^3.3.0"
 h11 = "^0.16.0"
-fastmcp = "2.13.1"
-posthog = "^7.0.1"
-authlib = "1.6.5"
+fastmcp = "2.14.2"
+posthog = "^7.5.1"
+authlib = "1.6.6"
 
 [tool.poetry.group.test]
 optional = true
 
 [tool.poetry.group.test.dependencies]
-pytest = "^9.0.1"
+pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
+freezegun = "^1.5.5"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.38.0"
+poethepoet = "^0.40.0"
 
 [tool.poe.tasks]
+lint = "ruff check --fix"
+format = "ruff format"
+ruff = ["lint", "format"]
 test = "pytest -v tests/"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 compose = "docker compose -f test-compose.yaml up -d"
 compose-down = "docker compose -f test-compose.yaml down"
 compile-requirements = "pip-compile --generate-hashes --upgrade requirements-poetry.in"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
 
 [tool.ruff.lint]
 #https://docs.astral.sh/ruff/rules/
@@ -90,6 +93,11 @@ select = [
     "FIX", #flake8-fixme
     "ISC", #flake8-implicit-str-concat
     "RSE", #flake8-raise
+    "T20", #flake-8 print
+    "TC", #flake8-type-checking
+    "FURB",
+    "PERF",
+    "FLY",
 ]
 
 [tool.ruff.lint.per-file-ignores]

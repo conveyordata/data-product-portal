@@ -2,6 +2,7 @@ import { Button, Checkbox, Flex, Input, Popconfirm, Select, type TableColumnsTyp
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import type { DataProductSettingsGetItem } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import type { DataProductSettingContract } from '@/types/data-product-setting';
 import { Sorter } from '@/utils/table-sorter.helper';
 
@@ -13,7 +14,7 @@ type Props = {
     handleRemove: (record: DataProductSettingContract) => void;
 };
 
-const defaultItem = (setting: DataProductSettingContract) => {
+const defaultItem = (setting: DataProductSettingsGetItem) => {
     switch (setting.type) {
         case 'checkbox': {
             const checked = setting.default === 'true';
@@ -53,8 +54,8 @@ export const getDataProductSettingsTableColumns = ({
     isLoading,
     handleEdit,
     handleRemove,
-}: Props): TableColumnsType<DataProductSettingContract> => {
-    const sorter = new Sorter<DataProductSettingContract>();
+}: Props): TableColumnsType<DataProductSettingsGetItem> => {
+    const sorter = new Sorter<DataProductSettingsGetItem>();
     return [
         {
             title: t('Id'),
@@ -122,7 +123,7 @@ export const getDataProductSettingsTableColumns = ({
                 showTitle: false,
             },
             render: (order: number) => <TableCellItem text={order.toString()} />,
-            sorter: sorter.numberSorter((setting) => setting.order),
+            sorter: sorter.numberSorter((setting) => setting.order ?? -1),
         },
         {
             title: t('Actions'),

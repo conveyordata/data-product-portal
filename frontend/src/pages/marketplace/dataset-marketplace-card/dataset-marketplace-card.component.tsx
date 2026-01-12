@@ -50,7 +50,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Domain')}
                     </Space>
                 ),
-                children: dataset.domain.name,
+                children: <Typography.Text ellipsis={{ tooltip: true }}>{dataset.domain.name}</Typography.Text>,
             },
             {
                 key: 'status',
@@ -70,7 +70,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Access type')}
                     </Space>
                 ),
-                children: dataset.access_type,
+                children: <Typography.Text ellipsis={{ tooltip: true }}>{dataset.access_type}</Typography.Text>,
             },
             {
                 key: 'technical assets',
@@ -80,7 +80,6 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Technical Assets')}
                     </Space>
                 ),
-                span: 2,
                 children: dataset.data_output_links.length,
             },
             {
@@ -117,6 +116,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
         ];
         return items;
     }
+
     if (!dataset) return <LoadingSpinner />;
     return (
         <Card
@@ -165,7 +165,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                 </Tooltip>,
             ]}
         >
-            <Space direction="vertical" style={{ width: '100%' }} size="small">
+            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
                 <Link to={createDatasetIdPath(dataset.id)}>
                     <Typography.Title level={5} style={{ marginBottom: 0 }}>
                         {dataset.name}

@@ -3,11 +3,12 @@ import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
+    type DataProductTypeCreate,
+    type DataProductTypeGet,
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
-} from '@/store/features/data-product-types/data-product-types-api-slice';
+} from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
 import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import styles from './data-product-type-table.module.scss';
@@ -25,7 +26,7 @@ type Props = {
     onClose: () => void;
     isOpen: boolean;
     mode: 'create' | 'edit';
-    initial?: DataProductTypeContract;
+    initial?: Omit<DataProductTypeGet, 'data_products'>;
 };
 export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: Props) {
     const { t } = useTranslation();
@@ -49,12 +50,17 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (values: DataProductTypeCreateRequest) => {
+    const handleFinish = async (values: DataProductTypeCreate) => {
         try {
             if (mode === 'create') {
                 await createDataProductType(values);
             } else {
-                await editDataProductType({ dataProductType: values, dataProductTypeId: initial?.id || '' });
+                await editDataProductType({
+                    id: initial?.id as string,
+                    dataProductTypeUpdate: {
+                        ...values,
+                    },
+                });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });

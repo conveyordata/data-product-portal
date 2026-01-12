@@ -15,7 +15,9 @@ It allows you to:
 
 The MCP server can be integrated with any MCP client and has been tested with [Claude Desktop](https://claude.ai/download) and [Cursor](https://cursor.com).
 
----
+:::warning
+The MCP client is still experimental. Functionality may change, and it is not yet recommended for production use.
+:::
 
 ### How to use the MCP client
 
@@ -29,8 +31,6 @@ Make sure it is installed and available on your system:
 pip install uv
 ````
 
----
-
 #### 2. Download the MCP proxy script
 
 Download the MCP proxy script from the [following location](https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/heads/main/mcp/remote_proxy.py).
@@ -41,8 +41,6 @@ wget https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/hea
 ```
 
 Please note the path where you save the file.
-
----
 
 #### 3. Configure your MCP client
 
@@ -71,8 +69,6 @@ Add the following JSON configuration to your MCP client setup:
 Configuration for Claude Desktop is located at: `Settings > Developer > Edit config`
 For Cursor you can find it at: `Cursor Settings > MCP & Integrations > New MCP Server`
 
----
-
 ### Usage
 
 Once configured, you can run the MCP client to explore the portal:
@@ -84,23 +80,19 @@ Once configured, you can run the MCP client to explore the portal:
 
 This makes it easier to integrate portal metadata into external tools, scripts, or workflows.
 
----
-
 ### Authentication
 
-The MCP server follows the same authentication flow as your backend server. It is possible that a reboot of your MCP client is needed after logging in to reset the MCP client. (This happens e.g. on Claude Desktop).
-
----
+The MCP server follows the same authentication flow as your backend server.
+It is possible that a reboot of your MCP client is needed after logging in to reset the MCP client.
+(This happens e.g. on Claude Desktop).
 
 ### Available tools
 
 After logging in you should see the tools that are available in the MCP Server.
-With Claude Desktop you can verify this via `Settings > Connectors > Click on Configure for AuthenticatedProxyDataProductPortal`. You should see the list of tools.
+With Claude Desktop you can verify this via `Settings > Connectors > Click on Configure for AuthenticatedProxyDataProductPortal`.
+You should see the list of tools.
 
 ![Claude with tools access](./img/claude-desktop.png)
 
-In Cursor you can check this with `Cursor Settings > MCP & Integrations > AuthenticatedProxyDataProductPortal > X tools enabled`.
+In Cursor, you can check this with `Cursor Settings > MCP & Integrations > AuthenticatedProxyDataProductPortal > X tools enabled`.
 ![Cursor with tools access](./img/cursor-mcp.png)
-
-
-⚠️ **Note:** The MCP client is still experimental. Functionality may change, and it is not yet recommended for production use.

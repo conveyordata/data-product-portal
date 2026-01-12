@@ -43,7 +43,7 @@ repos:
   rev: v0.14.5
   hooks:
     - id: ruff-check
-      args: [ --fix ]
+      args: [ --fix, --unsafe-fixes]
     - id: ruff-format
 - repo: https://github.com/gitleaks/gitleaks
   rev: v8.27.2
@@ -53,8 +53,14 @@ repos:
   hooks:
     - id: add-helm-version
       name: add-helm-version
-      entry: ./add_helm_version.sh
+      entry: ./scripts/add_helm_version.sh
       language: script
+    - id: regen-openapi-spec
+      name: Regen openapi spec
+      entry: ./scripts/check_openapi_spec.sh
+      language: script
+      types: [text]
+      files: ^backend\/.*\.py$
     - id: local-fe-check
       name: fe check
       entry: bash -c "cd frontend && npm run check:fix"

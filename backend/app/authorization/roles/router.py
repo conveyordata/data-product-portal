@@ -88,6 +88,7 @@ router.include_router(_router, prefix=route)
             Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
+    deprecated=True,
 )
 def update_role_old(
     request: UpdateRoleOld,

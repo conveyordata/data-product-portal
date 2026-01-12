@@ -7,11 +7,11 @@ import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import {
     useCreateDataProductSettingMutation,
-    useGetDataProductSettingNamespaceLengthLimitsQuery,
-    useLazyGetDataProductSettingNamespaceSuggestionQuery,
-    useLazyValidateDataProductSettingNamespaceQuery,
+    useGetDataProductSettingsNamespaceLengthLimitsQuery,
+    useLazyGetDataProductSettingsNamespaceSuggestionQuery,
+    useLazyValidateDataProductSettingsNamespaceQuery,
     useUpdateDataProductSettingMutation,
-} from '@/store/features/data-product-settings/data-product-settings-api-slice';
+} from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type {
     DataProductSettingContract,
@@ -123,6 +123,7 @@ type Props = {
     scope: DataProductSettingScope;
     initial?: DataProductSettingContract;
 };
+
 export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Props) {
     const { t } = useTranslation();
     const [form] = Form.useForm();
@@ -131,9 +132,9 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
     const typeValue = Form.useWatch<DataProductSettingType>('type', form);
     const nameValue = Form.useWatch<string>('name', form);
 
-    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductSettingNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateDataProductSettingNamespaceQuery();
-    const { data: namespaceLengthLimits } = useGetDataProductSettingNamespaceLengthLimitsQuery();
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductSettingsNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataProductSettingsNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataProductSettingsNamespaceLengthLimitsQuery();
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const initialValues = useMemo(() => {
@@ -170,7 +171,12 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
                     ...values,
                     default: values.default.toString(),
                 };
-                await updateDataProductSetting(updateSetting);
+                await updateDataProductSetting({
+                    id: updateSetting.id,
+                    dataProductSettingUpdate: {
+                        ...updateSetting,
+                    },
+                });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });

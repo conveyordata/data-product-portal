@@ -1,11 +1,12 @@
 import factory
 
-from app.datasets.enums import OutputPortAccessType
-from app.datasets.model import Dataset
-from app.datasets.status import OutputPortStatus
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.status import OutputPortStatus
+from tests import test_session
 
 from .data_product import DataProductFactory
-from .domain import DomainFactory
+from .tags import TagFactory
 
 
 class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -19,6 +20,20 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     about = factory.Faker("text", max_nb_chars=20)
     status = OutputPortStatus.ACTIVE.value
     access_type = OutputPortAccessType.PUBLIC.value
-    domain = factory.SubFactory(DomainFactory)
     usage = factory.Faker("word")
     data_product = factory.SubFactory(DataProductFactory)
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        if not create:
+            # If we are just doing DataOutputFactory.build(), don't save tags
+            return
+
+        if extracted:
+            # If called as: DataOutputFactory(tags=[tag1, tag2])
+            for tag in extracted:
+                self.tags.append(tag)
+        else:
+            # If called without arguments, create a default tag
+            self.tags.append(TagFactory())
+        test_session.commit()

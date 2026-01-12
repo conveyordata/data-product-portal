@@ -4,7 +4,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
 
 ANY: str = "does_not_matter"
-ANY_ACT: AuthorizationAction = cast(AuthorizationAction, 0)
+ANY_ACT: AuthorizationAction = cast("AuthorizationAction", 0)
 
 
 class TestAuthorization:

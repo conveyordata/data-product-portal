@@ -2,9 +2,8 @@ import { EditOutlined } from '@ant-design/icons';
 import { Button, Form, type FormInstance, Input, Space } from 'antd';
 import type { Rule } from 'antd/es/form';
 import { useTranslation } from 'react-i18next';
-
-import { type NamespaceValidationResponse, ValidationType } from '@/types/namespace/namespace';
-
+import type { NamespaceValidation } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
+import { ValidationType } from '@/types/namespace/namespace';
 import styles from './namespace-form-item.module.scss';
 
 type Props = {
@@ -15,7 +14,7 @@ type Props = {
     canEditNamespace?: boolean;
     toggleCanEditNamespace?: () => void;
     validationRequired?: boolean;
-    validateNamespace?: (namespace: string) => Promise<NamespaceValidationResponse>;
+    validateNamespace?: (namespace: string) => Promise<NamespaceValidation>;
 };
 
 const DEBOUNCE = 500;
@@ -65,7 +64,7 @@ export function NamespaceFormItem({
 
     return (
         <Form.Item label={t('Namespace')} tooltip={tooltip} required>
-            <Space.Compact direction="horizontal" className={styles.namespaceFormField}>
+            <Space.Compact orientation="horizontal" className={styles.namespaceFormField}>
                 <Form.Item
                     name={'namespace'}
                     noStyle

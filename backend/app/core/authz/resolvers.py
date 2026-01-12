@@ -9,12 +9,16 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
-from app.data_outputs.model import DataOutput
-from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
-from app.data_products_datasets.model import DataProductDatasetAssociation
+from app.data_products.output_port_technical_assets_link.model import (
+    DataOutputDatasetAssociation,
+)
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation,
+)
+from app.data_products.output_ports.model import Dataset
+from app.data_products.technical_assets.model import DataOutput
 from app.database.database import get_db_session
-from app.datasets.model import Dataset
 
 Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], None]
 
@@ -28,26 +32,24 @@ class SubjectResolver(ABC):
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
         if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
         if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
         json_body = await request.json()
         if isinstance(json_body, dict) and (result := json_body.get(key)) is not None:
-            return cast(str, result)
+            return cast("str", result)
 
         return cls.DEFAULT
 
     @classmethod
-    def resolve_domain(
+    async def resolve_domain(
         cls,
         db: Session,
         id_: str,
     ) -> str:
         if id_ == cls.DEFAULT or cls.model is None:
             return cls.DEFAULT
-        domain = db.scalars(
-            select(cls.model.domain_id).where(cls.model.id == id_)
-        ).one_or_none()
+        domain = db.scalar(select(cls.model.domain_id).where(cls.model.id == id_))
         return cls.DEFAULT if domain is None else str(domain)
 
 
@@ -110,6 +112,19 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
 class DatasetResolver(SubjectResolver):
     model: Model = Dataset
 
+    @classmethod
+    async def resolve_domain(
+        cls,
+        db: Session,
+        id_: str,
+    ) -> str:
+        if id_ == cls.DEFAULT or cls.model is None:
+            return cls.DEFAULT
+        domain = db.scalar(
+            select(DataProduct.domain_id).join(cls.model).where(cls.model.id == id_)
+        )
+        return cls.DEFAULT if domain is None else str(domain)
+
 
 class DataProductNameResolver(SubjectResolver):
     model: Model = DataProduct
@@ -149,32 +164,24 @@ class DataOutputResolver(SubjectResolver):
         return cls.DEFAULT
 
 
-class DataOutputDatasetAssociationResolver(SubjectResolver):
-    model: Model = Dataset
-
+class DataOutputDatasetAssociationResolver(DatasetResolver):
     @classmethod
     async def resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await DataProductResolver.resolve(request, key, db)
+        obj = await SubjectResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
-            data_output_dataset = (
-                db.scalars(
-                    select(DataOutputDatasetAssociation).where(
-                        DataOutputDatasetAssociation.id == obj
-                    )
+            data_output_dataset = db.scalar(
+                select(DataOutputDatasetAssociation).where(
+                    DataOutputDatasetAssociation.id == obj
                 )
-                .unique()
-                .one_or_none()
             )
             if data_output_dataset:
                 return data_output_dataset.dataset_id
         return cls.DEFAULT
 
 
-class DataProductDatasetAssociationResolver(SubjectResolver):
-    model: Model = Dataset
-
+class DataProductDatasetAssociationResolver(DatasetResolver):
     @classmethod
     async def resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)

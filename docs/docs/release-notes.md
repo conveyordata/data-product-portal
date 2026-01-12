@@ -7,8 +7,22 @@ sidebar_position: 200
 ## Unreleased
 
 ### features
+- **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs.
+
+### bugfixes
+
+- **[Marketplace]**: Fixed an issue where long domains could result in inconsistent sizing of the cards
+
+## 0.4.2
+
+### features
+- **[Usage]**: Added usage tabs with curated queries and query statistics on data products. This feature is still in Beta.
+
+- **[Explorer]**: Removed technical assets from full explorer view for clarity. Improved performance of graph fetching.
+
 - **[Admin rights]**: It is no longer allowed to have permanent admin rights. Users who were admins before will now get the option to temporarily elevate themselves to super user rights.
 This avoids the pitfall where you permanently are allowed to do everything and no longer have a view on how the normal user flow looks.
+
 - **[API]**: We are working on a v2 version of the API, we have already migrated the endpoints:
   - `/api/data_product_lifecycles` -> `/api/v2/configuration/data_product_lifecycles`
   - `/api/data_product_settings` -> `/api/v2/configuration/data_product_settings`
@@ -23,6 +37,9 @@ This avoids the pitfall where you permanently are allowed to do everything and n
   - `/api/role_assignments/data_product` -> `/api/v2/authz/role_assignments/data_product`
   - `/api/role_assignments/global` -> `/api/v2/authz/role_assignments/global`
   - `/api/roles` -> `/api/v2/authz/roles`
+
+### bugfixes
+- **[Explorer]**: Removed dangling pointers when disabling certain types. Show datasets in view if they don't have technical assets added yet.
 
 ## 0.4.1
 

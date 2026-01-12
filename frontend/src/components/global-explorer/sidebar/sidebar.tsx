@@ -1,8 +1,8 @@
 import { type Node, useReactFlow } from '@xyflow/react';
 import { Select, Tag } from 'antd';
+import type { MouseEvent } from 'react';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import type { DataProductContract } from '@/types/data-product';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
 import { CustomNodeTypes } from '../../charts/node-editor/node-types';
@@ -12,7 +12,6 @@ import styles from './sidebar.module.scss';
 export type SidebarFilters = {
     dataProductsEnabled: boolean;
     datasetsEnabled: boolean;
-    dataOutputsEnabled: boolean;
     domainsEnabled: boolean;
 };
 
@@ -22,14 +21,14 @@ type Props = {
     sidebarFilters: SidebarFilters;
     onFilterChange: (filters: SidebarFilters) => void;
     nodeId: string | null;
-    setNodeId: (nodeId: string | null) => void; // Function to set the nodeId in the parent component
+    nodeClick: (event: MouseEvent | undefined, node: Node) => void;
 };
 
-export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNodeId }: Props) {
-    const { getNode, setNodes } = useReactFlow();
+export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeClick }: Props) {
     const { t } = useTranslation();
-    const currentInstance = useReactFlow();
-    useMemo(() => {
+    const { getNode, setNodes, fitView } = useReactFlow();
+
+    useEffect(() => {
         setNodes((nodes: Node[]) =>
             nodes.map((node) => ({
                 ...node,
@@ -45,14 +44,14 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
     useEffect(() => {
         if (!nodeId) return;
         const timeout = setTimeout(() => {
-            currentInstance.fitView({
+            fitView({
                 ...defaultFitViewOptions,
                 nodes: [{ id: nodeId }],
             });
         }, 50);
 
         return () => clearTimeout(timeout);
-    }, [nodeId, currentInstance]);
+    }, [nodeId, fitView]);
 
     function getNodeDataForSideBar(nodeId: string) {
         const node = getNode(nodeId);
@@ -124,29 +123,17 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
             >
                 {t('Output ports')}
             </Tag.CheckableTag>
-            <Tag.CheckableTag
-                checked={sidebarFilters.dataOutputsEnabled}
-                className={styles.checkableTag}
-                onChange={(e) => {
-                    onFilterChange({
-                        ...sidebarFilters,
-                        dataOutputsEnabled: e.valueOf(),
-                    });
-                }}
-            >
-                {t('Technical Assets')}
-            </Tag.CheckableTag>
             <Select
-                className={styles.select}
-                showSearch
-                placeholder={String('Select a node')}
-                onSelect={(value: string) => {
-                    setNodeId(value); // Use the setNodeId function from the parent
-                }}
+                placeholder={t('Select a node')}
                 value={nodeId ?? undefined}
-                filterOption={(input: string, option?: { value: string; label: string }) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
+                className={styles.select}
+                showSearch={{
+                    filterOption: (input: string, option?: { value: string; label: string }) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+                }}
+                onSelect={(value: string) => {
+                    nodeClick(undefined, { id: value } as Node); // Use the setNodeId function from the parent
+                }}
             >
                 {Object.entries(groupedNodes).map(
                     ([groupName, nodes]) =>

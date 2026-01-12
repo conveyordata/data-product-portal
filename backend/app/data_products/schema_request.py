@@ -1,5 +1,6 @@
 from typing import Annotated, Optional
 from uuid import UUID
+from warnings import deprecated
 
 from annotated_types import MinLen
 
@@ -34,6 +35,12 @@ class DataProductUsageUpdate(ORMModel):
     usage: str
 
 
+@deprecated("Use LinkInputPortsToDataProduct")
 class LinkDatasetsToDataProduct(ORMModel):
     dataset_ids: list[UUID]
+    justification: str
+
+
+class LinkInputPortsToDataProduct(ORMModel):
+    input_ports: list[UUID]
     justification: str

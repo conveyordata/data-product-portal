@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
-    useGetAllDataProductSettingsQuery,
+    type DataProductSettingsGetItem,
+    useGetDataProductsSettingsQuery,
     useRemoveDataProductSettingMutation,
-} from '@/store/features/data-product-settings/data-product-settings-api-slice';
+} from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DataProductSettingContract, DataProductSettingScope } from '@/types/data-product-setting';
 import styles from './data-product-settings-table.module.scss';
@@ -19,9 +20,10 @@ type Props = {
 
 export function DataProductSettingsTable({ scope }: Props) {
     const { t } = useTranslation();
-    const { data: dataProductSettings = [], isFetching } = useGetAllDataProductSettingsQuery();
+    const { data: dataProductSettings = undefined, isFetching } = useGetDataProductsSettingsQuery();
+
     const filteredSettings = useMemo(() => {
-        return dataProductSettings.filter((setting) => setting.scope === scope);
+        return dataProductSettings?.data_product_settings.filter((setting) => setting.scope === scope) ?? [];
     }, [dataProductSettings, scope]);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
@@ -44,7 +46,7 @@ export function DataProductSettingsTable({ scope }: Props) {
     );
 
     const handleRemove = useCallback(
-        async (setting: DataProductSettingContract) => {
+        async (setting: DataProductSettingsGetItem) => {
             try {
                 await onRemoveDataProductSetting(setting.id);
                 dispatchMessage({ content: t('Data product lifecycle removed successfully'), type: 'success' });
@@ -73,7 +75,7 @@ export function DataProductSettingsTable({ scope }: Props) {
                     {t('Add Custom Setting')}
                 </Button>
             </Flex>
-            <Table<DataProductSettingContract>
+            <Table<DataProductSettingsGetItem>
                 dataSource={filteredSettings}
                 columns={columns}
                 rowKey={(record) => record.id}

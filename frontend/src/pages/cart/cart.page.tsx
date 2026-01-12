@@ -25,7 +25,7 @@ import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import {
     useGetDataProductByIdQuery,
@@ -152,7 +152,7 @@ function Cart() {
             localStorage.removeItem(cartFormDataStorageKey);
             dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
 
-            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.Datasets));
+            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.OutputPorts));
         }
     }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
 
@@ -236,7 +236,7 @@ function Cart() {
                             </Form.Item>
                             {submitFormIssues.length > 0 && (
                                 <Alert
-                                    message={t('Cannot submit request')}
+                                    title={t('Cannot submit request')}
                                     description={
                                         <ul style={{ margin: 0, paddingLeft: 20 }}>
                                             {submitFormIssues.map((reason) => (

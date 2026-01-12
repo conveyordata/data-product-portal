@@ -1,4 +1,5 @@
-from casbin import Enforcer
+from typing import TYPE_CHECKING
+
 from casbin_sqlalchemy_adapter import Adapter, CasbinRule
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
@@ -22,6 +23,9 @@ from app.authorization.roles.auth import AuthRole
 from app.authorization.roles.service import RoleService
 from app.core.authz import Authorization
 from app.core.logging import logger
+
+if TYPE_CHECKING:
+    from casbin import Enforcer
 
 
 class AuthorizationService:

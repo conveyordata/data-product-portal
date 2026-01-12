@@ -7,6 +7,7 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.authorization.roles.service import RoleService
@@ -24,6 +25,7 @@ from app.mcp.middleware import LoggingMiddleware
 from app.mcp.router import router as mcp_router
 from app.settings import settings
 from app.shared.router import router
+from app.shared.schema import ORMModel
 
 with open(Path(__file__).parent.parent / "VERSION", "r") as f:
     API_VERSION = f.read().strip()
@@ -149,11 +151,33 @@ async def send_response_to_webhook(request: Request, call_next):
 
 
 # K8S health and liveness check
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
     return {"message": "Hello World"}
 
 
-@app.get("/api/version")
-def get_version():
+@app.get("/api/version", deprecated=True, tags=["Version"])
+def get_version_old():
     return {"version": app.version}
+
+
+class VersionResponse(ORMModel):
+    version: str
+
+
+@app.get("/api/v2/version", tags=["Version"])
+def get_version():
+    return VersionResponse(version=app.version)
+
+
+def use_route_names_as_operation_ids(app: FastAPI) -> None:
+    """
+    Simplify operation IDs so that generated API clients have simpler function names.
+    Should be called only after all routes have been added.
+    """
+    for route in app.routes:
+        if isinstance(route, APIRoute) and route.path.startswith("/api/v2"):
+            route.operation_id = route.name
+
+
+use_route_names_as_operation_ids(app)

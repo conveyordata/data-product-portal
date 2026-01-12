@@ -5,23 +5,25 @@ from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
-)
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.configuration.data_product_settings.model import DataProductSettingValue
 from app.configuration.data_product_types.model import DataProductType
+from app.configuration.domains.model import Domain
 from app.configuration.tags.model import Tag, tag_data_product_table
 from app.data_products.status import DataProductStatus
-from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
+    from app.authorization.role_assignments.data_product.model import (
+        DataProductRoleAssignment,
+    )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
-    from app.configuration.domains.model import Domain
-    from app.data_outputs.model import DataOutput
-    from app.datasets.model import Dataset
+    from app.configuration.data_product_settings.model import DataProductSettingValue
+    from app.data_products.output_ports.model import (
+        DataProductDatasetAssociation,
+        Dataset,
+    )
+    from app.data_products.technical_assets.model import DataOutput
 
 
 class DataProduct(Base, BaseORM):
@@ -45,15 +47,13 @@ class DataProduct(Base, BaseORM):
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
 
     # Relationships
-    type: Mapped["DataProductType"] = relationship(
+    type: Mapped[DataProductType] = relationship(
         back_populates="data_products", lazy="joined"
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="data_products", lazy="joined"
     )
-    domain: Mapped["Domain"] = relationship(
-        back_populates="data_products", lazy="joined"
-    )
+    domain: Mapped[Domain] = relationship(back_populates="data_products", lazy="joined")
     assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",

@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import UUID
 
-from app.data_outputs.status import DataOutputStatus
+from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.model import utcnow
 
 
@@ -37,7 +37,7 @@ def upgrade() -> None:
         sa.Column("external_id", sa.String),
         sa.Column("name", sa.String),
         sa.Column("description", sa.String),
-        sa.Column("status", sa.Enum(DataOutputStatus)),
+        sa.Column("status", sa.Enum(TechnicalAssetStatus)),
         sa.Column("platform_id", sa.UUID, sa.ForeignKey("platforms.id")),
         sa.Column("service_id", sa.UUID, sa.ForeignKey("platform_services.id")),
         sa.Column("owner_id", sa.UUID, sa.ForeignKey("data_products.id")),

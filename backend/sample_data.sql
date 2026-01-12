@@ -33,6 +33,9 @@ declare
     demand_forecast_dataset_id uuid;
     proteomics_dataset_id uuid;
 
+    month_offset integer;
+    day_offset integer;
+
     -- PLATFORMS
     returned_platform_id uuid;
     s3_service_id uuid;
@@ -66,6 +69,7 @@ begin
     TRUNCATE TABLE public.role_assignments_global CASCADE;
     TRUNCATE TABLE public.role_assignments_data_product CASCADE;
     TRUNCATE TABLE public.role_assignments_dataset CASCADE;
+    TRUNCATE TABLE public.dataset_curated_queries CASCADE;
 
     -- PLATFORMS
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
@@ -122,7 +126,7 @@ begin
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc', 'Proteomics', 'Proteomics and Biomarker Discovery', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO proteomics_id;
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES ('623e6fbf-3a06-434e-995c-b0336e71806e', 'Manufacturing', 'Manufacturing and Supply Chain', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO manufacturing_id;
     INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('bec196cb-81df-4cfc-959f-b142c312861e', 'Medical and Safety', 'Medical and Safety', '2025-10-28 16:30:24.123498', NULL, NULL);
-    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'CRM', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
+    INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('acaaaafe-cde9-4746-9835-f1e0c3c85b6c', 'Commercial and Customer Relationship Management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
     -- DATA PRODUCT TYPES
     -- ...existing data product types code...
@@ -171,30 +175,89 @@ begin
     It provides leadership with an objective decision framework for resource allocation.', NULL, 'ACTIVE', 'f1672c38-ad1a-401a-8dd3-e0b026ab1416', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:34:32.308251', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL);
 
     -- DATASETS
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES ('bdad0dec-19e6-4c85-a655-0960ca3a484c', 'histology_rnd_dataset', ai_model_histology_images_id, 'Histology RnD Data', 'Histology data from R&D experiments', '<h2>Histology RnD Data</h2><p></p><p>This dataset contains histology data from R&D experiments,including images of tissue samples, clinical data, and experimental results. The data is used for research and development purposes, such as biomarker discovery and drug development. <p></p><p><strong>Key features include:</strong></p><ul><li>Images of tissue samples from clinical trials</li><li>Clinical data and patient information</li><li>Experimental results and analysis</li></ul>', 'ACTIVE', 'RESTRICTED', proteomics_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO histology_rnd_dataset_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES ('dfbedc22-8295-4b35-a0fe-6b06c12adfde', 'histology_clinical_dataset', ai_model_histology_images_id, 'Histology Clinical Data', 'Histology data from clinical trials', '<h2>Histology Clinical Data</h2><p></p><p>This dataset contains histology data from clinical trials,including images of tissue samples, clinical data, and experimental results. The data is used for research and development purposes, such as biomarker discovery and drug development.</p><p></p><p><strong>Key features include:</strong></p><ul><li>Images of tissue samples from clinical trials</li><li>Clinical data and patient information</li><li>Experimental results and analysis</li></ul>', 'ACTIVE', 'PUBLIC', clinical_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO histology_clinical_dataset_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES ('5abfe489-8b84-4843-9582-84fbbc019556', 'drug_pipeline_dataset', rnd_program_pipeline_id, 'Drug Pipeline Data', 'Data related to drug pipeline and development', '<h2>Drug Pipeline Data</h2><p></p><p>This dataset contains data related to drug pipeline and development,including information on drug candidates, clinical trials, and regulatory requirements. The data is used for research and development purposes, such as monitoring the progress of drug candidates and optimizing clinical trials.</p><p></p><p><strong>Key features include:</strong></p><ul><li><p>Information on drug candidates and development stages</p></li><li><p>Clinical trial data and results</p></li><li><p>Regulatory requirements and compliance</p></li></ul>', 'PENDING', 'RESTRICTED', manufacturing_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO drug_pipeline_dataset_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES ('1b5f0d56-0699-42ce-a407-f47df844b0e2', 'demand_forecast_dataset', ai_model_histology_images_id, 'Demand Forecast Data', 'Historical data for demand forecasting', '<h2>Demand Forecast Data</h2><p></p><p>This dataset contains historical data for demand forecasting,including sales data, market trends, and customer behavior. The data is used for research and development purposes, such as developing models for demand forecasting and planning.</p><p></p><p><strong>Essential components are:</strong></p><ul><li>Sales figures across different markets</li><li>Analysis of consumer purchasing patterns</li><li>Insights into emerging market trends</li></ul>', 'ACTIVE', 'PUBLIC', clinical_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO demand_forecast_dataset_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, domain_id, created_on, updated_on, deleted_at) VALUES ('ae895c51-3c32-49b9-bd54-2fa4e04c6cc8', 'proteomics_dataset', prediction_model_id, 'Proteomics Data', 'Proteomics data for biomarker discovery', '<h2>Proteomics Data</h2><p></p><p>This dataset contains proteomics data for biomarker discovery, including protein expression data, mass spectrometry results, and clinical data. The data is used for research and development purposes, such as identifying biomarkers for disease diagnosis and treatment.</p><p></p><p><strong>Important elements include:</strong></p><ol><li>Quantitative protein expression levels</li><li>Mass spectrometry data for protein identification</li><li>Clinical correlations for biomarker validation</li></ol>', 'PENDING', 'PUBLIC', hr_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO proteomics_dataset_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('bdad0dec-19e6-4c85-a655-0960ca3a484c', 'histology_rnd_dataset', rnd_program_pipeline_id, 'Histology RnD Data', 'Histology data from R&D experiments', '<h2>Histology RnD Data</h2><p></p><p>This dataset contains histology data from R&D experiments,including images of tissue samples, clinical data, and experimental results. The data is used for research and development purposes, such as biomarker discovery and drug development. <p></p><p><strong>Key features include:</strong></p><ul><li>Images of tissue samples from clinical trials</li><li>Clinical data and patient information</li><li>Experimental results and analysis</li></ul>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO histology_rnd_dataset_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('dfbedc22-8295-4b35-a0fe-6b06c12adfde', 'histology_clinical_dataset', ai_model_histology_images_id, 'Histology Clinical Data', 'Histology data from clinical trials', '<h2>Histology Clinical Data</h2><p></p><p>This dataset contains histology data from clinical trials,including images of tissue samples, clinical data, and experimental results. The data is used for research and development purposes, such as biomarker discovery and drug development.</p><p></p><p><strong>Key features include:</strong></p><ul><li>Images of tissue samples from clinical trials</li><li>Clinical data and patient information</li><li>Experimental results and analysis</li></ul>', 'ACTIVE', 'PUBLIC', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO histology_clinical_dataset_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('5abfe489-8b84-4843-9582-84fbbc019556', 'drug_pipeline_dataset', rnd_program_pipeline_id, 'Drug Pipeline Data', 'Data related to drug pipeline and development', '<h2>Drug Pipeline Data</h2><p></p><p>This dataset contains data related to drug pipeline and development,including information on drug candidates, clinical trials, and regulatory requirements. The data is used for research and development purposes, such as monitoring the progress of drug candidates and optimizing clinical trials.</p><p></p><p><strong>Key features include:</strong></p><ul><li><p>Information on drug candidates and development stages</p></li><li><p>Clinical trial data and results</p></li><li><p>Regulatory requirements and compliance</p></li></ul>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO drug_pipeline_dataset_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('1b5f0d56-0699-42ce-a407-f47df844b0e2', 'demand_forecast_dataset', ai_model_histology_images_id, 'Demand Forecast Data', 'Historical data for demand forecasting', '<h2>Demand Forecast Data</h2><p></p><p>This dataset contains historical data for demand forecasting,including sales data, market trends, and customer behavior. The data is used for research and development purposes, such as developing models for demand forecasting and planning.</p><p></p><p><strong>Essential components are:</strong></p><ul><li>Sales figures across different markets</li><li>Analysis of consumer purchasing patterns</li><li>Insights into emerging market trends</li></ul>', 'ACTIVE', 'PUBLIC', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO demand_forecast_dataset_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('ae895c51-3c32-49b9-bd54-2fa4e04c6cc8', 'proteomics_dataset', ai_model_histology_images_id, 'Proteomics Data', 'Proteomics data for biomarker discovery', '<h2>Proteomics Data</h2><p></p><p>This dataset contains proteomics data for biomarker discovery, including protein expression data, mass spectrometry results, and clinical data. The data is used for research and development purposes, such as identifying biomarkers for disease diagnosis and treatment.</p><p></p><p><strong>Important elements include:</strong></p><ol><li>Quantitative protein expression levels</li><li>Mass spectrometry data for protein identification</li><li>Clinical correlations for biomarker validation</li></ol>', 'ACTIVE', 'PUBLIC', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO proteomics_dataset_id;
 
     -- extra datasets
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('0c1e0db2-9fb5-4b7e-98a5-75fc43b642f4', 'biomarker-discovery-output-tables', 'Biomarker Discovery Output Tables', 'CSV export from Neo4j Clinical Knowledge graph. This data can be imported in any Neo4 database by means of a very very long git URL. It can also be used via Python or imported in any other database. Did you know that placing Git URLs in a description makes it very long? These very long descriptions might give issues with the UX so that is why I put it here.', NULL, 'ACTIVE', 'RESTRICTED', '7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc', '2025-10-28 16:36:34.490179', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '81815c4c-f323-4cf1-b25b-f43f231f510f');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('01fec372-0398-477c-b928-d8ce2423d5bb', 'clinical-trial-dashboard', 'Clinical trial dashboard', 'Dashboard showing status and core metrics for our running clinical trials.', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 16:41:09.247316', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '6e580d91-14ea-495e-a6d7-5db236a5c1d5');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d7cef1cf-6e81-44b2-bab6-a6d4c85b52e5', 'clinical-data-quality-tables', 'Clinical data quality tables', 'Tables showing the data quality issues in our clinical studies.', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 17:58:22.338125', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '9fa5e299-fcc4-45e0-b48d-cc3deb68eefe');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d82a116f-2e70-40ae-94d1-782a0c79ce05', 'regulatory-filing-tables', 'Regulatory filing tables', 'Tables showing the status and changes related to regulatory submissions', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:01:09.81763', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, 'fbcd7899-2763-4659-bd28-2a278910ef85');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('a1927636-c1c2-4834-8d0b-05acff4d825e', 'expose-safety-data-on-s3', 'Expose safety data on s3', 'Expose the safety data on S3 to allow early detection of drug related incidents', NULL, 'ACTIVE', 'PUBLIC', 'bec196cb-81df-4cfc-959f-b142c312861e', '2025-10-28 18:04:02.529981', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '08039e5d-50a7-447a-b691-f5dc6b420dea');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d63acbcd-4df3-448f-bbb1-ebd0d2432947', 'drug-supply-data', 'Drug supply data', 'Shows the data used for supply chain optimization', NULL, 'ACTIVE', 'PUBLIC', '623e6fbf-3a06-434e-995c-b0336e71806e', '2025-10-28 18:08:09.720606', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '625b65b6-13d9-4c8c-a669-865e36fc3dfc');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('b45839dc-6b58-4eae-9096-9d4eb99e41d4', 'customer-360-view', 'Customer 360 view', 'Show all customer related data to tailor to marketing', NULL, 'ACTIVE', 'PUBLIC', 'acaaaafe-cde9-4746-9835-f1e0c3c85b6c', '2025-10-28 18:10:38.66717', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '22488fe0-c30a-4447-972e-3eb22a1bd266');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('34674f53-e20e-4ed2-8f8c-2648b3244c5e', 'knowledge-graph-concepts', 'Knowledge graph concepts', 'Exposes the knowledge within the organisation. Focuses on core concepts within our organisation.', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:13:20.770844', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '90e65438-a942-43e0-a4a9-ee406b92df65');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('6990dc28-fc94-49d4-b01b-17e7e5c55e5b', 'show-employee-performance-in-glue', 'Show employee performance in glue', 'Expose performance of people as well as projects', NULL, 'ACTIVE', 'RESTRICTED', '672debaf-31f9-4233-820b-ad2165af044e', '2025-10-28 18:15:47.64611', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '68b28e38-3faa-45ca-9d00-3830d0a7b108');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('3d2fe240-1505-4de6-8302-771d7d157992', 'report-on-enterprise-workforce', 'Report on enterprise workforce', 'Show core information on employee distribution within our organisation', NULL, 'ACTIVE', 'PUBLIC', '672debaf-31f9-4233-820b-ad2165af044e', '2025-10-28 18:18:37.476131', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '97af957a-70c4-465d-95f2-f70c11af8da0');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('b8777d07-e042-445e-8965-89f71ddc76f5', 'sales-performance-by-week', 'Sales performance by week', 'Shows our sales information by week.', NULL, 'ACTIVE', 'PUBLIC', 'acaaaafe-cde9-4746-9835-f1e0c3c85b6c', '2025-10-28 18:20:47.895478', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '86b74246-734f-4cea-a984-3dd0d27fc565');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', 'expose-patient-stratification-information', 'Expose patient stratification information', 'Combine all the anonymized patient data such that you can cluster them.', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:32:27.687291', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '58b837a5-33d0-41cf-bf95-eb9af846f4d0');
-    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, domain_id, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d10fe76b-d39d-4028-909c-aea3fd8a1405', 'rnd-prioritization-information', 'RnD prioritization information', 'All data required to rank and score the different R&D programs', NULL, 'ACTIVE', 'PUBLIC', 'bd09093e-14ff-41c1-b74d-7c2ce9821d1c', '2025-10-28 18:37:19.95164', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, 'ccdc13fa-4a1a-4dde-ad1c-efa0d58eafb7');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('0c1e0db2-9fb5-4b7e-98a5-75fc43b642f4', 'biomarker-discovery-output-tables', 'Biomarker Discovery Output Tables', 'CSV export from Neo4j Clinical Knowledge graph. This data can be imported in any Neo4 database by means of a very very long git URL. It can also be used via Python or imported in any other database. Did you know that placing Git URLs in a description makes it very long? These very long descriptions might give issues with the UX so that is why I put it here.', NULL, 'ACTIVE', 'RESTRICTED', '2025-10-28 16:36:34.490179', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '81815c4c-f323-4cf1-b25b-f43f231f510f');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('01fec372-0398-477c-b928-d8ce2423d5bb', 'clinical-trial-dashboard', 'Clinical trial dashboard', 'Dashboard showing status and core metrics for our running clinical trials.', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 16:41:09.247316', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '6e580d91-14ea-495e-a6d7-5db236a5c1d5');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d7cef1cf-6e81-44b2-bab6-a6d4c85b52e5', 'clinical-data-quality-tables', 'Clinical data quality tables', 'Tables showing the data quality issues in our clinical studies.', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 17:58:22.338125', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '9fa5e299-fcc4-45e0-b48d-cc3deb68eefe');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d82a116f-2e70-40ae-94d1-782a0c79ce05', 'regulatory-filing-tables', 'Regulatory filing tables', 'Tables showing the status and changes related to regulatory submissions', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:01:09.81763', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, 'fbcd7899-2763-4659-bd28-2a278910ef85');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('a1927636-c1c2-4834-8d0b-05acff4d825e', 'expose-safety-data-on-s3', 'Expose safety data on s3', 'Expose the safety data on S3 to allow early detection of drug related incidents', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:04:02.529981', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '08039e5d-50a7-447a-b691-f5dc6b420dea');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d63acbcd-4df3-448f-bbb1-ebd0d2432947', 'drug-supply-data', 'Drug supply data', 'Shows the data used for supply chain optimization', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:08:09.720606', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '625b65b6-13d9-4c8c-a669-865e36fc3dfc');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('b45839dc-6b58-4eae-9096-9d4eb99e41d4', 'customer-360-view', 'Customer 360 view', 'Show all customer related data to tailor to marketing', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:10:38.66717', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '22488fe0-c30a-4447-972e-3eb22a1bd266');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('34674f53-e20e-4ed2-8f8c-2648b3244c5e', 'knowledge-graph-concepts', 'Knowledge graph concepts', 'Exposes the knowledge within the organisation. Focuses on core concepts within our organisation.', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:13:20.770844', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '90e65438-a942-43e0-a4a9-ee406b92df65');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('6990dc28-fc94-49d4-b01b-17e7e5c55e5b', 'show-employee-performance-in-glue', 'Show employee performance in glue', 'Expose performance of people as well as projects', NULL, 'ACTIVE', 'RESTRICTED', '2025-10-28 18:15:47.64611', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '68b28e38-3faa-45ca-9d00-3830d0a7b108');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('3d2fe240-1505-4de6-8302-771d7d157992', 'report-on-enterprise-workforce', 'Report on enterprise workforce', 'Show core information on employee distribution within our organisation', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:18:37.476131', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '97af957a-70c4-465d-95f2-f70c11af8da0');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('b8777d07-e042-445e-8965-89f71ddc76f5', 'sales-performance-by-week', 'Sales performance by week', 'Shows our sales information by week.', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:20:47.895478', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '86b74246-734f-4cea-a984-3dd0d27fc565');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', 'expose-patient-stratification-information', 'Expose patient stratification information', 'Combine all the anonymized patient data such that you can cluster them.', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:32:27.687291', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, '58b837a5-33d0-41cf-bf95-eb9af846f4d0');
+    INSERT INTO public.datasets (id, namespace, name, description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, usage, data_product_id) VALUES ('d10fe76b-d39d-4028-909c-aea3fd8a1405', 'rnd-prioritization-information', 'RnD prioritization information', 'All data required to rank and score the different R&D programs', NULL, 'ACTIVE', 'PUBLIC', '2025-10-28 18:37:19.95164', NULL, NULL, '00000000-0000-0000-0000-000000000001', NULL, 'ccdc13fa-4a1a-4dde-ad1c-efa0d58eafb7');
+
+    -- DATASET CURATED QUERIES
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'QC failure hot-spots',
+            'Highlights the organs and staining protocols that most often cause histology slide rejection.',
+            'WITH qc_events AS (
+    SELECT organ, stain_protocol, rejection_reason, collected_on, technician
+    FROM histology_slide_qc
+    WHERE collected_on >= DATE_TRUNC(''month'', CURRENT_DATE) - INTERVAL ''6 months''
+),
+ranked AS (
+    SELECT
+        organ,
+        stain_protocol,
+        rejection_reason,
+        COUNT(*) AS failure_count,
+        DENSE_RANK() OVER (PARTITION BY organ ORDER BY COUNT(*) DESC) AS organ_rank
+    FROM qc_events
+    GROUP BY organ, stain_protocol, rejection_reason
+)
+SELECT organ, stain_protocol, rejection_reason, failure_count
+FROM ranked
+WHERE organ_rank <= 3
+ORDER BY organ, failure_count DESC;',
+            0
+        );
+
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'Latest monthly demand rollup',
+            'Quick sanity-check of forecasted demand by month.',
+            'SELECT forecast_month, SUM(demand_units) AS total_units FROM demand_forecast_daily where 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 and 1=1 and 2=2 and 3=3 and 4=4 GROUP BY 1 ORDER BY 1 DESC LIMIT 12;',
+            1
+        );
+
+
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+        VALUES (
+            'bdad0dec-19e6-4c85-a655-0960ca3a484c',
+            'Top unresolved data quality issues',
+            'Surfaces the longest-running clinical data defects that still lack remediation owners.',
+            'SELECT
+    issue_id,
+    study_id,
+    domain,
+    detected_on,
+    severity,
+    assigned_team,
+    status,
+    NOW()::date - detected_on::date AS days_open
+FROM clinical_data_quality_issues
+WHERE status NOT IN (''Resolved'', ''Closed'')
+ORDER BY severity DESC, detected_on ASC
+LIMIT 25;',
+            2
+        );
 
     -- DATA PRODUCTS - DATASETS
     INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
-        VALUES ('0658e52e-b69e-4787-b7b1-df215d75329c','Needed for doing my work', rnd_program_pipeline_id, drug_pipeline_dataset_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+        VALUES ('0658e52e-b69e-4787-b7b1-df215d75329c','Needed for doing my work', demand_forecast_id, drug_pipeline_dataset_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES ('8c9ae075-aac3-47f3-b46f-1e7d66ea008a', 'I am working on a top secret R&D project.
 
@@ -432,13 +495,93 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('3d2fe240-1505-4de6-8302-771d7d157992', 'be182db6-5268-466c-ae48-e5d6899c6d05', '2025-10-28 18:18:37.476131', NULL);
     INSERT INTO public.tags_datasets (dataset_id, tag_id, created_on, updated_on) VALUES ('2f645d36-ca49-45d9-97ad-28a5504e86bf', '6578f7bd-aebe-433e-8732-999d36d34af6', '2025-10-28 18:32:27.687291', NULL);
 
-    -- Insert 4 example rows into dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert dynamic dataset query stats
+    -- ------------------------------------------------------------------------------------------------
+
+    -- 1. Histology Clinical dataset query stats (adding 7 to test the other category aggregation)
+
+    -- Single-query daily consumer over the last six months
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, prediction_model_id, 1
+    FROM generate_series((CURRENT_DATE - INTERVAL '6 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs;
+
+    -- Ten weekday queries for the last four months
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, rnd_program_pipeline_id, 10
+    FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) BETWEEN 1 AND 5;
+
+    -- Weekly Monday pings for Biomarker Discovery (consumer #3)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '81815c4c-f323-4cf1-b25b-f43f231f510f', 3
+    FROM generate_series((CURRENT_DATE - INTERVAL '5 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) = 1;
+
+    -- Mid-week bursts for Clinical Trial Performance (consumer #4)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '6e580d91-14ea-495e-a6d7-5db236a5c1d5', 8
+    FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) = 3;
+
+    -- Structured cadence (5th, 15th, 25th) for Clinical Data Quality Monitor (consumer #5)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT
+        (date_trunc('month', CURRENT_DATE) - make_interval(months => month_idx) + make_interval(days => day_idx))::date,
+        histology_clinical_dataset_id,
+        '9fa5e299-fcc4-45e0-b48d-cc3deb68eefe',
+        4
+    FROM generate_series(0, 4) AS gs_month(month_idx)
+    CROSS JOIN LATERAL unnest(ARRAY[5, 15, 25]) AS day_in_month(day_idx);
+
+    -- First-of-month spikes for Regulatory Submission Tracker (consumer #6)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT
+        (date_trunc('month', CURRENT_DATE) - make_interval(months => month_idx))::date,
+        histology_clinical_dataset_id,
+        'fbcd7899-2763-4659-bd28-2a278910ef85',
+        18
+    FROM generate_series(0, 5) AS month_span(month_idx);
+
+    -- Weekend monitoring for Safety Signal Detection (consumer #7)
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, histology_clinical_dataset_id, '08039e5d-50a7-447a-b691-f5dc6b420dea', 6
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) IN (6, 7);
+
+    -- 2. Histology R&D dataset query stats
+    FOR month_offset IN 0..4 LOOP
+        INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+        VALUES (
+            (date_trunc('month', CURRENT_DATE) - make_interval(months => month_offset) + INTERVAL '5 days')::date,
+            histology_rnd_dataset_id,
+            rnd_program_pipeline_id,
+            5
+        );
+    END LOOP;
+
+    FOR month_offset IN 0..1 LOOP
+        FOR day_offset IN SELECT unnest(ARRAY[3, 12, 21]) LOOP
+            INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+            VALUES (
+                (date_trunc('month', CURRENT_DATE) - make_interval(months => month_offset) + make_interval(days => day_offset))::date,
+                histology_rnd_dataset_id,
+                ai_model_histology_images_id,
+                15
+            );
+        END LOOP;
+    END LOOP;
+
     INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count) VALUES
-        ('2025-10-21', histology_rnd_dataset_id, rnd_program_pipeline_id, 5),
-        ('2025-10-25', histology_rnd_dataset_id, rnd_program_pipeline_id, 15),
-        ('2025-10-26', histology_rnd_dataset_id, rnd_program_pipeline_id, 20),
-        ('2025-10-25', histology_rnd_dataset_id, ai_model_histology_images_id, 20),
-        ('2025-10-26', histology_rnd_dataset_id, ai_model_histology_images_id, 10);
+        ((CURRENT_DATE - INTERVAL '34 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 5),
+        ((CURRENT_DATE - INTERVAL '10 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 15),
+        ((CURRENT_DATE - INTERVAL '4 days')::date, demand_forecast_dataset_id, rnd_program_pipeline_id, 20),
+        ((CURRENT_DATE - INTERVAL '10 days')::date, demand_forecast_dataset_id, ai_model_histology_images_id, 20),
+        ((CURRENT_DATE - INTERVAL '4 days')::date, demand_forecast_dataset_id, ai_model_histology_images_id, 10);
+    -- ------------------------------------------------------------------------------------------------
+    -- END of Insert dynamic dataset query stats
+    -- ------------------------------------------------------------------------------------------------
 
 
 end $$;

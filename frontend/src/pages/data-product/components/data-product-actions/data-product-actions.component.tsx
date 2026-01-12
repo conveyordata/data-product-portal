@@ -6,7 +6,8 @@ import { useSelector } from 'react-redux';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,
@@ -17,7 +18,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
-import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
@@ -63,15 +63,15 @@ export function DataProductActions({ dataProductId }: Props) {
         return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
     }, [t, availablePlatforms]);
 
-    const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useGetDataProductRoleAssignmentsQuery({
-        data_product_id: dataProductId,
-        user_id: user?.id,
+    const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useListDataProductRoleAssignmentsQuery({
+        dataProductId: dataProductId,
+        userId: user?.id,
     });
 
     const allowRequesting = useMemo(() => {
         if (!user?.id || isFetchingRoleAssignments || !roleAssignments) return false;
 
-        return !roleAssignments.some(
+        return !roleAssignments?.role_assignments?.some(
             ({ user: u, decision }) =>
                 u.id === user.id && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
         );

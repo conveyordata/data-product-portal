@@ -25,7 +25,7 @@ data sources, and sharing concepts, ensuring control and oversight for business 
 Our goal is to bridge the gap between data governance, data platforms and data catalogs and provide a 360 view of all
 ongoing data initiatives that is easy to understand by everybody.
 
-To read more about it, please check out our [announcement blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
+To read more about it, please check out our [announcement blogpost](https://www.dataminded.com/resources/introducing-data-product-portal-an-open-source-tool-for-scaling-your-data-products?utm_source=github-portal-readme&utm_medium=referral).
 
 ## Who is it for?
 
@@ -101,17 +101,18 @@ It contains more detailed information about concepts, how-to guides, installatio
 
 ## General Blogposts
 
-- [Announcement Blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
-- [Interface to your data platform](https://conveyordata.com/portal-give-your-business-users-a-friendly-interface-to-your-data-platform?utm_source=github-portal-readme&utm_medium=referral)
-- [State of data products](https://medium.com/conveyordata/the-state-of-data-products-9e1bc5c39bcb)
-- [How to effectively structure data for self service data teams](https://conveyordata.com/portal-how-to-structure-data-for-self-service-data-teams?utm_source=github-portal-readme&utm_medium=referral)
+- [Announcement Blogpost](https://www.dataminded.com/resources/introducing-data-product-portal-an-open-source-tool-for-scaling-your-data-products?utm_source=github-portal-readme&utm_medium=referral)
+- [A User Interface to your Data Platform](https://www.dataminded.com/resources/why-you-should-build-a-user-interface-to-your-data-platform?utm_source=github-portal-readme&utm_medium=referral)
+- [The State of Data Products](https://www.dataminded.com/resources/the-state-of-data-products-in-2024?utm_source=github-portal-readme&utm_medium=referral)
+- [How to Structure Data for Self-Service Data Teams](https://www.dataminded.com/resources/beyond-medallion-how-to-structure-data-for-self-service-data-teams?utm_source=github-portal-readme&utm_medium=referral)
+- [Data Modeling for Data Products](https://www.dataminded.com/resources/data-modelling-in-a-data-product-world?utm_source=github-portal-readme&utm_medium=referral)
+- [Source-Aligned Data Products](https://www.dataminded.com/resources/source-aligned-data-products-the-foundation-of-a-scalable-data-mesh?utm_source=github-portal-readme&utm_medium=referral)
 
 ## Technical Blogposts
 
-- [Data product integrations: OIDC](https://medium.com/conveyordata/data-product-portal-integrations-1-oidc-8d1dcdc0896e)
-- [Data product integrations: Helm and Kubernetes](https://medium.com/conveyordata/data-product-portal-integrations-2-helm-982f4a54c0f0)
-- [Data product integrations: Data platforms](https://conveyordata.com/portal-how-portal-integrates-with-data-platforms?utm_source=github-portal-readme&utm_medium=referral)
-- [Data product integrations: AWS](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1)
+- [Data Product Integrations: OIDC](https://www.dataminded.com/resources/data-product-portal-integrations-1-oidc?utm_source=github-portal-readme&utm_medium=referral)
+- [Data Product Integrations: Helm and Kubernetes](https://www.dataminded.com/resources/data-product-portal-integrations-2-helm?utm_source=github-portal-readme&utm_medium=referral)
+- [Data Product Integrations: Data platforms](https://www.dataminded.com/resources/the-data-product-portal-integrates-with-your-preferred-data-platform?utm_source=github-portal-readme&utm_medium=referral)
 
 # Getting Started
 
@@ -124,6 +125,7 @@ It contains more detailed information about concepts, how-to guides, installatio
 - Install [Docker](https://docs.docker.com/get-docker/) on your machine.
 
 ### Installation
+
 - Ensure your Docker service is running.
 
 - In order to set up a local 'production-like' server with a connection to a database, run the command below in the root of this project.
@@ -186,7 +188,7 @@ Right now we support the following integrations:
 - **Conveyor**: A data product workflow manager that helps you build data products in a self-service manner
 
 A more detailed explanation of how to integrate the data product portal with your data platform can be found in our
-[platform integration blogpost](https://conveyordata.com/portal-how-portal-integrates-with-data-platforms?utm_source=github-portal-readme&utm_medium=referral).
+[platform integration blogpost](https://www.dataminded.com/resources/the-data-product-portal-integrates-with-your-preferred-data-platform?utm_source=github-portal-readme&utm_medium=referral).
 
 We are currently working on Databricks and Snowflake integrations and more are to come soon. If you have a specific
 request for a technology integration, please don't hesitate to reach out to us. Even better would be to create a pull
@@ -194,9 +196,10 @@ request with the integration you would like to see in the data product portal.
 
 # Production Installation
 
-Please find the relevant info in [Installation](docs/INSTALLATION.md)
+Please find the relevant info in [Getting Started](docs/docs/getting-started/installation.md).
 
 # Release Process
+
 To prepare a new release follow these steps, use the next minor or patch version (in this example 0.3.6):
 - Create a new branch from main called `chore/version_bump_036`
 - If you do a patch version bump: run `task bump-version -- 0.3.6` in root.
@@ -220,7 +223,7 @@ Check our [Contributing Guidelines](CONTRIBUTING.md).
 
 Distributed under the APACHE 2.0 License Copyright 2024 Dataminded. See [LICENSE](LICENSE.md) for more information.
 
-# Data Tracking Transparancy
+# Data Tracking Transparency
 
 This project has the possibility to track the actions of users using Data Product Portal in order to improve the UI and design.
 It also helps with error tracking and efficient debugging.

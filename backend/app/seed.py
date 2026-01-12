@@ -1,11 +1,14 @@
 import os
+from typing import TYPE_CHECKING
 
 from jinja2 import Template
-from sqlalchemy.orm import Session
 
 from app.authorization.service import AuthorizationService
+from app.data_products.output_ports.service import DatasetService
 from app.database.database import get_db_session
-from app.datasets.service import DatasetService
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
 def seed_db(path: str, **template_vars):

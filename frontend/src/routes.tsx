@@ -1,5 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v7';
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
 import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
@@ -21,14 +21,6 @@ import { ApplicationPaths } from '@/types/navigation';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
 import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
-import { EnvironmentConfig } from './pages/environment-config/environment-config.page.tsx';
-import { EnvironmentConfigCreate } from './pages/environment-config-create/environment-config-create.page.tsx';
-import { EnvironmentConfigs } from './pages/environment-configs/environment-configs.page.tsx';
-import { EnvironmentCreate } from './pages/environment-create/environment-create.page.tsx';
-import { Environments } from './pages/environments/environments.page.tsx';
-import { PlatformServiceConfig } from './pages/platform-service-config/platform-service-config.page.tsx';
-import { PlatformServiceConfigCreate } from './pages/platform-service-config-create/platform-service-config-create.page.tsx';
-import { PlatformsConfigs } from './pages/platforms-configs/platforms-configs.page.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
 
 const router = createBrowserRouter([
@@ -80,6 +72,10 @@ const router = createBrowserRouter([
                         ],
                     },
                     {
+                        path: ApplicationPaths.Marketplace,
+                        element: <Navigate to={ApplicationPaths.Datasets} />,
+                    },
+                    {
                         path: ApplicationPaths.MarketplaceCart,
                         children: [
                             {
@@ -124,51 +120,6 @@ const router = createBrowserRouter([
                             {
                                 index: true,
                                 element: <Settings />,
-                            },
-                        ],
-                    },
-                    {
-                        path: ApplicationPaths.PlatformsConfigs,
-                        element: <ProtectedRoute />,
-                        children: [
-                            {
-                                index: true,
-                                element: <PlatformsConfigs />,
-                            },
-                            {
-                                path: ApplicationPaths.PlatformServiceConfig,
-                                element: <PlatformServiceConfig />,
-                            },
-                            {
-                                path: ApplicationPaths.PlatformServiceConfigNew,
-                                element: <PlatformServiceConfigCreate />,
-                            },
-                        ],
-                    },
-
-                    {
-                        path: ApplicationPaths.Environments,
-                        element: <ProtectedRoute />,
-                        children: [
-                            {
-                                index: true,
-                                element: <Environments />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentNew,
-                                element: <EnvironmentCreate />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentConfigs,
-                                element: <EnvironmentConfigs />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentConfigNew,
-                                element: <EnvironmentConfigCreate />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentConfig,
-                                element: <EnvironmentConfig />,
                             },
                         ],
                     },
