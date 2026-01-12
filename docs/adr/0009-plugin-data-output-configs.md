@@ -106,22 +106,37 @@ This decision is reflected in the application by:
 ## Examples
 
 ### Example: AWS Glue Integration
+Current AWS Glue Integration has a frontend form consisting of
 
-#### Frontend requirements
+* Database selector or string field
+* Database suffix string field
+* Table string field, depending on a checkbox
 
-* Database selector
-* Table selector
-* Environment awareness
+#### Example response GET /api/v2/plugins
 
-#### Fake API endpoints
+Needed to know the structure of the different plugins, e.g. grouping them in templates later on etc etc
 
-```http
-GET /api/plugins
-GET /api/plugins/aws_glue
-POST /api/data_products/{id}/outputs
+```json
+{
+    [
+        {
+            "plugin": "GlueDataOutput",
+            "platform": "glue",
+            "display_name": "Glue",
+            "icon_name": "glue-logo.svg",
+            "parent_platform": "aws",
+            "platform_tile": null
+        },
+        {
+            // ...
+        }
+    ]
+  }
 ```
 
-#### Example response
+#### Example response GET /api/v2/plugins/<GLUE_ID>
+
+Single plugin content to generate the needed form.
 
 ```json
 {
