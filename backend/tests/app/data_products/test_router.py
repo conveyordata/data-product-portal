@@ -667,6 +667,27 @@ class TestDataProductsRouter:
 
         assert response.status_code == 400
 
+    def test_get_data_product_event_history(self, payload, client: TestClient, session):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 200
+        assert "id" in created_data_product.json()
+
+        history_response = self.get_data_product_history(
+            client, created_data_product.json().get("id")
+        )
+        assert history_response.status_code == 200, history_response.text
+        assert len(history_response.json()["events"]) == 2
+
     def test_history_event_created_on_data_product_creation(
         self, payload, client: TestClient, session
     ):
@@ -684,7 +705,7 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
-        history = self.get_data_product_history(
+        history = self.get_data_product_history_old(
             client, created_data_product.json().get("id")
         ).json()
         assert len(history) == 2
@@ -709,7 +730,7 @@ class TestDataProductsRouter:
 
         assert response.status_code == 200
 
-        history = self.get_data_product_history(client, data_product.id).json()
+        history = self.get_data_product_history_old(client, data_product.id).json()
         assert len(history) == 1
 
     def test_history_event_created_on_data_product_about_update(self, client):
@@ -727,7 +748,7 @@ class TestDataProductsRouter:
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 200
 
-        history = self.get_data_product_history(client, data_product.id).json()
+        history = self.get_data_product_history_old(client, data_product.id).json()
         assert len(history) == 1
 
     def test_history_event_created_on_data_product_status_update(self, client):
@@ -748,7 +769,7 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 200
 
-        history = self.get_data_product_history(client, data_product.id).json()
+        history = self.get_data_product_history_old(client, data_product.id).json()
         assert len(history) == 1
 
     def test_history_event_created_on_data_product_deletion(self, client):
@@ -766,7 +787,7 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
-        history = self.get_data_product_history(client, data_product.id).json()
+        history = self.get_data_product_history_old(client, data_product.id).json()
         assert len(history) == 1
 
     def test_retain_deleted_data_product_name_in_history(self, client: TestClient):
@@ -788,7 +809,7 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
-        response = self.get_data_product_history(client, data_product_id)
+        response = self.get_data_product_history_old(client, data_product_id)
         assert len(response.json()) == 1
         assert response.json()[0]["deleted_subject_identifier"] == data_product_name
 
@@ -865,8 +886,12 @@ class TestDataProductsRouter:
         return client.get(f"{OLD_ENDPOINT}/user/{user_id}")
 
     @staticmethod
-    def get_data_product_history(client: TestClient, data_product_id):
+    def get_data_product_history_old(client: TestClient, data_product_id):
         return client.get(f"{OLD_ENDPOINT}/{data_product_id}/history")
+
+    @staticmethod
+    def get_data_product_history(client: TestClient, data_product_id):
+        return client.get(f"{ENDPOINT}/{data_product_id}/history")
 
     @staticmethod
     def get_conveyor_ide_url(client: TestClient, data_product_id):

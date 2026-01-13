@@ -26,8 +26,8 @@ class TestNotificationsRouter:
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert len(data["events"]) == 1
-        assert data["events"][0]["id"] == str(notification.id)
+        assert len(data["notifications"]) == 1
+        assert data["notifications"][0]["id"] == str(notification.id)
 
     def test_delete_notification(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
