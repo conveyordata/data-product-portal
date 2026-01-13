@@ -3,7 +3,6 @@
 [![Postgres][Postgres]][Postgres-url]
 [![Docker][Docker]][Docker-url]
 
-
 # Backend Getting Started
 
 ## Prerequisites

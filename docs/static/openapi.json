@@ -14156,11 +14156,6 @@
             ],
             "title": "Lifecycle Id"
           },
-          "domain_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Domain Id"
-          },
           "tag_ids": {
             "items": {
               "type": "string",
@@ -14185,7 +14180,6 @@
           "namespace",
           "description",
           "access_type",
-          "domain_id",
           "tag_ids",
           "owners"
         ],
@@ -16745,11 +16739,6 @@
             ],
             "title": "Lifecycle Id"
           },
-          "domain_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Domain Id"
-          },
           "tag_ids": {
             "items": {
               "type": "string",
@@ -16779,7 +16768,6 @@
           "namespace",
           "description",
           "access_type",
-          "domain_id",
           "tag_ids",
           "data_product_id",
           "owners"
@@ -17124,11 +17112,6 @@
             ],
             "title": "Lifecycle Id"
           },
-          "domain_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Domain Id"
-          },
           "tag_ids": {
             "items": {
               "type": "string",
@@ -17144,7 +17127,6 @@
           "namespace",
           "description",
           "access_type",
-          "domain_id",
           "tag_ids"
         ],
         "title": "DatasetUpdate"
@@ -17457,13 +17439,6 @@
             },
             "type": "array",
             "title": "Data Products"
-          },
-          "datasets": {
-            "items": {
-              "$ref": "#/components/schemas/Dataset"
-            },
-            "type": "array",
-            "title": "Datasets"
           }
         },
         "type": "object",
@@ -17471,8 +17446,7 @@
           "id",
           "name",
           "description",
-          "data_products",
-          "datasets"
+          "data_products"
         ],
         "title": "DomainGetOld",
         "deprecated": true
@@ -18082,13 +18056,6 @@
             },
             "type": "array",
             "title": "Data Products"
-          },
-          "output_ports": {
-            "items": {
-              "$ref": "#/components/schemas/OutputPort"
-            },
-            "type": "array",
-            "title": "Output Ports"
           }
         },
         "type": "object",
@@ -18096,8 +18063,7 @@
           "id",
           "name",
           "description",
-          "data_products",
-          "output_ports"
+          "data_products"
         ],
         "title": "GetDomainResponse"
       },
@@ -18119,10 +18085,6 @@
           "data_product_count": {
             "type": "integer",
             "title": "Data Product Count"
-          },
-          "output_port_count": {
-            "type": "integer",
-            "title": "Output Port Count"
           }
         },
         "type": "object",
@@ -18130,8 +18092,7 @@
           "id",
           "name",
           "description",
-          "data_product_count",
-          "output_port_count"
+          "data_product_count"
         ],
         "title": "GetDomainsItem"
       },
@@ -18153,10 +18114,6 @@
           "data_product_count": {
             "type": "integer",
             "title": "Data Product Count"
-          },
-          "dataset_count": {
-            "type": "integer",
-            "title": "Dataset Count"
           }
         },
         "type": "object",
@@ -18164,8 +18121,7 @@
           "id",
           "name",
           "description",
-          "data_product_count",
-          "dataset_count"
+          "data_product_count"
         ],
         "title": "GetDomainsItemOld",
         "deprecated": true

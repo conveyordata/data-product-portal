@@ -8,6 +8,7 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useGetAllPlatformsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,
@@ -17,7 +18,6 @@ import {
     useGetDataProductSnowflakeUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
@@ -34,7 +34,7 @@ export function DataProductActions({ dataProductId }: Props) {
 
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const { data: availablePlatforms, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
+    const { data: { platforms = [] } = {}, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
@@ -58,10 +58,10 @@ export function DataProductActions({ dataProductId }: Props) {
     const canReadIntegrations = read_integrations?.allowed ?? false;
 
     const dataPlatforms = useMemo(() => {
-        const names = availablePlatforms ? availablePlatforms.map((platform) => platform.name.toLowerCase()) : [];
+        const names = platforms.map((platform) => platform.name.toLowerCase());
 
         return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
-    }, [t, availablePlatforms]);
+    }, [t, platforms]);
 
     const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useListDataProductRoleAssignmentsQuery({
         dataProductId: dataProductId,

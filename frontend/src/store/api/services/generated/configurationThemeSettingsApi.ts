@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/configurationDomainsApi";
+import { api } from "@/store/api/services/generated/configurationPlatformsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getThemeSettings: build.query<

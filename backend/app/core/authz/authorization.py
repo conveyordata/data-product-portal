@@ -58,7 +58,7 @@ class Authorization(metaclass=Singleton):
             db: Session = Depends(get_db_session),
         ) -> None:
             obj = await resolver.resolve(request, object_id, db)
-            dom = resolver.resolve_domain(db, obj)
+            dom = await resolver.resolve_domain(db, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
