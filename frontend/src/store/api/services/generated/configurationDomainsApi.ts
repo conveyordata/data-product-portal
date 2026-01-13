@@ -70,7 +70,6 @@ export type GetDomainsItem = {
   name: string;
   description: string;
   data_product_count: number;
-  output_port_count: number;
 };
 export type GetDomainsResponse = {
   domains: GetDomainsItem[];
@@ -120,28 +119,11 @@ export type DataProduct = {
   status: DataProductStatus;
   type: DataProductType;
 };
-export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType = "public" | "restricted" | "private";
-export type Tag = {
-  id: string;
-  value: string;
-};
-export type OutputPort = {
-  id: string;
-  name: string;
-  namespace: string;
-  description: string;
-  status: OutputPortStatus;
-  access_type: OutputPortAccessType;
-  data_product_id: string;
-  tags: Tag[];
-};
 export type GetDomainResponse = {
   id: string;
   name: string;
   description: string;
   data_products: DataProduct[];
-  output_ports: OutputPort[];
 };
 export const {
   useGetDomainsQuery,

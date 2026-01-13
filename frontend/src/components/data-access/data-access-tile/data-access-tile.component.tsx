@@ -2,17 +2,15 @@ import Icon from '@ant-design/icons';
 import { Dropdown, type DropdownProps, Flex, type MenuProps, Radio, Space, Spin, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import type { Environment } from '@/types/environment';
+import type { EnvironmentGetItem } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
-
 import styles from './data-access-tile.module.scss';
 
 const ACCESS_DATA_DROPDOWN_DELAY = 0.25;
 
 type Props<T extends string> = {
     dataPlatform: CustomDropdownItemProps<T>;
-    environments: Environment[];
+    environments: EnvironmentGetItem[];
     isLoading?: boolean;
     isDisabled?: boolean;
     dropdownProps?: DropdownProps;

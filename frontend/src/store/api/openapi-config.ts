@@ -9,6 +9,8 @@ const services = [
     { name: 'Configuration - Data product settings', file: 'configurationDataProductSettings' },
     { name: 'Configuration - Data product types', file: 'configurationDataProductTypes' },
     { name: 'Configuration - Domains', file: 'configurationDomains' },
+    { name: 'Configuration - Environments', file: 'configurationEnvironments' },
+    { name: 'Configuration - Platforms', file: 'configurationPlatforms' },
     { name: 'Configuration - Theme settings', file: 'configurationThemeSettings' },
     { name: 'Configuration - Tags', file: 'configurationTags' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
