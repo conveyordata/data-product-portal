@@ -17715,6 +17715,16 @@
         ],
         "title": "EnvironmentsGet"
       },
+      "EventEntityType": {
+        "type": "string",
+        "enum": [
+          "data_product",
+          "output_port",
+          "technical_asset",
+          "user"
+        ],
+        "title": "EventEntityType"
+      },
       "EventReferenceEntity": {
         "type": "string",
         "enum": [
@@ -18187,12 +18197,12 @@
             "title": "Target Id"
           },
           "subject_type": {
-            "$ref": "#/components/schemas/EventReferenceEntity"
+            "$ref": "#/components/schemas/EventEntityType"
           },
           "target_type": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/EventReferenceEntity"
+                "$ref": "#/components/schemas/EventEntityType"
               },
               {
                 "type": "null"
@@ -18737,17 +18747,17 @@
       },
       "GetUserNotificationsResponse": {
         "properties": {
-          "events": {
+          "notifications": {
             "items": {
               "$ref": "#/components/schemas/GetUserNotificationsResponseItem"
             },
             "type": "array",
-            "title": "Events"
+            "title": "Notifications"
           }
         },
         "type": "object",
         "required": [
-          "events"
+          "notifications"
         ],
         "title": "GetUserNotificationsResponse"
       },

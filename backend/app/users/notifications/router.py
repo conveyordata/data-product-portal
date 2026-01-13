@@ -55,8 +55,8 @@ def get_user_notifications(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> GetUserNotificationsResponse:
-    events = [
+    notifications = [
         NotificationGet.model_validate(event).convert()
         for event in get_user_notifications_old(db, authenticated_user)
     ]
-    return GetUserNotificationsResponse(events=events)
+    return GetUserNotificationsResponse(notifications=notifications)
