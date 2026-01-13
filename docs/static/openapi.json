@@ -8048,92 +8048,6 @@
         }
       }
     },
-    "/api/v2/technical_assets/platform-tiles": {
-      "get": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Get Platform Tiles",
-        "operationId": "get_platform_tiles",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlatformTileResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/plugins": {
-      "get": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "List Plugins",
-        "description": "List all available plugins with their metadata (ADR-compliant endpoint)",
-        "operationId": "list_plugins",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PluginResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/plugins/{plugin_name}/form": {
-      "get": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Get Plugin Form",
-        "description": "Get form metadata for a specific plugin (ADR-compliant endpoint)",
-        "operationId": "get_plugin_form",
-        "parameters": [
-          {
-            "name": "plugin_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Plugin Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UIElementMetadataResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/domains": {
       "get": {
         "tags": [
@@ -13339,6 +13253,92 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResourceNameLengthLimits"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/plugins/platform-tiles": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Get Platform Tiles",
+        "operationId": "get_platform_tiles",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformTileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/plugins/": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "List Plugins",
+        "description": "List all available plugins with their metadata (ADR-compliant endpoint)",
+        "operationId": "list_plugins",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/plugins/{plugin_name}/form": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Get Plugin Form",
+        "description": "Get form metadata for a specific plugin (ADR-compliant endpoint)",
+        "operationId": "get_plugin_form",
+        "parameters": [
+          {
+            "name": "plugin_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plugin Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UIElementMetadataResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }

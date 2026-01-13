@@ -29,9 +29,6 @@ from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
     GetTechnicalAssetsResponseItem,
-    PlatformTileResponse,
-    PluginResponse,
-    UIElementMetadataResponse,
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.service import DataOutputService
@@ -44,9 +41,6 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.platform_service_configurations.service import (
-    PlatformServiceConfigurationService,
-)
 from app.resource_names.service import ResourceNameService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
@@ -429,47 +423,3 @@ def get_technical_asset_graph_data(
     level: int = 3,
 ) -> Graph:
     return DataOutputService(db).get_graph_data(data_product_id, id, level)
-
-
-@router.get("/v2/technical_assets/platform-tiles")
-def get_platform_tiles(
-    db: Session = Depends(get_db_session),
-) -> PlatformTileResponse:
-    configs = PlatformServiceConfigurationService(
-        db
-    ).get_all_platform_service_configurations()
-    return PlatformTileResponse(
-        platform_tiles=DataOutputService(db).get_platform_tiles(configs)
-    )
-
-
-# ADR-compliant endpoints
-@router.get("/v2/plugins")
-def list_plugins(
-    db: Session = Depends(get_db_session),
-) -> PluginResponse:
-    """List all available plugins with their metadata (ADR-compliant endpoint)"""
-    return PluginResponse(
-        plugins=DataOutputService(db).get_technical_asset_ui_metadata()
-    )
-
-
-@router.get("/v2/plugins/{plugin_name}/form")
-def get_plugin_form(
-    plugin_name: str,
-    db: Session = Depends(get_db_session),
-) -> UIElementMetadataResponse:
-    """Get form metadata for a specific plugin (ADR-compliant endpoint)"""
-    all_plugins = DataOutputService(db).get_technical_asset_ui_metadata()
-
-    # Find the plugin by name
-    plugin = next((p for p in all_plugins if p.plugin == plugin_name), None)
-    if plugin is None:
-        from fastapi import HTTPException, status
-
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Plugin '{plugin_name}' not found",
-        )
-
-    return plugin
