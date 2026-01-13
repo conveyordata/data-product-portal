@@ -32,7 +32,7 @@ def get_platform_tiles(
 
 # ADR-compliant endpoints
 @router.get("/")
-def list_plugins(
+def get_plugins(
     db: Session = Depends(get_db_session),
 ) -> PluginResponse:
     """List all available plugins with their metadata (ADR-compliant endpoint)"""

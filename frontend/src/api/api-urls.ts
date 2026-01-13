@@ -12,10 +12,6 @@ export enum ApiUrl {
     DataOutputNamespaceSuggestion = '/api/data_outputs/namespace_suggestion',
     DataOutputNamespaceLimits = '/api/data_outputs/namespace_length_limits',
     DataOutputResultString = '/api/data_outputs/result_string',
-    // ADR-compliant plugin endpoints
-    Plugins = '/api/v2/plugins',
-    PluginForm = '/api/v2/plugins/:pluginName/form',
-    PlatformTiles = '/api/v2/technical_assets/platform-tiles',
     DataProducts = '/api/data_products',
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',

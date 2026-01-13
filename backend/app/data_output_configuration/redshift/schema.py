@@ -85,7 +85,6 @@ class RedshiftDataOutput(AssetProviderPlugin):
                 label="Database",
                 required=True,
                 use_namespace_when_not_source_aligned=True,
-                select_mode="tags",
                 max_count=1,
                 normalize_array=True,
             ),
@@ -111,6 +110,7 @@ class RedshiftDataOutput(AssetProviderPlugin):
                 type=UIElementType.String,
                 tooltip="The name of the table to give write access to",
                 required=True,
+                initial_value="*",
                 depends_on=FieldDependency(field_name="entire_schema", value=False),
             ),
         ]

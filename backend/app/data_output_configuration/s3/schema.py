@@ -66,6 +66,14 @@ class S3DataOutput(AssetProviderPlugin):
                 required=True,
             ),
             UIElementMetadata(
+                name="suffix",
+                type=UIElementType.String,
+                label="Suffix",
+                required=True,
+                initial_value="",
+                hidden=True,
+            ),
+            UIElementMetadata(
                 name="path",
                 label="Path",
                 type=UIElementType.String,

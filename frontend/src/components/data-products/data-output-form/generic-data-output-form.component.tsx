@@ -1,10 +1,8 @@
 import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
-import { useEffect } from 'react';
+import { type ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import type { UiElementMetadata } from '@/store/api/services/generated/pluginsApi';
 import type { DataOutputCreateFormSchema } from '@/types/data-output';
-import { DataPlatforms } from '@/types/data-platform';
-
 import { configurationFieldName } from './components/configuration-field-name';
 import { ConfigurationFormItem } from './components/output-configuration-form-item';
 import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
@@ -15,7 +13,7 @@ type Props = {
     identifiers?: string[];
     sourceAligned: boolean;
     configurationType: string;
-    uiMetadataGroups: UIElementMetadata[];
+    uiMetadataGroups: UiElementMetadata[];
     resultLabel?: string;
     resultTooltip?: string;
 };
@@ -31,14 +29,14 @@ export function GenericDataOutputForm({
     resultTooltip,
 }: Props) {
     const { t } = useTranslation();
-    const uiMetadata = uiMetadataGroups as UIElementMetadata[] | undefined;
+    const uiMetadata = uiMetadataGroups as UiElementMetadata[] | undefined;
 
     // Watch each field individually - hooks must be called unconditionally
     // We watch all potential fields that might be dependencies
     const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
 
     // Build the watched fields map
-    const watchedFields: Record<string, any> = {
+    const watchedFields: Record<string, unknown> = {
         entire_schema: entireSchema,
     };
 
@@ -47,16 +45,24 @@ export function GenericDataOutputForm({
         uiMetadata?.forEach((field) => {
             // Handle suffix field
             if (field.name === 'suffix') {
-                form.setFieldValue(configurationFieldName('suffix'), sourceAligned ? '' : namespace);
+                form.setFields([
+                    {
+                        // biome-ignore lint: dynamic field names can't be statically typed at compile time.
+                        name: configurationFieldName('suffix') as any,
+                        value: sourceAligned ? '' : namespace,
+                    },
+                ]);
             }
 
             // Handle fields that should auto-populate from namespace when not source-aligned
             if (field.use_namespace_when_not_source_aligned) {
-                if (!sourceAligned) {
-                    form.setFieldValue(configurationFieldName(field.name), namespace);
-                } else {
-                    form.setFieldValue(configurationFieldName(field.name), undefined);
-                }
+                form.setFields([
+                    {
+                        // biome-ignore lint: dynamic field names can't be statically typed at compile time.
+                        name: configurationFieldName(field.name) as any,
+                        value: !sourceAligned ? namespace : undefined,
+                    },
+                ]);
             }
         });
     }, [form, sourceAligned, namespace, uiMetadata]);
@@ -65,7 +71,7 @@ export function GenericDataOutputForm({
         return null;
     }
 
-    const renderFormField = (fieldMetadata: UIElementMetadata) => {
+    const renderFormField = (fieldMetadata: UiElementMetadata) => {
         const {
             name,
             label,
@@ -78,7 +84,6 @@ export function GenericDataOutputForm({
             initial_value,
             value_prop_name,
             depends_on,
-            select_mode,
             max_count,
             disabled,
             use_namespace_when_not_source_aligned,
@@ -93,7 +98,7 @@ export function GenericDataOutputForm({
         }
 
         // Build validation rules
-        const rules: any[] = [];
+        const rules: { required?: boolean; pattern?: RegExp; message?: string }[] = [];
         if (required && !isHidden) {
             rules.push({
                 required: true,
@@ -108,7 +113,7 @@ export function GenericDataOutputForm({
         }
 
         // Build select options based on sourceAligned for fields that use namespace
-        let selectOptions;
+        let selectOptions: { label: string; value: string }[] = [];
         if (type === 'select') {
             if (use_namespace_when_not_source_aligned) {
                 selectOptions = (sourceAligned ? identifiers : [namespace]).map((val) => ({
@@ -133,7 +138,7 @@ export function GenericDataOutputForm({
         const isDisabled = disabled || (use_namespace_when_not_source_aligned && !sourceAligned);
 
         // Render the appropriate input component based on type
-        let inputComponent;
+        let inputComponent: ReactElement;
         switch (type) {
             case 'checkbox':
                 inputComponent = <Checkbox>{t(label)}</Checkbox>;
@@ -144,9 +149,8 @@ export function GenericDataOutputForm({
                     <Select
                         allowClear
                         showSearch
-                        mode={select_mode}
-                        maxCount={max_count}
-                        disabled={isDisabled}
+                        maxCount={max_count || undefined}
+                        disabled={isDisabled ?? false}
                         options={selectOptions}
                     />
                 );
@@ -157,7 +161,6 @@ export function GenericDataOutputForm({
                 inputComponent = <Input />;
                 break;
         }
-        console.log(fieldMetadata);
         return (
             <ConfigurationFormItem
                 key={name}
@@ -165,8 +168,8 @@ export function GenericDataOutputForm({
                 label={type === 'checkbox' ? undefined : t(label)}
                 tooltip={tooltip ? t(tooltip) : undefined}
                 rules={rules}
-                hidden={isHidden}
-                valuePropName={value_prop_name}
+                hidden={isHidden ?? false}
+                valuePropName={value_prop_name ?? (type === 'checkbox' ? 'checked' : 'value')}
                 initialValue={initial_value}
                 normalize={normalize}
                 required={type !== 'checkbox' && required && !isHidden}

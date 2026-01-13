@@ -13286,9 +13286,9 @@
         "tags": [
           "Plugins"
         ],
-        "summary": "List Plugins",
+        "summary": "Get Plugins",
         "description": "List all available plugins with their metadata (ADR-compliant endpoint)",
-        "operationId": "list_plugins",
+        "operationId": "get_plugins",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -21463,17 +21463,6 @@
                 "type": "null"
               }
             ]
-          },
-          "select_mode": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Select Mode"
           },
           "max_count": {
             "anyOf": [

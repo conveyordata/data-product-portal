@@ -34,7 +34,6 @@ class UIElementMetadata(ORMModel):
     initial_value: Optional[str | int | float | bool] = None
     value_prop_name: Optional[str] = None
     depends_on: Optional[FieldDependency] = None
-    select_mode: Optional[str] = None  # "tags", "multiple", None
     max_count: Optional[int] = None
     disabled: Optional[bool] = None
     use_namespace_when_not_source_aligned: Optional[bool] = None

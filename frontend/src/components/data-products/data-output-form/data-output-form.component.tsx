@@ -11,10 +11,13 @@ import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
+    type PlatformTile,
+    useGetPlatformTilesQuery,
+    useGetPluginsQuery,
+} from '@/store/api/services/generated/pluginsApi';
+import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
-    useGetDataOutputUIElementMetadataQuery,
-    useGetPlatformTilesQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
@@ -25,12 +28,11 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
-import type { DataPlatform } from '@/types/data-platform';
+import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { getIcon } from '@/utils/icon-loader';
-
 import styles from './data-output-form.module.scss';
 import { GenericDataOutputForm } from './generic-data-output-form.component';
 
@@ -54,8 +56,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const navigate = useNavigate();
 
     // Data
-    const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } =
-        useGetDataOutputUIElementMetadataQuery();
+    const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
@@ -86,7 +87,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     // Result string
     const [fetchResultString] = useLazyGetDataOutputResultStringQuery();
 
-    const isLoading = platformsLoading || isCreating || isFetchingInitialValues || isFetchingTags;
+    const isLoading = platformsLoading || isLoadingMetadata || isCreating || isFetchingInitialValues || isFetchingTags;
 
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
@@ -99,7 +100,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             return [];
         }
 
-        const transformTile = (tile: any): CustomDropdownItemProps<DataPlatform> => ({
+        const transformTile = (tile: PlatformTile): CustomDropdownItemProps<DataPlatform> => ({
             label: t(tile.label),
             value: tile.value as DataPlatform,
             icon: getIcon(tile.icon_name),
