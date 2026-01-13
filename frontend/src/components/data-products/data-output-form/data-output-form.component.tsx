@@ -9,6 +9,7 @@ import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-pl
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     type PlatformTile,
@@ -26,7 +27,6 @@ import {
     useLazyValidateDataOutputNamespaceQuery,
 } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
@@ -59,7 +59,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
+    const { data: { platform_service_configurations: platformConfig = [] } = {}, isLoading: platformsLoading } =
+        useGetAllPlatformServiceConfigurationsQuery();
 
     // Mutations
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
