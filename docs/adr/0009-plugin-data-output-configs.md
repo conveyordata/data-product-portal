@@ -102,7 +102,7 @@ This decision is reflected in the application by:
 * Discover new plugins at startup (environment variable is sufficient for discovery)
 * Exposing integration metadata via REST APIs
 * Replacing hardcoded frontend forms with dynamically generated UI
-* Persisting configuration as JSON blobs scoped to the plugin type
+* Persisting configuration as table per plugin type
 
 ---
 
@@ -254,12 +254,13 @@ class UIElementMetadata(ORMModel):
 class AssetProviderPlugin(BaseModel):
     name: ClassVar[str]
     version: ClassVar[str]
+    migration_file_path: ClassVar[str]
 
     @classmethod
     def get_ui_metadata(cls) -> List[UIElementMetadata]:
         raise NotImplementedError
 
-    def validate(self):
+    def validate(self, **context):
         # Can check whether the content is valid. e.g. no illegal names used in identifiers. Namespace present if required, if table_path is not provided it takes table_name, etc etc
         pass
 
