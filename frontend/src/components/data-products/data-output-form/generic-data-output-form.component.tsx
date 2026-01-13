@@ -45,24 +45,14 @@ export function GenericDataOutputForm({
         uiMetadata?.forEach((field) => {
             // Handle suffix field
             if (field.name === 'suffix') {
-                form.setFields([
-                    {
-                        // biome-ignore lint: dynamic field names can't be statically typed at compile time.
-                        name: configurationFieldName('suffix') as any,
-                        value: sourceAligned ? '' : namespace,
-                    },
-                ]);
+                // biome-ignore lint: dynamic field names can't be statically typed at compile time.
+                form.setFieldValue(configurationFieldName('suffix') as any, sourceAligned ? '' : namespace);
             }
 
             // Handle fields that should auto-populate from namespace when not source-aligned
             if (field.use_namespace_when_not_source_aligned) {
-                form.setFields([
-                    {
-                        // biome-ignore lint: dynamic field names can't be statically typed at compile time.
-                        name: configurationFieldName(field.name) as any,
-                        value: !sourceAligned ? namespace : undefined,
-                    },
-                ]);
+                // biome-ignore lint: dynamic field names can't be statically typed at compile time.
+                form.setFieldValue(configurationFieldName(field.name) as any, !sourceAligned ? namespace : undefined);
             }
         });
     }, [form, sourceAligned, namespace, uiMetadata]);

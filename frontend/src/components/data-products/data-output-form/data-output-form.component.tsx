@@ -231,7 +231,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         changed,
         values: DataOutputCreateFormSchema,
     ) => {
-        if (changed.configuration || (values.configuration && changed.sourceAligned)) {
+        if (changed.configuration) {
             setResultString(values);
         }
     };
