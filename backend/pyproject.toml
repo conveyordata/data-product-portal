@@ -44,7 +44,7 @@ asyncpg = "^0.31.0"
 cachetools = "^6.2.4"
 greenlet = "^3.3.0"
 h11 = "^0.16.0"
-fastmcp = "2.14.2"
+fastmcp = "2.14.3"
 posthog = "^7.5.1"
 authlib = "1.6.6"
 
