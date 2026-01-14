@@ -2,11 +2,14 @@
 
 ## Consumers would benefit from data quality results on Output ports
 
-In order to be confident in an output port, it would be helpful to show data quality results.
+In order to be confident in an output port, it would be helpful to show measure of quality.
 We would like to show a high-level view or summary in Portal, without the details of the individual checks as to not rewrite DQ tooling.
 
 This summary should easily be calculated based on the output of the DQ tooling using a simple script.
-We currently store the data on output ports but the summary contains basic info for each asset.
+The portal API will support ingesting the summary of data quality results.
+
+In the future we can simplify the ingestion process by providing an SDK or creating a plugin for different DQ tooling.
+We currently store the summary results on output ports, but the summary contains high-level information about the technical assets.
 
 ## Decision Drivers
 
@@ -59,14 +62,18 @@ Summary submitted by a producer could look as follows:
   "generated_at": "2026-01-12T08:15:00Z",
   "overall_status": "WARN",
   "summary": "Optional extra user info",
-  "asset_details": [
+  "technical_assets": [
     {
-      "asset_name": "orders",
+      "name": "orders",
       "status": "PASS"
     },
     {
-      "asset_name": "order_items",
+      "name": "order_items",
       "status": "WARN"
+    },
+    {
+      "name": "customers",
+      "status": "ERROR"
     }
   ],
   "dimensions": {
@@ -74,15 +81,12 @@ Summary submitted by a producer could look as follows:
     "validity": "PASS" # Do values have the expected format, ranges,...
     "coverage": # Can be calculated by portal as assets with checks/total assets
   },
-  "dimension_coverage": {
-    "completeness": true,
-    "validity": false
-  },
   "details_url": "https://ci.company.com/runs/123"
 }
 ```
 
 Important note:
+- status can have 3 values: PASS, WARN, FAIL
 - The dimensions are optional and are inferred best effort based on the type of checks
 - The asset details combine all checks for a given asset into one value
 - The overall status is calculated based on the different asset details
