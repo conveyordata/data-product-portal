@@ -7,6 +7,7 @@ We would like to show a high-level view or summary in Portal, without the detail
 
 This summary should easily be calculated based on the output of the DQ tooling using a simple script.
 The portal API will support ingesting the summary of data quality results.
+We will follow the same approach for ingesting as described in [ADR 0007 - Ingestion usage metrics](./0007-ingestion-usage-metrics.md) to be consistent.
 
 In the future we can simplify the ingestion process by providing an SDK or creating a plugin for different DQ tooling.
 We currently store the summary results on output ports, but the summary contains high-level information about the technical assets.
