@@ -60,6 +60,19 @@ class TestDatasetsService:
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, user) is True
 
+    def test_recalculate_embedding(self):
+        settings.SEARCH_INDEXING_DISABLED = False
+        ds = DatasetFactory()
+
+        DatasetService(test_session).recalculate_embedding(ds.id)
+
+    def test_recalculate_all_embeddings(self):
+        settings.SEARCH_INDEXING_DISABLED = False
+        for i in range(51):  # Ensure we load 2 batches
+            DatasetFactory()
+
+        DatasetService(test_session).recalculate_all_embeddings()
+
     def test_create_search_vector_dataset(self):
         settings.SEARCH_INDEXING_DISABLED = False
         ds = DatasetFactory()
@@ -108,6 +121,29 @@ class TestDatasetsService:
         assert results[0].id == ds.id
         assert results[0].description == ds.description
         assert results[0].rank == pytest.approx(0.2857143)
+
+    def test_search_dataset_with_embeddings(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds_one = DatasetFactory(
+            name="Clinical patient information",
+            description="Clinical information on patients and is highly sensitive",
+        )
+        DatasetFactory(
+            name="Sales performance",
+            description="Sales performance track records since 2016",
+        )
+        DatasetFactory(
+            name="Inventory management",
+            description="Tracking our inventory since nineteen sixty three",
+        )
+        DatasetService(test_session).recalculate_all_embeddings()
+
+        results = DatasetService(test_session).search_datasets_with_embeddings(
+            "Patient information", 10, user
+        )
+
+        assert len(results) == 3
+        assert results[0].id == ds_one.id
 
     def test_search_dataset_matching_name(self):
         settings.SEARCH_INDEXING_DISABLED = False

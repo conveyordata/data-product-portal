@@ -37,4 +37,6 @@ def search_data_sets(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[SearchDatasets]:
-    return DatasetService(db).search_datasets(query=query, limit=limit, user=user)
+    return DatasetService(db).search_datasets_with_embeddings(
+        query=query, limit=limit, user=user
+    )

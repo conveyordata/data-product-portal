@@ -2,10 +2,11 @@ import uuid
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
@@ -45,6 +46,7 @@ class Dataset(Base, BaseORM):
     )
     usage = Column(String, nullable=True)
     search_vector = Column(postgresql.TSVECTOR)
+    embeddings = deferred(Column(Vector(384)))
 
     # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(

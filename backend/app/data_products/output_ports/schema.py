@@ -22,3 +22,17 @@ class OutputPort(ORMModel):
 class Dataset(OutputPort):
     def convert(self) -> OutputPort:
         return OutputPort(**self.model_dump())
+
+
+class DataProductEmbed(ORMModel):
+    name: str
+    description: str
+
+
+class DatasetEmbedModel(ORMModel):
+    name: str
+    namespace: str
+    description: str
+    status: OutputPortStatus
+
+    data_product: DataProductEmbed
