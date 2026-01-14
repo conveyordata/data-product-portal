@@ -39,13 +39,13 @@ export function DataOutputDescription({ status, type, description, tags, namespa
                     <Typography.Text>{getDataOutputType(type, t)}</Typography.Text>
                 </Flex>
             </Space>
-            <Flex>
+            <Space size={'small'}>
                 {tags.map((tag) => (
                     <Tag color="success" key={tag.id}>
                         {tag.value}
                     </Tag>
                 ))}
-            </Flex>
+            </Space>
             <Space>
                 <Typography.Paragraph italic>{description}</Typography.Paragraph>
             </Space>
