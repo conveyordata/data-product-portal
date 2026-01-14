@@ -31,7 +31,7 @@ jobs:
     needs: [environment]
     services:
       postgres:
-        image: postgres
+        image: pgvector/pgvector:pg17
         env:
           POSTGRES_PASSWORD: ${{ needs.environment.outputs.POSTGRES_PASSWORD }}
           POSTGRES_PORT: ${{ needs.environment.outputs.POSTGRES_PORT }}

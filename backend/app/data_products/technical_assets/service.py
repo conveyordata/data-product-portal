@@ -120,7 +120,7 @@ class DataOutputService:
         self.db.delete(data_output)
         self.db.flush()
 
-        self.update_search_vector_associated_datasets(result)
+        self.update_embeddings_for_associated_datasets(result)
         self.db.commit()
         return result
 
@@ -135,10 +135,10 @@ class DataOutputService:
             )
         return data_output
 
-    def update_search_vector_associated_datasets(self, result: DataOutputModel):
+    def update_embeddings_for_associated_datasets(self, result: DataOutputModel):
         dataset_service = DatasetService(self.db)
         for dataset_link in result.dataset_links:
-            dataset_service.recalculate_search_vector_for(dataset_link.dataset_id)
+            dataset_service.recalculate_embedding(dataset_link.dataset_id)
 
     def update_data_output_status(
         self,
@@ -152,7 +152,7 @@ class DataOutputService:
         current_data_output.status = data_output.status
         self.db.flush()
 
-        self.update_search_vector_associated_datasets(current_data_output)
+        self.update_embeddings_for_associated_datasets(current_data_output)
         self.db.commit()
 
     def link_dataset_to_data_output(
@@ -190,7 +190,7 @@ class DataOutputService:
         )
         data_output.dataset_links.append(dataset_link)
         self.db.flush()
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        DatasetService(self.db).recalculate_embedding(dataset_id)
         self.db.commit()
         return dataset_link
 
@@ -216,7 +216,7 @@ class DataOutputService:
 
         data_output.dataset_links.remove(data_output_dataset)
         self.db.flush()
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        DatasetService(self.db).recalculate_embedding(dataset_id)
         self.db.commit()
         return data_output
 
