@@ -17,6 +17,7 @@ from app.configuration.data_product_lifecycles.model import (
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
+from app.core.embed.model import EMBEDDING_MODEL
 from app.core.logging import logger
 from app.core.namespace.validation import (
     NamespaceValidator,
@@ -77,7 +78,7 @@ class DatasetService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
-        self.embedding_model = TextEmbedding()
+        self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
