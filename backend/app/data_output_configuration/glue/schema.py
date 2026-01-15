@@ -1,6 +1,7 @@
 from typing import ClassVar, List, Literal, Optional, Self
 
 from pydantic import model_validator
+from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSGlueConfig,
@@ -9,8 +10,10 @@ from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     FieldDependency,
     PlatformMetadata,
+    UIElementCheckbox,
     UIElementMetadata,
-    UIElementType,
+    UIElementSelect,
+    UIElementString,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.glue.model import (
@@ -75,38 +78,33 @@ class GlueDataOutput(AssetProviderPlugin):
         )
 
     @classmethod
-    def get_ui_metadata(cls) -> List[UIElementMetadata]:
-        base_metadata = super().get_ui_metadata()
+    def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
+        base_metadata = super().get_ui_metadata(db)
+
         base_metadata += [
-            UIElementMetadata(
+            UIElementSelect(
                 name="database",
-                type=UIElementType.Select,
                 label="Database",
                 required=True,
                 use_namespace_when_not_source_aligned=True,
-                max_count=1,
-                normalize_array=True,
+                options=cls.get_platform_options(db),
             ),
-            UIElementMetadata(
+            UIElementString(
                 name="database_suffix",
                 label="Database suffix",
-                type=UIElementType.String,
                 tooltip="The name of the database to give write access to. Defaults to data product namespace",
-                required=False,
+                required=True,
             ),
-            UIElementMetadata(
+            UIElementCheckbox(
                 name="entire_schema",
                 label="Entire schema",
-                type=UIElementType.Checkbox,
                 tooltip="Give write access to the entire schema instead of a single table",
                 required=False,
                 initial_value=True,
-                value_prop_name="checked",
             ),
-            UIElementMetadata(
+            UIElementString(
                 name="table",
                 label="Table",
-                type=UIElementType.String,
                 tooltip="The name of the table to give write access to",
                 required=True,
                 initial_value="*",

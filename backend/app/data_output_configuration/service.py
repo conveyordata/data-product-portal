@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Optional, Sequence
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -23,8 +23,12 @@ class PluginService:
         data_output_configurations = AssetProviderPlugin.__subclasses__()
 
         return [
-            self._build_metadata_response(plugin)
-            for plugin in data_output_configurations
+            y
+            for y in [
+                self._build_metadata_response(plugin)
+                for plugin in data_output_configurations
+            ]
+            if y is not None
         ]
 
     def get_technical_asset_ui_metadata_by_name(
@@ -44,19 +48,22 @@ class PluginService:
 
     def _build_metadata_response(
         self, plugin_class: type[AssetProviderPlugin]
-    ) -> UIElementMetadataResponse:
+    ) -> Optional[UIElementMetadataResponse]:
         """Build a complete metadata response for a plugin"""
-        platform_meta = plugin_class.get_platform_metadata()
-        return UIElementMetadataResponse(
-            ui_metadata=plugin_class.get_ui_metadata(),
-            plugin=plugin_class.__name__,
-            platform=platform_meta.platform_key,
-            display_name=platform_meta.display_name,
-            icon_name=platform_meta.icon_name,
-            parent_platform=platform_meta.parent_platform,
-            result_label=platform_meta.result_label,
-            result_tooltip=platform_meta.result_tooltip,
-        )
+        try:
+            platform_meta = plugin_class.get_platform_metadata()
+            return UIElementMetadataResponse(
+                ui_metadata=plugin_class.get_ui_metadata(self.db),
+                plugin=plugin_class.__name__,
+                platform=platform_meta.platform_key,
+                display_name=platform_meta.display_name,
+                icon_name=platform_meta.icon_name,
+                parent_platform=platform_meta.parent_platform,
+                result_label=platform_meta.result_label,
+                result_tooltip=platform_meta.result_tooltip,
+            )
+        except NotImplementedError:
+            return None
 
     def get_platform_tiles(self, configs: Sequence) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""

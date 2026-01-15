@@ -17842,7 +17842,7 @@
           "value"
         ],
         "title": "FieldDependency",
-        "description": "Represents a field dependency for conditional visibility"
+        "description": "Represents a field dependency for conditional visibility.\ne.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y\nIn practice this is often used with checkbox fields having value=True"
       },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
@@ -20949,6 +20949,32 @@
         ],
         "title": "SearchOutputPortsResponseItem"
       },
+      "SelectOption": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value"
+        ],
+        "title": "SelectOption",
+        "description": "Option for select UI elements"
+      },
       "SnowflakeConfig": {
         "properties": {
           "identifier": {
@@ -21399,18 +21425,6 @@
             ],
             "title": "Tooltip"
           },
-          "options": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Options"
-          },
           "hidden": {
             "anyOf": [
               {
@@ -21422,27 +21436,10 @@
             ],
             "title": "Hidden"
           },
-          "pattern": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pattern"
-          },
           "initial_value": {
             "anyOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "integer"
-              },
-              {
-                "type": "number"
               },
               {
                 "type": "boolean"
@@ -21507,16 +21504,19 @@
             ],
             "title": "Use Namespace When Not Source Aligned"
           },
-          "normalize_array": {
+          "options": {
             "anyOf": [
               {
-                "type": "boolean"
+                "items": {
+                  "$ref": "#/components/schemas/SelectOption"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Normalize Array"
+            "title": "Options"
           }
         },
         "type": "object",

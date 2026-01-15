@@ -42,24 +42,24 @@ export type FieldDependency = {
   field_name: string;
   value: any;
 };
+export type SelectOption = {
+  label: string;
+  value: string | boolean;
+};
 export type UiElementMetadata = {
   label: string;
   type: UiElementType;
   required: boolean;
   name: string;
   tooltip?: string | null;
-  options?: {
-    [key: string]: any;
-  } | null;
   hidden?: boolean | null;
-  pattern?: string | null;
-  initial_value?: string | number | number | boolean | null;
+  initial_value?: string | boolean | null;
   value_prop_name?: string | null;
   depends_on?: FieldDependency | null;
   max_count?: number | null;
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
-  normalize_array?: boolean | null;
+  options?: SelectOption[] | null;
 };
 export type UiElementMetadataResponse = {
   ui_metadata: UiElementMetadata[];

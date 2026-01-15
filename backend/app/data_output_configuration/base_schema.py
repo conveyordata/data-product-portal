@@ -2,10 +2,20 @@ from abc import ABC
 from enum import Enum
 from typing import Any, ClassVar, List, Optional
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+
 from app.configuration.environments.platform_service_configurations.schema_response import (
     ConfigType,
 )
+from app.configuration.platforms.platform_services.model import (
+    PlatformService as PlatformServiceModel,
+)
 from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.platform_service_configurations.model import (
+    PlatformServiceConfiguration as PlatformServiceConfigurationModel,
+)
+from app.platform_service_configurations.schema import PlatformServiceConfiguration
 from app.shared.schema import ORMModel
 
 
@@ -16,28 +26,64 @@ class UIElementType(str, Enum):
 
 
 class FieldDependency(ORMModel):
-    """Represents a field dependency for conditional visibility"""
+    """Represents a field dependency for conditional visibility.
+    e.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y
+    In practice this is often used with checkbox fields having value=True
+    """
 
     field_name: str
     value: Any
 
 
-class UIElementMetadata(ORMModel):
+class SelectOption(ORMModel):
+    """Option for select UI elements"""
+
     label: str
-    type: UIElementType
-    required: bool
-    name: str
-    tooltip: Optional[str] = None
-    options: Optional[dict] = None
-    hidden: Optional[bool] = None
-    pattern: Optional[str] = None
-    initial_value: Optional[str | int | float | bool] = None
-    value_prop_name: Optional[str] = None
-    depends_on: Optional[FieldDependency] = None
-    max_count: Optional[int] = None
-    disabled: Optional[bool] = None
-    use_namespace_when_not_source_aligned: Optional[bool] = None
-    normalize_array: Optional[bool] = None
+    value: str | bool
+
+
+class UIElementMetadata(ORMModel):
+    label: str  # The label shown in the UI, passed through a translating layer
+    type: UIElementType  # The type of UI element
+    required: bool  # Whether this field is required to be filled in in the form
+    name: str  # The internal name of the field, used as key in the configuration
+    tooltip: Optional[str] = (
+        None  # Tooltip text shown in the UI, passed through a translating layer
+    )
+    hidden: Optional[bool] = (
+        None  # Whether this field is hidden in the UI, used to pass generated values without user input.
+    )
+    initial_value: Optional[str | bool] = (
+        None  # Initial value for the field in the UI, select fields can't have an initial value yet.
+    )
+    value_prop_name: Optional[str] = (
+        None  # Used to override the default value_prop_name if needed, e.g. checked for checkboxes
+    )
+    depends_on: Optional[FieldDependency] = (
+        None  # Conditional rendering based on another field's value in the form.
+    )
+    max_count: Optional[int] = None  # For selects the maximum number of items allowed
+    disabled: Optional[bool] = (
+        None  # Whether this field is disabled in the UI, useful to show generated values
+    )
+    use_namespace_when_not_source_aligned: Optional[bool] = (
+        None  # Whether to use the data product namespace as default value when the data product is not source aligned
+    )
+    options: Optional[List[SelectOption]] = None  # Additional options for select fields
+
+
+class UIElementCheckbox(UIElementMetadata):
+    type: UIElementType = UIElementType.Checkbox
+    value_prop_name: str = "checked"
+
+
+class UIElementSelect(UIElementMetadata):
+    type: UIElementType = UIElementType.Select
+    max_count: Optional[int] = 1
+
+
+class UIElementString(UIElementMetadata):
+    type: UIElementType = UIElementType.String
 
 
 class PlatformMetadata(ORMModel):
@@ -74,7 +120,29 @@ class AssetProviderPlugin(ORMModel, ABC):
         pass
 
     @classmethod
-    def get_ui_metadata(cls) -> List[UIElementMetadata]:
+    def get_platform_options(cls, db: Session) -> List[SelectOption]:
+        """Get platform specific options from the database if needed"""
+        if not cls._platform_metadata:
+            raise NotImplementedError("Platform metadata not defined for this plugin")
+
+        service_id = db.scalar(
+            select(PlatformServiceModel).where(
+                func.lower(PlatformServiceModel.name)
+                == cls._platform_metadata.platform_key
+            )
+        ).id
+        config = db.scalar(
+            select(PlatformServiceConfigurationModel).filter_by(service_id=service_id)
+        )
+        if not config:
+            raise NotImplementedError("No platform service configuration found")
+        return [
+            SelectOption(label=option, value=option)
+            for option in PlatformServiceConfiguration.model_validate(config).config
+        ]
+
+    @classmethod
+    def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
         """Returns the UI metadata for form generation"""
         return []
 

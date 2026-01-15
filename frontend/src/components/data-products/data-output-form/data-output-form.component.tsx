@@ -72,7 +72,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [selectedConfiguration, setSelectedConfiguration] = useState<
         CustomDropdownItemProps<DataPlatforms> | undefined
     >(undefined);
-    const [identifiers, setIdentifiers] = useState<string[] | undefined>(undefined);
 
     // Form
     const [form] = Form.useForm();
@@ -162,10 +161,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             if (dropdown.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
                 form.setFieldValue('service_id', platformServiceConfigMap.get(dropdown.value)?.service_id);
-                setIdentifiers(platformServiceConfigMap.get(dropdown.value)?.configuration);
             } else {
                 setSelectedConfiguration(undefined);
-                setIdentifiers(undefined);
             }
         }
     };
@@ -175,7 +172,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             if (selectedConfiguration !== dropdown) {
                 form.setFieldsValue({ configuration: undefined, result: undefined });
                 setSelectedConfiguration(dropdown);
-                setIdentifiers(platformServiceConfigMap.get(dropdown.value)?.configuration);
             }
         }
     };
@@ -371,7 +367,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         form={form}
                         uiMetadataGroups={pluginMetadata.ui_metadata}
                         namespace={currentDataProduct.namespace}
-                        identifiers={identifiers}
                         sourceAligned={sourceAligned}
                         configurationType={pluginMetadata.plugin}
                         resultLabel={pluginMetadata.result_label}

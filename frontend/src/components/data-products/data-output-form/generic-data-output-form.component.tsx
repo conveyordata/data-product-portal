@@ -10,7 +10,6 @@ import { ConfigurationSubForm } from './components/output-configuration-sub-form
 type Props = {
     form: FormInstance<DataOutputCreateFormSchema>;
     namespace: string;
-    identifiers?: string[];
     sourceAligned: boolean;
     configurationType: string;
     uiMetadataGroups: UiElementMetadata[];
@@ -21,7 +20,6 @@ type Props = {
 export function GenericDataOutputForm({
     form,
     namespace,
-    identifiers = [],
     sourceAligned,
     uiMetadataGroups,
     configurationType,
@@ -68,16 +66,14 @@ export function GenericDataOutputForm({
             type,
             required,
             tooltip,
-            options,
             hidden,
-            pattern,
             initial_value,
             value_prop_name,
             depends_on,
+            options,
             max_count,
             disabled,
             use_namespace_when_not_source_aligned,
-            normalize_array,
         } = fieldMetadata;
 
         // Check if field should be hidden based on dependencies
@@ -85,6 +81,11 @@ export function GenericDataOutputForm({
         if (depends_on) {
             const dependentValue = watchedFields[depends_on.field_name];
             isHidden = dependentValue !== depends_on.value;
+            if (isHidden) {
+                // Clear the field value if it's hidden
+                // biome-ignore lint: dynamic field names can't be statically typed at compile time.
+                form.setFieldValue(configurationFieldName(name) as any, initial_value ?? undefined);
+            }
         }
 
         // Build validation rules
@@ -95,34 +96,21 @@ export function GenericDataOutputForm({
                 message: t(`Please input ${label.toLowerCase()}`),
             });
         }
-        if (pattern) {
-            rules.push({
-                pattern: new RegExp(pattern),
-                message: t(`Invalid format for ${label.toLowerCase()}`),
-            });
-        }
 
         // Build select options based on sourceAligned for fields that use namespace
         let selectOptions: { label: string; value: string }[] = [];
         if (type === 'select') {
-            if (use_namespace_when_not_source_aligned) {
-                selectOptions = (sourceAligned ? identifiers : [namespace]).map((val) => ({
+            selectOptions = options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
+            if (use_namespace_when_not_source_aligned && !sourceAligned) {
+                selectOptions = [namespace].map((val) => ({
                     label: val,
                     value: val,
                 }));
             } else {
-                selectOptions = options?.values
-                    ? options.values.map((val: string) => ({ label: val, value: val }))
-                    : identifiers.map((id) => ({ label: id, value: id }));
+                selectOptions =
+                    options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
             }
         }
-
-        // Normalize function for array handling
-        const normalize = normalize_array
-            ? (value: string | string[]) => {
-                  return Array.isArray(value) ? value[0] : value;
-              }
-            : undefined;
 
         // Determine if field should be disabled
         const isDisabled = disabled || (use_namespace_when_not_source_aligned && !sourceAligned);
@@ -161,7 +149,6 @@ export function GenericDataOutputForm({
                 hidden={isHidden ?? false}
                 valuePropName={value_prop_name ?? (type === 'checkbox' ? 'checked' : 'value')}
                 initialValue={initial_value}
-                normalize={normalize}
                 required={type !== 'checkbox' && required && !isHidden}
             >
                 {inputComponent}

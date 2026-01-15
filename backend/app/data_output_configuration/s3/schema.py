@@ -1,5 +1,7 @@
 from typing import ClassVar, List, Literal, Optional
 
+from sqlalchemy.orm import Session
+
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSS3Config,
 )
@@ -7,7 +9,8 @@ from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     PlatformMetadata,
     UIElementMetadata,
-    UIElementType,
+    UIElementSelect,
+    UIElementString,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputModel
@@ -56,27 +59,25 @@ class S3DataOutput(AssetProviderPlugin):
         )
 
     @classmethod
-    def get_ui_metadata(cls) -> List[UIElementMetadata]:
-        base_metadata = super().get_ui_metadata()
+    def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
+        base_metadata = super().get_ui_metadata(db)
         base_metadata += [
-            UIElementMetadata(
+            UIElementSelect(
                 name="bucket",
-                type=UIElementType.Select,
                 label="Bucket",
                 required=True,
+                options=cls.get_platform_options(db),
             ),
-            UIElementMetadata(
+            UIElementString(
                 name="suffix",
-                type=UIElementType.String,
                 label="Suffix",
                 required=True,
                 initial_value="",
                 hidden=True,
             ),
-            UIElementMetadata(
+            UIElementString(
                 name="path",
                 label="Path",
-                type=UIElementType.String,
                 tooltip="The name of the path to give write access to",
                 required=True,
             ),
