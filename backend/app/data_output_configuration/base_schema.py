@@ -125,14 +125,16 @@ class AssetProviderPlugin(ORMModel, ABC):
         if not cls._platform_metadata:
             raise NotImplementedError("Platform metadata not defined for this plugin")
 
-        service_id = db.scalar(
+        service = db.scalar(
             select(PlatformServiceModel).where(
                 func.lower(PlatformServiceModel.name)
                 == cls._platform_metadata.platform_key
             )
-        ).id
+        )
+        if not service:
+            raise NotImplementedError("No platform service found")
         config = db.scalar(
-            select(PlatformServiceConfigurationModel).filter_by(service_id=service_id)
+            select(PlatformServiceConfigurationModel).filter_by(service_id=service.id)
         )
         if not config:
             raise NotImplementedError("No platform service configuration found")
