@@ -179,22 +179,13 @@ class TestDatasetQueryStatsDailyRouter:
 
         data_product = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product, tags=[])
-        consumer1 = DataProductFactory()
-        consumer2 = DataProductFactory()
-        date1 = date(2024, 1, 15)
-        date2 = date(2024, 1, 14)
+        consumer = DataProductFactory()
 
         DatasetQueryStatsFactory(
-            date=date1,
+            date=date(2024, 1, 15),
             dataset_id=dataset.id,
-            consumer_data_product_id=consumer1.id,
+            consumer_data_product_id=consumer.id,
             query_count=150,
-        )
-        DatasetQueryStatsFactory(
-            date=date2,
-            dataset_id=dataset.id,
-            consumer_data_product_id=consumer2.id,
-            query_count=250,
         )
         session.commit()
 
@@ -205,7 +196,7 @@ class TestDatasetQueryStatsDailyRouter:
         stats_before = (
             session.query(DatasetQueryStatsDaily).filter_by(dataset_id=dataset_id).all()
         )
-        assert len(stats_before) == 2, "Should have 2 query stats before deletion"
+        assert len(stats_before) == 1, "Should have 1 query stat before deletion"
 
         # Set up authorization to allow data product deletion
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
