@@ -36,7 +36,9 @@ def get_plugins(
     db: Session = Depends(get_db_session),
 ) -> PluginResponse:
     """List all available plugins with their metadata (ADR-compliant endpoint)"""
-    return PluginResponse(plugins=PluginService(db).get_technical_asset_ui_metadata())
+    return PluginResponse(
+        plugins=PluginService(db).get_all_technical_assets_ui_metadata()
+    )
 
 
 @router.get("/{plugin_name}/form")
@@ -45,16 +47,4 @@ def get_plugin_form(
     db: Session = Depends(get_db_session),
 ) -> UIElementMetadataResponse:
     """Get form metadata for a specific plugin (ADR-compliant endpoint)"""
-    all_plugins = PluginService(db).get_technical_asset_ui_metadata()
-
-    # Find the plugin by name
-    plugin = next((p for p in all_plugins if p.plugin == plugin_name), None)
-    if plugin is None:
-        from fastapi import HTTPException, status
-
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Plugin '{plugin_name}' not found",
-        )
-
-    return plugin
+    return PluginService(db).get_technical_asset_ui_metadata_by_name(plugin_name)

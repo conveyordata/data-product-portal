@@ -1,5 +1,6 @@
 from typing import Sequence
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.data_output_configuration.base_schema import (
@@ -15,7 +16,7 @@ class PluginService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_technical_asset_ui_metadata(
+    def get_all_technical_assets_ui_metadata(
         self,
     ) -> Sequence[UIElementMetadataResponse]:
         """Generate UI metadata for all registered data output types"""
@@ -25,6 +26,21 @@ class PluginService:
             self._build_metadata_response(plugin)
             for plugin in data_output_configurations
         ]
+
+    def get_technical_asset_ui_metadata_by_name(
+        self, plugin_name: str
+    ) -> UIElementMetadataResponse:
+        all_plugins = self.get_all_technical_assets_ui_metadata()
+
+        # Find the plugin by name
+        plugin = next((p for p in all_plugins if p.plugin == plugin_name), None)
+        if plugin is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Plugin '{plugin_name}' not found",
+            )
+
+        return plugin
 
     def _build_metadata_response(
         self, plugin_class: type[AssetProviderPlugin]
@@ -44,7 +60,7 @@ class PluginService:
 
     def get_platform_tiles(self, configs: Sequence) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""
-        all_metadata = self.get_technical_asset_ui_metadata()
+        all_metadata = self.get_all_technical_assets_ui_metadata()
 
         # Filter to only configured platforms
         configured_metadata = [
