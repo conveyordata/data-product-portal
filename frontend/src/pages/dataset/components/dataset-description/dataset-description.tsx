@@ -54,13 +54,13 @@ export function DatasetDescription({
                     <Typography.Text>{accessType}</Typography.Text>
                 </Flex>
             </Space>
-            <Flex>
+            <Space size={'small'}>
                 {tags.map((tag) => (
                     <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
                         {tag.value}
                     </Tag>
                 ))}
-            </Flex>
+            </Space>
             <Space>
                 <Typography.Text italic>{description}</Typography.Text>
             </Space>

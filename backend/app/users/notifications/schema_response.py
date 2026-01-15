@@ -31,4 +31,4 @@ class NotificationGet(BaseNotificationGet):
 
 
 class GetUserNotificationsResponse(ORMModel):
-    events: Sequence[GetUserNotificationsResponseItem]
+    notifications: Sequence[GetUserNotificationsResponseItem]

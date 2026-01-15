@@ -47,8 +47,9 @@ class TestDataProductsDatasetsRouter:
             client, data_product.id, ds.id
         )
         assert response.status_code == 200
-        history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history) == 1
+        history_response = self.get_data_product_history(client, data_product.id)
+        assert history_response.status_code == 200, history_response.text
+        assert len(history_response.json()) == 1
 
     def test_request_data_product_link_deprecated_method(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

@@ -174,13 +174,13 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                 <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '44px', marginBottom: 0 }}>
                     {dataset.description || 'No description available.'}
                 </Typography.Paragraph>
-                <div style={{ height: '22px' }}>
+                <Space size={2} style={{ height: '22px' }}>
                     {dataset.tags?.map((tag) => (
                         <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.value}>
                             {tag.value}
                         </Tag>
                     ))}
-                </div>
+                </Space>
 
                 <Descriptions
                     layout="vertical"

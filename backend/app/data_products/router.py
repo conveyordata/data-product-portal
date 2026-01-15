@@ -635,7 +635,7 @@ def get_data_products(
 def get_event_history_old(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[GetEventHistoryResponseItemOld]:
-    return get_data_product_event_history(id, db).events
+    return EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
 
 
 @router.get(f"{route}/{{id}}/history")
@@ -643,7 +643,12 @@ def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
     return GetEventHistoryResponse(
-        events=EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
+        events=[
+            GetEventHistoryResponseItemOld.model_validate(event).convert()
+            for event in EventService(db).get_history(
+                id, EventReferenceEntity.DATA_PRODUCT
+            )
+        ]
     )
 
 
