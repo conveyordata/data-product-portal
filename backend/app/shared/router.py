@@ -17,6 +17,7 @@ from app.configuration.tags.router import router as tag
 from app.configuration.theme_settings.router import router as theme_settings
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
+from app.data_output_configuration.router import router as plugin
 from app.data_products.output_port_technical_assets_link.router import (
     router as data_output_dataset,
 )
@@ -61,3 +62,4 @@ router.include_router(graph)
 router.include_router(notification)
 router.include_router(pending_action)
 router.include_router(resource_name)
+router.include_router(plugin)

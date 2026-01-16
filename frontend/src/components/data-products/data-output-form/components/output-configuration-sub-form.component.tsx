@@ -3,23 +3,19 @@ import type React from 'react';
 import { useEffect } from 'react';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { DataPlatform } from '@/types/data-platform';
-import { DataPlatformDataOutputConfigurationMap } from '@/types/data-platform/data-platform';
 
 import { configurationFieldName } from './configuration-field-name';
 import { ConfigurationFormItem } from './output-configuration-form-item';
 
 type Props = {
     form: FormInstance;
-    platform: DataPlatform;
+    configurationType: string;
     resultLabel: string;
     resultTooltip: string;
     children: React.ReactNode;
 };
 
-export function ConfigurationSubForm({ form, platform, resultLabel, resultTooltip, children }: Props) {
-    const configurationType = DataPlatformDataOutputConfigurationMap.get(platform)?.toString();
-
+export function ConfigurationSubForm({ form, configurationType, resultLabel, resultTooltip, children }: Props) {
     if (!configurationType) {
         const errorMessage = 'Technical asset not configured correctly';
         dispatchMessage({ content: errorMessage, type: 'error' });

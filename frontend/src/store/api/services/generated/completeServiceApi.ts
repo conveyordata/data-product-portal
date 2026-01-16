@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { api } from "@/store/api/services/generated/configurationTagsApi";
+import { api } from "@/store/api/services/generated/pluginsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({}),
   overrideExisting: false,
