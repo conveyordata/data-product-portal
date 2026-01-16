@@ -242,7 +242,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const handleDeleteDataset = async () => {
         if (canDelete && currentDataset) {
             try {
-                await deleteDataset(currentDataset);
+                await deleteDataset(currentDataset).unwrap();
                 dispatchMessage({ content: t('Output port deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
