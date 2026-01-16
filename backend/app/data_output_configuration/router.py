@@ -30,7 +30,6 @@ def get_platform_tiles(
     )
 
 
-# ADR-compliant endpoints
 @router.get("/")
 def get_plugins(
     db: Session = Depends(get_db_session),
