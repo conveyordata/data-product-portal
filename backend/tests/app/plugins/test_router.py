@@ -7,8 +7,6 @@ ENDPOINT = "/api/v2/plugins"
 
 
 class TestPluginEndpoints:
-    """Test ADR-compliant plugin endpoints"""
-
     def test_list_plugins_returns_no_results_when_no_service_config(
         self, client: TestClient
     ):

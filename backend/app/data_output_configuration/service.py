@@ -23,12 +23,9 @@ class PluginService:
         data_output_configurations = AssetProviderPlugin.__subclasses__()
 
         return [
-            y
-            for y in [
-                self._build_metadata_response(plugin)
-                for plugin in data_output_configurations
-            ]
-            if y is not None
+            metadata_response
+            for plugin in data_output_configurations
+            if (metadata_response := self._build_metadata_response(plugin)) is not None
         ]
 
     def get_technical_asset_ui_metadata_by_name(
