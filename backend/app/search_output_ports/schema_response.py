@@ -7,12 +7,12 @@ from app.shared.schema import ORMModel
 
 
 class SearchOutputPortsResponseItem(OutputPortsGet):
-    rank: float
+    pass
 
 
 @deprecated("Use SearchOutputPortsResponseItem instead")
 class SearchDatasets(DatasetsGet):
-    rank: float
+    pass
 
     def convert(self):
         return SearchOutputPortsResponseItem(

@@ -3,7 +3,8 @@ from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, desc, func, select
+from fastembed import TextEmbedding
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -16,7 +17,7 @@ from app.configuration.data_product_lifecycles.model import (
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
-from app.core.logging import logger
+from app.core.embed.model import EMBEDDING_MODEL
 from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
@@ -31,7 +32,7 @@ from app.data_products.output_ports.input_ports.model import (
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
-from app.data_products.output_ports.schema import OutputPort
+from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
     DatasetAboutUpdate,
@@ -43,16 +44,11 @@ from app.data_products.output_ports.schema_response import (
     DatasetGet,
     DatasetsGet,
 )
-from app.data_products.output_ports.search_dataset import (
-    recalculate_search_vector_dataset_statement,
-    recalculate_search_vector_datasets_statement,
-)
 from app.data_products.technical_assets.model import DataOutput
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.search_output_ports.schema_response import SearchDatasets
-from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -76,6 +72,7 @@ class DatasetService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
+        self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
@@ -122,53 +119,90 @@ class DatasetService:
     def search_datasets(
         self, query: str, limit: int, user: UserModel
     ) -> Sequence[SearchDatasets]:
+        [query_embedding] = self.embedding_model.embed([query])
+        distance = DatasetModel.embeddings.cosine_distance(query_embedding)
         load_options = get_dataset_load_options()
         stmt = (
-            select(
-                DatasetModel,
-                func.ts_rank_cd(
-                    DatasetModel.search_vector,
-                    func.websearch_to_tsquery("english", query),
-                    32,  # 32 normalizes all results between 0-1
-                ).label("rank"),
-            )
+            select(DatasetModel)
             .options(*load_options)
-            .where(
-                DatasetModel.search_vector.op("@@")(
-                    func.websearch_to_tsquery("english", query)
-                )
-            )
-            .order_by(desc("rank"))
+            # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
+            .limit(limit * 2)
+            .order_by(distance)
         )
-        results = self.db.execute(stmt).unique().all()
+        datasets = self.db.scalars(stmt).unique().all()
         filtered_datasets: list[SearchDatasets] = []
-        for row in results:
+        for dataset in datasets:
             if len(filtered_datasets) >= limit:
                 return filtered_datasets
-            dataset = row[0]
-            rank = row[1]
             if self.is_visible_to_user(dataset, user):
-                dataset.rank = rank
                 dataset.domain = dataset.data_product.domain
                 filtered_datasets.append(dataset)
         return filtered_datasets
 
-    def recalculate_search_vector_for(self, dataset_id: UUID) -> int:
-        if settings.SEARCH_INDEXING_DISABLED:
-            logger.debug("Search indexing is disabled, skipping recalculation")
-            return 0
-        sql = recalculate_search_vector_dataset_statement(dataset_id)
-        result = self.db.execute(sql, {"dataset_id": dataset_id})
-        return result.rowcount
+    @staticmethod
+    def recalculate_embeddings_load_options():
+        return [
+            selectinload(DatasetModel.data_product),
+            selectinload(DatasetModel.data_output_links).selectinload(
+                DataOutputDatasetAssociationModel.data_output
+            ),
+        ]
 
-    def recalculate_search_vector_datasets(self) -> int:
-        if settings.SEARCH_INDEXING_DISABLED:
-            logger.debug("Search indexing is disabled, skipping recalculation")
-            return 0
-        sql = recalculate_search_vector_datasets_statement()
-        result = self.db.execute(sql)
+    def recalculate_embeddings_for_output_ports_of_product(self, data_product_id: UUID):
+        datasets = (
+            self.db.scalars(
+                select(DatasetModel)
+                .where(DatasetModel.data_product_id == data_product_id)
+                .options(
+                    *self.recalculate_embeddings_load_options(),
+                ),
+            )
+            .unique()
+            .all()
+        )
+        self._recalculate_embeddings(datasets)
+
+    def recalculate_embedding(self, dataset_id: UUID):
+        dataset = self.db.scalar(
+            select(DatasetModel)
+            .where(DatasetModel.id == dataset_id)
+            .options(
+                *self.recalculate_embeddings_load_options(),
+            )
+        )
+        self._recalculate_embeddings([dataset])
+
+    def _recalculate_embeddings(self, datasets: Sequence[DatasetModel]):
+        embeddings = self.embedding_model.embed(
+            [DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets]
+        )
+        for dataset, emb in zip(datasets, embeddings):
+            dataset.embeddings = emb.tolist()
+            self.db.add(dataset)
+
+    def recalculate_all_embeddings(self, batch_size: int = 50):
+        dataset_ids = self.db.scalars(select(DatasetModel.id)).all()
+
+        # Process in batches to reduce load
+        for i in range(0, len(dataset_ids), batch_size):
+            batch_ids = dataset_ids[i : i + batch_size]
+
+            batch_datasets = (
+                self.db.scalars(
+                    select(DatasetModel)
+                    .where(DatasetModel.id.in_(batch_ids))
+                    .options(
+                        *self.recalculate_embeddings_load_options(),
+                    )
+                )
+                .unique()
+                .all()
+            )
+
+            if batch_datasets:
+                self._recalculate_embeddings(batch_datasets)
+                self.db.flush()
         self.db.commit()
-        return result.rowcount
 
     def get_datasets(
         self, user: UserModel, check_user_assigned: bool = False
@@ -225,7 +259,7 @@ class DatasetService:
 
         self.db.add(model)
         self.db.flush()
-        self.recalculate_search_vector_for(model.id)
+        self.recalculate_embedding(model.id)
         self.db.commit()
         return model
 
@@ -270,7 +304,7 @@ class DatasetService:
             else:
                 setattr(current_dataset, k, v) if v else None
         self.db.flush()
-        self.recalculate_search_vector_for(id)
+        self.recalculate_embedding(id)
         self.db.commit()
         return current_dataset.id
 

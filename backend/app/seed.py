@@ -28,4 +28,4 @@ def seed_db(path: str, **template_vars):
 
     raw_connection.commit()
     AuthorizationService(db).reload_enforcer()
-    DatasetService(db).recalculate_search_vector_datasets()
+    DatasetService(db).recalculate_all_embeddings()

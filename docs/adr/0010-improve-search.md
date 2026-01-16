@@ -59,10 +59,12 @@ We will switch from the current search to the embedding search.
 
 # Investigation results
 
-| Method                           | Speed  | Precision | Recall | Notes                                                                                                                                  |
-|----------------------------------|--------|-----------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
-| Current search                   | ~20ms  | 86%       | 48%    | Extremely fast, good precision, very poor coverage (misses many relevant items, especially not adapted for broader business questions) |
-| LLM Search with: Claude-3-Haiku  | ~7s    | 91%       | 81%    | Very high precision and coverage, but very slow and inconsistent depending on input/output. Dependency on cloud (AWS Bedrock)          |
-| Embedding search: BAAI/bge-large | ~2s    | 81%       | 91%    | Excellent coverage, good precision, speed not that good.Open source Large model, needs a while to download                             |
-| Embedding Bedrock/Cohere v4.0    | ~1.5s  | 71%       | 77%    | Medium speed, lowest precision among embeddings, okay coverage. Dependency on cloud (AWS Bedrock)                                      |
-| Embedding BAAI/bge-small         | ~150ms | 76%       | 86%    | Very fast, slightly lower precision and coverage than large, good trade-off for speed-sensitive use. Open source small model           |
+| Method                           | Speed     | Precision | Recall | Notes                                                                                                                                  |
+|----------------------------------|-----------|-----------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
+| Current search                   | ~20ms     | 86%       | 48%    | Extremely fast, good precision, very poor coverage (misses many relevant items, especially not adapted for broader business questions) |
+| LLM Search with: Claude-3-Haiku  | ~7s       | 91%       | 81%    | Very high precision and coverage, but very slow and inconsistent depending on input/output. Dependency on cloud (AWS Bedrock)          |
+| Embedding search: BAAI/bge-large | ~2s *     | 81%       | 91%    | Excellent coverage, good precision, speed not that good.Open source Large model, needs a while to download                             |
+| Embedding Bedrock/Cohere v4.0    | ~1.5s *   | 71%       | 77%    | Medium speed, lowest precision among embeddings, okay coverage. Dependency on cloud (AWS Bedrock)                                      |
+| Embedding BAAI/bge-small         | ~150ms *  | 76%       | 86%    | Very fast, slightly lower precision and coverage than large, good trade-off for speed-sensitive use. Open source small model           |
+
+* Searches were done without an index, so an index might improve performance. In a first dirty test `BAAI/bge-large` was improved to 700ms, so it's still slower.

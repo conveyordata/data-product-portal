@@ -3,10 +3,10 @@ kind: ConfigMap
 metadata:
   name: {{ include "data-product-portal.fullname" . }}
 data:
-  POSTGRES_USER: {{ ternary .Values.global.postgresql.auth.username .Values.database.username .Values.postgres_enabled | default .Values.database.username  }}
-  POSTGRES_PORT: {{ ternary .Values.global.postgresql.auth.port .Values.database.port .Values.postgres_enabled  | default .Values.database.port }}
-  POSTGRES_SERVER: {{ ternary .Values.global.postgresql.auth.server .Values.database.server .Values.postgres_enabled  | default .Values.database.server }}
-  POSTGRES_DB: {{ ternary .Values.global.postgresql.auth.database .Values.database.dbname .Values.postgres_enabled  | default .Values.database.dbname }}
+  POSTGRES_USER: {{ .Values.database.username } }
+  POSTGRES_PORT: {{ .Values.database.port }}
+  POSTGRES_SERVER: {{ default .Values.database.server }}
+  POSTGRES_DB: {{ default .Values.database.dbname }}
   CORS_ALLOWED_ORIGINS: {{ .Values.host }}
   OIDC_AUTHORITY: {{ .Values.oidc.authority }}
   OIDC_REDIRECT_URI: {{ .Values.oidc.redirect_uri }}

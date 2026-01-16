@@ -3,6 +3,7 @@ import { Empty, Flex, Pagination } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery, useSearchDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
@@ -51,11 +52,13 @@ export function Marketplace() {
     return (
         <SearchPage
             title={t('Marketplace')}
-            searchPlaceholder={t('Search output ports by name')}
+            searchPlaceholder={t('Ask a business question to find the relevant data')}
             onSearch={handleSearchChange}
             loadingResults={datasetSearchResultLoading}
         >
-            {paginatedOutputPorts?.length > 0 ? (
+            {datasetSearchResultLoading ? (
+                <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
+            ) : paginatedOutputPorts?.length > 0 ? (
                 <Flex wrap="wrap" gap={'small'}>
                     {paginatedOutputPorts.map((dataset) => (
                         <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
@@ -67,7 +70,7 @@ export function Marketplace() {
                 </Flex>
             )}
 
-            {finalDatasetResults.length > pageSize && (
+            {!datasetSearchResultLoading && finalDatasetResults.length > pageSize && (
                 <Flex
                     key="pagination-container"
                     justify={'flex-end'}

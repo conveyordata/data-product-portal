@@ -33,6 +33,13 @@ Update your `values.yaml` to match your environment. By default, images will use
 
 #### Database
 
+:::warning
+
+We use PGVector to empower search functionality in Portal.
+Most cloud vendors do support PGVector so it's most likely not an issue.
+
+:::
+
 - **Preferred**: Use an external managed database like AWS RDS.
 - **Alternative**: Use the bundled PostgreSQL Helm dependency for in-cluster setup. By default this in-cluster database is *disabled*.
 
