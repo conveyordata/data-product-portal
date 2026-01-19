@@ -918,6 +918,130 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Get Latest Data Quality Summary For Output Port",
+        "operationId": "get_latest_data_quality_summary_for_output_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortDataQualitySummary-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Add Output Port Data Quality Run",
+        "operationId": "add_output_port_data_quality_run",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortDataQualitySummary-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortDataQualitySummaryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Dataset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Dataset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/datasets/namespace_suggestion": {
       "get": {
         "tags": [
@@ -16672,6 +16796,34 @@
         "title": "DataProductsGet",
         "deprecated": true
       },
+      "DataQualityStatus": {
+        "type": "string",
+        "enum": [
+          "pass",
+          "fail",
+          "warning",
+          "error",
+          "unknown"
+        ],
+        "title": "DataQualityStatus"
+      },
+      "DataQualityTechnicalAsset": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataQualityStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "DataQualityTechnicalAsset"
+      },
       "DatabricksConfig": {
         "properties": {
           "identifier": {
@@ -19757,6 +19909,204 @@
           "query_text"
         ],
         "title": "OutputPortCuratedQueryInput"
+      },
+      "OutputPortDataQualitySummary-Input": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "overall_status": {
+            "$ref": "#/components/schemas/DataQualityStatus"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "details_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details Url"
+          },
+          "technical_assets": {
+            "items": {
+              "$ref": "#/components/schemas/DataQualityTechnicalAsset"
+            },
+            "type": "array",
+            "title": "Technical Assets"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/DataQualityStatus"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "overall_status",
+          "technical_assets"
+        ],
+        "title": "OutputPortDataQualitySummary"
+      },
+      "OutputPortDataQualitySummary-Output": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "overall_status": {
+            "$ref": "#/components/schemas/DataQualityStatus"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "details_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details Url"
+          },
+          "technical_assets": {
+            "items": {
+              "$ref": "#/components/schemas/DataQualityTechnicalAsset"
+            },
+            "type": "array",
+            "title": "Technical Assets"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/DataQualityStatus"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "overall_status",
+          "technical_assets"
+        ],
+        "title": "OutputPortDataQualitySummary"
+      },
+      "OutputPortDataQualitySummaryResponse": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "overall_status": {
+            "$ref": "#/components/schemas/DataQualityStatus"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "details_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details Url"
+          },
+          "technical_assets": {
+            "items": {
+              "$ref": "#/components/schemas/DataQualityTechnicalAsset"
+            },
+            "type": "array",
+            "title": "Technical Assets"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/DataQualityStatus"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "overall_status",
+          "technical_assets",
+          "id",
+          "output_port_id"
+        ],
+        "title": "OutputPortDataQualitySummaryResponse"
       },
       "OutputPortLink": {
         "properties": {

@@ -60,7 +60,7 @@ Summary submitted by a producer could look as follows:
 
 ```
 {
-  "generated_at": "2026-01-12T08:15:00Z",
+  "created_at": "2026-01-12T08:15:00Z",
   "overall_status": "WARN",
   "summary": "Optional extra user info",
   "technical_assets": [
