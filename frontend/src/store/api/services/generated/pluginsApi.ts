@@ -38,6 +38,18 @@ export type PlatformTileResponse = {
   platform_tiles: PlatformTile[];
 };
 export type UiElementType = "string" | "select" | "checkbox";
+export type UiElementCheckbox = {
+  type?: UiElementType;
+  initial_value?: boolean | null;
+};
+export type UiElementSelect = {
+  type?: UiElementType;
+  max_count?: number | null;
+};
+export type UiElementString = {
+  type?: UiElementType;
+  initial_value?: string | null;
+};
 export type FieldDependency = {
   field_name: string;
   value: any;
@@ -53,9 +65,10 @@ export type UiElementMetadata = {
   name: string;
   tooltip?: string | null;
   hidden?: boolean | null;
-  initial_value?: string | boolean | null;
+  checkbox?: UiElementCheckbox | null;
+  select?: UiElementSelect | null;
+  string?: UiElementString | null;
   depends_on?: FieldDependency | null;
-  max_count?: number | null;
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
   options?: SelectOption[] | null;

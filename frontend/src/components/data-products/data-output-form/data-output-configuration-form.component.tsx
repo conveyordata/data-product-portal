@@ -69,12 +69,13 @@ export function DataOutputConfigurationForm({
             required,
             tooltip,
             hidden,
-            initial_value,
             depends_on,
             options,
-            max_count,
             disabled,
             use_namespace_when_not_source_aligned,
+            string,
+            checkbox,
+            select,
         } = fieldMetadata;
 
         // Check if field should be hidden based on dependencies
@@ -82,11 +83,6 @@ export function DataOutputConfigurationForm({
         if (depends_on) {
             const dependentValue = watchedFields[depends_on.field_name];
             isHidden = dependentValue !== depends_on.value;
-            if (isHidden) {
-                // Clear the field value if it's hidden
-                // biome-ignore lint: dynamic field names can't be statically typed at compile time.
-                form.setFieldValue(configurationFieldName(name) as any, initial_value ?? undefined);
-            }
         }
 
         // Build validation rules
@@ -128,7 +124,7 @@ export function DataOutputConfigurationForm({
                     <Select
                         allowClear
                         showSearch
-                        maxCount={max_count || undefined}
+                        maxCount={select?.max_count || undefined}
                         disabled={isDisabled ?? false}
                         options={selectOptions}
                     />
@@ -149,7 +145,13 @@ export function DataOutputConfigurationForm({
                 rules={rules}
                 hidden={isHidden ?? false}
                 valuePropName={type === 'checkbox' ? 'checked' : 'value'}
-                initialValue={initial_value}
+                initialValue={
+                    type === 'string'
+                        ? string?.initial_value
+                        : type === 'checkbox'
+                          ? checkbox?.initial_value
+                          : undefined
+                }
                 required={type !== 'checkbox' && required && !isHidden}
             >
                 {inputComponent}

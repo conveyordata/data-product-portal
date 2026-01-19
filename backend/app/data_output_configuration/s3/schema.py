@@ -9,8 +9,8 @@ from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     PlatformMetadata,
     UIElementMetadata,
-    UIElementSelect,
     UIElementString,
+    UIElementType,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputModel
@@ -62,22 +62,25 @@ class S3DataOutput(AssetProviderPlugin):
     def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
         base_metadata = super().get_ui_metadata(db)
         base_metadata += [
-            UIElementSelect(
+            UIElementMetadata(
                 name="bucket",
                 label="Bucket",
+                type=UIElementType.Select,
                 required=True,
                 options=cls.get_platform_options(db),
             ),
-            UIElementString(
+            UIElementMetadata(
                 name="suffix",
                 label="Suffix",
                 required=True,
-                initial_value="",
+                type=UIElementType.String,
+                string=UIElementString(initial_value=""),
                 hidden=True,
             ),
-            UIElementString(
+            UIElementMetadata(
                 name="path",
                 label="Path",
+                type=UIElementType.String,
                 tooltip="The name of the path to give write access to",
                 required=True,
             ),

@@ -42,24 +42,36 @@ class SelectOption(ORMModel):
     value: str | bool
 
 
+class UIElementCheckbox(ORMModel):
+    type: UIElementType = UIElementType.Checkbox
+    initial_value: Optional[bool] = None
+
+
+class UIElementSelect(ORMModel):
+    type: UIElementType = UIElementType.Select
+    max_count: Optional[int] = 1
+
+
+class UIElementString(ORMModel):
+    type: UIElementType = UIElementType.String
+    initial_value: Optional[str] = None
+
+
 class UIElementMetadata(ORMModel):
-    label: str  # The label shown in the UI, passed through a translating layer
+    label: str  # The label shown in the UI
     type: UIElementType  # The type of UI element
     required: bool  # Whether this field is required to be filled in in the form
     name: str  # The internal name of the field, used as key in the configuration
-    tooltip: Optional[str] = (
-        None  # Tooltip text shown in the UI, passed through a translating layer
-    )
+    tooltip: Optional[str] = None  # Tooltip text shown in the UI
     hidden: Optional[bool] = (
         None  # Whether this field is hidden in the UI, used to pass generated values without user input.
     )
-    initial_value: Optional[str | bool] = (
-        None  # Initial value for the field in the UI, select fields can't have an initial value yet.
-    )
+    checkbox: Optional[UIElementCheckbox] = None
+    select: Optional[UIElementSelect] = None
+    string: Optional[UIElementString] = None
     depends_on: Optional[FieldDependency] = (
         None  # Conditional rendering based on another field's value in the form.
     )
-    max_count: Optional[int] = None  # For selects the maximum number of items allowed
     disabled: Optional[bool] = (
         None  # Whether this field is disabled in the UI, useful to show generated values
     )
@@ -68,20 +80,14 @@ class UIElementMetadata(ORMModel):
     )
     options: Optional[List[SelectOption]] = None  # Additional options for select fields
 
-
-class UIElementCheckbox(UIElementMetadata):
-    type: UIElementType = UIElementType.Checkbox
-    initial_value: Optional[bool] = None
-
-
-class UIElementSelect(UIElementMetadata):
-    type: UIElementType = UIElementType.Select
-    max_count: Optional[int] = 1
-
-
-class UIElementString(UIElementMetadata):
-    type: UIElementType = UIElementType.String
-    initial_value: Optional[str] = None
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if self.type == UIElementType.Select and self.select is None:
+            self.select = UIElementSelect()
+        if self.type == UIElementType.String and self.string is None:
+            self.string = UIElementString()
+        if self.type == UIElementType.Checkbox and self.checkbox is None:
+            self.checkbox = UIElementCheckbox()
 
 
 class PlatformMetadata(ORMModel):

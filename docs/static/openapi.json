@@ -21397,6 +21397,27 @@
         ],
         "title": "ThemeSettings"
       },
+      "UIElementCheckbox": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/UIElementType",
+            "default": "checkbox"
+          },
+          "initial_value": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Value"
+          }
+        },
+        "type": "object",
+        "title": "UIElementCheckbox"
+      },
       "UIElementMetadata": {
         "properties": {
           "label": {
@@ -21436,19 +21457,35 @@
             ],
             "title": "Hidden"
           },
-          "initial_value": {
+          "checkbox": {
             "anyOf": [
               {
-                "type": "string"
-              },
-              {
-                "type": "boolean"
+                "$ref": "#/components/schemas/UIElementCheckbox"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Initial Value"
+            ]
+          },
+          "select": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UIElementSelect"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "string": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UIElementString"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "depends_on": {
             "anyOf": [
@@ -21459,17 +21496,6 @@
                 "type": "null"
               }
             ]
-          },
-          "max_count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Max Count"
           },
           "disabled": {
             "anyOf": [
@@ -21583,6 +21609,49 @@
           "icon_name"
         ],
         "title": "UIElementMetadataResponse"
+      },
+      "UIElementSelect": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/UIElementType",
+            "default": "select"
+          },
+          "max_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Count",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "title": "UIElementSelect"
+      },
+      "UIElementString": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/UIElementType",
+            "default": "string"
+          },
+          "initial_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Value"
+          }
+        },
+        "type": "object",
+        "title": "UIElementString"
       },
       "UIElementType": {
         "type": "string",

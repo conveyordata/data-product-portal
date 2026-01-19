@@ -12,8 +12,8 @@ from app.data_output_configuration.base_schema import (
     PlatformMetadata,
     UIElementCheckbox,
     UIElementMetadata,
-    UIElementSelect,
     UIElementString,
+    UIElementType,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.databricks.model import (
@@ -53,6 +53,8 @@ class DatabricksDataOutput(AssetProviderPlugin):
             self.catalog_path = self.catalog
         if not self.table_path:
             self.table_path = self.table
+        if self.entire_schema:
+            self.table = "*"
         return self
 
     def validate_configuration(self, data_product: DataProduct):
@@ -74,32 +76,36 @@ class DatabricksDataOutput(AssetProviderPlugin):
     def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
         base_metadata = super().get_ui_metadata(db)
         base_metadata += [
-            UIElementSelect(
-                name="catalog",
-                label="Catalog",
+            UIElementMetadata(
+                name="database",
+                label="Database",
+                type=UIElementType.Select,
                 required=True,
                 use_namespace_when_not_source_aligned=True,
                 options=cls.get_platform_options(db),
             ),
-            UIElementString(
+            UIElementMetadata(
                 name="schema",
+                type=UIElementType.String,
                 label="Schema",
                 tooltip="The name of the schema to give write access to. Defaults to data product namespace",
                 required=True,
             ),
-            UIElementCheckbox(
+            UIElementMetadata(
                 name="entire_schema",
                 label="Entire schema",
+                type=UIElementType.Checkbox,
                 tooltip="Give write access to the entire schema instead of a single table",
                 required=False,
-                initial_value=True,
+                checkbox=UIElementCheckbox(initial_value=True),
             ),
-            UIElementString(
+            UIElementMetadata(
                 name="table",
                 label="Table",
+                type=UIElementType.String,
                 tooltip="The name of the table to give write access to",
                 required=True,
-                initial_value="*",
+                string=UIElementString(initial_value="*"),
                 depends_on=FieldDependency(field_name="entire_schema", value=False),
             ),
         ]
