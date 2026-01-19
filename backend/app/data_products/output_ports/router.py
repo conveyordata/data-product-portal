@@ -25,6 +25,9 @@ from app.core.namespace.validation import (
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
+from app.data_products.output_ports.data_quality.router import (
+    router as data_quality_router,
+)
 from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_dataset_exists
 from app.data_products.output_ports.query_stats.router import (
@@ -102,6 +105,7 @@ old_route = "/datasets"
 route = "/v2/data_products/{data_product_id}/output_ports"
 router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
+router.include_router(data_quality_router)
 
 
 @router.get(f"{old_route}/namespace_suggestion", deprecated=True)

@@ -1,0 +1,68 @@
+import uuid
+from datetime import datetime
+from typing import Optional
+
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    SmallInteger,
+    String,
+    Text,
+)
+from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
+from app.database.database import Base
+from app.shared.model import utcnow
+
+
+class DataQualityTechnicalAssetModel(Base):
+    __tablename__ = "data_quality_technical_assets"
+
+    name: Mapped[str] = mapped_column(String(length=255), primary_key=True)
+    status: Mapped[DataQualityStatus] = mapped_column(
+        Enum(DataQualityStatus), default=DataQualityStatus.UNKNOWN
+    )
+
+    # Relationships
+    data_quality_summary_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("dataset_data_quality_summaries.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
+    )
+    data_quality_summary: Mapped["DataQualitySummary"] = relationship(
+        back_populates="technical_assets"
+    )
+
+
+class DataQualitySummary(Base):
+    __tablename__ = "dataset_data_quality_summaries"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    output_port_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("datasets.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    details_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=utcnow(), nullable=False
+    )
+    overall_status: Mapped[DataQualityStatus] = mapped_column(
+        Enum(DataQualityStatus), default=DataQualityStatus.UNKNOWN
+    )
+    assets_with_checks: Mapped[int] = mapped_column(SmallInteger, default=0)
+    assets_with_issues: Mapped[int] = mapped_column(SmallInteger, default=0)
+    dimensions = Column(JSONB, nullable=True)
+
+    # Relationships
+    technical_assets: Mapped[list["DataQualityTechnicalAssetModel"]] = relationship(
+        lazy="joined",
+        cascade="all, delete-orphan",
+        back_populates="data_quality_summary",  # We need all summary info when querying
+    )
