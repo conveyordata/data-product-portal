@@ -22,7 +22,7 @@
         "@ant-design/colors": "^8.0.1",
         "@dagrejs/dagre": "^1.1.8",
         "@fontsource/inter": "^5.2.8",
-        "@posthog/react": "^1.5.2",
+        "@posthog/react": "^1.6.0",
         "@reduxjs/toolkit": "^2.11.2",
         "@tiptap/extension-bubble-menu": "^3.15.3",
         "@tiptap/extension-document": "^3.15.3",
