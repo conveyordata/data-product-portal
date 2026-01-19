@@ -60,7 +60,17 @@ class PluginService:
                 result_tooltip=platform_meta.result_tooltip,
             )
         except NotImplementedError:
-            return None
+            return UIElementMetadataResponse(
+                not_configured=True,
+                ui_metadata=[],
+                plugin=plugin_class.__name__,
+                platform=platform_meta.platform_key,
+                display_name=platform_meta.display_name,
+                icon_name=platform_meta.icon_name,
+                parent_platform=platform_meta.parent_platform,
+                result_label=platform_meta.result_label,
+                result_tooltip=platform_meta.result_tooltip,
+            )
 
     def get_platform_tiles(self, configs: Sequence) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""

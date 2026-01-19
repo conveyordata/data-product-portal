@@ -111,8 +111,8 @@ class AssetProviderPlugin(ORMModel, ABC):
     # Platform metadata - should be overridden in subclasses
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 
-    def render_template(self, template: str, **context) -> str:
-        """Render a template with configuration values"""
+    def render_template(self, template: str, **context: dict[str, Any]) -> str:
+        """Render a template with configuration values. Template is fetched from db, context is filled with the full technical asset configuration + env info as dict."""
         return template.format(**self.model_dump(), **context)
 
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:

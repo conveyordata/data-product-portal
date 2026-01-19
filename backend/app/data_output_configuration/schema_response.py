@@ -16,6 +16,7 @@ class PlatformTile(ORMModel):
 
 
 class UIElementMetadataResponse(ORMModel):
+    not_configured: bool = False
     ui_metadata: Sequence[UIElementMetadata]
     plugin: str
     result_label: str = "Resulting path"

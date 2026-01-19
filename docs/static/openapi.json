@@ -21545,6 +21545,11 @@
       },
       "UIElementMetadataResponse": {
         "properties": {
+          "not_configured": {
+            "type": "boolean",
+            "title": "Not Configured",
+            "default": false
+          },
           "ui_metadata": {
             "items": {
               "$ref": "#/components/schemas/UIElementMetadata"

@@ -19,7 +19,10 @@ class TestPluginEndpoints:
         # Verify response structure
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 0
+        assert len(data["plugins"]) == 5
+        assert all(
+            plugin.get("not_configured", False) is True for plugin in data["plugins"]
+        )
 
     def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
         """Test GET /v2/plugins returns list of all available plugins"""
@@ -65,7 +68,14 @@ class TestPluginEndpoints:
             "GlueDataOutput",
         }
         assert expected_plugins.issubset(plugin_names)
-        assert "RedshiftDataOutput" not in plugin_names
+        # not configured = true
+        assert "RedshiftDataOutput" in plugin_names
+        assert (
+            next(p for p in data["plugins"] if p["plugin"] == "RedshiftDataOutput").get(
+                "not_configured", False
+            )
+            is True
+        )
 
     def test_list_plugins_includes_all_platforms(self, client: TestClient):
         """Test that all expected plugins are in the list"""
