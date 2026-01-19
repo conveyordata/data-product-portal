@@ -33,8 +33,8 @@ import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { getIcon } from '@/utils/icon-loader';
+import { DataOutputConfigurationForm } from './data-output-configuration-form.component';
 import styles from './data-output-form.module.scss';
-import { GenericDataOutputForm } from './generic-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -363,7 +363,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 }
 
                 return (
-                    <GenericDataOutputForm
+                    <DataOutputConfigurationForm
                         form={form}
                         uiMetadataGroups={pluginMetadata.ui_metadata}
                         namespace={currentDataProduct.namespace}

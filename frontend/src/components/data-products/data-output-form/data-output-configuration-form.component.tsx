@@ -1,4 +1,6 @@
 import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
+import type { Rule } from 'antd/es/form';
+import type { BaseOptionType } from 'antd/es/select';
 import { type ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UiElementMetadata } from '@/store/api/services/generated/pluginsApi';
@@ -17,7 +19,7 @@ type Props = {
     resultTooltip?: string;
 };
 
-export function GenericDataOutputForm({
+export function DataOutputConfigurationForm({
     form,
     namespace,
     sourceAligned,
@@ -89,7 +91,7 @@ export function GenericDataOutputForm({
         }
 
         // Build validation rules
-        const rules: { required?: boolean; pattern?: RegExp; message?: string }[] = [];
+        const rules: Rule[] = [];
         if (required && !isHidden) {
             rules.push({
                 required: true,
@@ -98,7 +100,7 @@ export function GenericDataOutputForm({
         }
 
         // Build select options based on sourceAligned for fields that use namespace
-        let selectOptions: { label: string; value: string }[] = [];
+        let selectOptions: BaseOptionType[] = [];
         if (type === 'select') {
             selectOptions = options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
             if (use_namespace_when_not_source_aligned && !sourceAligned) {
