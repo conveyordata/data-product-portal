@@ -21450,17 +21450,6 @@
             ],
             "title": "Initial Value"
           },
-          "value_prop_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Value Prop Name"
-          },
           "depends_on": {
             "anyOf": [
               {

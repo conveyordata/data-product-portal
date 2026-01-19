@@ -15,8 +15,8 @@ type Props = {
     sourceAligned: boolean;
     configurationType: string;
     uiMetadataGroups: UiElementMetadata[];
-    resultLabel?: string;
-    resultTooltip?: string;
+    resultLabel: string;
+    resultTooltip: string;
 };
 
 export function DataOutputConfigurationForm({
@@ -70,7 +70,6 @@ export function DataOutputConfigurationForm({
             tooltip,
             hidden,
             initial_value,
-            value_prop_name,
             depends_on,
             options,
             max_count,
@@ -121,7 +120,7 @@ export function DataOutputConfigurationForm({
         let inputComponent: ReactElement;
         switch (type) {
             case 'checkbox':
-                inputComponent = <Checkbox>{t(label)}</Checkbox>;
+                inputComponent = <Checkbox>{label}</Checkbox>;
                 break;
 
             case 'select':
@@ -145,11 +144,11 @@ export function DataOutputConfigurationForm({
             <ConfigurationFormItem
                 key={name}
                 name={name}
-                label={type === 'checkbox' ? undefined : t(label)}
-                tooltip={tooltip ? t(tooltip) : undefined}
+                label={type === 'checkbox' ? undefined : label}
+                tooltip={tooltip ?? undefined}
                 rules={rules}
                 hidden={isHidden ?? false}
-                valuePropName={value_prop_name ?? (type === 'checkbox' ? 'checked' : 'value')}
+                valuePropName={type === 'checkbox' ? 'checked' : 'value'}
                 initialValue={initial_value}
                 required={type !== 'checkbox' && required && !isHidden}
             >
@@ -162,8 +161,8 @@ export function DataOutputConfigurationForm({
         <ConfigurationSubForm
             form={form}
             configurationType={configurationType}
-            resultLabel={resultLabel ? t(resultLabel) : t('Resulting path')}
-            resultTooltip={resultTooltip ? t(resultTooltip) : t('The path you can access through this technical asset')}
+            resultLabel={resultLabel}
+            resultTooltip={resultTooltip}
         >
             {uiMetadata.map(renderFormField)}
         </ConfigurationSubForm>

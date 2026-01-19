@@ -369,8 +369,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         namespace={currentDataProduct.namespace}
                         sourceAligned={sourceAligned}
                         configurationType={pluginMetadata.plugin}
-                        resultLabel={pluginMetadata.result_label}
-                        resultTooltip={pluginMetadata.result_tooltip}
+                        resultLabel={pluginMetadata.result_label ?? ''}
+                        resultTooltip={pluginMetadata.result_tooltip ?? ''}
                     />
                 );
             })()}

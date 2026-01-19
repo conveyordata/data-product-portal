@@ -56,9 +56,6 @@ class UIElementMetadata(ORMModel):
     initial_value: Optional[str | bool] = (
         None  # Initial value for the field in the UI, select fields can't have an initial value yet.
     )
-    value_prop_name: Optional[str] = (
-        None  # Used to override the default value_prop_name if needed, e.g. checked for checkboxes
-    )
     depends_on: Optional[FieldDependency] = (
         None  # Conditional rendering based on another field's value in the form.
     )
@@ -74,7 +71,6 @@ class UIElementMetadata(ORMModel):
 
 class UIElementCheckbox(UIElementMetadata):
     type: UIElementType = UIElementType.Checkbox
-    value_prop_name: str = "checked"
     initial_value: Optional[bool] = None
 
 

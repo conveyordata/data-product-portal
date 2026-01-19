@@ -24,9 +24,7 @@ class TestPluginEndpoints:
     def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
         """Test GET /v2/plugins returns list of all available plugins"""
         s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
         PlatformServiceConfigFactory(service=s3)
-        PlatformServiceConfigFactory(service=glue)
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
@@ -102,9 +100,7 @@ class TestPluginEndpoints:
     def test_get_plugin_form_by_name_returns_correct_plugin(self, client: TestClient):
         """Test GET /v2/plugins/{plugin_name}/form returns specific plugin"""
         s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
         PlatformServiceConfigFactory(service=s3)
-        PlatformServiceConfigFactory(service=glue)
         response = client.get(f"{ENDPOINT}/S3DataOutput/form")
 
         assert response.status_code == 200
@@ -120,9 +116,7 @@ class TestPluginEndpoints:
 
     def test_get_plugin_form_includes_all_fields(self, client: TestClient):
         """Test that plugin form includes all expected fields"""
-        s3 = PlatformServiceFactory(name="S3")
         glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=s3)
         PlatformServiceConfigFactory(service=glue)
         response = client.get(f"{ENDPOINT}/GlueDataOutput/form")
 
@@ -140,10 +134,6 @@ class TestPluginEndpoints:
 
     def test_get_plugin_form_with_invalid_name_returns_404(self, client: TestClient):
         """Test GET /v2/plugins/{plugin_name}/form with invalid name returns 404"""
-        s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=s3)
-        PlatformServiceConfigFactory(service=glue)
         response = client.get(f"{ENDPOINT}/NonExistentPlugin/form")
 
         assert response.status_code == 404
@@ -156,9 +146,7 @@ class TestPluginEndpoints:
         """Test that each plugin from list can be retrieved individually"""
         # Get all plugins
         s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
         PlatformServiceConfigFactory(service=s3)
-        PlatformServiceConfigFactory(service=glue)
         list_response = client.get(ENDPOINT)
         assert list_response.status_code == 200
         plugins = list_response.json()["plugins"]
@@ -176,9 +164,7 @@ class TestPluginEndpoints:
 
     def test_plugin_form_has_field_dependencies(self, client: TestClient):
         """Test that plugin forms with dependencies include them correctly"""
-        s3 = PlatformServiceFactory(name="S3")
         glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=s3)
         PlatformServiceConfigFactory(service=glue)
         response = client.get(f"{ENDPOINT}/GlueDataOutput/form")
 
@@ -248,10 +234,6 @@ class TestPlatformTilesEndpoint:
     def test_get_platform_tiles_organizes_hierarchy(self, client: TestClient):
         """Test that platform tiles are organized in parent-child hierarchy"""
         # Create AWS services
-        PlatformServiceFactory(name="S3")
-        PlatformServiceFactory(name="Glue")
-        PlatformServiceFactory(name="Redshift")
-
         response = client.get(f"{ENDPOINT}/platform-tiles")
 
         assert response.status_code == 200
@@ -276,9 +258,6 @@ class TestPlatformTilesEndpoint:
     def test_get_platform_tiles_has_menu_flag(self, client: TestClient):
         """Test that tiles have has_menu flag for parent platforms"""
         # Create AWS services
-        PlatformServiceFactory(name="S3")
-        PlatformServiceFactory(name="Glue")
-
         response = client.get(f"{ENDPOINT}/platform-tiles")
 
         assert response.status_code == 200

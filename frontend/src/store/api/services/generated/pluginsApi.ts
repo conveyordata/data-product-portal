@@ -54,7 +54,6 @@ export type UiElementMetadata = {
   tooltip?: string | null;
   hidden?: boolean | null;
   initial_value?: string | boolean | null;
-  value_prop_name?: string | null;
   depends_on?: FieldDependency | null;
   max_count?: number | null;
   disabled?: boolean | null;
