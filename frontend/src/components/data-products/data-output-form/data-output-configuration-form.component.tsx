@@ -29,7 +29,7 @@ export function DataOutputConfigurationForm({
     resultTooltip,
 }: Props) {
     const { t } = useTranslation();
-    const uiMetadata = uiMetadataGroups as UiElementMetadata[] | undefined;
+    const uiMetadata = uiMetadataGroups as UiElementMetadata[];
 
     // Watch each field individually - hooks must be called unconditionally
     // We watch all potential fields that might be dependencies
@@ -80,9 +80,17 @@ export function DataOutputConfigurationForm({
 
         // Check if field should be hidden based on dependencies
         let isHidden = hidden;
+
+        // Depends on can have multiple dependencies
         if (depends_on) {
-            const dependentValue = watchedFields[depends_on.field_name];
-            isHidden = dependentValue !== depends_on.value;
+            for (const dep of depends_on) {
+                const dependentValue = watchedFields[dep.field_name];
+                if (dependentValue !== dep.value) {
+                    isHidden = true;
+                    break;
+                }
+                isHidden = false;
+            }
         }
 
         // Build validation rules

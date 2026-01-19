@@ -69,7 +69,7 @@ class UIElementMetadata(ORMModel):
     checkbox: Optional[UIElementCheckbox] = None
     select: Optional[UIElementSelect] = None
     string: Optional[UIElementString] = None
-    depends_on: Optional[FieldDependency] = (
+    depends_on: Optional[list[FieldDependency]] = (
         None  # Conditional rendering based on another field's value in the form.
     )
     disabled: Optional[bool] = (

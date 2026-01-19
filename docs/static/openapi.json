@@ -21490,12 +21490,16 @@
           "depends_on": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/FieldDependency"
+                "items": {
+                  "$ref": "#/components/schemas/FieldDependency"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Depends On"
           },
           "disabled": {
             "anyOf": [

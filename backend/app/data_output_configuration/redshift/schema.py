@@ -115,7 +115,7 @@ class RedshiftDataOutput(AssetProviderPlugin):
                 tooltip="The name of the table to give write access to",
                 required=True,
                 string=UIElementString(initial_value="*"),
-                depends_on=FieldDependency(field_name="entire_schema", value=False),
+                depends_on=[FieldDependency(field_name="entire_schema", value=False)],
             ),
         ]
         return base_metadata

@@ -68,12 +68,13 @@ export type UiElementMetadata = {
   checkbox?: UiElementCheckbox | null;
   select?: UiElementSelect | null;
   string?: UiElementString | null;
-  depends_on?: FieldDependency | null;
+  depends_on?: FieldDependency[] | null;
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
   options?: SelectOption[] | null;
 };
 export type UiElementMetadataResponse = {
+  not_configured?: boolean;
   ui_metadata: UiElementMetadata[];
   plugin: string;
   result_label?: string;
