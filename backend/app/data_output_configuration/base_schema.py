@@ -75,6 +75,7 @@ class UIElementMetadata(ORMModel):
 class UIElementCheckbox(UIElementMetadata):
     type: UIElementType = UIElementType.Checkbox
     value_prop_name: str = "checked"
+    initial_value: Optional[bool] = None
 
 
 class UIElementSelect(UIElementMetadata):
@@ -84,6 +85,7 @@ class UIElementSelect(UIElementMetadata):
 
 class UIElementString(UIElementMetadata):
     type: UIElementType = UIElementType.String
+    initial_value: Optional[str] = None
 
 
 class PlatformMetadata(ORMModel):
@@ -114,10 +116,6 @@ class AssetProviderPlugin(ORMModel, ABC):
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
         """Get platform and environment specific configuration"""
         raise NotImplementedError
-
-    def validate(self) -> None:
-        """Validate the configuration (e.g., no illegal names in identifiers)"""
-        pass
 
     @classmethod
     def get_platform_options(cls, db: Session) -> List[SelectOption]:
@@ -167,12 +165,3 @@ class AssetProviderPlugin(ORMModel, ABC):
         """Get the logo filename for this plugin"""
         platform_meta = cls.get_platform_metadata()
         return platform_meta.icon_name
-
-    def get_url(self, environment: str) -> Optional[str]:
-        """Get the URL for accessing this resource in the given environment"""
-        return None
-
-    @classmethod
-    def has_environnments(cls) -> bool:
-        """Whether this plugin supports multiple environments"""
-        return True
