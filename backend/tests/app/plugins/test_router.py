@@ -190,10 +190,10 @@ class TestPluginEndpoints:
         # Verify dependency structure
         assert "depends_on" in table_field
         if table_field["depends_on"] is not None:
-            assert "field_name" in table_field["depends_on"]
-            assert "value" in table_field["depends_on"]
-            assert table_field["depends_on"]["field_name"] == "entire_schema"
-            assert table_field["depends_on"]["value"] is False
+            assert "field_name" in table_field["depends_on"][0]
+            assert "value" in table_field["depends_on"][0]
+            assert table_field["depends_on"][0]["field_name"] == "entire_schema"
+            assert table_field["depends_on"][0]["value"] is False
 
 
 class TestPlatformTilesEndpoint:
