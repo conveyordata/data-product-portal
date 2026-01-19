@@ -10,6 +10,7 @@ from app.data_output_configuration.schema_response import (
     PlatformTile,
     UIElementMetadataResponse,
 )
+from app.platform_service_configurations.schema import PlatformServiceConfiguration
 
 
 class PluginService:
@@ -72,7 +73,9 @@ class PluginService:
                 result_tooltip=platform_meta.result_tooltip,
             )
 
-    def get_platform_tiles(self, configs: Sequence) -> Sequence[PlatformTile]:
+    def get_platform_tiles(
+        self, configs: Sequence[PlatformServiceConfiguration]
+    ) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""
         all_metadata = self.get_all_technical_assets_ui_metadata()
 
@@ -84,7 +87,11 @@ class PluginService:
         # Build tile hierarchy
         return self._build_tile_hierarchy(configured_metadata)
 
-    def _has_config(self, meta: UIElementMetadataResponse, configs: Sequence) -> bool:
+    def _has_config(
+        self,
+        meta: UIElementMetadataResponse,
+        configs: Sequence[PlatformServiceConfiguration],
+    ) -> bool:
         """Check if a platform has configuration"""
         return any(
             config.service.name.lower() == meta.display_name.lower()

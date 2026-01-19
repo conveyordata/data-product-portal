@@ -45,8 +45,7 @@ export function DataOutputConfigurationForm({
         uiMetadata?.forEach((field) => {
             // Handle suffix field
             if (field.name === 'suffix') {
-                // biome-ignore lint: dynamic field names can't be statically typed at compile time.
-                form.setFieldValue(configurationFieldName('suffix') as any, sourceAligned ? '' : namespace);
+                form.setFieldValue(configurationFieldName('suffix'), sourceAligned ? '' : namespace);
             }
 
             // Handle fields that should auto-populate from namespace when not source-aligned
