@@ -1,6 +1,6 @@
 from abc import ABC
 from enum import Enum
-from typing import Any, ClassVar, List, Optional
+from typing import Any, ClassVar, Optional
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -78,7 +78,7 @@ class UIElementMetadata(ORMModel):
     use_namespace_when_not_source_aligned: Optional[bool] = (
         None  # Whether to use the data product namespace as default value when the data product is not source aligned
     )
-    options: Optional[List[SelectOption]] = None  # Additional options for select fields
+    options: Optional[list[SelectOption]] = None  # Additional options for select fields
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -120,7 +120,7 @@ class AssetProviderPlugin(ORMModel, ABC):
         raise NotImplementedError
 
     @classmethod
-    def get_platform_options(cls, db: Session) -> List[SelectOption]:
+    def get_platform_options(cls, db: Session) -> list[SelectOption]:
         """Get platform specific options from the database if needed"""
         if not cls._platform_metadata:
             raise NotImplementedError("Platform metadata not defined for this plugin")
@@ -144,7 +144,7 @@ class AssetProviderPlugin(ORMModel, ABC):
         ]
 
     @classmethod
-    def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
+    def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
         """Returns the UI metadata for form generation"""
         return []
 

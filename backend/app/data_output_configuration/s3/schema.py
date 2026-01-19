@@ -1,4 +1,4 @@
-from typing import ClassVar, List, Literal, Optional
+from typing import ClassVar, Literal, Optional
 
 from sqlalchemy.orm import Session
 
@@ -59,7 +59,7 @@ class S3DataOutput(AssetProviderPlugin):
         )
 
     @classmethod
-    def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
+    def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
         base_metadata = super().get_ui_metadata(db)
         base_metadata += [
             UIElementMetadata(

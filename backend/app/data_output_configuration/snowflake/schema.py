@@ -1,4 +1,4 @@
-from typing import ClassVar, List, Literal, Optional, Self
+from typing import ClassVar, Literal, Optional, Self
 
 from pydantic import model_validator
 from sqlalchemy.orm import Session
@@ -77,7 +77,7 @@ class SnowflakeDataOutput(AssetProviderPlugin):
         )
 
     @classmethod
-    def get_ui_metadata(cls, db: Session) -> List[UIElementMetadata]:
+    def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
         base_metadata = super().get_ui_metadata(db)
         base_metadata += [
             UIElementMetadata(
