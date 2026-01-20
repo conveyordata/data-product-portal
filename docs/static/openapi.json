@@ -921,7 +921,8 @@
     "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary": {
       "get": {
         "tags": [
-          "Data Products - Output ports"
+          "Data Products - Output ports",
+          "Output Ports - Data Quality"
         ],
         "summary": "Get Latest Data Quality Summary For Output Port",
         "operationId": "get_latest_data_quality_summary_for_output_port",
@@ -972,7 +973,8 @@
       },
       "post": {
         "tags": [
-          "Data Products - Output ports"
+          "Data Products - Output ports",
+          "Output Ports - Data Quality"
         ],
         "summary": "Add Output Port Data Quality Run",
         "operationId": "add_output_port_data_quality_run",
