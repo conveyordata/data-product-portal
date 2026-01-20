@@ -29,21 +29,18 @@ export function DataOutputConfigurationForm({
     resultTooltip,
 }: Props) {
     const { t } = useTranslation();
-    const uiMetadata = uiMetadataGroups as UiElementMetadata[];
 
     // Watch all fields - we must call hooks unconditionally and in the same order every render
     // Since uiMetadata is stable for a given form, we can iterate through all fields
     const watchedFields: Record<string, unknown> = {};
-    if (uiMetadata) {
-        for (const field of uiMetadata) {
-            // biome-ignore lint: hooks in loops are safe when array length is stable across renders
-            watchedFields[field.name] = Form.useWatch(configurationFieldName(field.name), form);
-        }
+    for (const field of uiMetadataGroups) {
+        // biome-ignore lint: hooks in loops are safe when array length is stable across renders
+        watchedFields[field.name] = Form.useWatch(configurationFieldName(field.name), form);
     }
 
     // Auto-populate fields based on sourceAligned and namespace
     useEffect(() => {
-        uiMetadata?.forEach((field) => {
+        uiMetadataGroups.forEach((field) => {
             // Handle suffix field
             if (field.name === 'suffix') {
                 form.setFieldValue(configurationFieldName('suffix'), sourceAligned ? '' : namespace);
@@ -55,9 +52,9 @@ export function DataOutputConfigurationForm({
                 form.setFieldValue(configurationFieldName(field.name) as any, !sourceAligned ? namespace : undefined);
             }
         });
-    }, [form, sourceAligned, namespace, uiMetadata]);
+    }, [form, sourceAligned, namespace, uiMetadataGroups]);
 
-    if (!uiMetadata) {
+    if (!uiMetadataGroups) {
         return null;
     }
 
@@ -191,7 +188,7 @@ export function DataOutputConfigurationForm({
             resultLabel={resultLabel}
             resultTooltip={resultTooltip}
         >
-            {uiMetadata.map(renderFormField)}
+            {uiMetadataGroups.map(renderFormField)}
         </ConfigurationSubForm>
     );
 }

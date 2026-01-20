@@ -1,8 +1,6 @@
-from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.data_output_configuration.base_model import BaseDataOutputConfiguration
-from app.data_output_configuration.enums import AccessGranularity
 
 
 class SnowflakeDataOutput(BaseDataOutputConfiguration):
@@ -14,8 +12,7 @@ class SnowflakeDataOutput(BaseDataOutputConfiguration):
     )
     database_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
     table_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
-    access_granularity: Mapped[AccessGranularity] = mapped_column(
-        Enum(AccessGranularity),
+    access_granularity: Mapped[str] = mapped_column(
         nullable=True,
         use_existing_column=True,
     )
