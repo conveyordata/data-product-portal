@@ -46,9 +46,10 @@ class DataOutputLink(DataOutputDatasetAssociation):
 
     def convert(self):
         return TechnicalAssetLink(
-            **self.model_dump(exclude={"data_output", "data_output_id"}),
+            **self.model_dump(exclude={"data_output", "data_output_id", "dataset_id"}),
             technical_asset=self.data_output.convert(),
             technical_asset_id=self.data_output_id,
+            output_port_id=self.dataset_id,
         )
 
 
