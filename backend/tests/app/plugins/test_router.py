@@ -139,7 +139,7 @@ class TestPluginEndpoints:
         field_names = {field["name"] for field in data["ui_metadata"]}
 
         # Verify expected fields are present
-        expected_fields = {"database", "database_suffix", "entire_schema", "table"}
+        expected_fields = {"database", "database_suffix", "access_granularity", "table"}
         assert expected_fields.issubset(field_names)
 
     def test_get_plugin_form_with_invalid_name_returns_404(self, client: TestClient):
@@ -181,7 +181,7 @@ class TestPluginEndpoints:
         assert response.status_code == 200
         data = response.json()
 
-        # Find the table field which depends on entire_schema
+        # Find the table field which depends on access_granularity
         table_field = next(
             (f for f in data["ui_metadata"] if f["name"] == "table"), None
         )
@@ -192,8 +192,7 @@ class TestPluginEndpoints:
         if table_field["depends_on"] is not None:
             assert "field_name" in table_field["depends_on"][0]
             assert "value" in table_field["depends_on"][0]
-            assert table_field["depends_on"][0]["field_name"] == "entire_schema"
-            assert table_field["depends_on"][0]["value"] is False
+            assert table_field["depends_on"][0]["field_name"] == "access_granularity"
 
 
 class TestPlatformTilesEndpoint:

@@ -13868,6 +13868,14 @@
         ],
         "title": "AWSS3Config"
       },
+      "AccessGranularity": {
+        "type": "string",
+        "enum": [
+          "schema",
+          "table"
+        ],
+        "title": "AccessGranularity"
+      },
       "AccessResponse": {
         "properties": {
           "allowed": {
@@ -16681,16 +16689,15 @@
             "title": "Table Path",
             "default": ""
           },
-          "entire_schema": {
-            "type": "boolean",
-            "title": "Entire Schema",
-            "default": false
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "catalog"
+          "catalog",
+          "access_granularity"
         ],
         "title": "DatabricksDataOutput"
       },
@@ -19030,16 +19037,15 @@
             "title": "Table Path",
             "default": ""
           },
-          "entire_schema": {
-            "type": "boolean",
-            "title": "Entire Schema",
-            "default": false
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "database"
+          "database",
+          "access_granularity"
         ],
         "title": "GlueDataOutput"
       },
@@ -20245,16 +20251,15 @@
             "title": "Table Path",
             "default": ""
           },
-          "entire_schema": {
-            "type": "boolean",
-            "title": "Entire Schema",
-            "default": false
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "database"
+          "database",
+          "access_granularity"
         ],
         "title": "RedshiftDataOutput"
       },
@@ -21029,16 +21034,15 @@
             "title": "Table Path",
             "default": ""
           },
-          "entire_schema": {
-            "type": "boolean",
-            "title": "Entire Schema",
-            "default": false
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "database"
+          "database",
+          "access_granularity"
         ],
         "title": "SnowflakeDataOutput"
       },
@@ -21399,10 +21403,6 @@
       },
       "UIElementCheckbox": {
         "properties": {
-          "type": {
-            "$ref": "#/components/schemas/UIElementType",
-            "default": "checkbox"
-          },
           "initial_value": {
             "anyOf": [
               {
@@ -21487,6 +21487,16 @@
               }
             ]
           },
+          "radio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UIElementRadio"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "depends_on": {
             "anyOf": [
               {
@@ -21522,20 +21532,6 @@
               }
             ],
             "title": "Use Namespace When Not Source Aligned"
-          },
-          "options": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/SelectOption"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Options"
           }
         },
         "type": "object",
@@ -21619,12 +21615,8 @@
         ],
         "title": "UIElementMetadataResponse"
       },
-      "UIElementSelect": {
+      "UIElementRadio": {
         "properties": {
-          "type": {
-            "$ref": "#/components/schemas/UIElementType",
-            "default": "select"
-          },
           "max_count": {
             "anyOf": [
               {
@@ -21636,6 +21628,63 @@
             ],
             "title": "Max Count",
             "default": 1
+          },
+          "initial_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Value"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SelectOption"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "title": "UIElementRadio"
+      },
+      "UIElementSelect": {
+        "properties": {
+          "max_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Count",
+            "default": 1
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SelectOption"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
           }
         },
         "type": "object",
@@ -21643,10 +21692,6 @@
       },
       "UIElementString": {
         "properties": {
-          "type": {
-            "$ref": "#/components/schemas/UIElementType",
-            "default": "string"
-          },
           "initial_value": {
             "anyOf": [
               {
@@ -21667,7 +21712,8 @@
         "enum": [
           "string",
           "select",
-          "checkbox"
+          "checkbox",
+          "radio"
         ],
         "title": "UIElementType"
       },

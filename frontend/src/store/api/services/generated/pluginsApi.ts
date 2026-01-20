@@ -37,26 +37,29 @@ export type PlatformTile = {
 export type PlatformTileResponse = {
   platform_tiles: PlatformTile[];
 };
-export type UiElementType = "string" | "select" | "checkbox";
+export type UiElementType = "string" | "select" | "checkbox" | "radio";
 export type UiElementCheckbox = {
-  type?: UiElementType;
   initial_value?: boolean | null;
-};
-export type UiElementSelect = {
-  type?: UiElementType;
-  max_count?: number | null;
-};
-export type UiElementString = {
-  type?: UiElementType;
-  initial_value?: string | null;
-};
-export type FieldDependency = {
-  field_name: string;
-  value: any;
 };
 export type SelectOption = {
   label: string;
   value: string | boolean;
+};
+export type UiElementSelect = {
+  max_count?: number | null;
+  options?: SelectOption[] | null;
+};
+export type UiElementString = {
+  initial_value?: string | null;
+};
+export type UiElementRadio = {
+  max_count?: number | null;
+  initial_value?: string | null;
+  options?: SelectOption[] | null;
+};
+export type FieldDependency = {
+  field_name: string;
+  value: any;
 };
 export type UiElementMetadata = {
   label: string;
@@ -68,10 +71,10 @@ export type UiElementMetadata = {
   checkbox?: UiElementCheckbox | null;
   select?: UiElementSelect | null;
   string?: UiElementString | null;
+  radio?: UiElementRadio | null;
   depends_on?: FieldDependency[] | null;
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
-  options?: SelectOption[] | null;
 };
 export type UiElementMetadataResponse = {
   not_configured?: boolean;

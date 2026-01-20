@@ -10,12 +10,14 @@ from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     FieldDependency,
     PlatformMetadata,
-    UIElementCheckbox,
+    SelectOption,
     UIElementMetadata,
+    UIElementRadio,
+    UIElementSelect,
     UIElementString,
-    UIElementType,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.enums import AccessGranularity, UIElementType
 from app.data_output_configuration.snowflake.model import (
     SnowflakeDataOutput as SnowflakeDataOutputModel,
 )
@@ -33,7 +35,7 @@ class SnowflakeDataOutput(AssetProviderPlugin):
     bucket_identifier: str = ""
     database_path: str = ""
     table_path: str = ""
-    entire_schema: bool = False
+    access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
         display_name="Snowflake",
@@ -53,8 +55,7 @@ class SnowflakeDataOutput(AssetProviderPlugin):
             self.database_path = self.database
         if not self.table_path:
             self.table_path = self.table
-
-        if self.entire_schema:
+        if self.access_granularity == AccessGranularity.Schema:
             self.table = "*"
         return self
 
@@ -86,7 +87,7 @@ class SnowflakeDataOutput(AssetProviderPlugin):
                 type=UIElementType.Select,
                 required=True,
                 use_namespace_when_not_source_aligned=True,
-                options=cls.get_platform_options(db),
+                select=UIElementSelect(options=cls.get_platform_options(db)),
             ),
             UIElementMetadata(
                 name="schema",
@@ -96,12 +97,22 @@ class SnowflakeDataOutput(AssetProviderPlugin):
                 required=True,
             ),
             UIElementMetadata(
-                name="entire_schema",
-                label="Entire schema",
-                type=UIElementType.Checkbox,
-                tooltip="Give write access to the entire schema instead of a single table",
-                required=False,
-                checkbox=UIElementCheckbox(initial_value=True),
+                name="access_granularity",
+                label="Access granularity",
+                type=UIElementType.Radio,
+                tooltip="Give write access to the entire schema or a single table",
+                required=True,
+                radio=UIElementRadio(
+                    initial_value=AccessGranularity.Schema,
+                    options=[
+                        SelectOption(
+                            label="Schema level", value=AccessGranularity.Schema
+                        ),
+                        SelectOption(
+                            label="Table level", value=AccessGranularity.Table
+                        ),
+                    ],
+                ),
             ),
             UIElementMetadata(
                 name="table",
@@ -110,7 +121,11 @@ class SnowflakeDataOutput(AssetProviderPlugin):
                 tooltip="The name of the table to give write access to",
                 required=True,
                 string=UIElementString(initial_value="*"),
-                depends_on=[FieldDependency(field_name="entire_schema", value=False)],
+                depends_on=[
+                    FieldDependency(
+                        field_name="access_granularity", value=AccessGranularity.Table
+                    )
+                ],
             ),
         ]
         return base_metadata

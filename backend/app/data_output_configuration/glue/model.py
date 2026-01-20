@@ -1,6 +1,8 @@
+from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.data_output_configuration.base_model import BaseDataOutputConfiguration
+from app.data_output_configuration.enums import AccessGranularity
 
 
 class GlueDataOutput(BaseDataOutputConfiguration):
@@ -14,8 +16,11 @@ class GlueDataOutput(BaseDataOutputConfiguration):
     )
     database_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
     table_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
-    entire_schema: Mapped[bool] = mapped_column(
-        nullable=True, use_existing_column=True, default=False
+    access_granularity: Mapped[AccessGranularity] = mapped_column(
+        Enum(AccessGranularity),
+        default=AccessGranularity.Table,
+        nullable=False,
+        use_existing_column=True,
     )
 
     __mapper_args__ = {

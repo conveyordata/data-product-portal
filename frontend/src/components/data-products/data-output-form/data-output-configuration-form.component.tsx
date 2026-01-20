@@ -1,4 +1,4 @@
-import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
+import { Checkbox, type CheckboxOptionType, Form, type FormInstance, Input, Radio, Select } from 'antd';
 import type { Rule } from 'antd/es/form';
 import type { BaseOptionType } from 'antd/es/select';
 import { type ReactElement, useEffect } from 'react';
@@ -31,14 +31,15 @@ export function DataOutputConfigurationForm({
     const { t } = useTranslation();
     const uiMetadata = uiMetadataGroups as UiElementMetadata[];
 
-    // Watch each field individually - hooks must be called unconditionally
-    // We watch all potential fields that might be dependencies
-    const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
-
-    // Build the watched fields map
-    const watchedFields: Record<string, unknown> = {
-        entire_schema: entireSchema,
-    };
+    // Watch all fields - we must call hooks unconditionally and in the same order every render
+    // Since uiMetadata is stable for a given form, we can iterate through all fields
+    const watchedFields: Record<string, unknown> = {};
+    if (uiMetadata) {
+        for (const field of uiMetadata) {
+            // biome-ignore lint: hooks in loops are safe when array length is stable across renders
+            watchedFields[field.name] = Form.useWatch(configurationFieldName(field.name), form);
+        }
+    }
 
     // Auto-populate fields based on sourceAligned and namespace
     useEffect(() => {
@@ -69,12 +70,12 @@ export function DataOutputConfigurationForm({
             tooltip,
             hidden,
             depends_on,
-            options,
             disabled,
             use_namespace_when_not_source_aligned,
             string,
             checkbox,
             select,
+            radio,
         } = fieldMetadata;
 
         // Check if field should be hidden based on dependencies
@@ -104,7 +105,8 @@ export function DataOutputConfigurationForm({
         // Build select options based on sourceAligned for fields that use namespace
         let selectOptions: BaseOptionType[] = [];
         if (type === 'select') {
-            selectOptions = options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
+            selectOptions =
+                select?.options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
             if (use_namespace_when_not_source_aligned && !sourceAligned) {
                 selectOptions = [namespace].map((val) => ({
                     label: val,
@@ -112,8 +114,16 @@ export function DataOutputConfigurationForm({
                 }));
             } else {
                 selectOptions =
-                    options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
+                    select?.options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
             }
+        }
+        let radioOptions: CheckboxOptionType[] = [];
+        if (type === 'radio') {
+            radioOptions =
+                radio?.options?.map((option) => ({
+                    label: option.label,
+                    value: option.value.toString(),
+                })) ?? [];
         }
 
         // Determine if field should be disabled
@@ -137,7 +147,15 @@ export function DataOutputConfigurationForm({
                     />
                 );
                 break;
-
+            case 'radio':
+                inputComponent = (
+                    <Radio.Group
+                        defaultValue={radio?.initial_value || undefined}
+                        disabled={isDisabled ?? false}
+                        options={radioOptions}
+                    />
+                );
+                break;
             case 'string':
             default:
                 inputComponent = <Input />;

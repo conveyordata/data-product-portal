@@ -1,5 +1,4 @@
 from abc import ABC
-from enum import Enum
 from typing import Any, ClassVar, Optional
 
 from sqlalchemy import func, select
@@ -12,17 +11,12 @@ from app.configuration.platforms.platform_services.model import (
     PlatformService as PlatformServiceModel,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.enums import UIElementType
 from app.platform_service_configurations.model import (
     PlatformServiceConfiguration as PlatformServiceConfigurationModel,
 )
 from app.platform_service_configurations.schema import PlatformServiceConfiguration
 from app.shared.schema import ORMModel
-
-
-class UIElementType(str, Enum):
-    String = "string"
-    Select = "select"
-    Checkbox = "checkbox"
 
 
 class FieldDependency(ORMModel):
@@ -43,17 +37,21 @@ class SelectOption(ORMModel):
 
 
 class UIElementCheckbox(ORMModel):
-    type: UIElementType = UIElementType.Checkbox
     initial_value: Optional[bool] = None
 
 
-class UIElementSelect(ORMModel):
-    type: UIElementType = UIElementType.Select
+class UIElementRadio(ORMModel):
     max_count: Optional[int] = 1
+    initial_value: Optional[str] = None
+    options: Optional[list[SelectOption]] = None  # Additional options for radio fields
+
+
+class UIElementSelect(ORMModel):
+    max_count: Optional[int] = 1
+    options: Optional[list[SelectOption]] = None  # Additional options for select fields
 
 
 class UIElementString(ORMModel):
-    type: UIElementType = UIElementType.String
     initial_value: Optional[str] = None
 
 
@@ -69,6 +67,7 @@ class UIElementMetadata(ORMModel):
     checkbox: Optional[UIElementCheckbox] = None
     select: Optional[UIElementSelect] = None
     string: Optional[UIElementString] = None
+    radio: Optional[UIElementRadio] = None
     depends_on: Optional[list[FieldDependency]] = (
         None  # Conditional rendering based on another field's value in the form.
     )
@@ -78,10 +77,11 @@ class UIElementMetadata(ORMModel):
     use_namespace_when_not_source_aligned: Optional[bool] = (
         None  # Whether to use the data product namespace as default value when the data product is not source aligned
     )
-    options: Optional[list[SelectOption]] = None  # Additional options for select fields
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+        if self.type == UIElementType.Radio and self.radio is None:
+            self.radio = UIElementRadio()
         if self.type == UIElementType.Select and self.select is None:
             self.select = UIElementSelect()
         if self.type == UIElementType.String and self.string is None:

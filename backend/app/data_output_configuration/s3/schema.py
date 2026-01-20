@@ -9,10 +9,11 @@ from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     PlatformMetadata,
     UIElementMetadata,
+    UIElementSelect,
     UIElementString,
-    UIElementType,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.enums import UIElementType
 from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputModel
 from app.data_products.schema import DataProduct
 
@@ -67,7 +68,7 @@ class S3DataOutput(AssetProviderPlugin):
                 label="Bucket",
                 type=UIElementType.Select,
                 required=True,
-                options=cls.get_platform_options(db),
+                select=UIElementSelect(options=cls.get_platform_options(db)),
             ),
             UIElementMetadata(
                 name="suffix",
