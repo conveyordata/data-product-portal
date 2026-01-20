@@ -39,9 +39,19 @@ def upgrade() -> None:
         sa.Column(
             "access_granularity",
             sa.Enum(AccessGranularity),
-            nullable=False,
-            default=AccessGranularity.Table,
+            nullable=True,
         ),
+    )
+    # If not s3 data output, set access granularity to Schema if table_path is *, else Table
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET access_granularity = CASE
+            WHEN table_path = '*' THEN 'Schema'::accessgranularity
+            ELSE 'Table'::accessgranularity
+        END
+        WHERE configuration_type != 'S3DataOutput';
+    """
     )
 
 

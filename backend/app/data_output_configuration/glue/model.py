@@ -18,8 +18,7 @@ class GlueDataOutput(BaseDataOutputConfiguration):
     table_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
     access_granularity: Mapped[AccessGranularity] = mapped_column(
         Enum(AccessGranularity),
-        default=AccessGranularity.Table,
-        nullable=False,
+        nullable=True,
         use_existing_column=True,
     )
 
