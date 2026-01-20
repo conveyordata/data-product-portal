@@ -12,6 +12,11 @@ import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-
 import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
+    type PlatformTile,
+    useGetPlatformTilesQuery,
+    useGetPluginsQuery,
+} from '@/store/api/services/generated/pluginsApi';
+import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
@@ -23,17 +28,13 @@ import {
 } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
-import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
-import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
+import { getIcon } from '@/utils/icon-loader';
+import { DataOutputConfigurationForm } from './data-output-configuration-form.component';
 import styles from './data-output-form.module.scss';
-import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
-import { GlueDataOutputForm } from './glue-data-output-form.component';
-import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
-import { S3DataOutputForm } from './s3-data-output-form.component';
-import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -55,6 +56,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const navigate = useNavigate();
 
     // Data
+    const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const { data: { platform_service_configurations: platformConfig = [] } = {}, isLoading: platformsLoading } =
@@ -70,7 +72,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [selectedConfiguration, setSelectedConfiguration] = useState<
         CustomDropdownItemProps<DataPlatforms> | undefined
     >(undefined);
-    const [identifiers, setIdentifiers] = useState<string[] | undefined>(undefined);
 
     // Form
     const [form] = Form.useForm();
@@ -86,28 +87,30 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     // Result string
     const [fetchResultString] = useLazyGetDataOutputResultStringQuery();
 
-    const isLoading = platformsLoading || isCreating || isFetchingInitialValues || isFetchingTags;
+    const isLoading = platformsLoading || isLoadingMetadata || isCreating || isFetchingInitialValues || isFetchingTags;
 
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
-    const dataPlatforms = useMemo(
-        () =>
-            getDataPlatforms(t)
-                // Configured platforms
-                .filter(
-                    (platform) =>
-                        platform.hasConfig && platformConfig?.some((config) => config.platform.name === platform.label),
-                )
-                // Configured services
-                .map((platform) => {
-                    const platformConfigs = platformConfig?.filter((config) => config.platform.name === platform.label);
-                    platform.children = platform.children?.filter((child) =>
-                        platformConfigs?.some((config) => config.service.name === child.label),
-                    );
-                    return platform;
-                }),
-        [platformConfig, t],
-    );
+    // Get platform tiles from backend
+    const { data: { platform_tiles: platformTilesData } = {} } = useGetPlatformTilesQuery();
+
+    // Transform backend tiles to frontend format with icon components
+    const dataPlatforms = useMemo(() => {
+        if (!platformTilesData) {
+            return [];
+        }
+
+        const transformTile = (tile: PlatformTile): CustomDropdownItemProps<DataPlatform> => ({
+            label: t(tile.label),
+            value: tile.value as DataPlatform,
+            icon: getIcon(tile.icon_name),
+            hasMenu: tile.has_menu,
+            hasConfig: tile.has_config,
+            children: tile.children?.map(transformTile) || [],
+        });
+
+        return platformTilesData.map(transformTile);
+    }, [platformTilesData, t]);
 
     const platformServiceConfigMap = useMemo(() => {
         const map = new Map<DataPlatform, ServiceConfig>();
@@ -158,10 +161,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             if (dropdown.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
                 form.setFieldValue('service_id', platformServiceConfigMap.get(dropdown.value)?.service_id);
-                setIdentifiers(platformServiceConfigMap.get(dropdown.value)?.configuration);
             } else {
                 setSelectedConfiguration(undefined);
-                setIdentifiers(undefined);
             }
         }
     };
@@ -171,7 +172,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             if (selectedConfiguration !== dropdown) {
                 form.setFieldsValue({ configuration: undefined, result: undefined });
                 setSelectedConfiguration(dropdown);
-                setIdentifiers(platformServiceConfigMap.get(dropdown.value)?.configuration);
             }
         }
     };
@@ -228,7 +228,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         changed,
         values: DataOutputCreateFormSchema,
     ) => {
-        if (changed.configuration || (values.configuration && changed.sourceAligned)) {
+        if (changed.configuration) {
             setResultString(values);
         }
     };
@@ -349,58 +349,30 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 </Radio.Group>
             </Form.Item>
             {(() => {
-                if (!currentDataProduct) {
+                if (!currentDataProduct || !selectedConfiguration || !uiMetadataGroups) {
                     return null;
                 }
-                switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3:
-                        return (
-                            <S3DataOutputForm
-                                form={form}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                namespace={currentDataProduct.namespace}
-                            />
-                        );
-                    case DataPlatforms.Redshift:
-                        return (
-                            <RedshiftDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    case DataPlatforms.Glue:
-                        return (
-                            <GlueDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    case DataPlatforms.Databricks:
-                        return (
-                            <DatabricksDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    case DataPlatforms.Snowflake:
-                        return (
-                            <SnowflakeDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    default:
-                        return null;
+
+                // Find the metadata for the selected platform
+                const pluginMetadata = uiMetadataGroups.find(
+                    (meta) => meta.platform === selectedConfiguration.value.toLowerCase(),
+                );
+
+                if (!pluginMetadata) {
+                    return null;
                 }
+
+                return (
+                    <DataOutputConfigurationForm
+                        form={form}
+                        uiMetadataGroups={pluginMetadata.ui_metadata}
+                        namespace={currentDataProduct.namespace}
+                        sourceAligned={sourceAligned}
+                        configurationType={pluginMetadata.plugin}
+                        resultLabel={pluginMetadata.result_label ?? ''}
+                        resultTooltip={pluginMetadata.result_tooltip ?? ''}
+                    />
+                );
             })()}
         </Form>
     );

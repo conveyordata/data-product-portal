@@ -13260,6 +13260,92 @@
         }
       }
     },
+    "/api/v2/plugins/platform-tiles": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Get Platform Tiles",
+        "operationId": "get_platform_tiles",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformTileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/plugins/": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Get Plugins",
+        "description": "List all available plugins with their metadata (ADR-compliant endpoint)",
+        "operationId": "get_plugins",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/plugins/{plugin_name}/form": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Get Plugin Form",
+        "description": "Get form metadata for a specific plugin (ADR-compliant endpoint)",
+        "operationId": "get_plugin_form",
+        "parameters": [
+          {
+            "name": "plugin_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plugin Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UIElementMetadataResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/device/device_token": {
       "post": {
         "tags": [
@@ -13781,6 +13867,14 @@
           "is_default"
         ],
         "title": "AWSS3Config"
+      },
+      "AccessGranularity": {
+        "type": "string",
+        "enum": [
+          "schema",
+          "table"
+        ],
+        "title": "AccessGranularity"
       },
       "AccessResponse": {
         "properties": {
@@ -16594,12 +16688,16 @@
             "type": "string",
             "title": "Table Path",
             "default": ""
+          },
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "catalog"
+          "catalog",
+          "access_granularity"
         ],
         "title": "DatabricksDataOutput"
       },
@@ -17734,6 +17832,24 @@
           "user"
         ],
         "title": "EventReferenceEntity"
+      },
+      "FieldDependency": {
+        "properties": {
+          "field_name": {
+            "type": "string",
+            "title": "Field Name"
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field_name",
+          "value"
+        ],
+        "title": "FieldDependency",
+        "description": "Represents a field dependency for conditional visibility.\ne.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y\nIn practice this is often used with checkbox fields having value=True"
       },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
@@ -18920,12 +19036,16 @@
             "type": "string",
             "title": "Table Path",
             "default": ""
+          },
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "database"
+          "database",
+          "access_granularity"
         ],
         "title": "GlueDataOutput"
       },
@@ -19972,6 +20092,82 @@
         ],
         "title": "PlatformServiceConfiguration"
       },
+      "PlatformTile": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "icon_name": {
+            "type": "string",
+            "title": "Icon Name"
+          },
+          "has_menu": {
+            "type": "boolean",
+            "title": "Has Menu",
+            "default": true
+          },
+          "has_config": {
+            "type": "boolean",
+            "title": "Has Config",
+            "default": true
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformTile"
+            },
+            "type": "array",
+            "title": "Children",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value",
+          "icon_name"
+        ],
+        "title": "PlatformTile",
+        "description": "Represents a platform tile in the UI"
+      },
+      "PlatformTileResponse": {
+        "properties": {
+          "platform_tiles": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformTile"
+            },
+            "type": "array",
+            "title": "Platform Tiles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "platform_tiles"
+        ],
+        "title": "PlatformTileResponse",
+        "description": "Response model for platform tiles"
+      },
+      "PluginResponse": {
+        "properties": {
+          "plugins": {
+            "items": {
+              "$ref": "#/components/schemas/UIElementMetadataResponse"
+            },
+            "type": "array",
+            "title": "Plugins"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plugins"
+        ],
+        "title": "PluginResponse",
+        "description": "Response model for listing available plugins"
+      },
       "Prototype": {
         "type": "integer",
         "enum": [
@@ -20054,12 +20250,16 @@
             "type": "string",
             "title": "Table Path",
             "default": ""
+          },
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "database"
+          "database",
+          "access_granularity"
         ],
         "title": "RedshiftDataOutput"
       },
@@ -20754,6 +20954,32 @@
         ],
         "title": "SearchOutputPortsResponseItem"
       },
+      "SelectOption": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value"
+        ],
+        "title": "SelectOption",
+        "description": "Option for select UI elements"
+      },
       "SnowflakeConfig": {
         "properties": {
           "identifier": {
@@ -20807,12 +21033,16 @@
             "type": "string",
             "title": "Table Path",
             "default": ""
+          },
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
           }
         },
         "type": "object",
         "required": [
           "configuration_type",
-          "database"
+          "database",
+          "access_granularity"
         ],
         "title": "SnowflakeDataOutput"
       },
@@ -21170,6 +21400,322 @@
           "portal_name"
         ],
         "title": "ThemeSettings"
+      },
+      "UIElementCheckbox": {
+        "properties": {
+          "initial_value": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Value"
+          }
+        },
+        "type": "object",
+        "title": "UIElementCheckbox"
+      },
+      "UIElementMetadata": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "type": {
+            "$ref": "#/components/schemas/UIElementType"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tooltip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tooltip"
+          },
+          "hidden": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hidden"
+          },
+          "checkbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UIElementCheckbox"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "select": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UIElementSelect"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "string": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UIElementString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "radio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UIElementRadio"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "depends_on": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FieldDependency"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depends On"
+          },
+          "disabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disabled"
+          },
+          "use_namespace_when_not_source_aligned": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Namespace When Not Source Aligned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "type",
+          "required",
+          "name"
+        ],
+        "title": "UIElementMetadata"
+      },
+      "UIElementMetadataResponse": {
+        "properties": {
+          "not_configured": {
+            "type": "boolean",
+            "title": "Not Configured",
+            "default": false
+          },
+          "ui_metadata": {
+            "items": {
+              "$ref": "#/components/schemas/UIElementMetadata"
+            },
+            "type": "array",
+            "title": "Ui Metadata"
+          },
+          "plugin": {
+            "type": "string",
+            "title": "Plugin"
+          },
+          "result_label": {
+            "type": "string",
+            "title": "Result Label",
+            "default": "Resulting path"
+          },
+          "result_tooltip": {
+            "type": "string",
+            "title": "Result Tooltip",
+            "default": "The path you can access through this technical asset"
+          },
+          "platform": {
+            "type": "string",
+            "title": "Platform"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "icon_name": {
+            "type": "string",
+            "title": "Icon Name"
+          },
+          "parent_platform": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Platform"
+          },
+          "platform_tile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlatformTile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "ui_metadata",
+          "plugin",
+          "platform",
+          "display_name",
+          "icon_name"
+        ],
+        "title": "UIElementMetadataResponse"
+      },
+      "UIElementRadio": {
+        "properties": {
+          "max_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Count",
+            "default": 1
+          },
+          "initial_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Value"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SelectOption"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "title": "UIElementRadio"
+      },
+      "UIElementSelect": {
+        "properties": {
+          "max_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Count",
+            "default": 1
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SelectOption"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "title": "UIElementSelect"
+      },
+      "UIElementString": {
+        "properties": {
+          "initial_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Value"
+          }
+        },
+        "type": "object",
+        "title": "UIElementString"
+      },
+      "UIElementType": {
+        "type": "string",
+        "enum": [
+          "string",
+          "select",
+          "checkbox",
+          "radio"
+        ],
+        "title": "UIElementType"
       },
       "UnLinkTechnicalAssetToOutputPortRequest": {
         "properties": {

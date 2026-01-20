@@ -13,6 +13,7 @@ const services = [
     { name: 'Configuration - Platforms', file: 'configurationPlatforms' },
     { name: 'Configuration - Theme settings', file: 'configurationThemeSettings' },
     { name: 'Configuration - Tags', file: 'configurationTags' },
+    { name: 'Plugins', file: 'plugins' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
 ];
 
