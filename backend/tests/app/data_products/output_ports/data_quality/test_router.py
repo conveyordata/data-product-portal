@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 from app.authorization.roles.schema import Scope
 from app.authorization.roles.service import RoleService
@@ -101,7 +101,17 @@ class TestDataQualityRouter:
         service.save_data_quality_summary(
             dataset.id,
             OutputPortDataQualitySummary(
-                created_at=datetime.now(),
+                created_at=datetime.now(UTC) - timedelta(days=1),
+                overall_status=DataQualityStatus.FAIL,
+                technical_assets=[],
+                dimensions={},
+            ),
+        )
+
+        summary_last = service.save_data_quality_summary(
+            dataset.id,
+            OutputPortDataQualitySummary(
+                created_at=datetime.now(UTC),
                 overall_status=DataQualityStatus.PASS,
                 technical_assets=[],
                 dimensions={},
@@ -114,4 +124,6 @@ class TestDataQualityRouter:
         assert get_response.status_code == 200
         data = get_response.json()
         assert data["overall_status"] == DataQualityStatus.PASS
-        assert len(data["technical_assets"]) == 0
+        assert data["created_at"] == summary_last.created_at.isoformat().replace(
+            "+00:00", "Z"
+        )

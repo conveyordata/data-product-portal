@@ -21,7 +21,7 @@ from app.data_products.output_ports.data_quality.service import (
 from app.data_products.output_ports.model import ensure_dataset_exists
 from app.database.database import get_db_session
 
-router = APIRouter()
+router = APIRouter(tags=["Output Ports - Data Quality"])
 route = "/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary"
 
 
