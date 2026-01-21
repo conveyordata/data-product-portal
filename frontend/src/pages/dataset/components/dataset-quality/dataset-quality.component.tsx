@@ -86,23 +86,25 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
                     >
                         {formatStatus(summary.overall_status)}
                     </Tag>
-                    <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                    <Typography.Text type="secondary">
                         {formatDistanceToNow(new Date(summary.created_at), { addSuffix: true })}
                     </Typography.Text>
-                    <Button
-                        type="link"
-                        href={summary.details_url}
-                        target="_blank"
-                        icon={<ExportOutlined />}
-                        size="small"
-                        style={{ width: 'fit-content', padding: 0 }}
-                    >
-                        {t('View details')}
-                    </Button>
+                    {summary?.details_url && (
+                        <Button
+                            type="link"
+                            href={summary.details_url}
+                            target="_blank"
+                            icon={<ExportOutlined />}
+                            size="small"
+                            style={{ width: 'fit-content', padding: 0 }}
+                        >
+                            {t('View details')}
+                        </Button>
+                    )}
                 </Flex>
             ) : (
-                <Typography.Text type="secondary" style={{ fontSize: '13px', fontStyle: 'italic' }}>
-                    {t('Check with the output port owner to share data quality information.')}
+                <Typography.Text type="secondary">
+                    {t('Ask the owners to publish data quality information')}
                 </Typography.Text>
             )}
         </Flex>
