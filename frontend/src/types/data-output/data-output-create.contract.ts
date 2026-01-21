@@ -1,4 +1,5 @@
 import type { DataOutputContract } from './data-output.contract';
+import type { TechnicalMappingContract } from './technical-mapping.contract';
 
 export type DataOutputCreate = Pick<
     DataOutputContract,
@@ -6,7 +7,7 @@ export type DataOutputCreate = Pick<
 > & {
     platform_id: string;
     service_id: string;
-    sourceAligned: boolean;
+    technical_mapping: TechnicalMappingContract;
 };
 
 export type DataOutputCreateFormSchema = DataOutputCreate & {

@@ -41,7 +41,7 @@ def data_output_payload():
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
         "namespace": "namespace-updated",
-        "sourceAligned": True,
+        "technical_mapping": "custom",
         "configuration": {
             "bucket": "test",
             "path": "test",
@@ -66,7 +66,7 @@ def data_output_payload_not_owner():
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
         "namespace": "namespace",
-        "sourceAligned": True,
+        "technical_mapping": "custom",
         "configuration": {
             "bucket": "test",
             "path": "test",
@@ -112,7 +112,7 @@ class TestDataOutputsRouter:
             data_product_id=data_output_payload["owner_id"],
         )
         payload = deepcopy(data_output_payload)
-        payload["sourceAligned"] = False
+        payload["technical_mapping"] = "default"
 
         created_data_output = self.create_data_output(client, payload)
         assert created_data_output.status_code == 200

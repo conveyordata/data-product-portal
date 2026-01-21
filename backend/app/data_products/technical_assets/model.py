@@ -2,7 +2,7 @@ import uuid
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, String, and_
+from sqlalchemy import Column, Enum, ForeignKey, String, and_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, foreign, relationship
 
@@ -33,7 +33,7 @@ class DataOutput(Base, BaseORM):
     name = Column(String)
     description = Column(String)
     status: TechnicalAssetStatus = Column(Enum(TechnicalAssetStatus))
-    sourceAligned = Column(Boolean)
+    technical_mapping = Column(String)
 
     # Foreign keys
     platform_id: Mapped[UUID] = Column(ForeignKey("platforms.id"))

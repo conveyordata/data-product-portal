@@ -16,6 +16,7 @@ from app.data_products.output_port_technical_assets_link.schema import (
 )
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.schema import DataProduct
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
 
@@ -35,7 +36,7 @@ class BaseTechnicalAssetGet(ORMModel):
     platform_id: UUID
     service_id: UUID
     status: TechnicalAssetStatus
-    sourceAligned: Optional[bool]
+    technical_mapping: TechnicalMapping
 
     # Nested schemas
     configuration: DataOutputConfiguration

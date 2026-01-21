@@ -14420,9 +14420,8 @@
               }
             }
           },
-          "sourceAligned": {
-            "type": "boolean",
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "tag_ids": {
             "items": {
@@ -14442,7 +14441,7 @@
           "service_id",
           "status",
           "configuration",
-          "sourceAligned",
+          "technical_mapping",
           "tag_ids"
         ],
         "title": "CreateTechnicalAssetRequest"
@@ -14518,9 +14517,8 @@
               }
             }
           },
-          "sourceAligned": {
-            "type": "boolean",
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "tag_ids": {
             "items": {
@@ -14540,7 +14538,7 @@
           "service_id",
           "status",
           "configuration",
-          "sourceAligned",
+          "technical_mapping",
           "tag_ids"
         ],
         "title": "DataOutputCreate",
@@ -14686,16 +14684,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -14768,7 +14758,7 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "dataset_links",
@@ -14851,16 +14841,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -14926,7 +14908,7 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "dataset_links",
@@ -15063,16 +15045,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -15145,7 +15119,7 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "dataset_links",
@@ -18769,16 +18743,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -18851,7 +18817,7 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "output_port_links",
@@ -21148,16 +21114,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -21212,7 +21170,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
@@ -21387,6 +21345,14 @@
           "info"
         ],
         "title": "TechnicalInfo"
+      },
+      "TechnicalMapping": {
+        "type": "string",
+        "enum": [
+          "default",
+          "custom"
+        ],
+        "title": "TechnicalMapping"
       },
       "ThemeSettings": {
         "properties": {
@@ -22516,16 +22482,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -22583,7 +22541,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
@@ -22615,16 +22573,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -22682,7 +22632,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
@@ -22714,16 +22664,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -22778,7 +22720,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
