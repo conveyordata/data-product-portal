@@ -108,13 +108,9 @@ class DataOutputService:
             data_output.configuration.validate_configuration(data_product)
 
         data_output_schema = data_output.parse_pydantic_schema()
-        technical_mapping: TechnicalMapping = data_output_schema.pop(
-            "technical_mapping"
-        )
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
         model = DataOutputModel(
             **data_output_schema,
-            technical_mapping=technical_mapping.value,
             tags=tags,
             owner_id=id,
         )
