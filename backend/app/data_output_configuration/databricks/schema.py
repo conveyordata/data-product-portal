@@ -79,8 +79,8 @@ class DatabricksDataOutput(AssetProviderPlugin):
         base_metadata = super().get_ui_metadata(db)
         base_metadata += [
             UIElementMetadata(
-                name="database",
-                label="Database",
+                name="catalog",
+                label="Catalog",
                 type=UIElementType.Select,
                 required=True,
                 use_namespace_when_not_source_aligned=True,
