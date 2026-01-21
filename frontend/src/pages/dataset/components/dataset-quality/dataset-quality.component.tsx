@@ -35,7 +35,7 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
                 return <CheckCircleOutlined />;
             case 'fail':
                 return <CloseCircleOutlined />;
-            case 'warning':
+            case 'warn':
                 return <QuestionCircleOutlined />;
             case 'error':
                 return <ExclamationCircleOutlined />;
@@ -52,7 +52,7 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
                 return 'error';
             case 'error':
                 return 'error';
-            case 'warning':
+            case 'warn':
                 return 'warning';
             case 'unknown':
                 return 'info';
@@ -67,7 +67,7 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
                 return 'Failed';
             case 'error':
                 return 'Error';
-            case 'warning':
+            case 'warn':
                 return 'Warning';
             case 'unknown':
                 return 'Unknown';

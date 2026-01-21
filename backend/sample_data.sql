@@ -493,5 +493,51 @@ begin
     FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
     WHERE EXTRACT(ISODOW FROM gs) = 3;
 
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert data quality summary for half of the existing datasets
+    -- ------------------------------------------------------------------------------------------------
+    WITH dataset_selection AS (
+        -- Get up to 20 datasets and assign a row number for variety in data generation
+        SELECT id, name, ROW_NUMBER() OVER (ORDER BY id) as rn
+        FROM public.datasets
+        LIMIT 20
+    ),
+    summary_generation AS (
+        SELECT
+            gen_random_uuid() as summary_id,
+            id as dataset_id,
+            name as dataset_name,
+            rn,
+            (ARRAY['PASS', 'FAIL', 'WARN', 'ERROR'])[((rn - 1) % 4) + 1] as status
+        FROM dataset_selection
+    )
+    INSERT INTO public.dataset_data_quality_summaries
+        (id, output_port_id, assets_with_checks, assets_with_issues, details_url, description, overall_status, created_at, dimensions)
+    SELECT
+        summary_id,
+        dataset_id,
+        10 + rn,
+        CASE WHEN status = 'PASS' THEN 0 ELSE (rn % 3) + 1 END,
+        'https://quality-tool.internal/view/' || dataset_id,
+        'Recursive CTE generated report for ' || dataset_name,
+        status::dataqualitystatus,
+        NOW() - (rn || ' hours')::interval,
+        json_build_object('validity', lower(status), 'completeness', lower('PASS'))
+    FROM summary_generation;
+
+    -- 2. Generate the Technical Assets
+    WITH dataset_selection AS (
+        SELECT id, name, ROW_NUMBER() OVER (ORDER BY id) as rn FROM public.datasets LIMIT 20
+        ),
+        summary_mapping AS (
+    -- We need to join back to the summaries we just created to get the IDs
+    SELECT s.id as summary_id, d.name as dataset_name, d.rn
+    FROM public.dataset_data_quality_summaries s
+        JOIN dataset_selection d ON s.output_port_id = d.id
+        )
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id)
+    SELECT dataset_name || '_table', 'PASS'::dataqualitystatus, summary_id FROM summary_mapping
+    UNION ALL
+    SELECT dataset_name || '_view', 'WARN'::dataqualitystatus, summary_id FROM summary_mapping;
 
 end $$;

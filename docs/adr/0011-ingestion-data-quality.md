@@ -61,25 +61,25 @@ Summary submitted by a producer could look as follows:
 ```
 {
   "created_at": "2026-01-12T08:15:00Z",
-  "overall_status": "WARN",
+  "overall_status": "warn",
   "summary": "Optional extra user info",
   "technical_assets": [
     {
       "name": "orders",
-      "status": "PASS"
+      "status": "pass"
     },
     {
       "name": "order_items",
-      "status": "WARN"
+      "status": "warn"
     },
     {
       "name": "customers",
-      "status": "ERROR"
+      "status": "error"
     }
   ],
   "dimensions": {
-    "completeness": "WARN", #Are records missing or partial
-    "validity": "PASS" # Do values have the expected format, ranges,...
+    "completeness": "warn", #Are records missing or partial
+    "validity": "pass" # Do values have the expected format, ranges,...
     "coverage": # Can be calculated by portal as assets with checks/total assets
   },
   "details_url": "https://ci.company.com/runs/123"
