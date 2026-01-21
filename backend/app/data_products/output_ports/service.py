@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from fastembed import TextEmbedding
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
+from sqlalchemy.sql.base import ExecutableOption
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
@@ -53,7 +54,7 @@ from app.users.model import User as UserModel
 from app.users.schema import User
 
 
-def get_dataset_load_options():
+def get_dataset_load_options() -> Sequence[ExecutableOption]:
     return [
         selectinload(DatasetModel.data_product_links)
         .selectinload(DataProductDatasetAssociationModel.data_product)
@@ -68,7 +69,7 @@ def get_dataset_load_options():
     ]
 
 
-class DatasetService:
+class OutputPortService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
@@ -473,14 +474,9 @@ class DatasetService:
 
         return bool(consuming_data_products & user_data_products)
 
-    def get_output_ports(self, data_product_id: UUID) -> Sequence[OutputPort]:
-        ensure_data_product_exists(data_product_id, self.db)
-        return (
-            self.db.scalars(
-                select(DatasetModel).filter(
-                    DatasetModel.data_product_id == data_product_id
-                ),
-            )
-            .unique()
-            .all()
-        )
+    def get_output_ports(self, data_product_id: Optional[UUID]) -> Sequence[OutputPort]:
+        query = select(DatasetModel)
+        if data_product_id is not None:
+            ensure_data_product_exists(data_product_id, self.db)
+            query = query.filter(DatasetModel.data_product_id == data_product_id)
+        return self.db.scalars(query).unique().all()

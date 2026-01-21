@@ -36,7 +36,7 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation,
 )
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -171,7 +171,7 @@ def create_data_product(
     )
     RefreshInfrastructureLambda().trigger()
     db.flush()
-    DatasetService(db).recalculate_embeddings_for_output_ports_of_product(
+    OutputPortService(db).recalculate_embeddings_for_output_ports_of_product(
         created_data_product.id
     )
     return CreateDataProductResponse(id=created_data_product.id)
@@ -285,7 +285,7 @@ def update_data_product(
     )
     RefreshInfrastructureLambda().trigger()
     db.flush()
-    DatasetService(db).recalculate_embeddings_for_output_ports_of_product(id)
+    OutputPortService(db).recalculate_embeddings_for_output_ports_of_product(id)
     return result
 
 

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from jinja2 import Template
 
 from app.authorization.service import AuthorizationService
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_db_session
 
 if TYPE_CHECKING:
@@ -28,4 +28,4 @@ def seed_db(path: str, **template_vars):
 
     raw_connection.commit()
     AuthorizationService(db).reload_enforcer()
-    DatasetService(db).recalculate_all_embeddings()
+    OutputPortService(db).recalculate_all_embeddings()

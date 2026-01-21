@@ -22,7 +22,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.model import DataOutput as DataOutputModel
 from app.data_products.technical_assets.model import ensure_data_output_exists
@@ -136,7 +136,7 @@ class DataOutputService:
         return data_output
 
     def update_embeddings_for_associated_datasets(self, result: DataOutputModel):
-        dataset_service = DatasetService(self.db)
+        dataset_service = OutputPortService(self.db)
         for dataset_link in result.dataset_links:
             dataset_service.recalculate_embedding(dataset_link.dataset_id)
 
@@ -190,7 +190,7 @@ class DataOutputService:
         )
         data_output.dataset_links.append(dataset_link)
         self.db.flush()
-        DatasetService(self.db).recalculate_embedding(dataset_id)
+        OutputPortService(self.db).recalculate_embedding(dataset_id)
         self.db.commit()
         return dataset_link
 
@@ -216,7 +216,7 @@ class DataOutputService:
 
         data_output.dataset_links.remove(data_output_dataset)
         self.db.flush()
-        DatasetService(self.db).recalculate_embedding(dataset_id)
+        OutputPortService(self.db).recalculate_embedding(dataset_id)
         self.db.commit()
         return data_output
 

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_db_session
 from app.search_output_ports.schema_response import (
     SearchDatasets,
@@ -37,4 +37,4 @@ def search_data_sets(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[SearchDatasets]:
-    return DatasetService(db).search_datasets(query=query, limit=limit, user=user)
+    return OutputPortService(db).search_datasets(query=query, limit=limit, user=user)

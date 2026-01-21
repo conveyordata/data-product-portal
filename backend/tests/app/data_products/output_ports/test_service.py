@@ -4,7 +4,7 @@ from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Prototype, Scope
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.settings import settings
 from tests import test_session
 from tests.factories import (
@@ -26,7 +26,7 @@ class TestDatasetsService:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         ds = self.get_dataset(ds)
-        assert DatasetService(test_session).is_visible_to_user(ds, user) is False
+        assert OutputPortService(test_session).is_visible_to_user(ds, user) is False
 
     def test_get_private_dataset_by_owner(self):
         owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -36,7 +36,7 @@ class TestDatasetsService:
             role_id=role.id, dataset_id=ds.id, user_id=owner.id
         )
         ds = self.get_dataset(ds)
-        assert DatasetService(test_session).is_visible_to_user(ds, owner) is True
+        assert OutputPortService(test_session).is_visible_to_user(ds, owner) is True
 
     def test_get_private_dataset_by_admin(self):
         admin = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -44,7 +44,7 @@ class TestDatasetsService:
         GlobalRoleAssignmentFactory(role_id=role.id, user_id=admin.id)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         ds = self.get_dataset(ds)
-        assert DatasetService(test_session).is_visible_to_user(ds, admin) is True
+        assert OutputPortService(test_session).is_visible_to_user(ds, admin) is True
 
     def test_get_private_dataset_by_member_of_consuming_data_product(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -56,22 +56,22 @@ class TestDatasetsService:
         )
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
         ds = self.get_dataset(ds)
-        assert DatasetService(test_session).is_visible_to_user(ds, user) is True
+        assert OutputPortService(test_session).is_visible_to_user(ds, user) is True
 
     def test_recalculate_embedding(self):
         ds = DatasetFactory()
-        DatasetService(test_session).recalculate_embedding(ds.id)
+        OutputPortService(test_session).recalculate_embedding(ds.id)
 
     def test_recalculate_embedding_with_technical_asset(self):
         ds = DatasetFactory()
         data_output = DataOutputFactory(owner=ds.data_product)
         DataOutputDatasetAssociationFactory(data_output=data_output, dataset=ds)
-        DatasetService(test_session).recalculate_embedding(ds.id)
+        OutputPortService(test_session).recalculate_embedding(ds.id)
 
     def test_recalculate_all_embeddings(self):
         for i in range(51):  # Ensure we load 2 batches
             DatasetFactory()
-        DatasetService(test_session).recalculate_all_embeddings()
+        OutputPortService(test_session).recalculate_all_embeddings()
 
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:
