@@ -493,9 +493,9 @@ platformdirs==4.5.1 \
     #   findpython
     #   poetry
     #   virtualenv
-poetry==2.3.0 \
-    --hash=sha256:1f3c8912bac57c4e9a2a523dbed0271784fa696bbfb24d1b4d7931aa29b7906d \
-    --hash=sha256:56ef2a8188bb5157ef9df7e3d968cd27bacad34710818f1cd0306a46ac0b4d41
+poetry==2.3.1 \
+    --hash=sha256:1067f3a500b57b348a7b7a2ec0ee8e09dce65164a21926b1f6713481d94e8ee4 \
+    --hash=sha256:423cbccfe3533155ce9f49e929780a1386e564b2d97d2380664ea388cfe1191c
     # via -r requirements-poetry.in
 poetry-core==2.3.0 \
     --hash=sha256:f6da8f021fe380d8c9716085f4dcc5d26a5120a2452e077196333892af5de307 \
