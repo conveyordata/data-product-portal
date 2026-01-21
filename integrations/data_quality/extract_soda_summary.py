@@ -33,7 +33,7 @@ def extract_assets(soda_output: dict) -> list[dict]:
         if outcome == "fail":
             status = "fail"
         elif outcome == "warn":
-            status = "warning"
+            status = "warn"
         else:
             status = "pass"
 

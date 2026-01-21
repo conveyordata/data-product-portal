@@ -104,7 +104,10 @@ class TestDataQualityRouter:
                 created_at=datetime.now(UTC) - timedelta(days=1),
                 overall_status=DataQualityStatus.FAIL,
                 technical_assets=[],
-                dimensions={},
+                dimensions={
+                    "validity": DataQualityStatus.FAIL,
+                    "completeness": DataQualityStatus.PASS,
+                },
             ),
         )
 
@@ -114,7 +117,10 @@ class TestDataQualityRouter:
                 created_at=datetime.now(UTC),
                 overall_status=DataQualityStatus.PASS,
                 technical_assets=[],
-                dimensions={},
+                dimensions={
+                    "validity": DataQualityStatus.FAIL,
+                    "completeness": DataQualityStatus.PASS,
+                },
             ),
         )
 

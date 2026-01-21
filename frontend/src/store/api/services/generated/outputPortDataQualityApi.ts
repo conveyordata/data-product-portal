@@ -36,12 +36,7 @@ export type AddOutputPortDataQualityRunApiArg = {
   id: string;
   outputPortDataQualitySummaryInput: OutputPortDataQualitySummary2;
 };
-export type DataQualityStatus =
-  | "pass"
-  | "fail"
-  | "warning"
-  | "error"
-  | "unknown";
+export type DataQualityStatus = "pass" | "fail" | "warn" | "error" | "unknown";
 export type DataQualityTechnicalAsset = {
   name: string;
   status: DataQualityStatus;

@@ -16770,7 +16770,7 @@
         "enum": [
           "pass",
           "fail",
-          "warning",
+          "warn",
           "error",
           "unknown"
         ],

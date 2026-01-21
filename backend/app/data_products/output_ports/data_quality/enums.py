@@ -5,6 +5,6 @@ from enum import UNIQUE, Enum, verify
 class DataQualityStatus(str, Enum):
     PASS = "pass"  # noqa: S105
     FAIL = "fail"
-    WARNING = "warning"
+    WARN = "warn"
     ERROR = "error"
     UNKNOWN = "unknown"

@@ -19,25 +19,25 @@ The format looks as follows:
 ```json
 {
   "created_at": "2026-01-12T08:15:00Z",
-  "overall_status": "WARN",
+  "overall_status": "fail",
   "summary": "Optional extra user info",
   "technical_assets": [
     {
       "name": "orders",
-      "status": "PASS"
+      "status": "pass"
     },
     {
       "name": "order_items",
-      "status": "WARN"
+      "status": "warn"
     },
     {
       "name": "customers",
-      "status": "ERROR"
+      "status": "fail"
     }
   ],
   "dimensions": {
-    "completeness": "WARN",
-    "validity": "PASS"
+    "completeness": "warn",
+    "validity": "pass"
   },
   "details_url": "https://ci.company.com/runs/123"
 }
