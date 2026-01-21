@@ -1,7 +1,7 @@
 """add cascade delete to dataset_query_stats_daily
 
 Revision ID: ca5f5782790a
-Revises: 49990691cd30
+Revises: dbe6fbe45eef
 Create Date: 2026-01-14 12:50:00.000000
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "ca5f5782790a"
-down_revision: Union[str, None] = "49990691cd30"
+down_revision: Union[str, None] = "dbe6fbe45eef"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

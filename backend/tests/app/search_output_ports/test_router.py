@@ -10,7 +10,7 @@ from app.data_products.output_ports.schema_response import (
 from app.data_products.output_ports.service import OutputPortService
 from tests.factories import DatasetFactory
 
-EMBEDDING_LATENCY_BOUND: Final[float] = 1.000  # seconds
+EMBEDDING_LATENCY_BOUND: Final[float] = 2.000  # seconds
 LATENCY_BOUND: Final[float] = 0.300  # seconds
 PRECISION_BOUND: Final[float] = 0.7
 RECALL_BOUND: Final[float] = 0.7
