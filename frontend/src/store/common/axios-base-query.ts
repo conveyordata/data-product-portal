@@ -1,4 +1,4 @@
-import type { BaseQueryFn } from '@reduxjs/toolkit/query';
+import type { BaseQueryApi, BaseQueryFn } from '@reduxjs/toolkit/query';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios, { type AxiosResponse } from 'axios';
 import { User } from 'oidc-client-ts';
@@ -26,6 +26,36 @@ function getUser() {
     return User.fromStorageString(oidcStorage);
 }
 
+const defaultErrorMessage: NotificationState = {
+    message: 'Something went wrong',
+    description: 'Please try again later',
+    type: 'error',
+};
+
+function showErrorMessageToast(err: AxiosResponse<ApiError>, api: BaseQueryApi) {
+    const { correlation_id: correlationId = defaultErrorMessage.message, detail = defaultErrorMessage.description } =
+        err.data;
+
+    const message = typeof detail === 'string' ? detail : defaultErrorMessage.message;
+
+    api.dispatch(
+        showNotification({
+            message,
+            description: correlationId,
+            type: 'error',
+        }),
+    );
+}
+
+function shouldShowErrorToast(status: number, url: string) {
+    if (status === 404) {
+        if (url.includes('data_quality_summary')) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export const axiosBaseQuery =
     (
         { baseUrl }: { baseUrl: string } = { baseUrl: AppConfig.getApiBaseURL() },
@@ -42,12 +72,6 @@ export const axiosBaseQuery =
         unknown
     > =>
     async ({ url, method, data, body, params, headers }, api) => {
-        const defaultErrorMessage: NotificationState = {
-            message: 'Something went wrong',
-            description: 'Please try again later',
-            type: 'error',
-        };
-
         try {
             const user = getUser();
             const result = await axios({
@@ -65,20 +89,9 @@ export const axiosBaseQuery =
             const err = axiosError as CustomAxiosError;
 
             if (err.response) {
-                const {
-                    correlation_id: correlationId = defaultErrorMessage.message,
-                    detail = defaultErrorMessage.description,
-                } = err.response.data;
-
-                const message = typeof detail === 'string' ? detail : defaultErrorMessage.message;
-
-                api.dispatch(
-                    showNotification({
-                        message,
-                        description: correlationId,
-                        type: 'error',
-                    }),
-                );
+                if (shouldShowErrorToast(err.response.status, url)) {
+                    showErrorMessageToast(err.response, api);
+                }
             } else {
                 api.dispatch(showNotification(defaultErrorMessage));
             }
