@@ -18,7 +18,7 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
     const technicalInfo = data_output?.technical_info || [];
     const info_column =
         uiMetadataGroups?.find((plugin) => plugin.plugin === data_output?.configuration.configuration_type)
-            ?.detailed_name || 'Info';
+            ?.detailed_name ?? 'Info';
 
     const columns: TableColumnsType<TechnicalInfoContract> = useMemo(() => {
         return getTechnicalInformationColumns({
