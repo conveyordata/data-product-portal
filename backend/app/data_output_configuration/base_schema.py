@@ -99,6 +99,7 @@ class PlatformMetadata(ORMModel):
     parent_platform: Optional[str] = None
     result_label: str = "Resulting output"
     result_tooltip: str = "The output you can access through this technical asset"
+    detailed_name: str
 
 
 class AssetProviderPlugin(ORMModel, ABC):

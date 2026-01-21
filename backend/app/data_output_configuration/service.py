@@ -59,6 +59,7 @@ class PluginService:
                 parent_platform=platform_meta.parent_platform,
                 result_label=platform_meta.result_label,
                 result_tooltip=platform_meta.result_tooltip,
+                detailed_name=platform_meta.detailed_name,
             )
         except NotImplementedError:
             return UIElementMetadataResponse(
@@ -71,6 +72,7 @@ class PluginService:
                 parent_platform=platform_meta.parent_platform,
                 result_label=platform_meta.result_label,
                 result_tooltip=platform_meta.result_tooltip,
+                detailed_name=platform_meta.detailed_name,
             )
 
     def get_platform_tiles(

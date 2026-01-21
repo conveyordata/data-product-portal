@@ -26,6 +26,7 @@ class UIElementMetadataResponse(ORMModel):
     icon_name: str  # Icon filename (e.g., "s3-logo.svg")
     parent_platform: Optional[str] = None  # e.g., "aws" for s3, redshift, glue
     platform_tile: Optional[PlatformTile] = None  # Complete tile structure
+    detailed_name: str
 
 
 class PluginResponse(ORMModel):
