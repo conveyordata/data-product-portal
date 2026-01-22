@@ -131,14 +131,14 @@ class OutputPortService:
 
         alpha = 2 / 3
         hybrid_score = (
-            (alpha * semantic_score) + ((1 - alpha) * func.coalesce(keyword_score, 0))
+            (alpha * semantic_score) + ((1.0 - alpha) * func.coalesce(keyword_score, 0))
         ).label("hybrid_score")
 
         stmt = (
             select(DatasetModel, hybrid_score)
             .options(*get_dataset_load_options())
-            # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .order_by(hybrid_score.desc())
+            # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .limit(limit * 2)
         )
         results = self.db.execute(stmt).unique().all()
@@ -150,7 +150,10 @@ class OutputPortService:
                 dataset.domain = dataset.data_product.domain
                 visible_candidates.append((dataset, score))
 
-                if (
+                if len(visible_candidates) >= limit:
+                    split_index = limit
+                    break
+                elif (
                     len(visible_candidates) > 1
                     and (gap := score - visible_candidates[-1][1]) > max_gap
                 ):

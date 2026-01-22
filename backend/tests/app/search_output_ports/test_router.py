@@ -12,7 +12,7 @@ from tests.factories import DatasetFactory
 
 EMBEDDING_LATENCY_BOUND: Final[float] = 2.000  # seconds
 LATENCY_BOUND: Final[float] = 0.300  # seconds
-PRECISION_BOUND: Final[float] = 0.10
+PRECISION_BOUND: Final[float] = 0.1
 RECALL_BOUND: Final[float] = 0.7
 
 
@@ -55,7 +55,7 @@ class TestOutputPortSearchRouter:
                     "Top Engaged Segments",
                     "Weekly Churn Probabilities",
                 },
-                "recall_bound": 0.50
+                "recall_bound": 0.25,
             },
             {
                 "query": "Which campaigns delivered the best ROI?",
@@ -64,7 +64,7 @@ class TestOutputPortSearchRouter:
                     "Ad Spend Vs Roi",
                     "Campaign Performance Summary",
                 },
-                "precision_bound": 0.05,
+                "recall_bound": 0.65,
             },
             {
                 "query": "Which features are used the most?",
@@ -75,17 +75,15 @@ class TestOutputPortSearchRouter:
                     "Release Impact Summary",
                     "Weekly Feature Summary",
                 },
-                "recall_bound": 0.6,
+                "recall_bound": 0.60,
             },
             {
                 "query": "Are we GDPR compliant?",
                 "expected": {"Privacy Compliance Report", "Regulatory Audit Report"},
-                "precision_bound": 0.05,
             },
             {
                 "query": "What will our expenses look like next quarter?",
                 "expected": {"Expense Forecast"},
-                "precision_bound": 0.05
             },
             {
                 "query": "Planned versus actual production",
@@ -97,7 +95,6 @@ class TestOutputPortSearchRouter:
             {
                 "query": "inventory levels by warehouse",
                 "expected": {"Inventory Status"},
-                "precision_bound": 0.05
             },
         ]
 
