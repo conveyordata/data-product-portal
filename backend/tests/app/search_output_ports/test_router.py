@@ -131,11 +131,12 @@ class TestOutputPortSearchRouter:
         latency_bound: float = LATENCY_BOUND,
         precision_bound: float = PRECISION_BOUND,
         recall_bound: float = RECALL_BOUND,
+        limit: int = 10,
     ) -> tuple[float, float]:
         start_time = time.perf_counter()
         response = client.get(
             "/api/v2/search/output_ports",
-            params={"query": query, "limit": 10},
+            params={"query": query, "limit": limit},
         )
         end_time = time.perf_counter()
 
@@ -145,6 +146,7 @@ class TestOutputPortSearchRouter:
         )
 
         output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        assert len(output.output_ports) <= limit, "Query limit exceeded"
 
         positives = {port.name for port in output.output_ports}
         true_positives = len(expected.intersection(positives))
