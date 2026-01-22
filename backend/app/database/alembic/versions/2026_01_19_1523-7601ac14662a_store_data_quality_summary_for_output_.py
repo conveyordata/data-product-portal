@@ -87,3 +87,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("data_quality_technical_assets")
     op.drop_table("dataset_data_quality_summaries")
+    op.execute("DROP TYPE dataqualitystatus;")
