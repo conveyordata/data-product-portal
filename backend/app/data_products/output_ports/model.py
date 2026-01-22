@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 from fastapi import HTTPException, status
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import Column, Enum, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
 from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -45,6 +45,7 @@ class Dataset(Base, BaseORM):
     )
     usage = Column(String, nullable=True)
     embeddings = deferred(Column(Vector(384)))
+    search_vector = Column(TSVECTOR)
 
     # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(

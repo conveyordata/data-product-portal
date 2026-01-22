@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from fastembed import TextEmbedding
-from sqlalchemy import asc, select
+from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 from sqlalchemy.sql.base import ExecutableOption
 
@@ -120,25 +120,44 @@ class OutputPortService:
     def search_datasets(
         self, query: str, limit: int, user: UserModel
     ) -> Sequence[SearchDatasets]:
-        [query_embedding] = self.embedding_model.embed([query])
-        distance = DatasetModel.embeddings.cosine_distance(query_embedding)
-        load_options = get_dataset_load_options()
-        stmt = (
-            select(DatasetModel)
-            .options(*load_options)
-            # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
-            .limit(limit * 2)
-            .order_by(distance)
+        query_embedding = self.embedding_model.embed(query)
+        semantic_score = (
+            1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
+        ).label("sem_score")
+        ts_query = func.websearch_to_tsquery("english", query)
+        keyword_score = func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32).label(
+            "key_score"
         )
-        datasets = self.db.scalars(stmt).unique().all()
-        filtered_datasets: list[SearchDatasets] = []
-        for dataset in datasets:
-            if len(filtered_datasets) >= limit:
-                return filtered_datasets
+
+        alpha = 2 / 3
+        hybrid_score = (
+            (alpha * semantic_score) + ((1 - alpha) * func.coalesce(keyword_score, 0))
+        ).label("hybrid_score")
+
+        stmt = (
+            select(DatasetModel, hybrid_score)
+            .options(*get_dataset_load_options())
+            # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
+            .order_by(hybrid_score.desc())
+            .limit(limit * 2)
+        )
+        results = self.db.execute(stmt).unique().all()
+
+        max_gap, split_index = 0, -1
+        visible_candidates: list[tuple[DatasetModel, float]] = []
+        for idx, (dataset, score) in enumerate(results):
             if self.is_visible_to_user(dataset, user):
                 dataset.domain = dataset.data_product.domain
-                filtered_datasets.append(dataset)
-        return filtered_datasets
+                visible_candidates.append((dataset, score))
+
+                if (
+                    len(visible_candidates) > 1
+                    and (gap := score - visible_candidates[-1][1]) > max_gap
+                ):
+                    max_gap = gap
+                    split_index = len(visible_candidates) - 1
+
+        return [ds[0] for ds in visible_candidates[:split_index]]
 
     @staticmethod
     def recalculate_embeddings_load_options():
@@ -154,9 +173,7 @@ class OutputPortService:
             self.db.scalars(
                 select(DatasetModel)
                 .where(DatasetModel.data_product_id == data_product_id)
-                .options(
-                    *self.recalculate_embeddings_load_options(),
-                ),
+                .options(*self.recalculate_embeddings_load_options()),
             )
             .unique()
             .all()
@@ -167,19 +184,26 @@ class OutputPortService:
         dataset = self.db.scalar(
             select(DatasetModel)
             .where(DatasetModel.id == dataset_id)
-            .options(
-                *self.recalculate_embeddings_load_options(),
-            )
+            .options(*self.recalculate_embeddings_load_options())
         )
         self._recalculate_embeddings([dataset])
 
     def _recalculate_embeddings(self, datasets: Sequence[DatasetModel]):
         embeddings = self.embedding_model.embed(
-            [DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets]
+            DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
         )
         for dataset, emb in zip(datasets, embeddings):
             dataset.embeddings = emb.tolist()
+            self._recalculate_search_vector(dataset)
             self.db.add(dataset)
+
+    @staticmethod
+    def _recalculate_search_vector(dataset: DatasetModel):
+        dataset.search_vector = func.setweight(
+            func.to_tsvector("english", dataset.name), "A"
+        ).op("||")(
+            func.setweight(func.to_tsvector("english", dataset.description), "B")
+        )
 
     def recalculate_all_embeddings(self, batch_size: int = 50):
         dataset_ids = self.db.scalars(select(DatasetModel.id)).all()
@@ -192,9 +216,7 @@ class OutputPortService:
                 self.db.scalars(
                     select(DatasetModel)
                     .where(DatasetModel.id.in_(batch_ids))
-                    .options(
-                        *self.recalculate_embeddings_load_options(),
-                    )
+                    .options(*self.recalculate_embeddings_load_options())
                 )
                 .unique()
                 .all()

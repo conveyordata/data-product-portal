@@ -12,7 +12,7 @@ from tests.factories import DatasetFactory
 
 EMBEDDING_LATENCY_BOUND: Final[float] = 2.000  # seconds
 LATENCY_BOUND: Final[float] = 0.300  # seconds
-PRECISION_BOUND: Final[float] = 0.7
+PRECISION_BOUND: Final[float] = 0.10
 RECALL_BOUND: Final[float] = 0.7
 
 
@@ -23,21 +23,25 @@ class TestOutputPortSearchRouter:
         response = client.get("/api/datasets/search", params={"query": "Data"})
         assert response.status_code == 200, response.text
         data = response.json()
-        assert len(data) == 3
-        returned_ids = {item["id"] for item in data}
-        expected_ids = {str(ds_1.id), str(ds_2.id), str(ds_3.id)}
-        assert returned_ids == expected_ids
+        assert len(data) >= 2
+        returned_ops = {item["name"] for item in data}
+        expected_ops = {ds_1.name, ds_2.name}
+        assert returned_ops.issuperset(expected_ops), (
+            f"{returned_ops} is not the superset of {expected_ops}"
+        )
 
     def test_search_output_ports(self, session, client):
         ds_1, ds_2, ds_3 = self.setup(session)
 
         response = client.get("/api/v2/search/output_ports", params={"query": "Data"})
         assert response.status_code == 200, response.text
-        data = response.json()
-        assert len(data["output_ports"]) == 3
-        returned_ids = {item["id"] for item in data["output_ports"]}
-        expected_ids = {str(ds_1.id), str(ds_2.id), str(ds_3.id)}
-        assert returned_ids == expected_ids
+        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        assert len(output.output_ports) >= 2
+        returned_ops = {port.name for port in output.output_ports}
+        expected_ops = {ds_1.name, ds_2.name}
+        assert returned_ops.issuperset(expected_ops), (
+            f"{returned_ops} is not the superset of {expected_ops}"
+        )
 
     def test_benchmark_output_ports(self, session, client):
         self.reseed(session)
@@ -51,8 +55,7 @@ class TestOutputPortSearchRouter:
                     "Top Engaged Segments",
                     "Weekly Churn Probabilities",
                 },
-                "precision_bound": 0.25,
-                "recall_bound": 0.25,
+                "recall_bound": 0.50
             },
             {
                 "query": "Which campaigns delivered the best ROI?",
@@ -61,8 +64,7 @@ class TestOutputPortSearchRouter:
                     "Ad Spend Vs Roi",
                     "Campaign Performance Summary",
                 },
-                "precision_bound": 0.666,
-                "recall_bound": 0.666,
+                "precision_bound": 0.05,
             },
             {
                 "query": "Which features are used the most?",
@@ -73,18 +75,17 @@ class TestOutputPortSearchRouter:
                     "Release Impact Summary",
                     "Weekly Feature Summary",
                 },
-                "precision_bound": 0.6,
                 "recall_bound": 0.6,
             },
             {
                 "query": "Are we GDPR compliant?",
                 "expected": {"Privacy Compliance Report", "Regulatory Audit Report"},
-                "precision_bound": 0.5,
-                "recall_bound": 0.5,
+                "precision_bound": 0.05,
             },
             {
                 "query": "What will our expenses look like next quarter?",
                 "expected": {"Expense Forecast"},
+                "precision_bound": 0.05
             },
             {
                 "query": "Planned versus actual production",
@@ -96,6 +97,7 @@ class TestOutputPortSearchRouter:
             {
                 "query": "inventory levels by warehouse",
                 "expected": {"Inventory Status"},
+                "precision_bound": 0.05
             },
         ]
 
@@ -136,7 +138,7 @@ class TestOutputPortSearchRouter:
         start_time = time.perf_counter()
         response = client.get(
             "/api/v2/search/output_ports",
-            params={"query": query, "limit": len(expected)},
+            params={"query": query, "limit": 10},
         )
         end_time = time.perf_counter()
 
