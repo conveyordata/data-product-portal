@@ -21603,6 +21603,10 @@
                 "type": "null"
               }
             ]
+          },
+          "detailed_name": {
+            "type": "string",
+            "title": "Detailed Name"
           }
         },
         "type": "object",
@@ -21611,7 +21615,8 @@
           "plugin",
           "platform",
           "display_name",
-          "icon_name"
+          "icon_name",
+          "detailed_name"
         ],
         "title": "UIElementMetadataResponse"
       },

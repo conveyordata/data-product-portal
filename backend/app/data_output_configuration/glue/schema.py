@@ -44,6 +44,7 @@ class GlueDataOutput(AssetProviderPlugin):
         parent_platform="aws",
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
+        detailed_name="Database",
     )
 
     class Meta:
