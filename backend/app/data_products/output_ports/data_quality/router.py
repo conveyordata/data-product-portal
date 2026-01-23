@@ -64,9 +64,9 @@ def convert(
     route,
     responses={
         404: {
-            "description": "Dataset not found",
+            "description": "Output Port not found",
             "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
+                "application/json": {"example": {"detail": "Output Port ID not found"}}
             },
         }
     },
