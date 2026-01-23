@@ -2,7 +2,7 @@ from enum import UNIQUE, Enum, verify
 
 
 @verify(UNIQUE)
-class DataQualityStatus(str, Enum):
+class DataQualityStatus(StrEnum):
     PASS = "pass"  # noqa: S105
     FAIL = "fail"
     WARN = "warn"
