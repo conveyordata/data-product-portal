@@ -20,7 +20,7 @@
     "dependencies": {
         "@ant-design/charts": "^2.6.7",
         "@ant-design/colors": "^8.0.1",
-        "@dagrejs/dagre": "^1.1.8",
+        "@dagrejs/dagre": "^2.0.3",
         "@fontsource/inter": "^5.2.8",
         "@posthog/react": "^1.7.0",
         "@reduxjs/toolkit": "^2.11.2",
