@@ -1,45 +1,53 @@
-import { Col, Flex, type GetProps, Input, Row, Typography } from 'antd';
-import type { ReactNode } from 'react';
+import { Col, type GetProps, Input, Row, Typography } from 'antd';
+import { type ReactNode, useState } from 'react';
+import { SearchSuggestions } from '@/components/search-page/search-suggestions.tsx';
 
 type SearchProps = GetProps<typeof Input.Search>;
 
 type Props = {
     title: string;
     children: ReactNode;
-    onSearch: SearchProps['onSearch'];
+    onChange?: SearchProps['onChange'];
+    onSearch?: SearchProps['onSearch'];
     searchPlaceholder: string;
-    createButton?: ReactNode;
     actions?: ReactNode;
     loadingResults?: boolean;
+    searchSuggestions?: string[];
 };
 
 export default function SearchPage({
     title,
     children,
     onSearch,
-    createButton,
+    onChange,
     searchPlaceholder,
     actions,
     loadingResults,
+    searchSuggestions,
 }: Props) {
+    const [searched, setSearched] = useState<boolean>(false);
     return (
-        <Flex vertical>
-            <Typography.Title level={3}>{title}</Typography.Title>
-            <Row gutter={[16, 24]}>
-                <Col span={10}>
-                    <Input.Search
-                        placeholder={searchPlaceholder}
-                        allowClear
-                        onChange={(e) => onSearch?.(e.target.value, undefined, undefined)}
-                        loading={loadingResults}
-                    />
-                </Col>
-                <Col span={8}>{actions}</Col>
-                <Col span={4} offset={2}>
-                    <Flex justify="flex-end">{createButton}</Flex>
-                </Col>
-                <Col span={24}>{children}</Col>
-            </Row>
-        </Flex>
+        <Row gutter={[16, 16]}>
+            <Col span={24}>
+                <Typography.Title level={3}>{title}</Typography.Title>
+            </Col>
+            <Col span={10}>
+                <Input.Search
+                    placeholder={searchPlaceholder}
+                    allowClear
+                    onChange={onChange}
+                    onSearch={(e) => {
+                        setSearched(true);
+                        onSearch?.(e);
+                    }}
+                    loading={loadingResults}
+                />
+            </Col>
+            <Col span={14}>{actions}</Col>
+            <Col span={10}>
+                {searchSuggestions && !searched && <SearchSuggestions suggestions={searchSuggestions} />}
+            </Col>
+            <Col span={24}>{children}</Col>
+        </Row>
     );
 }
