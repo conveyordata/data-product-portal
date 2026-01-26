@@ -120,47 +120,44 @@ class OutputPortService:
     def search_datasets(
         self, query: str, limit: int, user: UserModel
     ) -> Sequence[SearchDatasets]:
+        """An attempt was made to use the elbow method to determine a cut-off for returned results.
+        The results of this method were quite poor, hence the search currently works as a sorting operation only,
+        no filtering is applied other than the limit.
+        """
         query_embedding = self.embedding_model.embed(query)
         semantic_score = (
             1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
-        ).label("sem_score")
+        ).label("semantic_score")
         ts_query = func.websearch_to_tsquery("english", query)
-        keyword_score = func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32).label(
-            "key_score"
-        )
+        keyword_score = func.coalesce(
+            func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32), 0
+        ).label("keyword_score")
 
-        alpha = 2 / 3
+        semantic_weight = 2.0 / 3.0
+        keyword_weight = 1.0 - semantic_weight
         hybrid_score = (
-            (alpha * semantic_score) + ((1.0 - alpha) * func.coalesce(keyword_score, 0))
+            (semantic_weight * semantic_score) + (keyword_weight * keyword_score)
         ).label("hybrid_score")
 
         stmt = (
-            select(DatasetModel, hybrid_score)
+            select(DatasetModel)
             .options(*get_dataset_load_options())
             .order_by(hybrid_score.desc())
             # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .limit(limit * 2)
         )
-        results = self.db.execute(stmt).unique().all()
+        results = self.db.scalars(stmt).unique().all()
 
-        max_gap, split_index = 0, -1
-        visible_candidates: list[tuple[DatasetModel, float]] = []
-        for idx, (dataset, score) in enumerate(results):
+        visible_candidates: list[DatasetModel] = []
+        for dataset in results:
             if self.is_visible_to_user(dataset, user):
                 dataset.domain = dataset.data_product.domain
-                visible_candidates.append((dataset, score))
+                visible_candidates.append(dataset)
 
                 if len(visible_candidates) >= limit:
-                    split_index = limit
-                    break
-                elif (
-                    len(visible_candidates) > 1
-                    and (gap := score - visible_candidates[-1][1]) > max_gap
-                ):
-                    max_gap = gap
-                    split_index = len(visible_candidates) - 1
+                    return visible_candidates
 
-        return [ds[0] for ds in visible_candidates[:split_index]]
+        return visible_candidates
 
     @staticmethod
     def recalculate_embeddings_load_options():
@@ -171,7 +168,10 @@ class OutputPortService:
             ),
         ]
 
-    def recalculate_embeddings_for_output_ports_of_product(self, data_product_id: UUID):
+    def recalculate_embeddings_for_output_ports_of_product(
+        self, data_product_id: UUID
+    ) -> None:
+        self.db.flush()
         datasets = (
             self.db.scalars(
                 select(DatasetModel)
@@ -183,7 +183,7 @@ class OutputPortService:
         )
         self._recalculate_embeddings(datasets)
 
-    def recalculate_embedding(self, dataset_id: UUID):
+    def recalculate_embedding(self, dataset_id: UUID) -> None:
         dataset = self.db.scalar(
             select(DatasetModel)
             .where(DatasetModel.id == dataset_id)
@@ -191,7 +191,7 @@ class OutputPortService:
         )
         self._recalculate_embeddings([dataset])
 
-    def _recalculate_embeddings(self, datasets: Sequence[DatasetModel]):
+    def _recalculate_embeddings(self, datasets: Sequence[DatasetModel]) -> None:
         embeddings = self.embedding_model.embed(
             DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
         )
@@ -201,14 +201,14 @@ class OutputPortService:
             self.db.add(dataset)
 
     @staticmethod
-    def _recalculate_search_vector(dataset: DatasetModel):
+    def _recalculate_search_vector(dataset: DatasetModel) -> None:
         dataset.search_vector = func.setweight(
             func.to_tsvector("english", dataset.name), "A"
         ).op("||")(
             func.setweight(func.to_tsvector("english", dataset.description), "B")
         )
 
-    def recalculate_all_embeddings(self, batch_size: int = 50):
+    def recalculate_all_embeddings(self, batch_size: int = 50) -> None:
         dataset_ids = self.db.scalars(select(DatasetModel.id)).all()
 
         # Process in batches to reduce load

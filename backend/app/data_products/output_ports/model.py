@@ -44,8 +44,8 @@ class Dataset(Base, BaseORM):
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
     )
     usage = Column(String, nullable=True)
-    embeddings = deferred(Column(Vector(384)))
     search_vector = Column(TSVECTOR)
+    embeddings = deferred(Column(Vector(384)))
 
     # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(

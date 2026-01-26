@@ -170,7 +170,6 @@ def create_data_product(
         extra_receiver_ids=owners,
     )
     RefreshInfrastructureLambda().trigger()
-    db.flush()
     OutputPortService(db).recalculate_embeddings_for_output_ports_of_product(
         created_data_product.id
     )
@@ -284,7 +283,6 @@ def update_data_product(
         )
     )
     RefreshInfrastructureLambda().trigger()
-    db.flush()
     OutputPortService(db).recalculate_embeddings_for_output_ports_of_product(id)
     return result
 
