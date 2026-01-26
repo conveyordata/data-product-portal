@@ -104,10 +104,6 @@ class TestDataQualityRouter:
                 created_at=datetime.now(UTC) - timedelta(days=1),
                 overall_status=DataQualityStatus.FAILURE,
                 technical_assets=[],
-                dimensions={
-                    "validity": DataQualityStatus.FAILURE,
-                    "completeness": DataQualityStatus.SUCCESS,
-                },
             ),
         )
 
@@ -133,3 +129,5 @@ class TestDataQualityRouter:
         assert data["created_at"] == summary_last.created_at.isoformat().replace(
             "+00:00", "Z"
         )
+        assert data["dimensions"]["validity"] == DataQualityStatus.FAILURE
+        assert data["dimensions"]["completeness"] == DataQualityStatus.SUCCESS

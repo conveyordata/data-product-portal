@@ -62,7 +62,7 @@ def convert(
         description=summary.description,
         created_at=summary.created_at,
         details_url=summary.details_url,
-        dimensions=summary.dimensions,
+        dimensions=convert_dimensions_to_api(summary.dimensions),
         technical_assets=convert_technical_assets_to_api(summary.technical_assets),
         overall_status=DataQualityStatus(summary.overall_status),
         id=summary.id,
