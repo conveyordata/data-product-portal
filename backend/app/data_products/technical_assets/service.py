@@ -109,6 +109,7 @@ class DataOutputService:
 
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
+        data_output_schema.pop("sourceAligned")  # Remove deprecated field
         model = DataOutputModel(
             **data_output_schema,
             tags=tags,

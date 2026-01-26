@@ -14420,8 +14420,28 @@
               }
             }
           },
+          "sourceAligned": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "deprecated": true
+          },
           "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TechnicalMapping"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "tag_ids": {
             "items": {
@@ -14441,7 +14461,6 @@
           "service_id",
           "status",
           "configuration",
-          "technical_mapping",
           "tag_ids"
         ],
         "title": "CreateTechnicalAssetRequest"
@@ -14517,8 +14536,28 @@
               }
             }
           },
+          "sourceAligned": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "deprecated": true
+          },
           "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TechnicalMapping"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "tag_ids": {
             "items": {
@@ -14538,7 +14577,6 @@
           "service_id",
           "status",
           "configuration",
-          "technical_mapping",
           "tag_ids"
         ],
         "title": "DataOutputCreate",
@@ -14734,6 +14772,12 @@
             "type": "array",
             "title": "Tags"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -14763,6 +14807,7 @@
           "owner",
           "dataset_links",
           "tags",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],
@@ -14884,6 +14929,12 @@
             "type": "array",
             "title": "Dataset Links"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -14912,6 +14963,7 @@
           "configuration",
           "owner",
           "dataset_links",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],
@@ -15095,6 +15147,12 @@
             "type": "array",
             "title": "Tags"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -15124,6 +15182,7 @@
           "owner",
           "dataset_links",
           "tags",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],
@@ -18793,6 +18852,12 @@
             "type": "array",
             "title": "Tags"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -18822,6 +18887,7 @@
           "owner",
           "output_port_links",
           "tags",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],

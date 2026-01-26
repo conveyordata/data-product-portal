@@ -46,6 +46,14 @@ class BaseTechnicalAssetGet(ORMModel):
     service: PlatformService = Field(exclude=True)
     environment_configurations: list[EnvironmentConfigsGetItem] = Field(exclude=True)
 
+    @computed_field(
+        description="DEPRECATED: Use 'technical_mapping' instead. "
+        "This field will be removed in a future version."
+    )
+    def sourceAligned(self) -> bool:
+        """Backwards compatibility: convert technical_mapping back to source_aligned."""
+        return self.technical_mapping == TechnicalMapping.Custom
+
     @computed_field
     def result_string(self) -> str:
         return self.configuration.render_template(self.service.result_string_template)
