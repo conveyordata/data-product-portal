@@ -47,15 +47,12 @@ class CreateTechnicalAssetRequest(ORMModel):
             )
 
             if self.technical_mapping is None:
-                # Convert sourceAligned to technical_mapping
                 self.technical_mapping = (
                     TechnicalMapping.Custom
                     if self.sourceAligned
                     else TechnicalMapping.Default
                 )
-            # If both are provided, technical_mapping takes precedence (already set)
 
-        # If neither was provided, default to Default
         if self.technical_mapping is None:
             self.technical_mapping = TechnicalMapping.Default
 

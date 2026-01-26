@@ -51,21 +51,16 @@ Technical assets are linked to and owned by a single **Data Product**.
 4. **Specify Metadata**: Include necessary metadata such as:
    - **Name**
    - **Description**
-   - **Alignment** Choose between *Product aligned* and *Source aligned* (see [Alignment](#alignment) below).
+   - **Technical Mapping** Choose between *Default* and *Custom* (see [Technical mapping](#technical-mapping) below).
    - **Technology** Choose from one of the enabled technologies within your organization.
    - **Technology specific information** Add some technical information such as database name and schema, prefix paths, ... This depends on the chosen technology.
 5. **Save Your Data Output**: Click **Create** to add the data output to your product.
 
 ![Data Output Creation](./img/technical-asset-modal.png)
 
-### Alignment
+### Technical mapping
 
-**Product aligned** Technical Assets are the default option.
-These assets are created within the namespace of the parent **Data Product** and have correct, restricted permissions.
-
-**Source aligned** Technical assets need to be explicitly approved by **Data Product Portal** administrators.
-
-When in doubt, choose **Product aligned**.
+*Default* is the **recommended option for most users**. Default mapping uses the platform's standard provisioning conventions, automatically generating technical identifiers (paths, table names, schemas, etc.) based on your Data Product's namespace and configuration. More information can be found in [Technical assets - Technical mapping](../concepts/technical-assets.md#%EF%B8%8F-technical-mapping)
 
 ## Creating an output port for your product
 
