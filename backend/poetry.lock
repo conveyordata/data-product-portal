@@ -983,14 +983,14 @@ standard-no-fastapi-cloud-cli = ["email-validator (>=2.0.0)", "fastapi-cli[stand
 
 [[package]]
 name = "fastmcp"
-version = "2.14.3"
+version = "2.14.4"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp-2.14.3-py3-none-any.whl", hash = "sha256:103c6b4c6e97a9acc251c81d303f110fe4f2bdba31353df515d66272bf1b9414"},
-    {file = "fastmcp-2.14.3.tar.gz", hash = "sha256:abc9113d5fcf79dfb4c060a1e1c55fccb0d4bce4a2e3eab15ca352341eec8dd6"},
+    {file = "fastmcp-2.14.4-py3-none-any.whl", hash = "sha256:5858cff5e4c8ea8107f9bca2609d71d6256e0fce74495912f6e51625e466c49a"},
+    {file = "fastmcp-2.14.4.tar.gz", hash = "sha256:c01f19845c2adda0a70d59525c9193be64a6383014c8d40ce63345ac664053ff"},
 ]
 
 [package.dependencies]
@@ -998,13 +998,15 @@ authlib = ">=1.6.5"
 cyclopts = ">=4.0.0"
 exceptiongroup = ">=1.2.2"
 httpx = ">=0.28.1"
+jsonref = ">=1.1.0"
 jsonschema-path = ">=0.3.4"
 mcp = ">=1.24.0,<2.0"
 openapi-pydantic = ">=0.5.1"
+packaging = ">=20.0"
 platformdirs = ">=4.0.0"
 py-key-value-aio = {version = ">=0.3.0,<0.4.0", extras = ["disk", "keyring", "memory"]}
 pydantic = {version = ">=2.11.7", extras = ["email"]}
-pydocket = ">=0.16.6"
+pydocket = ">=0.16.6,<0.17.0"
 pyperclip = ">=1.9.0"
 python-dotenv = ">=1.1.0"
 rich = ">=13.9.4"
@@ -1343,6 +1345,18 @@ groups = ["main"]
 files = [
     {file = "jmespath-1.0.1-py3-none-any.whl", hash = "sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980"},
     {file = "jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"},
+]
+
+[[package]]
+name = "jsonref"
+version = "1.1.0"
+description = "jsonref is a library for automatic dereferencing of JSON Reference objects for Python."
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "jsonref-1.1.0-py3-none-any.whl", hash = "sha256:590dc7773df6c21cbf948b5dac07a72a251db28b0238ceecce0a2abfa8ec30a9"},
+    {file = "jsonref-1.1.0.tar.gz", hash = "sha256:32fe8e1d85af0fdefbebce950af85590b22b60f9e95443176adbde4e1ecea552"},
 ]
 
 [[package]]
@@ -3421,4 +3435,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "8dfcad44f50e93951263ac0ebf40a808109e86354e764f110e1942456d8900e5"
+content-hash = "a46bdc5a7d3787b8f0519ca3c8484f196c908fa85075d5be77254326d3ff2193"
