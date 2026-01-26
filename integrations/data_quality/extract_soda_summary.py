@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 STATUS_PRIORITY = {
-    "pass": 0,
-    "fail": 1,
+    "success": 0,
+    "failure": 1,
     "warning": 2,
     "error": 3,
 }
@@ -31,11 +31,11 @@ def extract_assets(soda_output: dict) -> list[dict]:
         outcome = check.get("outcome")
 
         if outcome == "fail":
-            status = "fail"
+            status = "failure"
         elif outcome == "warn":
-            status = "warn"
+            status = "warning"
         else:
-            status = "pass"
+            status = "success"
 
         table_status.setdefault(table, []).append(status)
 

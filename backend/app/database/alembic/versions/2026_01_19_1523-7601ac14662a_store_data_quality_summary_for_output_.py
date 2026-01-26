@@ -11,7 +11,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.shared.model import utcnow
 
 revision: str = "7601ac14662a"
@@ -51,7 +50,7 @@ def upgrade() -> None:
         ),
         sa.Column("details_url", sa.Text(), nullable=True),
         sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("overall_status", sa.Enum(DataQualityStatus), nullable=False),
+        sa.Column("overall_status", sa.Text(), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -71,7 +70,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "status",
-            sa.Enum(DataQualityStatus),
+            sa.Text(),
             nullable=False,
         ),
         sa.Column(
@@ -87,4 +86,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("data_quality_technical_assets")
     op.drop_table("dataset_data_quality_summaries")
-    op.execute("DROP TYPE dataqualitystatus;")

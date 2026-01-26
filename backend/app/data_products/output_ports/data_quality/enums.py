@@ -1,10 +1,10 @@
-from enum import UNIQUE, Enum, verify
+from enum import UNIQUE, StrEnum, verify
 
 
 @verify(UNIQUE)
 class DataQualityStatus(StrEnum):
-    PASS = "pass"  # noqa: S105
-    FAIL = "fail"
-    WARN = "warn"
+    SUCCESS = "success"
+    FAILURE = "failure"
+    WARNING = "warning"
     ERROR = "error"
     UNKNOWN = "unknown"

@@ -31,11 +31,11 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
 
     const getStatusIcon = (status: DataQualityStatus) => {
         switch (status) {
-            case 'pass':
+            case 'success':
                 return <CheckCircleOutlined />;
-            case 'fail':
+            case 'failure':
                 return <CloseCircleOutlined />;
-            case 'warn':
+            case 'warning':
                 return <QuestionCircleOutlined />;
             case 'error':
                 return <ExclamationCircleOutlined />;
@@ -46,13 +46,13 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
 
     const getStatusColor = (status: DataQualityStatus) => {
         switch (status) {
-            case 'pass':
+            case 'success':
                 return 'success';
-            case 'fail':
+            case 'failure':
                 return 'error';
             case 'error':
                 return 'error';
-            case 'warn':
+            case 'warning':
                 return 'warning';
             case 'unknown':
                 return 'info';
@@ -61,13 +61,13 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
 
     function formatStatus(overall_status: DataQualityStatus) {
         switch (overall_status) {
-            case 'pass':
+            case 'success':
                 return 'Passed';
-            case 'fail':
+            case 'failure':
                 return 'Failed';
             case 'error':
                 return 'Error';
-            case 'warn':
+            case 'warning':
                 return 'Warning';
             case 'unknown':
                 return 'Unknown';
