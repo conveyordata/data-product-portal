@@ -1022,11 +1022,11 @@
             }
           },
           "404": {
-            "description": "Dataset not found",
+            "description": "Output Port not found",
             "content": {
               "application/json": {
                 "example": {
-                  "detail": "Dataset id not found"
+                  "detail": "Output Port ID not found"
                 }
               }
             }
@@ -16801,9 +16801,9 @@
       "DataQualityStatus": {
         "type": "string",
         "enum": [
-          "pass",
-          "fail",
-          "warn",
+          "success",
+          "failure",
+          "warning",
           "error",
           "unknown"
         ],

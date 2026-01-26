@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization, DatasetResolver
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.data_quality.model import (
     DataQualitySummary,
     DataQualityTechnicalAssetModel,
@@ -25,11 +26,19 @@ router = APIRouter(tags=["Output Ports - Data Quality"])
 route = "/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary"
 
 
+def convert_dimensions_to_api(
+    dimensions: dict[str, str],
+) -> dict[str, DataQualityStatus]:
+    return {key: DataQualityStatus(value) for key, value in dimensions.items()}
+
+
 def convert_technical_assets_to_api(
     technical_assets: list[DataQualityTechnicalAssetModel],
 ):
     return [
-        DataQualityTechnicalAsset(name=tech_asset.name, status=tech_asset.status)
+        DataQualityTechnicalAsset(
+            name=tech_asset.name, status=DataQualityStatus(tech_asset.status)
+        )
         for tech_asset in technical_assets
     ]
 
@@ -55,7 +64,7 @@ def convert(
         details_url=summary.details_url,
         dimensions=summary.dimensions,
         technical_assets=convert_technical_assets_to_api(summary.technical_assets),
-        overall_status=summary.overall_status,
+        overall_status=DataQualityStatus(summary.overall_status),
         id=summary.id,
     )
 

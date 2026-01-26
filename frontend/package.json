@@ -15,7 +15,7 @@
         "validate-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js --fail-on-update",
         "typecheck": "tsc --strict --noEmit",
         "dep-viz": "npm run build && npx open-cli dependencies.html",
-        "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts && sed -i '' '1s/^/\\/\\/ @ts-nocheck\\n/' src/store/api/services/generated/completeServiceApi.ts"
+        "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts && sed -i '1s/^/\\/\\/ @ts-nocheck\\n/' src/store/api/services/generated/completeServiceApi.ts"
     },
     "dependencies": {
         "@ant-design/charts": "^2.6.7",

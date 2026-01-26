@@ -13,6 +13,10 @@ from app.data_products.output_ports.data_quality.schema_response import (
 from app.data_products.output_ports.model import ensure_dataset_exists
 
 
+def convert_dimensions_db(dimensions: dict[str, DataQualityStatus]) -> dict[str, str]:
+    return {key: value.value for key, value in dimensions.items()}
+
+
 class DatasetDataQualityService:
     def __init__(self, db: Session):
         self.db = db
@@ -40,18 +44,23 @@ class DatasetDataQualityService:
         ensure_dataset_exists(dataset_id, self.db)
 
         technical_assets = [
-            DataQualityTechnicalAssetModel(name=asset.name, status=asset.status)
+            DataQualityTechnicalAssetModel(name=asset.name, status=asset.status.value)
             for asset in data_quality_summary.technical_assets
         ]
 
         assets_with_checks = len(
-            [a for a in technical_assets if a.status not in [DataQualityStatus.UNKNOWN]]
+            [
+                a
+                for a in technical_assets
+                if a.status not in [DataQualityStatus.UNKNOWN.value]
+            ]
         )
         assets_with_issues = len(
             [
                 a
                 for a in technical_assets
-                if a.status in [DataQualityStatus.FAIL, DataQualityStatus.ERROR]
+                if a.status
+                in [DataQualityStatus.FAILURE.value, DataQualityStatus.ERROR.value]
             ]
         )
 
@@ -60,8 +69,10 @@ class DatasetDataQualityService:
             details_url=data_quality_summary.details_url,
             description=data_quality_summary.description,
             created_at=data_quality_summary.created_at,
-            overall_status=data_quality_summary.overall_status,
-            dimensions=data_quality_summary.dimensions,
+            overall_status=data_quality_summary.overall_status.value,
+            dimensions=convert_dimensions_db(data_quality_summary.dimensions)
+            if data_quality_summary.dimensions
+            else {},
             technical_assets=technical_assets,
             assets_with_checks=assets_with_checks,
             assets_with_issues=assets_with_issues,

@@ -40,12 +40,12 @@ class TestDataQualityRouter:
         _assign_update_role(session, dataset)
 
         payload = {
-            "overall_status": "pass",
+            "overall_status": "success",
             "details_url": "https://mycustomdomain.be/run1",
             "created_at": datetime.now().isoformat(),
             "technical_assets": [
-                {"name": "table1", "status": "pass"},
-                {"name": "table2", "status": "fail"},
+                {"name": "table1", "status": "success"},
+                {"name": "table2", "status": "failure"},
             ],
         }
 
@@ -64,12 +64,12 @@ class TestDataQualityRouter:
         _assign_update_role(session, dataset)
 
         payload = {
-            "overall_status": "pass",
+            "overall_status": "success",
             "created_at": datetime.now().isoformat(),
             "technical_assets": [
-                {"name": "table1", "status": "pass"},
+                {"name": "table1", "status": "success"},
             ],
-            "dimensions": {"completeness": "pass", "validity": "fail"},
+            "dimensions": {"completeness": "success", "validity": "failure"},
         }
 
         post_response = client.post(
@@ -79,8 +79,8 @@ class TestDataQualityRouter:
         assert post_response.status_code == 200
         body = post_response.json()
         assert len(body["dimensions"]) == 2
-        assert body["dimensions"]["validity"] == "fail"
-        assert body["dimensions"]["completeness"] == "pass"
+        assert body["dimensions"]["validity"] == "failure"
+        assert body["dimensions"]["completeness"] == "success"
 
     def test_get_latest_data_quality_result_no_results(self, client, session):
         dataset = DatasetFactory()
@@ -102,11 +102,11 @@ class TestDataQualityRouter:
             dataset.id,
             OutputPortDataQualitySummary(
                 created_at=datetime.now(UTC) - timedelta(days=1),
-                overall_status=DataQualityStatus.FAIL,
+                overall_status=DataQualityStatus.FAILURE,
                 technical_assets=[],
                 dimensions={
-                    "validity": DataQualityStatus.FAIL,
-                    "completeness": DataQualityStatus.PASS,
+                    "validity": DataQualityStatus.FAILURE,
+                    "completeness": DataQualityStatus.SUCCESS,
                 },
             ),
         )
@@ -115,11 +115,11 @@ class TestDataQualityRouter:
             dataset.id,
             OutputPortDataQualitySummary(
                 created_at=datetime.now(UTC),
-                overall_status=DataQualityStatus.PASS,
+                overall_status=DataQualityStatus.SUCCESS,
                 technical_assets=[],
                 dimensions={
-                    "validity": DataQualityStatus.FAIL,
-                    "completeness": DataQualityStatus.PASS,
+                    "validity": DataQualityStatus.FAILURE,
+                    "completeness": DataQualityStatus.SUCCESS,
                 },
             ),
         )
@@ -129,7 +129,7 @@ class TestDataQualityRouter:
         )
         assert get_response.status_code == 200
         data = get_response.json()
-        assert data["overall_status"] == DataQualityStatus.PASS
+        assert data["overall_status"] == DataQualityStatus.SUCCESS
         assert data["created_at"] == summary_last.created_at.isoformat().replace(
             "+00:00", "Z"
         )

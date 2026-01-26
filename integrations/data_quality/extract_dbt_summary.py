@@ -4,17 +4,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 STATUS_PRIORITY = {
-    "pass": 0,
-    "fail": 1,
+    "success": 0,
+    "failure": 1,
     "warning": 2,
     "error": 3,
 }
 
 DBT_TO_PORT_STATUS = {
-    "success": "pass",
+    "success": "success",
     "warn": "warning",
     "error": "error",
-    "fail": "fail",
+    "fail": "failure",
 }
 
 

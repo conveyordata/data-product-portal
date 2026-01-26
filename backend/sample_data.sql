@@ -508,7 +508,7 @@ begin
             id as dataset_id,
             name as dataset_name,
             rn,
-            (ARRAY['PASS', 'FAIL', 'WARN', 'ERROR'])[((rn - 1) % 4) + 1] as status
+            (ARRAY['success', 'failure', 'warning', 'error'])[((rn - 1) % 4) + 1] as status
         FROM dataset_selection
     )
     INSERT INTO public.dataset_data_quality_summaries
@@ -517,12 +517,12 @@ begin
         summary_id,
         dataset_id,
         10 + rn,
-        CASE WHEN status = 'PASS' THEN 0 ELSE (rn % 3) + 1 END,
+        CASE WHEN status = 'success' THEN 0 ELSE (rn % 3) + 1 END,
         'https://quality-tool.internal/view/' || dataset_id,
         'Recursive CTE generated report for ' || dataset_name,
-        status::dataqualitystatus,
+        status,
         NOW() - (rn || ' hours')::interval,
-        json_build_object('validity', lower(status), 'completeness', lower('PASS'))
+        json_build_object('validity', lower(status), 'completeness', 'success')
     FROM summary_generation;
 
     -- 2. Generate the Technical Assets
@@ -536,8 +536,8 @@ begin
         JOIN dataset_selection d ON s.output_port_id = d.id
         )
     INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id)
-    SELECT dataset_name || '_table', 'PASS'::dataqualitystatus, summary_id FROM summary_mapping
+    SELECT dataset_name || '_table', 'success', summary_id FROM summary_mapping
     UNION ALL
-    SELECT dataset_name || '_view', 'WARN'::dataqualitystatus, summary_id FROM summary_mapping;
+    SELECT dataset_name || '_view', 'warning', summary_id FROM summary_mapping;
 
 end $$;
