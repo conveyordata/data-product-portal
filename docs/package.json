@@ -49,8 +49,8 @@
     "node": ">=18.0"
   },
   "overrides": {
-    "@docusaurus/core": {
-      "webpack-dev-server": ">=5.2.1"
+    "@docusaurus/theme-mermaid": {
+      "lodash-es": ">=4.17.23"
     }
   }
 }

@@ -87,6 +87,7 @@ export type UiElementMetadataResponse = {
   icon_name: string;
   parent_platform?: string | null;
   platform_tile?: PlatformTile | null;
+  detailed_name: string;
 };
 export type PluginResponse = {
   plugins: UiElementMetadataResponse[];

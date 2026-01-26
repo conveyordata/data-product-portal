@@ -31,12 +31,14 @@ export function DataOutputConfigurationForm({
 }: Props) {
     const { t } = useTranslation();
 
-    // Watch all fields - we must call hooks unconditionally and in the same order every render
-    // Since uiMetadata is stable for a given form, we can iterate through all fields
+    // Watch all form values at once - this ensures hooks are called unconditionally
+    const allFormValues = Form.useWatch([], form) || {};
+
+    // Build watched fields from form values
     const watchedFields: Record<string, unknown> = {};
     for (const field of uiMetadataGroups) {
-        // biome-ignore lint: hooks in loops are safe when array length is stable across renders
-        watchedFields[field.name] = Form.useWatch(configurationFieldName(field.name), form);
+        // biome-ignore lint: dynamic field names can't be statically typed at compile time
+        watchedFields[field.name] = (allFormValues.configuration as any)?.[field.name];
     }
 
     // Auto-populate fields based on technical_mapping and namespace
