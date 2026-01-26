@@ -13,7 +13,6 @@ import {
     type DataQualityStatus,
     useGetLatestDataQualitySummaryForOutputPortQuery,
 } from '@/store/api/services/generated/outputPortDataQualityApi.ts';
-import styles from '../../dataset.module.scss';
 
 interface Props {
     dataProductId: string;
@@ -75,7 +74,7 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
     }
 
     return (
-        <Flex vertical className={styles.sectionWrapper}>
+        <Flex vertical gap="small">
             <Typography.Title level={5}>{t('Quality Status')}</Typography.Title>
             {summary ? (
                 <Flex vertical gap="small" align="flex-start">
