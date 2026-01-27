@@ -14,6 +14,7 @@ The idea is similar to Github badges showing the overall status of CICD pipeline
 
 ## Data quality summary
 The data quality summary give a high level overview of the data quality status of an output port with its respective technical assets.
+The technical assets are the physical data of your data product as described [here](../concepts/technical-assets.md).
 We only show the overview and support linking to the actual quality run as Portal is not becoming a data quality tool itself.
 The format looks as follows:
 ```json
