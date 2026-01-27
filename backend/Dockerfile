@@ -37,6 +37,8 @@ COPY ./templates ./templates
 COPY ./alembic.ini ./alembic.ini
 COPY ./VERSION ./VERSION
 COPY ./sample_data.sql ./sample_data.sql
+ENV FASTEMBED_CACHE_PATH=/fastembed
+RUN mkdir $FASTEMBED_CACHE_PATH && python -m app.embed
 
 EXPOSE 5050
 

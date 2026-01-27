@@ -22,7 +22,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import DataOutput as DataOutputModel
@@ -126,7 +126,7 @@ class DataOutputService:
         self.db.delete(data_output)
         self.db.flush()
 
-        self.update_search_vector_associated_datasets(result)
+        self.update_search_for_associated_datasets(result)
         self.db.commit()
         return result
 
@@ -141,10 +141,10 @@ class DataOutputService:
             )
         return data_output
 
-    def update_search_vector_associated_datasets(self, result: DataOutputModel):
-        dataset_service = DatasetService(self.db)
+    def update_search_for_associated_datasets(self, result: DataOutputModel):
+        dataset_service = OutputPortService(self.db)
         for dataset_link in result.dataset_links:
-            dataset_service.recalculate_search_vector_for(dataset_link.dataset_id)
+            dataset_service.recalculate_search(dataset_link.dataset_id)
 
     def update_data_output_status(
         self,
@@ -158,7 +158,7 @@ class DataOutputService:
         current_data_output.status = data_output.status
         self.db.flush()
 
-        self.update_search_vector_associated_datasets(current_data_output)
+        self.update_search_for_associated_datasets(current_data_output)
         self.db.commit()
 
     def link_dataset_to_data_output(
@@ -196,7 +196,7 @@ class DataOutputService:
         )
         data_output.dataset_links.append(dataset_link)
         self.db.flush()
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        OutputPortService(self.db).recalculate_search(dataset_id)
         self.db.commit()
         return dataset_link
 
@@ -222,7 +222,7 @@ class DataOutputService:
 
         data_output.dataset_links.remove(data_output_dataset)
         self.db.flush()
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        OutputPortService(self.db).recalculate_search(dataset_id)
         self.db.commit()
         return data_output
 

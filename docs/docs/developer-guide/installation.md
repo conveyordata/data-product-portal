@@ -33,8 +33,11 @@ Update your `values.yaml` to match your environment. By default, images will use
 
 #### Database
 
-- **Preferred**: Use an external managed database like AWS RDS.
-- **Alternative**: Use the bundled PostgreSQL Helm dependency for in-cluster setup. By default this in-cluster database is *disabled*.
+Requirements:
+- Postgres version 17 or higher
+- PGVector extension available, minimum version 0.8.0. This is supported by most cloud vendors ([AWS](https://docs.aws.amazon.com/AmazonRDS/latest/PostgreSQLReleaseNotes/postgresql-extensions.html#postgresql-extensions-17x), [Azure](https://learn.microsoft.com/en-us/azure/postgresql/extensions/concepts-extensions-versions#vector) and [GCP](https://docs.cloud.google.com/sql/docs/postgres/extensions#miscellaneous-extensions).
+
+We recommend using a managed database service.
 
 #### Host
 

@@ -45,7 +45,7 @@ from app.data_products.output_ports.input_ports.model import (
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -94,7 +94,9 @@ class DataProductService:
     def get_rolled_up_tags(self, data_product_id: UUID) -> set[Tag]:
         ensure_data_product_exists(data_product_id, self.db)
         rolled_up_tags = set()
-        for output_ports in DatasetService(self.db).get_output_ports(data_product_id):
+        for output_ports in OutputPortService(self.db).get_output_ports(
+            data_product_id
+        ):
             rolled_up_tags.update(output_ports.tags)
         for technical_asset in self.get_data_outputs(data_product_id):
             rolled_up_tags.update(technical_asset.tags)
@@ -347,7 +349,7 @@ class DataProductService:
                 detail="Cannot link own dataset to data product",
             )
 
-        if not DatasetService(self.db).is_visible_to_user(dataset, actor):
+        if not OutputPortService(self.db).is_visible_to_user(dataset, actor):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",

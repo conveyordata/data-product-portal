@@ -46,7 +46,7 @@ from app.data_products.output_ports.schema_response import (
     GetOutputPortResponse,
     UpdateOutputPortResponse,
 )
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -135,7 +135,9 @@ def get_user_datasets_old(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
-    return DatasetService(db).get_datasets(authenticated_user, check_user_assigned=True)
+    return OutputPortService(db).get_datasets(
+        authenticated_user, check_user_assigned=True
+    )
 
 
 ## Also deprecated, let's see if we can remove that inbox or do something useful with it
@@ -144,7 +146,9 @@ def get_user_datasets(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
-    return DatasetService(db).get_datasets(authenticated_user, check_user_assigned=True)
+    return OutputPortService(db).get_datasets(
+        authenticated_user, check_user_assigned=True
+    )
 
 
 @router.get(old_route, deprecated=True)
@@ -152,7 +156,7 @@ def get_datasets(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
-    return DatasetService(db).get_datasets(user)
+    return OutputPortService(db).get_datasets(user)
 
 
 @router.get(route)
@@ -160,7 +164,7 @@ def get_data_product_output_ports(
     data_product_id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductOutputPortsResponse:
     return GetDataProductOutputPortsResponse(
-        output_ports=DatasetService(db).get_output_ports(data_product_id)
+        output_ports=OutputPortService(db).get_output_ports(data_product_id)
     )
 
 
@@ -170,7 +174,7 @@ def get_dataset(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> DatasetGet:
-    return DatasetService(db).get_dataset(id, user)
+    return OutputPortService(db).get_dataset(id, user)
 
 
 @router.get(f"{route}/{{id}}")
@@ -181,7 +185,7 @@ def get_output_port(
     user: User = Depends(get_authenticated_user),
 ) -> GetOutputPortResponse:
     return DatasetGet.model_validate(
-        DatasetService(db).get_dataset(id, user, data_product_id)
+        OutputPortService(db).get_dataset(id, user, data_product_id)
     ).convert()
 
 
@@ -261,7 +265,7 @@ def create_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateOutputPortResponse:
-    new_dataset = DatasetService(db).create_dataset(data_product_id, output_port)
+    new_dataset = OutputPortService(db).create_dataset(data_product_id, output_port)
     _assign_owner_role_assignments(
         new_dataset.id, output_port.owners, db=db, actor=authenticated_user
     )
@@ -325,7 +329,7 @@ def remove_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    dataset = DatasetService(db).remove_dataset(id, data_product_id)
+    dataset = OutputPortService(db).remove_dataset(id, data_product_id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
     event_id = EventService(db).create_event(
@@ -393,7 +397,7 @@ def update_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateOutputPortResponse:
-    response = DatasetService(db).update_dataset(id, data_product_id, dataset)
+    response = OutputPortService(db).update_dataset(id, data_product_id, dataset)
 
     EventService(db).create_event(
         CreateEvent(
@@ -459,7 +463,7 @@ def update_output_port_about(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DatasetService(db).update_dataset_about(id, data_product_id, dataset)
+    OutputPortService(db).update_dataset_about(id, data_product_id, dataset)
 
     EventService(db).create_event(
         CreateEvent(
@@ -519,7 +523,7 @@ def update_output_port_status(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DatasetService(db).update_dataset_status(id, data_product_id, dataset)
+    OutputPortService(db).update_dataset_status(id, data_product_id, dataset)
 
     EventService(db).create_event(
         CreateEvent(
@@ -546,7 +550,7 @@ def update_dataset_usage(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DatasetService(db).update_dataset_usage(id, usage)
+    OutputPortService(db).update_dataset_usage(id, usage)
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_UPDATED,
@@ -572,7 +576,7 @@ def get_output_port_graph_data(
     db: Session = Depends(get_db_session),
     level: int = 3,
 ) -> Graph:
-    return DatasetService(db).get_graph_data(id, data_product_id, level)
+    return OutputPortService(db).get_graph_data(id, data_product_id, level)
 
 
 @router.post(
