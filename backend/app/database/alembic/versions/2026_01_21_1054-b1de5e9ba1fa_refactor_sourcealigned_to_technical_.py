@@ -1,7 +1,7 @@
 """Refactor sourceAligned to Technical Mapping
 
 Revision ID: b1de5e9ba1fa
-Revises: dbe6fbe45eef
+Revises: c3fecd278d0c
 Create Date: 2026-01-21 10:54:04.011858
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "b1de5e9ba1fa"
-down_revision: Union[str, None] = "dbe6fbe45eef"
+down_revision: Union[str, None] = "c3fecd278d0c"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
