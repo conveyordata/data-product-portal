@@ -1,8 +1,8 @@
 """Add output-port embeddings
 
 Revision ID: c3fecd278d0c
-Revises: ca5f5782790a
-Create Date: 2026-01-14 14:14:28.166837
+Revises: dbe6fbe45eef
+Create Date: 2026-01-27 10:19:31.581396
 
 """
 
@@ -14,7 +14,7 @@ from pgvector.sqlalchemy import Vector
 
 # revision identifiers, used by Alembic.
 revision: str = "c3fecd278d0c"
-down_revision: Union[str, None] = "ca5f5782790a"
+down_revision: Union[str, None] = "dbe6fbe45eef"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
