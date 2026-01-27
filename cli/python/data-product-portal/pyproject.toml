@@ -1,0 +1,22 @@
+[project]
+name = "data-product-portal"
+version = "0.0.1"
+description = "Python package for interacting with the Data Product Portal"
+authors = [
+    {name = "Dataminded"}
+]
+
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "packaging (>=21.3)",
+    "requests (>=2.32.5,<3.0.0)"
+]
+
+[tool.poetry]
+name = "data-product-portal"
+packages = [{ include = "portal" }]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
