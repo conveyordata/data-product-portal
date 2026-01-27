@@ -27,7 +27,7 @@ httpx = "^0.28.1"
 alembic = "^1.18.1"
 sqlalchemy = { version = "^2.0.46", extras = ['asyncio'] }
 sqlalchemy-utils = "^0.42.1"
-sqlalchemy-easy-softdelete = "^0.8.3"
+sqlalchemy-easy-softdelete = "^0.9.0"
 psycopg2-binary = "^2.9.11"
 pyyaml = "^6.0.3"
 pyjwt = "^2.10.1"
