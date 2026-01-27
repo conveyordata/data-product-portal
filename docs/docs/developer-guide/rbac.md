@@ -106,6 +106,9 @@ Temporary admin privileges provide full access across the platform. All actions 
 At least one user must have the `can_become_admin` permission enabled. The system prevents removing this permission from the last eligible user.
 :::
 
+You can see what the RBAC settings page looks like below:
+![An overview of the RBAC settings for the Data Product scope](./img/rbac.png)
+
 ## Managing Roles
 
 ### Creating Custom Roles
