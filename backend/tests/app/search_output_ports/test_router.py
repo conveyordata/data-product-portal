@@ -1,3 +1,4 @@
+import os
 import time
 from typing import Final
 
@@ -11,7 +12,9 @@ from app.data_products.output_ports.schema_response import (
 from app.data_products.output_ports.service import OutputPortService
 from tests.factories import DatasetFactory
 
-EMBEDDING_LATENCY_BOUND: Final[float] = 2.000  # seconds
+EMBEDDING_LATENCY_BOUND: Final[float] = float(
+    os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.000)
+)  # seconds
 LATENCY_BOUND: Final[float] = 0.300  # seconds
 PRECISION_BOUND: Final[float] = 0.5
 RECALL_BOUND: Final[float] = 0.8
