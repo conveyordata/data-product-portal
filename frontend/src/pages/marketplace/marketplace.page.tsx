@@ -17,7 +17,7 @@ export function Marketplace() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
-    const { data: datasets = [] } = useGetAllDatasetsQuery();
+    const { data: datasets = [], isFetching: allDatasetsLoading } = useGetAllDatasetsQuery();
 
     const { data: datasetSearchResult = [], isFetching: datasetSearchResultLoading } = useSearchDatasetsQuery(
         {
@@ -55,8 +55,9 @@ export function Marketplace() {
             searchPlaceholder={t('Ask a business question to find the relevant data')}
             onSearch={handleSearchChange}
             loadingResults={datasetSearchResultLoading}
+            searchSuggestions={[t('Are we GDPR compliant'), t('I want to improve our productivity')]}
         >
-            {datasetSearchResultLoading ? (
+            {datasetSearchResultLoading || allDatasetsLoading ? (
                 <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
             ) : paginatedOutputPorts?.length > 0 ? (
                 <Flex wrap="wrap" gap={'small'}>

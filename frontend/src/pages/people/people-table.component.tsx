@@ -138,7 +138,11 @@ export function PeoplePage() {
     );
 
     return (
-        <SearchPage title={t('People')} onSearch={setSearchTerm} searchPlaceholder={t('Search people by name')}>
+        <SearchPage
+            title={t('People')}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            searchPlaceholder={t('Search people by name')}
+        >
             <Table<UsersGet>
                 columns={columns}
                 dataSource={filteredUsers}
