@@ -36,6 +36,7 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation,
 )
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -169,6 +170,9 @@ def create_data_product(
         extra_receiver_ids=owners,
     )
     RefreshInfrastructureLambda().trigger()
+    OutputPortService(db).recalculate_search_for_output_ports_of_product(
+        created_data_product.id
+    )
     return CreateDataProductResponse(id=created_data_product.id)
 
 
@@ -279,6 +283,7 @@ def update_data_product(
         )
     )
     RefreshInfrastructureLambda().trigger()
+    OutputPortService(db).recalculate_search_for_output_ports_of_product(id)
     return result
 
 

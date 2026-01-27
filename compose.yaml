@@ -32,7 +32,7 @@ services:
       retries: 10
 
   postgresql:
-    image: postgres:17.6
+    image: pgvector/pgvector:0.8.0-pg17
     container_name: data-product-portal-postgresql
     ports:
       - ${POSTGRES_PORT:-5432}:5432

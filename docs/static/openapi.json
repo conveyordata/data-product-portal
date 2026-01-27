@@ -20801,10 +20801,6 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
-          },
-          "rank": {
-            "type": "number",
-            "title": "Rank"
           }
         },
         "type": "object",
@@ -20823,8 +20819,7 @@
           "data_product_settings",
           "data_output_links",
           "data_product_count",
-          "data_product_name",
-          "rank"
+          "data_product_name"
         ],
         "title": "SearchDatasets",
         "deprecated": true
@@ -20927,10 +20922,6 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
-          },
-          "rank": {
-            "type": "number",
-            "title": "Rank"
           }
         },
         "type": "object",
@@ -20949,8 +20940,7 @@
           "data_product_settings",
           "technical_asset_links",
           "data_product_count",
-          "data_product_name",
-          "rank"
+          "data_product_name"
         ],
         "title": "SearchOutputPortsResponseItem"
       },

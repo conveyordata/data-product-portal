@@ -8,6 +8,7 @@ sidebar_position: 200
 
 ### features
 - **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs.
+- **[Search]**: Improved search functionality in the marketplace, the search now understands the context of the search term.
 
 ### bugfixes
 
