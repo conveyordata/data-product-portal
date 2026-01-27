@@ -8,6 +8,8 @@ sidebar_position: 200
 
 ### features
 - **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs.
+- **[Data quality]**: Support ingesting data quality summary data and showing the overall status on output ports.
+  For more details look at the [data quality documentation](./developer-guide/data-quality-information.md)
 
 ### bugfixes
 
