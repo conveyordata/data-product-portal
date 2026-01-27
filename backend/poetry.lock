@@ -3078,18 +3078,18 @@ sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
 name = "sqlalchemy-easy-softdelete"
-version = "0.8.3"
+version = "0.9.0"
 description = "Easily add soft-deletion to your SQLAlchemy Models."
 optional = false
-python-versions = ">=3.9,<4.0"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "sqlalchemy_easy_softdelete-0.8.3-py3-none-any.whl", hash = "sha256:6d0ae4a6bdffc082ad11618c27086a07eaa2ff9c86a5ee8899f47f8d2daa4efe"},
-    {file = "sqlalchemy_easy_softdelete-0.8.3.tar.gz", hash = "sha256:827c7fcb3949eb1cb1f9addf2f40a7cfc45571815dde4f8855061df09305b7d2"},
+    {file = "sqlalchemy_easy_softdelete-0.9.0-py3-none-any.whl", hash = "sha256:934efdfc8b558d9aa7e665940ea5789baf8bf963b4c9a70620e0319fde31faf2"},
+    {file = "sqlalchemy_easy_softdelete-0.9.0.tar.gz", hash = "sha256:c458464aaa1ac1ffa7e61e7ec98a0c9961d8fe0b365e07391a7bc17d6511a768"},
 ]
 
 [package.dependencies]
-SQLAlchemy = ">=1.4,<2.1"
+sqlalchemy = ">=1.4,<2.1"
 
 [[package]]
 name = "sqlalchemy-utils"
@@ -3440,4 +3440,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "61f0398f562fdc4897781112bfddfd00b8594379f9d68f3dcafc0b8e726ed50b"
+content-hash = "4772ced81e7058d74ac1ebf3e0180b6628275f0f2b03edabb5603df036b7cb77"
