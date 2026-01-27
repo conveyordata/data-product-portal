@@ -28,7 +28,7 @@ class DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     owner = factory.SubFactory(DataProductFactory)
 
-    sourceAligned = False
+    technical_mapping = "default"
     configuration = factory.SubFactory(S3DataOutputFactory)
 
     @factory.post_generation

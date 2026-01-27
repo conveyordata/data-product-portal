@@ -16,6 +16,7 @@ from app.data_products.output_port_technical_assets_link.schema import (
 )
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.schema import DataProduct
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
 
@@ -35,7 +36,7 @@ class BaseTechnicalAssetGet(ORMModel):
     platform_id: UUID
     service_id: UUID
     status: TechnicalAssetStatus
-    sourceAligned: Optional[bool]
+    technical_mapping: TechnicalMapping
 
     # Nested schemas
     configuration: DataOutputConfiguration
@@ -44,6 +45,14 @@ class BaseTechnicalAssetGet(ORMModel):
     # Excluded
     service: PlatformService = Field(exclude=True)
     environment_configurations: list[EnvironmentConfigsGetItem] = Field(exclude=True)
+
+    @computed_field(
+        description="DEPRECATED: Use 'technical_mapping' instead. "
+        "This field will be removed in a future version."
+    )
+    def sourceAligned(self) -> bool:
+        """Backwards compatibility: convert technical_mapping back to source_aligned."""
+        return self.technical_mapping == TechnicalMapping.Custom
 
     @computed_field
     def result_string(self) -> str:

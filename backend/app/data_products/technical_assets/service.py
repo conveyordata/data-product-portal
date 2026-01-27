@@ -24,6 +24,7 @@ from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import DataOutput as DataOutputModel
 from app.data_products.technical_assets.model import ensure_data_output_exists
 from app.data_products.technical_assets.schema_request import (
@@ -99,7 +100,7 @@ class DataOutputService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        if data_output.sourceAligned:
+        if data_output.technical_mapping == TechnicalMapping.Custom:
             data_output.status = TechnicalAssetStatus.PENDING
         else:
             data_product = self.db.get(DataProductModel, id)
@@ -108,7 +109,12 @@ class DataOutputService:
 
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
-        model = DataOutputModel(**data_output_schema, tags=tags, owner_id=id)
+        data_output_schema.pop("sourceAligned")  # Remove deprecated field
+        model = DataOutputModel(
+            **data_output_schema,
+            tags=tags,
+            owner_id=id,
+        )
         self.db.add(model)
         self.db.commit()
         return model

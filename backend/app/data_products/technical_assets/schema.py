@@ -1,8 +1,8 @@
-from typing import Optional
 from uuid import UUID
 from warnings import deprecated
 
 from app.data_output_configuration.schema_union import DataOutputConfiguration
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
 
@@ -13,7 +13,7 @@ class TechnicalAsset(ORMModel):
     namespace: str
     description: str
     status: TechnicalAssetStatus
-    sourceAligned: Optional[bool]
+    technical_mapping: TechnicalMapping
     owner_id: UUID
     platform_id: UUID
     service_id: UUID

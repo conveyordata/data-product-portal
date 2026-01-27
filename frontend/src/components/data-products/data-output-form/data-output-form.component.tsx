@@ -75,7 +75,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     // Form
     const [form] = Form.useForm();
-    const sourceAligned = Form.useWatch('sourceAligned', form);
+    const technical_mapping = Form.useWatch('technical_mapping', form);
     const dataOutputNameValue = Form.useWatch('name', form);
 
     // Namespace validation
@@ -200,8 +200,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
     const options = [
-        { label: t('Product aligned'), value: false },
-        { label: t('Source aligned'), value: true },
+        { label: t('Default'), value: 'default' },
+        { label: t('Custom'), value: 'custom' },
     ];
 
     const validateNamespaceCallback = useCallback(
@@ -301,13 +301,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 initialValue={DataOutputStatus.Active}
             />
             <Form.Item<DataOutputCreateFormSchema>
-                name={'sourceAligned'}
-                label={t('Alignment')}
+                name={'technical_mapping'}
+                label={t('Technical Mapping')}
                 required
                 tooltip={t(
-                    'If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.',
+                    'Default mapping applies the platform’s standards to your asset. Choose Custom if your asset exists outside these standards and requires explicit configuration, which may be subject to manual approval before activation.',
                 )}
-                initialValue={false}
+                initialValue={'default'}
             >
                 <Select allowClear={false} options={options} />
             </Form.Item>
@@ -367,7 +367,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         form={form}
                         uiMetadataGroups={pluginMetadata.ui_metadata}
                         namespace={currentDataProduct.namespace}
-                        sourceAligned={sourceAligned}
+                        technical_mapping={technical_mapping}
                         configurationType={pluginMetadata.plugin}
                         resultLabel={pluginMetadata.result_label ?? ''}
                         resultTooltip={pluginMetadata.result_tooltip ?? ''}

@@ -5,6 +5,7 @@ import { type ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UiElementMetadata } from '@/store/api/services/generated/pluginsApi';
 import type { DataOutputCreateFormSchema } from '@/types/data-output';
+import type { TechnicalMappingContract } from '@/types/data-output/technical-mapping.contract';
 import { configurationFieldName } from './components/configuration-field-name';
 import { ConfigurationFormItem } from './components/output-configuration-form-item';
 import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
@@ -12,7 +13,7 @@ import { ConfigurationSubForm } from './components/output-configuration-sub-form
 type Props = {
     form: FormInstance<DataOutputCreateFormSchema>;
     namespace: string;
-    sourceAligned: boolean;
+    technical_mapping: TechnicalMappingContract;
     configurationType: string;
     uiMetadataGroups: UiElementMetadata[];
     resultLabel: string;
@@ -22,7 +23,7 @@ type Props = {
 export function DataOutputConfigurationForm({
     form,
     namespace,
-    sourceAligned,
+    technical_mapping,
     uiMetadataGroups,
     configurationType,
     resultLabel,
@@ -40,21 +41,24 @@ export function DataOutputConfigurationForm({
         watchedFields[field.name] = (allFormValues.configuration as any)?.[field.name];
     }
 
-    // Auto-populate fields based on sourceAligned and namespace
+    // Auto-populate fields based on technical_mapping and namespace
     useEffect(() => {
         uiMetadataGroups.forEach((field) => {
             // Handle suffix field
             if (field.name === 'suffix') {
-                form.setFieldValue(configurationFieldName('suffix'), sourceAligned ? '' : namespace);
+                form.setFieldValue(configurationFieldName('suffix'), technical_mapping === 'default' ? namespace : '');
             }
 
             // Handle fields that should auto-populate from namespace when not source-aligned
             if (field.use_namespace_when_not_source_aligned) {
-                // biome-ignore lint: dynamic field names can't be statically typed at compile time.
-                form.setFieldValue(configurationFieldName(field.name) as any, !sourceAligned ? namespace : undefined);
+                form.setFieldValue(
+                    // biome-ignore lint: dynamic field names can't be statically typed at compile time.
+                    configurationFieldName(field.name) as any,
+                    technical_mapping === 'default' ? namespace : undefined,
+                );
             }
         });
-    }, [form, sourceAligned, namespace, uiMetadataGroups]);
+    }, [form, technical_mapping, namespace, uiMetadataGroups]);
 
     if (!uiMetadataGroups) {
         return null;
@@ -101,12 +105,12 @@ export function DataOutputConfigurationForm({
             });
         }
 
-        // Build select options based on sourceAligned for fields that use namespace
+        // Build select options based on technical_mapping for fields that use namespace
         let selectOptions: BaseOptionType[] = [];
         if (type === 'select') {
             selectOptions =
                 select?.options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
-            if (use_namespace_when_not_source_aligned && !sourceAligned) {
+            if (use_namespace_when_not_source_aligned && technical_mapping === 'default') {
                 selectOptions = [namespace].map((val) => ({
                     label: val,
                     value: val,
@@ -126,7 +130,7 @@ export function DataOutputConfigurationForm({
         }
 
         // Determine if field should be disabled
-        const isDisabled = disabled || (use_namespace_when_not_source_aligned && !sourceAligned);
+        const isDisabled = disabled || (use_namespace_when_not_source_aligned && technical_mapping === 'default');
 
         // Render the appropriate input component based on type
         let inputComponent: ReactElement;

@@ -14421,8 +14421,27 @@
             }
           },
           "sourceAligned": {
-            "type": "boolean",
-            "title": "Sourcealigned"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "deprecated": true
+          },
+          "technical_mapping": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TechnicalMapping"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "tag_ids": {
             "items": {
@@ -14442,7 +14461,6 @@
           "service_id",
           "status",
           "configuration",
-          "sourceAligned",
           "tag_ids"
         ],
         "title": "CreateTechnicalAssetRequest"
@@ -14519,8 +14537,27 @@
             }
           },
           "sourceAligned": {
-            "type": "boolean",
-            "title": "Sourcealigned"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "deprecated": true
+          },
+          "technical_mapping": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TechnicalMapping"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "tag_ids": {
             "items": {
@@ -14540,7 +14577,6 @@
           "service_id",
           "status",
           "configuration",
-          "sourceAligned",
           "tag_ids"
         ],
         "title": "DataOutputCreate",
@@ -14686,16 +14722,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -14744,6 +14772,12 @@
             "type": "array",
             "title": "Tags"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -14768,11 +14802,12 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "dataset_links",
           "tags",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],
@@ -14851,16 +14886,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -14902,6 +14929,12 @@
             "type": "array",
             "title": "Dataset Links"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -14926,10 +14959,11 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "dataset_links",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],
@@ -15063,16 +15097,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -15121,6 +15147,12 @@
             "type": "array",
             "title": "Tags"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -15145,11 +15177,12 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "dataset_links",
           "tags",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],
@@ -18769,16 +18802,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "configuration": {
             "oneOf": [
@@ -18827,6 +18852,12 @@
             "type": "array",
             "title": "Tags"
           },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
+            "readOnly": true
+          },
           "result_string": {
             "type": "string",
             "title": "Result String",
@@ -18851,11 +18882,12 @@
           "platform_id",
           "service_id",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "configuration",
           "owner",
           "output_port_links",
           "tags",
+          "sourceAligned",
           "result_string",
           "technical_info"
         ],
@@ -21138,16 +21170,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -21202,7 +21226,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
@@ -21377,6 +21401,14 @@
           "info"
         ],
         "title": "TechnicalInfo"
+      },
+      "TechnicalMapping": {
+        "type": "string",
+        "enum": [
+          "default",
+          "custom"
+        ],
+        "title": "TechnicalMapping"
       },
       "ThemeSettings": {
         "properties": {
@@ -22511,16 +22543,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -22578,7 +22602,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
@@ -22610,16 +22634,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -22677,7 +22693,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
@@ -22709,16 +22725,8 @@
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
           },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
           },
           "owner_id": {
             "type": "string",
@@ -22773,7 +22781,7 @@
           "namespace",
           "description",
           "status",
-          "sourceAligned",
+          "technical_mapping",
           "owner_id",
           "platform_id",
           "service_id",
