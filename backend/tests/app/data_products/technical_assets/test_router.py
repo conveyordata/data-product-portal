@@ -118,6 +118,30 @@ class TestDataOutputsRouter:
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
+    def test_deprecated_source_aligned(self, data_output_payload, client: TestClient):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
+        payload = deepcopy(data_output_payload)
+        payload.pop("technical_mapping")
+        payload["sourceAligned"] = True
+
+        created_data_output = self.create_data_output(client, payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
+        assert (
+            self.get_data_output_by_id(
+                client, created_data_output.json().get("id")
+            ).json()["technical_mapping"]
+            == "custom"
+        )
+
     def test_create_data_output_not_product_owner(
         self, data_output_payload_not_owner, client: TestClient
     ):
