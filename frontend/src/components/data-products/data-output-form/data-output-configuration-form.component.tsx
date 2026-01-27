@@ -43,7 +43,6 @@ export function DataOutputConfigurationForm({
 
     // Auto-populate fields based on technical_mapping and namespace
     useEffect(() => {
-        console.log(technical_mapping);
         uiMetadataGroups.forEach((field) => {
             // Handle suffix field
             if (field.name === 'suffix') {
