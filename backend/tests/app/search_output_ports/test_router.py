@@ -181,7 +181,7 @@ class TestOutputPortSearchRouter:
         ds_1 = DatasetFactory(name="Customer Data")
         ds_2 = DatasetFactory(name="Sales Data")
         ds_3 = DatasetFactory(name="Internal Metrics")
-        OutputPortService(db=session).recalculate_all_embeddings()
+        OutputPortService(db=session).recalculate_search_for_all_output_ports()
         return ds_1, ds_2, ds_3
 
     @staticmethod
@@ -199,7 +199,7 @@ class TestOutputPortSearchRouter:
         RoleService(db=session).initialize_prototype_roles()
 
         start_time = time.perf_counter()
-        OutputPortService(db=session).recalculate_all_embeddings()
+        OutputPortService(db=session).recalculate_search_for_all_output_ports()
         end_time = time.perf_counter()
         assert (duration := end_time - start_time) <= EMBEDDING_LATENCY_BOUND, (
             f"Embeddings take too long to calculate ({duration} > {EMBEDDING_LATENCY_BOUND})"

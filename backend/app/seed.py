@@ -28,4 +28,4 @@ def seed_db(path: str, **template_vars):
 
     raw_connection.commit()
     AuthorizationService(db).reload_enforcer()
-    OutputPortService(db).recalculate_all_embeddings()
+    OutputPortService(db).recalculate_search_for_all_output_ports()

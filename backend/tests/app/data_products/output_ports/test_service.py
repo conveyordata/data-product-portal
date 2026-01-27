@@ -58,20 +58,20 @@ class TestDatasetsService:
         ds = self.get_dataset(ds)
         assert OutputPortService(test_session).is_visible_to_user(ds, user) is True
 
-    def test_recalculate_embedding(self):
+    def test_recalculate_search(self):
         ds = DatasetFactory()
-        OutputPortService(test_session).recalculate_embedding(ds.id)
+        OutputPortService(test_session).recalculate_search(ds.id)
 
-    def test_recalculate_embedding_with_technical_asset(self):
+    def test_recalculate_search_with_technical_asset(self):
         ds = DatasetFactory()
         data_output = DataOutputFactory(owner=ds.data_product)
         DataOutputDatasetAssociationFactory(data_output=data_output, dataset=ds)
-        OutputPortService(test_session).recalculate_embedding(ds.id)
+        OutputPortService(test_session).recalculate_search(ds.id)
 
-    def test_recalculate_all_embeddings(self):
+    def test_recalculate_search_for_all_output_ports(self):
         for i in range(51):  # Ensure we load 2 batches
             DatasetFactory()
-        OutputPortService(test_session).recalculate_all_embeddings()
+        OutputPortService(test_session).recalculate_search_for_all_output_ports()
 
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:

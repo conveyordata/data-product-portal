@@ -168,7 +168,7 @@ class OutputPortService:
             ),
         ]
 
-    def recalculate_embeddings_for_output_ports_of_product(
+    def recalculate_search_for_output_ports_of_product(
         self, data_product_id: UUID
     ) -> None:
         self.db.flush()
@@ -181,17 +181,19 @@ class OutputPortService:
             .unique()
             .all()
         )
-        self._recalculate_embeddings(datasets)
+        self._recalculate_embeddings_and_search_vector(datasets)
 
-    def recalculate_embedding(self, dataset_id: UUID) -> None:
+    def recalculate_search(self, dataset_id: UUID) -> None:
         dataset = self.db.scalar(
             select(DatasetModel)
             .where(DatasetModel.id == dataset_id)
             .options(*self.recalculate_embeddings_load_options())
         )
-        self._recalculate_embeddings([dataset])
+        self._recalculate_embeddings_and_search_vector([dataset])
 
-    def _recalculate_embeddings(self, datasets: Sequence[DatasetModel]) -> None:
+    def _recalculate_embeddings_and_search_vector(
+        self, datasets: Sequence[DatasetModel]
+    ) -> None:
         embeddings = self.embedding_model.embed(
             DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
         )
@@ -208,7 +210,7 @@ class OutputPortService:
             func.setweight(func.to_tsvector("english", dataset.description), "B")
         )
 
-    def recalculate_all_embeddings(self, batch_size: int = 50) -> None:
+    def recalculate_search_for_all_output_ports(self, batch_size: int = 50) -> None:
         dataset_ids = self.db.scalars(select(DatasetModel.id)).all()
 
         # Process in batches to reduce load
@@ -226,7 +228,7 @@ class OutputPortService:
             )
 
             if batch_datasets:
-                self._recalculate_embeddings(batch_datasets)
+                self._recalculate_embeddings_and_search_vector(batch_datasets)
                 self.db.flush()
         self.db.commit()
 
@@ -285,7 +287,7 @@ class OutputPortService:
 
         self.db.add(model)
         self.db.flush()
-        self.recalculate_embedding(model.id)
+        self.recalculate_search(model.id)
         self.db.commit()
         return model
 
@@ -330,7 +332,7 @@ class OutputPortService:
             else:
                 setattr(current_dataset, k, v) if v else None
         self.db.flush()
-        self.recalculate_embedding(id)
+        self.recalculate_search(id)
         self.db.commit()
         return current_dataset.id
 
