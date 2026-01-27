@@ -163,6 +163,8 @@ volumes:
     configMap:
       name: sampledata
       optional: true
+  - name: tmpdir
+    emptyDir: {}
 
 
 volumeMounts:
@@ -170,6 +172,8 @@ volumeMounts:
     mountPath: /var/logs
   - name: sampledata
     mountPath: /sampledata
+  - name: tmpdir
+    mountPath: /tmp
 
 nodeSelector: {}
 
