@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "data-product-portal.fullname" . }}
 data:
-  POSTGRES_USER: {{ .Values.database.username } }
+  POSTGRES_USER: {{ .Values.database.username }}
   POSTGRES_PORT: {{ .Values.database.port }}
   POSTGRES_SERVER: {{ default .Values.database.server }}
   POSTGRES_DB: {{ default .Values.database.dbname }}
