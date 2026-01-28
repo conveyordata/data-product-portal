@@ -1,14 +1,16 @@
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 
 
 class S3DataOutput(BaseDataOutputConfiguration):
-    bucket: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
-    suffix: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
-    path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
+    __tablename__ = "s3_data_output_configurations"
+
+    bucket: Mapped[str] = mapped_column(String, nullable=True)
+    suffix: Mapped[str] = mapped_column(String, nullable=True)
+    path: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "S3DataOutput",
-        "polymorphic_load": "inline",
     }
