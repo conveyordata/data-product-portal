@@ -14,7 +14,7 @@ from app.data_products.technical_assets.status import TechnicalAssetStatus
 if TYPE_CHECKING:
     from app.configuration.platforms.model import Platform
     from app.configuration.platforms.platform_services.model import PlatformService
-    from app.data_output_configuration.base_model import BaseDataOutputConfiguration
+    from app.data_output_configuration.base_model import DataOutputConfiguration
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
         DataOutputDatasetAssociation,
@@ -47,7 +47,7 @@ class DataOutput(Base, BaseORM):
     owner: Mapped["DataProduct"] = relationship(
         back_populates="data_outputs", lazy="joined"
     )
-    configuration: Mapped["BaseDataOutputConfiguration"] = relationship(lazy="joined")
+    configuration: Mapped["DataOutputConfiguration"] = relationship(lazy="joined")
 
     dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
