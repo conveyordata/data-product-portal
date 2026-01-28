@@ -72,9 +72,9 @@ format = "ruff format"
 ruff = ["lint", "format"]
 test = "pytest -v tests/"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
-compose = "docker compose -f test-compose.yaml up -d"
-compose-down = "docker compose -f test-compose.yaml down"
-compile-requirements = "pip-compile --generate-hashes --upgrade requirements-poetry.in"
+up = "docker compose -f test-compose.yaml up -d"
+down = "docker compose -f test-compose.yaml down"
+poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --upgrade"
 
 [tool.ruff.lint]
 #https://docs.astral.sh/ruff/rules/
