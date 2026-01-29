@@ -93,4 +93,4 @@ Open an [issue on GitHub](https://github.com/conveyordata/data-product-portal/is
 
 - Start [Creating Data Products](../user-guide/creating-products.md).
 - Install Portal in a production-like environment using the [Installation guide](../developer-guide/installation.md).
-- Set up a custom RBAC system to suit your company's needs at [Role Based Access Control](../developer-guide/rbac.md).
+- Configure a set of roles to suit your company's needs at [Role Based Access Control](../developer-guide/rbac.md).
