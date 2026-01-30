@@ -45,7 +45,7 @@ def data_output_payload():
         "configuration": {
             "bucket": "test",
             "path": "test",
-            "configuration_type": "S3DataOutput",
+            "configuration_type": "S3TechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
         "platform_id": str(service.platform.id),
@@ -70,7 +70,7 @@ def data_output_payload_not_owner():
         "configuration": {
             "bucket": "test",
             "path": "test",
-            "configuration_type": "S3DataOutput",
+            "configuration_type": "S3TechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
         "platform_id": str(service.platform.id),
@@ -267,7 +267,7 @@ class TestDataOutputsRouter:
             if node["type"] == "dataOutputNode":
                 assert node == {
                     "data": {
-                        "icon_key": "S3DataOutput",
+                        "icon_key": "S3TechnicalAssetConfiguration",
                         "id": str(data_output.id),
                         "link_to_id": str(data_output.owner.id),
                         "name": data_output.name,
