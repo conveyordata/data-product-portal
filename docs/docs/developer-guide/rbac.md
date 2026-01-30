@@ -216,17 +216,6 @@ When making API calls:
 
 For more information on authentication, see the [Authentication Guide](./authentication.md).
 
-## Extending the RBAC System
-
-The RBAC system is designed to be extensible. If you need additional actions or scopes:
-
-1. **Define New Actions**: Add action constants to the `AuthorizationAction` enum in the backend
-2. **Apply Authorization Checks**: Use the `Authorization.enforce()` dependency on relevant API endpoints
-3. **Update UI**: Conditionally show/hide UI elements based on user permissions
-4. **Test Thoroughly**: Ensure new permissions work correctly across all scopes
-
-Contributions to extend the RBAC system are welcome! Please refer to our [Contributing Guide](./contributing.md) for more information.
-
 ## Best Practices
 
 1. **Principle of Least Privilege**: Grant users only the permissions they need to perform their work
