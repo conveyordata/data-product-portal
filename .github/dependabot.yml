@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gomod"
-    directory: "/cli"
+    directory: "/cli/golang"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
