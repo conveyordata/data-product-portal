@@ -2,6 +2,7 @@ import type { Node, NodeProps, Position } from '@xyflow/react';
 import type { ReactNode } from 'react';
 
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
+import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
 export type DataOutputNodeProps = Node<{
@@ -16,6 +17,7 @@ export type DataOutputNodeProps = Node<{
     domain?: string;
     centeredHandles?: boolean;
     onClick?: () => void;
+    plugins?: UiElementMetadataResponse[];
 }>;
 
 export function DataOutputNode({
@@ -31,6 +33,7 @@ export function DataOutputNode({
         domain,
         centeredHandles,
         onClick,
+        plugins,
     },
     ...props
 }: NodeProps<DataOutputNodeProps>) {
@@ -40,7 +43,7 @@ export function DataOutputNode({
                 isMainNode,
                 name,
                 id,
-                icon: getDataOutputIcon(icon_key),
+                icon: getDataOutputIcon(icon_key, plugins),
                 borderType: 'square',
                 nodeToolbarActions,
                 targetHandlePosition,

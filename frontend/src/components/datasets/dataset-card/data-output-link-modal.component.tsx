@@ -6,6 +6,7 @@ import { Searchbar } from '@/components/form';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
+import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -28,7 +29,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
     const { data: dataset } = useGetDatasetByIdQuery(datasetId);
-
+    const { data: { plugins } = {} } = useGetPluginsQuery();
     const [linkDatasets, { isLoading: isLinking }] = useRequestDatasetAccessForDataOutputMutation();
     const [approveLink] = useApproveDataOutputLinkMutation();
 
@@ -167,7 +168,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
                                 onChange={() => handleOutputToggle(output.id)}
                             />
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(output.configuration.configuration_type)}
+                                iconComponent={getDataOutputIcon(output.configuration.configuration_type, plugins)}
                             />
                             <Flex vertical style={{ flex: 1 }}>
                                 <Typography.Text strong>{output.result_string}</Typography.Text>

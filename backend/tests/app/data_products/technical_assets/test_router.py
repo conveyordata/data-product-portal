@@ -9,7 +9,7 @@ from httpx import Response
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.data_output_configuration.s3.schema import S3DataOutput
+from app.data_output_configuration.s3.schema import S3TechnicalAssetConfiguration
 from app.data_products.technical_assets.schema_request import (
     DataOutputResultStringRequest,
 )
@@ -45,7 +45,7 @@ def data_output_payload():
         "configuration": {
             "bucket": "test",
             "path": "test",
-            "configuration_type": "S3DataOutput",
+            "configuration_type": "S3TechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
         "platform_id": str(service.platform.id),
@@ -70,7 +70,7 @@ def data_output_payload_not_owner():
         "configuration": {
             "bucket": "test",
             "path": "test",
-            "configuration_type": "S3DataOutput",
+            "configuration_type": "S3TechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
         "platform_id": str(service.platform.id),
@@ -267,7 +267,7 @@ class TestDataOutputsRouter:
             if node["type"] == "dataOutputNode":
                 assert node == {
                     "data": {
-                        "icon_key": "S3DataOutput",
+                        "icon_key": "S3TechnicalAssetConfiguration",
                         "id": str(data_output.id),
                         "link_to_id": str(data_output.owner.id),
                         "name": data_output.name,
@@ -522,11 +522,11 @@ class TestDataOutputsRouter:
         service = PlatformServiceFactory(
             result_string_template="{bucket}/{suffix}/{path}"
         )
-        configuration = S3DataOutput(
+        configuration = S3TechnicalAssetConfiguration(
             bucket="bucket",
             suffix="suffix",
             path="path",
-            configuration_type=DataOutputTypes.S3DataOutput,
+            configuration_type=DataOutputTypes.S3TechnicalAssetConfiguration,
         )
         request = DataOutputResultStringRequest(
             platform_id=service.platform.id,

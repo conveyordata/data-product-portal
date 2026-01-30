@@ -14,18 +14,20 @@ from app.data_output_configuration.base_schema import (
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.enums import UIElementType
-from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputModel
+from app.data_output_configuration.s3.model import (
+    S3TechnicalAssetConfiguration as S3TechnicalAssetConfigurationModel,
+)
 from app.data_products.schema import DataProduct
 
 
-class S3DataOutput(AssetProviderPlugin):
-    name: ClassVar[str] = "S3DataOutput"
+class S3TechnicalAssetConfiguration(AssetProviderPlugin):
+    name: ClassVar[str] = "S3TechnicalAssetConfiguration"
     version: ClassVar[str] = "1.0"
 
     bucket: str
     suffix: str = ""
     path: str
-    configuration_type: Literal[DataOutputTypes.S3DataOutput]
+    configuration_type: Literal[DataOutputTypes.S3TechnicalAssetConfiguration]
 
     _platform_metadata = PlatformMetadata(
         display_name="S3",
@@ -38,7 +40,7 @@ class S3DataOutput(AssetProviderPlugin):
     )
 
     class Meta:
-        orm_model = S3DataOutputModel
+        orm_model = S3TechnicalAssetConfigurationModel
 
     def validate_configuration(self, data_product: DataProduct):
         pass

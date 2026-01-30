@@ -9,6 +9,7 @@ import { UserAccessOverview } from '@/components/data-access/user-access-overvie
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
+import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -29,9 +30,11 @@ export function DataOutput() {
 
     const { data: dataOutput, isLoading } = useGetDataOutputByIdQuery(dataOutputId, { skip: !dataOutputId });
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
+    const { data: { plugins } = {} } = useGetPluginsQuery();
+
     const dataOutputTypeIcon = useMemo(() => {
-        return getDataOutputIcon(dataOutput?.configuration.configuration_type);
-    }, [dataOutput?.configuration.configuration_type]);
+        return getDataOutputIcon(dataOutput?.configuration.configuration_type, plugins);
+    }, [dataOutput?.configuration.configuration_type, plugins]);
 
     const dataOutputOwners = useGetDataProductOwners(dataProduct?.id);
 

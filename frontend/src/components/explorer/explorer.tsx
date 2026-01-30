@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { type UiElementMetadataResponse, useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
@@ -25,7 +26,7 @@ type Props = {
     type: 'dataset' | 'dataproduct' | 'dataoutput';
 };
 
-function parseNodes(nodes: NodeContract[], t: TFunction): Node[] {
+function parseNodes(nodes: NodeContract[], t: TFunction, plugins: UiElementMetadataResponse[]): Node[] {
     return nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .map((node) => {
@@ -42,6 +43,7 @@ function parseNodes(nodes: NodeContract[], t: TFunction): Node[] {
                         isActive: true,
                         targetHandlePosition: Position.Right,
                         targetHandleId: 'left_t',
+                        plugins: plugins,
                     };
                     break;
                 case CustomNodeTypes.DatasetNode:
@@ -77,6 +79,7 @@ function parseNodes(nodes: NodeContract[], t: TFunction): Node[] {
 
 function InternalExplorer({ id, type }: Props) {
     const { token } = theme.useToken();
+    const { data: plugins } = useGetPluginsQuery();
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout } = useNodeEditor();
     const { t } = useTranslation();
     const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
@@ -97,7 +100,7 @@ function InternalExplorer({ id, type }: Props) {
     const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = useCallback(() => {
         if (graph) {
-            const nodes = parseNodes(graph.nodes, t);
+            const nodes = parseNodes(graph.nodes, t, plugins?.plugins || []);
             const edges = parseEdges(graph.edges, token);
 
             const straightEdges = edges.map((edge) => ({
@@ -110,7 +113,7 @@ function InternalExplorer({ id, type }: Props) {
             setNodes(positionedNodes);
             setEdges(straightEdges);
         }
-    }, [graph, setNodes, setEdges, applyLayout, token, t]);
+    }, [graph, setNodes, setEdges, applyLayout, token, t, plugins]);
 
     useEffect(() => {
         generateGraph();

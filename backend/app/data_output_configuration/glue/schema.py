@@ -19,13 +19,13 @@ from app.data_output_configuration.base_schema import (
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.enums import AccessGranularity, UIElementType
 from app.data_output_configuration.glue.model import (
-    GlueDataOutput as GlueDataOutputModel,
+    GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
 )
 from app.data_products.schema import DataProduct
 
 
-class GlueDataOutput(AssetProviderPlugin):
-    name: ClassVar[str] = "GlueDataOutput"
+class GlueTechnicalAssetConfiguration(AssetProviderPlugin):
+    name: ClassVar[str] = "GlueTechnicalAssetConfiguration"
     version: ClassVar[str] = "1.0"
 
     database: str
@@ -34,7 +34,7 @@ class GlueDataOutput(AssetProviderPlugin):
     bucket_identifier: str = ""
     database_path: str = ""
     table_path: str = ""
-    configuration_type: Literal[DataOutputTypes.GlueDataOutput]
+    configuration_type: Literal[DataOutputTypes.GlueTechnicalAssetConfiguration]
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
@@ -48,7 +48,7 @@ class GlueDataOutput(AssetProviderPlugin):
     )
 
     class Meta:
-        orm_model = GlueDataOutputModel
+        orm_model = GlueTechnicalAssetConfigurationModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:

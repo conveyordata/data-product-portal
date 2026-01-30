@@ -19,18 +19,18 @@ from app.data_output_configuration.base_schema import (
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.enums import AccessGranularity, UIElementType
 from app.data_output_configuration.redshift.model import (
-    RedshiftDataOutput as RedshiftDataOutputModel,
+    RedshiftTechnicalAssetConfiguration as RedshiftTechnicalAssetConfigurationModel,
 )
 from app.data_products.schema import DataProduct
 
 
-class RedshiftDataOutput(AssetProviderPlugin):
-    name: ClassVar[str] = "RedshiftDataOutput"
+class RedshiftTechnicalAssetConfiguration(AssetProviderPlugin):
+    name: ClassVar[str] = "RedshiftTechnicalAssetConfiguration"
     version: ClassVar[str] = "1.0"
 
     database: str
     schema: str = ""
-    configuration_type: Literal[DataOutputTypes.RedshiftDataOutput]
+    configuration_type: Literal[DataOutputTypes.RedshiftTechnicalAssetConfiguration]
     table: str = "*"
     bucket_identifier: str = ""
     database_path: str = ""
@@ -48,7 +48,7 @@ class RedshiftDataOutput(AssetProviderPlugin):
     )
 
     class Meta:
-        orm_model = RedshiftDataOutputModel
+        orm_model = RedshiftTechnicalAssetConfigurationModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:

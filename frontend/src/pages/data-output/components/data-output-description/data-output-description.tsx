@@ -1,6 +1,7 @@
 import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import type { DataOutputStatus } from '@/types/data-output';
 import type { TagModel } from '@/types/tag';
 import { getDataOutputType } from '@/utils/data-output-type.helper';
@@ -18,6 +19,7 @@ type Props = {
 
 export function DataOutputDescription({ status, type, description, tags, namespace }: Props) {
     const { t } = useTranslation();
+    const { data: { plugins } = {} } = useGetPluginsQuery();
 
     return (
         <Flex vertical className={styles.statusInfo}>
@@ -36,7 +38,7 @@ export function DataOutputDescription({ status, type, description, tags, namespa
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Type')}</Typography.Text>
-                    <Typography.Text>{getDataOutputType(type, t)}</Typography.Text>
+                    <Typography.Text>{getDataOutputType(type, plugins, t)}</Typography.Text>
                 </Flex>
             </Space>
             <Space size={'small'}>

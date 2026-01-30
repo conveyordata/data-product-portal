@@ -64,16 +64,18 @@ class TestPluginEndpoints:
 
         # Verify all expected plugins are present
         expected_plugins = {
-            "S3DataOutput",
-            "GlueDataOutput",
+            "S3TechnicalAssetConfiguration",
+            "GlueTechnicalAssetConfiguration",
         }
         assert expected_plugins.issubset(plugin_names)
         # not configured = true
-        assert "RedshiftDataOutput" in plugin_names
+        assert "RedshiftTechnicalAssetConfiguration" in plugin_names
         assert (
-            next(p for p in data["plugins"] if p["plugin"] == "RedshiftDataOutput").get(
-                "not_configured", False
-            )
+            next(
+                p
+                for p in data["plugins"]
+                if p["plugin"] == "RedshiftTechnicalAssetConfiguration"
+            ).get("not_configured", False)
             is True
         )
 
@@ -99,11 +101,11 @@ class TestPluginEndpoints:
 
         # Verify all expected plugins are present
         expected_plugins = {
-            "S3DataOutput",
-            "GlueDataOutput",
-            "RedshiftDataOutput",
-            "SnowflakeDataOutput",
-            "DatabricksDataOutput",
+            "S3TechnicalAssetConfiguration",
+            "GlueTechnicalAssetConfiguration",
+            "RedshiftTechnicalAssetConfiguration",
+            "SnowflakeTechnicalAssetConfiguration",
+            "DatabricksTechnicalAssetConfiguration",
         }
         assert expected_plugins.issubset(plugin_names)
 
@@ -111,13 +113,13 @@ class TestPluginEndpoints:
         """Test GET /v2/plugins/{plugin_name}/form returns specific plugin"""
         s3 = PlatformServiceFactory(name="S3")
         PlatformServiceConfigFactory(service=s3)
-        response = client.get(f"{ENDPOINT}/S3DataOutput/form")
+        response = client.get(f"{ENDPOINT}/S3TechnicalAssetConfiguration/form")
 
         assert response.status_code == 200
         data = response.json()
 
         # Verify it's the correct plugin
-        assert data["plugin"] == "S3DataOutput"
+        assert data["plugin"] == "S3TechnicalAssetConfiguration"
         assert data["platform"] == "s3"
         assert data["display_name"] == "S3"
         assert data["icon_name"] == "s3-logo.svg"
@@ -128,12 +130,12 @@ class TestPluginEndpoints:
         """Test that plugin form includes all expected fields"""
         glue = PlatformServiceFactory(name="Glue")
         PlatformServiceConfigFactory(service=glue)
-        response = client.get(f"{ENDPOINT}/GlueDataOutput/form")
+        response = client.get(f"{ENDPOINT}/GlueTechnicalAssetConfiguration/form")
 
         assert response.status_code == 200
         data = response.json()
 
-        assert data["plugin"] == "GlueDataOutput"
+        assert data["plugin"] == "GlueTechnicalAssetConfiguration"
 
         # Get field names
         field_names = {field["name"] for field in data["ui_metadata"]}
@@ -176,7 +178,7 @@ class TestPluginEndpoints:
         """Test that plugin forms with dependencies include them correctly"""
         glue = PlatformServiceFactory(name="Glue")
         PlatformServiceConfigFactory(service=glue)
-        response = client.get(f"{ENDPOINT}/GlueDataOutput/form")
+        response = client.get(f"{ENDPOINT}/GlueTechnicalAssetConfiguration/form")
 
         assert response.status_code == 200
         data = response.json()
