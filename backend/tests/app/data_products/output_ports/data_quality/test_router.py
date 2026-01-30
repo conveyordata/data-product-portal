@@ -5,6 +5,7 @@ from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.data_quality.schema_request import (
+    DataQualityTechnicalAsset,
     OutputPortDataQualitySummary,
 )
 from app.data_products.output_ports.data_quality.service import (
@@ -131,3 +132,39 @@ class TestDataQualityRouter:
         )
         assert data["dimensions"]["validity"] == DataQualityStatus.FAILURE
         assert data["dimensions"]["completeness"] == DataQualityStatus.SUCCESS
+
+    def test_update_data_quality_summary(self, client, session):
+        dataset = DatasetFactory()
+        _assign_update_role(session, dataset)
+
+        service = DatasetDataQualityService(session)
+        saved_result = service.save_data_quality_summary(
+            dataset.id,
+            OutputPortDataQualitySummary(
+                created_at=datetime.now(UTC) - timedelta(days=1),
+                overall_status=DataQualityStatus.FAILURE,
+                technical_assets=[
+                    DataQualityTechnicalAsset(
+                        name="table1", status=DataQualityStatus.SUCCESS
+                    )
+                ],
+            ),
+        )
+
+        updated_ts = datetime.now(UTC).isoformat()
+        update_payload = {
+            "overall_status": "success",
+            "created_at": updated_ts,
+            "technical_assets": [
+                {"name": "table1", "status": "success"},
+            ],
+        }
+
+        put_response = client.put(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_quality_summary/{saved_result.id}",
+            json=update_payload,
+        )
+        assert put_response.status_code == 200
+        body = put_response.json()
+        assert body["overall_status"] == update_payload["overall_status"]
+        assert body["created_at"] == updated_ts.replace("+00:00", "Z")

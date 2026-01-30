@@ -1044,6 +1044,90 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary/{summary_id}": {
+      "put": {
+        "tags": [
+          "Data Products - Output ports",
+          "Output Ports - Data Quality"
+        ],
+        "summary": "Overwrite Output Port Data Quality Summary",
+        "operationId": "overwrite_output_port_data_quality_summary",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "summary_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Summary Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortDataQualitySummary-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortDataQualitySummaryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Output Port or Summary not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/datasets/namespace_suggestion": {
       "get": {
         "tags": [

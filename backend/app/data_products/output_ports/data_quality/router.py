@@ -96,3 +96,31 @@ def add_output_port_data_quality_run(
         ds.id, data_quality_summary
     )
     return convert(summary_response, ds.id)
+
+
+@router.put(
+    route + "/{summary_id}",
+    responses={
+        404: {
+            "description": "Output Port or Summary not found",
+            "content": {"application/json": {"example": {"detail": "Not found"}}},
+        }
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+        ),
+    ],
+)
+def overwrite_output_port_data_quality_summary(
+    data_product_id: UUID,
+    id: UUID,
+    summary_id: UUID,
+    data_quality_summary: OutputPortDataQualitySummary,
+    db: Session = Depends(get_db_session),
+) -> OutputPortDataQualitySummaryResponse:
+    ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    updated = DatasetDataQualityService(db).overwrite_data_quality_summary(
+        ds.id, summary_id, data_quality_summary
+    )
+    return convert(updated, ds.id)
