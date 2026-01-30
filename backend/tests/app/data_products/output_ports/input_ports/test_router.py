@@ -33,7 +33,7 @@ class TestDataProductsDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -55,7 +55,7 @@ class TestDataProductsDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -76,7 +76,7 @@ class TestDataProductsDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -98,7 +98,7 @@ class TestDataProductsDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -130,7 +130,7 @@ class TestDataProductsDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -153,8 +153,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
             ],
         )
         DataProductRoleAssignmentFactory(
@@ -174,8 +174,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
             ],
         )
         DataProductRoleAssignmentFactory(
@@ -241,8 +241,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
-                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-                Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
             ],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -311,7 +311,7 @@ class TestDataProductsDatasetsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -324,7 +324,9 @@ class TestDataProductsDatasetsRouter:
     def test_delete_dataset_with_product_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
-        role = RoleFactory(scope=Scope.DATASET, permissions=[Action.DATASET__DELETE])
+        role = RoleFactory(
+            scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
+        )
         DatasetRoleAssignmentFactory(
             user_id=str(user.id), role_id=str(role.id), dataset_id=str(ds.id)
         )
@@ -347,8 +349,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
             ],
         )
         data_product = DataProductFactory()
@@ -360,7 +362,7 @@ class TestDataProductsDatasetsRouter:
         ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -378,8 +380,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
             ],
         )
         data_product = DataProductFactory()
@@ -402,7 +404,7 @@ class TestDataProductsDatasetsRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__REVOKE_DATAPRODUCT_ACCESS],
+            permissions=[Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataProductDatasetAssociationFactory(dataset=ds)
@@ -418,7 +420,7 @@ class TestDataProductsDatasetsRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -436,7 +438,7 @@ class TestDataProductsDatasetsRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataProductDatasetAssociationFactory(
@@ -453,8 +455,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
             ],
         )
         data_product = DataProductFactory()

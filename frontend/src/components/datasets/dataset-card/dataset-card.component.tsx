@@ -33,11 +33,11 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
     const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
     const { data: deleteAccess } = useCheckAccessQuery({
         resource: datasetId,
-        action: AuthorizationAction.DATASET__DELETE,
+        action: AuthorizationAction.OUTPUT_PORT__DELETE,
     });
     const { data: linkAccess } = useCheckAccessQuery({
         resource: dataset?.data_product_id,
-        action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+        action: AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
     });
 
     const [removeDataset, { isLoading: isRemoving }] = useRemoveDatasetMutation();

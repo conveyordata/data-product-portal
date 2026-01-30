@@ -66,7 +66,7 @@ class TestAuthorization:
     def test_global_role(self, authorizer: Authorization):
         user = "test_user"
         role = "test_role"
-        act = AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS
+        act = AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS
 
         authorizer.sync_role_permissions(role_id=role, actions=[act])
         assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False

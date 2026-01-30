@@ -15,7 +15,7 @@ class TestDataProductRoleAssignmentsService:
     def test_user_has_permission(self, session):
         service = RoleAssignmentService(db=session)
         data_product = DataProductFactory()
-        action = Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS
+        action = Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS
 
         authorized_users = service.users_with_authz_action(
             data_product_id=data_product.id,

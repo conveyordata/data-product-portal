@@ -26,7 +26,7 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
         },
         { skip: !dataProductId },
     );

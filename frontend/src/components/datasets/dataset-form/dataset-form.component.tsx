@@ -126,18 +126,18 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
 
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
-    const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATASET });
+    const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT });
     const { data: update_access } = useCheckAccessQuery(
         {
             resource: datasetId,
-            action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
+            action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
         },
         { skip: !datasetId },
     );
     const { data: delete_access } = useCheckAccessQuery(
         {
             resource: datasetId,
-            action: AuthorizationAction.DATASET__DELETE,
+            action: AuthorizationAction.OUTPUT_PORT__DELETE,
         },
         { skip: !datasetId },
     );

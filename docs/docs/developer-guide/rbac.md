@@ -28,7 +28,7 @@ Examples of actions include:
 
 **Global Actions:**
 - `GLOBAL__CREATE_DATAPRODUCT` - Create new data products
-- `GLOBAL__CREATE_DATASET` - Create new output ports
+- `GLOBAL__CREATE_OUTPUT_PORT` - Create new output ports
 - `GLOBAL__UPDATE_CONFIGURATION` - Modify platform configuration
 - `GLOBAL__CREATE_USER` - Add users to the platform
 
@@ -37,13 +37,13 @@ Examples of actions include:
 - `DATA_PRODUCT__UPDATE_SETTINGS` - Change data product settings
 - `DATA_PRODUCT__CREATE_USER` - Add team members
 - `DATA_PRODUCT__APPROVE_USER_REQUEST` - Accept membership requests
-- `DATA_PRODUCT__CREATE_DATA_OUTPUT` - Add technical assets
+- `DATA_PRODUCT__CREATE_TECHNICAL_ASSET` - Add technical assets
 
 **Output port Actions:**
-- `DATASET__UPDATE_PROPERTIES` - Modify output port metadata
-- `DATASET__APPROVE_USER_REQUEST` - Accept access requests
-- `DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST` - Approve data product links
-- `DATASET__REVOKE_DATAPRODUCT_ACCESS` - Remove data product access
+- `OUTPUT_PORT__UPDATE_PROPERTIES` - Modify output port metadata
+- `OUTPUT_PORT__APPROVE_USER_REQUEST` - Accept access requests
+- `OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST` - Approve data product links
+- `OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS` - Remove data product access
 
 :::note
 Actions are defined in the backend codebase and can be extended by the development team. If you need additional actions for your use case, feel free to submit a pull request.
@@ -98,7 +98,7 @@ To access and configure RBAC settings, you need temporary admin privileges:
    - Select **"Remove admin privileges"**
    - Admin privileges automatically expire after 10 minutes if not manually revoked
 
-:::tip
+:::important
 Temporary admin privileges provide full access across the platform. All actions performed while in admin mode are still audited under your user account. Use admin privileges judiciously and revoke them when finished.
 :::
 
