@@ -307,6 +307,7 @@ class PluginRegistry:
         3. It's idempotent - safe to run multiple times
         """
         try:
+            import logging as stdlib_logging
             from pathlib import Path
 
             from alembic import command
@@ -323,10 +324,24 @@ class PluginRegistry:
                 return
 
             logger.info("Checking for pending plugin migrations...")
-            alembic_cfg = Config(str(alembic_ini))
 
-            # Run alembic upgrade head to apply any pending migrations
-            command.upgrade(alembic_cfg, "head")
+            # Save current logging state to restore after alembic
+            root_logger = stdlib_logging.getLogger()
+            original_handlers = root_logger.handlers.copy()
+            original_level = root_logger.level
+
+            try:
+                alembic_cfg = Config(str(alembic_ini))
+                # Disable alembic's logging configuration
+                alembic_cfg.set_main_option("disable_logging", "true")
+
+                # Run alembic upgrade head to apply any pending migrations
+                command.upgrade(alembic_cfg, "head")
+            finally:
+                # Restore original logging configuration
+                root_logger.handlers = original_handlers
+                root_logger.level = original_level
+
             logger.info("Plugin table migrations complete")
 
         except Exception as e:

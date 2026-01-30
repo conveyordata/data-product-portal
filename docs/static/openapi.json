@@ -10,6 +10,370 @@
     "version": "0.4.2"
   },
   "paths": {
+    "/api/auth/device/device_token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Device Token",
+        "operationId": "get_device_token_api_auth_device_device_token_post",
+        "deprecated": true,
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "openid",
+              "title": "Scope"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/device/jwt_token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Jwt Token",
+        "operationId": "get_jwt_token_api_auth_device_jwt_token_post",
+        "deprecated": true,
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "device_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Device Code"
+            }
+          },
+          {
+            "name": "grant_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Grant Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/aws_credentials": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Aws Credentials",
+        "operationId": "get_aws_credentials_api_auth_aws_credentials_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "data_product_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Data Product Name"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Environment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AWSCredentials"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authn/device/device_token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Device Token",
+        "operationId": "get_device_token",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "openid",
+              "title": "Scope"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authn/device/jwt_token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Jwt Token",
+        "operationId": "get_jwt_token",
+        "security": [
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "device_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Device Code"
+            }
+          },
+          {
+            "name": "grant_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Grant Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/authn/aws_credentials": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Aws Credentials",
+        "operationId": "get_aws_credentials",
+        "parameters": [
+          {
+            "name": "data_product_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Data Product Name"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Environment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AWSCredentials"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/user": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authorize",
+        "description": "**DEPRECATED:** Please use current user endpoint instead",
+        "operationId": "authorize_api_auth_user_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
     "/api/authz/access/{action}": {
       "get": {
         "tags": [
@@ -13346,370 +13710,6 @@
         }
       }
     },
-    "/api/auth/device/device_token": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Get Device Token",
-        "operationId": "get_device_token_api_auth_device_device_token_post",
-        "deprecated": true,
-        "security": [
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "openid",
-              "title": "Scope"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/device/jwt_token": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Get Jwt Token",
-        "operationId": "get_jwt_token_api_auth_device_jwt_token_post",
-        "deprecated": true,
-        "security": [
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
-          },
-          {
-            "name": "device_code",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Device Code"
-            }
-          },
-          {
-            "name": "grant_type",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Grant Type"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/aws_credentials": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Get Aws Credentials",
-        "operationId": "get_aws_credentials_api_auth_aws_credentials_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "data_product_name",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Data Product Name"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AWSCredentials"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/authn/device/device_token": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Get Device Token",
-        "operationId": "get_device_token",
-        "security": [
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "openid",
-              "title": "Scope"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/authn/device/jwt_token": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Get Jwt Token",
-        "operationId": "get_jwt_token",
-        "security": [
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
-          },
-          {
-            "name": "device_code",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Device Code"
-            }
-          },
-          {
-            "name": "grant_type",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Grant Type"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/authn/aws_credentials": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Get Aws Credentials",
-        "operationId": "get_aws_credentials",
-        "parameters": [
-          {
-            "name": "data_product_name",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Data Product Name"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AWSCredentials"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/user": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Authorize",
-        "description": "**DEPRECATED:** Please use current user endpoint instead",
-        "operationId": "authorize_api_auth_user_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/api/version": {
       "get": {
         "tags": [
@@ -14403,6 +14403,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14412,6 +14415,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -14515,6 +14519,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14524,6 +14531,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -14730,6 +14738,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14739,6 +14750,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -14890,6 +14902,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14899,6 +14914,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -14979,6 +14995,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14988,6 +15007,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -15093,6 +15113,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -15102,6 +15125,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -18794,6 +18818,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -18803,6 +18830,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -20684,6 +20712,36 @@
         "title": "RoleAssignmentResponseOld",
         "deprecated": true
       },
+      "S3TechnicalAssetConfiguration": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "const": "S3TechnicalAssetConfiguration",
+            "title": "Configuration Type"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "suffix": {
+            "type": "string",
+            "title": "Suffix",
+            "default": ""
+          },
+          "path": {
+            "type": "string",
+            "title": "Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type",
+          "bucket",
+          "path"
+        ],
+        "title": "S3TechnicalAssetConfiguration",
+        "description": "S3 Data Output Configuration Plugin\n\nThis plugin provides S3 bucket output configuration for data products.\nIt can be installed as an external package and will be automatically discovered\nby the Data Product Portal via entry points."
+      },
       "Scope": {
         "type": "string",
         "enum": [
@@ -21144,6 +21202,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -21153,6 +21214,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -22513,6 +22575,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -22522,6 +22587,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -22600,6 +22666,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -22609,6 +22678,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
@@ -22687,6 +22757,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -22696,6 +22769,7 @@
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }

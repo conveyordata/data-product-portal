@@ -75,7 +75,8 @@ class Settings(BaseSettings):
     # Auto-run plugin migrations on startup (runs 'alembic upgrade head')
     # When enabled, newly registered plugins will have their tables created automatically
     # Disable in production if you prefer manual migration control
-    AUTO_RUN_PLUGIN_MIGRATIONS: bool = True
+    # setting this to true crashes the logging of calls in fastapi for some reason - to be investigated.
+    AUTO_RUN_PLUGIN_MIGRATIONS: bool = False
 
 
 class LogLevel(str, Enum):

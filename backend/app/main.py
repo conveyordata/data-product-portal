@@ -8,7 +8,6 @@ from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
@@ -33,6 +32,13 @@ with open(Path(__file__).parent.parent / "VERSION", "r") as f:
     API_VERSION = f.read().strip()
 
 TITLE = "Data product portal"
+
+# Plugin discovery happens automatically in _build_runtime_union()
+# when DataOutputConfiguration is first imported
+
+
+# Log plugin initialization (discovery already happened during router import)
+logger.info(f"Initialized {len(PluginRegistry.get_all())} plugins")
 
 oidc_kwargs = (
     {
@@ -66,22 +72,8 @@ async def log_middleware(request: Request, call_next):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # Initialize plugin registry
-    enabled_plugins = None
-    if settings.ENABLED_PLUGINS:
-        enabled_plugins = [
-            p.strip() for p in settings.ENABLED_PLUGINS.split(",") if p.strip()
-        ]
-    PluginRegistry.discover_and_register(enabled_plugins)
-    logger.info(f"Initialized {len(PluginRegistry.get_all())} plugins")
-
-    # Rebuild union types to include all discovered plugins (including external)
-    from app.data_output_configuration.schema_union import rebuild_union_types
-
-    rebuild_union_types()
-    logger.info("Rebuilt plugin union types for API serialization")
-
     # Auto-run migrations if enabled
+    # Plugin discovery already happened at module import time
     if settings.AUTO_RUN_PLUGIN_MIGRATIONS:
         logger.info("Auto-running plugin migrations...")
         PluginRegistry.ensure_plugin_tables()
@@ -125,7 +117,8 @@ app = FastAPI(
 mcp_app = mcp.http_app(path="/mcp")
 mcp.add_middleware(LoggingMiddleware())
 
-app.include_router(router, prefix="/api")
+# Router registration moved to lifespan after plugin loading
+# app.include_router(router, prefix="/api")  # Now in lifespan
 app.include_router(auth, prefix="/api")
 app.include_router(mcp_router)
 
@@ -138,8 +131,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
-
+app.include_router(router, prefix="/api")
 app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Request-ID",
@@ -194,6 +186,7 @@ def get_version():
     return VersionResponse(version=app.version)
 
 
+# Note: use_route_names_as_operation_ids moved to lifespan
 def use_route_names_as_operation_ids(app: FastAPI) -> None:
     """
     Simplify operation IDs so that generated API clients have simpler function names.
