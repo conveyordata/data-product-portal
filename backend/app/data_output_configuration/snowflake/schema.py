@@ -27,6 +27,9 @@ from app.data_products.schema import DataProduct
 class SnowflakeDataOutput(AssetProviderPlugin):
     name: ClassVar[str] = "SnowflakeDataOutput"
     version: ClassVar[str] = "1.0"
+    migration_file_path: ClassVar[str] = (
+        "app/database/alembic/versions/2026_01_28_1241_snowflake_separate_table.py"
+    )
 
     database: str
     schema: str = ""

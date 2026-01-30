@@ -27,6 +27,9 @@ from app.data_products.schema import DataProduct
 class DatabricksDataOutput(AssetProviderPlugin):
     name: ClassVar[str] = "DatabricksDataOutput"
     version: ClassVar[str] = "1.0"
+    migration_file_path: ClassVar[str] = (
+        "app/database/alembic/versions/2026_01_28_1242_databricks_separate_table.py"
+    )
 
     catalog: str
     schema: str = ""

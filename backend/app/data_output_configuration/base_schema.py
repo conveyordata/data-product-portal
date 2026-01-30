@@ -108,6 +108,7 @@ class AssetProviderPlugin(ORMModel, ABC):
     name: ClassVar[str]
     version: ClassVar[str] = "1.0"
     configuration_type: DataOutputTypes
+    migration_file_path: ClassVar[Optional[str]] = None
 
     # Platform metadata - should be overridden in subclasses
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
@@ -168,3 +169,8 @@ class AssetProviderPlugin(ORMModel, ABC):
         """Get the logo filename for this plugin"""
         platform_meta = cls.get_platform_metadata()
         return platform_meta.icon_name
+
+    @classmethod
+    def get_migration_path(cls) -> Optional[str]:
+        """Return the path to this plugin's migration file"""
+        return cls.migration_file_path

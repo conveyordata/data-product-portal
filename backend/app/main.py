@@ -20,6 +20,7 @@ from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
+from app.data_output_configuration.registry import PluginRegistry
 from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
@@ -65,6 +66,26 @@ async def log_middleware(request: Request, call_next):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # Initialize plugin registry
+    enabled_plugins = None
+    if settings.ENABLED_PLUGINS:
+        enabled_plugins = [
+            p.strip() for p in settings.ENABLED_PLUGINS.split(",") if p.strip()
+        ]
+    PluginRegistry.discover_and_register(enabled_plugins)
+    logger.info(f"Initialized {len(PluginRegistry.get_all())} plugins")
+
+    # Rebuild union types to include all discovered plugins (including external)
+    from app.data_output_configuration.schema_union import rebuild_union_types
+
+    rebuild_union_types()
+    logger.info("Rebuilt plugin union types for API serialization")
+
+    # Auto-run migrations if enabled
+    if settings.AUTO_RUN_PLUGIN_MIGRATIONS:
+        logger.info("Auto-running plugin migrations...")
+        PluginRegistry.ensure_plugin_tables()
+
     db = next(database.get_db_session())
     resync = RoleService(db).initialize_prototype_roles()
     if resync or settings.AUTHORIZER_STARTUP_SYNC:

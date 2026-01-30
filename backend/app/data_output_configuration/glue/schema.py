@@ -27,6 +27,9 @@ from app.data_products.schema import DataProduct
 class GlueDataOutput(AssetProviderPlugin):
     name: ClassVar[str] = "GlueDataOutput"
     version: ClassVar[str] = "1.0"
+    migration_file_path: ClassVar[str] = (
+        "app/database/alembic/versions/2026_01_28_1244_glue_separate_table.py"
+    )
 
     database: str
     database_suffix: str = ""

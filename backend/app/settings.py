@@ -69,6 +69,14 @@ class Settings(BaseSettings):
     # Device flow cleanup buffer in minutes
     DEVICE_CODE_FLOW_EXPIRY_MINUTES: int = 30
 
+    # Plugin discovery - comma-separated list of plugin module paths
+    ENABLED_PLUGINS: str = ""
+
+    # Auto-run plugin migrations on startup (runs 'alembic upgrade head')
+    # When enabled, newly registered plugins will have their tables created automatically
+    # Disable in production if you prefer manual migration control
+    AUTO_RUN_PLUGIN_MIGRATIONS: bool = True
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

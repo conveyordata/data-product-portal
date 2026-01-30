@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
 )
+from app.data_output_configuration.registry import PluginRegistry
 from app.data_output_configuration.schema_response import (
     PlatformTile,
     UIElementMetadataResponse,
@@ -21,7 +22,7 @@ class PluginService:
         self,
     ) -> Sequence[UIElementMetadataResponse]:
         """Generate UI metadata for all registered data output types"""
-        data_output_configurations = AssetProviderPlugin.__subclasses__()
+        data_output_configurations = PluginRegistry.get_all()
 
         return [
             metadata_response

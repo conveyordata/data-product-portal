@@ -27,6 +27,9 @@ from app.data_products.schema import DataProduct
 class RedshiftDataOutput(AssetProviderPlugin):
     name: ClassVar[str] = "RedshiftDataOutput"
     version: ClassVar[str] = "1.0"
+    migration_file_path: ClassVar[str] = (
+        "app/database/alembic/versions/2026_01_28_1245_redshift_separate_table.py"
+    )
 
     database: str
     schema: str = ""

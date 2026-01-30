@@ -14393,16 +14393,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -14415,7 +14412,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -14509,16 +14505,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -14531,7 +14524,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -14728,16 +14720,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -14750,7 +14739,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -14892,16 +14880,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -14914,7 +14899,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -14985,16 +14969,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -15007,7 +14988,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -15103,16 +15083,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -15125,7 +15102,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -18808,16 +18784,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -18830,7 +18803,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -20712,35 +20684,6 @@
         "title": "RoleAssignmentResponseOld",
         "deprecated": true
       },
-      "S3DataOutput": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "S3DataOutput",
-            "title": "Configuration Type"
-          },
-          "bucket": {
-            "type": "string",
-            "title": "Bucket"
-          },
-          "suffix": {
-            "type": "string",
-            "title": "Suffix",
-            "default": ""
-          },
-          "path": {
-            "type": "string",
-            "title": "Path"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "bucket",
-          "path"
-        ],
-        "title": "S3DataOutput"
-      },
       "Scope": {
         "type": "string",
         "enum": [
@@ -21191,16 +21134,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -21213,7 +21153,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -22564,16 +22503,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -22586,7 +22522,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -22655,16 +22590,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -22677,7 +22609,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }
@@ -22746,16 +22677,13 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/SnowflakeDataOutput"
               },
               {
                 "$ref": "#/components/schemas/DatabricksDataOutput"
               },
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/GlueDataOutput"
               },
               {
                 "$ref": "#/components/schemas/RedshiftDataOutput"
@@ -22768,7 +22696,6 @@
                 "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
                 "GlueDataOutput": "#/components/schemas/GlueDataOutput",
                 "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
                 "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
               }
             }

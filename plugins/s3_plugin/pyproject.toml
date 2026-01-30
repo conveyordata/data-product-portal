@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-product-portal-s3-plugin"
+version = "1.0.0"
+description = "S3 data output configuration plugin for Data Product Portal"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0",
+    "sqlalchemy>=2.0.0",
+]
+
+[project.entry-points."data_product_portal.plugins"]
+S3DataOutput = "s3_plugin.schema:S3DataOutput"
