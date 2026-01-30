@@ -41,10 +41,10 @@ class PluginRegistry:
         # Default internal plugins
         if enabled_plugins is None:
             enabled_plugins = [
-                "app.data_output_configuration.snowflake.schema.SnowflakeDataOutput",
-                "app.data_output_configuration.databricks.schema.DatabricksDataOutput",
-                "app.data_output_configuration.glue.schema.GlueDataOutput",
-                "app.data_output_configuration.redshift.schema.RedshiftDataOutput",
+                "app.data_output_configuration.snowflake.schema.SnowflakeTechnicalAssetConfiguration",
+                "app.data_output_configuration.databricks.schema.DatabricksTechnicalAssetConfiguration",
+                "app.data_output_configuration.glue.schema.GlueTechnicalAssetConfiguration",
+                "app.data_output_configuration.redshift.schema.RedshiftTechnicalAssetConfiguration",
                 # S3 will be external plugin for testing
             ]
 

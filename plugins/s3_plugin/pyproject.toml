@@ -14,4 +14,4 @@ dependencies = [
 ]
 
 [project.entry-points."data_product_portal.plugins"]
-S3DataOutput = "s3_plugin.schema:S3DataOutput"
+S3TechnicalAssetConfiguration = "s3_plugin.schema:S3TechnicalAssetConfiguration"
