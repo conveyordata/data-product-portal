@@ -1,11 +1,11 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.data_output_configuration.base_model import BaseDataOutputConfiguration
+from app.data_output_configuration.base_model import BaseTechnicalAssetConfiguration
 
 
-class RedshiftDataOutput(BaseDataOutputConfiguration):
-    __tablename__ = "redshift_data_output_configurations"
+class RedshiftTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
+    __tablename__ = "redshift_technical_asset_configurations"
 
     database: Mapped[str] = mapped_column(String, nullable=True)
     schema: Mapped[str] = mapped_column(String, nullable=True)
@@ -16,5 +16,5 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
     access_granularity: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
-        "polymorphic_identity": "RedshiftDataOutput",
+        "polymorphic_identity": "RedshiftTechnicalAssetConfiguration",
     }

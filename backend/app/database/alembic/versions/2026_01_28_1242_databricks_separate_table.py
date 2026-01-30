@@ -22,9 +22,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create the new databricks_data_output_configurations table
+    # Create the new databricks_technical_asset_configurations table
     op.create_table(
-        "databricks_data_output_configurations",
+        "databricks_technical_asset_configurations",
         sa.Column(
             "id",
             postgresql.UUID(as_uuid=True),
@@ -46,7 +46,7 @@ def upgrade() -> None:
     # Migrate existing Databricks data
     op.execute(
         """
-        INSERT INTO databricks_data_output_configurations
+        INSERT INTO databricks_technical_asset_configurations
             (id, catalog, schema, bucket_identifier, catalog_path, "table", table_path, access_granularity, created_on, updated_on, deleted_at)
         SELECT
             id, catalog, schema, bucket_identifier, catalog_path, "table", table_path, access_granularity, created_on, updated_on, deleted_at
@@ -55,8 +55,40 @@ def upgrade() -> None:
         """
     )
 
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'DatabricksTechnicalAssetConfiguration'
+        WHERE configuration_type = 'DatabricksDataOutput'
+        """
+    )
+
+    # Remove Databricks-specific columns from base table to avoid duplicate data
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET
+            catalog = NULL,
+            schema = NULL,
+            bucket_identifier = NULL,
+            catalog_path = NULL,
+            "table" = NULL,
+            table_path = NULL,
+            access_granularity = NULL
+        WHERE configuration_type = 'DatabricksTechnicalAssetConfiguration'
+        """
+    )
+
 
 def downgrade() -> None:
+    # Migrate all Databricks data back to base table (including newly created rows)
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'DatabricksDataOutput'
+        WHERE configuration_type = 'DatabricksTechnicalAssetConfiguration'
+        """
+    )
     op.execute(
         """
         UPDATE data_output_configurations AS base
@@ -68,9 +100,9 @@ def downgrade() -> None:
             "table" = db."table",
             table_path = db.table_path,
             access_granularity = db.access_granularity
-        FROM databricks_data_output_configurations AS db
+        FROM databricks_technical_asset_configurations AS db
         WHERE base.id = db.id
         """
     )
 
-    op.drop_table("databricks_data_output_configurations")
+    op.drop_table("databricks_technical_asset_configurations")

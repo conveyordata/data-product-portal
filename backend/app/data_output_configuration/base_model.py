@@ -1,15 +1,14 @@
 import uuid
 
-from sqlalchemy import Column, Enum, ForeignKey
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped
 
-from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.database.database import Base
 from app.shared.model import BaseORM
 
 
-class DataOutputConfiguration(Base, BaseORM):
+class TechnicalAssetConfiguration(Base, BaseORM):
     """
     Base table for all data output configurations.
     Contains the ID, timestamps, and configuration_type discriminator.
@@ -27,7 +26,7 @@ class DataOutputConfiguration(Base, BaseORM):
     __tablename__ = "data_output_configurations"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    configuration_type: Mapped[DataOutputTypes] = Column(Enum(DataOutputTypes))
+    configuration_type: Mapped[String] = Column(String)
 
     __mapper_args__ = {
         "polymorphic_on": "configuration_type",
@@ -35,7 +34,7 @@ class DataOutputConfiguration(Base, BaseORM):
     }
 
 
-class BaseDataOutputConfiguration(DataOutputConfiguration):
+class BaseTechnicalAssetConfiguration(TechnicalAssetConfiguration):
     """
     Abstract base class for specific configuration type tables.
     Each configuration type (Snowflake, Databricks, etc.) inherits from this

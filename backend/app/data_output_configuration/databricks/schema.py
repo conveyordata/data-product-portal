@@ -18,14 +18,14 @@ from app.data_output_configuration.base_schema import (
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.databricks.model import (
-    DatabricksDataOutput as DatabricksDataOutputModel,
+    DatabricksTechnicalAssetConfiguration as DatabricksTechnicalAssetConfigurationModel,
 )
 from app.data_output_configuration.enums import AccessGranularity, UIElementType
 from app.data_products.schema import DataProduct
 
 
-class DatabricksDataOutput(AssetProviderPlugin):
-    name: ClassVar[str] = "DatabricksDataOutput"
+class DatabricksTechnicalAssetConfiguration(AssetProviderPlugin):
+    name: ClassVar[str] = "DatabricksTechnicalAssetConfiguration"
     version: ClassVar[str] = "1.0"
     migration_file_path: ClassVar[str] = (
         "app/database/alembic/versions/2026_01_28_1242_databricks_separate_table.py"
@@ -33,7 +33,7 @@ class DatabricksDataOutput(AssetProviderPlugin):
 
     catalog: str
     schema: str = ""
-    configuration_type: Literal[DataOutputTypes.DatabricksDataOutput]
+    configuration_type: Literal[DataOutputTypes.DatabricksTechnicalAssetConfiguration]
     table: str = "*"
     bucket_identifier: str = ""
     catalog_path: str = ""
@@ -51,7 +51,7 @@ class DatabricksDataOutput(AssetProviderPlugin):
     )
 
     class Meta:
-        orm_model = DatabricksDataOutputModel
+        orm_model = DatabricksTechnicalAssetConfigurationModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:

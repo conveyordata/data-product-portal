@@ -22,9 +22,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create the new glue_data_output_configurations table
+    # Create the new glue_technical_asset_configurations table
     op.create_table(
-        "glue_data_output_configurations",
+        "glue_technical_asset_configurations",
         sa.Column(
             "id",
             postgresql.UUID(as_uuid=True),
@@ -46,7 +46,7 @@ def upgrade() -> None:
     # Migrate existing Glue data
     op.execute(
         """
-        INSERT INTO glue_data_output_configurations
+        INSERT INTO glue_technical_asset_configurations
             (id, database, database_suffix, "table", bucket_identifier, database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
         SELECT
             id, database, database_suffix, "table", bucket_identifier, database_path, table_path, access_granularity, created_on, updated_on, deleted_at
@@ -55,8 +55,40 @@ def upgrade() -> None:
         """
     )
 
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'GlueTechnicalAssetConfiguration'
+        WHERE configuration_type = 'GlueDataOutput'
+        """
+    )
+
+    # Remove Glue-specific columns from base table to avoid duplicate data
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET
+            database = NULL,
+            database_suffix = NULL,
+            "table" = NULL,
+            bucket_identifier = NULL,
+            database_path = NULL,
+            table_path = NULL,
+            access_granularity = NULL
+        WHERE configuration_type = 'GlueTechnicalAssetConfiguration'
+        """
+    )
+
 
 def downgrade() -> None:
+    # Migrate all Glue data back to base table (including newly created rows)
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'GlueDataOutput'
+        WHERE configuration_type = 'GlueTechnicalAssetConfiguration'
+        """
+    )
     op.execute(
         """
         UPDATE data_output_configurations AS base
@@ -68,9 +100,9 @@ def downgrade() -> None:
             database_path = glue.database_path,
             table_path = glue.table_path,
             access_granularity = glue.access_granularity
-        FROM glue_data_output_configurations AS glue
+        FROM glue_technical_asset_configurations AS glue
         WHERE base.id = glue.id
         """
     )
 
-    op.drop_table("glue_data_output_configurations")
+    op.drop_table("glue_technical_asset_configurations")

@@ -1,11 +1,11 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.data_output_configuration.base_model import BaseDataOutputConfiguration
+from app.data_output_configuration.base_model import BaseTechnicalAssetConfiguration
 
 
-class GlueDataOutput(BaseDataOutputConfiguration):
-    __tablename__ = "glue_data_output_configurations"
+class GlueTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
+    __tablename__ = "glue_technical_asset_configurations"
 
     database: Mapped[str] = mapped_column(String, nullable=True)
     database_suffix: Mapped[str] = mapped_column(String, nullable=True)
@@ -16,5 +16,5 @@ class GlueDataOutput(BaseDataOutputConfiguration):
     access_granularity: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
-        "polymorphic_identity": "GlueDataOutput",
+        "polymorphic_identity": "GlueTechnicalAssetConfiguration",
     }

@@ -14393,26 +14393,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -14505,26 +14505,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -14720,26 +14720,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -14880,26 +14880,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -14969,26 +14969,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           }
@@ -15083,26 +15083,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -16662,11 +16662,42 @@
         ],
         "title": "DatabricksConfig"
       },
-      "DatabricksDataOutput": {
+      "DatabricksEnvironmentPlatformConfiguration": {
+        "properties": {
+          "workspace_urls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Workspace Urls"
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id"
+          },
+          "metastore_id": {
+            "type": "string",
+            "title": "Metastore Id"
+          },
+          "credential_name": {
+            "type": "string",
+            "title": "Credential Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "workspace_urls",
+          "account_id",
+          "metastore_id",
+          "credential_name"
+        ],
+        "title": "DatabricksEnvironmentPlatformConfiguration"
+      },
+      "DatabricksTechnicalAssetConfiguration": {
         "properties": {
           "configuration_type": {
             "type": "string",
-            "const": "DatabricksDataOutput",
+            "const": "DatabricksTechnicalAssetConfiguration",
             "title": "Configuration Type"
           },
           "catalog": {
@@ -16708,38 +16739,7 @@
           "catalog",
           "access_granularity"
         ],
-        "title": "DatabricksDataOutput"
-      },
-      "DatabricksEnvironmentPlatformConfiguration": {
-        "properties": {
-          "workspace_urls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Workspace Urls"
-          },
-          "account_id": {
-            "type": "string",
-            "title": "Account Id"
-          },
-          "metastore_id": {
-            "type": "string",
-            "title": "Metastore Id"
-          },
-          "credential_name": {
-            "type": "string",
-            "title": "Credential Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "workspace_urls",
-          "account_id",
-          "metastore_id",
-          "credential_name"
-        ],
-        "title": "DatabricksEnvironmentPlatformConfiguration"
+        "title": "DatabricksTechnicalAssetConfiguration"
       },
       "Dataset": {
         "properties": {
@@ -18784,26 +18784,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -19005,11 +19005,11 @@
         ],
         "title": "GlobalRoleAssignmentResponse"
       },
-      "GlueDataOutput": {
+      "GlueTechnicalAssetConfiguration": {
         "properties": {
           "configuration_type": {
             "type": "string",
-            "const": "GlueDataOutput",
+            "const": "GlueTechnicalAssetConfiguration",
             "title": "Configuration Type"
           },
           "database": {
@@ -19051,7 +19051,7 @@
           "database",
           "access_granularity"
         ],
-        "title": "GlueDataOutput"
+        "title": "GlueTechnicalAssetConfiguration"
       },
       "Graph": {
         "properties": {
@@ -20219,11 +20219,11 @@
         ],
         "title": "RedshiftConfig"
       },
-      "RedshiftDataOutput": {
+      "RedshiftTechnicalAssetConfiguration": {
         "properties": {
           "configuration_type": {
             "type": "string",
-            "const": "RedshiftDataOutput",
+            "const": "RedshiftTechnicalAssetConfiguration",
             "title": "Configuration Type"
           },
           "database": {
@@ -20265,7 +20265,7 @@
           "database",
           "access_granularity"
         ],
-        "title": "RedshiftDataOutput"
+        "title": "RedshiftTechnicalAssetConfiguration"
       },
       "RemoveOutputPortAsInputPortRequest": {
         "properties": {
@@ -20963,11 +20963,11 @@
         ],
         "title": "SnowflakeConfig"
       },
-      "SnowflakeDataOutput": {
+      "SnowflakeTechnicalAssetConfiguration": {
         "properties": {
           "configuration_type": {
             "type": "string",
-            "const": "SnowflakeDataOutput",
+            "const": "SnowflakeTechnicalAssetConfiguration",
             "title": "Configuration Type"
           },
           "database": {
@@ -21009,7 +21009,7 @@
           "database",
           "access_granularity"
         ],
-        "title": "SnowflakeDataOutput"
+        "title": "SnowflakeTechnicalAssetConfiguration"
       },
       "Tag": {
         "properties": {
@@ -21134,26 +21134,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           }
@@ -22503,26 +22503,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -22590,26 +22590,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           },
@@ -22677,26 +22677,26 @@
           "configuration": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/GlueDataOutput"
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
           }

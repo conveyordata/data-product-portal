@@ -9,7 +9,7 @@ from httpx import Response
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.data_output_configuration.s3.schema import S3DataOutput
+from app.data_output_configuration.s3.schema import S3TechnicalAssetConfiguration
 from app.data_products.technical_assets.schema_request import (
     DataOutputResultStringRequest,
 )
@@ -522,11 +522,11 @@ class TestDataOutputsRouter:
         service = PlatformServiceFactory(
             result_string_template="{bucket}/{suffix}/{path}"
         )
-        configuration = S3DataOutput(
+        configuration = S3TechnicalAssetConfiguration(
             bucket="bucket",
             suffix="suffix",
             path="path",
-            configuration_type=DataOutputTypes.S3DataOutput,
+            configuration_type=DataOutputTypes.S3TechnicalAssetConfiguration,
         )
         request = DataOutputResultStringRequest(
             platform_id=service.platform.id,

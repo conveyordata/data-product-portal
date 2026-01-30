@@ -13,19 +13,25 @@ from app.data_output_configuration.registry import PluginRegistry
 
 # For type checking, import all known plugins statically
 if TYPE_CHECKING:
-    from app.data_output_configuration.databricks.schema import DatabricksDataOutput
-    from app.data_output_configuration.glue.schema import GlueDataOutput
-    from app.data_output_configuration.redshift.schema import RedshiftDataOutput
-    from app.data_output_configuration.s3.schema import S3DataOutput
-    from app.data_output_configuration.snowflake.schema import SnowflakeDataOutput
+    from app.data_output_configuration.databricks.schema import (
+        DatabricksTechnicalAssetConfiguration,
+    )
+    from app.data_output_configuration.glue.schema import (
+        GlueTechnicalAssetConfiguration,
+    )
+    from app.data_output_configuration.redshift.schema import (
+        RedshiftTechnicalAssetConfiguration,
+    )
+    from app.data_output_configuration.snowflake.schema import (
+        SnowflakeTechnicalAssetConfiguration,
+    )
 
     # Static type for mypy - will be overridden at runtime
     DataOutputs: TypeAlias = Union[
-        SnowflakeDataOutput,
-        DatabricksDataOutput,
-        GlueDataOutput,
-        RedshiftDataOutput,
-        S3DataOutput,
+        SnowflakeTechnicalAssetConfiguration,
+        DatabricksTechnicalAssetConfiguration,
+        GlueTechnicalAssetConfiguration,
+        RedshiftTechnicalAssetConfiguration,
     ]
     DataOutputConfiguration: TypeAlias = Annotated[
         DataOutputs,
@@ -45,26 +51,25 @@ def _build_data_output_union():
     if not plugins:
         # Fallback: import internal plugins directly if registry not initialized
         # This ensures backward compatibility during testing or early imports
-        from app.data_output_configuration.databricks.schema import DatabricksDataOutput
-        from app.data_output_configuration.glue.schema import GlueDataOutput
-        from app.data_output_configuration.redshift.schema import RedshiftDataOutput
-        from app.data_output_configuration.snowflake.schema import SnowflakeDataOutput
+        from app.data_output_configuration.databricks.schema import (
+            DatabricksTechnicalAssetConfiguration,
+        )
+        from app.data_output_configuration.glue.schema import (
+            GlueTechnicalAssetConfiguration,
+        )
+        from app.data_output_configuration.redshift.schema import (
+            RedshiftTechnicalAssetConfiguration,
+        )
+        from app.data_output_configuration.snowflake.schema import (
+            SnowflakeTechnicalAssetConfiguration,
+        )
 
         plugins = [
-            SnowflakeDataOutput,
-            DatabricksDataOutput,
-            GlueDataOutput,
-            RedshiftDataOutput,
+            SnowflakeTechnicalAssetConfiguration,
+            DatabricksTechnicalAssetConfiguration,
+            GlueTechnicalAssetConfiguration,
+            RedshiftTechnicalAssetConfiguration,
         ]
-
-        # Try to get S3 from registry or import (for backward compat)
-        try:
-            from app.data_output_configuration.s3.schema import S3DataOutput
-
-            plugins.append(S3DataOutput)
-        except ImportError:
-            # S3 might be external plugin, will be picked up when registry initializes
-            pass
 
     return Union[tuple(plugins)]
 
@@ -79,24 +84,25 @@ def _build_data_output_map():
 
     if not plugins:
         # Fallback for early imports
-        from app.data_output_configuration.databricks.schema import DatabricksDataOutput
-        from app.data_output_configuration.glue.schema import GlueDataOutput
-        from app.data_output_configuration.redshift.schema import RedshiftDataOutput
-        from app.data_output_configuration.snowflake.schema import SnowflakeDataOutput
+        from app.data_output_configuration.databricks.schema import (
+            DatabricksTechnicalAssetConfiguration,
+        )
+        from app.data_output_configuration.glue.schema import (
+            GlueTechnicalAssetConfiguration,
+        )
+        from app.data_output_configuration.redshift.schema import (
+            RedshiftTechnicalAssetConfiguration,
+        )
+        from app.data_output_configuration.snowflake.schema import (
+            SnowflakeTechnicalAssetConfiguration,
+        )
 
         plugins = [
-            SnowflakeDataOutput,
-            DatabricksDataOutput,
-            GlueDataOutput,
-            RedshiftDataOutput,
+            SnowflakeTechnicalAssetConfiguration,
+            DatabricksTechnicalAssetConfiguration,
+            GlueTechnicalAssetConfiguration,
+            RedshiftTechnicalAssetConfiguration,
         ]
-
-        try:
-            from app.data_output_configuration.s3.schema import S3DataOutput
-
-            plugins.append(S3DataOutput)
-        except ImportError:
-            pass
 
     # Build map from configuration_type to plugin class
     plugin_map = {}

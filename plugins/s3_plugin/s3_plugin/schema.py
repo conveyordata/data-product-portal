@@ -21,7 +21,9 @@ try:
     from app.data_products.schema import DataProduct
 
     # Import the model from the main backend
-    from s3_plugin.model import S3DataOutput as S3DataOutputModel
+    from s3_plugin.model import (
+        S3TechnicalAssetConfiguration as S3TechnicalAssetConfigurationModel,
+    )
 except ImportError as e:
     # When developing the plugin standalone, these might not be available
     raise ImportError(
@@ -30,7 +32,7 @@ except ImportError as e:
     )
 
 
-class S3DataOutput(AssetProviderPlugin):
+class S3TechnicalAssetConfiguration(AssetProviderPlugin):
     """
     S3 Data Output Configuration Plugin
 
@@ -39,7 +41,7 @@ class S3DataOutput(AssetProviderPlugin):
     by the Data Product Portal via entry points.
     """
 
-    name: ClassVar[str] = "S3DataOutput"
+    name: ClassVar[str] = "S3TechnicalAssetConfiguration"
     version: ClassVar[str] = "1.0"
     migration_file_path: ClassVar[str] = (
         "app/database/alembic/versions/2026_01_28_1243_s3_separate_table.py"
@@ -48,7 +50,7 @@ class S3DataOutput(AssetProviderPlugin):
     bucket: str
     suffix: str = ""
     path: str
-    configuration_type: Literal[DataOutputTypes.S3DataOutput]
+    configuration_type: Literal[DataOutputTypes.S3TechnicalAssetConfiguration]
 
     _platform_metadata = PlatformMetadata(
         display_name="S3",
@@ -61,7 +63,7 @@ class S3DataOutput(AssetProviderPlugin):
     )
 
     class Meta:
-        orm_model = S3DataOutputModel
+        orm_model = S3TechnicalAssetConfigurationModel
 
     def validate_configuration(self, data_product: DataProduct):
         """Validate S3 configuration against data product"""

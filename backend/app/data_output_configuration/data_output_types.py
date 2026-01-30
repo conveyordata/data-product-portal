@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class DataOutputTypes(str, Enum):
-    S3DataOutput = "S3DataOutput"
-    DatabricksDataOutput = "DatabricksDataOutput"
-    GlueDataOutput = "GlueDataOutput"
-    SnowflakeDataOutput = "SnowflakeDataOutput"
-    RedshiftDataOutput = "RedshiftDataOutput"
+    S3TechnicalAssetConfiguration = "S3TechnicalAssetConfiguration"
+    DatabricksTechnicalAssetConfiguration = "DatabricksTechnicalAssetConfiguration"
+    GlueTechnicalAssetConfiguration = "GlueTechnicalAssetConfiguration"
+    SnowflakeTechnicalAssetConfiguration = "SnowflakeTechnicalAssetConfiguration"
+    RedshiftTechnicalAssetConfiguration = "RedshiftTechnicalAssetConfiguration"
