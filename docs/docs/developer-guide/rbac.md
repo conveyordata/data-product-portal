@@ -28,7 +28,7 @@ Examples of actions include:
 
 **Global Actions:**
 - `GLOBAL__CREATE_DATAPRODUCT` - Create new data products
-- `GLOBAL__CREATE_DATASET` - Create new datasets
+- `GLOBAL__CREATE_DATASET` - Create new output ports
 - `GLOBAL__UPDATE_CONFIGURATION` - Modify platform configuration
 - `GLOBAL__CREATE_USER` - Add users to the platform
 
@@ -39,8 +39,8 @@ Examples of actions include:
 - `DATA_PRODUCT__APPROVE_USER_REQUEST` - Accept membership requests
 - `DATA_PRODUCT__CREATE_DATA_OUTPUT` - Add technical assets
 
-**Dataset Actions:**
-- `DATASET__UPDATE_PROPERTIES` - Modify dataset metadata
+**Output port Actions:**
+- `DATASET__UPDATE_PROPERTIES` - Modify output port metadata
 - `DATASET__APPROVE_USER_REQUEST` - Accept access requests
 - `DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST` - Approve data product links
 - `DATASET__REVOKE_DATAPRODUCT_ACCESS` - Remove data product access
@@ -59,7 +59,7 @@ Roles are collections of actions grouped together for a specific purpose. The po
 - **Custom**: Roles created specifically for your organization's needs
 
 Roles can be created and customized for each scope. When creating a custom role:
-1. Choose the scope (Global, Data Product, Domain, or Dataset)
+1. Choose the scope (Global, Data Product, Domain, or Output Port)
 2. Assign a descriptive name
 3. Select the actions this role should be allowed to perform
 
@@ -68,7 +68,7 @@ Roles can be created and customized for each scope. When creating a custom role:
 Role assignments link users to roles within a specific scope:
 - **Global roles** are assigned through the People page and apply platform-wide
 - **Data Product roles** are assigned when adding team members to a data product
-- **Dataset roles** are assigned when granting access to output ports
+- **Output Port roles** are assigned when granting access to output ports
 - Users can have different roles in different scopes simultaneously
 - Each user can have only **one global role** at a time (excluding temporary admin privileges)
 
@@ -158,14 +158,14 @@ Data product team members are assigned roles when added to the product:
 5. Users can also **request to join** a data product, specifying their desired role
 6. Existing team members with appropriate permissions can approve these requests
 
-### Dataset Role Assignment
+### Output Port Role Assignment
 
-Dataset access is managed separately from data product membership:
+Output port access is managed separately from data product membership:
 
-1. Navigate to the dataset (output port) detail page
+1. Navigate to the output port detail page
 2. Manage access through the **Access** tab
 3. Grant permissions based on configured roles
-4. Access can be requested by data product owners and approved by dataset owners
+4. Access can be requested by data product owners and approved by output port owners
 
 ## Use Cases
 
