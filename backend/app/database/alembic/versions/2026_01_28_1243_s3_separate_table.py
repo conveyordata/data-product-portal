@@ -22,9 +22,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create the new s3_data_output_configurations table
+    # Create the new s3_technical_asset_configurations table
     op.create_table(
-        "s3_data_output_configurations",
+        "s3_technical_asset_configurations",
         sa.Column(
             "id",
             postgresql.UUID(as_uuid=True),
@@ -42,7 +42,7 @@ def upgrade() -> None:
     # Migrate existing S3 data
     op.execute(
         """
-        INSERT INTO s3_data_output_configurations
+        INSERT INTO s3_technical_asset_configurations
             (id, bucket, suffix, path, created_on, updated_on, deleted_at)
         SELECT
             id, bucket, suffix, path, created_on, updated_on, deleted_at
@@ -51,8 +51,36 @@ def upgrade() -> None:
         """
     )
 
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'S3TechnicalAssetConfiguration'
+        WHERE configuration_type = 'S3DataOutput'
+        """
+    )
+
+    # Remove S3-specific columns from base table to avoid duplicate data
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET
+            bucket = NULL,
+            suffix = NULL,
+            path = NULL
+        WHERE configuration_type = 'S3TechnicalAssetConfiguration'
+        """
+    )
+
 
 def downgrade() -> None:
+    # Migrate all S3 data back to base table (including newly created rows)
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'S3DataOutput'
+        WHERE configuration_type = 'S3TechnicalAssetConfiguration'
+        """
+    )
     op.execute(
         """
         UPDATE data_output_configurations AS base
@@ -60,9 +88,9 @@ def downgrade() -> None:
             bucket = s3.bucket,
             suffix = s3.suffix,
             path = s3.path
-        FROM s3_data_output_configurations AS s3
+        FROM s3_technical_asset_configurations AS s3
         WHERE base.id = s3.id
         """
     )
 
-    op.drop_table("s3_data_output_configurations")
+    op.drop_table("s3_technical_asset_configurations")

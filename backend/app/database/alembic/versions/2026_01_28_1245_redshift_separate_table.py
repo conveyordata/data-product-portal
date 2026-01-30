@@ -22,9 +22,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create the new redshift_data_output_configurations table
+    # Create the new redshift_technical_asset_configurations table
     op.create_table(
-        "redshift_data_output_configurations",
+        "redshift_technical_asset_configurations",
         sa.Column(
             "id",
             postgresql.UUID(as_uuid=True),
@@ -46,7 +46,7 @@ def upgrade() -> None:
     # Migrate existing Redshift data
     op.execute(
         """
-        INSERT INTO redshift_data_output_configurations
+        INSERT INTO redshift_technical_asset_configurations
             (id, database, schema, "table", bucket_identifier, database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
         SELECT
             id, database, schema, "table", bucket_identifier, database_path, table_path, access_granularity, created_on, updated_on, deleted_at
@@ -55,8 +55,40 @@ def upgrade() -> None:
         """
     )
 
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'RedshiftTechnicalAssetConfiguration'
+        WHERE configuration_type = 'RedshiftDataOutput'
+        """
+    )
+
+    # Remove Redshift-specific columns from base table to avoid duplicate data
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET
+            database = NULL,
+            schema = NULL,
+            "table" = NULL,
+            bucket_identifier = NULL,
+            database_path = NULL,
+            table_path = NULL,
+            access_granularity = NULL
+        WHERE configuration_type = 'RedshiftTechnicalAssetConfiguration'
+        """
+    )
+
 
 def downgrade() -> None:
+    # Migrate all Redshift data back to base table (including newly created rows)
+    op.execute(
+        """
+        UPDATE data_output_configurations
+        SET configuration_type = 'RedshiftDataOutput'
+        WHERE configuration_type = 'RedshiftTechnicalAssetConfiguration'
+        """
+    )
     op.execute(
         """
         UPDATE data_output_configurations AS base
@@ -68,9 +100,9 @@ def downgrade() -> None:
             database_path = rs.database_path,
             table_path = rs.table_path,
             access_granularity = rs.access_granularity
-        FROM redshift_data_output_configurations AS rs
+        FROM redshift_technical_asset_configurations AS rs
         WHERE base.id = rs.id
         """
     )
 
-    op.drop_table("redshift_data_output_configurations")
+    op.drop_table("redshift_technical_asset_configurations")
