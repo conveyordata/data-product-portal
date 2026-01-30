@@ -44,14 +44,14 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const { data: update_access } = useCheckAccessQuery(
         {
             resource: dataProduct?.id,
-            action: AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
         },
         { skip: !dataProduct?.id },
     );
     const { data: delete_access } = useCheckAccessQuery(
         {
             resource: dataProduct?.id,
-            action: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+            action: AuthorizationAction.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
         },
         { skip: !dataProduct?.id },
     );

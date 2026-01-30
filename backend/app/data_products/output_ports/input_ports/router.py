@@ -37,7 +37,7 @@ route = "/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 DataProductDatasetAssociationResolver,
             )
         ),
@@ -66,7 +66,7 @@ def approve_data_product_link(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 DatasetResolver,
                 object_id="output_port_id",
             )
@@ -110,7 +110,7 @@ def approve_output_port_as_input_port(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 DataProductDatasetAssociationResolver,
             )
         ),
@@ -141,7 +141,7 @@ def deny_data_product_link(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 DatasetResolver,
                 object_id="output_port_id",
             )
@@ -184,7 +184,7 @@ def deny_output_port_as_input_port(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
                 DataProductDatasetAssociationResolver,
             )
         ),
@@ -213,7 +213,7 @@ def remove_data_product_link(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
                 DatasetResolver,
                 object_id="output_port_id",
             )

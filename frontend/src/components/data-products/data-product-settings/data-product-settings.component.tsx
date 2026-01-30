@@ -49,7 +49,7 @@ export function DataProductSettings({ id, scope }: Props) {
     const { data: dataset_access } = useCheckAccessQuery(
         {
             resource: id,
-            action: AuthorizationAction.DATASET__UPDATE_SETTINGS,
+            action: AuthorizationAction.OUTPUT_PORT__UPDATE_SETTINGS,
         },
         { skip: !id || scope !== 'dataset' },
     );

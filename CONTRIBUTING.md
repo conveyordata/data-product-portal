@@ -59,3 +59,14 @@ We follow a "Review Then Commit" workflow. All contributions are made via Pull R
 8.  **Merging:** Once the PR is approved by a committer and all automated checks have passed, it will be merged into the `main` branch.
 
 Congratulations! 🎉 Your contribution is now part of the project. We truly appreciate your effort and dedication.
+
+***
+
+## Extending the RBAC System
+
+The RBAC system is designed to be extensible. If you need additional actions or scopes:
+
+1. **Define New Actions**: Add action constants to the `AuthorizationAction` enum in the backend and frontend
+2. **Apply Authorization Checks**: Use the `Authorization.enforce()` dependency on relevant API endpoints
+3. **Update UI**: Conditionally show/hide UI elements based on user permissions
+4. **Test Thoroughly**: Ensure new permissions work correctly across all scopes

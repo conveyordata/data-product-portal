@@ -30,7 +30,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -47,7 +47,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -64,7 +64,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -96,7 +96,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -112,8 +112,8 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
             ],
         )
         DataProductRoleAssignmentFactory(
@@ -143,7 +143,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -158,7 +158,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -198,7 +198,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(
@@ -212,7 +212,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -252,7 +252,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
+            permissions=[Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         data_output = DataOutputFactory(owner=ds.data_product)
@@ -281,7 +281,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     def test_delete_dataset_with_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
-        role = RoleFactory(scope=Scope.DATASET, permissions=[Action.DATASET__DELETE])
+        role = RoleFactory(
+            scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
+        )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(dataset=ds)
         response = client.get(f"/api/data_outputs/{link.data_output_id}")
@@ -301,7 +303,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         data_output = DataOutputFactory(owner=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -310,7 +312,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -324,7 +326,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -345,7 +347,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
+            permissions=[Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         technical_asset = DataOutputFactory(owner=ds.data_product)
@@ -364,7 +366,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -382,7 +384,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(
@@ -402,8 +404,8 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
             ],
         )
         DataProductRoleAssignmentFactory(

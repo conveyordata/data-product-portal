@@ -54,7 +54,8 @@ class TestDatasetsRouter:
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -67,7 +68,8 @@ class TestDatasetsRouter:
     def test_create_dataset_no_owner_role(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -80,7 +82,8 @@ class TestDatasetsRouter:
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -95,7 +98,8 @@ class TestDatasetsRouter:
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -112,7 +116,8 @@ class TestDatasetsRouter:
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -130,7 +135,8 @@ class TestDatasetsRouter:
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -204,7 +210,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -231,7 +237,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -246,7 +252,7 @@ class TestDatasetsRouter:
     def test_remove_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -266,7 +272,7 @@ class TestDatasetsRouter:
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -276,7 +282,7 @@ class TestDatasetsRouter:
     def test_get_output_port(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -287,7 +293,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -305,7 +311,7 @@ class TestDatasetsRouter:
     def test_remove_dataset_with_invalid_dataset_id(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -321,7 +327,7 @@ class TestDatasetsRouter:
         ds_owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_STATUS],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_STATUS],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(
@@ -344,7 +350,7 @@ class TestDatasetsRouter:
         dataset = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
         DatasetRoleAssignmentFactory(
             user_id=user.id,
@@ -414,7 +420,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_SETTINGS],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_SETTINGS],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -553,7 +559,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -575,7 +581,8 @@ class TestDatasetsRouter:
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -592,7 +599,8 @@ class TestDatasetsRouter:
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -614,7 +622,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -637,7 +645,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -651,7 +659,7 @@ class TestDatasetsRouter:
         ds_owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_STATUS],
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_STATUS],
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(
@@ -666,7 +674,7 @@ class TestDatasetsRouter:
     def test_history_event_created_on_removing_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -682,7 +690,7 @@ class TestDatasetsRouter:
     def test_retain_deleted_dataset_name_in_history(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)

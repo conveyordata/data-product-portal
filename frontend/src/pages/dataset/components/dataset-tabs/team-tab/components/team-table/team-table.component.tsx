@@ -32,15 +32,15 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
 
     const { data: approve_access } = useCheckAccessQuery({
         resource: datasetId,
-        action: AuthorizationAction.DATASET__APPROVE_USER_REQUEST,
+        action: AuthorizationAction.OUTPUT_PORT__APPROVE_USER_REQUEST,
     });
     const { data: edit_access } = useCheckAccessQuery({
         resource: datasetId,
-        action: AuthorizationAction.DATASET__UPDATE_USER,
+        action: AuthorizationAction.OUTPUT_PORT__UPDATE_USER,
     });
     const { data: remove_access } = useCheckAccessQuery({
         resource: datasetId,
-        action: AuthorizationAction.DATASET__DELETE_USER,
+        action: AuthorizationAction.OUTPUT_PORT__DELETE_USER,
     });
 
     const canApproveUser = approve_access?.allowed ?? false;

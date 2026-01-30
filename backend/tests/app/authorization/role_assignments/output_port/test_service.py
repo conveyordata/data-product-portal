@@ -13,7 +13,7 @@ class TestDatasetRoleAssignmentsService:
     def test_user_has_permission(self, session):
         service = RoleAssignmentService(db=session)
         dataset = DatasetFactory()
-        action = Action.DATASET__READ_INTEGRATIONS
+        action = Action.OUTPUT_PORT__READ_INTEGRATIONS
 
         authorized_users = service.users_with_authz_action(
             dataset_id=dataset.id,

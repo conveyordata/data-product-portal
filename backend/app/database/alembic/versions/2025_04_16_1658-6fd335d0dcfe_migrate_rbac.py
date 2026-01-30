@@ -126,8 +126,8 @@ class RoleMigrationService:
                     scope=Scope.DATA_PRODUCT,
                     description="A member of the data product",
                     permissions=[
-                        Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                        Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                        Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
+                        Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
                         Action.DATA_PRODUCT__READ_INTEGRATIONS,
                     ],
                 )

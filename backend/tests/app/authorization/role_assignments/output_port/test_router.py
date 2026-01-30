@@ -60,11 +60,11 @@ class TestDatasetRoleAssignmentsRouter:
         "permissions",
         [
             [
-                Action.DATASET__CREATE_USER,
+                Action.OUTPUT_PORT__CREATE_USER,
             ],
             [
-                Action.DATASET__CREATE_USER,
-                Action.DATASET__APPROVE_USER_REQUEST,
+                Action.OUTPUT_PORT__CREATE_USER,
+                Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
             ],
         ],
     )
@@ -98,8 +98,14 @@ class TestDatasetRoleAssignmentsRouter:
     @pytest.mark.parametrize(
         ("permissions", "should_update_casbin"),
         [
-            ([Action.DATASET__CREATE_USER], False),
-            ([Action.DATASET__CREATE_USER, Action.DATASET__APPROVE_USER_REQUEST], True),
+            ([Action.OUTPUT_PORT__CREATE_USER], False),
+            (
+                [
+                    Action.OUTPUT_PORT__CREATE_USER,
+                    Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
+                ],
+                True,
+            ),
         ],
     )
     @patch(
@@ -151,7 +157,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
+            permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -176,7 +182,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
+            permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -218,7 +224,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__DELETE_USER],
+            permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -248,7 +254,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_USER_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -277,7 +283,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_USER_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -306,7 +312,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_USER_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -333,7 +339,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_USER_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -358,7 +364,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_USER_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -383,7 +389,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__UPDATE_USER],
+            permissions=[Action.OUTPUT_PORT__UPDATE_USER],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -410,7 +416,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__UPDATE_USER],
+            permissions=[Action.OUTPUT_PORT__UPDATE_USER],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -436,7 +442,7 @@ class TestDatasetRoleAssignmentsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         dataset: Dataset = DatasetFactory()
         role: Role = RoleFactory(
-            scope=Scope.DATASET, permissions=[Action.DATASET__DELETE]
+            scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
         )
         DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
@@ -462,7 +468,7 @@ class TestDatasetRoleAssignmentsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__DELETE_USER],
+            permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -492,7 +498,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
+            permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -517,7 +523,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
+            permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -542,7 +548,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_USER_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -573,7 +579,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__UPDATE_USER],
+            permissions=[Action.OUTPUT_PORT__UPDATE_USER],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
@@ -604,7 +610,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__DELETE_USER],
+            permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id

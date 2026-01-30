@@ -222,7 +222,9 @@ class TestUsersRouter:
         data_output = DataOutputFactory(owner=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[
+                AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK
+            ],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -231,7 +233,9 @@ class TestUsersRouter:
         ds = DatasetFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[
+                AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST
+            ],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 

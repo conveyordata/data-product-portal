@@ -68,7 +68,7 @@ export function TeamTab({ datasetId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             resource: datasetId,
-            action: AuthorizationAction.DATASET__CREATE_USER,
+            action: AuthorizationAction.OUTPUT_PORT__CREATE_USER,
         },
         { skip: !datasetId },
     );

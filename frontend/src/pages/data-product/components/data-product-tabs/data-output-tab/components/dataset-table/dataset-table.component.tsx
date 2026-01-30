@@ -26,7 +26,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
     const { data: access_create_dataset } = useCheckAccessQuery(
         {
             resource: dataProductId,
-            action: AuthorizationAction.GLOBAL__CREATE_DATASET,
+            action: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,
         },
         { skip: !dataProductId },
     );
@@ -34,7 +34,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
     const { data: can_link_data_output } = useCheckAccessQuery(
         {
             resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+            action: AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
         },
         { skip: !dataProductId },
     );

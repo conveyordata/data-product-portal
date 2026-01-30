@@ -57,7 +57,9 @@ def get_output_port_curated_queries(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -87,7 +89,9 @@ def replace_dataset_curated_queries(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
 )

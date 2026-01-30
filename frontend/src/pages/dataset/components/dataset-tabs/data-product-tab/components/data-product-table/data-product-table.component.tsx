@@ -35,14 +35,14 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
     const { data: approve_access } = useCheckAccessQuery(
         {
             resource: datasetId,
-            action: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            action: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
         },
         { skip: !datasetId },
     );
     const { data: revoke_access } = useCheckAccessQuery(
         {
             resource: datasetId,
-            action: AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+            action: AuthorizationAction.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
         },
         { skip: !datasetId },
     );

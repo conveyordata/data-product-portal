@@ -394,7 +394,7 @@ def _send_dataset_link_emails(
         if dataset_link.dataset.access_type != OutputPortAccessType.PUBLIC:
             approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
                 dataset_link.dataset_id,
-                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
             background_tasks.add_task(
                 email.send_dataset_link_email(
@@ -469,7 +469,7 @@ router.include_router(_router, prefix=route)
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
                 DataProductResolver,
             )
         ),
@@ -515,7 +515,7 @@ def link_dataset_to_data_product(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
                 DataProductResolver,
             )
         ),
@@ -561,7 +561,7 @@ def link_datasets_to_data_product(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
                 DataProductResolver,
             )
         ),
@@ -672,7 +672,7 @@ def get_data_product_event_history(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
                 DataProductResolver,
             )
         )
@@ -708,7 +708,7 @@ def create_data_output(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
                 DataProductResolver,
             )
         )
@@ -997,7 +997,7 @@ def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) 
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
                 DataProductResolver,
             )
         ),
@@ -1032,7 +1032,7 @@ def unlink_dataset_from_data_product(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
                 DataProductResolver,
             )
         ),

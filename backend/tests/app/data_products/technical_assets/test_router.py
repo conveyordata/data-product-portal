@@ -88,7 +88,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -104,7 +104,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -121,7 +121,7 @@ class TestDataOutputsRouter:
     def test_deprecated_source_aligned(self, data_output_payload, client: TestClient):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -183,7 +183,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -217,7 +217,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -236,7 +236,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -339,7 +339,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         owner = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -363,7 +363,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -381,7 +381,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -399,7 +399,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -418,7 +418,7 @@ class TestDataOutputsRouter:
     def test_get_technical_asset_history(self, data_output_payload, client):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -442,7 +442,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -462,7 +462,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -485,7 +485,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -502,7 +502,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -551,7 +551,7 @@ class TestDataOutputsRouter:
         # Create role that allows linking datasets
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
 
         DataProductRoleAssignmentFactory(
@@ -559,7 +559,7 @@ class TestDataOutputsRouter:
         )
         ds_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=ds_role.id, dataset_id=dataset.id
@@ -586,7 +586,7 @@ class TestDataOutputsRouter:
         # Create role that allows linking datasets
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
