@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRemoveDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
@@ -25,6 +26,7 @@ type Props = {
 
 export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
+    const { data: { plugins } = {} } = useGetPluginsQuery();
     const { data: deleteAccess } = useCheckAccessQuery({
         resource: dataProductId,
         action: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
@@ -123,7 +125,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                     <Flex justify="space-between" align="flex-start">
                         <Flex gap={'middle'} align="center">
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type)}
+                                iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type, plugins)}
                             />
                             <Flex>
                                 <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>

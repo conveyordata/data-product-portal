@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next';
 
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
 import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import type { DataOutputLink } from '@/types/dataset';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
@@ -15,6 +16,7 @@ import styles from './data-output-table.module.scss';
 
 type Props = {
     t: TFunction;
+    plugins?: UiElementMetadataResponse[];
     onRemoveDataOutputDatasetLink: (data_outputId: string, name: string, datasetLinkId: string) => void;
     onAcceptDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void;
     onRejectDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void;
@@ -26,6 +28,7 @@ type Props = {
 
 export const getDatasetDataProductsColumns = ({
     t,
+    plugins,
     onRemoveDataOutputDatasetLink,
     onAcceptDataOutputDatasetLink,
     onRejectDataOutputDatasetLink,
@@ -76,7 +79,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type)}
+                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type, plugins)}
                                 size={'default'}
                             />
                         }
