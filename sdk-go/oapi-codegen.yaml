@@ -1,9 +1,8 @@
 package: portalsdk
 generate:
-  models: true
   client: true
-output: portalsdk/portalsdk.go
-output-options:
-  skip-fmt: true
-compatibility:
   always-prefix-enum-values: true
+output:
+  use-single-file: true
+  directory: portalsdk
+  filename: portalsdk.go
