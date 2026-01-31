@@ -75,8 +75,8 @@ type ClientInterface interface {
 	// UpdateOutputPort Update Output Port
 	UpdateOutputPort(ctx context.Context, options *UpdateOutputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateOutputPortResponseJSON, error)
 
-	// GetEventHistory Get Event History
-	GetEventHistory(ctx context.Context, options *GetEventHistoryRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetEventHistoryResponseJSON, error)
+	// GetOutputPortsEventHistory Get Output Ports Event History
+	GetOutputPortsEventHistory(ctx context.Context, options *GetOutputPortsEventHistoryRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetOutputPortsEventHistoryResponse, error)
 
 	// UpdateOutputPortAbout Update Output Port About
 	UpdateOutputPortAbout(ctx context.Context, options *UpdateOutputPortAboutRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateOutputPortAboutResponse, error)
@@ -84,20 +84,11 @@ type ClientInterface interface {
 	// UpdateOutputPortStatus Update Output Port Status
 	UpdateOutputPortStatus(ctx context.Context, options *UpdateOutputPortStatusRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateOutputPortStatusResponse, error)
 
-	// GetGraphData Get Graph Data
-	GetGraphData(ctx context.Context, options *GetGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponse, error)
+	// GetOutputPortGraphData Get Output Port Graph Data
+	GetOutputPortGraphData(ctx context.Context, options *GetOutputPortGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetOutputPortGraphDataResponse, error)
 
 	// SetValueForOutputPort Set Value For Output Port
 	SetValueForOutputPort(ctx context.Context, options *SetValueForOutputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*SetValueForOutputPortResponse, error)
-
-	// GetDataProductNamespaceSuggestion Get Data Product Namespace Suggestion
-	GetDataProductNamespaceSuggestion(ctx context.Context, options *GetDataProductNamespaceSuggestionRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductNamespaceSuggestionResponse, error)
-
-	// ValidateDataProductNamespace Validate Data Product Namespace
-	ValidateDataProductNamespace(ctx context.Context, options *ValidateDataProductNamespaceRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateDataProductNamespaceResponse, error)
-
-	// GetDataProductNamespaceLengthLimits Get Data Product Namespace Length Limits
-	GetDataProductNamespaceLengthLimits(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetDataProductNamespaceLengthLimitsResponse, error)
 
 	// CreateDataProduct Create Data Product
 	CreateDataProduct(ctx context.Context, options *CreateDataProductRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateDataProductResponseJSON, error)
@@ -123,14 +114,17 @@ type ClientInterface interface {
 	// UpdateDataProductUsage Update Data Product Usage
 	UpdateDataProductUsage(ctx context.Context, options *UpdateDataProductUsageRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateDataProductUsageResponse, error)
 
-	// GetGraphData_1 Get Graph Data
-	GetGraphData_1(ctx context.Context, options *GetGraphData_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponseJSON, error)
+	// GetDataProductGraphData Get Data Product Graph Data
+	GetDataProductGraphData(ctx context.Context, options *GetDataProductGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductGraphDataResponse, error)
 
 	// SetValueForDataProduct Set Value For Data Product
 	SetValueForDataProduct(ctx context.Context, options *SetValueForDataProductRequestOptions, reqEditors ...runtime.RequestEditorFn) (*SetValueForDataProductResponse, error)
 
 	// LinkInputPortsToDataProduct Link Input Ports To Data Product
 	LinkInputPortsToDataProduct(ctx context.Context, options *LinkInputPortsToDataProductRequestOptions, reqEditors ...runtime.RequestEditorFn) (*LinkInputPortsToDataProductResponse, error)
+
+	// GetDataProductEventHistory Get Data Product Event History
+	GetDataProductEventHistory(ctx context.Context, options *GetDataProductEventHistoryRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductEventHistoryResponse, error)
 
 	// CreateTechnicalAsset Create Technical Asset
 	CreateTechnicalAsset(ctx context.Context, options *CreateTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateTechnicalAssetResponseJSON, error)
@@ -159,9 +153,6 @@ type ClientInterface interface {
 	// UnlinkInputPortFromDataProduct Unlink Input Port From Data Product
 	UnlinkInputPortFromDataProduct(ctx context.Context, options *UnlinkInputPortFromDataProductRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UnlinkInputPortFromDataProductResponse, error)
 
-	// ValidateTechnicalAssetNamespace Validate Technical Asset Namespace
-	ValidateTechnicalAssetNamespace(ctx context.Context, options *ValidateTechnicalAssetNamespaceRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateTechnicalAssetNamespaceResponse, error)
-
 	// GetDataProductType Get Data Product Type
 	GetDataProductType(ctx context.Context, options *GetDataProductTypeRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductTypeResponse, error)
 
@@ -189,8 +180,8 @@ type ClientInterface interface {
 	// UpdateDataProductLifecycle Update Data Product Lifecycle
 	UpdateDataProductLifecycle(ctx context.Context, options *UpdateDataProductLifecycleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateDataProductLifecycleResponse, error)
 
-	// DeleteDataProductLifecycle Delete Data Product Lifecycle
-	DeleteDataProductLifecycle(ctx context.Context, options *DeleteDataProductLifecycleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteDataProductLifecycleResponse, error)
+	// RemoveDataProductLifecycle Remove Data Product Lifecycle
+	RemoveDataProductLifecycle(ctx context.Context, options *RemoveDataProductLifecycleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveDataProductLifecycleResponse, error)
 
 	// GetDataProductsSettings Get Data Products Settings
 	GetDataProductsSettings(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetDataProductsSettingsResponse, error)
@@ -198,20 +189,32 @@ type ClientInterface interface {
 	// CreateDataProductSetting Create Data Product Setting
 	CreateDataProductSetting(ctx context.Context, options *CreateDataProductSettingRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateDataProductSettingResponseJSON, error)
 
-	// GetDataProductSettingsNamespaceSuggestion Get Data Product Settings Namespace Suggestion
-	GetDataProductSettingsNamespaceSuggestion(ctx context.Context, options *GetDataProductSettingsNamespaceSuggestionRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductSettingsNamespaceSuggestionResponse, error)
-
-	// ValidateDataProductSettingsNamespace Validate Data Product Settings Namespace
-	ValidateDataProductSettingsNamespace(ctx context.Context, options *ValidateDataProductSettingsNamespaceRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateDataProductSettingsNamespaceResponse, error)
-
-	// GetDataProductSettingsNamespaceLengthLimits Get Data Product Settings Namespace Length Limits
-	GetDataProductSettingsNamespaceLengthLimits(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetDataProductSettingsNamespaceLengthLimitsResponse, error)
-
 	// UpdateDataProductSetting Update Data Product Setting
 	UpdateDataProductSetting(ctx context.Context, options *UpdateDataProductSettingRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateDataProductSettingResponseJSON, error)
 
-	// DeleteDataProductSetting Delete Data Product Setting
-	DeleteDataProductSetting(ctx context.Context, options *DeleteDataProductSettingRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteDataProductSettingResponse, error)
+	// RemoveDataProductSetting Remove Data Product Setting
+	RemoveDataProductSetting(ctx context.Context, options *RemoveDataProductSettingRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveDataProductSettingResponse, error)
+
+	// ApproveOutputPortAsInputPort Approve Output Port As Input Port
+	ApproveOutputPortAsInputPort(ctx context.Context, options *ApproveOutputPortAsInputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ApproveOutputPortAsInputPortResponse, error)
+
+	// DenyOutputPortAsInputPort Deny Output Port As Input Port
+	DenyOutputPortAsInputPort(ctx context.Context, options *DenyOutputPortAsInputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DenyOutputPortAsInputPortResponse, error)
+
+	// RemoveOutputPortAsInputPort Remove Output Port As Input Port
+	RemoveOutputPortAsInputPort(ctx context.Context, options *RemoveOutputPortAsInputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveOutputPortAsInputPortResponse, error)
+
+	// ApproveOutputPortTechnicalAssetLink Approve Output Port Technical Asset Link
+	ApproveOutputPortTechnicalAssetLink(ctx context.Context, options *ApproveOutputPortTechnicalAssetLinkRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ApproveOutputPortTechnicalAssetLinkResponse, error)
+
+	// DenyOutputPortTechnicalAssetLink Deny Output Port Technical Asset Link
+	DenyOutputPortTechnicalAssetLink(ctx context.Context, options *DenyOutputPortTechnicalAssetLinkRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DenyOutputPortTechnicalAssetLinkResponse, error)
+
+	// LinkOutputPortToTechnicalAsset Link Output Port To Technical Asset
+	LinkOutputPortToTechnicalAsset(ctx context.Context, options *LinkOutputPortToTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*LinkOutputPortToTechnicalAssetResponse, error)
+
+	// UnlinkOutputPortFromTechnicalAsset Unlink Output Port From Technical Asset
+	UnlinkOutputPortFromTechnicalAsset(ctx context.Context, options *UnlinkOutputPortFromTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UnlinkOutputPortFromTechnicalAssetResponse, error)
 
 	// GetTechnicalAsset Get Technical Asset
 	GetTechnicalAsset(ctx context.Context, options *GetTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetTechnicalAssetResponse, error)
@@ -225,14 +228,8 @@ type ClientInterface interface {
 	// UpdateTechnicalAssetStatus Update Technical Asset Status
 	UpdateTechnicalAssetStatus(ctx context.Context, options *UpdateTechnicalAssetStatusRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateTechnicalAssetStatusResponse, error)
 
-	// LinkOutputPortToTechnicalAsset Link Output Port To Technical Asset
-	LinkOutputPortToTechnicalAsset(ctx context.Context, options *LinkOutputPortToTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*LinkOutputPortToTechnicalAssetResponse, error)
-
-	// UnlinkOutputPortFromTechnicalAsset Unlink Output Port From Technical Asset
-	UnlinkOutputPortFromTechnicalAsset(ctx context.Context, options *UnlinkOutputPortFromTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UnlinkOutputPortFromTechnicalAssetResponse, error)
-
-	// GetGraphData_2 Get Graph Data
-	GetGraphData_2(ctx context.Context, options *GetGraphData_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponseJSON200, error)
+	// GetTechnicalAssetGraphData Get Technical Asset Graph Data
+	GetTechnicalAssetGraphData(ctx context.Context, options *GetTechnicalAssetGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetTechnicalAssetGraphDataResponse, error)
 
 	// GetDomains Get Domains
 	GetDomains(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetDomainsResponseJSON, error)
@@ -315,6 +312,12 @@ type ClientInterface interface {
 	// MarkTourAsSeen Mark Tour As Seen
 	MarkTourAsSeen(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*MarkTourAsSeenResponse, error)
 
+	// GetUserPendingActions Get User Pending Actions
+	GetUserPendingActions(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetUserPendingActionsResponse, error)
+
+	// GetCurrentUser Get Current User
+	GetCurrentUser(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetCurrentUserResponse, error)
+
 	// CreateRole Create Role
 	CreateRole(ctx context.Context, options *CreateRoleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateRoleResponse, error)
 
@@ -333,62 +336,104 @@ type ClientInterface interface {
 	// RevokeAdmin Revoke Admin
 	RevokeAdmin(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*RevokeAdminResponse, error)
 
-	// CreateAssignment Create Assignment
-	CreateAssignment(ctx context.Context, options *CreateAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateAssignmentResponse, error)
+	// CreateGlobalRoleAssignment Create Global Role Assignment
+	CreateGlobalRoleAssignment(ctx context.Context, options *CreateGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateGlobalRoleAssignmentResponse, error)
 
-	// ListAssignments List Assignments
-	ListAssignments(ctx context.Context, options *ListAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListAssignmentsResponse, error)
+	// ListGlobalRoleAssignments List Global Role Assignments
+	ListGlobalRoleAssignments(ctx context.Context, options *ListGlobalRoleAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListGlobalRoleAssignmentsResponse, error)
 
-	// DeleteAssignment Delete Assignment
-	DeleteAssignment(ctx context.Context, options *DeleteAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteAssignmentResponse, error)
+	// DeleteGlobalRoleAssignment Delete Global Role Assignment
+	DeleteGlobalRoleAssignment(ctx context.Context, options *DeleteGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteGlobalRoleAssignmentResponseJSON, error)
 
-	// DecideAssignment Decide Assignment
-	DecideAssignment(ctx context.Context, options *DecideAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideAssignmentResponse, error)
+	// DecideGlobalRoleAssignment Decide Global Role Assignment
+	DecideGlobalRoleAssignment(ctx context.Context, options *DecideGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideGlobalRoleAssignmentResponse, error)
 
-	// ModifyAssignedRole Modify Assigned Role
-	ModifyAssignedRole(ctx context.Context, options *ModifyAssignedRoleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyAssignedRoleResponse, error)
+	// ModifyGlobalRoleAssignment Modify Global Role Assignment
+	ModifyGlobalRoleAssignment(ctx context.Context, options *ModifyGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyGlobalRoleAssignmentResponse, error)
 
-	// DeleteAssignment_1 Delete Assignment
-	DeleteAssignment_1(ctx context.Context, options *DeleteAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteAssignmentResponseJSON, error)
+	// DeleteDataProductRoleAssignment Delete Data Product Role Assignment
+	DeleteDataProductRoleAssignment(ctx context.Context, options *DeleteDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteDataProductRoleAssignmentResponseJSON, error)
 
-	// ModifyAssignedRole_1 Modify Assigned Role
-	ModifyAssignedRole_1(ctx context.Context, options *ModifyAssignedRole_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyAssignedRoleResponseJSON, error)
+	// ModifyDataProductRoleAssignment Modify Data Product Role Assignment
+	ModifyDataProductRoleAssignment(ctx context.Context, options *ModifyDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyDataProductRoleAssignmentResponse, error)
 
-	// ListAssignments_1 List Assignments
-	ListAssignments_1(ctx context.Context, options *ListAssignments_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListAssignmentsResponseJSON, error)
+	// ListDataProductRoleAssignments List Data Product Role Assignments
+	ListDataProductRoleAssignments(ctx context.Context, options *ListDataProductRoleAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListDataProductRoleAssignmentsResponse, error)
 
-	// CreateAssignment_1 Create Assignment
-	CreateAssignment_1(ctx context.Context, options *CreateAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateAssignmentResponseJSON, error)
+	// CreateDataProductRoleAssignment Create Data Product Role Assignment
+	CreateDataProductRoleAssignment(ctx context.Context, options *CreateDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateDataProductRoleAssignmentResponse, error)
 
-	// RequestAssignment Request Assignment
-	RequestAssignment(ctx context.Context, options *RequestAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestAssignmentResponse, error)
+	// RequestDataProductRoleAssignment Request Data Product Role Assignment
+	RequestDataProductRoleAssignment(ctx context.Context, options *RequestDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestDataProductRoleAssignmentResponse, error)
 
-	// DecideAssignment_1 Decide Assignment
-	DecideAssignment_1(ctx context.Context, options *DecideAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideAssignmentResponseJSON, error)
+	// DecideDataProductRoleAssignment Decide Data Product Role Assignment
+	DecideDataProductRoleAssignment(ctx context.Context, options *DecideDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideDataProductRoleAssignmentResponse, error)
 
-	// DeleteAssignment_2 Delete Assignment
-	DeleteAssignment_2(ctx context.Context, options *DeleteAssignment_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteAssignmentResponseJSON200, error)
+	// DeleteOutputPortRoleAssignment Delete Output Port Role Assignment
+	DeleteOutputPortRoleAssignment(ctx context.Context, options *DeleteOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteOutputPortRoleAssignmentResponseJSON, error)
 
-	// ModifyAssignedRole_2 Modify Assigned Role
-	ModifyAssignedRole_2(ctx context.Context, options *ModifyAssignedRole_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyAssignedRoleResponseJSON200, error)
+	// ModifyOutputPortRoleAssignment Modify Output Port Role Assignment
+	ModifyOutputPortRoleAssignment(ctx context.Context, options *ModifyOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyOutputPortRoleAssignmentResponse, error)
 
-	// ListAssignments_2 List Assignments
-	ListAssignments_2(ctx context.Context, options *ListAssignments_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListAssignmentsResponseJSON200, error)
+	// ListOutputPortRoleAssignments List Output Port Role Assignments
+	ListOutputPortRoleAssignments(ctx context.Context, options *ListOutputPortRoleAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListOutputPortRoleAssignmentsResponse, error)
 
-	// CreateAssignment_2 Create Assignment
-	CreateAssignment_2(ctx context.Context, options *CreateAssignment_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateAssignmentResponseJSON200, error)
+	// CreateOutputPortRoleAssignment Create Output Port Role Assignment
+	CreateOutputPortRoleAssignment(ctx context.Context, options *CreateOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateOutputPortRoleAssignmentResponse, error)
 
-	// RequestAssignment_1 Request Assignment
-	RequestAssignment_1(ctx context.Context, options *RequestAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestAssignmentResponseJSON, error)
+	// RequestOutputPortRoleAssignment Request Output Port Role Assignment
+	RequestOutputPortRoleAssignment(ctx context.Context, options *RequestOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestOutputPortRoleAssignmentResponse, error)
 
-	// DecideAssignment_2 Decide Assignment
-	DecideAssignment_2(ctx context.Context, options *DecideAssignment_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideAssignmentResponseJSON200, error)
+	// DecideOutputPortRoleAssignment Decide Output Port Role Assignment
+	DecideOutputPortRoleAssignment(ctx context.Context, options *DecideOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideOutputPortRoleAssignmentResponse, error)
 
-	// GetSettings Get Settings
-	GetSettings(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetSettingsResponse, error)
+	// GetThemeSettings Get Theme Settings
+	GetThemeSettings(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetThemeSettingsResponse, error)
 
-	// UpdateSettings Update Settings
-	UpdateSettings(ctx context.Context, options *UpdateSettingsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateSettingsResponse, error)
+	// UpdateThemeSettings Update Theme Settings
+	UpdateThemeSettings(ctx context.Context, options *UpdateThemeSettingsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateThemeSettingsResponse, error)
+
+	// GetGraphData Get Graph Data
+	GetGraphData(ctx context.Context, options *GetGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponse, error)
+
+	// RemoveAllUserNotifications Remove All User Notifications
+	RemoveAllUserNotifications(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*RemoveAllUserNotificationsResponse, error)
+
+	// RemoveUserNotification Remove User Notification
+	RemoveUserNotification(ctx context.Context, options *RemoveUserNotificationRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveUserNotificationResponse, error)
+
+	// GetUserNotifications Get User Notifications
+	GetUserNotifications(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetUserNotificationsResponseJSON, error)
+
+	// SanitizeResourceName Sanitize Resource Name
+	SanitizeResourceName(ctx context.Context, options *SanitizeResourceNameRequestOptions, reqEditors ...runtime.RequestEditorFn) (*SanitizeResourceNameResponse, error)
+
+	// ValidateResourceName Validate Resource Name
+	ValidateResourceName(ctx context.Context, options *ValidateResourceNameRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateResourceNameResponse, error)
+
+	// ResourceNameConstraints Resource Name Constraints
+	ResourceNameConstraints(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*ResourceNameConstraintsResponse, error)
+
+	// GetPlatformTiles Get Platform Tiles
+	GetPlatformTiles(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetPlatformTilesResponse, error)
+
+	// GetPlugins Get Plugins
+	GetPlugins(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetPluginsResponse, error)
+
+	// GetPluginForm Get Plugin Form
+	GetPluginForm(ctx context.Context, options *GetPluginFormRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetPluginFormResponse, error)
+
+	// GetDeviceToken Get Device Token
+	GetDeviceToken(ctx context.Context, options *GetDeviceTokenRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDeviceTokenResponse, error)
+
+	// GetJwtToken Get Jwt Token
+	GetJwtToken(ctx context.Context, options *GetJwtTokenRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetJwtTokenResponse, error)
+
+	// GetAwsCredentials Get Aws Credentials
+	GetAwsCredentials(ctx context.Context, options *GetAwsCredentialsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetAwsCredentialsResponse, error)
+
+	// GetVersion Get Version
+	GetVersion(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetVersionResponse, error)
 }
 
 // CheckAccess Check Access
@@ -922,8 +967,8 @@ func (c *Client) UpdateOutputPort(ctx context.Context, options *UpdateOutputPort
 	return responseParser(ctx, resp)
 }
 
-// GetEventHistory Get Event History
-func (c *Client) GetEventHistory(ctx context.Context, options *GetEventHistoryRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetEventHistoryResponseJSON, error) {
+// GetOutputPortsEventHistory Get Output Ports Event History
+func (c *Client) GetOutputPortsEventHistory(ctx context.Context, options *GetOutputPortsEventHistoryRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetOutputPortsEventHistoryResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{id}/history",
@@ -936,10 +981,10 @@ func (c *Client) GetEventHistory(ctx context.Context, options *GetEventHistoryRe
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetEventHistoryResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetOutputPortsEventHistoryResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(GetEventHistoryErrorResponse)
+			target := new(GetOutputPortsEventHistoryErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -951,7 +996,7 @@ func (c *Client) GetEventHistory(ctx context.Context, options *GetEventHistoryRe
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(GetEventHistoryResponseJSON)
+		target := new(GetOutputPortsEventHistoryResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -1038,8 +1083,8 @@ func (c *Client) UpdateOutputPortStatus(ctx context.Context, options *UpdateOutp
 	return responseParser(ctx, resp)
 }
 
-// GetGraphData Get Graph Data
-func (c *Client) GetGraphData(ctx context.Context, options *GetGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponse, error) {
+// GetOutputPortGraphData Get Output Port Graph Data
+func (c *Client) GetOutputPortGraphData(ctx context.Context, options *GetOutputPortGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetOutputPortGraphDataResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{id}/graph",
@@ -1052,10 +1097,10 @@ func (c *Client) GetGraphData(ctx context.Context, options *GetGraphDataRequestO
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetGraphDataResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetOutputPortGraphDataResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(GetGraphDataErrorResponse)
+			target := new(GetOutputPortGraphDataErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -1067,7 +1112,7 @@ func (c *Client) GetGraphData(ctx context.Context, options *GetGraphDataRequestO
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(GetGraphDataResponse)
+		target := new(GetOutputPortGraphDataResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -1120,128 +1165,6 @@ func (c *Client) SetValueForOutputPort(ctx context.Context, options *SetValueFor
 	}
 
 	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{id}/settings/{setting_id}")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
-// GetDataProductNamespaceSuggestion Get Data Product Namespace Suggestion
-func (c *Client) GetDataProductNamespaceSuggestion(ctx context.Context, options *GetDataProductNamespaceSuggestionRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductNamespaceSuggestionResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/namespace_suggestion",
-		Method:     "GET",
-		Options:    options,
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetDataProductNamespaceSuggestionResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			target := new(GetDataProductNamespaceSuggestionErrorResponse)
-			err = json.Unmarshal(bodyBytes, target)
-			if err != nil {
-				return nil, fmt.Errorf("error decoding response: %w", err)
-			}
-
-			if errTarget, ok := any(*target).(error); ok {
-				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
-			}
-			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(GetDataProductNamespaceSuggestionResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/namespace_suggestion")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
-// ValidateDataProductNamespace Validate Data Product Namespace
-func (c *Client) ValidateDataProductNamespace(ctx context.Context, options *ValidateDataProductNamespaceRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateDataProductNamespaceResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/validate_namespace",
-		Method:     "GET",
-		Options:    options,
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ValidateDataProductNamespaceResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			target := new(ValidateDataProductNamespaceErrorResponse)
-			err = json.Unmarshal(bodyBytes, target)
-			if err != nil {
-				return nil, fmt.Errorf("error decoding response: %w", err)
-			}
-
-			if errTarget, ok := any(*target).(error); ok {
-				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
-			}
-			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(ValidateDataProductNamespaceResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/validate_namespace")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
-// GetDataProductNamespaceLengthLimits Get Data Product Namespace Length Limits
-func (c *Client) GetDataProductNamespaceLengthLimits(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetDataProductNamespaceLengthLimitsResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/namespace_length_limits",
-		Method:     "GET",
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetDataProductNamespaceLengthLimitsResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(GetDataProductNamespaceLengthLimitsResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/namespace_length_limits")
 	if err != nil {
 		return nil, fmt.Errorf("error executing request: %w", err)
 	}
@@ -1560,8 +1483,8 @@ func (c *Client) UpdateDataProductUsage(ctx context.Context, options *UpdateData
 	return responseParser(ctx, resp)
 }
 
-// GetGraphData_1 Get Graph Data
-func (c *Client) GetGraphData_1(ctx context.Context, options *GetGraphData_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponseJSON, error) {
+// GetDataProductGraphData Get Data Product Graph Data
+func (c *Client) GetDataProductGraphData(ctx context.Context, options *GetDataProductGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductGraphDataResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/{id}/graph",
@@ -1574,10 +1497,10 @@ func (c *Client) GetGraphData_1(ctx context.Context, options *GetGraphData_1Requ
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetGraphDataResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetDataProductGraphDataResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(GetGraphDataErrorResponseJSON)
+			target := new(GetDataProductGraphDataErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -1589,7 +1512,7 @@ func (c *Client) GetGraphData_1(ctx context.Context, options *GetGraphData_1Requ
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(GetGraphDataResponseJSON)
+		target := new(GetDataProductGraphDataResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -1678,6 +1601,50 @@ func (c *Client) LinkInputPortsToDataProduct(ctx context.Context, options *LinkI
 	}
 
 	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{id}/link_input_ports")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetDataProductEventHistory Get Data Product Event History
+func (c *Client) GetDataProductEventHistory(ctx context.Context, options *GetDataProductEventHistoryRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductEventHistoryResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/{id}/history",
+		Method:     "GET",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetDataProductEventHistoryResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(GetDataProductEventHistoryErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetDataProductEventHistoryResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{id}/history")
 	if err != nil {
 		return nil, fmt.Errorf("error executing request: %w", err)
 	}
@@ -2072,50 +2039,6 @@ func (c *Client) UnlinkInputPortFromDataProduct(ctx context.Context, options *Un
 	return responseParser(ctx, resp)
 }
 
-// ValidateTechnicalAssetNamespace Validate Technical Asset Namespace
-func (c *Client) ValidateTechnicalAssetNamespace(ctx context.Context, options *ValidateTechnicalAssetNamespaceRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateTechnicalAssetNamespaceResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/{id}/technical_asset/validate_namespace",
-		Method:     "GET",
-		Options:    options,
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ValidateTechnicalAssetNamespaceResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			target := new(ValidateTechnicalAssetNamespaceErrorResponse)
-			err = json.Unmarshal(bodyBytes, target)
-			if err != nil {
-				return nil, fmt.Errorf("error decoding response: %w", err)
-			}
-
-			if errTarget, ok := any(*target).(error); ok {
-				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
-			}
-			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(ValidateTechnicalAssetNamespaceResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{id}/technical_asset/validate_namespace")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
 // GetDataProductType Get Data Product Type
 func (c *Client) GetDataProductType(ctx context.Context, options *GetDataProductTypeRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductTypeResponse, error) {
 	var err error
@@ -2469,8 +2392,8 @@ func (c *Client) UpdateDataProductLifecycle(ctx context.Context, options *Update
 	return responseParser(ctx, resp)
 }
 
-// DeleteDataProductLifecycle Delete Data Product Lifecycle
-func (c *Client) DeleteDataProductLifecycle(ctx context.Context, options *DeleteDataProductLifecycleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteDataProductLifecycleResponse, error) {
+// RemoveDataProductLifecycle Remove Data Product Lifecycle
+func (c *Client) RemoveDataProductLifecycle(ctx context.Context, options *RemoveDataProductLifecycleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveDataProductLifecycleResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/configuration/data_product_lifecycles/{id}",
@@ -2483,10 +2406,10 @@ func (c *Client) DeleteDataProductLifecycle(ctx context.Context, options *Delete
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteDataProductLifecycleResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*RemoveDataProductLifecycleResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DeleteDataProductLifecycleErrorResponse)
+			target := new(RemoveDataProductLifecycleErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -2498,7 +2421,7 @@ func (c *Client) DeleteDataProductLifecycle(ctx context.Context, options *Delete
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DeleteDataProductLifecycleResponse)
+		target := new(RemoveDataProductLifecycleResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -2592,128 +2515,6 @@ func (c *Client) CreateDataProductSetting(ctx context.Context, options *CreateDa
 	return responseParser(ctx, resp)
 }
 
-// GetDataProductSettingsNamespaceSuggestion Get Data Product Settings Namespace Suggestion
-func (c *Client) GetDataProductSettingsNamespaceSuggestion(ctx context.Context, options *GetDataProductSettingsNamespaceSuggestionRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDataProductSettingsNamespaceSuggestionResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/configuration/data_product_settings/namespace_suggestion",
-		Method:     "GET",
-		Options:    options,
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetDataProductSettingsNamespaceSuggestionResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			target := new(GetDataProductSettingsNamespaceSuggestionErrorResponse)
-			err = json.Unmarshal(bodyBytes, target)
-			if err != nil {
-				return nil, fmt.Errorf("error decoding response: %w", err)
-			}
-
-			if errTarget, ok := any(*target).(error); ok {
-				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
-			}
-			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(GetDataProductSettingsNamespaceSuggestionResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/configuration/data_product_settings/namespace_suggestion")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
-// ValidateDataProductSettingsNamespace Validate Data Product Settings Namespace
-func (c *Client) ValidateDataProductSettingsNamespace(ctx context.Context, options *ValidateDataProductSettingsNamespaceRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateDataProductSettingsNamespaceResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/configuration/data_product_settings/validate_namespace",
-		Method:     "GET",
-		Options:    options,
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ValidateDataProductSettingsNamespaceResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			target := new(ValidateDataProductSettingsNamespaceErrorResponse)
-			err = json.Unmarshal(bodyBytes, target)
-			if err != nil {
-				return nil, fmt.Errorf("error decoding response: %w", err)
-			}
-
-			if errTarget, ok := any(*target).(error); ok {
-				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
-			}
-			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(ValidateDataProductSettingsNamespaceResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/configuration/data_product_settings/validate_namespace")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
-// GetDataProductSettingsNamespaceLengthLimits Get Data Product Settings Namespace Length Limits
-func (c *Client) GetDataProductSettingsNamespaceLengthLimits(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetDataProductSettingsNamespaceLengthLimitsResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/configuration/data_product_settings/namespace_length_limits",
-		Method:     "GET",
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetDataProductSettingsNamespaceLengthLimitsResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(GetDataProductSettingsNamespaceLengthLimitsResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/configuration/data_product_settings/namespace_length_limits")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
 // UpdateDataProductSetting Update Data Product Setting
 func (c *Client) UpdateDataProductSetting(ctx context.Context, options *UpdateDataProductSettingRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateDataProductSettingResponseJSON, error) {
 	var err error
@@ -2759,8 +2560,8 @@ func (c *Client) UpdateDataProductSetting(ctx context.Context, options *UpdateDa
 	return responseParser(ctx, resp)
 }
 
-// DeleteDataProductSetting Delete Data Product Setting
-func (c *Client) DeleteDataProductSetting(ctx context.Context, options *DeleteDataProductSettingRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteDataProductSettingResponse, error) {
+// RemoveDataProductSetting Remove Data Product Setting
+func (c *Client) RemoveDataProductSetting(ctx context.Context, options *RemoveDataProductSettingRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveDataProductSettingResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/configuration/data_product_settings/{id}",
@@ -2773,10 +2574,10 @@ func (c *Client) DeleteDataProductSetting(ctx context.Context, options *DeleteDa
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteDataProductSettingResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*RemoveDataProductSettingResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DeleteDataProductSettingErrorResponse)
+			target := new(RemoveDataProductSettingErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -2788,7 +2589,7 @@ func (c *Client) DeleteDataProductSetting(ctx context.Context, options *DeleteDa
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DeleteDataProductSettingResponse)
+		target := new(RemoveDataProductSettingResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -2797,6 +2598,303 @@ func (c *Client) DeleteDataProductSetting(ctx context.Context, options *DeleteDa
 	}
 
 	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/configuration/data_product_settings/{id}")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// ApproveOutputPortAsInputPort Approve Output Port As Input Port
+func (c *Client) ApproveOutputPortAsInputPort(ctx context.Context, options *ApproveOutputPortAsInputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ApproveOutputPortAsInputPortResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/approve",
+		Method:      "POST",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ApproveOutputPortAsInputPortResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(ApproveOutputPortAsInputPortErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(ApproveOutputPortAsInputPortResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/approve")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// DenyOutputPortAsInputPort Deny Output Port As Input Port
+func (c *Client) DenyOutputPortAsInputPort(ctx context.Context, options *DenyOutputPortAsInputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DenyOutputPortAsInputPortResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/deny",
+		Method:      "POST",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DenyOutputPortAsInputPortResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(DenyOutputPortAsInputPortErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(DenyOutputPortAsInputPortResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/deny")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// RemoveOutputPortAsInputPort Remove Output Port As Input Port
+func (c *Client) RemoveOutputPortAsInputPort(ctx context.Context, options *RemoveOutputPortAsInputPortRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveOutputPortAsInputPortResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/remove",
+		Method:      "POST",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*RemoveOutputPortAsInputPortResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(RemoveOutputPortAsInputPortErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(RemoveOutputPortAsInputPortResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/remove")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// ApproveOutputPortTechnicalAssetLink Approve Output Port Technical Asset Link
+func (c *Client) ApproveOutputPortTechnicalAssetLink(ctx context.Context, options *ApproveOutputPortTechnicalAssetLinkRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ApproveOutputPortTechnicalAssetLinkResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/approve_link_request",
+		Method:      "POST",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ApproveOutputPortTechnicalAssetLinkResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(ApproveOutputPortTechnicalAssetLinkErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(ApproveOutputPortTechnicalAssetLinkResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/approve_link_request")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// DenyOutputPortTechnicalAssetLink Deny Output Port Technical Asset Link
+func (c *Client) DenyOutputPortTechnicalAssetLink(ctx context.Context, options *DenyOutputPortTechnicalAssetLinkRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DenyOutputPortTechnicalAssetLinkResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/deny_link_request",
+		Method:      "POST",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DenyOutputPortTechnicalAssetLinkResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(DenyOutputPortTechnicalAssetLinkErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(DenyOutputPortTechnicalAssetLinkResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/deny_link_request")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// LinkOutputPortToTechnicalAsset Link Output Port To Technical Asset
+func (c *Client) LinkOutputPortToTechnicalAsset(ctx context.Context, options *LinkOutputPortToTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*LinkOutputPortToTechnicalAssetResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/add",
+		Method:      "POST",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*LinkOutputPortToTechnicalAssetResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(LinkOutputPortToTechnicalAssetResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/add")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// UnlinkOutputPortFromTechnicalAsset Unlink Output Port From Technical Asset
+func (c *Client) UnlinkOutputPortFromTechnicalAsset(ctx context.Context, options *UnlinkOutputPortFromTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UnlinkOutputPortFromTechnicalAssetResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/remove",
+		Method:      "DELETE",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*UnlinkOutputPortFromTechnicalAssetResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(UnlinkOutputPortFromTechnicalAssetResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/remove")
 	if err != nil {
 		return nil, fmt.Errorf("error executing request: %w", err)
 	}
@@ -2962,79 +3060,8 @@ func (c *Client) UpdateTechnicalAssetStatus(ctx context.Context, options *Update
 	return responseParser(ctx, resp)
 }
 
-// LinkOutputPortToTechnicalAsset Link Output Port To Technical Asset
-func (c *Client) LinkOutputPortToTechnicalAsset(ctx context.Context, options *LinkOutputPortToTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*LinkOutputPortToTechnicalAssetResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/technical_assets/{id}/link_output_port",
-		Method:      "POST",
-		Options:     options,
-		ContentType: "application/json",
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*LinkOutputPortToTechnicalAssetResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(LinkOutputPortToTechnicalAssetResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/technical_assets/{id}/link_output_port")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
-// UnlinkOutputPortFromTechnicalAsset Unlink Output Port From Technical Asset
-func (c *Client) UnlinkOutputPortFromTechnicalAsset(ctx context.Context, options *UnlinkOutputPortFromTechnicalAssetRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UnlinkOutputPortFromTechnicalAssetResponse, error) {
-	var err error
-	reqParams := runtime.RequestOptionsParameters{
-		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/technical_assets/{id}/unlink_output_port",
-		Method:     "DELETE",
-		Options:    options,
-	}
-
-	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*UnlinkOutputPortFromTechnicalAssetResponse, error) {
-		bodyBytes := resp.Content
-		if resp.StatusCode != 200 {
-			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
-				runtime.WithStatusCode(resp.StatusCode))
-		}
-		target := new(UnlinkOutputPortFromTechnicalAssetResponse)
-		if err = json.Unmarshal(bodyBytes, target); err != nil {
-			err = fmt.Errorf("error decoding response: %w", err)
-			return nil, err
-		}
-		return target, nil
-	}
-
-	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/data_products/{data_product_id}/technical_assets/{id}/unlink_output_port")
-	if err != nil {
-		return nil, fmt.Errorf("error executing request: %w", err)
-	}
-	return responseParser(ctx, resp)
-}
-
-// GetGraphData_2 Get Graph Data
-func (c *Client) GetGraphData_2(ctx context.Context, options *GetGraphData_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponseJSON200, error) {
+// GetTechnicalAssetGraphData Get Technical Asset Graph Data
+func (c *Client) GetTechnicalAssetGraphData(ctx context.Context, options *GetTechnicalAssetGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetTechnicalAssetGraphDataResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/data_products/{data_product_id}/technical_assets/{id}/graph",
@@ -3047,10 +3074,10 @@ func (c *Client) GetGraphData_2(ctx context.Context, options *GetGraphData_2Requ
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetGraphDataResponseJSON200, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetTechnicalAssetGraphDataResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(GetGraphDataErrorResponseJSON422)
+			target := new(GetTechnicalAssetGraphDataErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -3062,7 +3089,7 @@ func (c *Client) GetGraphData_2(ctx context.Context, options *GetGraphData_2Requ
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(GetGraphDataResponseJSON200)
+		target := new(GetTechnicalAssetGraphDataResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4183,6 +4210,74 @@ func (c *Client) MarkTourAsSeen(ctx context.Context, reqEditors ...runtime.Reque
 	return responseParser(ctx, resp)
 }
 
+// GetUserPendingActions Get User Pending Actions
+func (c *Client) GetUserPendingActions(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetUserPendingActionsResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/users/current/pending_actions",
+		Method:     "GET",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetUserPendingActionsResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetUserPendingActionsResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/users/current/pending_actions")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetCurrentUser Get Current User
+func (c *Client) GetCurrentUser(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetCurrentUserResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/users/current",
+		Method:     "GET",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetCurrentUserResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetCurrentUserResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/users/current")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
 // CreateRole Create Role
 func (c *Client) CreateRole(ctx context.Context, options *CreateRoleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateRoleResponse, error) {
 	var err error
@@ -4431,8 +4526,8 @@ func (c *Client) RevokeAdmin(ctx context.Context, reqEditors ...runtime.RequestE
 	return responseParser(ctx, resp)
 }
 
-// CreateAssignment Create Assignment
-func (c *Client) CreateAssignment(ctx context.Context, options *CreateAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateAssignmentResponse, error) {
+// CreateGlobalRoleAssignment Create Global Role Assignment
+func (c *Client) CreateGlobalRoleAssignment(ctx context.Context, options *CreateGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateGlobalRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/global",
@@ -4446,10 +4541,10 @@ func (c *Client) CreateAssignment(ctx context.Context, options *CreateAssignment
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*CreateAssignmentResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*CreateGlobalRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(CreateAssignmentErrorResponse)
+			target := new(CreateGlobalRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4461,7 +4556,7 @@ func (c *Client) CreateAssignment(ctx context.Context, options *CreateAssignment
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(CreateAssignmentResponse)
+		target := new(CreateGlobalRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4476,8 +4571,8 @@ func (c *Client) CreateAssignment(ctx context.Context, options *CreateAssignment
 	return responseParser(ctx, resp)
 }
 
-// ListAssignments List Assignments
-func (c *Client) ListAssignments(ctx context.Context, options *ListAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListAssignmentsResponse, error) {
+// ListGlobalRoleAssignments List Global Role Assignments
+func (c *Client) ListGlobalRoleAssignments(ctx context.Context, options *ListGlobalRoleAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListGlobalRoleAssignmentsResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/global",
@@ -4490,10 +4585,10 @@ func (c *Client) ListAssignments(ctx context.Context, options *ListAssignmentsRe
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ListAssignmentsResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ListGlobalRoleAssignmentsResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(ListAssignmentsErrorResponse)
+			target := new(ListGlobalRoleAssignmentsErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4505,7 +4600,7 @@ func (c *Client) ListAssignments(ctx context.Context, options *ListAssignmentsRe
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(ListAssignmentsResponse)
+		target := new(ListGlobalRoleAssignmentsResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4520,8 +4615,8 @@ func (c *Client) ListAssignments(ctx context.Context, options *ListAssignmentsRe
 	return responseParser(ctx, resp)
 }
 
-// DeleteAssignment Delete Assignment
-func (c *Client) DeleteAssignment(ctx context.Context, options *DeleteAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteAssignmentResponse, error) {
+// DeleteGlobalRoleAssignment Delete Global Role Assignment
+func (c *Client) DeleteGlobalRoleAssignment(ctx context.Context, options *DeleteGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteGlobalRoleAssignmentResponseJSON, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/global/{id}",
@@ -4534,10 +4629,10 @@ func (c *Client) DeleteAssignment(ctx context.Context, options *DeleteAssignment
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteAssignmentResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteGlobalRoleAssignmentResponseJSON, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DeleteAssignmentErrorResponse)
+			target := new(DeleteGlobalRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4549,7 +4644,7 @@ func (c *Client) DeleteAssignment(ctx context.Context, options *DeleteAssignment
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DeleteAssignmentResponse)
+		target := new(DeleteGlobalRoleAssignmentResponseJSON)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4564,8 +4659,8 @@ func (c *Client) DeleteAssignment(ctx context.Context, options *DeleteAssignment
 	return responseParser(ctx, resp)
 }
 
-// DecideAssignment Decide Assignment
-func (c *Client) DecideAssignment(ctx context.Context, options *DecideAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideAssignmentResponse, error) {
+// DecideGlobalRoleAssignment Decide Global Role Assignment
+func (c *Client) DecideGlobalRoleAssignment(ctx context.Context, options *DecideGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideGlobalRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/global/{id}/decide",
@@ -4579,10 +4674,10 @@ func (c *Client) DecideAssignment(ctx context.Context, options *DecideAssignment
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DecideAssignmentResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DecideGlobalRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DecideAssignmentErrorResponse)
+			target := new(DecideGlobalRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4594,7 +4689,7 @@ func (c *Client) DecideAssignment(ctx context.Context, options *DecideAssignment
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DecideAssignmentResponse)
+		target := new(DecideGlobalRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4609,8 +4704,8 @@ func (c *Client) DecideAssignment(ctx context.Context, options *DecideAssignment
 	return responseParser(ctx, resp)
 }
 
-// ModifyAssignedRole Modify Assigned Role
-func (c *Client) ModifyAssignedRole(ctx context.Context, options *ModifyAssignedRoleRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyAssignedRoleResponse, error) {
+// ModifyGlobalRoleAssignment Modify Global Role Assignment
+func (c *Client) ModifyGlobalRoleAssignment(ctx context.Context, options *ModifyGlobalRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyGlobalRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/global/{id}/role",
@@ -4624,10 +4719,10 @@ func (c *Client) ModifyAssignedRole(ctx context.Context, options *ModifyAssigned
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ModifyAssignedRoleResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ModifyGlobalRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(ModifyAssignedRoleErrorResponse)
+			target := new(ModifyGlobalRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4639,7 +4734,7 @@ func (c *Client) ModifyAssignedRole(ctx context.Context, options *ModifyAssigned
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(ModifyAssignedRoleResponse)
+		target := new(ModifyGlobalRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4654,8 +4749,8 @@ func (c *Client) ModifyAssignedRole(ctx context.Context, options *ModifyAssigned
 	return responseParser(ctx, resp)
 }
 
-// DeleteAssignment_1 Delete Assignment
-func (c *Client) DeleteAssignment_1(ctx context.Context, options *DeleteAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteAssignmentResponseJSON, error) {
+// DeleteDataProductRoleAssignment Delete Data Product Role Assignment
+func (c *Client) DeleteDataProductRoleAssignment(ctx context.Context, options *DeleteDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteDataProductRoleAssignmentResponseJSON, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/data_product/{id}",
@@ -4668,10 +4763,10 @@ func (c *Client) DeleteAssignment_1(ctx context.Context, options *DeleteAssignme
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteAssignmentResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteDataProductRoleAssignmentResponseJSON, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DeleteAssignmentErrorResponseJSON)
+			target := new(DeleteDataProductRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4683,7 +4778,7 @@ func (c *Client) DeleteAssignment_1(ctx context.Context, options *DeleteAssignme
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DeleteAssignmentResponseJSON)
+		target := new(DeleteDataProductRoleAssignmentResponseJSON)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4698,8 +4793,8 @@ func (c *Client) DeleteAssignment_1(ctx context.Context, options *DeleteAssignme
 	return responseParser(ctx, resp)
 }
 
-// ModifyAssignedRole_1 Modify Assigned Role
-func (c *Client) ModifyAssignedRole_1(ctx context.Context, options *ModifyAssignedRole_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyAssignedRoleResponseJSON, error) {
+// ModifyDataProductRoleAssignment Modify Data Product Role Assignment
+func (c *Client) ModifyDataProductRoleAssignment(ctx context.Context, options *ModifyDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyDataProductRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/data_product/{id}",
@@ -4713,10 +4808,10 @@ func (c *Client) ModifyAssignedRole_1(ctx context.Context, options *ModifyAssign
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ModifyAssignedRoleResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ModifyDataProductRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(ModifyAssignedRoleErrorResponseJSON)
+			target := new(ModifyDataProductRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4728,7 +4823,7 @@ func (c *Client) ModifyAssignedRole_1(ctx context.Context, options *ModifyAssign
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(ModifyAssignedRoleResponseJSON)
+		target := new(ModifyDataProductRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4743,8 +4838,8 @@ func (c *Client) ModifyAssignedRole_1(ctx context.Context, options *ModifyAssign
 	return responseParser(ctx, resp)
 }
 
-// ListAssignments_1 List Assignments
-func (c *Client) ListAssignments_1(ctx context.Context, options *ListAssignments_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListAssignmentsResponseJSON, error) {
+// ListDataProductRoleAssignments List Data Product Role Assignments
+func (c *Client) ListDataProductRoleAssignments(ctx context.Context, options *ListDataProductRoleAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListDataProductRoleAssignmentsResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/data_product",
@@ -4757,10 +4852,10 @@ func (c *Client) ListAssignments_1(ctx context.Context, options *ListAssignments
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ListAssignmentsResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ListDataProductRoleAssignmentsResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(ListAssignmentsErrorResponseJSON)
+			target := new(ListDataProductRoleAssignmentsErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4772,7 +4867,7 @@ func (c *Client) ListAssignments_1(ctx context.Context, options *ListAssignments
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(ListAssignmentsResponseJSON)
+		target := new(ListDataProductRoleAssignmentsResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4787,8 +4882,8 @@ func (c *Client) ListAssignments_1(ctx context.Context, options *ListAssignments
 	return responseParser(ctx, resp)
 }
 
-// CreateAssignment_1 Create Assignment
-func (c *Client) CreateAssignment_1(ctx context.Context, options *CreateAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateAssignmentResponseJSON, error) {
+// CreateDataProductRoleAssignment Create Data Product Role Assignment
+func (c *Client) CreateDataProductRoleAssignment(ctx context.Context, options *CreateDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateDataProductRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/data_product",
@@ -4802,10 +4897,10 @@ func (c *Client) CreateAssignment_1(ctx context.Context, options *CreateAssignme
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*CreateAssignmentResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*CreateDataProductRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(CreateAssignmentErrorResponseJSON)
+			target := new(CreateDataProductRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4817,7 +4912,7 @@ func (c *Client) CreateAssignment_1(ctx context.Context, options *CreateAssignme
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(CreateAssignmentResponseJSON)
+		target := new(CreateDataProductRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4832,8 +4927,8 @@ func (c *Client) CreateAssignment_1(ctx context.Context, options *CreateAssignme
 	return responseParser(ctx, resp)
 }
 
-// RequestAssignment Request Assignment
-func (c *Client) RequestAssignment(ctx context.Context, options *RequestAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestAssignmentResponse, error) {
+// RequestDataProductRoleAssignment Request Data Product Role Assignment
+func (c *Client) RequestDataProductRoleAssignment(ctx context.Context, options *RequestDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestDataProductRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/data_product/request",
@@ -4847,10 +4942,10 @@ func (c *Client) RequestAssignment(ctx context.Context, options *RequestAssignme
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*RequestAssignmentResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*RequestDataProductRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(RequestAssignmentErrorResponse)
+			target := new(RequestDataProductRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4862,7 +4957,7 @@ func (c *Client) RequestAssignment(ctx context.Context, options *RequestAssignme
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(RequestAssignmentResponse)
+		target := new(RequestDataProductRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4877,8 +4972,8 @@ func (c *Client) RequestAssignment(ctx context.Context, options *RequestAssignme
 	return responseParser(ctx, resp)
 }
 
-// DecideAssignment_1 Decide Assignment
-func (c *Client) DecideAssignment_1(ctx context.Context, options *DecideAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideAssignmentResponseJSON, error) {
+// DecideDataProductRoleAssignment Decide Data Product Role Assignment
+func (c *Client) DecideDataProductRoleAssignment(ctx context.Context, options *DecideDataProductRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideDataProductRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/data_product/{id}/decide",
@@ -4892,10 +4987,10 @@ func (c *Client) DecideAssignment_1(ctx context.Context, options *DecideAssignme
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DecideAssignmentResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DecideDataProductRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DecideAssignmentErrorResponseJSON)
+			target := new(DecideDataProductRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4907,7 +5002,7 @@ func (c *Client) DecideAssignment_1(ctx context.Context, options *DecideAssignme
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DecideAssignmentResponseJSON)
+		target := new(DecideDataProductRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4922,8 +5017,8 @@ func (c *Client) DecideAssignment_1(ctx context.Context, options *DecideAssignme
 	return responseParser(ctx, resp)
 }
 
-// DeleteAssignment_2 Delete Assignment
-func (c *Client) DeleteAssignment_2(ctx context.Context, options *DeleteAssignment_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteAssignmentResponseJSON200, error) {
+// DeleteOutputPortRoleAssignment Delete Output Port Role Assignment
+func (c *Client) DeleteOutputPortRoleAssignment(ctx context.Context, options *DeleteOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DeleteOutputPortRoleAssignmentResponseJSON, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/output_port/{id}",
@@ -4936,10 +5031,10 @@ func (c *Client) DeleteAssignment_2(ctx context.Context, options *DeleteAssignme
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteAssignmentResponseJSON200, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DeleteOutputPortRoleAssignmentResponseJSON, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DeleteAssignmentErrorResponseJSON422)
+			target := new(DeleteOutputPortRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4951,7 +5046,7 @@ func (c *Client) DeleteAssignment_2(ctx context.Context, options *DeleteAssignme
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DeleteAssignmentResponseJSON200)
+		target := new(DeleteOutputPortRoleAssignmentResponseJSON)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -4966,8 +5061,8 @@ func (c *Client) DeleteAssignment_2(ctx context.Context, options *DeleteAssignme
 	return responseParser(ctx, resp)
 }
 
-// ModifyAssignedRole_2 Modify Assigned Role
-func (c *Client) ModifyAssignedRole_2(ctx context.Context, options *ModifyAssignedRole_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyAssignedRoleResponseJSON200, error) {
+// ModifyOutputPortRoleAssignment Modify Output Port Role Assignment
+func (c *Client) ModifyOutputPortRoleAssignment(ctx context.Context, options *ModifyOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ModifyOutputPortRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/output_port/{id}",
@@ -4981,10 +5076,10 @@ func (c *Client) ModifyAssignedRole_2(ctx context.Context, options *ModifyAssign
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ModifyAssignedRoleResponseJSON200, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ModifyOutputPortRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(ModifyAssignedRoleErrorResponseJSON422)
+			target := new(ModifyOutputPortRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -4996,7 +5091,7 @@ func (c *Client) ModifyAssignedRole_2(ctx context.Context, options *ModifyAssign
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(ModifyAssignedRoleResponseJSON200)
+		target := new(ModifyOutputPortRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -5011,8 +5106,8 @@ func (c *Client) ModifyAssignedRole_2(ctx context.Context, options *ModifyAssign
 	return responseParser(ctx, resp)
 }
 
-// ListAssignments_2 List Assignments
-func (c *Client) ListAssignments_2(ctx context.Context, options *ListAssignments_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListAssignmentsResponseJSON200, error) {
+// ListOutputPortRoleAssignments List Output Port Role Assignments
+func (c *Client) ListOutputPortRoleAssignments(ctx context.Context, options *ListOutputPortRoleAssignmentsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ListOutputPortRoleAssignmentsResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/output_port",
@@ -5025,10 +5120,10 @@ func (c *Client) ListAssignments_2(ctx context.Context, options *ListAssignments
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*ListAssignmentsResponseJSON200, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ListOutputPortRoleAssignmentsResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(ListAssignmentsErrorResponseJSON422)
+			target := new(ListOutputPortRoleAssignmentsErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -5040,7 +5135,7 @@ func (c *Client) ListAssignments_2(ctx context.Context, options *ListAssignments
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(ListAssignmentsResponseJSON200)
+		target := new(ListOutputPortRoleAssignmentsResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -5055,8 +5150,8 @@ func (c *Client) ListAssignments_2(ctx context.Context, options *ListAssignments
 	return responseParser(ctx, resp)
 }
 
-// CreateAssignment_2 Create Assignment
-func (c *Client) CreateAssignment_2(ctx context.Context, options *CreateAssignment_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateAssignmentResponseJSON200, error) {
+// CreateOutputPortRoleAssignment Create Output Port Role Assignment
+func (c *Client) CreateOutputPortRoleAssignment(ctx context.Context, options *CreateOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*CreateOutputPortRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/output_port",
@@ -5070,10 +5165,10 @@ func (c *Client) CreateAssignment_2(ctx context.Context, options *CreateAssignme
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*CreateAssignmentResponseJSON200, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*CreateOutputPortRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(CreateAssignmentErrorResponseJSON422)
+			target := new(CreateOutputPortRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -5085,7 +5180,7 @@ func (c *Client) CreateAssignment_2(ctx context.Context, options *CreateAssignme
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(CreateAssignmentResponseJSON200)
+		target := new(CreateOutputPortRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -5100,8 +5195,8 @@ func (c *Client) CreateAssignment_2(ctx context.Context, options *CreateAssignme
 	return responseParser(ctx, resp)
 }
 
-// RequestAssignment_1 Request Assignment
-func (c *Client) RequestAssignment_1(ctx context.Context, options *RequestAssignment_1RequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestAssignmentResponseJSON, error) {
+// RequestOutputPortRoleAssignment Request Output Port Role Assignment
+func (c *Client) RequestOutputPortRoleAssignment(ctx context.Context, options *RequestOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RequestOutputPortRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/output_port/request",
@@ -5115,10 +5210,10 @@ func (c *Client) RequestAssignment_1(ctx context.Context, options *RequestAssign
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*RequestAssignmentResponseJSON, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*RequestOutputPortRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(RequestAssignmentErrorResponseJSON)
+			target := new(RequestOutputPortRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -5130,7 +5225,7 @@ func (c *Client) RequestAssignment_1(ctx context.Context, options *RequestAssign
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(RequestAssignmentResponseJSON)
+		target := new(RequestOutputPortRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -5145,8 +5240,8 @@ func (c *Client) RequestAssignment_1(ctx context.Context, options *RequestAssign
 	return responseParser(ctx, resp)
 }
 
-// DecideAssignment_2 Decide Assignment
-func (c *Client) DecideAssignment_2(ctx context.Context, options *DecideAssignment_2RequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideAssignmentResponseJSON200, error) {
+// DecideOutputPortRoleAssignment Decide Output Port Role Assignment
+func (c *Client) DecideOutputPortRoleAssignment(ctx context.Context, options *DecideOutputPortRoleAssignmentRequestOptions, reqEditors ...runtime.RequestEditorFn) (*DecideOutputPortRoleAssignmentResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/authz/role_assignments/output_port/{id}/decide",
@@ -5160,10 +5255,10 @@ func (c *Client) DecideAssignment_2(ctx context.Context, options *DecideAssignme
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*DecideAssignmentResponseJSON200, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*DecideOutputPortRoleAssignmentResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(DecideAssignmentErrorResponseJSON422)
+			target := new(DecideOutputPortRoleAssignmentErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -5175,7 +5270,7 @@ func (c *Client) DecideAssignment_2(ctx context.Context, options *DecideAssignme
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(DecideAssignmentResponseJSON200)
+		target := new(DecideOutputPortRoleAssignmentResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -5190,8 +5285,8 @@ func (c *Client) DecideAssignment_2(ctx context.Context, options *DecideAssignme
 	return responseParser(ctx, resp)
 }
 
-// GetSettings Get Settings
-func (c *Client) GetSettings(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetSettingsResponse, error) {
+// GetThemeSettings Get Theme Settings
+func (c *Client) GetThemeSettings(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetThemeSettingsResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/configuration/theme_settings",
@@ -5203,13 +5298,13 @@ func (c *Client) GetSettings(ctx context.Context, reqEditors ...runtime.RequestE
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetSettingsResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetThemeSettingsResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
 			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(GetSettingsResponse)
+		target := new(GetThemeSettingsResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -5224,8 +5319,8 @@ func (c *Client) GetSettings(ctx context.Context, reqEditors ...runtime.RequestE
 	return responseParser(ctx, resp)
 }
 
-// UpdateSettings Update Settings
-func (c *Client) UpdateSettings(ctx context.Context, options *UpdateSettingsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateSettingsResponse, error) {
+// UpdateThemeSettings Update Theme Settings
+func (c *Client) UpdateThemeSettings(ctx context.Context, options *UpdateThemeSettingsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*UpdateThemeSettingsResponse, error) {
 	var err error
 	reqParams := runtime.RequestOptionsParameters{
 		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/configuration/theme_settings",
@@ -5239,10 +5334,10 @@ func (c *Client) UpdateSettings(ctx context.Context, options *UpdateSettingsRequ
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	responseParser := func(ctx context.Context, resp *runtime.Response) (*UpdateSettingsResponse, error) {
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*UpdateThemeSettingsResponse, error) {
 		bodyBytes := resp.Content
 		if resp.StatusCode != 200 {
-			target := new(UpdateSettingsErrorResponse)
+			target := new(UpdateThemeSettingsErrorResponse)
 			err = json.Unmarshal(bodyBytes, target)
 			if err != nil {
 				return nil, fmt.Errorf("error decoding response: %w", err)
@@ -5254,7 +5349,7 @@ func (c *Client) UpdateSettings(ctx context.Context, options *UpdateSettingsRequ
 			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
 				runtime.WithStatusCode(resp.StatusCode))
 		}
-		target := new(UpdateSettingsResponse)
+		target := new(UpdateThemeSettingsResponse)
 		if err = json.Unmarshal(bodyBytes, target); err != nil {
 			err = fmt.Errorf("error decoding response: %w", err)
 			return nil, err
@@ -5263,6 +5358,563 @@ func (c *Client) UpdateSettings(ctx context.Context, options *UpdateSettingsRequ
 	}
 
 	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/configuration/theme_settings")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetGraphData Get Graph Data
+func (c *Client) GetGraphData(ctx context.Context, options *GetGraphDataRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetGraphDataResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/graph",
+		Method:     "GET",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetGraphDataResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(GetGraphDataErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetGraphDataResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/graph")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// RemoveAllUserNotifications Remove All User Notifications
+func (c *Client) RemoveAllUserNotifications(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*RemoveAllUserNotificationsResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/users/current/notifications/all",
+		Method:     "DELETE",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*RemoveAllUserNotificationsResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(RemoveAllUserNotificationsResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/users/current/notifications/all")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// RemoveUserNotification Remove User Notification
+func (c *Client) RemoveUserNotification(ctx context.Context, options *RemoveUserNotificationRequestOptions, reqEditors ...runtime.RequestEditorFn) (*RemoveUserNotificationResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/users/current/notifications/{id}",
+		Method:     "DELETE",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*RemoveUserNotificationResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(RemoveUserNotificationErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(RemoveUserNotificationResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/users/current/notifications/{id}")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetUserNotifications Get User Notifications
+func (c *Client) GetUserNotifications(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetUserNotificationsResponseJSON, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/users/current/notifications",
+		Method:     "GET",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetUserNotificationsResponseJSON, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetUserNotificationsResponseJSON)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/users/current/notifications")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// SanitizeResourceName Sanitize Resource Name
+func (c *Client) SanitizeResourceName(ctx context.Context, options *SanitizeResourceNameRequestOptions, reqEditors ...runtime.RequestEditorFn) (*SanitizeResourceNameResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/resource_names/sanitize",
+		Method:     "POST",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*SanitizeResourceNameResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(SanitizeResourceNameErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(SanitizeResourceNameResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/resource_names/sanitize")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// ValidateResourceName Validate Resource Name
+func (c *Client) ValidateResourceName(ctx context.Context, options *ValidateResourceNameRequestOptions, reqEditors ...runtime.RequestEditorFn) (*ValidateResourceNameResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL:  c.apiClient.GetBaseURL() + "/api/v2/resource_names/validate",
+		Method:      "POST",
+		Options:     options,
+		ContentType: "application/json",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ValidateResourceNameResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(ValidateResourceNameErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(ValidateResourceNameResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/resource_names/validate")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// ResourceNameConstraints Resource Name Constraints
+func (c *Client) ResourceNameConstraints(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*ResourceNameConstraintsResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/resource_names/constraints",
+		Method:     "GET",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*ResourceNameConstraintsResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(ResourceNameConstraintsResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/resource_names/constraints")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetPlatformTiles Get Platform Tiles
+func (c *Client) GetPlatformTiles(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetPlatformTilesResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/plugins/platform-tiles",
+		Method:     "GET",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetPlatformTilesResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetPlatformTilesResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/plugins/platform-tiles")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetPlugins Get Plugins
+func (c *Client) GetPlugins(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetPluginsResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/plugins/",
+		Method:     "GET",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetPluginsResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetPluginsResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/plugins/")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetPluginForm Get Plugin Form
+func (c *Client) GetPluginForm(ctx context.Context, options *GetPluginFormRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetPluginFormResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/plugins/{plugin_name}/form",
+		Method:     "GET",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetPluginFormResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(GetPluginFormErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetPluginFormResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/plugins/{plugin_name}/form")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetDeviceToken Get Device Token
+func (c *Client) GetDeviceToken(ctx context.Context, options *GetDeviceTokenRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetDeviceTokenResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authn/device/device_token",
+		Method:     "POST",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetDeviceTokenResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(GetDeviceTokenErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetDeviceTokenResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/authn/device/device_token")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetJwtToken Get Jwt Token
+func (c *Client) GetJwtToken(ctx context.Context, options *GetJwtTokenRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetJwtTokenResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authn/device/jwt_token",
+		Method:     "POST",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetJwtTokenResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(GetJwtTokenErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetJwtTokenResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/authn/device/jwt_token")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetAwsCredentials Get Aws Credentials
+func (c *Client) GetAwsCredentials(ctx context.Context, options *GetAwsCredentialsRequestOptions, reqEditors ...runtime.RequestEditorFn) (*GetAwsCredentialsResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/authn/aws_credentials",
+		Method:     "GET",
+		Options:    options,
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetAwsCredentialsResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			target := new(GetAwsCredentialsErrorResponse)
+			err = json.Unmarshal(bodyBytes, target)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding response: %w", err)
+			}
+
+			if errTarget, ok := any(*target).(error); ok {
+				return nil, runtime.NewClientAPIError(errTarget, runtime.WithStatusCode(resp.StatusCode))
+			}
+			return nil, runtime.NewClientAPIError(fmt.Errorf("API error (status %d): %v", resp.StatusCode, *target),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetAwsCredentialsResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/authn/aws_credentials")
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	return responseParser(ctx, resp)
+}
+
+// GetVersion Get Version
+func (c *Client) GetVersion(ctx context.Context, reqEditors ...runtime.RequestEditorFn) (*GetVersionResponse, error) {
+	var err error
+	reqParams := runtime.RequestOptionsParameters{
+		RequestURL: c.apiClient.GetBaseURL() + "/api/v2/version",
+		Method:     "GET",
+	}
+
+	req, err := c.apiClient.CreateRequest(ctx, reqParams, reqEditors...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	responseParser := func(ctx context.Context, resp *runtime.Response) (*GetVersionResponse, error) {
+		bodyBytes := resp.Content
+		if resp.StatusCode != 200 {
+			return nil, runtime.NewClientAPIError(fmt.Errorf("unexpected status code: %d", resp.StatusCode),
+				runtime.WithStatusCode(resp.StatusCode))
+		}
+		target := new(GetVersionResponse)
+		if err = json.Unmarshal(bodyBytes, target); err != nil {
+			err = fmt.Errorf("error decoding response: %w", err)
+			return nil, err
+		}
+		return target, nil
+	}
+
+	resp, err := c.apiClient.ExecuteRequest(ctx, req, "/api/v2/version")
 	if err != nil {
 		return nil, fmt.Errorf("error executing request: %w", err)
 	}
@@ -5862,14 +6514,14 @@ func (o *UpdateOutputPortRequestOptions) GetHeader() (map[string]string, error) 
 	return nil, nil
 }
 
-// GetEventHistoryRequestOptions is the options needed to make a request to GetEventHistory.
-type GetEventHistoryRequestOptions struct {
-	PathParams *GetEventHistoryPath
+// GetOutputPortsEventHistoryRequestOptions is the options needed to make a request to GetOutputPortsEventHistory.
+type GetOutputPortsEventHistoryRequestOptions struct {
+	PathParams *GetOutputPortsEventHistoryPath
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *GetEventHistoryRequestOptions) Validate() error {
+func (o *GetOutputPortsEventHistoryRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -5887,22 +6539,22 @@ func (o *GetEventHistoryRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *GetEventHistoryRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *GetOutputPortsEventHistoryRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *GetEventHistoryRequestOptions) GetQuery() (map[string]any, error) {
+func (o *GetOutputPortsEventHistoryRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *GetEventHistoryRequestOptions) GetBody() any {
+func (o *GetOutputPortsEventHistoryRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *GetEventHistoryRequestOptions) GetHeader() (map[string]string, error) {
+func (o *GetOutputPortsEventHistoryRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -6012,15 +6664,15 @@ func (o *UpdateOutputPortStatusRequestOptions) GetHeader() (map[string]string, e
 	return nil, nil
 }
 
-// GetGraphDataRequestOptions is the options needed to make a request to GetGraphData.
-type GetGraphDataRequestOptions struct {
-	PathParams *GetGraphDataPath
-	Query      *GetGraphDataQuery
+// GetOutputPortGraphDataRequestOptions is the options needed to make a request to GetOutputPortGraphData.
+type GetOutputPortGraphDataRequestOptions struct {
+	PathParams *GetOutputPortGraphDataPath
+	Query      *GetOutputPortGraphDataQuery
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *GetGraphDataRequestOptions) Validate() error {
+func (o *GetOutputPortGraphDataRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -6046,22 +6698,22 @@ func (o *GetGraphDataRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *GetGraphDataRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *GetOutputPortGraphDataRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *GetGraphDataRequestOptions) GetQuery() (map[string]any, error) {
+func (o *GetOutputPortGraphDataRequestOptions) GetQuery() (map[string]any, error) {
 	return runtime.AsMap[any](o.Query)
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *GetGraphDataRequestOptions) GetBody() any {
+func (o *GetOutputPortGraphDataRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *GetGraphDataRequestOptions) GetHeader() (map[string]string, error) {
+func (o *GetOutputPortGraphDataRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -6115,94 +6767,6 @@ func (o *SetValueForOutputPortRequestOptions) GetBody() any {
 
 // GetHeader returns the headers as a map.
 func (o *SetValueForOutputPortRequestOptions) GetHeader() (map[string]string, error) {
-	return nil, nil
-}
-
-// GetDataProductNamespaceSuggestionRequestOptions is the options needed to make a request to GetDataProductNamespaceSuggestion.
-type GetDataProductNamespaceSuggestionRequestOptions struct {
-	Query *GetDataProductNamespaceSuggestionQuery
-}
-
-// Validate validates all the fields in the options.
-// Use it if fields validation was not run.
-func (o *GetDataProductNamespaceSuggestionRequestOptions) Validate() error {
-	var errors runtime.ValidationErrors
-
-	if o.Query != nil {
-		if v, ok := any(o.Query).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("Query", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return errors
-}
-
-// GetPathParams returns the path params as a map.
-func (o *GetDataProductNamespaceSuggestionRequestOptions) GetPathParams() (map[string]any, error) {
-	return nil, nil
-}
-
-// GetQuery returns the query params as a map.
-func (o *GetDataProductNamespaceSuggestionRequestOptions) GetQuery() (map[string]any, error) {
-	return runtime.AsMap[any](o.Query)
-}
-
-// GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *GetDataProductNamespaceSuggestionRequestOptions) GetBody() any {
-	return nil
-}
-
-// GetHeader returns the headers as a map.
-func (o *GetDataProductNamespaceSuggestionRequestOptions) GetHeader() (map[string]string, error) {
-	return nil, nil
-}
-
-// ValidateDataProductNamespaceRequestOptions is the options needed to make a request to ValidateDataProductNamespace.
-type ValidateDataProductNamespaceRequestOptions struct {
-	Query *ValidateDataProductNamespaceQuery
-}
-
-// Validate validates all the fields in the options.
-// Use it if fields validation was not run.
-func (o *ValidateDataProductNamespaceRequestOptions) Validate() error {
-	var errors runtime.ValidationErrors
-
-	if o.Query != nil {
-		if v, ok := any(o.Query).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("Query", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return errors
-}
-
-// GetPathParams returns the path params as a map.
-func (o *ValidateDataProductNamespaceRequestOptions) GetPathParams() (map[string]any, error) {
-	return nil, nil
-}
-
-// GetQuery returns the query params as a map.
-func (o *ValidateDataProductNamespaceRequestOptions) GetQuery() (map[string]any, error) {
-	return runtime.AsMap[any](o.Query)
-}
-
-// GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ValidateDataProductNamespaceRequestOptions) GetBody() any {
-	return nil
-}
-
-// GetHeader returns the headers as a map.
-func (o *ValidateDataProductNamespaceRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -6594,15 +7158,15 @@ func (o *UpdateDataProductUsageRequestOptions) GetHeader() (map[string]string, e
 	return nil, nil
 }
 
-// GetGraphData_1RequestOptions is the options needed to make a request to GetGraphData_1.
-type GetGraphData_1RequestOptions struct {
-	PathParams *GetGraphDataPath
-	Query      *GetGraphDataQuery
+// GetDataProductGraphDataRequestOptions is the options needed to make a request to GetDataProductGraphData.
+type GetDataProductGraphDataRequestOptions struct {
+	PathParams *GetDataProductGraphDataPath
+	Query      *GetDataProductGraphDataQuery
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *GetGraphData_1RequestOptions) Validate() error {
+func (o *GetDataProductGraphDataRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -6628,22 +7192,22 @@ func (o *GetGraphData_1RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *GetGraphData_1RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *GetDataProductGraphDataRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *GetGraphData_1RequestOptions) GetQuery() (map[string]any, error) {
+func (o *GetDataProductGraphDataRequestOptions) GetQuery() (map[string]any, error) {
 	return runtime.AsMap[any](o.Query)
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *GetGraphData_1RequestOptions) GetBody() any {
+func (o *GetDataProductGraphDataRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *GetGraphData_1RequestOptions) GetHeader() (map[string]string, error) {
+func (o *GetDataProductGraphDataRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -6750,6 +7314,50 @@ func (o *LinkInputPortsToDataProductRequestOptions) GetBody() any {
 
 // GetHeader returns the headers as a map.
 func (o *LinkInputPortsToDataProductRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// GetDataProductEventHistoryRequestOptions is the options needed to make a request to GetDataProductEventHistory.
+type GetDataProductEventHistoryRequestOptions struct {
+	PathParams *GetDataProductEventHistoryPath
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *GetDataProductEventHistoryRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *GetDataProductEventHistoryRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *GetDataProductEventHistoryRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *GetDataProductEventHistoryRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *GetDataProductEventHistoryRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -7185,59 +7793,6 @@ func (o *UnlinkInputPortFromDataProductRequestOptions) GetHeader() (map[string]s
 	return nil, nil
 }
 
-// ValidateTechnicalAssetNamespaceRequestOptions is the options needed to make a request to ValidateTechnicalAssetNamespace.
-type ValidateTechnicalAssetNamespaceRequestOptions struct {
-	PathParams *ValidateTechnicalAssetNamespacePath
-	Query      *ValidateTechnicalAssetNamespaceQuery
-}
-
-// Validate validates all the fields in the options.
-// Use it if fields validation was not run.
-func (o *ValidateTechnicalAssetNamespaceRequestOptions) Validate() error {
-	var errors runtime.ValidationErrors
-
-	if o.PathParams != nil {
-		if v, ok := any(o.PathParams).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("PathParams", err)
-			}
-		}
-	}
-
-	if o.Query != nil {
-		if v, ok := any(o.Query).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("Query", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return errors
-}
-
-// GetPathParams returns the path params as a map.
-func (o *ValidateTechnicalAssetNamespaceRequestOptions) GetPathParams() (map[string]any, error) {
-	return runtime.AsMap[any](o.PathParams)
-}
-
-// GetQuery returns the query params as a map.
-func (o *ValidateTechnicalAssetNamespaceRequestOptions) GetQuery() (map[string]any, error) {
-	return runtime.AsMap[any](o.Query)
-}
-
-// GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ValidateTechnicalAssetNamespaceRequestOptions) GetBody() any {
-	return nil
-}
-
-// GetHeader returns the headers as a map.
-func (o *ValidateTechnicalAssetNamespaceRequestOptions) GetHeader() (map[string]string, error) {
-	return nil, nil
-}
-
 // GetDataProductTypeRequestOptions is the options needed to make a request to GetDataProductType.
 type GetDataProductTypeRequestOptions struct {
 	PathParams *GetDataProductTypePath
@@ -7564,14 +8119,14 @@ func (o *UpdateDataProductLifecycleRequestOptions) GetHeader() (map[string]strin
 	return nil, nil
 }
 
-// DeleteDataProductLifecycleRequestOptions is the options needed to make a request to DeleteDataProductLifecycle.
-type DeleteDataProductLifecycleRequestOptions struct {
-	PathParams *DeleteDataProductLifecyclePath
+// RemoveDataProductLifecycleRequestOptions is the options needed to make a request to RemoveDataProductLifecycle.
+type RemoveDataProductLifecycleRequestOptions struct {
+	PathParams *RemoveDataProductLifecyclePath
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DeleteDataProductLifecycleRequestOptions) Validate() error {
+func (o *RemoveDataProductLifecycleRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -7589,22 +8144,22 @@ func (o *DeleteDataProductLifecycleRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DeleteDataProductLifecycleRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *RemoveDataProductLifecycleRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DeleteDataProductLifecycleRequestOptions) GetQuery() (map[string]any, error) {
+func (o *RemoveDataProductLifecycleRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DeleteDataProductLifecycleRequestOptions) GetBody() any {
+func (o *RemoveDataProductLifecycleRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *DeleteDataProductLifecycleRequestOptions) GetHeader() (map[string]string, error) {
+func (o *RemoveDataProductLifecycleRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -7649,94 +8204,6 @@ func (o *CreateDataProductSettingRequestOptions) GetBody() any {
 
 // GetHeader returns the headers as a map.
 func (o *CreateDataProductSettingRequestOptions) GetHeader() (map[string]string, error) {
-	return nil, nil
-}
-
-// GetDataProductSettingsNamespaceSuggestionRequestOptions is the options needed to make a request to GetDataProductSettingsNamespaceSuggestion.
-type GetDataProductSettingsNamespaceSuggestionRequestOptions struct {
-	Query *GetDataProductSettingsNamespaceSuggestionQuery
-}
-
-// Validate validates all the fields in the options.
-// Use it if fields validation was not run.
-func (o *GetDataProductSettingsNamespaceSuggestionRequestOptions) Validate() error {
-	var errors runtime.ValidationErrors
-
-	if o.Query != nil {
-		if v, ok := any(o.Query).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("Query", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return errors
-}
-
-// GetPathParams returns the path params as a map.
-func (o *GetDataProductSettingsNamespaceSuggestionRequestOptions) GetPathParams() (map[string]any, error) {
-	return nil, nil
-}
-
-// GetQuery returns the query params as a map.
-func (o *GetDataProductSettingsNamespaceSuggestionRequestOptions) GetQuery() (map[string]any, error) {
-	return runtime.AsMap[any](o.Query)
-}
-
-// GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *GetDataProductSettingsNamespaceSuggestionRequestOptions) GetBody() any {
-	return nil
-}
-
-// GetHeader returns the headers as a map.
-func (o *GetDataProductSettingsNamespaceSuggestionRequestOptions) GetHeader() (map[string]string, error) {
-	return nil, nil
-}
-
-// ValidateDataProductSettingsNamespaceRequestOptions is the options needed to make a request to ValidateDataProductSettingsNamespace.
-type ValidateDataProductSettingsNamespaceRequestOptions struct {
-	Query *ValidateDataProductSettingsNamespaceQuery
-}
-
-// Validate validates all the fields in the options.
-// Use it if fields validation was not run.
-func (o *ValidateDataProductSettingsNamespaceRequestOptions) Validate() error {
-	var errors runtime.ValidationErrors
-
-	if o.Query != nil {
-		if v, ok := any(o.Query).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("Query", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return errors
-}
-
-// GetPathParams returns the path params as a map.
-func (o *ValidateDataProductSettingsNamespaceRequestOptions) GetPathParams() (map[string]any, error) {
-	return nil, nil
-}
-
-// GetQuery returns the query params as a map.
-func (o *ValidateDataProductSettingsNamespaceRequestOptions) GetQuery() (map[string]any, error) {
-	return runtime.AsMap[any](o.Query)
-}
-
-// GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ValidateDataProductSettingsNamespaceRequestOptions) GetBody() any {
-	return nil
-}
-
-// GetHeader returns the headers as a map.
-func (o *ValidateDataProductSettingsNamespaceRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -7793,14 +8260,14 @@ func (o *UpdateDataProductSettingRequestOptions) GetHeader() (map[string]string,
 	return nil, nil
 }
 
-// DeleteDataProductSettingRequestOptions is the options needed to make a request to DeleteDataProductSetting.
-type DeleteDataProductSettingRequestOptions struct {
-	PathParams *DeleteDataProductSettingPath
+// RemoveDataProductSettingRequestOptions is the options needed to make a request to RemoveDataProductSetting.
+type RemoveDataProductSettingRequestOptions struct {
+	PathParams *RemoveDataProductSettingPath
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DeleteDataProductSettingRequestOptions) Validate() error {
+func (o *RemoveDataProductSettingRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -7818,22 +8285,393 @@ func (o *DeleteDataProductSettingRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DeleteDataProductSettingRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *RemoveDataProductSettingRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DeleteDataProductSettingRequestOptions) GetQuery() (map[string]any, error) {
+func (o *RemoveDataProductSettingRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DeleteDataProductSettingRequestOptions) GetBody() any {
+func (o *RemoveDataProductSettingRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *DeleteDataProductSettingRequestOptions) GetHeader() (map[string]string, error) {
+func (o *RemoveDataProductSettingRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// ApproveOutputPortAsInputPortRequestOptions is the options needed to make a request to ApproveOutputPortAsInputPort.
+type ApproveOutputPortAsInputPortRequestOptions struct {
+	PathParams *ApproveOutputPortAsInputPortPath
+	Body       *ApproveOutputPortAsInputPortBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *ApproveOutputPortAsInputPortRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *ApproveOutputPortAsInputPortRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *ApproveOutputPortAsInputPortRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *ApproveOutputPortAsInputPortRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *ApproveOutputPortAsInputPortRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// DenyOutputPortAsInputPortRequestOptions is the options needed to make a request to DenyOutputPortAsInputPort.
+type DenyOutputPortAsInputPortRequestOptions struct {
+	PathParams *DenyOutputPortAsInputPortPath
+	Body       *DenyOutputPortAsInputPortBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *DenyOutputPortAsInputPortRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *DenyOutputPortAsInputPortRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *DenyOutputPortAsInputPortRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *DenyOutputPortAsInputPortRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *DenyOutputPortAsInputPortRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// RemoveOutputPortAsInputPortRequestOptions is the options needed to make a request to RemoveOutputPortAsInputPort.
+type RemoveOutputPortAsInputPortRequestOptions struct {
+	PathParams *RemoveOutputPortAsInputPortPath
+	Body       *RemoveOutputPortAsInputPortBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *RemoveOutputPortAsInputPortRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *RemoveOutputPortAsInputPortRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *RemoveOutputPortAsInputPortRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *RemoveOutputPortAsInputPortRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *RemoveOutputPortAsInputPortRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// ApproveOutputPortTechnicalAssetLinkRequestOptions is the options needed to make a request to ApproveOutputPortTechnicalAssetLink.
+type ApproveOutputPortTechnicalAssetLinkRequestOptions struct {
+	PathParams *ApproveOutputPortTechnicalAssetLinkPath
+	Body       *ApproveOutputPortTechnicalAssetLinkBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *ApproveOutputPortTechnicalAssetLinkRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *ApproveOutputPortTechnicalAssetLinkRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *ApproveOutputPortTechnicalAssetLinkRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *ApproveOutputPortTechnicalAssetLinkRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *ApproveOutputPortTechnicalAssetLinkRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// DenyOutputPortTechnicalAssetLinkRequestOptions is the options needed to make a request to DenyOutputPortTechnicalAssetLink.
+type DenyOutputPortTechnicalAssetLinkRequestOptions struct {
+	PathParams *DenyOutputPortTechnicalAssetLinkPath
+	Body       *DenyOutputPortTechnicalAssetLinkBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *DenyOutputPortTechnicalAssetLinkRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *DenyOutputPortTechnicalAssetLinkRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *DenyOutputPortTechnicalAssetLinkRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *DenyOutputPortTechnicalAssetLinkRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *DenyOutputPortTechnicalAssetLinkRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// LinkOutputPortToTechnicalAssetRequestOptions is the options needed to make a request to LinkOutputPortToTechnicalAsset.
+type LinkOutputPortToTechnicalAssetRequestOptions struct {
+	PathParams *LinkOutputPortToTechnicalAssetPath
+	Body       *LinkOutputPortToTechnicalAssetBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *LinkOutputPortToTechnicalAssetRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// UnlinkOutputPortFromTechnicalAssetRequestOptions is the options needed to make a request to UnlinkOutputPortFromTechnicalAsset.
+type UnlinkOutputPortFromTechnicalAssetRequestOptions struct {
+	PathParams *UnlinkOutputPortFromTechnicalAssetPath
+	Body       *UnlinkOutputPortFromTechnicalAssetBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -8022,68 +8860,15 @@ func (o *UpdateTechnicalAssetStatusRequestOptions) GetHeader() (map[string]strin
 	return nil, nil
 }
 
-// LinkOutputPortToTechnicalAssetRequestOptions is the options needed to make a request to LinkOutputPortToTechnicalAsset.
-type LinkOutputPortToTechnicalAssetRequestOptions struct {
-	PathParams *LinkOutputPortToTechnicalAssetPath
-	Body       *LinkOutputPortToTechnicalAssetBody
+// GetTechnicalAssetGraphDataRequestOptions is the options needed to make a request to GetTechnicalAssetGraphData.
+type GetTechnicalAssetGraphDataRequestOptions struct {
+	PathParams *GetTechnicalAssetGraphDataPath
+	Query      *GetTechnicalAssetGraphDataQuery
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *LinkOutputPortToTechnicalAssetRequestOptions) Validate() error {
-	var errors runtime.ValidationErrors
-
-	if o.PathParams != nil {
-		if v, ok := any(o.PathParams).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("PathParams", err)
-			}
-		}
-	}
-
-	if o.Body != nil {
-		if v, ok := any(o.Body).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("Body", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return errors
-}
-
-// GetPathParams returns the path params as a map.
-func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetPathParams() (map[string]any, error) {
-	return runtime.AsMap[any](o.PathParams)
-}
-
-// GetQuery returns the query params as a map.
-func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetQuery() (map[string]any, error) {
-	return nil, nil
-}
-
-// GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetBody() any {
-	return o.Body
-}
-
-// GetHeader returns the headers as a map.
-func (o *LinkOutputPortToTechnicalAssetRequestOptions) GetHeader() (map[string]string, error) {
-	return nil, nil
-}
-
-// UnlinkOutputPortFromTechnicalAssetRequestOptions is the options needed to make a request to UnlinkOutputPortFromTechnicalAsset.
-type UnlinkOutputPortFromTechnicalAssetRequestOptions struct {
-	PathParams *UnlinkOutputPortFromTechnicalAssetPath
-	Query      *UnlinkOutputPortFromTechnicalAssetQuery
-}
-
-// Validate validates all the fields in the options.
-// Use it if fields validation was not run.
-func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) Validate() error {
+func (o *GetTechnicalAssetGraphDataRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -8109,75 +8894,22 @@ func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *GetTechnicalAssetGraphDataRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetQuery() (map[string]any, error) {
+func (o *GetTechnicalAssetGraphDataRequestOptions) GetQuery() (map[string]any, error) {
 	return runtime.AsMap[any](o.Query)
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetBody() any {
+func (o *GetTechnicalAssetGraphDataRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *UnlinkOutputPortFromTechnicalAssetRequestOptions) GetHeader() (map[string]string, error) {
-	return nil, nil
-}
-
-// GetGraphData_2RequestOptions is the options needed to make a request to GetGraphData_2.
-type GetGraphData_2RequestOptions struct {
-	PathParams *GetGraphDataPath
-	Query      *GetGraphDataQuery
-}
-
-// Validate validates all the fields in the options.
-// Use it if fields validation was not run.
-func (o *GetGraphData_2RequestOptions) Validate() error {
-	var errors runtime.ValidationErrors
-
-	if o.PathParams != nil {
-		if v, ok := any(o.PathParams).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("PathParams", err)
-			}
-		}
-	}
-
-	if o.Query != nil {
-		if v, ok := any(o.Query).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("Query", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return errors
-}
-
-// GetPathParams returns the path params as a map.
-func (o *GetGraphData_2RequestOptions) GetPathParams() (map[string]any, error) {
-	return runtime.AsMap[any](o.PathParams)
-}
-
-// GetQuery returns the query params as a map.
-func (o *GetGraphData_2RequestOptions) GetQuery() (map[string]any, error) {
-	return runtime.AsMap[any](o.Query)
-}
-
-// GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *GetGraphData_2RequestOptions) GetBody() any {
-	return nil
-}
-
-// GetHeader returns the headers as a map.
-func (o *GetGraphData_2RequestOptions) GetHeader() (map[string]string, error) {
+func (o *GetTechnicalAssetGraphDataRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
@@ -9308,14 +10040,14 @@ func (o *BecomeAdminRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// CreateAssignmentRequestOptions is the options needed to make a request to CreateAssignment.
-type CreateAssignmentRequestOptions struct {
-	Body *CreateAssignmentBody
+// CreateGlobalRoleAssignmentRequestOptions is the options needed to make a request to CreateGlobalRoleAssignment.
+type CreateGlobalRoleAssignmentRequestOptions struct {
+	Body *CreateGlobalRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *CreateAssignmentRequestOptions) Validate() error {
+func (o *CreateGlobalRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Body != nil {
@@ -9333,33 +10065,33 @@ func (o *CreateAssignmentRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *CreateAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *CreateGlobalRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *CreateAssignmentRequestOptions) GetQuery() (map[string]any, error) {
+func (o *CreateGlobalRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *CreateAssignmentRequestOptions) GetBody() any {
+func (o *CreateGlobalRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *CreateAssignmentRequestOptions) GetHeader() (map[string]string, error) {
+func (o *CreateGlobalRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// ListAssignmentsRequestOptions is the options needed to make a request to ListAssignments.
-type ListAssignmentsRequestOptions struct {
-	Query *ListAssignmentsQuery
+// ListGlobalRoleAssignmentsRequestOptions is the options needed to make a request to ListGlobalRoleAssignments.
+type ListGlobalRoleAssignmentsRequestOptions struct {
+	Query *ListGlobalRoleAssignmentsQuery
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *ListAssignmentsRequestOptions) Validate() error {
+func (o *ListGlobalRoleAssignmentsRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Query != nil {
@@ -9377,33 +10109,33 @@ func (o *ListAssignmentsRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *ListAssignmentsRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *ListGlobalRoleAssignmentsRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *ListAssignmentsRequestOptions) GetQuery() (map[string]any, error) {
+func (o *ListGlobalRoleAssignmentsRequestOptions) GetQuery() (map[string]any, error) {
 	return runtime.AsMap[any](o.Query)
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ListAssignmentsRequestOptions) GetBody() any {
+func (o *ListGlobalRoleAssignmentsRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *ListAssignmentsRequestOptions) GetHeader() (map[string]string, error) {
+func (o *ListGlobalRoleAssignmentsRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// DeleteAssignmentRequestOptions is the options needed to make a request to DeleteAssignment.
-type DeleteAssignmentRequestOptions struct {
-	PathParams *DeleteAssignmentPath
+// DeleteGlobalRoleAssignmentRequestOptions is the options needed to make a request to DeleteGlobalRoleAssignment.
+type DeleteGlobalRoleAssignmentRequestOptions struct {
+	PathParams *DeleteGlobalRoleAssignmentPath
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DeleteAssignmentRequestOptions) Validate() error {
+func (o *DeleteGlobalRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9421,34 +10153,34 @@ func (o *DeleteAssignmentRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DeleteAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *DeleteGlobalRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DeleteAssignmentRequestOptions) GetQuery() (map[string]any, error) {
+func (o *DeleteGlobalRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DeleteAssignmentRequestOptions) GetBody() any {
+func (o *DeleteGlobalRoleAssignmentRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *DeleteAssignmentRequestOptions) GetHeader() (map[string]string, error) {
+func (o *DeleteGlobalRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// DecideAssignmentRequestOptions is the options needed to make a request to DecideAssignment.
-type DecideAssignmentRequestOptions struct {
-	PathParams *DecideAssignmentPath
-	Body       *DecideAssignmentBody
+// DecideGlobalRoleAssignmentRequestOptions is the options needed to make a request to DecideGlobalRoleAssignment.
+type DecideGlobalRoleAssignmentRequestOptions struct {
+	PathParams *DecideGlobalRoleAssignmentPath
+	Body       *DecideGlobalRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DecideAssignmentRequestOptions) Validate() error {
+func (o *DecideGlobalRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9474,34 +10206,34 @@ func (o *DecideAssignmentRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DecideAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *DecideGlobalRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DecideAssignmentRequestOptions) GetQuery() (map[string]any, error) {
+func (o *DecideGlobalRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DecideAssignmentRequestOptions) GetBody() any {
+func (o *DecideGlobalRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *DecideAssignmentRequestOptions) GetHeader() (map[string]string, error) {
+func (o *DecideGlobalRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// ModifyAssignedRoleRequestOptions is the options needed to make a request to ModifyAssignedRole.
-type ModifyAssignedRoleRequestOptions struct {
-	PathParams *ModifyAssignedRolePath
-	Body       *ModifyAssignedRoleBody
+// ModifyGlobalRoleAssignmentRequestOptions is the options needed to make a request to ModifyGlobalRoleAssignment.
+type ModifyGlobalRoleAssignmentRequestOptions struct {
+	PathParams *ModifyGlobalRoleAssignmentPath
+	Body       *ModifyGlobalRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *ModifyAssignedRoleRequestOptions) Validate() error {
+func (o *ModifyGlobalRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9527,33 +10259,33 @@ func (o *ModifyAssignedRoleRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *ModifyAssignedRoleRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *ModifyGlobalRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *ModifyAssignedRoleRequestOptions) GetQuery() (map[string]any, error) {
+func (o *ModifyGlobalRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ModifyAssignedRoleRequestOptions) GetBody() any {
+func (o *ModifyGlobalRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *ModifyAssignedRoleRequestOptions) GetHeader() (map[string]string, error) {
+func (o *ModifyGlobalRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// DeleteAssignment_1RequestOptions is the options needed to make a request to DeleteAssignment_1.
-type DeleteAssignment_1RequestOptions struct {
-	PathParams *DeleteAssignmentPath
+// DeleteDataProductRoleAssignmentRequestOptions is the options needed to make a request to DeleteDataProductRoleAssignment.
+type DeleteDataProductRoleAssignmentRequestOptions struct {
+	PathParams *DeleteDataProductRoleAssignmentPath
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DeleteAssignment_1RequestOptions) Validate() error {
+func (o *DeleteDataProductRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9571,34 +10303,34 @@ func (o *DeleteAssignment_1RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DeleteAssignment_1RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *DeleteDataProductRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DeleteAssignment_1RequestOptions) GetQuery() (map[string]any, error) {
+func (o *DeleteDataProductRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DeleteAssignment_1RequestOptions) GetBody() any {
+func (o *DeleteDataProductRoleAssignmentRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *DeleteAssignment_1RequestOptions) GetHeader() (map[string]string, error) {
+func (o *DeleteDataProductRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// ModifyAssignedRole_1RequestOptions is the options needed to make a request to ModifyAssignedRole_1.
-type ModifyAssignedRole_1RequestOptions struct {
-	PathParams *ModifyAssignedRolePath
-	Body       *ModifyAssignedRoleBody
+// ModifyDataProductRoleAssignmentRequestOptions is the options needed to make a request to ModifyDataProductRoleAssignment.
+type ModifyDataProductRoleAssignmentRequestOptions struct {
+	PathParams *ModifyDataProductRoleAssignmentPath
+	Body       *ModifyDataProductRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *ModifyAssignedRole_1RequestOptions) Validate() error {
+func (o *ModifyDataProductRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9624,33 +10356,33 @@ func (o *ModifyAssignedRole_1RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *ModifyAssignedRole_1RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *ModifyDataProductRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *ModifyAssignedRole_1RequestOptions) GetQuery() (map[string]any, error) {
+func (o *ModifyDataProductRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ModifyAssignedRole_1RequestOptions) GetBody() any {
+func (o *ModifyDataProductRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *ModifyAssignedRole_1RequestOptions) GetHeader() (map[string]string, error) {
+func (o *ModifyDataProductRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// ListAssignments_1RequestOptions is the options needed to make a request to ListAssignments_1.
-type ListAssignments_1RequestOptions struct {
-	Query *ListAssignmentsQuery
+// ListDataProductRoleAssignmentsRequestOptions is the options needed to make a request to ListDataProductRoleAssignments.
+type ListDataProductRoleAssignmentsRequestOptions struct {
+	Query *ListDataProductRoleAssignmentsQuery
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *ListAssignments_1RequestOptions) Validate() error {
+func (o *ListDataProductRoleAssignmentsRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Query != nil {
@@ -9668,33 +10400,33 @@ func (o *ListAssignments_1RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *ListAssignments_1RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *ListDataProductRoleAssignmentsRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *ListAssignments_1RequestOptions) GetQuery() (map[string]any, error) {
+func (o *ListDataProductRoleAssignmentsRequestOptions) GetQuery() (map[string]any, error) {
 	return runtime.AsMap[any](o.Query)
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ListAssignments_1RequestOptions) GetBody() any {
+func (o *ListDataProductRoleAssignmentsRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *ListAssignments_1RequestOptions) GetHeader() (map[string]string, error) {
+func (o *ListDataProductRoleAssignmentsRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// CreateAssignment_1RequestOptions is the options needed to make a request to CreateAssignment_1.
-type CreateAssignment_1RequestOptions struct {
-	Body *CreateAssignmentBody
+// CreateDataProductRoleAssignmentRequestOptions is the options needed to make a request to CreateDataProductRoleAssignment.
+type CreateDataProductRoleAssignmentRequestOptions struct {
+	Body *CreateDataProductRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *CreateAssignment_1RequestOptions) Validate() error {
+func (o *CreateDataProductRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Body != nil {
@@ -9712,33 +10444,33 @@ func (o *CreateAssignment_1RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *CreateAssignment_1RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *CreateDataProductRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *CreateAssignment_1RequestOptions) GetQuery() (map[string]any, error) {
+func (o *CreateDataProductRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *CreateAssignment_1RequestOptions) GetBody() any {
+func (o *CreateDataProductRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *CreateAssignment_1RequestOptions) GetHeader() (map[string]string, error) {
+func (o *CreateDataProductRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// RequestAssignmentRequestOptions is the options needed to make a request to RequestAssignment.
-type RequestAssignmentRequestOptions struct {
-	Body *RequestAssignmentBody
+// RequestDataProductRoleAssignmentRequestOptions is the options needed to make a request to RequestDataProductRoleAssignment.
+type RequestDataProductRoleAssignmentRequestOptions struct {
+	Body *RequestDataProductRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *RequestAssignmentRequestOptions) Validate() error {
+func (o *RequestDataProductRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Body != nil {
@@ -9756,34 +10488,34 @@ func (o *RequestAssignmentRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *RequestAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *RequestDataProductRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *RequestAssignmentRequestOptions) GetQuery() (map[string]any, error) {
+func (o *RequestDataProductRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *RequestAssignmentRequestOptions) GetBody() any {
+func (o *RequestDataProductRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *RequestAssignmentRequestOptions) GetHeader() (map[string]string, error) {
+func (o *RequestDataProductRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// DecideAssignment_1RequestOptions is the options needed to make a request to DecideAssignment_1.
-type DecideAssignment_1RequestOptions struct {
-	PathParams *DecideAssignmentPath
-	Body       *DecideAssignmentBody
+// DecideDataProductRoleAssignmentRequestOptions is the options needed to make a request to DecideDataProductRoleAssignment.
+type DecideDataProductRoleAssignmentRequestOptions struct {
+	PathParams *DecideDataProductRoleAssignmentPath
+	Body       *DecideDataProductRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DecideAssignment_1RequestOptions) Validate() error {
+func (o *DecideDataProductRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9809,33 +10541,33 @@ func (o *DecideAssignment_1RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DecideAssignment_1RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *DecideDataProductRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DecideAssignment_1RequestOptions) GetQuery() (map[string]any, error) {
+func (o *DecideDataProductRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DecideAssignment_1RequestOptions) GetBody() any {
+func (o *DecideDataProductRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *DecideAssignment_1RequestOptions) GetHeader() (map[string]string, error) {
+func (o *DecideDataProductRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// DeleteAssignment_2RequestOptions is the options needed to make a request to DeleteAssignment_2.
-type DeleteAssignment_2RequestOptions struct {
-	PathParams *DeleteAssignmentPath
+// DeleteOutputPortRoleAssignmentRequestOptions is the options needed to make a request to DeleteOutputPortRoleAssignment.
+type DeleteOutputPortRoleAssignmentRequestOptions struct {
+	PathParams *DeleteOutputPortRoleAssignmentPath
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DeleteAssignment_2RequestOptions) Validate() error {
+func (o *DeleteOutputPortRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9853,34 +10585,34 @@ func (o *DeleteAssignment_2RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DeleteAssignment_2RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *DeleteOutputPortRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DeleteAssignment_2RequestOptions) GetQuery() (map[string]any, error) {
+func (o *DeleteOutputPortRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DeleteAssignment_2RequestOptions) GetBody() any {
+func (o *DeleteOutputPortRoleAssignmentRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *DeleteAssignment_2RequestOptions) GetHeader() (map[string]string, error) {
+func (o *DeleteOutputPortRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// ModifyAssignedRole_2RequestOptions is the options needed to make a request to ModifyAssignedRole_2.
-type ModifyAssignedRole_2RequestOptions struct {
-	PathParams *ModifyAssignedRolePath
-	Body       *ModifyAssignedRoleBody
+// ModifyOutputPortRoleAssignmentRequestOptions is the options needed to make a request to ModifyOutputPortRoleAssignment.
+type ModifyOutputPortRoleAssignmentRequestOptions struct {
+	PathParams *ModifyOutputPortRoleAssignmentPath
+	Body       *ModifyOutputPortRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *ModifyAssignedRole_2RequestOptions) Validate() error {
+func (o *ModifyOutputPortRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -9906,33 +10638,33 @@ func (o *ModifyAssignedRole_2RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *ModifyAssignedRole_2RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *ModifyOutputPortRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *ModifyAssignedRole_2RequestOptions) GetQuery() (map[string]any, error) {
+func (o *ModifyOutputPortRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ModifyAssignedRole_2RequestOptions) GetBody() any {
+func (o *ModifyOutputPortRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *ModifyAssignedRole_2RequestOptions) GetHeader() (map[string]string, error) {
+func (o *ModifyOutputPortRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// ListAssignments_2RequestOptions is the options needed to make a request to ListAssignments_2.
-type ListAssignments_2RequestOptions struct {
-	Query *ListAssignmentsQuery
+// ListOutputPortRoleAssignmentsRequestOptions is the options needed to make a request to ListOutputPortRoleAssignments.
+type ListOutputPortRoleAssignmentsRequestOptions struct {
+	Query *ListOutputPortRoleAssignmentsQuery
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *ListAssignments_2RequestOptions) Validate() error {
+func (o *ListOutputPortRoleAssignmentsRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Query != nil {
@@ -9950,33 +10682,33 @@ func (o *ListAssignments_2RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *ListAssignments_2RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *ListOutputPortRoleAssignmentsRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *ListAssignments_2RequestOptions) GetQuery() (map[string]any, error) {
+func (o *ListOutputPortRoleAssignmentsRequestOptions) GetQuery() (map[string]any, error) {
 	return runtime.AsMap[any](o.Query)
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *ListAssignments_2RequestOptions) GetBody() any {
+func (o *ListOutputPortRoleAssignmentsRequestOptions) GetBody() any {
 	return nil
 }
 
 // GetHeader returns the headers as a map.
-func (o *ListAssignments_2RequestOptions) GetHeader() (map[string]string, error) {
+func (o *ListOutputPortRoleAssignmentsRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// CreateAssignment_2RequestOptions is the options needed to make a request to CreateAssignment_2.
-type CreateAssignment_2RequestOptions struct {
-	Body *CreateAssignmentBody
+// CreateOutputPortRoleAssignmentRequestOptions is the options needed to make a request to CreateOutputPortRoleAssignment.
+type CreateOutputPortRoleAssignmentRequestOptions struct {
+	Body *CreateOutputPortRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *CreateAssignment_2RequestOptions) Validate() error {
+func (o *CreateOutputPortRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Body != nil {
@@ -9994,33 +10726,33 @@ func (o *CreateAssignment_2RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *CreateAssignment_2RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *CreateOutputPortRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *CreateAssignment_2RequestOptions) GetQuery() (map[string]any, error) {
+func (o *CreateOutputPortRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *CreateAssignment_2RequestOptions) GetBody() any {
+func (o *CreateOutputPortRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *CreateAssignment_2RequestOptions) GetHeader() (map[string]string, error) {
+func (o *CreateOutputPortRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// RequestAssignment_1RequestOptions is the options needed to make a request to RequestAssignment_1.
-type RequestAssignment_1RequestOptions struct {
-	Body *RequestAssignmentBody
+// RequestOutputPortRoleAssignmentRequestOptions is the options needed to make a request to RequestOutputPortRoleAssignment.
+type RequestOutputPortRoleAssignmentRequestOptions struct {
+	Body *RequestOutputPortRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *RequestAssignment_1RequestOptions) Validate() error {
+func (o *RequestOutputPortRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Body != nil {
@@ -10038,34 +10770,34 @@ func (o *RequestAssignment_1RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *RequestAssignment_1RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *RequestOutputPortRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *RequestAssignment_1RequestOptions) GetQuery() (map[string]any, error) {
+func (o *RequestOutputPortRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *RequestAssignment_1RequestOptions) GetBody() any {
+func (o *RequestOutputPortRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *RequestAssignment_1RequestOptions) GetHeader() (map[string]string, error) {
+func (o *RequestOutputPortRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// DecideAssignment_2RequestOptions is the options needed to make a request to DecideAssignment_2.
-type DecideAssignment_2RequestOptions struct {
-	PathParams *DecideAssignmentPath
-	Body       *DecideAssignmentBody
+// DecideOutputPortRoleAssignmentRequestOptions is the options needed to make a request to DecideOutputPortRoleAssignment.
+type DecideOutputPortRoleAssignmentRequestOptions struct {
+	PathParams *DecideOutputPortRoleAssignmentPath
+	Body       *DecideOutputPortRoleAssignmentBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *DecideAssignment_2RequestOptions) Validate() error {
+func (o *DecideOutputPortRoleAssignmentRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.PathParams != nil {
@@ -10091,33 +10823,33 @@ func (o *DecideAssignment_2RequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *DecideAssignment_2RequestOptions) GetPathParams() (map[string]any, error) {
+func (o *DecideOutputPortRoleAssignmentRequestOptions) GetPathParams() (map[string]any, error) {
 	return runtime.AsMap[any](o.PathParams)
 }
 
 // GetQuery returns the query params as a map.
-func (o *DecideAssignment_2RequestOptions) GetQuery() (map[string]any, error) {
+func (o *DecideOutputPortRoleAssignmentRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *DecideAssignment_2RequestOptions) GetBody() any {
+func (o *DecideOutputPortRoleAssignmentRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *DecideAssignment_2RequestOptions) GetHeader() (map[string]string, error) {
+func (o *DecideOutputPortRoleAssignmentRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
 }
 
-// UpdateSettingsRequestOptions is the options needed to make a request to UpdateSettings.
-type UpdateSettingsRequestOptions struct {
-	Body *UpdateSettingsBody
+// UpdateThemeSettingsRequestOptions is the options needed to make a request to UpdateThemeSettings.
+type UpdateThemeSettingsRequestOptions struct {
+	Body *UpdateThemeSettingsBody
 }
 
 // Validate validates all the fields in the options.
 // Use it if fields validation was not run.
-func (o *UpdateSettingsRequestOptions) Validate() error {
+func (o *UpdateThemeSettingsRequestOptions) Validate() error {
 	var errors runtime.ValidationErrors
 
 	if o.Body != nil {
@@ -10135,23 +10867,392 @@ func (o *UpdateSettingsRequestOptions) Validate() error {
 }
 
 // GetPathParams returns the path params as a map.
-func (o *UpdateSettingsRequestOptions) GetPathParams() (map[string]any, error) {
+func (o *UpdateThemeSettingsRequestOptions) GetPathParams() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetQuery returns the query params as a map.
-func (o *UpdateSettingsRequestOptions) GetQuery() (map[string]any, error) {
+func (o *UpdateThemeSettingsRequestOptions) GetQuery() (map[string]any, error) {
 	return nil, nil
 }
 
 // GetBody returns the payload in any type that can be marshalled to JSON by the client.
-func (o *UpdateSettingsRequestOptions) GetBody() any {
+func (o *UpdateThemeSettingsRequestOptions) GetBody() any {
 	return o.Body
 }
 
 // GetHeader returns the headers as a map.
-func (o *UpdateSettingsRequestOptions) GetHeader() (map[string]string, error) {
+func (o *UpdateThemeSettingsRequestOptions) GetHeader() (map[string]string, error) {
 	return nil, nil
+}
+
+// GetGraphDataRequestOptions is the options needed to make a request to GetGraphData.
+type GetGraphDataRequestOptions struct {
+	Query *GetGraphDataQuery
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *GetGraphDataRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.Query != nil {
+		if v, ok := any(o.Query).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Query", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *GetGraphDataRequestOptions) GetPathParams() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetQuery returns the query params as a map.
+func (o *GetGraphDataRequestOptions) GetQuery() (map[string]any, error) {
+	return runtime.AsMap[any](o.Query)
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *GetGraphDataRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *GetGraphDataRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// RemoveUserNotificationRequestOptions is the options needed to make a request to RemoveUserNotification.
+type RemoveUserNotificationRequestOptions struct {
+	PathParams *RemoveUserNotificationPath
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *RemoveUserNotificationRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *RemoveUserNotificationRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *RemoveUserNotificationRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *RemoveUserNotificationRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *RemoveUserNotificationRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// SanitizeResourceNameRequestOptions is the options needed to make a request to SanitizeResourceName.
+type SanitizeResourceNameRequestOptions struct {
+	Query *SanitizeResourceNameQuery
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *SanitizeResourceNameRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.Query != nil {
+		if v, ok := any(o.Query).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Query", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *SanitizeResourceNameRequestOptions) GetPathParams() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetQuery returns the query params as a map.
+func (o *SanitizeResourceNameRequestOptions) GetQuery() (map[string]any, error) {
+	return runtime.AsMap[any](o.Query)
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *SanitizeResourceNameRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *SanitizeResourceNameRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// ValidateResourceNameRequestOptions is the options needed to make a request to ValidateResourceName.
+type ValidateResourceNameRequestOptions struct {
+	Body *ValidateResourceNameBody
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *ValidateResourceNameRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.Body != nil {
+		if v, ok := any(o.Body).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Body", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *ValidateResourceNameRequestOptions) GetPathParams() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetQuery returns the query params as a map.
+func (o *ValidateResourceNameRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *ValidateResourceNameRequestOptions) GetBody() any {
+	return o.Body
+}
+
+// GetHeader returns the headers as a map.
+func (o *ValidateResourceNameRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// GetPluginFormRequestOptions is the options needed to make a request to GetPluginForm.
+type GetPluginFormRequestOptions struct {
+	PathParams *GetPluginFormPath
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *GetPluginFormRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.PathParams != nil {
+		if v, ok := any(o.PathParams).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PathParams", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *GetPluginFormRequestOptions) GetPathParams() (map[string]any, error) {
+	return runtime.AsMap[any](o.PathParams)
+}
+
+// GetQuery returns the query params as a map.
+func (o *GetPluginFormRequestOptions) GetQuery() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *GetPluginFormRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *GetPluginFormRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// GetDeviceTokenRequestOptions is the options needed to make a request to GetDeviceToken.
+type GetDeviceTokenRequestOptions struct {
+	Query *GetDeviceTokenQuery
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *GetDeviceTokenRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.Query != nil {
+		if v, ok := any(o.Query).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Query", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *GetDeviceTokenRequestOptions) GetPathParams() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetQuery returns the query params as a map.
+func (o *GetDeviceTokenRequestOptions) GetQuery() (map[string]any, error) {
+	return runtime.AsMap[any](o.Query)
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *GetDeviceTokenRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *GetDeviceTokenRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// GetJwtTokenRequestOptions is the options needed to make a request to GetJwtToken.
+type GetJwtTokenRequestOptions struct {
+	Query *GetJwtTokenQuery
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *GetJwtTokenRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.Query != nil {
+		if v, ok := any(o.Query).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Query", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *GetJwtTokenRequestOptions) GetPathParams() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetQuery returns the query params as a map.
+func (o *GetJwtTokenRequestOptions) GetQuery() (map[string]any, error) {
+	return runtime.AsMap[any](o.Query)
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *GetJwtTokenRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *GetJwtTokenRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+// GetAwsCredentialsRequestOptions is the options needed to make a request to GetAwsCredentials.
+type GetAwsCredentialsRequestOptions struct {
+	Query *GetAwsCredentialsQuery
+}
+
+// Validate validates all the fields in the options.
+// Use it if fields validation was not run.
+func (o *GetAwsCredentialsRequestOptions) Validate() error {
+	var errors runtime.ValidationErrors
+
+	if o.Query != nil {
+		if v, ok := any(o.Query).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Query", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+
+	return errors
+}
+
+// GetPathParams returns the path params as a map.
+func (o *GetAwsCredentialsRequestOptions) GetPathParams() (map[string]any, error) {
+	return nil, nil
+}
+
+// GetQuery returns the query params as a map.
+func (o *GetAwsCredentialsRequestOptions) GetQuery() (map[string]any, error) {
+	return runtime.AsMap[any](o.Query)
+}
+
+// GetBody returns the payload in any type that can be marshalled to JSON by the client.
+func (o *GetAwsCredentialsRequestOptions) GetBody() any {
+	return nil
+}
+
+// GetHeader returns the headers as a map.
+func (o *GetAwsCredentialsRequestOptions) GetHeader() (map[string]string, error) {
+	return nil, nil
+}
+
+type AccessGranularity string
+
+const (
+	AccessGranularitySchema AccessGranularity = "schema"
+	AccessGranularityTable  AccessGranularity = "table"
+)
+
+// Validate checks if the AccessGranularity value is valid
+func (a AccessGranularity) Validate() error {
+	switch a {
+	case AccessGranularitySchema, AccessGranularityTable:
+		return nil
+	default:
+		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid AccessGranularity value, got: %v", a))
+	}
 }
 
 // AuthorizationAction The integer values for the authorization actions are stored directly in the DB.
@@ -10301,41 +11402,22 @@ func (d DecisionStatus) Validate() error {
 	}
 }
 
-type EventReferenceEntity string
+type EventEntityType string
 
 const (
-	EventReferenceEntityDataOutput  EventReferenceEntity = "data_output"
-	EventReferenceEntityDataProduct EventReferenceEntity = "data_product"
-	EventReferenceEntityDataset     EventReferenceEntity = "dataset"
-	EventReferenceEntityUser        EventReferenceEntity = "user"
+	EventEntityTypeDataProduct    EventEntityType = "data_product"
+	EventEntityTypeOutputPort     EventEntityType = "output_port"
+	EventEntityTypeTechnicalAsset EventEntityType = "technical_asset"
+	EventEntityTypeUser           EventEntityType = "user"
 )
 
-// Validate checks if the EventReferenceEntity value is valid
-func (e EventReferenceEntity) Validate() error {
+// Validate checks if the EventEntityType value is valid
+func (e EventEntityType) Validate() error {
 	switch e {
-	case EventReferenceEntityDataOutput, EventReferenceEntityDataProduct, EventReferenceEntityDataset, EventReferenceEntityUser:
+	case EventEntityTypeDataProduct, EventEntityTypeOutputPort, EventEntityTypeTechnicalAsset, EventEntityTypeUser:
 		return nil
 	default:
-		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid EventReferenceEntity value, got: %v", e))
-	}
-}
-
-type NamespaceValidityType string
-
-const (
-	NamespaceValidityTypeDUPLICATENAMESPACE NamespaceValidityType = "DUPLICATE_NAMESPACE"
-	NamespaceValidityTypeINVALIDCHARACTERS  NamespaceValidityType = "INVALID_CHARACTERS"
-	NamespaceValidityTypeINVALIDLENGTH      NamespaceValidityType = "INVALID_LENGTH"
-	NamespaceValidityTypeVALID              NamespaceValidityType = "VALID"
-)
-
-// Validate checks if the NamespaceValidityType value is valid
-func (n NamespaceValidityType) Validate() error {
-	switch n {
-	case NamespaceValidityTypeDUPLICATENAMESPACE, NamespaceValidityTypeINVALIDCHARACTERS, NamespaceValidityTypeINVALIDLENGTH, NamespaceValidityTypeVALID:
-		return nil
-	default:
-		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid NamespaceValidityType value, got: %v", n))
+		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid EventEntityType value, got: %v", e))
 	}
 }
 
@@ -10431,6 +11513,45 @@ func (q QueryStatsGranularity) Validate() error {
 	}
 }
 
+type ResourceNameModel string
+
+const (
+	ResourceNameModelDataProduct        ResourceNameModel = "data_product"
+	ResourceNameModelDataProductSetting ResourceNameModel = "data_product_setting"
+	ResourceNameModelOutputPort         ResourceNameModel = "output_port"
+	ResourceNameModelOutputPortSetting  ResourceNameModel = "output_port_setting"
+	ResourceNameModelTechnicalAsset     ResourceNameModel = "technical_asset"
+)
+
+// Validate checks if the ResourceNameModel value is valid
+func (r ResourceNameModel) Validate() error {
+	switch r {
+	case ResourceNameModelDataProduct, ResourceNameModelDataProductSetting, ResourceNameModelOutputPort, ResourceNameModelOutputPortSetting, ResourceNameModelTechnicalAsset:
+		return nil
+	default:
+		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid ResourceNameModel value, got: %v", r))
+	}
+}
+
+type ResourceNameValidityType string
+
+const (
+	ResourceNameValidityTypeDUPLICATENAMESPACE ResourceNameValidityType = "DUPLICATE_NAMESPACE"
+	ResourceNameValidityTypeINVALIDCHARACTERS  ResourceNameValidityType = "INVALID_CHARACTERS"
+	ResourceNameValidityTypeINVALIDLENGTH      ResourceNameValidityType = "INVALID_LENGTH"
+	ResourceNameValidityTypeVALID              ResourceNameValidityType = "VALID"
+)
+
+// Validate checks if the ResourceNameValidityType value is valid
+func (r ResourceNameValidityType) Validate() error {
+	switch r {
+	case ResourceNameValidityTypeDUPLICATENAMESPACE, ResourceNameValidityTypeINVALIDCHARACTERS, ResourceNameValidityTypeINVALIDLENGTH, ResourceNameValidityTypeVALID:
+		return nil
+	default:
+		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid ResourceNameValidityType value, got: %v", r))
+	}
+}
+
 type Scope string
 
 const (
@@ -10465,6 +11586,42 @@ func (t TechnicalAssetStatus) Validate() error {
 		return nil
 	default:
 		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid TechnicalAssetStatus value, got: %v", t))
+	}
+}
+
+type TechnicalMapping string
+
+const (
+	TechnicalMappingCustom  TechnicalMapping = "custom"
+	TechnicalMappingDefault TechnicalMapping = "default"
+)
+
+// Validate checks if the TechnicalMapping value is valid
+func (t TechnicalMapping) Validate() error {
+	switch t {
+	case TechnicalMappingCustom, TechnicalMappingDefault:
+		return nil
+	default:
+		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid TechnicalMapping value, got: %v", t))
+	}
+}
+
+type UIElementType string
+
+const (
+	UIElementTypeCheckbox UIElementType = "checkbox"
+	UIElementTypeRadio    UIElementType = "radio"
+	UIElementTypeSelect   UIElementType = "select"
+	UIElementTypeString   UIElementType = "string"
+)
+
+// Validate checks if the UIElementType value is valid
+func (u UIElementType) Validate() error {
+	switch u {
+	case UIElementTypeCheckbox, UIElementTypeRadio, UIElementTypeSelect, UIElementTypeString:
+		return nil
+	default:
+		return runtime.NewValidationErrorsFromString("Enum", fmt.Sprintf("must be a valid UIElementType value, got: %v", u))
 	}
 }
 
@@ -10703,12 +11860,12 @@ func (u UpdateOutputPortPath) Validate() error {
 	return errors
 }
 
-type GetEventHistoryPath struct {
+type GetOutputPortsEventHistoryPath struct {
 	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
 	ID            uuid.UUID `json:"id" validate:"required"`
 }
 
-func (g GetEventHistoryPath) Validate() error {
+func (g GetOutputPortsEventHistoryPath) Validate() error {
 	var errors runtime.ValidationErrors
 	if v, ok := any(g.DataProductID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
@@ -10772,12 +11929,12 @@ func (u UpdateOutputPortStatusPath) Validate() error {
 	return errors
 }
 
-type GetGraphDataPath struct {
+type GetOutputPortGraphDataPath struct {
 	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
 	ID            uuid.UUID `json:"id" validate:"required"`
 }
 
-func (g GetGraphDataPath) Validate() error {
+func (g GetOutputPortGraphDataPath) Validate() error {
 	var errors runtime.ValidationErrors
 	if v, ok := any(g.DataProductID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
@@ -10926,6 +12083,23 @@ func (u UpdateDataProductUsagePath) Validate() error {
 	return errors
 }
 
+type GetDataProductGraphDataPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (g GetDataProductGraphDataPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(g.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
 type SetValueForDataProductPath struct {
 	ID        uuid.UUID `json:"id" validate:"required"`
 	SettingID uuid.UUID `json:"setting_id" validate:"required"`
@@ -10956,6 +12130,23 @@ type LinkInputPortsToDataProductPath struct {
 func (l LinkInputPortsToDataProductPath) Validate() error {
 	var errors runtime.ValidationErrors
 	if v, ok := any(l.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type GetDataProductEventHistoryPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (g GetDataProductEventHistoryPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(g.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("ID", err)
 		}
@@ -11125,23 +12316,6 @@ func (u UnlinkInputPortFromDataProductPath) Validate() error {
 	return errors
 }
 
-type ValidateTechnicalAssetNamespacePath struct {
-	ID uuid.UUID `json:"id" validate:"required"`
-}
-
-func (v ValidateTechnicalAssetNamespacePath) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(v.ID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("ID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
 type GetDataProductTypePath struct {
 	ID uuid.UUID `json:"id" validate:"required"`
 }
@@ -11233,13 +12407,13 @@ func (u UpdateDataProductLifecyclePath) Validate() error {
 	return errors
 }
 
-type DeleteDataProductLifecyclePath struct {
+type RemoveDataProductLifecyclePath struct {
 	ID uuid.UUID `json:"id" validate:"required"`
 }
 
-func (d DeleteDataProductLifecyclePath) Validate() error {
+func (r RemoveDataProductLifecyclePath) Validate() error {
 	var errors runtime.ValidationErrors
-	if v, ok := any(d.ID).(runtime.Validator); ok {
+	if v, ok := any(r.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("ID", err)
 		}
@@ -11267,15 +12441,176 @@ func (u UpdateDataProductSettingPath) Validate() error {
 	return errors
 }
 
-type DeleteDataProductSettingPath struct {
+type RemoveDataProductSettingPath struct {
 	ID uuid.UUID `json:"id" validate:"required"`
 }
 
-func (d DeleteDataProductSettingPath) Validate() error {
+func (r RemoveDataProductSettingPath) Validate() error {
 	var errors runtime.ValidationErrors
-	if v, ok := any(d.ID).(runtime.Validator); ok {
+	if v, ok := any(r.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ApproveOutputPortAsInputPortPath struct {
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+	OutputPortID  uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (a ApproveOutputPortAsInputPortPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(a.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(a.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DenyOutputPortAsInputPortPath struct {
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+	OutputPortID  uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (d DenyOutputPortAsInputPortPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(d.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type RemoveOutputPortAsInputPortPath struct {
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+	OutputPortID  uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (r RemoveOutputPortAsInputPortPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(r.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(r.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ApproveOutputPortTechnicalAssetLinkPath struct {
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+	OutputPortID  uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (a ApproveOutputPortTechnicalAssetLinkPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(a.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(a.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DenyOutputPortTechnicalAssetLinkPath struct {
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+	OutputPortID  uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (d DenyOutputPortTechnicalAssetLinkPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(d.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type LinkOutputPortToTechnicalAssetPath struct {
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+	OutputPortID  uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (l LinkOutputPortToTechnicalAssetPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(l.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(l.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type UnlinkOutputPortFromTechnicalAssetPath struct {
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+	OutputPortID  uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (u UnlinkOutputPortFromTechnicalAssetPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(u.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(u.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -11376,42 +12711,19 @@ func (u UpdateTechnicalAssetStatusPath) Validate() error {
 	return errors
 }
 
-type LinkOutputPortToTechnicalAssetPath struct {
+type GetTechnicalAssetGraphDataPath struct {
 	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
 	ID            uuid.UUID `json:"id" validate:"required"`
 }
 
-func (l LinkOutputPortToTechnicalAssetPath) Validate() error {
+func (g GetTechnicalAssetGraphDataPath) Validate() error {
 	var errors runtime.ValidationErrors
-	if v, ok := any(l.DataProductID).(runtime.Validator); ok {
+	if v, ok := any(g.DataProductID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("DataProductID", err)
 		}
 	}
-	if v, ok := any(l.ID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("ID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type UnlinkOutputPortFromTechnicalAssetPath struct {
-	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
-	ID            uuid.UUID `json:"id" validate:"required"`
-}
-
-func (u UnlinkOutputPortFromTechnicalAssetPath) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(u.DataProductID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DataProductID", err)
-		}
-	}
-	if v, ok := any(u.ID).(runtime.Validator); ok {
+	if v, ok := any(g.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("ID", err)
 		}
@@ -11781,11 +13093,11 @@ func (g GetRolesPath) Validate() error {
 	return errors
 }
 
-type DeleteAssignmentPath struct {
+type DeleteGlobalRoleAssignmentPath struct {
 	ID uuid.UUID `json:"id" validate:"required"`
 }
 
-func (d DeleteAssignmentPath) Validate() error {
+func (d DeleteGlobalRoleAssignmentPath) Validate() error {
 	var errors runtime.ValidationErrors
 	if v, ok := any(d.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
@@ -11798,11 +13110,11 @@ func (d DeleteAssignmentPath) Validate() error {
 	return errors
 }
 
-type DecideAssignmentPath struct {
+type DecideGlobalRoleAssignmentPath struct {
 	ID uuid.UUID `json:"id" validate:"required"`
 }
 
-func (d DecideAssignmentPath) Validate() error {
+func (d DecideGlobalRoleAssignmentPath) Validate() error {
 	var errors runtime.ValidationErrors
 	if v, ok := any(d.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
@@ -11815,11 +13127,11 @@ func (d DecideAssignmentPath) Validate() error {
 	return errors
 }
 
-type ModifyAssignedRolePath struct {
+type ModifyGlobalRoleAssignmentPath struct {
 	ID uuid.UUID `json:"id" validate:"required"`
 }
 
-func (m ModifyAssignedRolePath) Validate() error {
+func (m ModifyGlobalRoleAssignmentPath) Validate() error {
 	var errors runtime.ValidationErrors
 	if v, ok := any(m.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
@@ -11830,6 +13142,133 @@ func (m ModifyAssignedRolePath) Validate() error {
 		return nil
 	}
 	return errors
+}
+
+type DeleteDataProductRoleAssignmentPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (d DeleteDataProductRoleAssignmentPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ModifyDataProductRoleAssignmentPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (m ModifyDataProductRoleAssignmentPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(m.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DecideDataProductRoleAssignmentPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (d DecideDataProductRoleAssignmentPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DeleteOutputPortRoleAssignmentPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (d DeleteOutputPortRoleAssignmentPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ModifyOutputPortRoleAssignmentPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (m ModifyOutputPortRoleAssignmentPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(m.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DecideOutputPortRoleAssignmentPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (d DecideOutputPortRoleAssignmentPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type RemoveUserNotificationPath struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (r RemoveUserNotificationPath) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(r.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type GetPluginFormPath struct {
+	PluginName string `json:"plugin_name" validate:"required"`
+}
+
+func (g GetPluginFormPath) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(g))
 }
 
 type UpdateOutputPortQueryStatsBody = UpdateOutputPortQueryStatus
@@ -11872,9 +13311,21 @@ type CreateDataProductSettingBody = DataProductSettingCreate
 
 type UpdateDataProductSettingBody = DataProductSettingUpdate
 
-type UpdateTechnicalAssetStatusBody = DataOutputStatusUpdate
+type ApproveOutputPortAsInputPortBody = ApproveOutputPortAsInputPortRequest
+
+type DenyOutputPortAsInputPortBody = DenyOutputPortAsInputPortRequest
+
+type RemoveOutputPortAsInputPortBody = RemoveOutputPortAsInputPortRequest
+
+type ApproveOutputPortTechnicalAssetLinkBody = ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
+
+type DenyOutputPortTechnicalAssetLinkBody = DenyLinkBetweenTechnicalAssetAndOutputPortRequest
 
 type LinkOutputPortToTechnicalAssetBody = LinkTechnicalAssetToOutputPortRequest
+
+type UnlinkOutputPortFromTechnicalAssetBody = UnLinkTechnicalAssetToOutputPortRequest
+
+type UpdateTechnicalAssetStatusBody = DataOutputStatusUpdate
 
 type CreateDomainBody = DomainCreate
 
@@ -11894,15 +13345,31 @@ type UpdateRoleBody = UpdateRole
 
 type BecomeAdminBody = BecomeAdmin
 
-type CreateAssignmentBody = AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment
+type CreateGlobalRoleAssignmentBody = CreateGlobalRoleAssignment
 
-type DecideAssignmentBody = AppAuthorizationRoleAssignmentsOutputPortSchemaDecideRoleAssignment
+type DecideGlobalRoleAssignmentBody = DecideGlobalRoleAssignment
 
-type ModifyAssignedRoleBody = AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment
+type ModifyGlobalRoleAssignmentBody = ModifyGlobalRoleAssignment
 
-type RequestAssignmentBody = AppAuthorizationRoleAssignmentsDataProductSchemaRequestRoleAssignment
+type ModifyDataProductRoleAssignmentBody = ModifyDataProductRoleAssignment
 
-type UpdateSettingsBody = ThemeSettings
+type CreateDataProductRoleAssignmentBody = CreateDataProductRoleAssignment
+
+type RequestDataProductRoleAssignmentBody = RequestDataProductRoleAssignment
+
+type DecideDataProductRoleAssignmentBody = DecideDataProductRoleAssignment
+
+type ModifyOutputPortRoleAssignmentBody = ModifyOutputPortRoleAssignment
+
+type CreateOutputPortRoleAssignmentBody = CreateOutputPortRoleAssignment
+
+type RequestOutputPortRoleAssignmentBody = RequestOutputPortRoleAssignment
+
+type DecideOutputPortRoleAssignmentBody = DecideOutputPortRoleAssignment
+
+type UpdateThemeSettingsBody = ThemeSettings
+
+type ValidateResourceNameBody = ResourceNameValidationRequest
 
 type CheckAccessQuery struct {
 	Resource *uuid.UUID `json:"resource,omitempty"`
@@ -11965,7 +13432,7 @@ func (g GetOutputPortQueryStatsQuery) Validate() error {
 	return errors
 }
 
-type GetGraphDataQuery struct {
+type GetOutputPortGraphDataQuery struct {
 	Level *int `json:"level,omitempty"`
 }
 
@@ -11975,22 +13442,6 @@ type SetValueForOutputPortQuery struct {
 
 func (s SetValueForOutputPortQuery) Validate() error {
 	return runtime.ConvertValidatorError(typesValidator.Struct(s))
-}
-
-type GetDataProductNamespaceSuggestionQuery struct {
-	Name string `json:"name" validate:"required"`
-}
-
-func (g GetDataProductNamespaceSuggestionQuery) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(g))
-}
-
-type ValidateDataProductNamespaceQuery struct {
-	Namespace string `json:"namespace" validate:"required"`
-}
-
-func (v ValidateDataProductNamespaceQuery) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(v))
 }
 
 type GetDataProductsQuery struct {
@@ -12010,6 +13461,10 @@ func (g GetDataProductsQuery) Validate() error {
 		return nil
 	}
 	return errors
+}
+
+type GetDataProductGraphDataQuery struct {
+	Level *int `json:"level,omitempty"`
 }
 
 type SetValueForDataProductQuery struct {
@@ -12044,66 +13499,16 @@ func (g GetSnowflakeURLQuery) Validate() error {
 	return runtime.ConvertValidatorError(typesValidator.Struct(g))
 }
 
-type ValidateTechnicalAssetNamespaceQuery struct {
-	Namespace string `json:"namespace" validate:"required"`
+type GetTechnicalAssetGraphDataQuery struct {
+	Level *int `json:"level,omitempty"`
 }
 
-func (v ValidateTechnicalAssetNamespaceQuery) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(v))
-}
-
-type GetDataProductSettingsNamespaceSuggestionQuery struct {
-	Name string `json:"name" validate:"required"`
-}
-
-func (g GetDataProductSettingsNamespaceSuggestionQuery) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(g))
-}
-
-type ValidateDataProductSettingsNamespaceQuery struct {
-	Namespace string                  `json:"namespace" validate:"required"`
-	Scope     DataProductSettingScope `json:"scope" validate:"required"`
-}
-
-func (v ValidateDataProductSettingsNamespaceQuery) Validate() error {
-	var errors runtime.ValidationErrors
-	if err := typesValidator.Var(v.Namespace, "required"); err != nil {
-		errors = errors.Append("Namespace", err)
-	}
-	if v, ok := any(v.Scope).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Scope", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type UnlinkOutputPortFromTechnicalAssetQuery struct {
-	DatasetID uuid.UUID `json:"dataset_id" validate:"required"`
-}
-
-func (u UnlinkOutputPortFromTechnicalAssetQuery) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(u.DatasetID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DatasetID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type ListAssignmentsQuery struct {
+type ListGlobalRoleAssignmentsQuery struct {
 	UserID *uuid.UUID `json:"user_id,omitempty"`
 	RoleID *uuid.UUID `json:"role_id,omitempty"`
 }
 
-func (l ListAssignmentsQuery) Validate() error {
+func (l ListGlobalRoleAssignmentsQuery) Validate() error {
 	var errors runtime.ValidationErrors
 	if l.UserID != nil {
 		if v, ok := any(l.UserID).(runtime.Validator); ok {
@@ -12123,6 +13528,134 @@ func (l ListAssignmentsQuery) Validate() error {
 		return nil
 	}
 	return errors
+}
+
+type ListDataProductRoleAssignmentsQuery struct {
+	DataProductID *uuid.UUID      `json:"data_product_id,omitempty"`
+	UserID        *uuid.UUID      `json:"user_id,omitempty"`
+	RoleID        *uuid.UUID      `json:"role_id,omitempty"`
+	Decision      *DecisionStatus `json:"decision,omitempty"`
+}
+
+func (l ListDataProductRoleAssignmentsQuery) Validate() error {
+	var errors runtime.ValidationErrors
+	if l.DataProductID != nil {
+		if v, ok := any(l.DataProductID).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("DataProductID", err)
+			}
+		}
+	}
+	if l.UserID != nil {
+		if v, ok := any(l.UserID).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("UserID", err)
+			}
+		}
+	}
+	if l.RoleID != nil {
+		if v, ok := any(l.RoleID).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("RoleID", err)
+			}
+		}
+	}
+	if l.Decision != nil {
+		if v, ok := any(l.Decision).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Decision", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ListOutputPortRoleAssignmentsQuery struct {
+	OutputPortID *uuid.UUID      `json:"output_port_id,omitempty"`
+	UserID       *uuid.UUID      `json:"user_id,omitempty"`
+	RoleID       *uuid.UUID      `json:"role_id,omitempty"`
+	Decision     *DecisionStatus `json:"decision,omitempty"`
+}
+
+func (l ListOutputPortRoleAssignmentsQuery) Validate() error {
+	var errors runtime.ValidationErrors
+	if l.OutputPortID != nil {
+		if v, ok := any(l.OutputPortID).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("OutputPortID", err)
+			}
+		}
+	}
+	if l.UserID != nil {
+		if v, ok := any(l.UserID).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("UserID", err)
+			}
+		}
+	}
+	if l.RoleID != nil {
+		if v, ok := any(l.RoleID).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("RoleID", err)
+			}
+		}
+	}
+	if l.Decision != nil {
+		if v, ok := any(l.Decision).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Decision", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type GetGraphDataQuery struct {
+	DomainNodesEnabled      *bool `json:"domain_nodes_enabled,omitempty"`
+	DataProductNodesEnabled *bool `json:"data_product_nodes_enabled,omitempty"`
+	DatasetNodesEnabled     *bool `json:"dataset_nodes_enabled,omitempty"`
+}
+
+type SanitizeResourceNameQuery struct {
+	Name string `json:"name" validate:"required"`
+}
+
+func (s SanitizeResourceNameQuery) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(s))
+}
+
+type GetDeviceTokenQuery struct {
+	ClientID string  `json:"client_id" validate:"required"`
+	Scope    *string `json:"scope,omitempty"`
+}
+
+func (g GetDeviceTokenQuery) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(g))
+}
+
+type GetJwtTokenQuery struct {
+	ClientID   string `json:"client_id" validate:"required"`
+	DeviceCode string `json:"device_code" validate:"required"`
+	GrantType  string `json:"grant_type" validate:"required"`
+}
+
+func (g GetJwtTokenQuery) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(g))
+}
+
+type GetAwsCredentialsQuery struct {
+	DataProductName string `json:"data_product_name" validate:"required"`
+	Environment     string `json:"environment" validate:"required"`
+}
+
+func (g GetAwsCredentialsQuery) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(g))
 }
 
 type CheckAccessResponse = AccessResponse
@@ -12175,9 +13708,9 @@ type UpdateOutputPortResponseJSON = UpdateOutputPortResponse
 
 type UpdateOutputPortErrorResponse = HTTPValidationError
 
-type GetEventHistoryResponseJSON = GetEventHistoryResponse
+type GetOutputPortsEventHistoryResponse = GetEventHistoryResponse
 
-type GetEventHistoryErrorResponse = HTTPValidationError
+type GetOutputPortsEventHistoryErrorResponse = HTTPValidationError
 
 type UpdateOutputPortAboutResponse struct{}
 
@@ -12187,23 +13720,13 @@ type UpdateOutputPortStatusResponse struct{}
 
 type UpdateOutputPortStatusErrorResponse = HTTPValidationError
 
-type GetGraphDataResponse = Graph
+type GetOutputPortGraphDataResponse = Graph
 
-type GetGraphDataErrorResponse = HTTPValidationError
+type GetOutputPortGraphDataErrorResponse = HTTPValidationError
 
 type SetValueForOutputPortResponse struct{}
 
 type SetValueForOutputPortErrorResponse = HTTPValidationError
-
-type GetDataProductNamespaceSuggestionResponse = NamespaceSuggestion
-
-type GetDataProductNamespaceSuggestionErrorResponse = HTTPValidationError
-
-type ValidateDataProductNamespaceResponse = NamespaceValidation
-
-type ValidateDataProductNamespaceErrorResponse = HTTPValidationError
-
-type GetDataProductNamespaceLengthLimitsResponse = NamespaceLengthLimits
 
 type CreateDataProductResponseJSON = CreateDataProductResponse
 
@@ -12237,9 +13760,9 @@ type UpdateDataProductUsageResponse struct{}
 
 type UpdateDataProductUsageErrorResponse = HTTPValidationError
 
-type GetGraphDataResponseJSON = Graph
+type GetDataProductGraphDataResponse = Graph
 
-type GetGraphDataErrorResponseJSON = HTTPValidationError
+type GetDataProductGraphDataErrorResponse = HTTPValidationError
 
 type SetValueForDataProductResponse struct{}
 
@@ -12248,6 +13771,10 @@ type SetValueForDataProductErrorResponse = HTTPValidationError
 type LinkInputPortsToDataProductResponse = LinkInputPortsToDataProductPost
 
 type LinkInputPortsToDataProductErrorResponse = HTTPValidationError
+
+type GetDataProductEventHistoryResponse = GetEventHistoryResponse
+
+type GetDataProductEventHistoryErrorResponse = HTTPValidationError
 
 type CreateTechnicalAssetResponseJSON = CreateTechnicalAssetResponse
 
@@ -12285,10 +13812,6 @@ type UnlinkInputPortFromDataProductResponse struct{}
 
 type UnlinkInputPortFromDataProductErrorResponse = HTTPValidationError
 
-type ValidateTechnicalAssetNamespaceResponse = NamespaceValidation
-
-type ValidateTechnicalAssetNamespaceErrorResponse = HTTPValidationError
-
 type GetDataProductTypeResponse = DataProductTypeGet
 
 type GetDataProductTypeErrorResponse = HTTPValidationError
@@ -12321,9 +13844,9 @@ type UpdateDataProductLifecycleResponse = UpdateDataProductLifeCycleResponse
 
 type UpdateDataProductLifecycleErrorResponse = HTTPValidationError
 
-type DeleteDataProductLifecycleResponse struct{}
+type RemoveDataProductLifecycleResponse struct{}
 
-type DeleteDataProductLifecycleErrorResponse = HTTPValidationError
+type RemoveDataProductLifecycleErrorResponse = HTTPValidationError
 
 type GetDataProductsSettingsResponse = DataProductSettingsGet
 
@@ -12331,23 +13854,41 @@ type CreateDataProductSettingResponseJSON = CreateDataProductSettingResponse
 
 type CreateDataProductSettingErrorResponse = HTTPValidationError
 
-type GetDataProductSettingsNamespaceSuggestionResponse = NamespaceSuggestion
-
-type GetDataProductSettingsNamespaceSuggestionErrorResponse = HTTPValidationError
-
-type ValidateDataProductSettingsNamespaceResponse = NamespaceValidation
-
-type ValidateDataProductSettingsNamespaceErrorResponse = HTTPValidationError
-
-type GetDataProductSettingsNamespaceLengthLimitsResponse = NamespaceLengthLimits
-
 type UpdateDataProductSettingResponseJSON = UpdateDataProductSettingResponse
 
 type UpdateDataProductSettingErrorResponse = HTTPValidationError
 
-type DeleteDataProductSettingResponse struct{}
+type RemoveDataProductSettingResponse struct{}
 
-type DeleteDataProductSettingErrorResponse = HTTPValidationError
+type RemoveDataProductSettingErrorResponse = HTTPValidationError
+
+type ApproveOutputPortAsInputPortResponse struct{}
+
+type ApproveOutputPortAsInputPortErrorResponse = HTTPValidationError
+
+type DenyOutputPortAsInputPortResponse struct{}
+
+type DenyOutputPortAsInputPortErrorResponse = HTTPValidationError
+
+type RemoveOutputPortAsInputPortResponse struct{}
+
+type RemoveOutputPortAsInputPortErrorResponse = HTTPValidationError
+
+type ApproveOutputPortTechnicalAssetLinkResponse struct{}
+
+type ApproveOutputPortTechnicalAssetLinkErrorResponse = HTTPValidationError
+
+type DenyOutputPortTechnicalAssetLinkResponse struct{}
+
+type DenyOutputPortTechnicalAssetLinkErrorResponse = HTTPValidationError
+
+type LinkOutputPortToTechnicalAssetResponse = LinkTechnicalAssetsToOutputPortResponse
+
+type LinkOutputPortToTechnicalAssetErrorResponse = HTTPValidationError
+
+type UnlinkOutputPortFromTechnicalAssetResponse struct{}
+
+type UnlinkOutputPortFromTechnicalAssetErrorResponse = HTTPValidationError
 
 type GetTechnicalAssetResponse = GetTechnicalAssetsResponseItem
 
@@ -12365,17 +13906,9 @@ type UpdateTechnicalAssetStatusResponse struct{}
 
 type UpdateTechnicalAssetStatusErrorResponse = HTTPValidationError
 
-type LinkOutputPortToTechnicalAssetResponse = LinkTechnicalAssetsToOutputPortResponse
+type GetTechnicalAssetGraphDataResponse = Graph
 
-type LinkOutputPortToTechnicalAssetErrorResponse = HTTPValidationError
-
-type UnlinkOutputPortFromTechnicalAssetResponse struct{}
-
-type UnlinkOutputPortFromTechnicalAssetErrorResponse = HTTPValidationError
-
-type GetGraphDataResponseJSON200 = Graph
-
-type GetGraphDataErrorResponseJSON422 = HTTPValidationError
+type GetTechnicalAssetGraphDataErrorResponse = HTTPValidationError
 
 type GetDomainsResponseJSON = GetDomainsResponse
 
@@ -12471,6 +14004,10 @@ type SetCanBecomeAdminErrorResponse = HTTPValidationError
 
 type MarkTourAsSeenResponse struct{}
 
+type GetUserPendingActionsResponse = PendingActionResponse
+
+type GetCurrentUserResponse = User
+
 type CreateRoleResponse = Role
 
 type CreateRoleErrorResponse = HTTPValidationError
@@ -12493,79 +14030,136 @@ type BecomeAdminErrorResponse = HTTPValidationError
 
 type RevokeAdminResponse struct{}
 
-type CreateAssignmentResponse = AppAuthorizationRoleAssignmentsGlobalSchemaRoleAssignmentResponse
+type CreateGlobalRoleAssignmentResponse = GlobalRoleAssignmentResponse
 
-type CreateAssignmentErrorResponse = HTTPValidationError
+type CreateGlobalRoleAssignmentErrorResponse = HTTPValidationError
 
-type ListAssignmentsResponse = AppAuthorizationRoleAssignmentsGlobalSchemaListRoleAssignmentsResponse
+type ListGlobalRoleAssignmentsResponse = AppAuthorizationRoleAssignmentsGlobalSchemaListRoleAssignmentsResponse
 
-type ListAssignmentsErrorResponse = HTTPValidationError
+type ListGlobalRoleAssignmentsErrorResponse = HTTPValidationError
 
-type DeleteAssignmentResponse struct{}
+type DeleteGlobalRoleAssignmentResponseJSON = DeleteGlobalRoleAssignmentResponse
 
-type DeleteAssignmentErrorResponse = HTTPValidationError
+type DeleteGlobalRoleAssignmentErrorResponse = HTTPValidationError
 
-type DecideAssignmentResponse = AppAuthorizationRoleAssignmentsGlobalSchemaRoleAssignmentResponse
+type DecideGlobalRoleAssignmentResponse = GlobalRoleAssignmentResponse
 
-type DecideAssignmentErrorResponse = HTTPValidationError
+type DecideGlobalRoleAssignmentErrorResponse = HTTPValidationError
 
-type ModifyAssignedRoleResponse = AppAuthorizationRoleAssignmentsGlobalSchemaRoleAssignmentResponse
+type ModifyGlobalRoleAssignmentResponse = GlobalRoleAssignmentResponse
 
-type ModifyAssignedRoleErrorResponse = HTTPValidationError
+type ModifyGlobalRoleAssignmentErrorResponse = HTTPValidationError
 
-type DeleteAssignmentResponseJSON struct{}
+type DeleteDataProductRoleAssignmentResponseJSON = DeleteDataProductRoleAssignmentResponse
 
-type DeleteAssignmentErrorResponseJSON = HTTPValidationError
+type DeleteDataProductRoleAssignmentErrorResponse = HTTPValidationError
 
-type ModifyAssignedRoleResponseJSON = AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignmentResponse
+type ModifyDataProductRoleAssignmentResponse = DataProductRoleAssignmentResponse
 
-type ModifyAssignedRoleErrorResponseJSON = HTTPValidationError
+type ModifyDataProductRoleAssignmentErrorResponse = HTTPValidationError
 
-type ListAssignmentsResponseJSON = AppAuthorizationRoleAssignmentsDataProductSchemaListRoleAssignmentsResponse
+type ListDataProductRoleAssignmentsResponse = AppAuthorizationRoleAssignmentsDataProductSchemaListRoleAssignmentsResponse
 
-type ListAssignmentsErrorResponseJSON = HTTPValidationError
+type ListDataProductRoleAssignmentsErrorResponse = HTTPValidationError
 
-type CreateAssignmentResponseJSON = AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignmentResponse
+type CreateDataProductRoleAssignmentResponse = DataProductRoleAssignmentResponse
 
-type CreateAssignmentErrorResponseJSON = HTTPValidationError
+type CreateDataProductRoleAssignmentErrorResponse = HTTPValidationError
 
-type RequestAssignmentResponse = AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignmentResponse
+type RequestDataProductRoleAssignmentResponse = DataProductRoleAssignmentResponse
 
-type RequestAssignmentErrorResponse = HTTPValidationError
+type RequestDataProductRoleAssignmentErrorResponse = HTTPValidationError
 
-type DecideAssignmentResponseJSON = AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignmentResponse
+type DecideDataProductRoleAssignmentResponse = DataProductRoleAssignmentResponse
 
-type DecideAssignmentErrorResponseJSON = HTTPValidationError
+type DecideDataProductRoleAssignmentErrorResponse = HTTPValidationError
 
-type DeleteAssignmentResponseJSON200 struct{}
+type DeleteOutputPortRoleAssignmentResponseJSON = DeleteOutputPortRoleAssignmentResponse
 
-type DeleteAssignmentErrorResponseJSON422 = HTTPValidationError
+type DeleteOutputPortRoleAssignmentErrorResponse = HTTPValidationError
 
-type ModifyAssignedRoleResponseJSON200 = AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignmentResponse
+type ModifyOutputPortRoleAssignmentResponse = OutputPortRoleAssignmentResponse
 
-type ModifyAssignedRoleErrorResponseJSON422 = HTTPValidationError
+type ModifyOutputPortRoleAssignmentErrorResponse = HTTPValidationError
 
-type ListAssignmentsResponseJSON200 = AppAuthorizationRoleAssignmentsOutputPortSchemaListRoleAssignmentsResponse
+type ListOutputPortRoleAssignmentsResponse = AppAuthorizationRoleAssignmentsOutputPortSchemaListRoleAssignmentsResponse
 
-type ListAssignmentsErrorResponseJSON422 = HTTPValidationError
+type ListOutputPortRoleAssignmentsErrorResponse = HTTPValidationError
 
-type CreateAssignmentResponseJSON200 = AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignmentResponse
+type CreateOutputPortRoleAssignmentResponse = OutputPortRoleAssignmentResponse
 
-type CreateAssignmentErrorResponseJSON422 = HTTPValidationError
+type CreateOutputPortRoleAssignmentErrorResponse = HTTPValidationError
 
-type RequestAssignmentResponseJSON = AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignmentResponse
+type RequestOutputPortRoleAssignmentResponse = OutputPortRoleAssignmentResponse
 
-type RequestAssignmentErrorResponseJSON = HTTPValidationError
+type RequestOutputPortRoleAssignmentErrorResponse = HTTPValidationError
 
-type DecideAssignmentResponseJSON200 = AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignmentResponse
+type DecideOutputPortRoleAssignmentResponse = OutputPortRoleAssignmentResponse
 
-type DecideAssignmentErrorResponseJSON422 = HTTPValidationError
+type DecideOutputPortRoleAssignmentErrorResponse = HTTPValidationError
 
-type GetSettingsResponse = ThemeSettings
+type GetThemeSettingsResponse = ThemeSettings
 
-type UpdateSettingsResponse struct{}
+type UpdateThemeSettingsResponse struct{}
 
-type UpdateSettingsErrorResponse = HTTPValidationError
+type UpdateThemeSettingsErrorResponse = HTTPValidationError
+
+type GetGraphDataResponse = Graph
+
+type GetGraphDataErrorResponse = HTTPValidationError
+
+type RemoveAllUserNotificationsResponse struct{}
+
+type RemoveUserNotificationResponse struct{}
+
+type RemoveUserNotificationErrorResponse = HTTPValidationError
+
+type GetUserNotificationsResponseJSON = GetUserNotificationsResponse
+
+type SanitizeResourceNameResponse = ResourceNameSuggestion
+
+type SanitizeResourceNameErrorResponse = HTTPValidationError
+
+type ValidateResourceNameResponse = ResourceNameValidation
+
+type ValidateResourceNameErrorResponse = HTTPValidationError
+
+type ResourceNameConstraintsResponse = ResourceNameLengthLimits
+
+// GetPlatformTilesResponse Response model for platform tiles
+type GetPlatformTilesResponse = PlatformTileResponse
+
+// GetPluginsResponse Response model for listing available plugins
+type GetPluginsResponse = PluginResponse
+
+type GetPluginFormResponse = UIElementMetadataResponse
+
+type GetPluginFormErrorResponse = HTTPValidationError
+
+type GetDeviceTokenResponse struct{}
+
+type GetDeviceTokenErrorResponse = HTTPValidationError
+
+type GetJwtTokenResponse struct{}
+
+type GetJwtTokenErrorResponse = HTTPValidationError
+
+type GetAwsCredentialsResponse = AWSCredentials
+
+type GetAwsCredentialsErrorResponse = HTTPValidationError
+
+type GetVersionResponse struct{}
+
+type AWSCredentials struct {
+	AccessKeyID     string    `json:"AccessKeyId" validate:"required"`
+	SecretAccessKey string    `json:"SecretAccessKey" validate:"required"`
+	SessionToken    string    `json:"SessionToken" validate:"required"`
+	Expiration      time.Time `json:"Expiration" validate:"required"`
+}
+
+func (a AWSCredentials) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(a))
+}
 
 type AWSEnvironmentPlatformConfiguration struct {
 	AccountID   string   `json:"account_id" validate:"required"`
@@ -12602,6 +14196,40 @@ func (a AWSS3Config) Validate() error {
 
 type AccessResponse struct {
 	Allowed bool `json:"allowed"`
+}
+
+type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
+	TechnicalAssetID uuid.UUID `json:"technical_asset_id" validate:"required"`
+}
+
+func (a ApproveLinkBetweenTechnicalAssetAndOutputPortRequest) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(a.TechnicalAssetID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("TechnicalAssetID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ApproveOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id" validate:"required"`
+}
+
+func (a ApproveOutputPortAsInputPortRequest) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(a.ConsumingDataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ConsumingDataProductID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
 }
 
 type BecomeAdmin struct {
@@ -12647,6 +14275,35 @@ func (c CreateDataProductResponse) Validate() error {
 	if v, ok := any(c.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type CreateDataProductRoleAssignment struct {
+	UserID        uuid.UUID `json:"user_id" validate:"required"`
+	RoleID        uuid.UUID `json:"role_id" validate:"required"`
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+}
+
+func (c CreateDataProductRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(c.UserID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("UserID", err)
+		}
+	}
+	if v, ok := any(c.RoleID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RoleID", err)
+		}
+	}
+	if v, ok := any(c.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -12706,6 +14363,82 @@ func (c CreateDomainResponse) Validate() error {
 	return errors
 }
 
+type CreateGlobalRoleAssignment struct {
+	UserID uuid.UUID                         `json:"user_id" validate:"required"`
+	RoleID CreateGlobalRoleAssignment_RoleID `json:"role_id"`
+}
+
+func (c CreateGlobalRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(c.UserID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("UserID", err)
+		}
+	}
+	if v, ok := any(c.RoleID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RoleID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type CreateGlobalRoleAssignment_RoleID struct {
+	CreateGlobalRoleAssignment_RoleID_AnyOf *CreateGlobalRoleAssignment_RoleID_AnyOf `json:"-"`
+}
+
+func (c CreateGlobalRoleAssignment_RoleID) Validate() error {
+	var errors runtime.ValidationErrors
+	if c.CreateGlobalRoleAssignment_RoleID_AnyOf != nil {
+		if v, ok := any(c.CreateGlobalRoleAssignment_RoleID_AnyOf).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("CreateGlobalRoleAssignment_RoleID_AnyOf", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+func (c CreateGlobalRoleAssignment_RoleID) MarshalJSON() ([]byte, error) {
+	var parts []json.RawMessage
+
+	{
+		b, err := runtime.MarshalJSON(c.CreateGlobalRoleAssignment_RoleID_AnyOf)
+		if err != nil {
+			return nil, fmt.Errorf("CreateGlobalRoleAssignment_RoleID_AnyOf marshal: %w", err)
+		}
+		parts = append(parts, b)
+	}
+
+	return runtime.CoalesceOrMerge(parts...)
+}
+
+func (c *CreateGlobalRoleAssignment_RoleID) UnmarshalJSON(data []byte) error {
+	trim := bytes.TrimSpace(data)
+	if bytes.Equal(trim, []byte("null")) {
+		return nil
+	}
+	if len(trim) == 0 {
+		return fmt.Errorf("empty JSON input")
+	}
+
+	if c.CreateGlobalRoleAssignment_RoleID_AnyOf == nil {
+		c.CreateGlobalRoleAssignment_RoleID_AnyOf = &CreateGlobalRoleAssignment_RoleID_AnyOf{}
+	}
+
+	if err := runtime.UnmarshalJSON(data, c.CreateGlobalRoleAssignment_RoleID_AnyOf); err != nil {
+		return fmt.Errorf("CreateGlobalRoleAssignment_RoleID_AnyOf unmarshal: %w", err)
+	}
+
+	return nil
+}
+
 type CreateOutputPortRequest struct {
 	Name        string               `json:"name" validate:"required"`
 	Namespace   string               `json:"namespace" validate:"required"`
@@ -12713,7 +14446,6 @@ type CreateOutputPortRequest struct {
 	AccessType  OutputPortAccessType `json:"access_type" validate:"required"`
 	About       *string              `json:"about,omitempty"`
 	LifecycleID *uuid.UUID           `json:"lifecycle_id,omitempty"`
-	DomainID    uuid.UUID            `json:"domain_id" validate:"required"`
 	TagIds      []uuid.UUID          `json:"tag_ids" validate:"required"`
 	Owners      []uuid.UUID          `json:"owners" validate:"required"`
 }
@@ -12739,11 +14471,6 @@ func (c CreateOutputPortRequest) Validate() error {
 			if err := v.Validate(); err != nil {
 				errors = errors.Append("LifecycleID", err)
 			}
-		}
-	}
-	if v, ok := any(c.DomainID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DomainID", err)
 		}
 	}
 	for i, item := range c.TagIds {
@@ -12775,6 +14502,35 @@ func (c CreateOutputPortResponse) Validate() error {
 	if v, ok := any(c.ID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type CreateOutputPortRoleAssignment struct {
+	UserID       uuid.UUID `json:"user_id" validate:"required"`
+	RoleID       uuid.UUID `json:"role_id" validate:"required"`
+	OutputPortID uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (c CreateOutputPortRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(c.UserID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("UserID", err)
+		}
+	}
+	if v, ok := any(c.RoleID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RoleID", err)
+		}
+	}
+	if v, ok := any(c.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -12841,8 +14597,12 @@ type CreateTechnicalAssetRequest struct {
 	ServiceID     uuid.UUID                                 `json:"service_id" validate:"required"`
 	Status        TechnicalAssetStatus                      `json:"status" validate:"required"`
 	Configuration CreateTechnicalAssetRequest_Configuration `json:"configuration"`
-	SourceAligned bool                                      `json:"sourceAligned"`
-	TagIds        []uuid.UUID                               `json:"tag_ids" validate:"required"`
+
+	// SourceAligned DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
+	// Deprecated:
+	SourceAligned    *bool             `json:"sourceAligned,omitempty"`
+	TechnicalMapping *TechnicalMapping `json:"technical_mapping,omitempty"`
+	TagIds           []uuid.UUID       `json:"tag_ids" validate:"required"`
 }
 
 func (c CreateTechnicalAssetRequest) Validate() error {
@@ -12874,6 +14634,13 @@ func (c CreateTechnicalAssetRequest) Validate() error {
 	if v, ok := any(c.Configuration).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("Configuration", err)
+		}
+	}
+	if c.TechnicalMapping != nil {
+		if v, ok := any(c.TechnicalMapping).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("TechnicalMapping", err)
+			}
 		}
 	}
 	for i, item := range c.TagIds {
@@ -13177,6 +14944,191 @@ func (d DataProductLifeCyclesGetItem) Validate() error {
 	}
 	if err := typesValidator.Var(d.Color, "required"); err != nil {
 		errors = errors.Append("Color", err)
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DataProductOutputPortPendingAction struct {
+	ID                uuid.UUID      `json:"id" validate:"required"`
+	Justification     string         `json:"justification" validate:"required"`
+	DataProductID     uuid.UUID      `json:"data_product_id" validate:"required"`
+	OutputPortID      uuid.UUID      `json:"output_port_id" validate:"required"`
+	Status            DecisionStatus `json:"status" validate:"required"`
+	RequestedOn       time.Time      `json:"requested_on" validate:"required"`
+	OutputPort        OutputPort     `json:"output_port"`
+	DataProduct       DataProduct    `json:"data_product"`
+	RequestedBy       User           `json:"requested_by"`
+	DeniedBy          User           `json:"denied_by"`
+	ApprovedBy        User           `json:"approved_by"`
+	PendingActionType *string        `json:"pending_action_type,omitempty"`
+}
+
+func (d DataProductOutputPortPendingAction) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if err := typesValidator.Var(d.Justification, "required"); err != nil {
+		errors = errors.Append("Justification", err)
+	}
+	if v, ok := any(d.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if v, ok := any(d.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if v, ok := any(d.Status).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Status", err)
+		}
+	}
+	if err := typesValidator.Var(d.RequestedOn, "required"); err != nil {
+		errors = errors.Append("RequestedOn", err)
+	}
+	if v, ok := any(d.OutputPort).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPort", err)
+		}
+	}
+	if v, ok := any(d.DataProduct).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProduct", err)
+		}
+	}
+	if v, ok := any(d.RequestedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RequestedBy", err)
+		}
+	}
+	if v, ok := any(d.DeniedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DeniedBy", err)
+		}
+	}
+	if v, ok := any(d.ApprovedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ApprovedBy", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DataProductRoleAssignmentPendingAction struct {
+	ID                uuid.UUID      `json:"id" validate:"required"`
+	DataProduct       DataProduct    `json:"data_product"`
+	User              User           `json:"user"`
+	Role              Role           `json:"role"`
+	Decision          DecisionStatus `json:"decision" validate:"required"`
+	RequestedOn       time.Time      `json:"requested_on"`
+	RequestedBy       User           `json:"requested_by"`
+	DecidedOn         time.Time      `json:"decided_on"`
+	DecidedBy         User           `json:"decided_by"`
+	PendingActionType *string        `json:"pending_action_type,omitempty"`
+}
+
+func (d DataProductRoleAssignmentPendingAction) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(d.DataProduct).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProduct", err)
+		}
+	}
+	if v, ok := any(d.User).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("User", err)
+		}
+	}
+	if v, ok := any(d.Role).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Role", err)
+		}
+	}
+	if v, ok := any(d.Decision).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Decision", err)
+		}
+	}
+	if v, ok := any(d.RequestedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RequestedBy", err)
+		}
+	}
+	if v, ok := any(d.DecidedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DecidedBy", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DataProductRoleAssignmentResponse struct {
+	ID          uuid.UUID      `json:"id" validate:"required"`
+	DataProduct DataProduct    `json:"data_product"`
+	User        User           `json:"user"`
+	Role        Role           `json:"role"`
+	Decision    DecisionStatus `json:"decision" validate:"required"`
+	RequestedOn time.Time      `json:"requested_on"`
+	RequestedBy User           `json:"requested_by"`
+	DecidedOn   time.Time      `json:"decided_on"`
+	DecidedBy   User           `json:"decided_by"`
+}
+
+func (d DataProductRoleAssignmentResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(d.DataProduct).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProduct", err)
+		}
+	}
+	if v, ok := any(d.User).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("User", err)
+		}
+	}
+	if v, ok := any(d.Role).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Role", err)
+		}
+	}
+	if v, ok := any(d.Decision).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Decision", err)
+		}
+	}
+	if v, ok := any(d.RequestedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RequestedBy", err)
+		}
+	}
+	if v, ok := any(d.DecidedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DecidedBy", err)
+		}
 	}
 	if len(errors) == 0 {
 		return nil
@@ -13688,17 +15640,33 @@ func (d DatabricksConfig) Validate() error {
 }
 
 type DatabricksDataOutput struct {
-	ConfigurationType string  `json:"configuration_type" validate:"required"`
-	Catalog           string  `json:"catalog" validate:"required"`
-	Schema            *string `json:"schema,omitempty"`
-	Table             *string `json:"table,omitempty"`
-	BucketIdentifier  *string `json:"bucket_identifier,omitempty"`
-	CatalogPath       *string `json:"catalog_path,omitempty"`
-	TablePath         *string `json:"table_path,omitempty"`
+	ConfigurationType string            `json:"configuration_type" validate:"required"`
+	Catalog           string            `json:"catalog" validate:"required"`
+	Schema            *string           `json:"schema,omitempty"`
+	Table             *string           `json:"table,omitempty"`
+	BucketIdentifier  *string           `json:"bucket_identifier,omitempty"`
+	CatalogPath       *string           `json:"catalog_path,omitempty"`
+	TablePath         *string           `json:"table_path,omitempty"`
+	AccessGranularity AccessGranularity `json:"access_granularity" validate:"required"`
 }
 
 func (d DatabricksDataOutput) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(d))
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(d.ConfigurationType, "required"); err != nil {
+		errors = errors.Append("ConfigurationType", err)
+	}
+	if err := typesValidator.Var(d.Catalog, "required"); err != nil {
+		errors = errors.Append("Catalog", err)
+	}
+	if v, ok := any(d.AccessGranularity).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("AccessGranularity", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
 }
 
 type DatabricksEnvironmentPlatformConfiguration struct {
@@ -13744,7 +15712,6 @@ type DatasetUpdate struct {
 	AccessType  OutputPortAccessType `json:"access_type" validate:"required"`
 	About       *string              `json:"about,omitempty"`
 	LifecycleID *uuid.UUID           `json:"lifecycle_id,omitempty"`
-	DomainID    uuid.UUID            `json:"domain_id" validate:"required"`
 	TagIds      []uuid.UUID          `json:"tag_ids" validate:"required"`
 }
 
@@ -13771,16 +15738,159 @@ func (d DatasetUpdate) Validate() error {
 			}
 		}
 	}
-	if v, ok := any(d.DomainID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DomainID", err)
-		}
-	}
 	for i, item := range d.TagIds {
 		if v, ok := any(item).(runtime.Validator); ok {
 			if err := v.Validate(); err != nil {
 				errors = errors.Append(fmt.Sprintf("TagIds[%d]", i), err)
 			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DecideDataProductRoleAssignment struct {
+	Decision DecisionStatus `json:"decision" validate:"required"`
+}
+
+func (d DecideDataProductRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.Decision).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Decision", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DecideGlobalRoleAssignment struct {
+	Decision DecisionStatus `json:"decision" validate:"required"`
+}
+
+func (d DecideGlobalRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.Decision).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Decision", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DecideOutputPortRoleAssignment struct {
+	Decision DecisionStatus `json:"decision" validate:"required"`
+}
+
+func (d DecideOutputPortRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.Decision).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Decision", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DeleteDataProductRoleAssignmentResponse struct {
+	ID            uuid.UUID `json:"id" validate:"required"`
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+}
+
+func (d DeleteDataProductRoleAssignmentResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(d.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DeleteGlobalRoleAssignmentResponse struct {
+	ID uuid.UUID `json:"id" validate:"required"`
+}
+
+func (d DeleteGlobalRoleAssignmentResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DeleteOutputPortRoleAssignmentResponse struct {
+	ID           uuid.UUID `json:"id" validate:"required"`
+	OutputPortID uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (d DeleteOutputPortRoleAssignmentResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(d.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DenyLinkBetweenTechnicalAssetAndOutputPortRequest struct {
+	TechnicalAssetID uuid.UUID `json:"technical_asset_id" validate:"required"`
+}
+
+func (d DenyLinkBetweenTechnicalAssetAndOutputPortRequest) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.TechnicalAssetID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("TechnicalAssetID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type DenyOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id" validate:"required"`
+}
+
+func (d DenyOutputPortAsInputPortRequest) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(d.ConsumingDataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ConsumingDataProductID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -14320,6 +16430,18 @@ func (e EnvironmentsGet) Validate() error {
 	return errors
 }
 
+// FieldDependency Represents a field dependency for conditional visibility.
+// e.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y
+// In practice this is often used with checkbox fields having value=True
+type FieldDependency struct {
+	FieldName string   `json:"field_name" validate:"required"`
+	Value     struct{} `json:"value"`
+}
+
+func (f FieldDependency) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(f))
+}
+
 type GetAllPlatformServiceConfigurationsResponse struct {
 	PlatformServiceConfigurations []PlatformServiceConfiguration `json:"platform_service_configurations" validate:"required"`
 }
@@ -14608,7 +16730,6 @@ type GetDomainResponse struct {
 	Name         string        `json:"name" validate:"required"`
 	Description  string        `json:"description" validate:"required"`
 	DataProducts []DataProduct `json:"data_products" validate:"required"`
-	OutputPorts  []OutputPort  `json:"output_ports" validate:"required"`
 }
 
 func (g GetDomainResponse) Validate() error {
@@ -14631,13 +16752,6 @@ func (g GetDomainResponse) Validate() error {
 			}
 		}
 	}
-	for i, item := range g.OutputPorts {
-		if v, ok := any(item).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append(fmt.Sprintf("OutputPorts[%d]", i), err)
-			}
-		}
-	}
 	if len(errors) == 0 {
 		return nil
 	}
@@ -14649,7 +16763,6 @@ type GetDomainsItem struct {
 	Name             string    `json:"name" validate:"required"`
 	Description      string    `json:"description" validate:"required"`
 	DataProductCount int       `json:"data_product_count" validate:"required"`
-	OutputPortCount  int       `json:"output_port_count" validate:"required"`
 }
 
 func (g GetDomainsItem) Validate() error {
@@ -14667,9 +16780,6 @@ func (g GetDomainsItem) Validate() error {
 	}
 	if err := typesValidator.Var(g.DataProductCount, "required"); err != nil {
 		errors = errors.Append("DataProductCount", err)
-	}
-	if err := typesValidator.Var(g.OutputPortCount, "required"); err != nil {
-		errors = errors.Append("OutputPortCount", err)
 	}
 	if len(errors) == 0 {
 		return nil
@@ -14716,21 +16826,21 @@ func (g GetEventHistoryResponse) Validate() error {
 }
 
 type GetEventHistoryResponseItem struct {
-	ID                       uuid.UUID             `json:"id" validate:"required"`
-	Name                     string                `json:"name" validate:"required"`
-	SubjectID                uuid.UUID             `json:"subject_id" validate:"required"`
-	TargetID                 *uuid.UUID            `json:"target_id,omitempty"`
-	SubjectType              EventReferenceEntity  `json:"subject_type" validate:"required"`
-	TargetType               *EventReferenceEntity `json:"target_type,omitempty"`
-	ActorID                  uuid.UUID             `json:"actor_id" validate:"required"`
-	CreatedOn                time.Time             `json:"created_on" validate:"required"`
-	DeletedSubjectIdentifier *string               `json:"deleted_subject_identifier,omitempty"`
-	DeletedTargetIdentifier  *string               `json:"deleted_target_identifier,omitempty"`
-	Actor                    User                  `json:"actor"`
-	DataProduct              *DataProduct          `json:"data_product,omitempty"`
-	User                     *User                 `json:"user,omitempty"`
-	OutputPort               *OutputPort           `json:"output_port,omitempty"`
-	TechnicalAsset           *TechnicalAsset       `json:"technical_asset,omitempty"`
+	ID                       uuid.UUID        `json:"id" validate:"required"`
+	Name                     string           `json:"name" validate:"required"`
+	SubjectID                uuid.UUID        `json:"subject_id" validate:"required"`
+	TargetID                 *uuid.UUID       `json:"target_id,omitempty"`
+	SubjectType              EventEntityType  `json:"subject_type" validate:"required"`
+	TargetType               *EventEntityType `json:"target_type,omitempty"`
+	ActorID                  uuid.UUID        `json:"actor_id" validate:"required"`
+	CreatedOn                time.Time        `json:"created_on" validate:"required"`
+	DeletedSubjectIdentifier *string          `json:"deleted_subject_identifier,omitempty"`
+	DeletedTargetIdentifier  *string          `json:"deleted_target_identifier,omitempty"`
+	Actor                    User             `json:"actor"`
+	DataProduct              *DataProduct     `json:"data_product,omitempty"`
+	User                     *User            `json:"user,omitempty"`
+	OutputPort               *OutputPort      `json:"output_port,omitempty"`
+	TechnicalAsset           *TechnicalAsset  `json:"technical_asset,omitempty"`
 }
 
 func (g GetEventHistoryResponseItem) Validate() error {
@@ -14981,21 +17091,24 @@ func (g GetTechnicalAssetsResponse) Validate() error {
 }
 
 type GetTechnicalAssetsResponseItem struct {
-	ID              uuid.UUID                                    `json:"id" validate:"required"`
-	Name            string                                       `json:"name" validate:"required"`
-	Description     string                                       `json:"description" validate:"required"`
-	Namespace       string                                       `json:"namespace" validate:"required"`
-	OwnerID         uuid.UUID                                    `json:"owner_id" validate:"required"`
-	PlatformID      uuid.UUID                                    `json:"platform_id" validate:"required"`
-	ServiceID       uuid.UUID                                    `json:"service_id" validate:"required"`
-	Status          TechnicalAssetStatus                         `json:"status" validate:"required"`
-	SourceAligned   bool                                         `json:"sourceAligned"`
-	Configuration   GetTechnicalAssetsResponseItem_Configuration `json:"configuration"`
-	Owner           DataProduct                                  `json:"owner"`
-	OutputPortLinks []OutputPortLink                             `json:"output_port_links" validate:"required"`
-	Tags            []Tag                                        `json:"tags" validate:"required"`
-	ResultString    *string                                      `json:"result_string,omitempty"`
-	TechnicalInfo   []TechnicalInfo                              `json:"technical_info,omitempty"`
+	ID               uuid.UUID                                    `json:"id" validate:"required"`
+	Name             string                                       `json:"name" validate:"required"`
+	Description      string                                       `json:"description" validate:"required"`
+	Namespace        string                                       `json:"namespace" validate:"required"`
+	OwnerID          uuid.UUID                                    `json:"owner_id" validate:"required"`
+	PlatformID       uuid.UUID                                    `json:"platform_id" validate:"required"`
+	ServiceID        uuid.UUID                                    `json:"service_id" validate:"required"`
+	Status           TechnicalAssetStatus                         `json:"status" validate:"required"`
+	TechnicalMapping TechnicalMapping                             `json:"technical_mapping" validate:"required"`
+	Configuration    GetTechnicalAssetsResponseItem_Configuration `json:"configuration"`
+	Owner            DataProduct                                  `json:"owner"`
+	OutputPortLinks  []OutputPortLink                             `json:"output_port_links" validate:"required"`
+	Tags             []Tag                                        `json:"tags" validate:"required"`
+
+	// SourceAligned DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
+	SourceAligned *bool           `json:"sourceAligned,omitempty"`
+	ResultString  *string         `json:"result_string,omitempty"`
+	TechnicalInfo []TechnicalInfo `json:"technical_info,omitempty"`
 }
 
 func (g GetTechnicalAssetsResponseItem) Validate() error {
@@ -15032,6 +17145,11 @@ func (g GetTechnicalAssetsResponseItem) Validate() error {
 	if v, ok := any(g.Status).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("Status", err)
+		}
+	}
+	if v, ok := any(g.TechnicalMapping).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("TechnicalMapping", err)
 		}
 	}
 	if v, ok := any(g.Configuration).(runtime.Validator); ok {
@@ -15124,6 +17242,66 @@ func (g *GetTechnicalAssetsResponseItem_Configuration) UnmarshalJSON(data []byte
 	return nil
 }
 
+type GetUserNotificationsResponse struct {
+	Notifications []GetUserNotificationsResponseItem `json:"notifications" validate:"required"`
+}
+
+func (g GetUserNotificationsResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	for i, item := range g.Notifications {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("Notifications[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type GetUserNotificationsResponseItem struct {
+	ID      uuid.UUID                   `json:"id" validate:"required"`
+	EventID uuid.UUID                   `json:"event_id" validate:"required"`
+	UserID  uuid.UUID                   `json:"user_id" validate:"required"`
+	Event   GetEventHistoryResponseItem `json:"event"`
+	User    User                        `json:"user"`
+}
+
+func (g GetUserNotificationsResponseItem) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(g.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(g.EventID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("EventID", err)
+		}
+	}
+	if v, ok := any(g.UserID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("UserID", err)
+		}
+	}
+	if v, ok := any(g.Event).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Event", err)
+		}
+	}
+	if v, ok := any(g.User).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("User", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
 type GetUsersResponse struct {
 	Users []UsersGet `json:"users" validate:"required"`
 }
@@ -15143,18 +17321,83 @@ func (g GetUsersResponse) Validate() error {
 	return errors
 }
 
+type GlobalRoleAssignmentResponse struct {
+	ID          uuid.UUID      `json:"id" validate:"required"`
+	User        User           `json:"user"`
+	Role        Role           `json:"role"`
+	Decision    DecisionStatus `json:"decision" validate:"required"`
+	RequestedOn time.Time      `json:"requested_on"`
+	RequestedBy User           `json:"requested_by"`
+	DecidedOn   time.Time      `json:"decided_on"`
+	DecidedBy   User           `json:"decided_by"`
+}
+
+func (g GlobalRoleAssignmentResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(g.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(g.User).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("User", err)
+		}
+	}
+	if v, ok := any(g.Role).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Role", err)
+		}
+	}
+	if v, ok := any(g.Decision).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Decision", err)
+		}
+	}
+	if v, ok := any(g.RequestedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RequestedBy", err)
+		}
+	}
+	if v, ok := any(g.DecidedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DecidedBy", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
 type GlueDataOutput struct {
-	ConfigurationType string  `json:"configuration_type" validate:"required"`
-	Database          string  `json:"database" validate:"required"`
-	DatabaseSuffix    *string `json:"database_suffix,omitempty"`
-	Table             *string `json:"table,omitempty"`
-	BucketIdentifier  *string `json:"bucket_identifier,omitempty"`
-	DatabasePath      *string `json:"database_path,omitempty"`
-	TablePath         *string `json:"table_path,omitempty"`
+	ConfigurationType string            `json:"configuration_type" validate:"required"`
+	Database          string            `json:"database" validate:"required"`
+	DatabaseSuffix    *string           `json:"database_suffix,omitempty"`
+	Table             *string           `json:"table,omitempty"`
+	BucketIdentifier  *string           `json:"bucket_identifier,omitempty"`
+	DatabasePath      *string           `json:"database_path,omitempty"`
+	TablePath         *string           `json:"table_path,omitempty"`
+	AccessGranularity AccessGranularity `json:"access_granularity" validate:"required"`
 }
 
 func (g GlueDataOutput) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(g))
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(g.ConfigurationType, "required"); err != nil {
+		errors = errors.Append("ConfigurationType", err)
+	}
+	if err := typesValidator.Var(g.Database, "required"); err != nil {
+		errors = errors.Append("Database", err)
+	}
+	if v, ok := any(g.AccessGranularity).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("AccessGranularity", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
 }
 
 type Graph struct {
@@ -15300,14 +17543,14 @@ func (l LinkInputPortsToDataProductPost) Validate() error {
 }
 
 type LinkTechnicalAssetToOutputPortRequest struct {
-	OutputPortID uuid.UUID `json:"output_port_id" validate:"required"`
+	TechnicalAssetID uuid.UUID `json:"technical_asset_id" validate:"required"`
 }
 
 func (l LinkTechnicalAssetToOutputPortRequest) Validate() error {
 	var errors runtime.ValidationErrors
-	if v, ok := any(l.OutputPortID).(runtime.Validator); ok {
+	if v, ok := any(l.TechnicalAssetID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
-			errors = errors.Append("OutputPortID", err)
+			errors = errors.Append("TechnicalAssetID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -15333,31 +17576,102 @@ func (l LinkTechnicalAssetsToOutputPortResponse) Validate() error {
 	return errors
 }
 
-type NamespaceLengthLimits struct {
-	MaxLength int `json:"max_length" validate:"required"`
+type ModifyDataProductRoleAssignment struct {
+	RoleID uuid.UUID `json:"role_id" validate:"required"`
 }
 
-func (n NamespaceLengthLimits) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(n))
-}
-
-type NamespaceSuggestion struct {
-	Namespace string `json:"namespace" validate:"required"`
-}
-
-func (n NamespaceSuggestion) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(n))
-}
-
-type NamespaceValidation struct {
-	Validity NamespaceValidityType `json:"validity" validate:"required"`
-}
-
-func (n NamespaceValidation) Validate() error {
+func (m ModifyDataProductRoleAssignment) Validate() error {
 	var errors runtime.ValidationErrors
-	if v, ok := any(n.Validity).(runtime.Validator); ok {
+	if v, ok := any(m.RoleID).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
-			errors = errors.Append("Validity", err)
+			errors = errors.Append("RoleID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ModifyGlobalRoleAssignment struct {
+	RoleID ModifyGlobalRoleAssignment_RoleID `json:"role_id"`
+}
+
+func (m ModifyGlobalRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(m.RoleID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RoleID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ModifyGlobalRoleAssignment_RoleID struct {
+	ModifyGlobalRoleAssignment_RoleID_AnyOf *ModifyGlobalRoleAssignment_RoleID_AnyOf `json:"-"`
+}
+
+func (m ModifyGlobalRoleAssignment_RoleID) Validate() error {
+	var errors runtime.ValidationErrors
+	if m.ModifyGlobalRoleAssignment_RoleID_AnyOf != nil {
+		if v, ok := any(m.ModifyGlobalRoleAssignment_RoleID_AnyOf).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("ModifyGlobalRoleAssignment_RoleID_AnyOf", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+func (m ModifyGlobalRoleAssignment_RoleID) MarshalJSON() ([]byte, error) {
+	var parts []json.RawMessage
+
+	{
+		b, err := runtime.MarshalJSON(m.ModifyGlobalRoleAssignment_RoleID_AnyOf)
+		if err != nil {
+			return nil, fmt.Errorf("ModifyGlobalRoleAssignment_RoleID_AnyOf marshal: %w", err)
+		}
+		parts = append(parts, b)
+	}
+
+	return runtime.CoalesceOrMerge(parts...)
+}
+
+func (m *ModifyGlobalRoleAssignment_RoleID) UnmarshalJSON(data []byte) error {
+	trim := bytes.TrimSpace(data)
+	if bytes.Equal(trim, []byte("null")) {
+		return nil
+	}
+	if len(trim) == 0 {
+		return fmt.Errorf("empty JSON input")
+	}
+
+	if m.ModifyGlobalRoleAssignment_RoleID_AnyOf == nil {
+		m.ModifyGlobalRoleAssignment_RoleID_AnyOf = &ModifyGlobalRoleAssignment_RoleID_AnyOf{}
+	}
+
+	if err := runtime.UnmarshalJSON(data, m.ModifyGlobalRoleAssignment_RoleID_AnyOf); err != nil {
+		return fmt.Errorf("ModifyGlobalRoleAssignment_RoleID_AnyOf unmarshal: %w", err)
+	}
+
+	return nil
+}
+
+type ModifyOutputPortRoleAssignment struct {
+	RoleID uuid.UUID `json:"role_id" validate:"required"`
+}
+
+func (m ModifyOutputPortRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(m.RoleID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RoleID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -16001,6 +18315,61 @@ func (o OutputPortQueryStatsUpdate) Validate() error {
 	return errors
 }
 
+type OutputPortRoleAssignmentResponse struct {
+	ID          uuid.UUID      `json:"id" validate:"required"`
+	OutputPort  OutputPort     `json:"output_port"`
+	User        User           `json:"user"`
+	Role        Role           `json:"role"`
+	Decision    DecisionStatus `json:"decision" validate:"required"`
+	RequestedOn time.Time      `json:"requested_on"`
+	RequestedBy User           `json:"requested_by"`
+	DecidedOn   time.Time      `json:"decided_on"`
+	DecidedBy   User           `json:"decided_by"`
+}
+
+func (o OutputPortRoleAssignmentResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(o.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(o.OutputPort).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPort", err)
+		}
+	}
+	if v, ok := any(o.User).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("User", err)
+		}
+	}
+	if v, ok := any(o.Role).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Role", err)
+		}
+	}
+	if v, ok := any(o.Decision).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Decision", err)
+		}
+	}
+	if v, ok := any(o.RequestedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RequestedBy", err)
+		}
+	}
+	if v, ok := any(o.DecidedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DecidedBy", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
 type OutputPortSettingValue struct {
 	ID                   uuid.UUID          `json:"id" validate:"required"`
 	DataProductSettingID uuid.UUID          `json:"data_product_setting_id" validate:"required"`
@@ -16038,6 +18407,93 @@ func (o OutputPortSettingValue) Validate() error {
 		return nil
 	}
 	return errors
+}
+
+type PendingActionResponse struct {
+	PendingActions PendingActionResponse_PendingActions `json:"pending_actions" validate:"required"`
+}
+
+func (p PendingActionResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(p.PendingActions).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("PendingActions", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type PendingActionResponse_PendingActions []PendingActionResponse_PendingActions_Item
+
+func (p PendingActionResponse_PendingActions) Validate() error {
+	var errors runtime.ValidationErrors
+	for i, item := range p {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type PendingActionResponse_PendingActions_Item struct {
+	PendingActionResponse_PendingActions_AnyOf *PendingActionResponse_PendingActions_AnyOf `json:"-"`
+}
+
+func (p PendingActionResponse_PendingActions_Item) Validate() error {
+	var errors runtime.ValidationErrors
+	if p.PendingActionResponse_PendingActions_AnyOf != nil {
+		if v, ok := any(p.PendingActionResponse_PendingActions_AnyOf).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PendingActionResponse_PendingActions_AnyOf", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+func (p PendingActionResponse_PendingActions_Item) MarshalJSON() ([]byte, error) {
+	var parts []json.RawMessage
+
+	{
+		b, err := runtime.MarshalJSON(p.PendingActionResponse_PendingActions_AnyOf)
+		if err != nil {
+			return nil, fmt.Errorf("PendingActionResponse_PendingActions_AnyOf marshal: %w", err)
+		}
+		parts = append(parts, b)
+	}
+
+	return runtime.CoalesceOrMerge(parts...)
+}
+
+func (p *PendingActionResponse_PendingActions_Item) UnmarshalJSON(data []byte) error {
+	trim := bytes.TrimSpace(data)
+	if bytes.Equal(trim, []byte("null")) {
+		return nil
+	}
+	if len(trim) == 0 {
+		return fmt.Errorf("empty JSON input")
+	}
+
+	if p.PendingActionResponse_PendingActions_AnyOf == nil {
+		p.PendingActionResponse_PendingActions_AnyOf = &PendingActionResponse_PendingActions_AnyOf{}
+	}
+
+	if err := runtime.UnmarshalJSON(data, p.PendingActionResponse_PendingActions_AnyOf); err != nil {
+		return fmt.Errorf("PendingActionResponse_PendingActions_AnyOf unmarshal: %w", err)
+	}
+
+	return nil
 }
 
 type Platform struct {
@@ -16129,6 +18585,80 @@ func (p PlatformServiceConfiguration) Validate() error {
 	return errors
 }
 
+// PlatformTile Represents a platform tile in the UI
+type PlatformTile struct {
+	Label     string         `json:"label" validate:"required"`
+	Value     string         `json:"value" validate:"required"`
+	IconName  string         `json:"icon_name" validate:"required"`
+	HasMenu   *bool          `json:"has_menu,omitempty"`
+	HasConfig *bool          `json:"has_config,omitempty"`
+	Children  []PlatformTile `json:"children,omitempty"`
+}
+
+func (p PlatformTile) Validate() error {
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(p.Label, "required"); err != nil {
+		errors = errors.Append("Label", err)
+	}
+	if err := typesValidator.Var(p.Value, "required"); err != nil {
+		errors = errors.Append("Value", err)
+	}
+	if err := typesValidator.Var(p.IconName, "required"); err != nil {
+		errors = errors.Append("IconName", err)
+	}
+	for i, item := range p.Children {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("Children[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+// PlatformTileResponse Response model for platform tiles
+type PlatformTileResponse struct {
+	PlatformTiles []PlatformTile `json:"platform_tiles" validate:"required"`
+}
+
+func (p PlatformTileResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	for i, item := range p.PlatformTiles {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("PlatformTiles[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+// PluginResponse Response model for listing available plugins
+type PluginResponse struct {
+	Plugins []UIElementMetadataResponse `json:"plugins" validate:"required"`
+}
+
+func (p PluginResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	for i, item := range p.Plugins {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("Plugins[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
 type RedshiftConfig struct {
 	Identifier       string `json:"identifier" validate:"required"`
 	DatabaseName     string `json:"database_name" validate:"required"`
@@ -16141,17 +18671,170 @@ func (r RedshiftConfig) Validate() error {
 }
 
 type RedshiftDataOutput struct {
-	ConfigurationType string  `json:"configuration_type" validate:"required"`
-	Database          string  `json:"database" validate:"required"`
-	Schema            *string `json:"schema,omitempty"`
-	Table             *string `json:"table,omitempty"`
-	BucketIdentifier  *string `json:"bucket_identifier,omitempty"`
-	DatabasePath      *string `json:"database_path,omitempty"`
-	TablePath         *string `json:"table_path,omitempty"`
+	ConfigurationType string            `json:"configuration_type" validate:"required"`
+	Database          string            `json:"database" validate:"required"`
+	Schema            *string           `json:"schema,omitempty"`
+	Table             *string           `json:"table,omitempty"`
+	BucketIdentifier  *string           `json:"bucket_identifier,omitempty"`
+	DatabasePath      *string           `json:"database_path,omitempty"`
+	TablePath         *string           `json:"table_path,omitempty"`
+	AccessGranularity AccessGranularity `json:"access_granularity" validate:"required"`
 }
 
 func (r RedshiftDataOutput) Validate() error {
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(r.ConfigurationType, "required"); err != nil {
+		errors = errors.Append("ConfigurationType", err)
+	}
+	if err := typesValidator.Var(r.Database, "required"); err != nil {
+		errors = errors.Append("Database", err)
+	}
+	if v, ok := any(r.AccessGranularity).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("AccessGranularity", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type RemoveOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id" validate:"required"`
+}
+
+func (r RemoveOutputPortAsInputPortRequest) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(r.ConsumingDataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ConsumingDataProductID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type RequestDataProductRoleAssignment struct {
+	UserID        uuid.UUID `json:"user_id" validate:"required"`
+	RoleID        uuid.UUID `json:"role_id" validate:"required"`
+	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
+}
+
+func (r RequestDataProductRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(r.UserID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("UserID", err)
+		}
+	}
+	if v, ok := any(r.RoleID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RoleID", err)
+		}
+	}
+	if v, ok := any(r.DataProductID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DataProductID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type RequestOutputPortRoleAssignment struct {
+	UserID       uuid.UUID `json:"user_id" validate:"required"`
+	RoleID       uuid.UUID `json:"role_id" validate:"required"`
+	OutputPortID uuid.UUID `json:"output_port_id" validate:"required"`
+}
+
+func (r RequestOutputPortRoleAssignment) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(r.UserID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("UserID", err)
+		}
+	}
+	if v, ok := any(r.RoleID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RoleID", err)
+		}
+	}
+	if v, ok := any(r.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ResourceNameLengthLimits struct {
+	MaxLength int `json:"max_length" validate:"required"`
+}
+
+func (r ResourceNameLengthLimits) Validate() error {
 	return runtime.ConvertValidatorError(typesValidator.Struct(r))
+}
+
+type ResourceNameSuggestion struct {
+	ResourceName string `json:"resource_name" validate:"required"`
+}
+
+func (r ResourceNameSuggestion) Validate() error {
+	return runtime.ConvertValidatorError(typesValidator.Struct(r))
+}
+
+type ResourceNameValidation struct {
+	Validity ResourceNameValidityType `json:"validity" validate:"required"`
+}
+
+func (r ResourceNameValidation) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(r.Validity).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Validity", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type ResourceNameValidationRequest struct {
+	ResourceName  string            `json:"resource_name" validate:"required"`
+	DataProductID *uuid.UUID        `json:"data_product_id,omitempty"`
+	Model         ResourceNameModel `json:"model" validate:"required"`
+}
+
+func (r ResourceNameValidationRequest) Validate() error {
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(r.ResourceName, "required"); err != nil {
+		errors = errors.Append("ResourceName", err)
+	}
+	if r.DataProductID != nil {
+		if v, ok := any(r.DataProductID).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("DataProductID", err)
+			}
+		}
+	}
+	if v, ok := any(r.Model).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Model", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
 }
 
 type Role struct {
@@ -16245,7 +18928,6 @@ type SearchOutputPortsResponseItem struct {
 	TechnicalAssetLinks []TechnicalAssetLink     `json:"technical_asset_links" validate:"required"`
 	DataProductCount    int                      `json:"data_product_count" validate:"required"`
 	DataProductName     string                   `json:"data_product_name" validate:"required"`
-	Rank                float32                  `json:"rank" validate:"required"`
 }
 
 func (s SearchOutputPortsResponseItem) Validate() error {
@@ -16316,13 +18998,85 @@ func (s SearchOutputPortsResponseItem) Validate() error {
 	if err := typesValidator.Var(s.DataProductName, "required"); err != nil {
 		errors = errors.Append("DataProductName", err)
 	}
-	if err := typesValidator.Var(s.Rank, "required"); err != nil {
-		errors = errors.Append("Rank", err)
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+// SelectOption Option for select UI elements
+type SelectOption struct {
+	Label string             `json:"label" validate:"required"`
+	Value SelectOption_Value `json:"value"`
+}
+
+func (s SelectOption) Validate() error {
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(s.Label, "required"); err != nil {
+		errors = errors.Append("Label", err)
+	}
+	if v, ok := any(s.Value).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Value", err)
+		}
 	}
 	if len(errors) == 0 {
 		return nil
 	}
 	return errors
+}
+
+type SelectOption_Value struct {
+	SelectOption_Value_AnyOf *SelectOption_Value_AnyOf `json:"-"`
+}
+
+func (s SelectOption_Value) Validate() error {
+	var errors runtime.ValidationErrors
+	if s.SelectOption_Value_AnyOf != nil {
+		if v, ok := any(s.SelectOption_Value_AnyOf).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("SelectOption_Value_AnyOf", err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+func (s SelectOption_Value) MarshalJSON() ([]byte, error) {
+	var parts []json.RawMessage
+
+	{
+		b, err := runtime.MarshalJSON(s.SelectOption_Value_AnyOf)
+		if err != nil {
+			return nil, fmt.Errorf("SelectOption_Value_AnyOf marshal: %w", err)
+		}
+		parts = append(parts, b)
+	}
+
+	return runtime.CoalesceOrMerge(parts...)
+}
+
+func (s *SelectOption_Value) UnmarshalJSON(data []byte) error {
+	trim := bytes.TrimSpace(data)
+	if bytes.Equal(trim, []byte("null")) {
+		return nil
+	}
+	if len(trim) == 0 {
+		return fmt.Errorf("empty JSON input")
+	}
+
+	if s.SelectOption_Value_AnyOf == nil {
+		s.SelectOption_Value_AnyOf = &SelectOption_Value_AnyOf{}
+	}
+
+	if err := runtime.UnmarshalJSON(data, s.SelectOption_Value_AnyOf); err != nil {
+		return fmt.Errorf("SelectOption_Value_AnyOf unmarshal: %w", err)
+	}
+
+	return nil
 }
 
 type SnowflakeConfig struct {
@@ -16335,17 +19089,33 @@ func (s SnowflakeConfig) Validate() error {
 }
 
 type SnowflakeDataOutput struct {
-	ConfigurationType string  `json:"configuration_type" validate:"required"`
-	Database          string  `json:"database" validate:"required"`
-	Schema            *string `json:"schema,omitempty"`
-	Table             *string `json:"table,omitempty"`
-	BucketIdentifier  *string `json:"bucket_identifier,omitempty"`
-	DatabasePath      *string `json:"database_path,omitempty"`
-	TablePath         *string `json:"table_path,omitempty"`
+	ConfigurationType string            `json:"configuration_type" validate:"required"`
+	Database          string            `json:"database" validate:"required"`
+	Schema            *string           `json:"schema,omitempty"`
+	Table             *string           `json:"table,omitempty"`
+	BucketIdentifier  *string           `json:"bucket_identifier,omitempty"`
+	DatabasePath      *string           `json:"database_path,omitempty"`
+	TablePath         *string           `json:"table_path,omitempty"`
+	AccessGranularity AccessGranularity `json:"access_granularity" validate:"required"`
 }
 
 func (s SnowflakeDataOutput) Validate() error {
-	return runtime.ConvertValidatorError(typesValidator.Struct(s))
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(s.ConfigurationType, "required"); err != nil {
+		errors = errors.Append("ConfigurationType", err)
+	}
+	if err := typesValidator.Var(s.Database, "required"); err != nil {
+		errors = errors.Append("Database", err)
+	}
+	if v, ok := any(s.AccessGranularity).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("AccessGranularity", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
 }
 
 type Tag struct {
@@ -16426,16 +19196,16 @@ func (t TagsGetItem) Validate() error {
 }
 
 type TechnicalAsset struct {
-	ID            uuid.UUID                    `json:"id" validate:"required"`
-	Name          string                       `json:"name" validate:"required"`
-	Namespace     string                       `json:"namespace" validate:"required"`
-	Description   string                       `json:"description" validate:"required"`
-	Status        TechnicalAssetStatus         `json:"status" validate:"required"`
-	SourceAligned bool                         `json:"sourceAligned"`
-	OwnerID       uuid.UUID                    `json:"owner_id" validate:"required"`
-	PlatformID    uuid.UUID                    `json:"platform_id" validate:"required"`
-	ServiceID     uuid.UUID                    `json:"service_id" validate:"required"`
-	Configuration TechnicalAsset_Configuration `json:"configuration"`
+	ID               uuid.UUID                    `json:"id" validate:"required"`
+	Name             string                       `json:"name" validate:"required"`
+	Namespace        string                       `json:"namespace" validate:"required"`
+	Description      string                       `json:"description" validate:"required"`
+	Status           TechnicalAssetStatus         `json:"status" validate:"required"`
+	TechnicalMapping TechnicalMapping             `json:"technical_mapping" validate:"required"`
+	OwnerID          uuid.UUID                    `json:"owner_id" validate:"required"`
+	PlatformID       uuid.UUID                    `json:"platform_id" validate:"required"`
+	ServiceID        uuid.UUID                    `json:"service_id" validate:"required"`
+	Configuration    TechnicalAsset_Configuration `json:"configuration"`
 }
 
 func (t TechnicalAsset) Validate() error {
@@ -16457,6 +19227,11 @@ func (t TechnicalAsset) Validate() error {
 	if v, ok := any(t.Status).(runtime.Validator); ok {
 		if err := v.Validate(); err != nil {
 			errors = errors.Append("Status", err)
+		}
+	}
+	if v, ok := any(t.TechnicalMapping).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("TechnicalMapping", err)
 		}
 	}
 	if v, ok := any(t.OwnerID).(runtime.Validator); ok {
@@ -16579,6 +19354,66 @@ func (t TechnicalAssetLink) Validate() error {
 	return errors
 }
 
+type TechnicalAssetOutputPortPendingAction struct {
+	ID                uuid.UUID      `json:"id" validate:"required"`
+	OutputPortID      uuid.UUID      `json:"output_port_id" validate:"required"`
+	TechnicalAssetID  uuid.UUID      `json:"technical_asset_id" validate:"required"`
+	Status            DecisionStatus `json:"status" validate:"required"`
+	RequestedOn       time.Time      `json:"requested_on" validate:"required"`
+	DeniedOn          time.Time      `json:"denied_on"`
+	ApprovedOn        time.Time      `json:"approved_on"`
+	RequestedBy       User           `json:"requested_by"`
+	DeniedBy          User           `json:"denied_by"`
+	ApprovedBy        User           `json:"approved_by"`
+	PendingActionType *string        `json:"pending_action_type,omitempty"`
+}
+
+func (t TechnicalAssetOutputPortPendingAction) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(t.ID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ID", err)
+		}
+	}
+	if v, ok := any(t.OutputPortID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("OutputPortID", err)
+		}
+	}
+	if v, ok := any(t.TechnicalAssetID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("TechnicalAssetID", err)
+		}
+	}
+	if v, ok := any(t.Status).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Status", err)
+		}
+	}
+	if err := typesValidator.Var(t.RequestedOn, "required"); err != nil {
+		errors = errors.Append("RequestedOn", err)
+	}
+	if v, ok := any(t.RequestedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("RequestedBy", err)
+		}
+	}
+	if v, ok := any(t.DeniedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("DeniedBy", err)
+		}
+	}
+	if v, ok := any(t.ApprovedBy).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("ApprovedBy", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
 type TechnicalInfo struct {
 	EnvironmentID uuid.UUID `json:"environment_id" validate:"required"`
 	Environment   string    `json:"environment" validate:"required"`
@@ -16607,6 +19442,193 @@ type ThemeSettings struct {
 
 func (t ThemeSettings) Validate() error {
 	return runtime.ConvertValidatorError(typesValidator.Struct(t))
+}
+
+type UIElementCheckbox struct {
+	InitialValue *bool `json:"initial_value,omitempty"`
+}
+
+type UIElementMetadata struct {
+	Label                            string             `json:"label" validate:"required"`
+	Type                             UIElementType      `json:"type" validate:"required"`
+	Required                         bool               `json:"required"`
+	Name                             string             `json:"name" validate:"required"`
+	Tooltip                          *string            `json:"tooltip,omitempty"`
+	Hidden                           *bool              `json:"hidden,omitempty"`
+	Checkbox                         *UIElementCheckbox `json:"checkbox,omitempty"`
+	Select                           *UIElementSelect   `json:"select,omitempty"`
+	String                           *UIElementString   `json:"string,omitempty"`
+	Radio                            *UIElementRadio    `json:"radio,omitempty"`
+	DependsOn                        []FieldDependency  `json:"depends_on,omitempty"`
+	Disabled                         *bool              `json:"disabled,omitempty"`
+	UseNamespaceWhenNotSourceAligned *bool              `json:"use_namespace_when_not_source_aligned,omitempty"`
+}
+
+func (u UIElementMetadata) Validate() error {
+	var errors runtime.ValidationErrors
+	if err := typesValidator.Var(u.Label, "required"); err != nil {
+		errors = errors.Append("Label", err)
+	}
+	if v, ok := any(u.Type).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("Type", err)
+		}
+	}
+	if err := typesValidator.Var(u.Name, "required"); err != nil {
+		errors = errors.Append("Name", err)
+	}
+	if u.Checkbox != nil {
+		if v, ok := any(u.Checkbox).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Checkbox", err)
+			}
+		}
+	}
+	if u.Select != nil {
+		if v, ok := any(u.Select).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Select", err)
+			}
+		}
+	}
+	if u.String != nil {
+		if v, ok := any(u.String).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("String", err)
+			}
+		}
+	}
+	if u.Radio != nil {
+		if v, ok := any(u.Radio).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("Radio", err)
+			}
+		}
+	}
+	for i, item := range u.DependsOn {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("DependsOn[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type UIElementMetadataResponse struct {
+	NotConfigured  *bool               `json:"not_configured,omitempty"`
+	UIMetadata     []UIElementMetadata `json:"ui_metadata" validate:"required"`
+	Plugin         string              `json:"plugin" validate:"required"`
+	ResultLabel    *string             `json:"result_label,omitempty"`
+	ResultTooltip  *string             `json:"result_tooltip,omitempty"`
+	Platform       string              `json:"platform" validate:"required"`
+	DisplayName    string              `json:"display_name" validate:"required"`
+	IconName       string              `json:"icon_name" validate:"required"`
+	ParentPlatform *string             `json:"parent_platform,omitempty"`
+	PlatformTile   *PlatformTile       `json:"platform_tile,omitempty"`
+	DetailedName   string              `json:"detailed_name" validate:"required"`
+}
+
+func (u UIElementMetadataResponse) Validate() error {
+	var errors runtime.ValidationErrors
+	for i, item := range u.UIMetadata {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("UIMetadata[%d]", i), err)
+			}
+		}
+	}
+	if err := typesValidator.Var(u.Plugin, "required"); err != nil {
+		errors = errors.Append("Plugin", err)
+	}
+	if err := typesValidator.Var(u.Platform, "required"); err != nil {
+		errors = errors.Append("Platform", err)
+	}
+	if err := typesValidator.Var(u.DisplayName, "required"); err != nil {
+		errors = errors.Append("DisplayName", err)
+	}
+	if err := typesValidator.Var(u.IconName, "required"); err != nil {
+		errors = errors.Append("IconName", err)
+	}
+	if u.PlatformTile != nil {
+		if v, ok := any(u.PlatformTile).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append("PlatformTile", err)
+			}
+		}
+	}
+	if err := typesValidator.Var(u.DetailedName, "required"); err != nil {
+		errors = errors.Append("DetailedName", err)
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type UIElementRadio struct {
+	MaxCount     *int           `json:"max_count,omitempty"`
+	InitialValue *string        `json:"initial_value,omitempty"`
+	Options      []SelectOption `json:"options,omitempty"`
+}
+
+func (u UIElementRadio) Validate() error {
+	var errors runtime.ValidationErrors
+	for i, item := range u.Options {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("Options[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type UIElementSelect struct {
+	MaxCount *int           `json:"max_count,omitempty"`
+	Options  []SelectOption `json:"options,omitempty"`
+}
+
+func (u UIElementSelect) Validate() error {
+	var errors runtime.ValidationErrors
+	for i, item := range u.Options {
+		if v, ok := any(item).(runtime.Validator); ok {
+			if err := v.Validate(); err != nil {
+				errors = errors.Append(fmt.Sprintf("Options[%d]", i), err)
+			}
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
+}
+
+type UIElementString struct {
+	InitialValue *string `json:"initial_value,omitempty"`
+}
+
+type UnLinkTechnicalAssetToOutputPortRequest struct {
+	TechnicalAssetID uuid.UUID `json:"technical_asset_id" validate:"required"`
+}
+
+func (u UnLinkTechnicalAssetToOutputPortRequest) Validate() error {
+	var errors runtime.ValidationErrors
+	if v, ok := any(u.TechnicalAssetID).(runtime.Validator); ok {
+		if err := v.Validate(); err != nil {
+			errors = errors.Append("TechnicalAssetID", err)
+		}
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return errors
 }
 
 type UpdateDataProductLifeCycleResponse struct {
@@ -16853,15 +19875,15 @@ func (u UserCreateResponse) Validate() error {
 }
 
 type UsersGet struct {
-	ID             uuid.UUID                                                         `json:"id" validate:"required"`
-	Email          runtime.Email                                                     `json:"email" validate:"required"`
-	ExternalID     string                                                            `json:"external_id" validate:"required"`
-	FirstName      string                                                            `json:"first_name" validate:"required"`
-	LastName       string                                                            `json:"last_name" validate:"required"`
-	HasSeenTour    bool                                                              `json:"has_seen_tour"`
-	CanBecomeAdmin bool                                                              `json:"can_become_admin"`
-	AdminExpiry    *time.Time                                                        `json:"admin_expiry,omitempty"`
-	GlobalRole     AppAuthorizationRoleAssignmentsGlobalSchemaRoleAssignmentResponse `json:"global_role"`
+	ID             uuid.UUID                    `json:"id" validate:"required"`
+	Email          runtime.Email                `json:"email" validate:"required"`
+	ExternalID     string                       `json:"external_id" validate:"required"`
+	FirstName      string                       `json:"first_name" validate:"required"`
+	LastName       string                       `json:"last_name" validate:"required"`
+	HasSeenTour    bool                         `json:"has_seen_tour"`
+	CanBecomeAdmin bool                         `json:"can_become_admin"`
+	AdminExpiry    *time.Time                   `json:"admin_expiry,omitempty"`
+	GlobalRole     GlobalRoleAssignmentResponse `json:"global_role"`
 }
 
 func (u UsersGet) Validate() error {
@@ -16991,37 +20013,8 @@ func (v *ValidationError_Loc_Item) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type AppAuthorizationRoleAssignmentsDataProductSchemaCreateRoleAssignment struct {
-	UserID        uuid.UUID `json:"user_id" validate:"required"`
-	RoleID        uuid.UUID `json:"role_id" validate:"required"`
-	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
-}
-
-func (a AppAuthorizationRoleAssignmentsDataProductSchemaCreateRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.UserID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("UserID", err)
-		}
-	}
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if v, ok := any(a.DataProductID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DataProductID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
 type AppAuthorizationRoleAssignmentsDataProductSchemaListRoleAssignmentsResponse struct {
-	RoleAssignments []AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignmentResponse `json:"role_assignments" validate:"required"`
+	RoleAssignments []DataProductRoleAssignmentResponse `json:"role_assignments" validate:"required"`
 }
 
 func (a AppAuthorizationRoleAssignmentsDataProductSchemaListRoleAssignmentsResponse) Validate() error {
@@ -17031,52 +20024,6 @@ func (a AppAuthorizationRoleAssignmentsDataProductSchemaListRoleAssignmentsRespo
 			if err := v.Validate(); err != nil {
 				errors = errors.Append(fmt.Sprintf("RoleAssignments[%d]", i), err)
 			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsDataProductSchemaModifyRoleAssignment struct {
-	RoleID uuid.UUID `json:"role_id" validate:"required"`
-}
-
-func (a AppAuthorizationRoleAssignmentsDataProductSchemaModifyRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsDataProductSchemaRequestRoleAssignment struct {
-	UserID        uuid.UUID `json:"user_id" validate:"required"`
-	RoleID        uuid.UUID `json:"role_id" validate:"required"`
-	DataProductID uuid.UUID `json:"data_product_id" validate:"required"`
-}
-
-func (a AppAuthorizationRoleAssignmentsDataProductSchemaRequestRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.UserID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("UserID", err)
-		}
-	}
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if v, ok := any(a.DataProductID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DataProductID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -17170,139 +20117,8 @@ func (a AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignment) Validate
 	return errors
 }
 
-type AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignmentResponse struct {
-	ID          uuid.UUID      `json:"id" validate:"required"`
-	DataProduct DataProduct    `json:"data_product"`
-	User        User           `json:"user"`
-	Role        Role           `json:"role"`
-	Decision    DecisionStatus `json:"decision" validate:"required"`
-	RequestedOn time.Time      `json:"requested_on"`
-	RequestedBy User           `json:"requested_by"`
-	DecidedOn   time.Time      `json:"decided_on"`
-	DecidedBy   User           `json:"decided_by"`
-}
-
-func (a AppAuthorizationRoleAssignmentsDataProductSchemaRoleAssignmentResponse) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.ID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("ID", err)
-		}
-	}
-	if v, ok := any(a.DataProduct).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DataProduct", err)
-		}
-	}
-	if v, ok := any(a.User).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("User", err)
-		}
-	}
-	if v, ok := any(a.Role).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Role", err)
-		}
-	}
-	if v, ok := any(a.Decision).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Decision", err)
-		}
-	}
-	if v, ok := any(a.RequestedBy).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RequestedBy", err)
-		}
-	}
-	if v, ok := any(a.DecidedBy).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DecidedBy", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment struct {
-	UserID uuid.UUID                                                              `json:"user_id" validate:"required"`
-	RoleID AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID `json:"role_id"`
-}
-
-func (a AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.UserID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("UserID", err)
-		}
-	}
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID struct {
-	AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf *AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf `json:"-"`
-}
-
-func (a AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID) Validate() error {
-	var errors runtime.ValidationErrors
-	if a.AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf != nil {
-		if v, ok := any(a.AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-func (a AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID) MarshalJSON() ([]byte, error) {
-	var parts []json.RawMessage
-
-	{
-		b, err := runtime.MarshalJSON(a.AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf)
-		if err != nil {
-			return nil, fmt.Errorf("AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf marshal: %w", err)
-		}
-		parts = append(parts, b)
-	}
-
-	return runtime.CoalesceOrMerge(parts...)
-}
-
-func (a *AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID) UnmarshalJSON(data []byte) error {
-	trim := bytes.TrimSpace(data)
-	if bytes.Equal(trim, []byte("null")) {
-		return nil
-	}
-	if len(trim) == 0 {
-		return fmt.Errorf("empty JSON input")
-	}
-
-	if a.AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf == nil {
-		a.AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf = &AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf{}
-	}
-
-	if err := runtime.UnmarshalJSON(data, a.AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf); err != nil {
-		return fmt.Errorf("AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf unmarshal: %w", err)
-	}
-
-	return nil
-}
-
 type AppAuthorizationRoleAssignmentsGlobalSchemaListRoleAssignmentsResponse struct {
-	RoleAssignments []AppAuthorizationRoleAssignmentsGlobalSchemaRoleAssignmentResponse `json:"role_assignments" validate:"required"`
+	RoleAssignments []GlobalRoleAssignmentResponse `json:"role_assignments" validate:"required"`
 }
 
 func (a AppAuthorizationRoleAssignmentsGlobalSchemaListRoleAssignmentsResponse) Validate() error {
@@ -17320,173 +20136,8 @@ func (a AppAuthorizationRoleAssignmentsGlobalSchemaListRoleAssignmentsResponse) 
 	return errors
 }
 
-type AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment struct {
-	RoleID AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID `json:"role_id"`
-}
-
-func (a AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID struct {
-	AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf *AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf `json:"-"`
-}
-
-func (a AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID) Validate() error {
-	var errors runtime.ValidationErrors
-	if a.AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf != nil {
-		if v, ok := any(a.AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf).(runtime.Validator); ok {
-			if err := v.Validate(); err != nil {
-				errors = errors.Append("AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf", err)
-			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-func (a AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID) MarshalJSON() ([]byte, error) {
-	var parts []json.RawMessage
-
-	{
-		b, err := runtime.MarshalJSON(a.AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf)
-		if err != nil {
-			return nil, fmt.Errorf("AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf marshal: %w", err)
-		}
-		parts = append(parts, b)
-	}
-
-	return runtime.CoalesceOrMerge(parts...)
-}
-
-func (a *AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID) UnmarshalJSON(data []byte) error {
-	trim := bytes.TrimSpace(data)
-	if bytes.Equal(trim, []byte("null")) {
-		return nil
-	}
-	if len(trim) == 0 {
-		return fmt.Errorf("empty JSON input")
-	}
-
-	if a.AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf == nil {
-		a.AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf = &AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf{}
-	}
-
-	if err := runtime.UnmarshalJSON(data, a.AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf); err != nil {
-		return fmt.Errorf("AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf unmarshal: %w", err)
-	}
-
-	return nil
-}
-
-type AppAuthorizationRoleAssignmentsGlobalSchemaRoleAssignmentResponse struct {
-	ID          uuid.UUID      `json:"id" validate:"required"`
-	User        User           `json:"user"`
-	Role        Role           `json:"role"`
-	Decision    DecisionStatus `json:"decision" validate:"required"`
-	RequestedOn time.Time      `json:"requested_on"`
-	RequestedBy User           `json:"requested_by"`
-	DecidedOn   time.Time      `json:"decided_on"`
-	DecidedBy   User           `json:"decided_by"`
-}
-
-func (a AppAuthorizationRoleAssignmentsGlobalSchemaRoleAssignmentResponse) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.ID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("ID", err)
-		}
-	}
-	if v, ok := any(a.User).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("User", err)
-		}
-	}
-	if v, ok := any(a.Role).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Role", err)
-		}
-	}
-	if v, ok := any(a.Decision).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Decision", err)
-		}
-	}
-	if v, ok := any(a.RequestedBy).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RequestedBy", err)
-		}
-	}
-	if v, ok := any(a.DecidedBy).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DecidedBy", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsOutputPortSchemaCreateRoleAssignment struct {
-	UserID       uuid.UUID `json:"user_id" validate:"required"`
-	RoleID       uuid.UUID `json:"role_id" validate:"required"`
-	OutputPortID uuid.UUID `json:"output_port_id" validate:"required"`
-}
-
-func (a AppAuthorizationRoleAssignmentsOutputPortSchemaCreateRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.UserID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("UserID", err)
-		}
-	}
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if v, ok := any(a.OutputPortID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("OutputPortID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsOutputPortSchemaDecideRoleAssignment struct {
-	Decision DecisionStatus `json:"decision" validate:"required"`
-}
-
-func (a AppAuthorizationRoleAssignmentsOutputPortSchemaDecideRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.Decision).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Decision", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
 type AppAuthorizationRoleAssignmentsOutputPortSchemaListRoleAssignmentsResponse struct {
-	RoleAssignments []AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignmentResponse `json:"role_assignments" validate:"required"`
+	RoleAssignments []OutputPortRoleAssignmentResponse `json:"role_assignments" validate:"required"`
 }
 
 func (a AppAuthorizationRoleAssignmentsOutputPortSchemaListRoleAssignmentsResponse) Validate() error {
@@ -17496,52 +20147,6 @@ func (a AppAuthorizationRoleAssignmentsOutputPortSchemaListRoleAssignmentsRespon
 			if err := v.Validate(); err != nil {
 				errors = errors.Append(fmt.Sprintf("RoleAssignments[%d]", i), err)
 			}
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsOutputPortSchemaModifyRoleAssignment struct {
-	RoleID uuid.UUID `json:"role_id" validate:"required"`
-}
-
-func (a AppAuthorizationRoleAssignmentsOutputPortSchemaModifyRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
-
-type AppAuthorizationRoleAssignmentsOutputPortSchemaRequestRoleAssignment struct {
-	UserID       uuid.UUID `json:"user_id" validate:"required"`
-	RoleID       uuid.UUID `json:"role_id" validate:"required"`
-	OutputPortID uuid.UUID `json:"output_port_id" validate:"required"`
-}
-
-func (a AppAuthorizationRoleAssignmentsOutputPortSchemaRequestRoleAssignment) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.UserID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("UserID", err)
-		}
-	}
-	if v, ok := any(a.RoleID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RoleID", err)
-		}
-	}
-	if v, ok := any(a.OutputPortID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("OutputPortID", err)
 		}
 	}
 	if len(errors) == 0 {
@@ -17635,66 +20240,15 @@ func (a AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignment) Validate(
 	return errors
 }
 
-type AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignmentResponse struct {
-	ID          uuid.UUID      `json:"id" validate:"required"`
-	OutputPort  OutputPort     `json:"output_port"`
-	User        User           `json:"user"`
-	Role        Role           `json:"role"`
-	Decision    DecisionStatus `json:"decision" validate:"required"`
-	RequestedOn time.Time      `json:"requested_on"`
-	RequestedBy User           `json:"requested_by"`
-	DecidedOn   time.Time      `json:"decided_on"`
-	DecidedBy   User           `json:"decided_by"`
-}
-
-func (a AppAuthorizationRoleAssignmentsOutputPortSchemaRoleAssignmentResponse) Validate() error {
-	var errors runtime.ValidationErrors
-	if v, ok := any(a.ID).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("ID", err)
-		}
-	}
-	if v, ok := any(a.OutputPort).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("OutputPort", err)
-		}
-	}
-	if v, ok := any(a.User).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("User", err)
-		}
-	}
-	if v, ok := any(a.Role).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Role", err)
-		}
-	}
-	if v, ok := any(a.Decision).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("Decision", err)
-		}
-	}
-	if v, ok := any(a.RequestedBy).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("RequestedBy", err)
-		}
-	}
-	if v, ok := any(a.DecidedBy).(runtime.Validator); ok {
-		if err := v.Validate(); err != nil {
-			errors = errors.Append("DecidedBy", err)
-		}
-	}
-	if len(errors) == 0 {
-		return nil
-	}
-	return errors
-}
+type CreateGlobalRoleAssignment_RoleID_AnyOf_0 = uuid.UUID
 
 type Edge_ID_AnyOf_1 = uuid.UUID
 
 type Edge_Source_AnyOf_1 = uuid.UUID
 
 type Edge_Target_AnyOf_1 = uuid.UUID
+
+type ModifyGlobalRoleAssignment_RoleID_AnyOf_0 = uuid.UUID
 
 type Node_ID_AnyOf_1 = uuid.UUID
 
@@ -17704,9 +20258,23 @@ type NodeData_LinkToID_AnyOf_1 = uuid.UUID
 
 type NodeData_DomainID_AnyOf_1 = uuid.UUID
 
-type AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf_0 = uuid.UUID
+type CreateGlobalRoleAssignment_RoleID_AnyOf struct {
+	runtime.Either[CreateGlobalRoleAssignment_RoleID_AnyOf_0, string]
+}
 
-type AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf_0 = uuid.UUID
+func (c *CreateGlobalRoleAssignment_RoleID_AnyOf) Validate() error {
+	if c.IsA() {
+		if v, ok := any(c.A).(runtime.Validator); ok {
+			return v.Validate()
+		}
+	}
+	if c.IsB() {
+		if v, ok := any(c.B).(runtime.Validator); ok {
+			return v.Validate()
+		}
+	}
+	return nil
+}
 
 type CreateTechnicalAssetRequest_Configuration_OneOf struct {
 	union json.RawMessage
@@ -18496,6 +21064,24 @@ func (g *GetTechnicalAssetsResponseItem_Configuration_OneOf) UnmarshalJSON(bts [
 	return err
 }
 
+type ModifyGlobalRoleAssignment_RoleID_AnyOf struct {
+	runtime.Either[ModifyGlobalRoleAssignment_RoleID_AnyOf_0, string]
+}
+
+func (m *ModifyGlobalRoleAssignment_RoleID_AnyOf) Validate() error {
+	if m.IsA() {
+		if v, ok := any(m.A).(runtime.Validator); ok {
+			return v.Validate()
+		}
+	}
+	if m.IsB() {
+		if v, ok := any(m.B).(runtime.Validator); ok {
+			return v.Validate()
+		}
+	}
+	return nil
+}
+
 type Node_ID_AnyOf struct {
 	runtime.Either[string, Node_ID_AnyOf_1]
 }
@@ -18580,6 +21166,166 @@ func (n *NodeData_Assignments_AnyOf_AnyOf) Validate() error {
 	}
 	if n.IsB() {
 		if v, ok := any(n.B).(runtime.Validator); ok {
+			return v.Validate()
+		}
+	}
+	return nil
+}
+
+type PendingActionResponse_PendingActions_AnyOf struct {
+	union json.RawMessage
+}
+
+func (p *PendingActionResponse_PendingActions_AnyOf) Validate() error {
+	// NOTE: Validation is not supported for unions with more than 2 elements.
+	// Validating would require unmarshaling against each possible type, which is inefficient.
+	// Use AsValidated<Type>() methods to validate after retrieving the specific type.
+	return nil
+}
+
+// Raw returns the union data inside the PendingActionResponse_PendingActions_AnyOf as bytes
+func (p *PendingActionResponse_PendingActions_AnyOf) Raw() json.RawMessage {
+	return p.union
+}
+
+// AsDataProductOutputPortPendingAction returns the union data inside the PendingActionResponse_PendingActions_AnyOf as a DataProductOutputPortPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) AsDataProductOutputPortPendingAction() (DataProductOutputPortPendingAction, error) {
+	return runtime.UnmarshalAs[DataProductOutputPortPendingAction](p.union)
+}
+
+// AsValidatedDataProductOutputPortPendingAction returns the union data inside the PendingActionResponse_PendingActions_AnyOf as a validated DataProductOutputPortPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) AsValidatedDataProductOutputPortPendingAction() (DataProductOutputPortPendingAction, error) {
+	val, err := p.AsDataProductOutputPortPendingAction()
+	if err != nil {
+		var zero DataProductOutputPortPendingAction
+		return zero, err
+	}
+	if err := p.validateDataProductOutputPortPendingAction(val); err != nil {
+		var zero DataProductOutputPortPendingAction
+		return zero, err
+	}
+	return val, nil
+}
+
+// FromDataProductOutputPortPendingAction overwrites any union data inside the PendingActionResponse_PendingActions_AnyOf as the provided DataProductOutputPortPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) FromDataProductOutputPortPendingAction(val DataProductOutputPortPendingAction) error {
+	// Validate before storing
+	if err := p.validateDataProductOutputPortPendingAction(val); err != nil {
+		return err
+	}
+	bts, err := json.Marshal(val)
+	p.union = bts
+	return err
+}
+
+// AsTechnicalAssetOutputPortPendingAction returns the union data inside the PendingActionResponse_PendingActions_AnyOf as a TechnicalAssetOutputPortPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) AsTechnicalAssetOutputPortPendingAction() (TechnicalAssetOutputPortPendingAction, error) {
+	return runtime.UnmarshalAs[TechnicalAssetOutputPortPendingAction](p.union)
+}
+
+// AsValidatedTechnicalAssetOutputPortPendingAction returns the union data inside the PendingActionResponse_PendingActions_AnyOf as a validated TechnicalAssetOutputPortPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) AsValidatedTechnicalAssetOutputPortPendingAction() (TechnicalAssetOutputPortPendingAction, error) {
+	val, err := p.AsTechnicalAssetOutputPortPendingAction()
+	if err != nil {
+		var zero TechnicalAssetOutputPortPendingAction
+		return zero, err
+	}
+	if err := p.validateTechnicalAssetOutputPortPendingAction(val); err != nil {
+		var zero TechnicalAssetOutputPortPendingAction
+		return zero, err
+	}
+	return val, nil
+}
+
+// FromTechnicalAssetOutputPortPendingAction overwrites any union data inside the PendingActionResponse_PendingActions_AnyOf as the provided TechnicalAssetOutputPortPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) FromTechnicalAssetOutputPortPendingAction(val TechnicalAssetOutputPortPendingAction) error {
+	// Validate before storing
+	if err := p.validateTechnicalAssetOutputPortPendingAction(val); err != nil {
+		return err
+	}
+	bts, err := json.Marshal(val)
+	p.union = bts
+	return err
+}
+
+// AsDataProductRoleAssignmentPendingAction returns the union data inside the PendingActionResponse_PendingActions_AnyOf as a DataProductRoleAssignmentPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) AsDataProductRoleAssignmentPendingAction() (DataProductRoleAssignmentPendingAction, error) {
+	return runtime.UnmarshalAs[DataProductRoleAssignmentPendingAction](p.union)
+}
+
+// AsValidatedDataProductRoleAssignmentPendingAction returns the union data inside the PendingActionResponse_PendingActions_AnyOf as a validated DataProductRoleAssignmentPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) AsValidatedDataProductRoleAssignmentPendingAction() (DataProductRoleAssignmentPendingAction, error) {
+	val, err := p.AsDataProductRoleAssignmentPendingAction()
+	if err != nil {
+		var zero DataProductRoleAssignmentPendingAction
+		return zero, err
+	}
+	if err := p.validateDataProductRoleAssignmentPendingAction(val); err != nil {
+		var zero DataProductRoleAssignmentPendingAction
+		return zero, err
+	}
+	return val, nil
+}
+
+// FromDataProductRoleAssignmentPendingAction overwrites any union data inside the PendingActionResponse_PendingActions_AnyOf as the provided DataProductRoleAssignmentPendingAction
+func (p *PendingActionResponse_PendingActions_AnyOf) FromDataProductRoleAssignmentPendingAction(val DataProductRoleAssignmentPendingAction) error {
+	// Validate before storing
+	if err := p.validateDataProductRoleAssignmentPendingAction(val); err != nil {
+		return err
+	}
+	bts, err := json.Marshal(val)
+	p.union = bts
+	return err
+}
+
+// validateDataProductOutputPortPendingAction validates a DataProductOutputPortPendingAction value
+func (p *PendingActionResponse_PendingActions_AnyOf) validateDataProductOutputPortPendingAction(val DataProductOutputPortPendingAction) error {
+	if v, ok := any(val).(runtime.Validator); ok {
+		return v.Validate()
+	}
+	return nil
+}
+
+// validateTechnicalAssetOutputPortPendingAction validates a TechnicalAssetOutputPortPendingAction value
+func (p *PendingActionResponse_PendingActions_AnyOf) validateTechnicalAssetOutputPortPendingAction(val TechnicalAssetOutputPortPendingAction) error {
+	if v, ok := any(val).(runtime.Validator); ok {
+		return v.Validate()
+	}
+	return nil
+}
+
+// validateDataProductRoleAssignmentPendingAction validates a DataProductRoleAssignmentPendingAction value
+func (p *PendingActionResponse_PendingActions_AnyOf) validateDataProductRoleAssignmentPendingAction(val DataProductRoleAssignmentPendingAction) error {
+	if v, ok := any(val).(runtime.Validator); ok {
+		return v.Validate()
+	}
+	return nil
+}
+
+func (p PendingActionResponse_PendingActions_AnyOf) MarshalJSON() ([]byte, error) {
+	bts, err := p.union.MarshalJSON()
+
+	return bts, err
+}
+
+func (p *PendingActionResponse_PendingActions_AnyOf) UnmarshalJSON(bts []byte) error {
+	err := p.union.UnmarshalJSON(bts)
+
+	return err
+}
+
+type SelectOption_Value_AnyOf struct {
+	runtime.Either[string, bool]
+}
+
+func (s *SelectOption_Value_AnyOf) Validate() error {
+	if s.IsA() {
+		if v, ok := any(s.A).(runtime.Validator); ok {
+			return v.Validate()
+		}
+	}
+	if s.IsB() {
+		if v, ok := any(s.B).(runtime.Validator); ok {
 			return v.Validate()
 		}
 	}
@@ -18847,42 +21593,6 @@ func (v *ValidationError_Loc_AnyOf) Validate() error {
 	}
 	if v.IsB() {
 		if v, ok := any(v.B).(runtime.Validator); ok {
-			return v.Validate()
-		}
-	}
-	return nil
-}
-
-type AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf struct {
-	runtime.Either[AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf_0, string]
-}
-
-func (a *AppAuthorizationRoleAssignmentsGlobalSchemaCreateRoleAssignment_RoleID_AnyOf) Validate() error {
-	if a.IsA() {
-		if v, ok := any(a.A).(runtime.Validator); ok {
-			return v.Validate()
-		}
-	}
-	if a.IsB() {
-		if v, ok := any(a.B).(runtime.Validator); ok {
-			return v.Validate()
-		}
-	}
-	return nil
-}
-
-type AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf struct {
-	runtime.Either[AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf_0, string]
-}
-
-func (a *AppAuthorizationRoleAssignmentsGlobalSchemaModifyRoleAssignment_RoleID_AnyOf) Validate() error {
-	if a.IsA() {
-		if v, ok := any(a.A).(runtime.Validator); ok {
-			return v.Validate()
-		}
-	}
-	if a.IsB() {
-		if v, ok := any(a.B).(runtime.Validator); ok {
 			return v.Validate()
 		}
 	}
