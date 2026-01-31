@@ -5,7 +5,11 @@ repos:
     hooks:
       # Git style
       - id: check-added-large-files
-        exclude: ^frontend/src/assets/fonts/
+        exclude: |
+            (?x)^(
+                frontend/src/assets/fonts/|
+                sdk-go/portalsdk/portalsdk.go
+            )$
       - id: check-merge-conflict
       - id: no-commit-to-branch
 
