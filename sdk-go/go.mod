@@ -1,4 +1,4 @@
-module github.com/data-product-portal/sdk-go/portalsdk
+module github.com/data-product-portal/sdk-go
 
 go 1.25.3
 
