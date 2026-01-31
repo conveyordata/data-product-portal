@@ -135,3 +135,9 @@ tasks:
       - task: update:openapi-spec
       - task: release:commit
       - task: release:pr
+
+  poetry:setup:
+    desc: "Install the backend python project so the precommit does not fail"
+    dir: backend
+    cmds:
+      - poetry install
