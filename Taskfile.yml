@@ -35,9 +35,40 @@ tasks:
     desc: "Update OpenAPI spec with new version"
     generates:
       - docs/static/openapi.json
-    dotenv: [backend/.test.env]
+    dir: backend
+    dotenv: [.test.env]
     cmds:
-      - cd backend && poetry run python -m app.open_api_export ../docs/static/openapi.json --openapi-version 3.0.4
+      - poetry run python -m app.open_api_export ../docs/static/openapi.json
+
+  openapi-spec:generate-no-deprecated:
+    desc: "Generate OpenAPI spec without deprecated endpoints"
+    sources: [docs/static/openapi.json]
+    generates: [docs/static/openapi-3.0.json]
+    dir: backend
+    dotenv: [.test.env]
+    cmds:
+      - poetry run python -m app.open_api_export ../docs/static/openapi-no-deprecated.json --exclude-deprecated
+
+  go-sdk:setup:
+    desc: "Setup Go SDK generation"
+    cmds:
+      - go install github.com/doordash-oss/oapi-codegen-dd/v3/cmd/oapi-codegen@latest
+
+
+  go-sdk:generate:
+    desc: "Generate the Go SDK from the OpenAPI spec"
+    sources: [docs/static/openapi-no-deprecated.json, sdk-go/oapi-codegen.yaml]
+    generates: [sdk-go/portalsdk/portalsdk.go]
+    preconditions:
+      - oapi-codegen --help # has no --version flag
+    dir: sdk-go
+    cmds:
+      - mkdir -p portalsdk # inside of sdk-go
+      - oapi-codegen --config oapi-codegen.yaml ../docs/static/openapi-no-deprecated.json
+      #- sed -i 's/^union json\.RawMessage$/\tunion json.RawMessage/' portalsdk/portalsdk.go
+      - gofmt -w portalsdk/portalsdk.go
+      - cd portalsdk && go mod init github.com/data-product-portal/sdk-go/portalsdk || true
+      - cd portalsdk && go mod tidy
 
   docusaurus:version:
     desc: "Run Docusaurus versioning"
@@ -104,17 +135,3 @@ tasks:
       - task: update:openapi-spec
       - task: release:commit
       - task: release:pr
-
-  go-sdk:setup:
-    desc: "Setup Go SDK generation"
-    cmds:
-      - go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-
-  go-sdk:generate:
-    desc: "Generate the Go SDK from the OpenAPI spec"
-    sources: [docs/static/openapi.json]
-    generates: [sdk-go/portal-sdk/portal-sdk.go]
-    cmds:
-      - task: openapi-spec:generate
-      - cd sdk-go && oapi-codegen --package portal-sdk --generate types,client -o portal-sdk.go ../docs/static/openapi.json
-      - go mod tidy
