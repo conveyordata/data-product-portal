@@ -65,7 +65,6 @@ tasks:
     cmds:
       - mkdir -p portalsdk # inside of sdk-go
       - oapi-codegen --config oapi-codegen.yaml ../docs/static/openapi-no-deprecated.json
-      #- sed -i 's/^union json\.RawMessage$/\tunion json.RawMessage/' portalsdk/portalsdk.go
       - gofmt -w portalsdk/
       - cd portalsdk && go mod init github.com/data-product-portal/sdk-go/portalsdk || true
       - cd portalsdk && go mod tidy
