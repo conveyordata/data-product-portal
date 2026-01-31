@@ -58,7 +58,7 @@ tasks:
   go-sdk:generate:
     desc: "Generate the Go SDK from the OpenAPI spec"
     sources: [docs/static/openapi-no-deprecated.json, sdk-go/oapi-codegen.yaml]
-    generates: [sdk-go/portalsdk/portalsdk.go]
+    generates: [sdk-go/portalsdk/client.go]
     preconditions:
       - oapi-codegen --help # has no --version flag
     dir: sdk-go
@@ -66,7 +66,7 @@ tasks:
       - mkdir -p portalsdk # inside of sdk-go
       - oapi-codegen --config oapi-codegen.yaml ../docs/static/openapi-no-deprecated.json
       #- sed -i 's/^union json\.RawMessage$/\tunion json.RawMessage/' portalsdk/portalsdk.go
-      - gofmt -w portalsdk/portalsdk.go
+      - gofmt -w portalsdk/
       - cd portalsdk && go mod init github.com/data-product-portal/sdk-go/portalsdk || true
       - cd portalsdk && go mod tidy
 

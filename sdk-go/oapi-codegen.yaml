@@ -3,6 +3,6 @@ generate:
   client: true
   always-prefix-enum-values: true
 output:
-  use-single-file: true
+  use-single-file: false
   directory: portalsdk
   filename: portalsdk.go
