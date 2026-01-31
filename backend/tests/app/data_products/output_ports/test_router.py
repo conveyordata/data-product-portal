@@ -1,4 +1,3 @@
-import uuid
 from copy import deepcopy
 
 import pytest
@@ -195,7 +194,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tags": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -217,7 +215,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -301,7 +298,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tags": [],
             "access_type": "public",
-            "domain_id": str(uuid.uuid4()),
         }
         dataset = self.update_default_dataset(client, update_payload, self.invalid_id)
         assert dataset.status_code == 403
@@ -512,6 +508,13 @@ class TestDatasetsRouter:
         assert response.status_code == 200
         assert response.json()["max_length"] > 1
 
+    def test_validate_namespace_old(self, client):
+        namespace = "test"
+        response = self.validate_namespace_old(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID.value
+
     def test_validate_namespace(self, client):
         namespace = "test"
         response = self.validate_namespace(client, namespace)
@@ -560,7 +563,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         response = self.update_default_dataset(client, update_payload, ds.id)
@@ -623,7 +625,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -735,8 +736,15 @@ class TestDatasetsRouter:
         return client.get(f"{OLD_ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def validate_namespace(client, namespace):
+    def validate_namespace_old(client, namespace):
         return client.get(f"{OLD_ENDPOINT}/validate_namespace?namespace={namespace}")
+
+    @staticmethod
+    def validate_namespace(client, namespace):
+        return client.post(
+            "api/v2/resource_names/validate",
+            json={"resource_name": namespace, "model": "output_port"},
+        )
 
     @staticmethod
     def get_namespace_length_limits(client):

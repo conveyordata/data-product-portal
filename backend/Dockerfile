@@ -1,5 +1,5 @@
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} python:3.13.11-slim-bookworm@sha256:ac4274977cc5093aa7675b5f39e59403c7b692d0bf7549b49563177ddc02552d AS base-image
+FROM --platform=${PLATFORM} python:3.13.11-slim-bookworm@sha256:97e9392d12279f8c180eb80f0c7c0f3dfe5650f0f2573f7ad770aea58f75ed12 AS base-image
 
 FROM base-image AS build-stage
 
@@ -37,6 +37,8 @@ COPY ./templates ./templates
 COPY ./alembic.ini ./alembic.ini
 COPY ./VERSION ./VERSION
 COPY ./sample_data.sql ./sample_data.sql
+ENV FASTEMBED_CACHE_PATH=/fastembed
+RUN mkdir $FASTEMBED_CACHE_PATH && python -m app.embed
 
 EXPOSE 5050
 

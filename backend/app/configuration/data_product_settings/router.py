@@ -24,6 +24,10 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.database.database import get_db_session
+from app.resource_names.service import (
+    DataProductSettingResourceNameValidator,
+    ResourceNameService,
+)
 
 router = APIRouter()
 
@@ -43,25 +47,31 @@ def create_data_product_setting(
     return DataProductSettingService(db).create_data_product_setting(setting)
 
 
-@router.get("/namespace_suggestion")
+@router.get("/namespace_suggestion", deprecated=True)
 def get_data_product_settings_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataProductSettingService.data_product_settings_namespace_suggestion(name)
+    return NamespaceSuggestion(
+        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
+    )
 
 
-@router.get("/validate_namespace")
+@router.get("/validate_namespace", deprecated=True)
 def validate_data_product_settings_namespace(
     namespace: str,
     scope: DataProductSettingScope,
     db: Session = Depends(get_db_session),
 ) -> NamespaceValidation:
-    return DataProductSettingService(db).validate_data_product_settings_namespace(
-        namespace, scope
+    return NamespaceValidation(
+        validity=DataProductSettingResourceNameValidator()
+        .validate_resource_name(namespace, db, scope)
+        .validity
     )
 
 
-@router.get("/namespace_length_limits")
+@router.get("/namespace_length_limits", deprecated=True)
 def get_data_product_settings_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataProductSettingService.data_product_settings_namespace_length_limits()
+    return NamespaceLengthLimits(
+        max_length=ResourceNameService.resource_name_length_limits().max_length
+    )
 
 
 @router.put(
@@ -88,7 +98,7 @@ def update_data_product_setting(
         ),
     ],
 )
-def delete_data_product_setting(
+def remove_data_product_setting(
     id: UUID,
     db: Session = Depends(get_db_session),
 ) -> None:

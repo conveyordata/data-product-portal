@@ -2,14 +2,12 @@ import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, type FormProps, Input, Skeleton, Space, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
+    type ThemeSettings,
     useGetThemeSettingsQuery,
     useUpdateThemeSettingsMutation,
-} from '@/store/features/theme-settings/theme-settings-api-slice';
-import type { ThemeSettings } from '@/types/theme-settings';
-
+} from '@/store/api/services/generated/configurationThemeSettingsApi.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import styles from './theme-form.module.scss';
 
 export function ThemeSettingsForm() {

@@ -17,15 +17,21 @@ from app.configuration.tags.router import router as tag
 from app.configuration.theme_settings.router import router as theme_settings
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
-from app.data_outputs_datasets.router import router as data_output_dataset
+from app.data_output_configuration.router import router as plugin
+from app.data_products.output_port_technical_assets_link.router import (
+    router as data_output_dataset,
+)
+from app.data_products.output_ports.input_ports.router import (
+    router as data_product_dataset,
+)
 from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as data_outputs
-from app.data_products_datasets.router import router as data_product_dataset
 from app.graph.router import router as graph
-from app.notifications.router import router as notification
 from app.pending_actions.router import router as pending_action
+from app.resource_names.router import router as resource_name
 from app.search_output_ports.router import router as search_output_ports
+from app.users.notifications.router import router as notification
 from app.users.router import router as user
 
 router = (
@@ -55,3 +61,5 @@ router.include_router(theme_settings)
 router.include_router(graph)
 router.include_router(notification)
 router.include_router(pending_action)
+router.include_router(resource_name)
+router.include_router(plugin)

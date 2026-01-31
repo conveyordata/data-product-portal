@@ -2,23 +2,27 @@ import { Table } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
+    type GlobalRoleAssignmentResponse,
     useCreateGlobalRoleAssignmentMutation,
     useDecideGlobalRoleAssignmentMutation,
     useDeleteGlobalRoleAssignmentMutation,
-    useUpdateGlobalRoleAssignmentMutation,
-} from '@/store/features/role-assignments/global-roles-api-slice.ts';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
-import { useCanBecomeAdminMutation, useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { type GlobalRoleAssignmentContract, Prototype, Scope } from '@/types/roles/role.contract.ts';
-import type { UsersGetContract } from '@/types/users/user.contract.ts';
+    useModifyGlobalRoleAssignmentMutation,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import {
+    type UsersGet,
+    useGetUsersQuery,
+    useSetCanBecomeAdminMutation,
+} from '@/store/api/services/generated/usersApi.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
 import styles from './people-table.module.scss';
-import { getPeopleTableColumns } from './people-table-columns.tsx';
+import { getPeopleTableColumns } from './people-table-columns';
 
-function filterUsers(users: UsersGetContract, searchTerm?: string) {
+function filterUsers(users: UsersGet[], searchTerm?: string) {
     if (!searchTerm) {
         return users;
     }
@@ -31,28 +35,26 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
 
 export function PeoplePage() {
     const { t } = useTranslation();
-    const { data: users = [], isFetching } = useGetAllUsersQuery();
-    const { data: roles = [] } = useGetRolesQuery(Scope.GLOBAL);
+    const { data: { users = [] } = {}, isFetching } = useGetUsersQuery();
+    const { data: { roles = [] } = {} } = useGetRolesQuery(Scope.GLOBAL);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
-    const [searchTerm, setSearchTerm] = useState('');
 
+    const [searchTerm, setSearchTerm] = useState('');
     const filteredUsers = useMemo(() => filterUsers(users, searchTerm), [users, searchTerm]);
     const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
-    const [updateGlobalRoleAssignment] = useUpdateGlobalRoleAssignmentMutation();
+    const [updateGlobalRoleAssignment] = useModifyGlobalRoleAssignmentMutation();
     const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRoleAssignment] = useDeleteGlobalRoleAssignmentMutation();
-    const [canBecomeAdmin] = useCanBecomeAdminMutation();
+    const [canBecomeAdmin] = useSetCanBecomeAdminMutation();
 
     const onChangeGlobalRole = useCallback(
-        (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
+        (user_id: string, value: string, original: GlobalRoleAssignment | null) => {
             if (original?.role.id === value) {
                 return;
             }
             if (original !== null && !value) {
-                deleteGlobalRoleAssignment({
-                    role_assignment_id: original.id,
-                })
+                deleteGlobalRoleAssignment(original.id)
                     .unwrap()
                     .then(() => {
                         dispatchMessage({
@@ -66,8 +68,10 @@ export function PeoplePage() {
             }
             if (original !== null && value) {
                 updateGlobalRoleAssignment({
-                    role_assignment_id: original.id,
-                    role_id: value,
+                    id: original.id,
+                    modifyGlobalRoleAssignment: {
+                        role_id: value,
+                    },
                 })
                     .unwrap()
                     .then(() => {
@@ -86,10 +90,12 @@ export function PeoplePage() {
                     role_id: value,
                 })
                     .unwrap()
-                    .then((result: GlobalRoleAssignmentContract) => {
+                    .then((result: GlobalRoleAssignmentResponse) => {
                         decideGlobalRoleAssignment({
-                            role_assignment_id: result.id,
-                            decision_status: 'approved',
+                            id: result.id,
+                            decideGlobalRoleAssignment: {
+                                decision: 'approved',
+                            },
                         })
                             .unwrap()
                             .then(() => {
@@ -132,8 +138,12 @@ export function PeoplePage() {
     );
 
     return (
-        <SearchPage title={t('People')} onSearch={setSearchTerm} searchPlaceholder={t('Search people by name')}>
-            <Table<UsersGetContract[0]>
+        <SearchPage
+            title={t('People')}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            searchPlaceholder={t('Search people by name')}
+        >
+            <Table<UsersGet>
                 columns={columns}
                 dataSource={filteredUsers}
                 pagination={{

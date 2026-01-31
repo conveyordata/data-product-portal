@@ -54,7 +54,7 @@ const basicLayoutOptions = {
     'elk.spacing.nodeNode': '80.0', // spacing between nodes vertically
     'elk.layered.spacing.edgeNodeBetweenLayers': '50.0', // spacing between nodes horizontally
 
-    'elk.layered.nodePlacement.strategy': 'SIMPLE', // keeps the flow simple and symmetrical
+    'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX', // Better for strict alignment than SIMPLE
     'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
 
     // Port constraints
@@ -66,20 +66,16 @@ const basicLayoutOptions = {
 
 // Layout options between domain nodes (e.g. for full-explorer.tsx with domain nodes visible).
 const interDomainLayoutOptions = {
-    'elk.algorithm': 'force',
-    'elk.spacing.nodeNode': '60.0', // spacing between domain nodes
-    'elk.aspectRatio': '2', // lower => layout more vertical <-> higher => layout more horizontal
+    'elk.algorithm': 'layered',
+    'elk.direction': 'RIGHT',
+    'elk.spacing.nodeNode': '60.0',
 };
 
 // Layout options within a domain node.
 const intraDomainLayoutOptions = {
-    'elk.algorithm': 'force',
-
-    // these are for a left to right layered design *within* a domain node
-    // 'elk.algorithm': 'layered',
-    // 'elk.direction': 'RIGHT',
-    // 'elk.layered.spacing.edgeNodeBetweenLayers': '50.0',
-    'elk.spacing.nodeNode': '40.0', // spacing between regular nodes within a domain node
+    'elk.algorithm': 'layered',
+    'elk.direction': 'RIGHT',
+    'elk.spacing.nodeNode': '40.0',
 
     // A bit more padding at the top.
     // Most of the time, the label doesn't take up the whole height of the node, so this trick evens it out for short labels (taking up 1 instead of 2 lines).

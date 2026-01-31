@@ -15,7 +15,7 @@ import {
     Tooltip,
 } from 'antd';
 import type { TFunction } from 'i18next';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type Ref, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
@@ -23,9 +23,11 @@ import { useDebouncedCallback } from 'use-debounce';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
+import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import {
     useCreateDatasetMutation,
@@ -37,8 +39,6 @@ import {
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import {
     DatasetAccess,
@@ -64,7 +64,7 @@ type Props = {
     dataProductId?: string;
     dataOutputId?: string;
     modalCallbackOnSubmit?: () => void;
-    formRef?: React.Ref<FormInstance<DatasetCreateFormSchema>>;
+    formRef?: Ref<FormInstance<DatasetCreateFormSchema>>;
 };
 
 const { TextArea } = Input;
@@ -110,9 +110,9 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId || '', {
         skip: mode === 'edit' || !dataProductId,
     });
-    const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
-    const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
+    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
+    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [requestDatasetsAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
@@ -162,7 +162,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
         value: owner.id,
     }));
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -174,7 +174,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
-                    domain_id: dataProduct.domain.id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
@@ -191,7 +190,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     navigate(createDataOutputIdPath(dataOutputId, dataProductId));
                 } else {
                     if (dataProductId) {
-                        navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+                        navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
                     } else {
                         navigate(createDatasetIdPath(response.id));
                     }
@@ -208,7 +207,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     description: values.description,
                     data_product_id: currentDataset.data_product_id,
                     tag_ids: values.tag_ids,
-                    domain_id: currentDataset.domain.id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
@@ -244,7 +242,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const handleDeleteDataset = async () => {
         if (canDelete && currentDataset) {
             try {
-                await deleteDataset(currentDataset);
+                await deleteDataset(currentDataset).unwrap();
                 dispatchMessage({ content: t('Output port deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
@@ -354,7 +352,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                         loading={isFetchingUsers}
                         mode={'multiple'}
                         options={userSelectOptions}
-                        filterOption={selectFilterOptionByLabelAndValue}
+                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                         tokenSeparators={[',']}
                         allowClear
                     />
@@ -373,9 +371,11 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 <Select
                     loading={isFetchingLifecycles}
                     allowClear
-                    showSearch
-                    options={lifecycles.map((lifecycle) => ({ value: lifecycle.id, label: lifecycle.name }))}
-                    filterOption={selectFilterOptionByLabelAndValue}
+                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                    options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
+                        value: lifecycle.id,
+                        label: lifecycle.name,
+                    }))}
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
@@ -397,7 +397,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     placeholder={t('Select output port tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
-                    filterOption={selectFilterOptionByLabel}
+                    showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>

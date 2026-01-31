@@ -14,6 +14,10 @@ class GlueDataOutput(BaseDataOutputConfiguration):
     )
     database_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
     table_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
+    access_granularity: Mapped[str] = mapped_column(
+        nullable=True,
+        use_existing_column=True,
+    )
 
     __mapper_args__ = {
         "polymorphic_identity": "GlueDataOutput",

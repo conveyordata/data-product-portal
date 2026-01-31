@@ -1,6 +1,6 @@
 services:
   postgresql:
-    image: postgres:17.6
+    image: pgvector/pgvector:0.8.0-pg17
     container_name: data-product-portal-postgresql-test
     ports:
       - "5433:5432"

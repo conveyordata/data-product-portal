@@ -1,19 +1,18 @@
-import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
-import { DecisionStatus } from '@/types/roles';
-import { Prototype } from '@/types/roles/role.contract';
+import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { DecisionStatus, Prototype } from '@/types/roles';
 import type { UserContract } from '@/types/users';
 
 export function useGetDataProductOwners(dataProductId: string | undefined): UserContract[] | undefined {
-    const { data: roleAssignments } = useGetDataProductRoleAssignmentsQuery(
+    const { data: roleAssignments } = useListDataProductRoleAssignmentsQuery(
         {
-            data_product_id: dataProductId,
+            dataProductId: dataProductId,
             decision: DecisionStatus.Approved,
         },
         { skip: !dataProductId },
     );
 
-    return roleAssignments
-        ?.filter((assignment) => assignment.role.prototype === Prototype.OWNER)
+    return roleAssignments?.role_assignments
+        ?.filter((assignment) => assignment.role?.prototype === Prototype.OWNER)
         .map((assignment) => assignment.user);
 }
 

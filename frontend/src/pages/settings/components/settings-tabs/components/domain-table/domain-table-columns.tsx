@@ -2,6 +2,7 @@ import { Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import type { GetDomainsItem } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import type { DomainsGetContract } from '@/types/domain';
 import { Sorter } from '@/utils/table-sorter.helper';
 
@@ -11,8 +12,8 @@ type Props = {
     handleEdit: (domain: DomainsGetContract) => () => void;
 };
 
-export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): TableColumnsType<DomainsGetContract> => {
-    const sorter = new Sorter<DomainsGetContract>();
+export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): TableColumnsType<GetDomainsItem> => {
+    const sorter = new Sorter<GetDomainsItem>();
     return [
         {
             title: t('Id'),

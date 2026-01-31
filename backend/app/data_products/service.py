@@ -31,19 +31,21 @@ from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
+from app.data_products.output_port_technical_assets_link.model import (
+    DataOutputDatasetAssociation,
+)
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation as DataProductDatasetModel,
+)
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -60,12 +62,10 @@ from app.data_products.schema_response import (
 )
 from app.data_products.technical_assets.model import DataOutput as DataOutputModel
 from app.data_products.technical_assets.schema_response import DataOutputGet
-from app.data_products_datasets.model import (
-    DataProductDatasetAssociation as DataProductDatasetModel,
-)
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.resource_names.service import ResourceNameService
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -94,7 +94,9 @@ class DataProductService:
     def get_rolled_up_tags(self, data_product_id: UUID) -> set[Tag]:
         ensure_data_product_exists(data_product_id, self.db)
         rolled_up_tags = set()
-        for output_ports in DatasetService(self.db).get_output_ports(data_product_id):
+        for output_ports in OutputPortService(self.db).get_output_ports(
+            data_product_id
+        ):
             rolled_up_tags.update(output_ports.tags)
         for technical_asset in self.get_data_outputs(data_product_id):
             rolled_up_tags.update(technical_asset.tags)
@@ -212,9 +214,9 @@ class DataProductService:
         data_product: DataProductCreate,
     ) -> DataProductModel:
         if (
-            validity := self.namespace_validator.validate_namespace(
-                data_product.namespace, self.db
-            ).validity
+            validity := ResourceNameService(model=DataProductModel)
+            .validate_resource_name(data_product.namespace, self.db)
+            .validity
         ) != NamespaceValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -253,9 +255,9 @@ class DataProductService:
         if (
             current_data_product.namespace != data_product.namespace
             and (
-                validity := self.namespace_validator.validate_namespace(
-                    data_product.namespace, self.db
-                ).validity
+                validity := ResourceNameService(model=DataProductModel)
+                .validate_resource_name(data_product.namespace, self.db)
+                .validity
             )
             != NamespaceValidityType.VALID
         ):
@@ -347,7 +349,7 @@ class DataProductService:
                 detail="Cannot link own dataset to data product",
             )
 
-        if not DatasetService(self.db).is_visible_to_user(dataset, actor):
+        if not OutputPortService(self.db).is_visible_to_user(dataset, actor):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",
@@ -698,21 +700,3 @@ class DataProductService:
                 )
 
         return Graph(nodes=set(nodes), edges=set(edges))
-
-    def validate_data_product_namespace(self, namespace: str) -> NamespaceValidation:
-        return self.namespace_validator.validate_namespace(namespace, self.db)
-
-    @classmethod
-    def data_product_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
-        return NamespaceValidator.namespace_suggestion(name)
-
-    @classmethod
-    def data_product_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return NamespaceValidator.namespace_length_limits()
-
-    def validate_data_output_namespace(
-        self, namespace: str, data_product_id: UUID
-    ) -> NamespaceValidation:
-        return self.data_output_namespace_validator.validate_namespace(
-            namespace, self.db, data_product_id
-        )

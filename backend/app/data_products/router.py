@@ -31,7 +31,12 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.data_products import email
+from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation,
+)
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -69,7 +74,6 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponse,
 )
 from app.data_products.technical_assets.service import DataOutputService
-from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -79,27 +83,39 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.notifications.service import NotificationService
+from app.resource_names.service import (
+    DataOutputResourceNameValidator,
+    ResourceNameService,
+)
+from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 router = APIRouter()
 
 
-@router.get("/namespace_suggestion")
+@router.get("/namespace_suggestion", deprecated=True)
 def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataProductService.data_product_namespace_suggestion(name)
+    return NamespaceSuggestion(
+        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
+    )
 
 
-@router.get("/validate_namespace")
+@router.get("/validate_namespace", deprecated=True)
 def validate_data_product_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return DataProductService(db).validate_data_product_namespace(namespace)
+    return NamespaceValidation(
+        validity=ResourceNameService(model=DataProductModel)
+        .validate_resource_name(namespace, db)
+        .validity
+    )
 
 
-@router.get("/namespace_length_limits")
+@router.get("/namespace_length_limits", deprecated=True)
 def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataProductService.data_product_namespace_length_limits()
+    return NamespaceLengthLimits(
+        max_length=ResourceNameService.resource_name_length_limits().max_length
+    )
 
 
 @router.post(
@@ -154,6 +170,9 @@ def create_data_product(
         extra_receiver_ids=owners,
     )
     RefreshInfrastructureLambda().trigger()
+    OutputPortService(db).recalculate_search_for_output_ports_of_product(
+        created_data_product.id
+    )
     return CreateDataProductResponse(id=created_data_product.id)
 
 
@@ -264,6 +283,7 @@ def update_data_product(
         )
     )
     RefreshInfrastructureLambda().trigger()
+    OutputPortService(db).recalculate_search_for_output_ports_of_product(id)
     return result
 
 
@@ -387,7 +407,7 @@ def _send_dataset_link_emails(
 
 
 @router.get("/{id}/graph")
-def get_graph_data(
+def get_data_product_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
     return DataProductService(db).get_graph_data(id, level)
@@ -620,15 +640,20 @@ def get_data_products(
 def get_event_history_old(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[GetEventHistoryResponseItemOld]:
-    return get_event_history(id, db).events
+    return EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
 
 
-@router.get("/{id}/history")
-def get_event_history(
+@router.get(f"{route}/{{id}}/history")
+def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
     return GetEventHistoryResponse(
-        events=EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
+        events=[
+            GetEventHistoryResponseItemOld.model_validate(event).convert()
+            for event in EventService(db).get_history(
+                id, EventReferenceEntity.DATA_PRODUCT
+            )
+        ]
     )
 
 
@@ -1048,11 +1073,8 @@ def unlink_input_port_from_data_product(
 def validate_data_output_namespace(
     id: UUID, namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return validate_technical_asset_namespace(id, namespace, db)
-
-
-@router.get(f"{route}/{{id}}/technical_asset/validate_namespace")
-def validate_technical_asset_namespace(
-    id: UUID, namespace: str, db: Session = Depends(get_db_session)
-) -> NamespaceValidation:
-    return DataProductService(db).validate_data_output_namespace(namespace, id)
+    return NamespaceValidation(
+        validity=DataOutputResourceNameValidator()
+        .validate_resource_name(resource_name=namespace, db=db, scope=id)
+        .validity
+    )

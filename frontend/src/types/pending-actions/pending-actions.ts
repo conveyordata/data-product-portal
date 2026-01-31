@@ -1,7 +1,6 @@
-import type { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
-import type { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
-import type { DataProductRoleRequest, DatasetRoleRequest } from '../roles';
-import type { DataProductRoleAssignmentContract, DatasetRoleAssignmentContract } from '../roles/role.contract';
+import type { DataOutputDatasetContract } from '../data-output-dataset';
+import type { DataProductDatasetContract } from '../data-product-dataset';
+import type { DataProductRoleAssignment, OutputPortRoleAssignment } from '../roles';
 
 export enum PendingActionTypes {
     DataProductDataset = 'DataProductDataset',
@@ -18,11 +17,11 @@ export interface DataOutputDatasetPendingAction extends DataOutputDatasetContrac
     pending_action_type: PendingActionTypes.DataOutputDataset;
 }
 
-export interface DataProductRoleAssignmentPendingAction extends DataProductRoleAssignmentContract {
+export interface DataProductRoleAssignmentPendingAction extends DataProductRoleAssignment {
     pending_action_type: PendingActionTypes.DataProductRoleAssignment;
 }
 
-export interface DatasetRoleAssignmentPendingAction extends DatasetRoleAssignmentContract {
+export interface DatasetRoleAssignmentPendingAction extends OutputPortRoleAssignment {
     pending_action_type: PendingActionTypes.DatasetRoleAssignment;
 }
 
@@ -31,9 +30,3 @@ export type PendingAction =
     | DataOutputDatasetPendingAction
     | DataProductRoleAssignmentPendingAction
     | DatasetRoleAssignmentPendingAction;
-
-export type ActionResolveRequest =
-    | { type: PendingActionTypes.DataOutputDataset; request: DataOutputDatasetLinkRequest }
-    | { type: PendingActionTypes.DataProductDataset; request: DataProductDatasetLinkRequest }
-    | { type: PendingActionTypes.DataProductRoleAssignment; request: DataProductRoleRequest }
-    | { type: PendingActionTypes.DatasetRoleAssignment; request: DatasetRoleRequest };

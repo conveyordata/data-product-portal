@@ -1,9 +1,7 @@
 import { Flex, Typography } from 'antd';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-
-import { useGetThemeSettingsQuery } from '@/store/features/theme-settings/theme-settings-api-slice';
-
+import { useGetThemeSettingsQuery } from '@/store/api/services/generated/configurationThemeSettingsApi.ts';
 import styles from './sidebar-logo.module.scss';
 
 type Props = {

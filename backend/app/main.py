@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
+from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
@@ -25,6 +26,7 @@ from app.mcp.middleware import LoggingMiddleware
 from app.mcp.router import router as mcp_router
 from app.settings import settings
 from app.shared.router import router
+from app.shared.schema import ORMModel
 
 with open(Path(__file__).parent.parent / "VERSION", "r") as f:
     API_VERSION = f.read().strip()
@@ -69,9 +71,11 @@ async def lifespan(_: FastAPI):
         AuthorizationService(db).reload_enforcer()
 
     backend_analytics(API_VERSION)
-    task = asyncio.create_task(check_expired_admins())
+    admin_task = asyncio.create_task(check_expired_admins())
+    device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
     yield
-    task.cancel()
+    admin_task.cancel()
+    device_flow_cleanup_task.cancel()
 
 
 # Combine both lifespans
@@ -150,14 +154,23 @@ async def send_response_to_webhook(request: Request, call_next):
 
 
 # K8S health and liveness check
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
     return {"message": "Hello World"}
 
 
-@app.get("/api/version")
-def get_version():
+@app.get("/api/version", deprecated=True, tags=["Version"])
+def get_version_old():
     return {"version": app.version}
+
+
+class VersionResponse(ORMModel):
+    version: str
+
+
+@app.get("/api/v2/version", tags=["Version"])
+def get_version():
+    return VersionResponse(version=app.version)
 
 
 def use_route_names_as_operation_ids(app: FastAPI) -> None:
@@ -166,7 +179,7 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
     Should be called only after all routes have been added.
     """
     for route in app.routes:
-        if isinstance(route, APIRoute):
+        if isinstance(route, APIRoute) and route.path.startswith("/api/v2"):
             route.operation_id = route.name
 
 

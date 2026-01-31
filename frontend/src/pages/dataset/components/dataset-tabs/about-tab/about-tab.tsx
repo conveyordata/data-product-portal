@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery, useUpdateDatasetAboutMutation } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';

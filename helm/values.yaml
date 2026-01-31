@@ -22,7 +22,6 @@ email_button_color: ""
 webhook:
   url: ""
   secret: ""
-postgres_enabled: false
 cloudwatch_enabled: false
 api_key:
   enabled: false
@@ -163,12 +162,16 @@ volumes:
     configMap:
       name: sampledata
       optional: true
+  - name: tmpdir
+    emptyDir: {}
 
 volumeMounts:
   - name: varlog
     mountPath: /var/log
   - name: sampledata
     mountPath: /sampledata
+  - name: tmpdir
+    mountPath: /tmp
 
 nodeSelector: {}
 

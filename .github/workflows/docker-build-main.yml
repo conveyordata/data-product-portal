@@ -15,7 +15,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Get commit hash
@@ -30,7 +30,7 @@ jobs:
       contents: read
     needs: ["prep-version"]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Configure AWS Credentials
@@ -65,7 +65,7 @@ jobs:
       contents: read
     needs: ["prep-version"]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Configure AWS Credentials
@@ -93,6 +93,36 @@ jobs:
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG"
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+  helm:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: [ "prep-version" ]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+        with:
+          registries: ${{ secrets.PUBLICAWSACCOUNTID }}
+          registry-type: public
+          mask-password: "true"
+      - name: Publish Helm package
+        uses: WyriHaximus/github-action-helm3@e3894d973c282349e3d41d3347767f2b2545b583 # v4.0.2
+        env:
+          VERSION: ${{ needs.prep-version.outputs.version }}
+        with:
+          exec: |
+            helm package helm --version 0.0.0-$VERSION
+            helm push data-product-portal-0.0.0-$VERSION.tgz oci://public.ecr.aws/conveyordata
 
   deploy-on-portal-dev:
     name: Deploy to portal dev
@@ -100,9 +130,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: ["backend","frontend"]
+    needs: ["backend", "frontend", "helm"]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
       - name: Dispatch to demo-portal-infrastructure
@@ -111,7 +141,7 @@ jobs:
           repo_name="demo-portal-infrastructure"
           event_type="apply-portal-release"
           version="$(git rev-parse --short=7 HEAD)"
-          chart="$(git describe --tags --abbrev=0 | cut -c2-)"
+          chart="0.0.0-${version}"
 
           curl -L \
             -X POST \

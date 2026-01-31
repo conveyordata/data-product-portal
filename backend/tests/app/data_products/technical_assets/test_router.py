@@ -41,7 +41,7 @@ def data_output_payload():
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
         "namespace": "namespace-updated",
-        "sourceAligned": True,
+        "technical_mapping": "custom",
         "configuration": {
             "bucket": "test",
             "path": "test",
@@ -66,7 +66,7 @@ def data_output_payload_not_owner():
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
         "namespace": "namespace",
-        "sourceAligned": True,
+        "technical_mapping": "custom",
         "configuration": {
             "bucket": "test",
             "path": "test",
@@ -112,11 +112,35 @@ class TestDataOutputsRouter:
             data_product_id=data_output_payload["owner_id"],
         )
         payload = deepcopy(data_output_payload)
-        payload["sourceAligned"] = False
+        payload["technical_mapping"] = "default"
 
         created_data_output = self.create_data_output(client, payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
+
+    def test_deprecated_source_aligned(self, data_output_payload, client: TestClient):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
+        payload = deepcopy(data_output_payload)
+        payload.pop("technical_mapping")
+        payload["sourceAligned"] = True
+
+        created_data_output = self.create_data_output(client, payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
+        assert (
+            self.get_data_output_by_id(
+                client, created_data_output.json().get("id")
+            ).json()["technical_mapping"]
+            == "custom"
+        )
 
     def test_create_data_output_not_product_owner(
         self, data_output_payload_not_owner, client: TestClient
@@ -273,18 +297,42 @@ class TestDataOutputsRouter:
                     "type": "dataProductNode",
                 }
 
+    def test_get_namespace_suggestion_substitution_old(self, client: TestClient):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion_old(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+
+    def test_get_namespace_length_limits_old(self, client):
+        response = self.get_namespace_length_limits_old(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
     def test_get_namespace_suggestion_substitution(self, client: TestClient):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
         body = response.json()
 
         assert response.status_code == 200
-        assert body["namespace"] == "test-with-spaces"
+        assert body["resource_name"] == "test-with-spaces"
 
     def test_get_namespace_length_limits(self, client):
         response = self.get_namespace_length_limits(client)
         assert response.status_code == 200
         assert response.json()["max_length"] > 1
+
+    def test_get_namespace_validation(self, client: TestClient):
+        namespace = "valid-namespace"
+        data_product = DataProductFactory()
+        response = self.get_namespace_validation(
+            client, namespace, str(data_product.id)
+        )
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["validity"] == "VALID"
 
     def test_create_data_output_duplicate_namespace(
         self, data_output_payload, client: TestClient
@@ -586,12 +634,33 @@ class TestDataOutputsRouter:
         return client.put(f"{OLD_ENDPOINT}/{data_output_id}/status", json=status)
 
     @staticmethod
-    def get_namespace_suggestion(client: TestClient, name) -> Response:
+    def get_namespace_suggestion_old(client: TestClient, name) -> Response:
         return client.get(f"{OLD_ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def get_namespace_length_limits(client: TestClient) -> Response:
+    def get_namespace_suggestion(client: TestClient, name) -> Response:
+        return client.post(f"/api/v2/resource_names/sanitize?name={name}")
+
+    @staticmethod
+    def get_namespace_validation(
+        client: TestClient, namespace, data_product_id
+    ) -> Response:
+        return client.post(
+            "/api/v2/resource_names/validate",
+            json={
+                "resource_name": namespace,
+                "model": "technical_asset",
+                "data_product_id": data_product_id,
+            },
+        )
+
+    @staticmethod
+    def get_namespace_length_limits_old(client: TestClient) -> Response:
         return client.get(f"{OLD_ENDPOINT}/namespace_length_limits")
+
+    @staticmethod
+    def get_namespace_length_limits(client: TestClient) -> Response:
+        return client.get("/api/v2/resource_names/constraints")
 
     @staticmethod
     def get_data_output_history(client, data_output_id):

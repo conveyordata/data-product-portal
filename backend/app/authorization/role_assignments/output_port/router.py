@@ -7,14 +7,15 @@ from sqlalchemy.orm import Session
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.role_assignments.output_port.schema import (
-    CreateRoleAssignment,
+    CreateOutputPortRoleAssignment,
     CreateRoleAssignmentOld,
-    DecideRoleAssignment,
+    DecideOutputPortRoleAssignment,
+    DeleteOutputPortRoleAssignmentResponse,
     ListRoleAssignmentsResponse,
-    ModifyRoleAssignment,
-    RequestRoleAssignment,
+    ModifyOutputPortRoleAssignment,
+    OutputPortRoleAssignmentResponse,
+    RequestOutputPortRoleAssignment,
     RoleAssignmentOld,
-    RoleAssignmentResponse,
     RoleAssignmentResponseOld,
     UpdateRoleAssignment,
 )
@@ -30,7 +31,7 @@ from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
-from app.notifications.service import NotificationService
+from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 router = APIRouter()
@@ -47,11 +48,11 @@ router = APIRouter()
         )
     ],
 )
-def delete_assignment(
+def delete_output_port_role_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
+) -> DeleteOutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).delete_assignment(id)
     if assignment.decision is DecisionStatus.APPROVED:
         DatasetAuthAssignment(assignment).remove()
@@ -72,6 +73,10 @@ def delete_assignment(
         extra_receiver_ids=(
             [requester] if (requester := assignment.requested_by_id) is not None else []
         ),
+    )
+    return DeleteOutputPortRoleAssignmentResponse(
+        id=assignment.id,
+        output_port_id=assignment.dataset_id,
     )
 
 
@@ -99,8 +104,8 @@ def list_assignments_old(
 
 def convert_to_role_assignment(
     assignment: RoleAssignmentResponseOld,
-) -> RoleAssignmentResponse:
-    return RoleAssignmentResponse(
+) -> OutputPortRoleAssignmentResponse:
+    return OutputPortRoleAssignmentResponse(
         id=assignment.id,
         output_port=assignment.dataset,
         user=assignment.user,
@@ -114,7 +119,7 @@ def convert_to_role_assignment(
 
 
 @router.get(route)
-def list_assignments(
+def list_output_port_role_assignments(
     output_port_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
@@ -182,11 +187,11 @@ def request_assignment_old(
         )
     ],
 )
-def request_assignment(
-    request: RequestRoleAssignment,
+def request_output_port_role_assignment(
+    request: RequestOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> OutputPortRoleAssignmentResponse:
     return convert_to_role_assignment(
         request_assignment_old(
             request.output_port_id,
@@ -204,6 +209,7 @@ def request_assignment(
             Authorization.enforce(Action.DATASET__CREATE_USER, resolver=DatasetResolver)
         )
     ],
+    deprecated=True,
 )
 def create_assignment_old(
     id: UUID,
@@ -265,11 +271,11 @@ def create_assignment_old(
         )
     ],
 )
-def create_assignment(
-    request: CreateRoleAssignment,
+def create_output_port_role_assignment(
+    request: CreateOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> OutputPortRoleAssignmentResponse:
     return convert_to_role_assignment(
         create_assignment_old(
             request.output_port_id,
@@ -294,7 +300,7 @@ def create_assignment(
 )
 def decide_assignment_old(
     id: UUID,
-    request: DecideRoleAssignment,
+    request: DecideOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponseOld:
@@ -356,12 +362,12 @@ def decide_assignment_old(
         )
     ],
 )
-def decide_assignment(
+def decide_output_port_role_assignment(
     id: UUID,
-    request: DecideRoleAssignment,
+    request: DecideOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> OutputPortRoleAssignmentResponse:
     return convert_to_role_assignment(decide_assignment_old(id, request, db, user))
 
 
@@ -379,7 +385,7 @@ def decide_assignment(
 )
 def modify_assigned_role_old(
     id: UUID,
-    request: ModifyRoleAssignment,
+    request: ModifyOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponseOld:
@@ -424,10 +430,10 @@ def modify_assigned_role_old(
         )
     ],
 )
-def modify_assigned_role(
+def modify_output_port_role_assignment(
     id: UUID,
-    request: ModifyRoleAssignment,
+    request: ModifyOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> OutputPortRoleAssignmentResponse:
     return convert_to_role_assignment(modify_assigned_role_old(id, request, db, user))

@@ -146,3 +146,56 @@ def test_no_token_in_route_params():
     assert not routes_with_token, (
         f"Found unwanted 'token' query parameter in the following routes: {routes_with_token}"
     )
+
+
+def test_openapi_no_duplicate_operation_ids():
+    openapi_schema = app.openapi()
+    operation_ids = set()
+    duplicates = set()
+
+    for methods in openapi_schema.get("paths", {}).values():
+        for config in methods.values():
+            if operation_id := config.get("operationId"):
+                if operation_id in operation_ids:
+                    duplicates.add(operation_id)
+                operation_ids.add(operation_id)
+
+    assert not duplicates, f"Duplicate operationIds found in OpenAPI spec: {duplicates}"
+
+
+def test_routes_not_v2_are_deprecated():
+    """
+    Ensures that all routes not starting with /api/v2/ are marked as deprecated.
+    """
+    # Add paths or route names here to skip this check
+    EXCEPTIONS = {
+        # MCP Routes
+        "oauth_metadata",
+        "openid_config",
+        "oauth_protected_resource",
+        "register",
+        # Root route is hidden
+        "root",
+    }
+
+    non_deprecated_old_routes = []
+
+    for route in app.routes:
+        if not isinstance(route, APIRoute):
+            continue
+
+        # Skip exceptions
+        if route.path in EXCEPTIONS or route.name in EXCEPTIONS:
+            continue
+
+        if not route.path.startswith("/api/v2/") and not route.deprecated:
+            non_deprecated_old_routes.append(
+                f"Route '{route.name}' ('{route.path}') is not /api/v2/ but is NOT marked as deprecated."
+            )
+
+    error_msg = (
+        "The following routes are legacy (not /api/v2/) but lack the 'deprecated=True' flag:\n"
+        + "\n".join(non_deprecated_old_routes)
+    )
+
+    assert not non_deprecated_old_routes, error_msg

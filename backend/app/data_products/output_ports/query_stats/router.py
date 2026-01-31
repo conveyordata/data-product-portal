@@ -25,7 +25,7 @@ old_route = "/datasets/{id}/query_stats"
 route = "/v2/data_products/{data_product_id}/output_ports/{id}/query_stats"
 
 
-@router.get(old_route)
+@router.get(old_route, deprecated=True)
 def get_dataset_query_stats(
     id: UUID,
     granularity: QueryStatsGranularity = Query(default=QueryStatsGranularity.WEEK),

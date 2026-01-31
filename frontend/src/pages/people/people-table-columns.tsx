@@ -1,15 +1,16 @@
 import { Checkbox, Select, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { type GlobalRoleAssignmentContract, Prototype, type RoleContract } from '@/types/roles/role.contract.ts';
-import type { UserContract, UsersGetContract } from '@/types/users/user.contract.ts';
+import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
+import { type GlobalRoleAssignment, Prototype } from '@/types/roles';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 import styles from './people-table.module.scss';
 
 type SelectorProps = {
-    role: GlobalRoleAssignmentContract | null;
-    everyone: RoleContract | undefined;
+    role: GlobalRoleAssignment | null;
+    everyone: Role | undefined;
     options: { label: string; value: string }[];
     onChange: (value: string) => void;
     disabled?: boolean;
@@ -35,20 +36,20 @@ export const getPeopleTableColumns = ({
     changeCheckbox,
 }: {
     t: TFunction;
-    users: UsersGetContract;
+    users: UsersGet[];
     canAssignRole: boolean;
-    allRoles: RoleContract[];
-    onChange: (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => void;
+    allRoles: Role[];
+    onChange: (user_id: string, value: string, original: GlobalRoleAssignment | null) => void;
     changeCheckbox: (user_id: string, can_become_admin: boolean) => void;
-}): TableColumnsType<UsersGetContract[0]> => {
-    const sorter = new Sorter<UsersGetContract[0]>();
+}): TableColumnsType<UsersGet> => {
+    const sorter = new Sorter<UsersGet>();
     const everyone = allRoles.find((role) => role.prototype === Prototype.EVERYONE);
     const options = allRoles.map((role) => ({
         label: role.name,
         value: role.prototype === Prototype.EVERYONE ? '' : role.id,
     }));
 
-    const columns: TableColumnsType<UsersGetContract[0]> = [
+    const columns: TableColumnsType<UsersGet> = [
         {
             title: t('Id'),
             dataIndex: 'id',
@@ -83,7 +84,7 @@ export const getPeopleTableColumns = ({
             dataIndex: 'global_role',
             ellipsis: { showTitle: false },
             width: 4,
-            render: (role: GlobalRoleAssignmentContract | null, user: UserContract) => {
+            render: (role: GlobalRoleAssignment | null, user: UsersGet) => {
                 let name = role?.role.name;
                 if (role?.role.prototype === Prototype.ADMIN) {
                     name = everyone?.name;

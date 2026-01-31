@@ -5,7 +5,7 @@ on:
 permissions:
   contents: read
 env:
-  POETRY_VERSION: "2.2.1"
+  POETRY_VERSION: '2.3.1'
 
 jobs:
   environment:
@@ -19,7 +19,7 @@ jobs:
       POSTGRES_SERVER: ${{ steps.out.outputs.POSTGRES_SERVER }}
     steps:
       - name: Checkout github repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set test environment variables as outputs
         id: out
         working-directory: ./backend
@@ -31,7 +31,7 @@ jobs:
     needs: [environment]
     services:
       postgres:
-        image: postgres
+        image: pgvector/pgvector:0.8.0-pg17
         env:
           POSTGRES_PASSWORD: ${{ needs.environment.outputs.POSTGRES_PASSWORD }}
           POSTGRES_PORT: ${{ needs.environment.outputs.POSTGRES_PORT }}
@@ -47,7 +47,7 @@ jobs:
           - ${{ needs.environment.outputs.POSTGRES_PORT }}:5432
     steps:
       - name: Checkout github repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Poetry
         uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
@@ -56,7 +56,7 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
       - name: Setup Python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           cache: "poetry"
           cache-dependency-path: "backend/poetry.lock"
@@ -69,6 +69,8 @@ jobs:
         working-directory: ./backend
         id: run-test
         run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
+        env:
+          TEST_EMBEDDING_LATENCY_BOUND: "3.000"
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
         run: ./check_coverage.sh
@@ -83,53 +85,66 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set up Go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
-          go-version-file: cli/go.mod
-          cache-dependency-path: cli/go.sum
+          go-version-file: cli/golang/go.mod
+          cache-dependency-path: cli/golang/go.sum
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
           args: --timeout 15m0s
-          working-directory: cli
+          working-directory: cli/golang
 
   pre-commit:
     name: Run pre-commit hooks
     runs-on: ubuntu-latest
     steps:
-      - name: Git checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - name: Install Task # to run taskfile.yml
+      run: pip install go-task-bin
 
-      - name: Install Task # to run taskfile.yml
-        run: pip install go-task-bin
+    - name: Git checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Install Poetry
-        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
-        with:
-          version: ${{ env.POETRY_VERSION }}
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      - name: Setup Python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
-        with:
-          cache: "poetry"
-          cache-dependency-path: "backend/poetry.lock"
-          python-version-file: "backend/.python-version"
-      - name: Install Python dependencies
-        working-directory: backend
-        run: poetry install --no-interaction
+    - name: Install Poetry
+      uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
+      with:
+        version: ${{ env.POETRY_VERSION }}
+        virtualenvs-create: true
+        virtualenvs-in-project: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
-        with:
-          cache: "npm"
-          cache-dependency-path: "frontend/package-lock.json"
-          node-version-file: "frontend/package.json"
-      - name: Install npm dependencies
-        working-directory: frontend
-        run: npm ci --ignore-scripts --legacy-peer-deps
+    - name: Setup Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        cache: 'poetry'
+        cache-dependency-path: 'backend/poetry.lock'
+        python-version-file: 'backend/.python-version'
 
-      - name: Run pre-commit
-        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+    - name: Install Python dependencies
+      working-directory: backend
+      run: poetry install --no-interaction
+
+    - name: Setup Node.js
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+      with:
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+        node-version-file: 'frontend/package.json'
+
+    - name: Install npm dependencies
+      working-directory: frontend
+      run: npm ci --ignore-scripts --legacy-peer-deps
+
+    - name: Setup Node.js
+      uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      with:
+        cache: "npm"
+        cache-dependency-path: "frontend/package-lock.json"
+        node-version-file: "frontend/package.json"
+    - name: Install npm dependencies
+      working-directory: frontend
+      run: npm ci --ignore-scripts --legacy-peer-deps
+
+    - name: Run pre-commit
+      uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1

@@ -8,12 +8,13 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
 from app.authorization.role_assignments.global_.schema import (
     BecomeAdmin,
-    CreateRoleAssignment,
-    DecideRoleAssignment,
+    CreateGlobalRoleAssignment,
+    DecideGlobalRoleAssignment,
+    DeleteGlobalRoleAssignmentResponse,
+    GlobalRoleAssignmentResponse,
     ListRoleAssignmentsResponse,
-    ModifyRoleAssignment,
+    ModifyGlobalRoleAssignment,
     RoleAssignmentRequest,
-    RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.authorization.role_assignments.global_.service import RoleAssignmentService
@@ -67,11 +68,11 @@ def revoke_admin(
         )
     ],
 )
-def create_assignment(
-    request: CreateRoleAssignment,
+def create_global_role_assignment(
+    request: CreateGlobalRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> GlobalRoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db).create_assignment(
         RoleAssignmentRequest(user_id=request.user_id, role_id=role_id),
@@ -87,15 +88,15 @@ def create_assignment(
         )
     ],
 )
-def delete_assignment(
+def delete_global_role_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
-) -> None:
+) -> DeleteGlobalRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
         GlobalAuthAssignment(assignment).remove()
-    return None
+    return DeleteGlobalRoleAssignmentResponse(id=assignment.id)
 
 
 def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
@@ -118,12 +119,14 @@ def list_assignments_old(
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
-) -> Sequence[RoleAssignmentResponse]:
-    return list_assignments(user_id=user_id, role_id=role_id, db=db).role_assignments
+) -> Sequence[GlobalRoleAssignmentResponse]:
+    return list_global_role_assignments(
+        user_id=user_id, role_id=role_id, db=db
+    ).role_assignments
 
 
 @router.get(route)
-def list_assignments(
+def list_global_role_assignments(
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
@@ -146,11 +149,11 @@ def list_assignments(
 )
 def decide_assignment_old(
     id: UUID,
-    request: DecideRoleAssignment,
+    request: DecideGlobalRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    return decide_assignment(id, request, db, user)
+) -> GlobalRoleAssignmentResponse:
+    return decide_global_role_assignment(id, request, db, user)
 
 
 @router.post(
@@ -161,12 +164,12 @@ def decide_assignment_old(
         )
     ],
 )
-def decide_assignment(
+def decide_global_role_assignment(
     id: UUID,
-    request: DecideRoleAssignment,
+    request: DecideGlobalRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     original = service.get_assignment(id)
 
@@ -197,11 +200,11 @@ def decide_assignment(
 )
 def modify_assigned_role_old(
     id: UUID,
-    request: ModifyRoleAssignment,
+    request: ModifyGlobalRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    return modify_assigned_role(id, request, db, user)
+) -> GlobalRoleAssignmentResponse:
+    return modify_global_role_assignment(id, request, db, user)
 
 
 @router.put(
@@ -212,12 +215,12 @@ def modify_assigned_role_old(
         )
     ],
 )
-def modify_assigned_role(
+def modify_global_role_assignment(
     id: UUID,
-    request: ModifyRoleAssignment,
+    request: ModifyGlobalRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     original_role = service.get_assignment(id).role_id
 

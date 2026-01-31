@@ -1,5 +1,5 @@
 import { usePostHog } from '@posthog/react';
-import { Button, type GetProps, type Input, Table } from 'antd';
+import { Button, Flex, type GetProps, type Input, Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
@@ -46,8 +46,8 @@ export function DataProductsTable() {
 
     const [searchTerm, setSearchTerm] = useState<string>('');
 
-    const onSearch: SearchProps['onSearch'] = (value) => {
-        setSearchTerm(value);
+    const onSearch: SearchProps['onChange'] = (e) => {
+        setSearchTerm(e.target.value);
     };
 
     const filteredDataProducts = useMemo(() => {
@@ -72,19 +72,21 @@ export function DataProductsTable() {
 
     return (
         <SearchPage
-            onSearch={onSearch}
+            onChange={onSearch}
             title={t('Data Products')}
             searchPlaceholder={t('Search data products by name')}
-            actions={<RoleFilter mode={'data_products'} selectedRole={selectedRole} onRoleChange={handleRoleChange} />}
-            createButton={
-                <Link
-                    to={ApplicationPaths.DataProductNew}
-                    onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
-                >
-                    <Button type={'primary'} disabled={!canCreateDataProduct}>
-                        {t('Create Data Product')}
-                    </Button>
-                </Link>
+            actions={
+                <Flex justify={'space-between'}>
+                    <RoleFilter mode={'data_products'} selectedRole={selectedRole} onRoleChange={handleRoleChange} />
+                    <Link
+                        to={ApplicationPaths.DataProductNew}
+                        onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
+                    >
+                        <Button type={'primary'} disabled={!canCreateDataProduct}>
+                            {t('Create Data Product')}
+                        </Button>
+                    </Link>
+                </Flex>
             }
         >
             <Table<DataProductsGetContract[0]>

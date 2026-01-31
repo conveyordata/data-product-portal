@@ -2,10 +2,10 @@ import uuid
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import Column, Enum, ForeignKey, String
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
+from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
@@ -20,10 +20,13 @@ if TYPE_CHECKING:
     )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
-    from app.configuration.domains.model import Domain
-    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products.model import DataProduct
-    from app.data_products_datasets.model import DataProductDatasetAssociation
+    from app.data_products.output_port_technical_assets_link.model import (
+        DataOutputDatasetAssociation,
+    )
+    from app.data_products.output_ports.input_ports.model import (
+        DataProductDatasetAssociation,
+    )
 
 
 class Dataset(Base, BaseORM):
@@ -41,14 +44,14 @@ class Dataset(Base, BaseORM):
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
     )
     usage = Column(String, nullable=True)
-    search_vector = Column(postgresql.TSVECTOR)
+    search_vector = Column(TSVECTOR)
+    embeddings = deferred(Column(Vector(384)))
 
     # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
-    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
-    data_product_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_products.id"))
+    data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
 
     # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
@@ -87,7 +90,6 @@ class Dataset(Base, BaseORM):
     data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
     )
-    domain: Mapped["Domain"] = relationship(back_populates="datasets", lazy="joined")
 
     @property
     def data_product_count(self) -> int:

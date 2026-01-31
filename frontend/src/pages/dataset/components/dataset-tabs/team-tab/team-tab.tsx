@@ -6,27 +6,27 @@ import { useSelector } from 'react-redux';
 import { Searchbar } from '@/components/form';
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import {
+    type OutputPortRoleAssignmentResponse,
+    useCreateOutputPortRoleAssignmentMutation,
+    useListOutputPortRoleAssignmentsQuery,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import {
-    useCreateDatasetRoleAssignmentMutation,
-    useGetDatasetRoleAssignmentsQuery,
-} from '@/store/features/role-assignments/dataset-roles-api-slice';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { DatasetRoleAssignmentContract } from '@/types/roles/role.contract';
+import { Scope } from '@/types/roles';
 import type { SearchForm } from '@/types/shared';
-import type { UserContract } from '@/types/users';
-
 import { TeamTable } from './components/team-table/team-table.component.tsx';
 import styles from './team-tab.module.scss';
 
 function filterUsers(
-    assignments: DatasetRoleAssignmentContract[],
+    assignments: OutputPortRoleAssignmentResponse[],
     searchTerm: string,
-): DatasetRoleAssignmentContract[] {
+): OutputPortRoleAssignmentResponse[] {
     if (!searchTerm) return assignments;
 
     const searchString = searchTerm.toLowerCase();
@@ -51,17 +51,17 @@ export function TeamTab({ datasetId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { data: dataset } = useGetDatasetByIdQuery(datasetId);
-    const { data: roleAssignments, isFetching } = useGetDatasetRoleAssignmentsQuery({
-        dataset_id: datasetId,
+    const { data: roleAssignments, isFetching } = useListOutputPortRoleAssignmentsQuery({
+        outputPortId: datasetId,
     });
-    const [addUserToDataset, { isLoading: isAddingUser }] = useCreateDatasetRoleAssignmentMutation();
+    const [addUserToDataset, { isLoading: isAddingUser }] = useCreateOutputPortRoleAssignmentMutation();
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { data: DATASET_ROLES, isFetching: isLoadingRoles } = useGetRolesQuery('dataset');
+    const { data: { roles: DATASET_ROLES = [] } = {}, isFetching: isLoadingRoles } = useGetRolesQuery(Scope.DATASET);
 
     const filteredUsers = useMemo(() => {
-        return filterUsers(roleAssignments ?? [], searchTerm);
+        return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
     }, [searchTerm, roleAssignments]);
     const datasetUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
 
@@ -75,10 +75,10 @@ export function TeamTab({ datasetId }: Props) {
     const canAddUser = access?.allowed || false;
 
     const handleGrantAccessToDataset = useCallback(
-        async (user: UserContract, role_id: string) => {
+        async (user: UsersGet, role_id: string) => {
             try {
                 await addUserToDataset({
-                    dataset_id: datasetId,
+                    output_port_id: datasetId,
                     user_id: user.id,
                     role_id: role_id,
                 }).unwrap();
@@ -118,7 +118,7 @@ export function TeamTab({ datasetId }: Props) {
                     onClose={handleClose}
                     isLoading={isFetching || isAddingUser || isLoadingRoles}
                     userIdsToHide={datasetUserIds}
-                    roles={DATASET_ROLES || []}
+                    roles={DATASET_ROLES}
                     item={{
                         action: handleGrantAccessToDataset,
                         label: t('Grant Access'),

@@ -22,6 +22,7 @@ from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
 from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
 from app.core.logging import logger
+from app.settings import settings
 
 basic_auth = HTTPBasic()
 
@@ -57,7 +58,8 @@ class DeviceFlowService:
         device_flow = DeviceFlowModel(
             client_id=client_id,
             scope=scope,
-            max_expiry=utc_now() + timedelta(seconds=1800),
+            max_expiry=utc_now()
+            + timedelta(minutes=settings.DEVICE_CODE_FLOW_EXPIRY_MINUTES),
             oidc_redirect_uri=get_oidc().redirect_uri,
             last_checked=utc_now(),
         )

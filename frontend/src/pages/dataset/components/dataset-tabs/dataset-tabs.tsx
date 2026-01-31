@@ -8,15 +8,15 @@ import {
 } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Badge, Flex, Tabs } from 'antd';
-import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router';
 
 import { Explorer } from '@/components/explorer/explorer';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
+import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
@@ -29,7 +29,7 @@ import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 
 type Tab = {
-    label: string | ReactElement;
+    label: ReactNode;
     key: TabKeys;
     icon?: ReactNode;
     children: ReactNode;
@@ -44,26 +44,16 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
 
-    const location = useLocation();
-    const navigate = useNavigate();
-
     const { data: datasetHistoryData, isLoading: isFetchingDatasetHistory } = useGetDatasetHistoryQuery(datasetId, {
         skip: !datasetId,
     });
-    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+    const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
     useEffect(() => {
         posthog.capture(PosthogEvents.MARKETPLACE_DATASET_TAB_CLICKED, {
             tab_name: activeTab,
         });
     }, [activeTab, posthog]);
-
-    useEffect(() => {
-        const hash = location.hash.slice(1);
-        if (hash) {
-            setActiveTab(hash);
-        }
-    }, [location]);
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -86,13 +76,13 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
             },
             {
                 label: t('Producing Data Products'),
-                key: TabKeys.DataOutput,
+                key: TabKeys.Producers,
                 icon: <DataOutputOutlined />,
                 children: <DataOutputTab datasetId={datasetId} />,
             },
             {
                 label: t('Consuming Data Products'),
-                key: TabKeys.DataProduct,
+                key: TabKeys.Consumers,
                 icon: <DataProductOutlined />,
                 children: <DataProductTab datasetId={datasetId} />,
             },
@@ -134,13 +124,10 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
         return <LoadingSpinner />;
     }
 
-    const onTabChange = (key: string) => {
-        navigate(`#${key}`);
-    };
-
     return (
         <Tabs
             activeKey={activeTab}
+            onChange={onTabChange}
             items={tabs.map(({ key, label, icon, children }) => {
                 return {
                     label,
@@ -153,7 +140,6 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
             })}
             size={'middle'}
             rootClassName={styles.tabContainer}
-            onChange={onTabChange}
         />
     );
 }

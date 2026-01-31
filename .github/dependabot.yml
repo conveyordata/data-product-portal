@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gomod"
-    directory: "/cli"
+    directory: "/cli/golang"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
@@ -13,7 +13,7 @@ updates:
         patterns:
           - "k8s.io/*"
           - "sigs.k8s.io/*"
-      aws-sdk:
+      aws-sdk-go:
         patterns:
           - "github.com/aws/aws-sdk-*"
           - "github.com/aws/smithy-go"
@@ -45,7 +45,7 @@ updates:
       types:
         patterns:
           - "@types/*"
-      aws-sdk:
+      aws-sdk-js:
         patterns:
           - "@aws-sdk/*"
 

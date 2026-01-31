@@ -8,6 +8,8 @@ sidebar_position: 200
 
 ### features
 - **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs.
+- **[Technical Mapping]**: Reworked source aligned concepts to [technical mapping ](./concepts/technical-assets.md#%EF%B8%8F-technical-mapping)
+- **[Search]**: Improved search functionality in the marketplace, the search now understands the context of the search term.
 
 ### bugfixes
 

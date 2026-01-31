@@ -7,7 +7,7 @@ from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
 from app.authorization.role_assignments.data_product.schema import (
-    RoleAssignmentResponse as DataProductRoleAssignmentResponse,
+    DataProductRoleAssignmentResponse as DataProductRoleAssignmentResponse,
 )
 
 # Add role assignment imports
@@ -15,13 +15,13 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
 from app.authorization.role_assignments.global_.schema import (
-    RoleAssignmentResponse as GlobalRoleAssignmentResponse,
+    GlobalRoleAssignmentResponse as GlobalRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
 from app.authorization.role_assignments.output_port.schema import (
-    RoleAssignmentResponse as DatasetRoleAssignmentResponse,
+    OutputPortRoleAssignmentResponse as DatasetRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
@@ -32,7 +32,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
 from app.data_products.output_ports.schema_response import DatasetGet, DatasetsGet
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 
 # Import enums - corrected paths
 from app.data_products.schema_response import (
@@ -153,7 +153,7 @@ def universal_search(
 
             # Search Datasets - get all and filter manually
             if "datasets" in search_types:
-                all_datasets = DatasetService(db).get_datasets(user=user)
+                all_datasets = OutputPortService(db).get_datasets(user=user)
                 # Filter by query manually
                 filtered_datasets = []
                 for ds in all_datasets:
@@ -289,7 +289,7 @@ def search_datasets(
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
             # Get all datasets and filter manually
-            all_datasets = DatasetService(db).get_datasets(user=user)
+            all_datasets = OutputPortService(db).get_datasets(user=user)
             filtered_datasets = []
 
             for ds in all_datasets:
@@ -370,7 +370,7 @@ def get_dataset_details(dataset_id: str) -> Dict[str, Any]:
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = DatasetService(db).get_dataset(id=UUID(dataset_id), user=user)
+            dataset = OutputPortService(db).get_dataset(id=UUID(dataset_id), user=user)
 
             if not dataset:
                 return {"error": f"Dataset {dataset_id} not found"}
@@ -442,7 +442,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
         try:
             # Get counts by querying all and taking length
             all_data_products = DataProductService(db).get_data_products()
-            all_datasets = DatasetService(db).get_datasets(user=user)
+            all_datasets = OutputPortService(db).get_datasets(user=user)
             all_data_outputs = DataOutputService(db).get_data_outputs()
             all_domains = DomainService(db).get_domains()
 
@@ -496,7 +496,7 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
                 return {"error": f"Data product {data_product_id} not found"}
 
             # Get related datasets - filter manually from all datasets
-            all_datasets = DatasetService(db).get_datasets(user=user)
+            all_datasets = OutputPortService(db).get_datasets(user=user)
             related_datasets = [
                 ds
                 for ds in all_datasets
@@ -592,7 +592,7 @@ def get_dataset_resource(dataset_id: str) -> str:
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = DatasetService(db).get_dataset(id=UUID(dataset_id), user=user)
+            dataset = OutputPortService(db).get_dataset(id=UUID(dataset_id), user=user)
 
             if not dataset:
                 return f"Error: Dataset {dataset_id} not found"

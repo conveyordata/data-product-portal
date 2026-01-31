@@ -10,13 +10,14 @@ from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
 from app.authorization.role_assignments.data_product.schema import (
-    CreateRoleAssignment,
+    CreateDataProductRoleAssignment,
     CreateRoleAssignmentOld,
-    DecideRoleAssignment,
+    DataProductRoleAssignmentResponse,
+    DecideDataProductRoleAssignment,
+    DeleteDataProductRoleAssignmentResponse,
     ListRoleAssignmentsResponse,
-    ModifyRoleAssignment,
-    RequestRoleAssignment,
-    RoleAssignmentResponse,
+    ModifyDataProductRoleAssignment,
+    RequestDataProductRoleAssignment,
     UpdateRoleAssignment,
 )
 from app.authorization.role_assignments.data_product.service import (
@@ -34,7 +35,7 @@ from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
-from app.notifications.service import NotificationService
+from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 router = APIRouter()
@@ -51,11 +52,11 @@ router = APIRouter()
         )
     ],
 )
-def delete_assignment(
+def delete_data_product_role_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> None:
+) -> DeleteDataProductRoleAssignmentResponse:
     assignment = RoleAssignmentService(db=db).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -78,6 +79,9 @@ def delete_assignment(
             [receiver] if (receiver := assignment.requested_by_id) is not None else []
         ),
     )
+    return DeleteDataProductRoleAssignmentResponse(
+        id=assignment.id, data_product_id=assignment.data_product_id
+    )
 
 
 _router = router
@@ -96,14 +100,14 @@ def list_assignments_old(
     role_id: Optional[UUID] = None,
     decision: Optional[DecisionStatus] = None,
     db: Session = Depends(get_db_session),
-) -> Sequence[RoleAssignmentResponse]:
-    return list_assignments(
+) -> Sequence[DataProductRoleAssignmentResponse]:
+    return list_data_product_role_assignments(
         data_product_id, user_id, role_id, decision, db=db
     ).role_assignments
 
 
 @router.get(route)
-def list_assignments(
+def list_data_product_role_assignments(
     data_product_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
@@ -137,9 +141,9 @@ def request_assignment_old(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    return request_assignment(
-        RequestRoleAssignment(
+) -> DataProductRoleAssignmentResponse:
+    return request_data_product_role_assignment(
+        RequestDataProductRoleAssignment(
             data_product_id=id, user_id=request.user_id, role_id=request.role_id
         ),
         background_tasks,
@@ -158,12 +162,12 @@ def request_assignment_old(
         )
     ],
 )
-def request_assignment(
-    request: RequestRoleAssignment,
+def request_data_product_role_assignment(
+    request: RequestDataProductRoleAssignment,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(
         data_product_id=request.data_product_id,
@@ -212,9 +216,9 @@ def create_assignment_old(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    return create_assignment(
-        CreateRoleAssignment(
+) -> DataProductRoleAssignmentResponse:
+    return create_data_product_role_assignment(
+        CreateDataProductRoleAssignment(
             data_product_id=id, user_id=request.user_id, role_id=request.role_id
         ),
         background_tasks,
@@ -233,12 +237,12 @@ def create_assignment_old(
         )
     ],
 )
-def create_assignment(
-    request: CreateRoleAssignment,
+def create_data_product_role_assignment(
+    request: CreateDataProductRoleAssignment,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(
         data_product_id=request.data_product_id,
@@ -299,11 +303,11 @@ def create_assignment(
 )
 def decide_assignment_old(
     id: UUID,
-    request: DecideRoleAssignment,
+    request: DecideDataProductRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    return decide_assignment(id, request, db, user)
+) -> DataProductRoleAssignmentResponse:
+    return decide_data_product_role_assignment(id, request, db, user)
 
 
 @router.post(
@@ -317,12 +321,12 @@ def decide_assignment_old(
         )
     ],
 )
-def decide_assignment(
+def decide_data_product_role_assignment(
     id: UUID,
-    request: DecideRoleAssignment,
+    request: DecideDataProductRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     original = service.get_assignment(id)
 
@@ -382,11 +386,11 @@ def decide_assignment(
 )
 def modify_assigned_role_old(
     id: UUID,
-    request: ModifyRoleAssignment,
+    request: ModifyDataProductRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    return modify_assigned_role(id, request, db, user)
+) -> DataProductRoleAssignmentResponse:
+    return modify_data_product_role_assignment(id, request, db, user)
 
 
 @router.put(
@@ -400,12 +404,12 @@ def modify_assigned_role_old(
         )
     ],
 )
-def modify_assigned_role(
+def modify_data_product_role_assignment(
     id: UUID,
-    request: ModifyRoleAssignment,
+    request: ModifyDataProductRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     original_role = service.get_assignment(id).role_id
 

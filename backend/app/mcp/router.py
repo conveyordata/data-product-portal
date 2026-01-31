@@ -7,7 +7,7 @@ from app.core.auth.jwt import get_oidc
 from app.core.logging import logger
 from app.settings import settings
 
-router = APIRouter(prefix="", tags=["mcp"])
+router = APIRouter(prefix="", include_in_schema=False)
 
 
 @router.get("/.well-known/oauth-authorization-server")

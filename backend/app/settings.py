@@ -61,13 +61,13 @@ class Settings(BaseSettings):
     # Namespace validation
     NAMESPACE_MAX_LENGTH: int = 64
 
-    DISABLED_AWS: bool = False
+    DISABLED_AWS: bool = True
     POSTHOG_API_KEY: str = "phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc"
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
     POSTHOG_ENABLED: bool = True
 
-    # Postgres FTS indexing
-    SEARCH_INDEXING_DISABLED: bool = False
+    # Device flow cleanup buffer in minutes
+    DEVICE_CODE_FLOW_EXPIRY_MINUTES: int = 30
 
 
 class LogLevel(str, Enum):

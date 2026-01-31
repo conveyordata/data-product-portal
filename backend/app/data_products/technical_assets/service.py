@@ -14,19 +14,17 @@ from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.model import (
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_dataset_exists
-from app.data_products.output_ports.service import DatasetService
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import DataOutput as DataOutputModel
 from app.data_products.technical_assets.model import ensure_data_output_exists
 from app.data_products.technical_assets.schema_request import (
@@ -102,7 +100,7 @@ class DataOutputService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        if data_output.sourceAligned:
+        if data_output.technical_mapping == TechnicalMapping.Custom:
             data_output.status = TechnicalAssetStatus.PENDING
         else:
             data_product = self.db.get(DataProductModel, id)
@@ -111,7 +109,12 @@ class DataOutputService:
 
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
-        model = DataOutputModel(**data_output_schema, tags=tags, owner_id=id)
+        data_output_schema.pop("sourceAligned")  # Remove deprecated field
+        model = DataOutputModel(
+            **data_output_schema,
+            tags=tags,
+            owner_id=id,
+        )
         self.db.add(model)
         self.db.commit()
         return model
@@ -123,7 +126,7 @@ class DataOutputService:
         self.db.delete(data_output)
         self.db.flush()
 
-        self.update_search_vector_associated_datasets(result)
+        self.update_search_for_associated_datasets(result)
         self.db.commit()
         return result
 
@@ -138,10 +141,10 @@ class DataOutputService:
             )
         return data_output
 
-    def update_search_vector_associated_datasets(self, result: DataOutputModel):
-        dataset_service = DatasetService(self.db)
+    def update_search_for_associated_datasets(self, result: DataOutputModel):
+        dataset_service = OutputPortService(self.db)
         for dataset_link in result.dataset_links:
-            dataset_service.recalculate_search_vector_for(dataset_link.dataset_id)
+            dataset_service.recalculate_search(dataset_link.dataset_id)
 
     def update_data_output_status(
         self,
@@ -155,7 +158,7 @@ class DataOutputService:
         current_data_output.status = data_output.status
         self.db.flush()
 
-        self.update_search_vector_associated_datasets(current_data_output)
+        self.update_search_for_associated_datasets(current_data_output)
         self.db.commit()
 
     def link_dataset_to_data_output(
@@ -193,7 +196,7 @@ class DataOutputService:
         )
         data_output.dataset_links.append(dataset_link)
         self.db.flush()
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        OutputPortService(self.db).recalculate_search(dataset_id)
         self.db.commit()
         return dataset_link
 
@@ -219,7 +222,7 @@ class DataOutputService:
 
         data_output.dataset_links.remove(data_output_dataset)
         self.db.flush()
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        OutputPortService(self.db).recalculate_search(dataset_id)
         self.db.commit()
         return data_output
 
@@ -252,14 +255,6 @@ class DataOutputService:
                 node.isMain = True
 
         return graph
-
-    @classmethod
-    def data_output_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
-        return NamespaceValidator.namespace_suggestion(name)
-
-    @classmethod
-    def data_output_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return NamespaceValidator.namespace_length_limits()
 
     def get_data_output_result_string(
         self,
