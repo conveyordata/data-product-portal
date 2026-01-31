@@ -4,5 +4,4 @@ generate:
   always-prefix-enum-values: true
 output:
   use-single-file: false
-  directory: .
-  filename: portalsdk.go
+  directory: portalsdk
