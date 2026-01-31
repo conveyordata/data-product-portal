@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
-	"github.com/data-product-portal/sdk-go/models"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -16,13 +16,14 @@ import (
 var _ resource.Resource = &DataProductTypeResource{}
 
 type DataProductTypeResource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type DataProductTypeResourceModel struct {
-	ID      types.String `tfsdk:"id"`
-	Name    types.String `tfsdk:"name"`
-	IconKey types.String `tfsdk:"icon_key"`
+	ID          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	Description types.String `tfsdk:"description"`
+	IconKey     types.String `tfsdk:"icon_key"`
 }
 
 func NewDataProductTypeResource() resource.Resource {
@@ -41,8 +42,9 @@ func (r *DataProductTypeResource) Schema(ctx context.Context, req resource.Schem
 				Computed: true, Description: "The unique identifier.",
 				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"name":     schema.StringAttribute{Required: true, Description: "The name."},
-			"icon_key": schema.StringAttribute{Required: true, Description: "The icon key."},
+			"name":        schema.StringAttribute{Required: true, Description: "The name."},
+			"description": schema.StringAttribute{Required: true, Description: "The description."},
+			"icon_key":    schema.StringAttribute{Required: true, Description: "The icon key."},
 		},
 	}
 }
@@ -51,7 +53,12 @@ func (r *DataProductTypeResource) Configure(ctx context.Context, req resource.Co
 	if req.ProviderData == nil {
 		return
 	}
-	r.client = req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Resource Configure Type", "Expected *portalsdk.Client")
+		return
+	}
+	r.client = client
 }
 
 func (r *DataProductTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -60,15 +67,19 @@ func (r *DataProductTypeResource) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	item, err := r.client.DataProductTypes.Create(ctx, &models.DataProductTypeCreate{
-		Name:    data.Name.ValueString(),
-		IconKey: data.IconKey.ValueString(),
+
+	created, err := r.client.CreateDataProductType(ctx, &portalsdk.CreateDataProductTypeRequestOptions{
+		Body: &portalsdk.DataProductTypeCreate{
+			Name:        data.Name.ValueString(),
+			Description: data.Description.ValueString(),
+			IconKey:     portalsdk.DataProductIconKey(data.IconKey.ValueString()),
+		},
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create: %s", err))
 		return
 	}
-	data.ID = types.StringValue(item.ID)
+	data.ID = types.StringValue(created.ID.String())
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -78,13 +89,23 @@ func (r *DataProductTypeResource) Read(ctx context.Context, req resource.ReadReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	item, err := r.client.DataProductTypes.Get(ctx, data.ID.ValueString())
+
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+
+	item, err := r.client.GetDataProductType(ctx, &portalsdk.GetDataProductTypeRequestOptions{
+		PathParams: &portalsdk.GetDataProductTypePath{ID: id},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read: %s", err))
 		return
 	}
 	data.Name = types.StringValue(item.Name)
-	data.IconKey = types.StringValue(item.IconKey)
+	data.Description = types.StringValue(item.Description)
+	data.IconKey = types.StringValue(string(item.IconKey))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -94,9 +115,20 @@ func (r *DataProductTypeResource) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	_, err := r.client.DataProductTypes.Update(ctx, data.ID.ValueString(), &models.DataProductTypeCreate{
-		Name:    data.Name.ValueString(),
-		IconKey: data.IconKey.ValueString(),
+
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+
+	_, err = r.client.UpdateDataProductType(ctx, &portalsdk.UpdateDataProductTypeRequestOptions{
+		PathParams: &portalsdk.UpdateDataProductTypePath{ID: id},
+		Body: &portalsdk.DataProductTypeUpdate{
+			Name:        data.Name.ValueString(),
+			Description: data.Description.ValueString(),
+			IconKey:     portalsdk.DataProductIconKey(data.IconKey.ValueString()),
+		},
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update: %s", err))
@@ -111,7 +143,17 @@ func (r *DataProductTypeResource) Delete(ctx context.Context, req resource.Delet
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DataProductTypes.Delete(ctx, data.ID.ValueString()); err != nil {
+
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+
+	_, err = r.client.RemoveDataProductType(ctx, &portalsdk.RemoveDataProductTypeRequestOptions{
+		PathParams: &portalsdk.RemoveDataProductTypePath{ID: id},
+	})
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete: %s", err))
 	}
 }

@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,7 @@ import (
 var _ datasource.DataSource = &EnvironmentDataSource{}
 
 type EnvironmentDataSource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type EnvironmentDataSourceModel struct {
@@ -34,7 +35,7 @@ func (d *EnvironmentDataSource) Metadata(ctx context.Context, req datasource.Met
 
 func (d *EnvironmentDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Fetches an environment by ID from the list of environments.",
+		Description: "Fetches an environment from the Data Product Portal.",
 		Attributes: map[string]schema.Attribute{
 			"id":         schema.StringAttribute{Required: true, Description: "The unique identifier."},
 			"name":       schema.StringAttribute{Computed: true, Description: "The name."},
@@ -49,7 +50,12 @@ func (d *EnvironmentDataSource) Configure(ctx context.Context, req datasource.Co
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *portalsdk.Client")
+		return
+	}
+	d.client = client
 }
 
 func (d *EnvironmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -59,23 +65,28 @@ func (d *EnvironmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	// API only supports listing, so we find by ID from the list
-	items, err := d.client.Environments.List(ctx)
+	id, err := uuid.Parse(data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list environments: %s", err))
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
 		return
 	}
 
-	for _, item := range items {
-		if item.ID == data.ID.ValueString() {
-			data.Name = types.StringValue(item.Name)
-			data.Acronym = types.StringValue(item.Acronym)
-			data.Context = types.StringValue(item.Context)
-			data.IsDefault = types.BoolValue(item.IsDefault)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-			return
-		}
+	env, err := d.client.GetEnvironment(ctx, &portalsdk.GetEnvironmentRequestOptions{
+		PathParams: &portalsdk.GetEnvironmentPath{ID: id},
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read environment: %s", err))
+		return
 	}
 
-	resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Environment with ID %s not found", data.ID.ValueString()))
+	data.Name = types.StringValue(env.Name)
+	data.Acronym = types.StringValue(env.Acronym)
+	data.Context = types.StringValue(env.Context)
+	if env.IsDefault != nil {
+		data.IsDefault = types.BoolValue(*env.IsDefault)
+	} else {
+		data.IsDefault = types.BoolValue(false)
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

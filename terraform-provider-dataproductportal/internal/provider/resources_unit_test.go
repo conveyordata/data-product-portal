@@ -28,7 +28,7 @@ func TestDomainResource_Schema(t *testing.T) {
 		t.Fatal("expected schema attributes to be non-nil")
 	}
 
-	requiredAttrs := []string{"name"}
+	requiredAttrs := []string{"name", "description"}
 	for _, attr := range requiredAttrs {
 		if _, ok := resp.Schema.Attributes[attr]; !ok {
 			t.Errorf("expected %q attribute in schema", attr)
@@ -40,40 +40,6 @@ func TestDomainResource_Schema(t *testing.T) {
 		if _, ok := resp.Schema.Attributes[attr]; !ok {
 			t.Errorf("expected %q attribute in schema", attr)
 		}
-	}
-
-	optionalAttrs := []string{"description"}
-	for _, attr := range optionalAttrs {
-		if _, ok := resp.Schema.Attributes[attr]; !ok {
-			t.Errorf("expected %q attribute in schema", attr)
-		}
-	}
-}
-
-func TestEnvironmentResource_Metadata(t *testing.T) {
-	r := NewEnvironmentResource()
-	resp := &resource.MetadataResponse{}
-	r.Metadata(context.Background(), resource.MetadataRequest{ProviderTypeName: "dataproductportal"}, resp)
-
-	if resp.TypeName != "dataproductportal_environment" {
-		t.Errorf("expected TypeName 'dataproductportal_environment', got %q", resp.TypeName)
-	}
-}
-
-func TestEnvironmentResource_Schema(t *testing.T) {
-	r := NewEnvironmentResource()
-	resp := &resource.SchemaResponse{}
-	r.Schema(context.Background(), resource.SchemaRequest{}, resp)
-
-	if resp.Schema.Attributes == nil {
-		t.Fatal("expected schema attributes to be non-nil")
-	}
-
-	if _, ok := resp.Schema.Attributes["id"]; !ok {
-		t.Error("expected 'id' attribute in schema")
-	}
-	if _, ok := resp.Schema.Attributes["name"]; !ok {
-		t.Error("expected 'name' attribute in schema")
 	}
 }
 
@@ -104,23 +70,37 @@ func TestTagResource_Schema(t *testing.T) {
 	}
 }
 
-func TestPlatformResource_Metadata(t *testing.T) {
-	r := NewPlatformResource()
+func TestOutputPortResource_Metadata(t *testing.T) {
+	r := NewOutputPortResource()
 	resp := &resource.MetadataResponse{}
 	r.Metadata(context.Background(), resource.MetadataRequest{ProviderTypeName: "dataproductportal"}, resp)
 
-	if resp.TypeName != "dataproductportal_platform" {
-		t.Errorf("expected TypeName 'dataproductportal_platform', got %q", resp.TypeName)
+	if resp.TypeName != "dataproductportal_output_port" {
+		t.Errorf("expected TypeName 'dataproductportal_output_port', got %q", resp.TypeName)
 	}
 }
 
-func TestDataOutputResource_Metadata(t *testing.T) {
-	r := NewDataOutputResource()
-	resp := &resource.MetadataResponse{}
-	r.Metadata(context.Background(), resource.MetadataRequest{ProviderTypeName: "dataproductportal"}, resp)
+func TestOutputPortResource_Schema(t *testing.T) {
+	r := NewOutputPortResource()
+	resp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, resp)
 
-	if resp.TypeName != "dataproductportal_data_output" {
-		t.Errorf("expected TypeName 'dataproductportal_data_output', got %q", resp.TypeName)
+	if resp.Schema.Attributes == nil {
+		t.Fatal("expected schema attributes to be non-nil")
+	}
+
+	requiredAttrs := []string{"data_product_id", "name", "namespace", "description", "access_type", "tag_ids", "owners"}
+	for _, attr := range requiredAttrs {
+		if _, ok := resp.Schema.Attributes[attr]; !ok {
+			t.Errorf("expected %q attribute in schema", attr)
+		}
+	}
+
+	computedAttrs := []string{"id", "status"}
+	for _, attr := range computedAttrs {
+		if _, ok := resp.Schema.Attributes[attr]; !ok {
+			t.Errorf("expected %q attribute in schema", attr)
+		}
 	}
 }
 
@@ -134,13 +114,34 @@ func TestDataProductResource_Metadata(t *testing.T) {
 	}
 }
 
-func TestDatasetResource_Metadata(t *testing.T) {
-	r := NewDatasetResource()
-	resp := &resource.MetadataResponse{}
-	r.Metadata(context.Background(), resource.MetadataRequest{ProviderTypeName: "dataproductportal"}, resp)
+func TestDataProductResource_Schema(t *testing.T) {
+	r := NewDataProductResource()
+	resp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, resp)
 
-	if resp.TypeName != "dataproductportal_dataset" {
-		t.Errorf("expected TypeName 'dataproductportal_dataset', got %q", resp.TypeName)
+	if resp.Schema.Attributes == nil {
+		t.Fatal("expected schema attributes to be non-nil")
+	}
+
+	requiredAttrs := []string{"name", "description", "domain_id", "type_id", "namespace", "lifecycle_id", "tag_ids", "owners"}
+	for _, attr := range requiredAttrs {
+		if _, ok := resp.Schema.Attributes[attr]; !ok {
+			t.Errorf("expected %q attribute in schema", attr)
+		}
+	}
+
+	computedAttrs := []string{"id", "status"}
+	for _, attr := range computedAttrs {
+		if _, ok := resp.Schema.Attributes[attr]; !ok {
+			t.Errorf("expected %q attribute in schema", attr)
+		}
+	}
+
+	optionalAttrs := []string{"about"}
+	for _, attr := range optionalAttrs {
+		if _, ok := resp.Schema.Attributes[attr]; !ok {
+			t.Errorf("expected %q attribute in schema", attr)
+		}
 	}
 }
 
@@ -154,12 +155,26 @@ func TestDataProductTypeResource_Metadata(t *testing.T) {
 	}
 }
 
-func TestRoleAssignmentResource_Metadata(t *testing.T) {
-	r := NewRoleAssignmentResource()
-	resp := &resource.MetadataResponse{}
-	r.Metadata(context.Background(), resource.MetadataRequest{ProviderTypeName: "dataproductportal"}, resp)
+func TestDataProductTypeResource_Schema(t *testing.T) {
+	r := NewDataProductTypeResource()
+	resp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, resp)
 
-	if resp.TypeName != "dataproductportal_role_assignment" {
-		t.Errorf("expected TypeName 'dataproductportal_role_assignment', got %q", resp.TypeName)
+	if resp.Schema.Attributes == nil {
+		t.Fatal("expected schema attributes to be non-nil")
+	}
+
+	requiredAttrs := []string{"name", "description", "icon_key"}
+	for _, attr := range requiredAttrs {
+		if _, ok := resp.Schema.Attributes[attr]; !ok {
+			t.Errorf("expected %q attribute in schema", attr)
+		}
+	}
+
+	computedAttrs := []string{"id"}
+	for _, attr := range computedAttrs {
+		if _, ok := resp.Schema.Attributes[attr]; !ok {
+			t.Errorf("expected %q attribute in schema", attr)
+		}
 	}
 }

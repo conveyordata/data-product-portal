@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,7 @@ import (
 var _ datasource.DataSource = &DataProductDataSource{}
 
 type DataProductDataSource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type DataProductDataSourceModel struct {
@@ -55,9 +56,9 @@ func (d *DataProductDataSource) Configure(ctx context.Context, req datasource.Co
 	if req.ProviderData == nil {
 		return
 	}
-	client, ok := req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
 	if !ok {
-		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *sdk.DataProductPortalSDK")
+		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *portalsdk.Client")
 		return
 	}
 	d.client = client
@@ -70,7 +71,15 @@ func (d *DataProductDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	dp, err := d.client.DataProducts.Get(ctx, data.ID.ValueString())
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+
+	dp, err := d.client.GetDataProduct(ctx, &portalsdk.GetDataProductRequestOptions{
+		PathParams: &portalsdk.GetDataProductPath{ID: id},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data product: %s", err))
 		return
@@ -78,13 +87,11 @@ func (d *DataProductDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	data.Name = types.StringValue(dp.Name)
 	data.Description = types.StringValue(dp.Description)
-	if dp.About != nil {
-		data.About = types.StringValue(*dp.About)
-	}
-	data.DomainID = types.StringValue(dp.DomainID)
-	data.TypeID = types.StringValue(dp.TypeID)
+	data.About = types.StringValue(dp.About)
+	data.DomainID = types.StringValue(dp.Domain.ID.String())
+	data.TypeID = types.StringValue(dp.Type.ID.String())
 	data.Namespace = types.StringValue(dp.Namespace)
-	data.Status = types.StringValue(dp.Status)
+	data.Status = types.StringValue(string(dp.Status))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

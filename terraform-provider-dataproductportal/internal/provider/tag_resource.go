@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
-	"github.com/data-product-portal/sdk-go/models"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -16,7 +16,7 @@ import (
 var _ resource.Resource = &TagResource{}
 
 type TagResource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type TagResourceModel struct {
@@ -49,7 +49,12 @@ func (r *TagResource) Configure(ctx context.Context, req resource.ConfigureReque
 	if req.ProviderData == nil {
 		return
 	}
-	r.client = req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Resource Configure Type", "Expected *portalsdk.Client")
+		return
+	}
+	r.client = client
 }
 
 func (r *TagResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -58,12 +63,15 @@ func (r *TagResource) Create(ctx context.Context, req resource.CreateRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	item, err := r.client.Tags.Create(ctx, &models.TagCreate{Value: data.Value.ValueString()})
+
+	created, err := r.client.CreateTag(ctx, &portalsdk.CreateTagRequestOptions{
+		Body: &portalsdk.TagCreate{Value: data.Value.ValueString()},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create: %s", err))
 		return
 	}
-	data.ID = types.StringValue(item.ID)
+	data.ID = types.StringValue(created.ID.String())
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -73,13 +81,26 @@ func (r *TagResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	item, err := r.client.Tags.Get(ctx, data.ID.ValueString())
+
+	id, err := uuid.Parse(data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read: %s", err))
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
 		return
 	}
-	data.Value = types.StringValue(item.Value)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	tags, err := r.client.GetTags(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list tags: %s", err))
+		return
+	}
+	for _, item := range tags.Tags {
+		if item.ID == id {
+			data.Value = types.StringValue(item.Value)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+		}
+	}
+	resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Tag with ID %s not found", data.ID.ValueString()))
 }
 
 func (r *TagResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -88,7 +109,17 @@ func (r *TagResource) Update(ctx context.Context, req resource.UpdateRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	_, err := r.client.Tags.Update(ctx, data.ID.ValueString(), &models.TagCreate{Value: data.Value.ValueString()})
+
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+
+	_, err = r.client.UpdateTag(ctx, &portalsdk.UpdateTagRequestOptions{
+		PathParams: &portalsdk.UpdateTagPath{ID: id},
+		Body:       &portalsdk.TagUpdate{Value: data.Value.ValueString()},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update: %s", err))
 		return
@@ -102,7 +133,17 @@ func (r *TagResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.Tags.Delete(ctx, data.ID.ValueString()); err != nil {
+
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+
+	_, err = r.client.RemoveTag(ctx, &portalsdk.RemoveTagRequestOptions{
+		PathParams: &portalsdk.RemoveTagPath{ID: id},
+	})
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete: %s", err))
 	}
 }

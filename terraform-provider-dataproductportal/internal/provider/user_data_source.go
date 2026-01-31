@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,7 @@ import (
 var _ datasource.DataSource = &UserDataSource{}
 
 type UserDataSource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type UserDataSourceModel struct {
@@ -36,7 +37,7 @@ func (d *UserDataSource) Schema(ctx context.Context, req datasource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id":    schema.StringAttribute{Required: true, Description: "The unique identifier."},
 			"email": schema.StringAttribute{Computed: true, Description: "The email."},
-			"name":  schema.StringAttribute{Computed: true, Description: "The name."},
+			"name":  schema.StringAttribute{Computed: true, Description: "The full name."},
 		},
 	}
 }
@@ -45,7 +46,12 @@ func (d *UserDataSource) Configure(ctx context.Context, req datasource.Configure
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *portalsdk.Client")
+		return
+	}
+	d.client = client
 }
 
 func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -55,13 +61,24 @@ func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	item, err := d.client.Users.Get(ctx, data.ID.ValueString())
+	id, err := uuid.Parse(data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read: %s", err))
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
 		return
 	}
 
-	data.Email = types.StringValue(item.Email)
-	data.Name = types.StringValue(item.Name)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	users, err := d.client.GetUsers(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list users: %s", err))
+		return
+	}
+	for _, item := range users.Users {
+		if item.ID == id {
+			data.Email = types.StringValue(string(item.Email))
+			data.Name = types.StringValue(item.FirstName + " " + item.LastName)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+		}
+	}
+	resp.Diagnostics.AddError("Not Found", fmt.Sprintf("User with ID %s not found", data.ID.ValueString()))
 }

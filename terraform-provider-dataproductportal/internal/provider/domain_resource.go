@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
-	"github.com/data-product-portal/sdk-go/models"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -17,7 +17,7 @@ var _ resource.Resource = &DomainResource{}
 var _ resource.ResourceWithImportState = &DomainResource{}
 
 type DomainResource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type DomainResourceModel struct {
@@ -50,7 +50,7 @@ func (r *DomainResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Description: "The name of the domain.",
 			},
 			"description": schema.StringAttribute{
-				Optional:    true,
+				Required:    true,
 				Description: "The description of the domain.",
 			},
 		},
@@ -61,9 +61,9 @@ func (r *DomainResource) Configure(ctx context.Context, req resource.ConfigureRe
 	if req.ProviderData == nil {
 		return
 	}
-	client, ok := req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
 	if !ok {
-		resp.Diagnostics.AddError("Unexpected Resource Configure Type", "Expected *sdk.DataProductPortalSDK")
+		resp.Diagnostics.AddError("Unexpected Resource Configure Type", "Expected *portalsdk.Client")
 		return
 	}
 	r.client = client
@@ -76,23 +76,26 @@ func (r *DomainResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	created, err := r.client.Domains.Create(ctx, &models.DomainCreate{
-		Name:        data.Name.ValueString(),
-		Description: data.Description.ValueString(),
+	created, err := r.client.CreateDomain(ctx, &portalsdk.CreateDomainRequestOptions{
+		Body: &portalsdk.DomainCreate{
+			Name:        data.Name.ValueString(),
+			Description: data.Description.ValueString(),
+		},
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create domain: %s", err))
 		return
 	}
 
-	// API returns only ID on create, so we need to fetch the full object
-	domain, err := r.client.Domains.Get(ctx, created.ID)
+	domain, err := r.client.GetDomain(ctx, &portalsdk.GetDomainRequestOptions{
+		PathParams: &portalsdk.GetDomainPath{ID: created.ID},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read created domain: %s", err))
 		return
 	}
 
-	data.ID = types.StringValue(domain.ID)
+	data.ID = types.StringValue(domain.ID.String())
 	data.Name = types.StringValue(domain.Name)
 	data.Description = types.StringValue(domain.Description)
 
@@ -106,7 +109,15 @@ func (r *DomainResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	domain, err := r.client.Domains.Get(ctx, data.ID.ValueString())
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse domain ID: %s", err))
+		return
+	}
+
+	domain, err := r.client.GetDomain(ctx, &portalsdk.GetDomainRequestOptions{
+		PathParams: &portalsdk.GetDomainPath{ID: id},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read domain: %s", err))
 		return
@@ -125,17 +136,27 @@ func (r *DomainResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	_, err := r.client.Domains.Update(ctx, data.ID.ValueString(), &models.DomainCreate{
-		Name:        data.Name.ValueString(),
-		Description: data.Description.ValueString(),
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse domain ID: %s", err))
+		return
+	}
+
+	_, err = r.client.UpdateDomain(ctx, &portalsdk.UpdateDomainRequestOptions{
+		PathParams: &portalsdk.UpdateDomainPath{ID: id},
+		Body: &portalsdk.DomainUpdate{
+			Name:        data.Name.ValueString(),
+			Description: data.Description.ValueString(),
+		},
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update domain: %s", err))
 		return
 	}
 
-	// API may return only ID on update, so fetch the full object
-	domain, err := r.client.Domains.Get(ctx, data.ID.ValueString())
+	domain, err := r.client.GetDomain(ctx, &portalsdk.GetDomainRequestOptions{
+		PathParams: &portalsdk.GetDomainPath{ID: id},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read updated domain: %s", err))
 		return
@@ -154,7 +175,15 @@ func (r *DomainResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	err := r.client.Domains.Delete(ctx, data.ID.ValueString())
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse domain ID: %s", err))
+		return
+	}
+
+	_, err = r.client.RemoveDomain(ctx, &portalsdk.RemoveDomainRequestOptions{
+		PathParams: &portalsdk.RemoveDomainPath{ID: id},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete domain: %s", err))
 		return
@@ -162,14 +191,22 @@ func (r *DomainResource) Delete(ctx context.Context, req resource.DeleteRequest,
 }
 
 func (r *DomainResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	domain, err := r.client.Domains.Get(ctx, req.ID)
+	id, err := uuid.Parse(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse domain ID: %s", err))
+		return
+	}
+
+	domain, err := r.client.GetDomain(ctx, &portalsdk.GetDomainRequestOptions{
+		PathParams: &portalsdk.GetDomainPath{ID: id},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to import domain: %s", err))
 		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &DomainResourceModel{
-		ID:          types.StringValue(domain.ID),
+		ID:          types.StringValue(domain.ID.String()),
 		Name:        types.StringValue(domain.Name),
 		Description: types.StringValue(domain.Description),
 	})...)

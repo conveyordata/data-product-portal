@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,7 @@ import (
 var _ datasource.DataSource = &DomainDataSource{}
 
 type DomainDataSource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type DomainDataSourceModel struct {
@@ -54,9 +55,9 @@ func (d *DomainDataSource) Configure(ctx context.Context, req datasource.Configu
 	if req.ProviderData == nil {
 		return
 	}
-	client, ok := req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
 	if !ok {
-		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *sdk.DataProductPortalSDK")
+		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *portalsdk.Client")
 		return
 	}
 	d.client = client
@@ -69,7 +70,15 @@ func (d *DomainDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	domain, err := d.client.Domains.Get(ctx, data.ID.ValueString())
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse domain ID: %s", err))
+		return
+	}
+
+	domain, err := d.client.GetDomain(ctx, &portalsdk.GetDomainRequestOptions{
+		PathParams: &portalsdk.GetDomainPath{ID: id},
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read domain: %s", err))
 		return

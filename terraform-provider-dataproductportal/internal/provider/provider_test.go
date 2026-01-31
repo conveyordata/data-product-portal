@@ -60,7 +60,7 @@ func TestProvider_Resources(t *testing.T) {
 	p := &DataProductPortalProvider{version: "test"}
 	resources := p.Resources(context.Background())
 
-	expectedCount := 9 // domain, data_product, data_product_type, dataset, data_output, environment, platform, tag, role_assignment
+	expectedCount := 5 // domain, data_product, data_product_type, output_port, tag
 
 	if len(resources) != expectedCount {
 		t.Errorf("expected %d resources, got %d", expectedCount, len(resources))
@@ -71,7 +71,7 @@ func TestProvider_DataSources(t *testing.T) {
 	p := &DataProductPortalProvider{version: "test"}
 	dataSources := p.DataSources(context.Background())
 
-	expectedCount := 9 // domain, data_product, data_product_type, dataset, data_output, environment, platform, tag, user
+	expectedCount := 8 // domain, data_product, data_product_type, output_port, environment, platform, tag, user
 
 	if len(dataSources) != expectedCount {
 		t.Errorf("expected %d data sources, got %d", expectedCount, len(dataSources))

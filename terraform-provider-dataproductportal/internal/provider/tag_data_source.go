@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,7 @@ import (
 var _ datasource.DataSource = &TagDataSource{}
 
 type TagDataSource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type TagDataSourceModel struct {
@@ -43,7 +44,12 @@ func (d *TagDataSource) Configure(ctx context.Context, req datasource.ConfigureR
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *portalsdk.Client")
+		return
+	}
+	d.client = client
 }
 
 func (d *TagDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -52,23 +58,24 @@ func (d *TagDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// List all tags and find by ID (API doesn't support Get by ID)
-	items, err := d.client.Tags.List(ctx)
+
+	id, err := uuid.Parse(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+
+	tags, err := d.client.GetTags(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list tags: %s", err))
 		return
 	}
-	var found bool
-	for _, item := range items {
-		if item.ID == data.ID.ValueString() {
+	for _, item := range tags.Tags {
+		if item.ID == id {
 			data.Value = types.StringValue(item.Value)
-			found = true
-			break
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
 		}
 	}
-	if !found {
-		resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Tag with ID %s not found", data.ID.ValueString()))
-		return
-	}
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Tag with ID %s not found", data.ID.ValueString()))
 }

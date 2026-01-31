@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,7 @@ import (
 var _ datasource.DataSource = &PlatformDataSource{}
 
 type PlatformDataSource struct {
-	client *sdk.DataProductPortalSDK
+	client *portalsdk.Client
 }
 
 type PlatformDataSourceModel struct {
@@ -43,7 +44,12 @@ func (d *PlatformDataSource) Configure(ctx context.Context, req datasource.Confi
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *portalsdk.Client")
+		return
+	}
+	d.client = client
 }
 
 func (d *PlatformDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -52,11 +58,24 @@ func (d *PlatformDataSource) Read(ctx context.Context, req datasource.ReadReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	item, err := d.client.Platforms.Get(ctx, data.ID.ValueString())
+
+	id, err := uuid.Parse(data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read: %s", err))
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
 		return
 	}
-	data.Name = types.StringValue(item.Name)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	platforms, err := d.client.GetAllPlatforms(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list platforms: %s", err))
+		return
+	}
+	for _, item := range platforms.Platforms {
+		if item.ID == id {
+			data.Name = types.StringValue(item.Name)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+		}
+	}
+	resp.Diagnostics.AddError("Not Found", fmt.Sprintf("Platform with ID %s not found", data.ID.ValueString()))
 }

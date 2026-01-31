@@ -2,74 +2,97 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var _ datasource.DataSource = &DataOutputDataSource{}
+var _ datasource.DataSource = &OutputPortDataSource{}
 
-type DataOutputDataSource struct {
-	client *sdk.DataProductPortalSDK
+type OutputPortDataSource struct {
+	client *portalsdk.Client
 }
 
-type DataOutputDataSourceModel struct {
+type OutputPortDataSourceModel struct {
 	ID            types.String `tfsdk:"id"`
+	DataProductID types.String `tfsdk:"data_product_id"`
 	Name          types.String `tfsdk:"name"`
+	Namespace     types.String `tfsdk:"namespace"`
 	Description   types.String `tfsdk:"description"`
-	OwnerID       types.String `tfsdk:"owner_id"`
-	Configuration types.String `tfsdk:"configuration"`
+	AccessType    types.String `tfsdk:"access_type"`
+	Status        types.String `tfsdk:"status"`
 }
 
-func NewDataOutputDataSource() datasource.DataSource {
-	return &DataOutputDataSource{}
+func NewOutputPortDataSource() datasource.DataSource {
+	return &OutputPortDataSource{}
 }
 
-func (d *DataOutputDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_data_output"
+func (d *OutputPortDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_output_port"
 }
 
-func (d *DataOutputDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *OutputPortDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Fetches a data output.",
+		Description: "Fetches an output port from the Data Product Portal.",
 		Attributes: map[string]schema.Attribute{
-			"id":            schema.StringAttribute{Required: true, Description: "The unique identifier."},
-			"name":          schema.StringAttribute{Computed: true, Description: "The name."},
-			"description":   schema.StringAttribute{Computed: true, Description: "The description."},
-			"owner_id":      schema.StringAttribute{Computed: true, Description: "The owner data product ID."},
-			"configuration": schema.StringAttribute{Computed: true, Description: "JSON configuration."},
+			"id":              schema.StringAttribute{Required: true, Description: "The unique identifier."},
+			"data_product_id": schema.StringAttribute{Required: true, Description: "The data product ID."},
+			"name":            schema.StringAttribute{Computed: true, Description: "The name."},
+			"namespace":       schema.StringAttribute{Computed: true, Description: "The namespace."},
+			"description":     schema.StringAttribute{Computed: true, Description: "The description."},
+			"access_type":     schema.StringAttribute{Computed: true, Description: "The access type."},
+			"status":          schema.StringAttribute{Computed: true, Description: "The status."},
 		},
 	}
 }
 
-func (d *DataOutputDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *OutputPortDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*sdk.DataProductPortalSDK)
+	client, ok := req.ProviderData.(*portalsdk.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Data Source Configure Type", "Expected *portalsdk.Client")
+		return
+	}
+	d.client = client
 }
 
-func (d *DataOutputDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data DataOutputDataSourceModel
+func (d *OutputPortDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data OutputPortDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	item, err := d.client.DataOutputs.Get(ctx, data.ID.ValueString())
+	id, err := uuid.Parse(data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read: %s", err))
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse ID: %s", err))
+		return
+	}
+	dpID, err := uuid.Parse(data.DataProductID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Unable to parse data_product_id: %s", err))
 		return
 	}
 
-	configBytes, _ := json.Marshal(item.Configuration)
-	data.Name = types.StringValue(item.Name)
-	data.Description = types.StringValue(item.Description)
-	data.OwnerID = types.StringValue(item.OwnerID)
-	data.Configuration = types.StringValue(string(configBytes))
+	op, err := d.client.GetOutputPort(ctx, &portalsdk.GetOutputPortRequestOptions{
+		PathParams: &portalsdk.GetOutputPortPath{DataProductID: dpID, ID: id},
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read output port: %s", err))
+		return
+	}
+
+	data.Name = types.StringValue(op.Name)
+	data.Namespace = types.StringValue(op.Namespace)
+	data.Description = types.StringValue(op.Description)
+	data.AccessType = types.StringValue(string(op.AccessType))
+	data.Status = types.StringValue(string(op.Status))
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

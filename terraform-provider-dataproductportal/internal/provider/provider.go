@@ -2,9 +2,11 @@ package provider
 
 import (
 	"context"
+	"net/http"
 	"os"
 
-	sdk "github.com/data-product-portal/sdk-go"
+	"github.com/data-product-portal/sdk-go/portalsdk"
+	"github.com/doordash-oss/oapi-codegen-dd/v3/pkg/runtime"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -87,7 +89,20 @@ func (p *DataProductPortalProvider) Configure(ctx context.Context, req provider.
 		return
 	}
 
-	client := sdk.New(baseURL, apiKey)
+	client, err := portalsdk.NewDefaultClient(baseURL, runtime.WithRequestEditorFn(
+		func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("X-API-Key", apiKey)
+			return nil
+		},
+	))
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Create Client",
+			"An unexpected error occurred when creating the Data Product Portal client: "+err.Error(),
+		)
+		return
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
@@ -97,12 +112,8 @@ func (p *DataProductPortalProvider) Resources(ctx context.Context) []func() reso
 		NewDomainResource,
 		NewDataProductResource,
 		NewDataProductTypeResource,
-		NewDatasetResource,
-		NewDataOutputResource,
-		NewEnvironmentResource,
-		NewPlatformResource,
+		NewOutputPortResource,
 		NewTagResource,
-		NewRoleAssignmentResource,
 	}
 }
 
@@ -111,8 +122,7 @@ func (p *DataProductPortalProvider) DataSources(ctx context.Context) []func() da
 		NewDomainDataSource,
 		NewDataProductDataSource,
 		NewDataProductTypeDataSource,
-		NewDatasetDataSource,
-		NewDataOutputDataSource,
+		NewOutputPortDataSource,
 		NewEnvironmentDataSource,
 		NewPlatformDataSource,
 		NewTagDataSource,

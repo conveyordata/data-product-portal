@@ -73,13 +73,13 @@ func TestPlatformDataSource_Metadata(t *testing.T) {
 	}
 }
 
-func TestDataOutputDataSource_Metadata(t *testing.T) {
-	d := NewDataOutputDataSource()
+func TestOutputPortDataSource_Metadata(t *testing.T) {
+	d := NewOutputPortDataSource()
 	resp := &datasource.MetadataResponse{}
 	d.Metadata(context.Background(), datasource.MetadataRequest{ProviderTypeName: "dataproductportal"}, resp)
 
-	if resp.TypeName != "dataproductportal_data_output" {
-		t.Errorf("expected TypeName 'dataproductportal_data_output', got %q", resp.TypeName)
+	if resp.TypeName != "dataproductportal_output_port" {
+		t.Errorf("expected TypeName 'dataproductportal_output_port', got %q", resp.TypeName)
 	}
 }
 
@@ -90,16 +90,6 @@ func TestDataProductDataSource_Metadata(t *testing.T) {
 
 	if resp.TypeName != "dataproductportal_data_product" {
 		t.Errorf("expected TypeName 'dataproductportal_data_product', got %q", resp.TypeName)
-	}
-}
-
-func TestDatasetDataSource_Metadata(t *testing.T) {
-	d := NewDatasetDataSource()
-	resp := &datasource.MetadataResponse{}
-	d.Metadata(context.Background(), datasource.MetadataRequest{ProviderTypeName: "dataproductportal"}, resp)
-
-	if resp.TypeName != "dataproductportal_dataset" {
-		t.Errorf("expected TypeName 'dataproductportal_dataset', got %q", resp.TypeName)
 	}
 }
 
