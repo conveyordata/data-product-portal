@@ -511,7 +511,7 @@ begin
             (ARRAY['success', 'failure', 'warning', 'error'])[((rn - 1) % 4) + 1] as status
         FROM dataset_selection
     )
-    INSERT INTO public.dataset_data_quality_summaries
+    INSERT INTO public.output_port_data_quality_summaries
         (id, output_port_id, assets_with_checks, assets_with_issues, details_url, description, overall_status, created_at, dimensions)
     SELECT
         summary_id,
@@ -532,7 +532,7 @@ begin
         summary_mapping AS (
     -- We need to join back to the summaries we just created to get the IDs
     SELECT s.id as summary_id, d.name as dataset_name, d.rn
-    FROM public.dataset_data_quality_summaries s
+    FROM public.output_port_data_quality_summaries s
         JOIN dataset_selection d ON s.output_port_id = d.id
         )
     INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id)
