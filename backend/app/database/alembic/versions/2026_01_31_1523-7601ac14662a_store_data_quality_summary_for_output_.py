@@ -1,7 +1,7 @@
 """store data quality summary for output ports
 
 Revision ID: 7601ac14662a
-Revises: dbe6fbe45eef
+Revises: b1de5e9ba1fa
 Create Date: 2026-01-19 15:23:46.910285
 
 """
@@ -14,7 +14,7 @@ from alembic import op
 from app.shared.model import utcnow
 
 revision: str = "7601ac14662a"
-down_revision: Union[str, None] = "dbe6fbe45eef"
+down_revision: Union[str, None] = "b1de5e9ba1fa"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
