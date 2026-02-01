@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.query_stats.schema_request import (
     DatasetQueryStatsUpdates,
     OutputPortQueryStatsDelete,
@@ -32,7 +32,7 @@ def get_dataset_query_stats(
     day_range: int = Query(default=DEFAULT_DAY_RANGE, ge=1),
     db: Session = Depends(get_db_session),
 ) -> DatasetQueryStatsResponses:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return DatasetQueryStatsResponses(
         dataset_query_stats_daily_responses=get_output_port_query_stats(
             ds.data_product_id, ds.id, granularity, day_range, db
@@ -48,7 +48,7 @@ def get_output_port_query_stats(
     day_range: int = Query(default=DEFAULT_DAY_RANGE, ge=1),
     db: Session = Depends(get_db_session),
 ) -> OutputPortQueryStatsResponses:
-    ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortStatsService(db).get_query_stats(
         dataset_id=ds.id, granularity=granularity, day_range=day_range
     )
@@ -60,7 +60,7 @@ def update_dataset_query_stats(
     input_data: DatasetQueryStatsUpdates,
     db: Session = Depends(get_db_session),
 ) -> None:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     update_output_port_query_stats(
         ds.data_product_id,
         ds.id,
@@ -78,7 +78,7 @@ def update_output_port_query_stats(
     input_data: UpdateOutputPortQueryStatus,
     db: Session = Depends(get_db_session),
 ) -> None:
-    ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     OutputPortStatsService(db).update_query_stats(
         dataset_id=ds.id, updates=input_data.output_port_query_stats_updates
     )
@@ -90,7 +90,7 @@ def delete_dataset_query_stat(
     input_data: OutputPortQueryStatsDelete,
     db: Session = Depends(get_db_session),
 ) -> None:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     delete_output_port_query_stat(ds.data_product_id, ds.id, input_data, db)
 
 
@@ -101,7 +101,7 @@ def delete_output_port_query_stat(
     input_data: OutputPortQueryStatsDelete,
     db: Session = Depends(get_db_session),
 ) -> None:
-    ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     OutputPortStatsService(db).delete_query_stats(
         dataset_id=ds.id, delete_request=input_data
     )

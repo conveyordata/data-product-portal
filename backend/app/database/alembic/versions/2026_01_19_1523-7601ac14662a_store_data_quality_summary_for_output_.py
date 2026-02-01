@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        "dataset_data_quality_summaries",
+        "output_port_data_quality_summaries",
         sa.Column(
             "output_port_id",
             sa.UUID,
@@ -76,7 +76,7 @@ def upgrade() -> None:
         sa.Column(
             "data_quality_summary_id",
             sa.UUID,
-            sa.ForeignKey("dataset_data_quality_summaries.id", ondelete="CASCADE"),
+            sa.ForeignKey("output_port_data_quality_summaries.id", ondelete="CASCADE"),
             nullable=False,
             primary_key=True,
         ),
@@ -85,4 +85,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("data_quality_technical_assets")
-    op.drop_table("dataset_data_quality_summaries")
+    op.drop_table("output_port_data_quality_summaries")

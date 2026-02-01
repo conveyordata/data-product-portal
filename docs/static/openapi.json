@@ -14164,7 +14164,8 @@
           410,
           411,
           412,
-          413
+          413,
+          414
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."

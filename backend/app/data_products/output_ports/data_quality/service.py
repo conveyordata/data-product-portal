@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.data_quality.model import (
     DataQualitySummary,
-    DataQualityTechnicalAssetModel,
+    DataQualityTechnicalAsset,
 )
 from app.data_products.output_ports.data_quality.schema_response import (
     OutputPortDataQualitySummary,
 )
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 
 
 def convert_dimensions_db(
@@ -21,16 +21,18 @@ def convert_dimensions_db(
     return {key: value.value for key, value in dimensions.items()}
 
 
-class DatasetDataQualityService:
+class OutputPortDataQualityService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_latest_data_quality_summary(self, dataset_id: UUID) -> DataQualitySummary:
-        ensure_dataset_exists(dataset_id, self.db)
+    def get_latest_data_quality_summary(
+        self, output_port_id: UUID
+    ) -> DataQualitySummary:
+        ensure_output_port_exists(output_port_id, self.db)
 
         data_quality_summary = (
             self.db.query(DataQualitySummary)
-            .filter(DataQualitySummary.output_port_id == dataset_id)
+            .filter(DataQualitySummary.output_port_id == output_port_id)
             .order_by(desc(DataQualitySummary.created_at))
             .first()
         )
@@ -38,20 +40,20 @@ class DatasetDataQualityService:
         if not data_quality_summary:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No data quality summary found for output port {dataset_id}",
+                detail=f"No data quality summary found for output port {output_port_id}",
             )
         return data_quality_summary
 
     def save_data_quality_summary(
-        self, dataset_id: UUID, data_quality_summary: OutputPortDataQualitySummary
+        self, output_port_id: UUID, data_quality_summary: OutputPortDataQualitySummary
     ):
-        ensure_dataset_exists(dataset_id, self.db)
+        ensure_output_port_exists(output_port_id, self.db)
 
         technical_assets = self.convert_to_db(data_quality_summary)
         assets_with_checks, assets_with_issues = self.get_asset_stats(technical_assets)
 
         db_summary = DataQualitySummary(
-            output_port_id=dataset_id,
+            output_port_id=output_port_id,
             details_url=data_quality_summary.details_url,
             description=data_quality_summary.description,
             created_at=data_quality_summary.created_at,
@@ -70,13 +72,13 @@ class DatasetDataQualityService:
 
     def overwrite_data_quality_summary(
         self,
-        dataset_id: UUID,
+        output_port_id: UUID,
         summary_id: UUID,
         data_quality_summary: OutputPortDataQualitySummary,
     ) -> DataQualitySummary:
-        ensure_dataset_exists(dataset_id, self.db)
+        ensure_output_port_exists(output_port_id, self.db)
 
-        existing_summary = self.get_summary(dataset_id, summary_id)
+        existing_summary = self.get_summary(output_port_id, summary_id)
         technical_assets = self.convert_to_db(data_quality_summary)
         assets_with_checks, assets_with_issues = self.get_asset_stats(technical_assets)
 
@@ -97,12 +99,12 @@ class DatasetDataQualityService:
         self.db.refresh(existing_summary)
         return existing_summary
 
-    def get_summary(self, dataset_id: UUID, summary_id: UUID) -> DataQualitySummary:
+    def get_summary(self, output_port_id: UUID, summary_id: UUID) -> DataQualitySummary:
         existing_summary = (
             self.db.query(DataQualitySummary)
             .filter(
                 DataQualitySummary.id == summary_id,
-                DataQualitySummary.output_port_id == dataset_id,
+                DataQualitySummary.output_port_id == output_port_id,
             )
             .first()
         )
@@ -110,22 +112,22 @@ class DatasetDataQualityService:
         if not existing_summary:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data quality summary {summary_id} not found for output port {dataset_id}",
+                detail=f"Data quality summary {summary_id} not found for output port {output_port_id}",
             )
         return existing_summary
 
     @staticmethod
     def convert_to_db(
         data_quality_summary: OutputPortDataQualitySummary,
-    ) -> list[DataQualityTechnicalAssetModel]:
+    ) -> list[DataQualityTechnicalAsset]:
         return [
-            DataQualityTechnicalAssetModel(name=asset.name, status=asset.status.value)
+            DataQualityTechnicalAsset(name=asset.name, status=asset.status.value)
             for asset in data_quality_summary.technical_assets
         ]
 
     @staticmethod
     def get_asset_stats(
-        technical_assets: list[DataQualityTechnicalAssetModel],
+        technical_assets: list[DataQualityTechnicalAsset],
     ) -> tuple[int, int]:
         assets_with_checks = len(
             [

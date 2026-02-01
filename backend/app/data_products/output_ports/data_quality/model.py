@@ -17,7 +17,7 @@ from app.database.database import Base
 from app.shared.model import utcnow
 
 
-class DataQualityTechnicalAssetModel(Base):
+class DataQualityTechnicalAsset(Base):
     """
     We store the data quality for technical assets in a separate table instead of linking to technical assets table.
     The reason for this is that creating an exact link will be difficult to achieve always.
@@ -37,7 +37,7 @@ class DataQualityTechnicalAssetModel(Base):
     # Relationships
     data_quality_summary_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("dataset_data_quality_summaries.id", ondelete="CASCADE"),
+        ForeignKey("output_port_data_quality_summaries.id", ondelete="CASCADE"),
         nullable=False,
         primary_key=True,
     )
@@ -47,7 +47,7 @@ class DataQualityTechnicalAssetModel(Base):
 
 
 class DataQualitySummary(Base):
-    __tablename__ = "dataset_data_quality_summaries"
+    __tablename__ = "output_port_data_quality_summaries"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     output_port_id: Mapped[uuid.UUID] = mapped_column(
@@ -70,7 +70,7 @@ class DataQualitySummary(Base):
     dimensions = Column(JSONB, nullable=True)
 
     # Relationships
-    technical_assets: Mapped[list["DataQualityTechnicalAssetModel"]] = relationship(
+    technical_assets: Mapped[list["DataQualityTechnicalAsset"]] = relationship(
         lazy="joined",
         cascade="all, delete-orphan",
         back_populates="data_quality_summary",  # We need all summary info when querying

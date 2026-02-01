@@ -44,7 +44,7 @@ from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -318,7 +318,7 @@ class DataProductService:
         Links an output port to a data product to be used as input port.
         """
 
-        dataset = ensure_dataset_exists(
+        dataset = ensure_output_port_exists(
             dataset_id,
             self.db,
             options=[
@@ -393,7 +393,7 @@ class DataProductService:
         id: UUID,
         dataset_id: UUID,
     ) -> DataProductDatasetModel:
-        ensure_dataset_exists(dataset_id, self.db)
+        ensure_output_port_exists(dataset_id, self.db)
         data_product = ensure_data_product_exists(
             id, self.db, options=[selectinload(DataProductModel.dataset_links)]
         )
