@@ -19,6 +19,16 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.outputPortDataQualitySummaryInput,
       }),
     }),
+    overwriteOutputPortDataQualitySummary: build.mutation<
+      OverwriteOutputPortDataQualitySummaryApiResponse,
+      OverwriteOutputPortDataQualitySummaryApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_quality_summary/${queryArg.summaryId}`,
+        method: "PUT",
+        body: queryArg.outputPortDataQualitySummaryInput,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -34,6 +44,14 @@ export type AddOutputPortDataQualityRunApiResponse =
 export type AddOutputPortDataQualityRunApiArg = {
   dataProductId: string;
   id: string;
+  outputPortDataQualitySummaryInput: OutputPortDataQualitySummary2;
+};
+export type OverwriteOutputPortDataQualitySummaryApiResponse =
+  /** status 200 Successful Response */ OutputPortDataQualitySummaryResponse;
+export type OverwriteOutputPortDataQualitySummaryApiArg = {
+  dataProductId: string;
+  id: string;
+  summaryId: string;
   outputPortDataQualitySummaryInput: OutputPortDataQualitySummary2;
 };
 export type DataQualityStatus =
@@ -90,4 +108,5 @@ export const {
   useGetLatestDataQualitySummaryForOutputPortQuery,
   useLazyGetLatestDataQualitySummaryForOutputPortQuery,
   useAddOutputPortDataQualityRunMutation,
+  useOverwriteOutputPortDataQualitySummaryMutation,
 } = injectedRtkApi;
