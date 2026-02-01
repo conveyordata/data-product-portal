@@ -131,6 +131,12 @@ tasks:
       - task: release:commit
       - task: release:pr
 
+  terraform-provider:docs:
+    desc: "Generate Terraform provider documentation"
+    dir: terraform-provider-dataproductportal
+    cmds:
+      - go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest generate
+
   poetry:setup:
     desc: "Install the backend python project so the precommit does not fail"
     dir: backend
