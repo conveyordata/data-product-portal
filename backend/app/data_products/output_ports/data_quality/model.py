@@ -20,8 +20,8 @@ from app.shared.model import utcnow
 class DataQualityTechnicalAsset(Base):
     """
     We store the data quality for technical assets in a separate table instead of linking to technical assets table.
-    The reason for this is that creating an exact link will be difficult to achieve always.
-    By storing it this way we have the information and we can see whether creating a link might be feasible in the future
+    The reason for this is that creating an exact link will be difficult to always achieve.
+    By storing it this way we have the information, and we can see whether creating a link might be feasible in the future
     or we need to clean/validate the provided input.
     """
 
