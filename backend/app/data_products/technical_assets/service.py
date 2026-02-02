@@ -21,7 +21,7 @@ from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
@@ -169,7 +169,7 @@ class DataOutputService:
         *,
         actor: User,
     ) -> DataOutputDatasetAssociationModel:
-        dataset = ensure_dataset_exists(
+        dataset = ensure_output_port_exists(
             dataset_id,
             self.db,
             data_product_id=data_product_id,
@@ -203,7 +203,7 @@ class DataOutputService:
     def unlink_dataset_from_data_output(
         self, data_product_id: UUID, id: UUID, dataset_id: UUID
     ) -> DataOutputModel:
-        ensure_dataset_exists(dataset_id, self.db)
+        ensure_output_port_exists(dataset_id, self.db)
         data_output = self.get_data_output(data_product_id, id)
 
         data_output_dataset = next(

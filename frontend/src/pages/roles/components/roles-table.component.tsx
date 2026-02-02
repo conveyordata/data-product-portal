@@ -512,6 +512,12 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Dataset',
                 },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_DATA_QUALITY,
+                    name: 'Insert data quality results',
+                    description: 'Allows inserting data quality results for an output port',
+                },
             ];
             break;
     }

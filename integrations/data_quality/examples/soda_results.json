@@ -1,0 +1,485 @@
+{
+  "definitionName": "Soda Core CLI",
+  "defaultDataSource": "adventureworks",
+  "dataTimestamp": "2026-01-13T10:20:01+00:00",
+  "scanStartTimestamp": "2026-01-13T10:20:01+00:00",
+  "scanEndTimestamp": "2026-01-13T10:20:02+00:00",
+  "hasErrors": false,
+  "hasWarnings": false,
+  "hasFailures": true,
+  "metrics": [
+    {
+      "identity": "metric-Soda Core CLI-adventureworks-dim_customer-phone-duplicate_count",
+      "metricName": "duplicate_count",
+      "value": 715
+    },
+    {
+      "identity": "metric-Soda Core CLI-adventureworks-dim_customer-date_first_purchase-max",
+      "metricName": "max",
+      "value": "2014-01-28"
+    },
+    {
+      "identity": "metric-Soda Core CLI-adventureworks-dim_customer-email_address-invalid_count-61813b33",
+      "metricName": "invalid_count",
+      "value": 0
+    },
+    {
+      "identity": "metric-Soda Core CLI-adventureworks-dim_customer-last_name-missing_count",
+      "metricName": "missing_count",
+      "value": 0
+    }
+  ],
+  "checks": [
+    {
+      "identity": "f994881f",
+      "identities": {
+        "v1": "7e691da0",
+        "v2": "8f352fe4",
+        "v3": "f994881f"
+      },
+      "migratedIdentities": null,
+      "name": "Ensure values are formatted as email addresses",
+      "type": "generic",
+      "definition": "checks for dim_customer:\n  - invalid_count(email_address) = 0:\n      valid format: email\n      name: Ensure values are formatted as email addresses\n",
+      "resourceAttributes": [],
+      "location": {
+        "filePath": "checks.yml",
+        "line": 2,
+        "col": 5
+      },
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "column": "email_address",
+      "metrics": [
+        "metric-Soda Core CLI-adventureworks-dim_customer-email_address-invalid_count-61813b33"
+      ],
+      "outcome": "pass",
+      "diagnostics": {
+        "blocks": [],
+        "value": 0,
+        "fail": {
+          "greaterThan": 0,
+          "lessThan": 0
+        }
+      },
+      "source": "soda-core"
+    },
+    {
+      "identity": "46cbd5f8",
+      "identities": {
+        "v1": "8f0b4201",
+        "v2": "b2350d6b",
+        "v3": "46cbd5f8"
+      },
+      "migratedIdentities": null,
+      "name": "Ensure there are no null values in the Last Name column",
+      "type": "generic",
+      "definition": "checks for dim_customer:\n  - missing_count(last_name) = 0:\n      name: Ensure there are no null values in the Last Name column\n",
+      "resourceAttributes": [],
+      "location": {
+        "filePath": "checks.yml",
+        "line": 5,
+        "col": 5
+      },
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "column": "last_name",
+      "metrics": [
+        "metric-Soda Core CLI-adventureworks-dim_customer-last_name-missing_count"
+      ],
+      "outcome": "pass",
+      "diagnostics": {
+        "blocks": [],
+        "value": 0,
+        "fail": {
+          "greaterThan": 0,
+          "lessThan": 0
+        }
+      },
+      "source": "soda-core"
+    },
+    {
+      "identity": "9aafee95",
+      "identities": {
+        "v1": "851dfda8",
+        "v2": "c5afa527",
+        "v3": "9aafee95"
+      },
+      "migratedIdentities": null,
+      "name": "No duplicate phone numbers",
+      "type": "generic",
+      "definition": "checks for dim_customer:\n  - duplicate_count(phone) = 0:\n      name: No duplicate phone numbers\n",
+      "resourceAttributes": [],
+      "location": {
+        "filePath": "checks.yml",
+        "line": 7,
+        "col": 5
+      },
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "column": "phone",
+      "metrics": [
+        "metric-Soda Core CLI-adventureworks-dim_customer-phone-duplicate_count"
+      ],
+      "outcome": "fail",
+      "diagnostics": {
+        "blocks": [
+          {
+            "type": "failedRowsAnalysis",
+            "title": "Failed Rows Analysis",
+            "file": {
+              "columns": [
+                {
+                  "name": "customer_key",
+                  "type": "int4"
+                },
+                {
+                  "name": "geography_key",
+                  "type": "int4"
+                },
+                {
+                  "name": "customer_alternate_key",
+                  "type": "varchar"
+                },
+                {
+                  "name": "title",
+                  "type": "varchar"
+                },
+                {
+                  "name": "first_name",
+                  "type": "varchar"
+                },
+                {
+                  "name": "middle_name",
+                  "type": "varchar"
+                },
+                {
+                  "name": "last_name",
+                  "type": "varchar"
+                },
+                {
+                  "name": "name_style",
+                  "type": "bit"
+                },
+                {
+                  "name": "birth_date",
+                  "type": "date"
+                },
+                {
+                  "name": "marital_status",
+                  "type": "bpchar"
+                },
+                {
+                  "name": "suffix",
+                  "type": "varchar"
+                },
+                {
+                  "name": "gender",
+                  "type": "varchar"
+                },
+                {
+                  "name": "email_address",
+                  "type": "varchar"
+                },
+                {
+                  "name": "yearly_income",
+                  "type": "money"
+                },
+                {
+                  "name": "total_children",
+                  "type": "int4"
+                },
+                {
+                  "name": "number_children_at_home",
+                  "type": "int4"
+                },
+                {
+                  "name": "english_education",
+                  "type": "varchar"
+                },
+                {
+                  "name": "spanish_education",
+                  "type": "varchar"
+                },
+                {
+                  "name": "french_education",
+                  "type": "varchar"
+                },
+                {
+                  "name": "english_occupation",
+                  "type": "varchar"
+                },
+                {
+                  "name": "spanish_occupation",
+                  "type": "varchar"
+                },
+                {
+                  "name": "french_occupation",
+                  "type": "varchar"
+                },
+                {
+                  "name": "house_owner_flag",
+                  "type": "bpchar"
+                },
+                {
+                  "name": "number_cars_owned",
+                  "type": "int4"
+                },
+                {
+                  "name": "address_line1",
+                  "type": "varchar"
+                },
+                {
+                  "name": "address_line2",
+                  "type": "varchar"
+                },
+                {
+                  "name": "phone",
+                  "type": "varchar"
+                },
+                {
+                  "name": "date_first_purchase",
+                  "type": "date"
+                },
+                {
+                  "name": "commute_distance",
+                  "type": "varchar"
+                }
+              ],
+              "totalRowCount": 100,
+              "storedRowCount": 100,
+              "reference": {
+                "type": "noFile",
+                "message": "Samples are not sent to Soda Cloud",
+                "link": {
+                  "href": null,
+                  "text": null
+                },
+                "fileId": ""
+              }
+            },
+            "failingRowsQueryName": "2.adventureworks.dim_customer.phone.duplicate_count.failing_sql",
+            "passingRowsQueryName": "2.adventureworks.dim_customer.phone.duplicate_count.passing_sql",
+            "totalFailingRows": 715,
+            "sampleRowCount": 100
+          }
+        ],
+        "value": 715,
+        "fail": {
+          "greaterThan": 0,
+          "lessThan": 0
+        }
+      },
+      "source": "soda-core"
+    },
+    {
+      "identity": "73da5f65",
+      "identities": {
+        "v1": "838d2167",
+        "v2": "4f745656",
+        "v3": "73da5f65"
+      },
+      "migratedIdentities": null,
+      "name": "Data in this dataset is less than 7 days old",
+      "type": "generic",
+      "definition": "checks for dim_customer:\n  - freshness(date_first_purchase) < 7d:\n      name: Data in this dataset is less than 7 days old\n\n",
+      "resourceAttributes": [],
+      "location": {
+        "filePath": "checks.yml",
+        "line": 9,
+        "col": 5
+      },
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "column": "date_first_purchase",
+      "metrics": [
+        "metric-Soda Core CLI-adventureworks-dim_customer-date_first_purchase-max"
+      ],
+      "outcome": "fail",
+      "diagnostics": {
+        "blocks": [],
+        "value": 377346001875,
+        "measure": "time",
+        "maxColumnTimestamp": "2014-01-28 23:59:59.999999",
+        "maxColumnTimestampUtc": "2014-01-28 23:59:59.999999+00:00",
+        "nowVariableName": "NOW",
+        "nowTimestamp": "2026-01-13T10:20:01.874943+00:00",
+        "nowTimestampUtc": "2026-01-13 10:20:01.874943+00:00",
+        "freshness": "4367 days, 10:20:01.874944"
+      },
+      "source": "soda-core"
+    }
+  ],
+  "queries": [
+    {
+      "name": "1.adventureworks.dim_customer.aggregation[0]",
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "partition": null,
+      "column": null,
+      "sql": "SELECT \n  COUNT(CASE WHEN NOT (email_address IS NULL) AND NOT (email_address ~ '^[a-zA-ZÀ-ÿĀ-ſƀ-ȳ0-9.\\-_%+]+@[a-zA-ZÀ-ÿĀ-ſƀ-ȳ0-9.\\-_%]+\\.[A-Za-z]{2,4}$') THEN 1 END),\n  COUNT(CASE WHEN last_name IS NULL THEN 1 END),\n  MAX(date_first_purchase) \nFROM public.dim_customer",
+      "exception": null,
+      "duration": "0:00:00.015629"
+    },
+    {
+      "name": "2.adventureworks.dim_customer.phone.duplicate_count",
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "partition": null,
+      "column": "phone",
+      "sql": "\nWITH frequencies AS (\n    SELECT COUNT(*) AS frequency\n    FROM public.dim_customer\n    WHERE phone IS NOT NULL\n    GROUP BY phone)\nSELECT COUNT(*)\nFROM frequencies\nWHERE frequency > 1",
+      "exception": null,
+      "duration": "0:00:00.005236"
+    },
+    {
+      "name": "2.adventureworks.dim_customer.phone.duplicate_count.failing_sql",
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "partition": null,
+      "column": "phone",
+      "sql": "\nWITH frequencies AS (\n    SELECT phone\n    FROM public.dim_customer\n    WHERE phone IS NOT NULL\n    GROUP BY phone\n    HAVING COUNT(*) > 1)\nSELECT main.*\nFROM public.dim_customer main\nJOIN frequencies ON main.phone = frequencies.phone\n",
+      "exception": null,
+      "duration": null
+    },
+    {
+      "name": "2.adventureworks.dim_customer.phone.duplicate_count.passing_sql",
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "partition": null,
+      "column": "phone",
+      "sql": "\nWITH frequencies AS (\n    SELECT phone\n    FROM public.dim_customer\n    WHERE phone IS NOT NULL\n    GROUP BY phone\n    HAVING COUNT(*) <= 1)\nSELECT main.*\nFROM public.dim_customer main\nJOIN frequencies ON main.phone = frequencies.phone\n",
+      "exception": null,
+      "duration": null
+    },
+    {
+      "name": "3.adventureworks.dim_customer.phone.failed_rows[duplicate_count]",
+      "dataSource": "adventureworks",
+      "table": "dim_customer",
+      "partition": null,
+      "column": "phone",
+      "sql": "\nWITH frequencies AS (\n    SELECT phone\n    FROM public.dim_customer\n    WHERE phone IS NOT NULL\n    GROUP BY phone\n    HAVING COUNT(*) > 1)\nSELECT main.*\nFROM public.dim_customer main\nJOIN frequencies ON main.phone = frequencies.phone\n\nLIMIT 100",
+      "exception": null,
+      "duration": "0:00:00.012877"
+    }
+  ],
+  "automatedMonitoringChecks": [],
+  "profiling": [],
+  "metadata": [],
+  "logs": [
+    {
+      "level": "info",
+      "message": "Soda Core 3.5.6",
+      "timestamp": "2026-01-13T10:20:01+00:00",
+      "index": 1
+    },
+    {
+      "level": "info",
+      "message": "Using DefaultSampler",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 2
+    },
+    {
+      "level": "info",
+      "message": "Scan summary:",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 3
+    },
+    {
+      "level": "info",
+      "message": "2/4 checks PASSED: ",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 4
+    },
+    {
+      "level": "info",
+      "message": "    dim_customer in adventureworks",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 5
+    },
+    {
+      "level": "info",
+      "message": "      Ensure values are formatted as email addresses [PASSED]",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 6
+    },
+    {
+      "level": "info",
+      "message": "      Ensure there are no null values in the Last Name column [PASSED]",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 7
+    },
+    {
+      "level": "info",
+      "message": "2/4 checks FAILED: ",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 8
+    },
+    {
+      "level": "info",
+      "message": "    dim_customer in adventureworks",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 9
+    },
+    {
+      "level": "info",
+      "message": "      No duplicate phone numbers [FAILED]",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 10
+    },
+    {
+      "level": "info",
+      "message": "        check_value: 715",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 11
+    },
+    {
+      "level": "info",
+      "message": "      Data in this dataset is less than 7 days old [FAILED]",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 12
+    },
+    {
+      "level": "info",
+      "message": "        max_column_timestamp: 2014-01-28 23:59:59.999999",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 13
+    },
+    {
+      "level": "info",
+      "message": "        max_column_timestamp_utc: 2014-01-28 23:59:59.999999+00:00",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 14
+    },
+    {
+      "level": "info",
+      "message": "        now_variable_name: NOW",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 15
+    },
+    {
+      "level": "info",
+      "message": "        now_timestamp: 2026-01-13T10:20:01.874943+00:00",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 16
+    },
+    {
+      "level": "info",
+      "message": "        now_timestamp_utc: 2026-01-13 10:20:01.874943+00:00",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 17
+    },
+    {
+      "level": "info",
+      "message": "        freshness: 4367 days, 10:20:01.874944",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 18
+    },
+    {
+      "level": "info",
+      "message": "Oops! 2 failures. 0 warnings. 0 errors. 2 pass.",
+      "timestamp": "2026-01-13T10:20:02+00:00",
+      "index": 19
+    }
+  ],
+  "sourceOwner": "soda-core"
+}
