@@ -233,7 +233,9 @@ def get_output_ports_event_history(
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, EmptyResolver)),
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
+        ),
     ],
     deprecated=True,
 )
@@ -260,7 +262,9 @@ def create_dataset_old(
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, EmptyResolver)),
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
+        ),
     ],
 )
 def create_output_port(
@@ -300,7 +304,7 @@ def create_output_port(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
+        Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
     ],
     deprecated=True,
 )
@@ -324,7 +328,7 @@ def remove_dataset_old(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
+        Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
     ],
 )
 def remove_dataset(
@@ -363,7 +367,9 @@ def remove_dataset(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -390,7 +396,9 @@ def update_dataset(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
 )
@@ -427,7 +435,9 @@ def update_output_port(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -456,7 +466,9 @@ def update_dataset_about(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
 )
@@ -490,7 +502,9 @@ def update_output_port_about(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__UPDATE_STATUS, DatasetResolver)),
+        Depends(
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
+        ),
     ],
     deprecated=True,
 )
@@ -517,7 +531,9 @@ def update_dataset_status(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__UPDATE_STATUS, DatasetResolver)),
+        Depends(
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
+        ),
     ],
 )
 def update_output_port_status(
@@ -543,7 +559,9 @@ def update_output_port_status(
     f"{old_route}/{{id}}/usage",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -587,7 +605,7 @@ def get_output_port_graph_data(
     f"{old_route}/{{id}}/settings/{{setting_id}}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_SETTINGS, DatasetResolver)
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
         ),
     ],
     deprecated=True,
@@ -609,7 +627,7 @@ def set_value_for_dataset(
     f"{route}/{{id}}/settings/{{setting_id}}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_SETTINGS, DatasetResolver)
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
         ),
     ],
 )

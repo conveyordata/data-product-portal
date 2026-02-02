@@ -23,7 +23,7 @@ def _assign_update_role(session, dataset):
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(
         scope=Scope.DATASET,
-        permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
     )
     DatasetRoleAssignmentFactory(
         user_id=user.id, role_id=role.id, dataset_id=dataset.id

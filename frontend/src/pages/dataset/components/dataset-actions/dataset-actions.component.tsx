@@ -37,13 +37,13 @@ export function DatasetActions({ datasetId }: Props) {
 
     // const { data: request_access } = useCheckAccessQuery(
     //     {
-    //         action: AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS,
+    //         action: AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS,
     //     },
     // );
     const { data: read_integrations } = useCheckAccessQuery(
         {
             resource: datasetId,
-            action: AuthorizationAction.DATASET__READ_INTEGRATIONS,
+            action: AuthorizationAction.OUTPUT_PORT__READ_INTEGRATIONS,
         },
         {
             skip: !datasetId,

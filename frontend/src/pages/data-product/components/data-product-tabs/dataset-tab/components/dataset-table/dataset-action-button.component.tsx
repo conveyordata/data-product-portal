@@ -20,7 +20,7 @@ export function DatasetActionButton({ dataset, dataProductId, status }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+            action: AuthorizationAction.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
         },
         { skip: !dataProductId },
     );

@@ -42,7 +42,7 @@ router = APIRouter()
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__DELETE_USER,
+                Action.OUTPUT_PORT__DELETE_USER,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )
@@ -144,7 +144,7 @@ def list_output_port_role_assignments(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.GLOBAL__REQUEST_DATASET_ACCESS, resolver=EmptyResolver
+                Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS, resolver=EmptyResolver
             )
         )
     ],
@@ -182,7 +182,7 @@ def request_assignment_old(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.GLOBAL__REQUEST_DATASET_ACCESS, resolver=EmptyResolver
+                Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS, resolver=EmptyResolver
             )
         )
     ],
@@ -206,7 +206,9 @@ def request_output_port_role_assignment(
     f"{old_route}/{{id}}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__CREATE_USER, resolver=DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__CREATE_USER, resolver=DatasetResolver
+            )
         )
     ],
     deprecated=True,
@@ -242,7 +244,7 @@ def create_assignment_old(
     ):
         approvers = service.users_with_authz_action(
             dataset_id=role_assignment.dataset_id,
-            action=Action.DATASET__APPROVE_USER_REQUEST,
+            action=Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
         )
 
     if is_admin or authenticated_user.id in (approver.id for approver in approvers):
@@ -264,7 +266,7 @@ def create_assignment_old(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__CREATE_USER,
+                Action.OUTPUT_PORT__CREATE_USER,
                 resolver=DatasetResolver,
                 object_id="output_port_id",
             )
@@ -291,7 +293,7 @@ def create_output_port_role_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_USER_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )
@@ -356,7 +358,7 @@ def decide_assignment_old(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_USER_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )
@@ -376,7 +378,7 @@ def decide_output_port_role_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__UPDATE_USER,
+                Action.OUTPUT_PORT__UPDATE_USER,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )
@@ -424,7 +426,7 @@ def modify_assigned_role_old(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__UPDATE_USER,
+                Action.OUTPUT_PORT__UPDATE_USER,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )

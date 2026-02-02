@@ -152,6 +152,6 @@ class DataProductDatasetService:
                 sub=str(user.id),
                 dom=str(a.dataset.data_product.domain),
                 obj=str(a.dataset_id),
-                act=Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
         ]
