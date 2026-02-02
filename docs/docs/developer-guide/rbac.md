@@ -20,8 +20,8 @@ Scopes define the context or level at which permissions are applied. The portal 
 - **Data Product**: Permissions specific to a single data product (e.g., updating properties, managing team members)
 - **Output Port**: Permissions for individual output ports (e.g., approving access requests, managing links)
 - **Domain**: Permissions at the domain level for organizational grouping. (*this scope is not yet in use, but the ground works have been provided for future improvements*)
-### Actions
 
+### Actions
 Actions represent specific operations that can be performed in the portal. Each action is tied to both API endpoints and UI features. Your ability to perform an action depends on the roles assigned to you in the relevant scope.
 
 Examples of actions include:
@@ -46,7 +46,8 @@ Examples of actions include:
 - `OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS` - Remove data product access
 
 :::note
-Actions are defined in the backend codebase and can be extended by the development team. If you need additional actions for your use case, feel free to submit a pull request.
+Actions are defined in the backend codebase and can be extended by the development team.
+If you need additional actions for your use case, feel free to submit a pull request.
 :::
 
 ### Roles
@@ -59,7 +60,7 @@ Roles are collections of actions grouped together for a specific purpose. The po
 - **Custom**: Roles created specifically for your organization's needs
 
 Roles can be created and customized for each scope. When creating a custom role:
-1. Choose the scope (Global, Data Product, Domain, or Output Port)
+1. Choose the scope (Global, Data Product or Output Port)
 2. Assign a descriptive name
 3. Select the actions this role should be allowed to perform
 
