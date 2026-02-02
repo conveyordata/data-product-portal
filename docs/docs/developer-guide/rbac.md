@@ -113,7 +113,7 @@ You can see what the RBAC settings page looks like below:
 
 ### Creating Custom Roles
 
-1. Navigate to **Settings** → **Roles** (requires admin privileges)
+1. Navigate to **Settings** → **Roles** (This requires admin privileges)
 2. Select the scope for which you want to create a role
 3. Click **"Create Role"**
 4. Provide:
