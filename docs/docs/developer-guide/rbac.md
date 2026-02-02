@@ -103,7 +103,8 @@ Temporary admin privileges provide full access across the platform. All actions 
 :::
 
 :::warning
-At least one user must have the `can_become_admin` permission enabled. The system prevents removing this permission from the last eligible user.
+At least one user must have the `can_become_admin` permission enabled.
+The system prevents removing this permission from the last eligible user.
 :::
 
 You can see what the RBAC settings page looks like below:
