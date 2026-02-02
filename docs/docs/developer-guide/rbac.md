@@ -99,7 +99,9 @@ To access and configure RBAC settings, you need temporary admin privileges:
    - Admin privileges automatically expire after 10 minutes if not manually revoked
 
 :::important
-Temporary admin privileges provide full access across the platform. All actions performed while in admin mode are still audited under your user account. Use admin privileges judiciously and revoke them when finished.
+Temporary admin privileges provide full access across the platform.
+All actions performed while in admin mode are still audited under your user account.
+Use admin privileges judiciously and revoke them when finished.
 :::
 
 :::warning
