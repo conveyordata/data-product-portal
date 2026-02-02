@@ -21,6 +21,8 @@ class TechnicalAssetConfiguration(Base, BaseORM):
     The configuration_type field is used for:
     1. Pydantic serialization (discriminator for Union types)
     2. SQLAlchemy polymorphic loading (to load the correct subclass)
+
+    In case of future performance issues these fields can be used in DataOutput directly, which would mean one less join.
     """
 
     __tablename__ = "data_output_configurations"
