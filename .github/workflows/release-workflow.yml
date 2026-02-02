@@ -67,8 +67,7 @@ jobs:
           VERSION: ${{ needs.prep-version.outputs.version }}
         with:
           exec: |
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm package --dependency-update helm
+            helm package helm
             helm push data-product-portal-$VERSION.tgz oci://public.ecr.aws/conveyordata
   backend:
     runs-on: ubuntu-latest

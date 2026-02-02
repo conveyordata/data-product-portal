@@ -159,7 +159,6 @@ export function DataOutputConfigurationForm({
                     />
                 );
                 break;
-            case 'string':
             default:
                 inputComponent = <Input />;
                 break;

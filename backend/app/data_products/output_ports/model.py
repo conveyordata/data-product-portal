@@ -105,7 +105,7 @@ class Dataset(Base, BaseORM):
         return self.data_product.name
 
 
-def ensure_dataset_exists(
+def ensure_output_port_exists(
     dataset_id: UUID,
     db: Session,
     data_product_id: Optional[UUID] = None,

@@ -13,7 +13,7 @@ from app.data_products.output_ports.curated_queries.schema_request import (
 from app.data_products.output_ports.curated_queries.schema_response import (
     OutputPortCuratedQueries,
 )
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 
 
 class DatasetCuratedQueryService:
@@ -21,7 +21,7 @@ class DatasetCuratedQueryService:
         self.db = db
 
     def get_curated_queries(self, dataset_id: UUID) -> OutputPortCuratedQueries:
-        ensure_dataset_exists(dataset_id, self.db)
+        ensure_output_port_exists(dataset_id, self.db)
         queries = self.db.scalars(
             select(DatasetCuratedQueryModel)
             .where(DatasetCuratedQueryModel.output_port_id == dataset_id)
@@ -35,7 +35,7 @@ class DatasetCuratedQueryService:
     def replace_curated_queries(
         self, dataset_id: UUID, curated_queries: Sequence[OutputPortCuratedQueryInput]
     ) -> OutputPortCuratedQueries:
-        ensure_dataset_exists(dataset_id, self.db)
+        ensure_output_port_exists(dataset_id, self.db)
         self.db.execute(
             delete(DatasetCuratedQueryModel).where(
                 DatasetCuratedQueryModel.output_port_id == dataset_id

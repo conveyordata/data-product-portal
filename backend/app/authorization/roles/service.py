@@ -140,6 +140,7 @@ class RoleService:
                         Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                         Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
                         Action.OUTPUT_PORT__READ_INTEGRATIONS,
+                        Action.OUTPUT_PORT__UPDATE_DATA_QUALITY,
                     ],
                 ),
                 prototype=Prototype.OWNER,
