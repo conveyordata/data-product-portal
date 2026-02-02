@@ -1,0 +1,135 @@
+apiVersion: v3.1.0
+kind: DataContract
+
+# Full specification available: https://github.com/bitol-io/open-data-contract-standard/blob/main/schema/odcs-json-schema-v3.1.0.json
+id: clinical-trial-dashboard-contract
+name: Clinical Trial Dashboard Contract
+version: "1.0.0"
+status: active #will be mapped on lifecycle in Portal
+domain: clinical
+dataProduct: clinical-trial-performance
+
+description:
+  # Portal does not distinguish between the different description fields.
+  purpose: >
+    Clinical Trial Performance dataset, which quantifies the enrollment,
+    progress, and efficiency of ongoing clinical trials.
+  usage: >
+    Can only be used to perform analytics and reporting on clinical trial performance metrics.
+
+tags:
+  - PII
+
+schema:
+  - name: trial_master
+    id: trial_master
+    logicalType: object
+    physicalType: table
+    physicalName: "clinical-trial-dashboard.trial_master"
+    description: "Main table of clinical trial performance metrics"
+    properties:
+      - name: trial_id
+        businessName: "Trial Identifier"
+        logicalType: string
+        physicalType: varchar
+        description: "Unique identifier for the clinical trial"
+        examples:
+          - "CT-12345"
+          - "AX-45678"
+      - name: enrollment_count
+        businessName: "Enrollment Count"
+        physicalType: integer
+        logicalType: number
+        description: "Number of enrolled patients"
+        examples:
+          - 100
+          - 2000
+      - name: snapshot_date
+        businessName: "Snapshot Date"
+        physicalType: timestamp
+        logicalType: timestamp
+        description: "Snapshot date/time of performance metrics"
+        examples:
+          - 2025-01-01
+          - 2025-02-01
+  - name: retention_metrics
+    id: retention_metrics
+    logicalType: object
+    physicalType: table
+    physicalName: "clinical-trial-dashboard.retention_metrics"
+    description: "Retention metrics for patient in every study at every site"
+    properties:
+      - name: trial_id
+        businessName: "Trial Identifier"
+        logicalType: string
+        physicalType: varchar
+        description: "Unique identifier for the clinical trial"
+        examples:
+          - "CT-12345"
+          - "AX-45678"
+      - name: patient_id
+        businessName: "Patient identifier"
+        physicalType: varchar
+        logicalType: string
+        description: "The identifier of the patient"
+        examples:
+          - "ID-123456"
+          - "ID-789456"
+      - name: site_id
+        businessName: "Site identifier"
+        physicalType: varchar
+        logicalType: string
+        description: "The identifier of the site which manages the patient"
+        examples:
+          - "us-east-1"
+          - "eu-west-1"
+      - name: snapshot_date
+        businessName: "Snapshot Date"
+        physicalType: timestamp
+        logicalType: timestamp
+        description: "Snapshot date/time of performance metrics"
+        examples:
+          - 2025-01-01
+          - 2025-02-01
+
+servers:
+  - type: glue
+    environment: production
+    description: "Production glue catalog"
+    location: "s3://clinical/prod/clinical_trial_performance/"
+    account: "1234-5678-9012"
+    database: "clinical-trial-performance.trial_master"
+    format: "parquet"
+    server: "ProdGlueCatalog" # Required but not clear what it should be in case of glue
+  - type: glue
+    environment: development
+    description: "Development glue catalog"
+    location: "s3://clinical/dev/clinical_trial_performance/"
+    account: "1234-5678-9012"
+    database: "clinical-trial-performance.trial_master"
+    format: "parquet"
+    server: "DevGlueCatalog" # Required but not clear what it should be in case of glue
+
+team:
+  name: Product team
+  members:
+    - role: Owner
+      username: "jane.researcher@pharma.com"
+
+roles:
+  - role: reader
+    description: "Teams consuming clinical performance metrics"
+
+slaProperties:
+  - id: latency_1_day
+    property: latency
+    value: 1
+    unit: d
+    scheduler: cron
+    schedule: "0 1 * * *"
+    description: "New updates to enrollment_count should be available daily"
+  - id: retention_3_years
+    property: retention
+    value: 3
+    unit: y
+    element: snapshot_date
