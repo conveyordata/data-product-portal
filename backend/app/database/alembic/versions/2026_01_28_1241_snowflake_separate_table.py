@@ -1,7 +1,7 @@
 """Migrate Snowflake configurations to separate table
 
 Revision ID: snowflake_separate_table
-Revises: b1de5e9ba1fa
+Revises: 7601ac14662a
 Create Date: 2026-01-28 12:41:00.000000
 
 """
@@ -16,7 +16,7 @@ from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "snowflake_separate_table"
-down_revision: Union[str, None] = "b1de5e9ba1fa"
+down_revision: Union[str, None] = "7601ac14662a"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
