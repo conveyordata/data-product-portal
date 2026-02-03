@@ -17,7 +17,7 @@ readme = "README.md"
 python = "^3.13"
 python-dotenv = "^1.2.1"
 fastapi = "0.127.0"
-gunicorn = "^24.1.1"
+gunicorn = "^25.0.1"
 uvicorn = "^0.40.0"
 pydantic = { version = "^2.12.5", extras = ['email'] }
 pydantic-settings = "^2.12.0"
