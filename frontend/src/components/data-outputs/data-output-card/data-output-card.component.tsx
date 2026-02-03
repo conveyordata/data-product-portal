@@ -29,7 +29,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
     const { data: { plugins } = {} } = useGetPluginsQuery();
     const { data: deleteAccess } = useCheckAccessQuery({
         resource: dataProductId,
-        action: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+        action: AuthorizationAction.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
     });
 
     const [removeDataOutput, { isLoading: isRemoving }] = useRemoveDataOutputMutation();

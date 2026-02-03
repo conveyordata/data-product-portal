@@ -32,7 +32,7 @@ from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
@@ -292,7 +292,9 @@ class OutputPortService:
         return model
 
     def remove_dataset(self, id: UUID, data_product_id: UUID) -> DatasetModel:
-        dataset = ensure_dataset_exists(id, self.db, data_product_id=data_product_id)
+        dataset = ensure_output_port_exists(
+            id, self.db, data_product_id=data_product_id
+        )
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
@@ -306,7 +308,7 @@ class OutputPortService:
     def update_dataset(
         self, id: UUID, data_product_id: UUID, dataset: DatasetUpdate
     ) -> UUID:
-        current_dataset = ensure_dataset_exists(
+        current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
         updated_dataset = dataset.model_dump(exclude_unset=True)
@@ -342,7 +344,7 @@ class OutputPortService:
         data_product_id: UUID,
         dataset: DatasetAboutUpdate,
     ) -> None:
-        current_dataset = ensure_dataset_exists(
+        current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
         current_dataset.about = dataset.about
@@ -354,7 +356,7 @@ class OutputPortService:
         data_product_id: UUID,
         dataset: DatasetStatusUpdate,
     ) -> None:
-        current_dataset = ensure_dataset_exists(
+        current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
         current_dataset.status = dataset.status
@@ -365,7 +367,7 @@ class OutputPortService:
         id: UUID,
         usage: DatasetUsageUpdate,
     ) -> DatasetModel:
-        current_dataset = ensure_dataset_exists(id, self.db)
+        current_dataset = ensure_output_port_exists(id, self.db)
         current_dataset.usage = usage.usage
         self.db.commit()
         return current_dataset

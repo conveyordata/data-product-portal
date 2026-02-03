@@ -39,7 +39,7 @@ export function DatasetTab({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+            action: AuthorizationAction.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
         },
         { skip: !dataProductId },
     );

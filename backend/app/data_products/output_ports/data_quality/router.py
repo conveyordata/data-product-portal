@@ -1,0 +1,133 @@
+from typing import Sequence
+from uuid import UUID
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.core.authz import Action, Authorization, DatasetResolver
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
+from app.data_products.output_ports.data_quality.model import (
+    DataQualitySummary,
+)
+from app.data_products.output_ports.data_quality.model import (
+    DataQualityTechnicalAsset as DataQualityTechnicalAssetModel,
+)
+from app.data_products.output_ports.data_quality.schema_request import (
+    DataQualityTechnicalAsset,
+)
+from app.data_products.output_ports.data_quality.schema_response import (
+    OutputPortDataQualitySummary,
+    OutputPortDataQualitySummaryResponse,
+)
+from app.data_products.output_ports.data_quality.service import (
+    OutputPortDataQualityService,
+)
+from app.data_products.output_ports.model import ensure_output_port_exists
+from app.database.database import get_db_session
+
+router = APIRouter(tags=["Output Ports - Data Quality"])
+route = "/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary"
+
+
+def convert_dimensions_to_api(
+    dimensions: dict[str, str],
+) -> dict[str, DataQualityStatus]:
+    return {key: DataQualityStatus(value) for key, value in dimensions.items()}
+
+
+def convert_technical_assets_to_api(
+    technical_assets: Sequence[DataQualityTechnicalAssetModel],
+) -> Sequence[DataQualityTechnicalAsset]:
+    return [
+        DataQualityTechnicalAsset(
+            name=tech_asset.name, status=DataQualityStatus(tech_asset.status)
+        )
+        for tech_asset in technical_assets
+    ]
+
+
+@router.get(route)
+def get_latest_data_quality_summary_for_output_port(
+    data_product_id: UUID,
+    id: UUID,
+    db: Session = Depends(get_db_session),
+) -> OutputPortDataQualitySummary:
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
+    summary = OutputPortDataQualityService(db).get_latest_data_quality_summary(ds.id)
+    return convert(summary, id)
+
+
+def convert(
+    summary: DataQualitySummary, output_port_id: UUID
+) -> OutputPortDataQualitySummaryResponse:
+    return OutputPortDataQualitySummaryResponse(
+        output_port_id=output_port_id,
+        description=summary.description,
+        created_at=summary.created_at,
+        details_url=summary.details_url,
+        dimensions=convert_dimensions_to_api(summary.dimensions),
+        technical_assets=convert_technical_assets_to_api(summary.technical_assets),
+        overall_status=DataQualityStatus(summary.overall_status),
+        id=summary.id,
+    )
+
+
+@router.post(
+    route,
+    responses={
+        404: {
+            "description": "Output Port not found",
+            "content": {
+                "application/json": {"example": {"detail": "Output Port ID not found"}}
+            },
+        }
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_DATA_QUALITY, DatasetResolver
+            )
+        ),
+    ],
+)
+def add_output_port_data_quality_run(
+    data_product_id: UUID,
+    id: UUID,
+    data_quality_summary: OutputPortDataQualitySummary,
+    db: Session = Depends(get_db_session),
+) -> OutputPortDataQualitySummaryResponse:
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
+    summary_response = OutputPortDataQualityService(db).save_data_quality_summary(
+        ds.id, data_quality_summary
+    )
+    return convert(summary_response, ds.id)
+
+
+@router.put(
+    route + "/{summary_id}",
+    responses={
+        404: {
+            "description": "Output Port or Summary not found",
+            "content": {"application/json": {"example": {"detail": "Not found"}}},
+        }
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_DATA_QUALITY, DatasetResolver
+            )
+        ),
+    ],
+)
+def overwrite_output_port_data_quality_summary(
+    data_product_id: UUID,
+    id: UUID,
+    summary_id: UUID,
+    data_quality_summary: OutputPortDataQualitySummary,
+    db: Session = Depends(get_db_session),
+) -> OutputPortDataQualitySummaryResponse:
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
+    updated = OutputPortDataQualityService(db).overwrite_data_quality_summary(
+        ds.id, summary_id, data_quality_summary
+    )
+    return convert(updated, ds.id)

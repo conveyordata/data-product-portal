@@ -14,7 +14,7 @@ from app.data_products.output_ports.curated_queries.schema_response import (
 from app.data_products.output_ports.curated_queries.service import (
     DatasetCuratedQueryService,
 )
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.database.database import get_db_session
 
 router = APIRouter()
@@ -27,7 +27,7 @@ def get_dataset_curated_queries(
     id: UUID,
     db: Session = Depends(get_db_session),
 ) -> DatasetCuratedQueries:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return DatasetCuratedQueries(
         dataset_curated_queries=get_output_port_curated_queries(
             ds.data_product_id, id, db
@@ -41,7 +41,7 @@ def get_output_port_curated_queries(
     id: UUID,
     db: Session = Depends(get_db_session),
 ) -> OutputPortCuratedQueries:
-    ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return DatasetCuratedQueryService(db).get_curated_queries(ds.id)
 
 
@@ -57,7 +57,9 @@ def get_output_port_curated_queries(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -67,7 +69,7 @@ def replace_dataset_curated_queries(
     curated_queries: OutputPortCuratedQueriesUpdate,
     db: Session = Depends(get_db_session),
 ) -> DatasetCuratedQueries:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return DatasetCuratedQueries(
         dataset_curated_queries=replace_output_port_curated_queries(
             ds.data_product_id, id, curated_queries, db
@@ -87,7 +89,9 @@ def replace_dataset_curated_queries(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
 )
@@ -97,7 +101,7 @@ def replace_output_port_curated_queries(
     curated_queries: OutputPortCuratedQueriesUpdate,
     db: Session = Depends(get_db_session),
 ) -> OutputPortCuratedQueries:
-    ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return DatasetCuratedQueryService(db).replace_curated_queries(
         ds.id, curated_queries.curated_queries
     )

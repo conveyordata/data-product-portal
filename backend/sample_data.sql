@@ -133,7 +133,7 @@ begin
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('e43b6f7a-e776-49b2-9b51-117d8644d971', 'Owner', 'data_product', 2, 'The owner of a Data Product', ARRAY [301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into product_owner_id;
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('18e67286-92aa-449a-ba46-ac26eb0de21d', 'Solution Architect', 'data_product', 0, 'The Solution Architect for a Data Product', ARRAY [303, 309, 310, 311, 312, 313, 314], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('9ca3bfdd-2919-4190-a8bb-55e9ee7d70dd', 'Member', 'data_product', 0, 'A regular team member of a Data Product', ARRAY [313, 314, 315], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '2 seconds'), NULL, NULL) returning id into product_member_id;
-    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'Owner', 'dataset', 2, 'The owner of a Dataset', ARRAY [401, 402, 404, 405, 406, 407, 408, 411, 412, 413], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into dataset_owner_id;
+    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'Owner', 'dataset', 2, 'The owner of a Dataset', ARRAY [401, 402, 404, 405, 406, 407, 408, 411, 412, 413, 414], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into dataset_owner_id;
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('2ae1b4e3-5b13-491a-912b-984e2e90b858', 'Solution Architect', 'dataset', 0, 'The Solution Architect for a Dataset', ARRAY [403, 409, 410], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('db8d7a76-c50b-4e95-8549-8da86f48e7c2', 'Member', 'dataset', 0, 'A regular team member of a Dataset', ARRAY [413], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '2 seconds'), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at)
@@ -523,5 +523,51 @@ begin
     FROM generate_series((CURRENT_DATE - INTERVAL '4 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
     WHERE EXTRACT(ISODOW FROM gs) = 3;
 
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert data quality summary for half of the existing datasets
+    -- ------------------------------------------------------------------------------------------------
+    WITH dataset_selection AS (
+        -- Get up to 20 datasets and assign a row number for variety in data generation
+        SELECT id, name, ROW_NUMBER() OVER (ORDER BY id) as rn
+        FROM public.datasets
+        LIMIT 20
+    ),
+    summary_generation AS (
+        SELECT
+            gen_random_uuid() as summary_id,
+            id as dataset_id,
+            name as dataset_name,
+            rn,
+            (ARRAY['success', 'failure', 'warning', 'error'])[((rn - 1) % 4) + 1] as status
+        FROM dataset_selection
+    )
+    INSERT INTO public.output_port_data_quality_summaries
+        (id, output_port_id, assets_with_checks, assets_with_issues, details_url, description, overall_status, created_at, dimensions)
+    SELECT
+        summary_id,
+        dataset_id,
+        10 + rn,
+        CASE WHEN status = 'success' THEN 0 ELSE (rn % 3) + 1 END,
+        'https://quality-tool.internal/view/' || dataset_id,
+        'Recursive CTE generated report for ' || dataset_name,
+        status,
+        NOW() - (rn || ' hours')::interval,
+        json_build_object('validity', lower(status), 'completeness', 'success')
+    FROM summary_generation;
+
+    -- 2. Generate the Technical Assets
+    WITH dataset_selection AS (
+        SELECT id, name, ROW_NUMBER() OVER (ORDER BY id) as rn FROM public.datasets LIMIT 20
+        ),
+        summary_mapping AS (
+    -- We need to join back to the summaries we just created to get the IDs
+    SELECT s.id as summary_id, d.name as dataset_name, d.rn
+    FROM public.output_port_data_quality_summaries s
+        JOIN dataset_selection d ON s.output_port_id = d.id
+        )
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id)
+    SELECT dataset_name || '_table', 'success', summary_id FROM summary_mapping
+    UNION ALL
+    SELECT dataset_name || '_view', 'warning', summary_id FROM summary_mapping;
 
 end $$;

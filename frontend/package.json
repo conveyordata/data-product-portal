@@ -15,7 +15,7 @@
         "validate-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js --fail-on-update",
         "typecheck": "tsc --strict --noEmit",
         "dep-viz": "npm run build && npx open-cli dependencies.html",
-        "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts && sed -i '' '1s/^/\\/\\/ @ts-nocheck\\n/' src/store/api/services/generated/completeServiceApi.ts"
+        "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts && node scripts/add-ts-nocheck.js"
     },
     "dependencies": {
         "@ant-design/charts": "^2.6.7",
@@ -41,7 +41,7 @@
         "@tiptap/react": "^3.18.0",
         "@tiptap/starter-kit": "^3.18.0",
         "@xyflow/react": "^12.10.0",
-        "antd": "^6.2.2",
+        "antd": "^6.2.3",
         "axios": "^1.13.4",
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
@@ -49,9 +49,9 @@
         "i18next": "^25.8.0",
         "i18next-http-backend": "^3.0.2",
         "js-sha256": "^0.11.1",
-        "nuqs": "^2.8.6",
+        "nuqs": "^2.8.8",
         "oidc-client-ts": "^3.4.1",
-        "posthog-js": "^1.336.1",
+        "posthog-js": "^1.336.4",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",
         "react-i18next": "^16.5.4",
@@ -65,10 +65,10 @@
     "devDependencies": {
         "@biomejs/biome": "2.3.13",
         "@rtk-query/codegen-openapi": "^2.0.0",
-        "@types/node": "^25.1.0",
+        "@types/node": "^25.2.0",
         "@types/react": "^19.2.10",
         "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^5.1.2",
+        "@vitejs/plugin-react": "^5.1.3",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.27.2",
         "esbuild-runner": "^2.2.2",
@@ -81,7 +81,7 @@
         "vite-plugin-svgr": "^4.5.0"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-musl": "^4.57.0"
+        "@rollup/rollup-linux-x64-musl": "^4.57.1"
     },
     "volta": {
         "node": "20.12.2"

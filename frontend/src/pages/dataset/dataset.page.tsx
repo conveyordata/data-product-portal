@@ -12,6 +12,7 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.component';
 import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description';
+import { DatasetQuality } from '@/pages/dataset/components/dataset-quality/dataset-quality.component.tsx';
 import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -37,7 +38,7 @@ export function Dataset() {
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: datasetId,
-            action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
+            action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
         },
         { skip: !datasetId },
     );
@@ -101,7 +102,7 @@ export function Dataset() {
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
                 <DatasetActions datasetId={datasetId} />
-                {/*  Dataset owners overview */}
+                <DatasetQuality dataProductId={dataset?.data_product_id} datasetId={datasetId} />
                 <UserAccessOverview users={datasetOwners} title={t('Output port Owners')} />
             </Flex>
         </Flex>

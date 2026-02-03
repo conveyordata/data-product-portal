@@ -1,0 +1,95 @@
+apiVersion: v1.0.0
+kind: DataProduct
+
+# Full specification defintion: https://github.com/bitol-io/open-data-product-standard/blob/main/schema/odps-json-schema-v1.0.0.json
+# Core metadata
+id: clinical-trial-performance
+name: Clinical Trial Performance
+status: active #will be mapped on lifecycle in Portal
+domain: clinical
+version: latest #not required
+
+description:
+  purpose: >
+    Monitors progress, enrollment, and efficiency of ongoing clinical studies.
+  # Portal does distinguish between the different description fields.
+  usage: >
+    This data product aggregates inputs from drug supply and patient stratification
+    sources to produce performance metrics for clinical operations.
+  limitations: >
+    This can only be used internally for evaluating trial performance and not for marketing, individual performance usecases
+tags:
+  - PII
+
+# Input ports: not required but important info in Portal
+inputPorts:
+  - name: drug-supply-data
+    version: "v0.0.1" #not required
+    contractId: drug-supply-data-contract
+    # Optional metadata: We need to see which customProperties make sense for us.
+    customProperties:
+      - property: Status
+        value: Draft
+      - property: AccessType
+        value: public
+
+  - name: patient-stratification-info
+    contractId: patient-stratification-info-contract
+    tags: [ "PII" ]
+    # Optional metadata: We need to see which customProperties make sense for us.
+    customProperties:
+      - property: Status
+        value: Draft
+      - property: AccessType
+        value: Public
+    version: "v0.1.0"
+
+# Not required but is useful to link it to Portal.
+managementPorts:
+  - content: control
+    url: https://portal.demo1.conveyordata.com/api/data_products/6e580d91-14ea-495e-a6d7-5db236a5c1d5
+    type: rest
+    name: data-product-portal
+    description: "Showing and managing the product is done in the tool called: Data product Portal"
+
+# Output ports: required to have at least 1 according to bitol as otherwise it is not a DP!
+outputPorts:
+  - name: clinical-trial-performance
+    version: "v0.0.1"
+    description: "Overview of status and core metrics for our running clinical trials."
+    type: tables
+    contractId: clinical-trial-performance-contract
+    customProperties:
+      - property: Url
+        value: https://github.com/conveyordata/data-product-portal/blob/main/integrations/bitol/data-contract-example.yml
+      - property: Status
+        value: Draft
+      - property: AccessType
+        value: public
+
+# support: not required and currently not available in portal
+support:
+  - channel: "Product Tech Slack"
+    url: "The slack URL"
+    description: "Primary support channel"
+    tool: "slack"
+    scope: "interactive"
+  - channel: "Email support"
+    url: "mailto:support@conveyordata.com"
+    description: "Email support"
+    tool: "email"
+    scope: "issues"
+
+# team: not required but data that exists in Portal
+team:
+  name: "Product team"
+  description: "Data Minded product team"
+  members:
+    - username: "john.scientist@conveyordata.com"
+      name: "John Scientist"
+      role: "Owner"
+    - username: "jane.researcher@conveyordata.com"
+      name: "Jane Researcher"
+      role: "Owner"
+
+productCreatedTs: "2026-02-02T14:30:00Z"

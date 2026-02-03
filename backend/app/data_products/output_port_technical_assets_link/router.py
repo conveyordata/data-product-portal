@@ -45,7 +45,7 @@ route = (
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
                 DataOutputDatasetAssociationResolver,
             )
         )
@@ -76,7 +76,7 @@ def approve_data_output_link(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
                 DatasetResolver,
                 object_id="output_port_id",
             )
@@ -120,7 +120,7 @@ def approve_output_port_technical_asset_link(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
                 DataOutputDatasetAssociationResolver,
             )
         )
@@ -149,7 +149,7 @@ def deny_data_output_link(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
                 DatasetResolver,
                 object_id="output_port_id",
             )
@@ -192,7 +192,7 @@ def deny_output_port_technical_asset_link(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__REVOKE_DATA_OUTPUT_LINK,
+                Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK,
                 DataOutputDatasetAssociationResolver,
             )
         )
@@ -244,7 +244,7 @@ def get_user_pending_actions(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
                 DataOutputResolver,
             )
         ),
@@ -278,7 +278,8 @@ def link_output_port_to_technical_asset(
     RefreshInfrastructureLambda().trigger()
 
     approvers = RoleAssignmentService(db).users_with_authz_action(
-        dataset_link.dataset_id, Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST
+        dataset_link.dataset_id,
+        Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
     )
     if authenticated_user not in approvers:
         background_tasks.add_task(
@@ -305,7 +306,7 @@ def link_output_port_to_technical_asset(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
                 DataOutputResolver,
             )
         ),

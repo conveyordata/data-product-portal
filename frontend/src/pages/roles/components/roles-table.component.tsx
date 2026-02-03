@@ -247,7 +247,7 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.GLOBAL__CREATE_DATASET,
+                    id: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,
                     name: 'Create Dataset',
                     description: 'Allows the creation of a Dataset',
                 },
@@ -264,7 +264,7 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS,
+                    id: AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS,
                     name: 'Request Dataset access',
                     description: 'Allows requesting access to a Dataset',
                 },
@@ -354,26 +354,26 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                    id: AuthorizationAction.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
                     name: 'Add Technical Asset',
                     description: 'Allows adding a Technical Asset to this Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                    id: AuthorizationAction.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
                     name: 'Remove and unlink Technical Asset',
                     description:
                         'Allows removing a Technical Asset from this Data Product and unlinking it from a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                    id: AuthorizationAction.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
                     name: 'Modify Technical Asset',
                     description: 'Allows modifying the details of a Technical Asset of this Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                    id: AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
                     name: 'Request Technical Asset Link',
                     description: 'Allows to request that a Technical Asset of Data Product gets linked to a Dataset',
                 },
@@ -384,13 +384,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                    id: AuthorizationAction.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
                     name: 'Request Access to Dataset',
                     description: 'Allows to request read access to a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                    id: AuthorizationAction.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
                     name: 'Remove Access to Dataset',
                     description: 'Allows to remove read access to a Dataset',
                 },
@@ -416,25 +416,25 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
                     name: 'Manage general properties',
                     description: 'Allows modifying properties such as labels and the description of a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__UPDATE_SETTINGS,
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_SETTINGS,
                     name: 'Manage settings',
                     description: 'Allows changing the settings of a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__UPDATE_STATUS,
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_STATUS,
                     name: 'Manage status',
                     description: 'Allows changing the status of a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__DELETE,
+                    id: AuthorizationAction.OUTPUT_PORT__DELETE,
                     name: 'Delete Dataset',
                     description: 'Allows the role to delete the Dataset',
                 },
@@ -445,25 +445,25 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__CREATE_USER,
+                    id: AuthorizationAction.OUTPUT_PORT__CREATE_USER,
                     name: 'Add User',
                     description: 'Allows adding a user as member to this Dataset and assigning a role',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__DELETE_USER,
+                    id: AuthorizationAction.OUTPUT_PORT__DELETE_USER,
                     name: 'Remove User',
                     description: 'Allows removing a user as member from this Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__UPDATE_USER,
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_USER,
                     name: 'Modify User',
                     description: 'Allows changing the role of a member of the Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__APPROVE_USER_REQUEST,
+                    id: AuthorizationAction.OUTPUT_PORT__APPROVE_USER_REQUEST,
                     name: 'Review access request',
                     description: 'Allows approving or rejecting an access request made for the Dataset',
                 },
@@ -474,13 +474,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                    id: AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
                     name: 'Accept Technical Asset link',
                     description: 'Allows accepting a request to link a Technical Asset to the Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK,
+                    id: AuthorizationAction.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK,
                     name: 'Remove Technical Asset link',
                     description: 'Allows unlinking Technical Assets from the Dataset',
                 },
@@ -491,13 +491,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                    id: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                     name: 'Approve Data Product Access',
                     description: 'Allows the role to accept or reject a read access request from a data product',
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                    id: AuthorizationAction.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
                     name: 'Revoke Data Product Access',
                     description: 'Allows the role to revoke read access from a data product again',
                 },
@@ -508,9 +508,15 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                 },
                 {
                     type: 'Instance',
-                    id: AuthorizationAction.DATASET__READ_INTEGRATIONS,
+                    id: AuthorizationAction.OUTPUT_PORT__READ_INTEGRATIONS,
                     name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Dataset',
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_DATA_QUALITY,
+                    name: 'Insert data quality results',
+                    description: 'Allows inserting data quality results for an output port',
                 },
             ];
             break;

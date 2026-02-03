@@ -126,7 +126,7 @@ def get_technical_asset_event_history(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
                 DataOutputResolver,
             )
         ),
@@ -157,7 +157,7 @@ def remove_data_output(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
                 DataOutputResolver,
             )
         ),
@@ -201,7 +201,7 @@ def remove_technical_asset(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
                 DataOutputResolver,
             )
         ),
@@ -233,7 +233,7 @@ def update_data_output(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
                 DataOutputResolver,
             )
         ),
@@ -273,7 +273,7 @@ def update_technical_asset(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
                 DataOutputResolver,
             )
         ),
@@ -305,7 +305,7 @@ def update_data_output_status(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
                 DataOutputResolver,
             )
         ),
@@ -344,7 +344,7 @@ def update_technical_asset_status(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
                 DataOutputResolver,
             )
         ),
@@ -382,7 +382,7 @@ def link_dataset_to_data_output(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
                 DataOutputResolver,
             )
         ),

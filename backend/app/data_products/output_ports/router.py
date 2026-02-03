@@ -25,8 +25,11 @@ from app.core.namespace.validation import (
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
+from app.data_products.output_ports.data_quality.router import (
+    router as data_quality_router,
+)
 from app.data_products.output_ports.model import Dataset as OutputPortModel
-from app.data_products.output_ports.model import ensure_dataset_exists
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.query_stats.router import (
     router as query_stats_router,
 )
@@ -102,6 +105,7 @@ old_route = "/datasets"
 route = "/v2/data_products/{data_product_id}/output_ports"
 router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
+router.include_router(data_quality_router)
 
 
 @router.get(f"{old_route}/namespace_suggestion", deprecated=True)
@@ -193,7 +197,7 @@ def get_output_port(
 def get_event_history_old(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[GetEventHistoryResponseItemOld]:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return EventService(db).get_history(ds.id, EventReferenceEntity.DATASET)
 
 
@@ -201,7 +205,7 @@ def get_event_history_old(
 def get_output_ports_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
-    ds = ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
             GetEventHistoryResponseItemOld.model_validate(ds).convert()
@@ -229,7 +233,9 @@ def get_output_ports_event_history(
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, EmptyResolver)),
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
+        ),
     ],
     deprecated=True,
 )
@@ -256,7 +262,9 @@ def create_dataset_old(
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, EmptyResolver)),
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
+        ),
     ],
 )
 def create_output_port(
@@ -296,7 +304,7 @@ def create_output_port(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
+        Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
     ],
     deprecated=True,
 )
@@ -305,7 +313,7 @@ def remove_dataset_old(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return remove_dataset(ds.data_product_id, id, db, authenticated_user)
 
 
@@ -320,7 +328,7 @@ def remove_dataset_old(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
+        Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
     ],
 )
 def remove_dataset(
@@ -359,7 +367,9 @@ def remove_dataset(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -370,7 +380,7 @@ def update_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateOutputPortResponse:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return update_output_port(ds.data_product_id, id, dataset, db, authenticated_user)
 
 
@@ -386,7 +396,9 @@ def update_dataset(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
 )
@@ -423,7 +435,9 @@ def update_output_port(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -434,7 +448,7 @@ def update_dataset_about(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return update_output_port_about(
         ds.data_product_id, id, dataset, db, authenticated_user
     )
@@ -452,7 +466,9 @@ def update_dataset_about(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
 )
@@ -486,7 +502,9 @@ def update_output_port_about(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__UPDATE_STATUS, DatasetResolver)),
+        Depends(
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
+        ),
     ],
     deprecated=True,
 )
@@ -496,7 +514,7 @@ def update_dataset_status(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return update_output_port_status(
         ds.data_product_id, id, dataset, db, authenticated_user
     )
@@ -513,7 +531,9 @@ def update_dataset_status(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__UPDATE_STATUS, DatasetResolver)),
+        Depends(
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
+        ),
     ],
 )
 def update_output_port_status(
@@ -539,7 +559,9 @@ def update_output_port_status(
     f"{old_route}/{{id}}/usage",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+            )
         ),
     ],
     deprecated=True,
@@ -565,7 +587,7 @@ def update_dataset_usage(
 def get_graph_data_old(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return get_output_port_graph_data(ds.data_product_id, id, db, level)
 
 
@@ -583,7 +605,7 @@ def get_output_port_graph_data(
     f"{old_route}/{{id}}/settings/{{setting_id}}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_SETTINGS, DatasetResolver)
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
         ),
     ],
     deprecated=True,
@@ -595,7 +617,7 @@ def set_value_for_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    ds = ensure_dataset_exists(id, db)
+    ds = ensure_output_port_exists(id, db)
     return set_value_for_output_port(
         ds.data_product_id, id, setting_id, value, db, authenticated_user
     )
@@ -605,7 +627,7 @@ def set_value_for_dataset(
     f"{route}/{{id}}/settings/{{setting_id}}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__UPDATE_SETTINGS, DatasetResolver)
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
         ),
     ],
 )
@@ -617,7 +639,7 @@ def set_value_for_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    ensure_dataset_exists(id, db, data_product_id=data_product_id)
+    ensure_output_port_exists(id, db, data_product_id=data_product_id)
     DataProductSettingService(db).set_value_for_product(setting_id, id, value)
     EventService(db).create_event(
         CreateEvent(

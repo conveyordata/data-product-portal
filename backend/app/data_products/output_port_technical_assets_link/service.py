@@ -147,6 +147,6 @@ class DataOutputDatasetService:
                 sub=str(user.id),
                 dom=str(a.dataset.data_product.domain),
                 obj=str(a.dataset_id),
-                act=Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
             )
         ]
