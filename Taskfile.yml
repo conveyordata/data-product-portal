@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   VERSION_FILE: VERSION
@@ -31,11 +31,39 @@ tasks:
         fs.writeFileSync(file, updated);
         '
 
-  update:open-api-spec:
-    desc: "Update OpenAPI spec with new version"
+  openapi-spec:generate:
+    desc: "Generate OpenAPI spec from backend pydantic models"
+    generates:
+      - docs/static/openapi.json
+    dir: backend
+    dotenv: [.test.env]
     cmds:
-      - cd backend && poetry run python -m app.open_api_export
-      - mv backend/openapi.json docs/static/openapi.json
+      - poetry run python -m app.open_api_export ../docs/static/openapi.json
+
+  openapi-spec:generate-no-deprecated:
+    desc: "Generate OpenAPI spec without deprecated endpoints"
+    generates: [docs/static/openapi-no-deprecated.json]
+    dir: backend
+    dotenv: [.test.env]
+    cmds:
+      - poetry run python -m app.open_api_export ../docs/static/openapi-no-deprecated.json --exclude-deprecated
+
+  go-sdk:setup:
+    desc: "Setup Go SDK generation"
+    cmds:
+      - go install github.com/doordash-oss/oapi-codegen-dd/v3/cmd/oapi-codegen@latest
+
+  go-sdk:generate:
+    desc: "Generate the Go SDK from the OpenAPI spec"
+    sources: [docs/static/openapi-no-deprecated.json, sdk-go/oapi-codegen.yaml]
+    generates: [sdk-go/client.go]
+    preconditions:
+      - oapi-codegen --help # has no --version flag
+    dir: sdk-go
+    cmds:
+      - oapi-codegen --config oapi-codegen.yaml ../docs/static/openapi-no-deprecated.json
+      - gofmt -w .
+      - go mod tidy
 
   docusaurus:version:
     desc: "Run Docusaurus versioning"
@@ -99,6 +127,18 @@ tasks:
     cmds:
       - task: bump:version-file
       - task: bump:release-notes
-      - task: update:open-api-spec
+      - task: update:openapi-spec
       - task: release:commit
       - task: release:pr
+
+  terraform-provider:docs:
+    desc: "Generate Terraform provider documentation"
+    dir: terraform-provider-dataproductportal
+    cmds:
+      - go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest generate
+
+  poetry:setup:
+    desc: "Install the backend python project so the precommit does not fail"
+    dir: backend
+    cmds:
+      - poetry install

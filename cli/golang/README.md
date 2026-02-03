@@ -13,3 +13,9 @@ golangci-lint run --fix
 
 This will fix all things that can be automatically fixed,
 and will tell you were you need to make changes manually.
+
+## Installing oapi-codegen
+`task go-sdk:setup`
+
+## Generating the SDK from the OpenAPI spec
+`task go-sdk:generate`
