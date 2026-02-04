@@ -1,12 +1,13 @@
 import { Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract';
 import { createDatasetIdPath } from '@/types/navigation.ts';
@@ -43,6 +44,35 @@ export function OutputPortsTab() {
     const [showAllPorts, setShowAllPorts] = useQueryState('showAll', parseAsBoolean.withDefault(false));
     const [selectedRole, setSelectedRole] = useQueryState('role', parseAsString);
     const [selectedPortIds, setSelectedPortIds] = useState<string[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    // Fetch user's role assignments to find the Owner role
+    const { data: userDatasetRoles } = useListOutputPortRoleAssignmentsQuery(
+        { userId: currentUser?.id || '' },
+        { skip: !currentUser },
+    );
+
+    // Set default to Owner role on initial load
+    useEffect(() => {
+        if (isInitialized || !userDatasetRoles?.role_assignments || selectedRole !== null) {
+            return;
+        }
+
+        // Find the Owner role
+        const ownerAssignments = userDatasetRoles.role_assignments.filter(
+            (assignment) => assignment.role?.name?.toLowerCase() === 'owner',
+        );
+
+        if (ownerAssignments.length > 0) {
+            const ownerRoleId = ownerAssignments[0].role?.id || '';
+            const ownerPortIds = ownerAssignments.map((assignment) => assignment.output_port.id);
+
+            setSelectedRole(ownerRoleId);
+            setSelectedPortIds(ownerPortIds);
+        }
+
+        setIsInitialized(true);
+    }, [userDatasetRoles, selectedRole, isInitialized, setSelectedRole]);
 
     const { data: userOutputPorts = [], isFetching: isFetchingUserPorts } = useGetUserDatasetsQuery(
         currentUser?.id || '',

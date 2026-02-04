@@ -9,6 +9,9 @@ from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationshi
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
+from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
+    DataQualitySummary,
+)
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
 from app.database.database import Base, ensure_exists
@@ -24,7 +27,6 @@ if TYPE_CHECKING:
     from app.data_products.output_port_technical_assets_link.model import (
         DataOutputDatasetAssociation,
     )
-    from app.data_products.output_ports.data_quality.model import DataQualitySummary
     from app.data_products.output_ports.input_ports.model import (
         DataProductDatasetAssociation,
     )
@@ -91,10 +93,8 @@ class Dataset(Base, BaseORM):
     data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
     )
-    quality_summary: Mapped[Optional["DataQualitySummary"]] = relationship(
-        "DataQualitySummary",
-        foreign_keys="[DataQualitySummary.output_port_id]",
-        lazy="joined",
+    quality_summary: Mapped[Optional[DataQualitySummary]] = relationship(
+        foreign_keys=[DataQualitySummary.output_port_id], lazy="joined", uselist=False
     )
 
     @property
