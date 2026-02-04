@@ -64,12 +64,13 @@ export const Breadcrumbs = () => {
             };
 
             switch (path) {
+                case ApplicationPaths.Studio:
                 case ApplicationPaths.DataProducts:
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space>
                                 <DataProductOutlined />
-                                {t('Data Products')}
+                                {t('Product Studio')}
                             </Space>
                         ),
                     });
@@ -144,7 +145,8 @@ export const Breadcrumbs = () => {
                     if (
                         dataProduct &&
                         !isFetchingDataProduct &&
-                        pathnames.includes(ApplicationPaths.DataProducts.replace('/', ''))
+                        (pathnames.includes(ApplicationPaths.DataProducts.replace('/', '')) ||
+                            pathnames.includes(ApplicationPaths.Studio.replace('/', '')))
                     ) {
                         if (
                             isDataProductEditPage(path, dataProduct.id) ||

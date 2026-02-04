@@ -13,7 +13,7 @@ export function DataProductEdit() {
     const navigate = useNavigate();
 
     if (!dataProductId || isError) {
-        navigate(ApplicationPaths.DataProducts, { replace: true });
+        navigate(ApplicationPaths.Studio, { replace: true });
         return null;
     }
 

@@ -9,7 +9,6 @@ import Cart from '@/pages/cart/cart.page.tsx';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
-import { DataProductsTable } from '@/pages/data-products/data-products-table.component.tsx';
 import { Dataset } from '@/pages/dataset/dataset.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
@@ -17,6 +16,7 @@ import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
 import { Marketplace } from '@/pages/marketplace/marketplace.page.tsx';
 import { PeoplePage } from '@/pages/people/people-table.component.tsx';
+import { ProductStudio } from '@/pages/product-studio/product-studio.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
@@ -46,7 +46,7 @@ const router = createBrowserRouter([
                         path: ApplicationPaths.DataProducts,
                         children: [
                             {
-                                element: <DataProductsTable />,
+                                element: <ProductStudio />,
                                 index: true,
                             },
                             {
@@ -70,6 +70,10 @@ const router = createBrowserRouter([
                                 element: <DataProductEdit />,
                             },
                         ],
+                    },
+                    {
+                        path: ApplicationPaths.Studio,
+                        element: <Navigate to={ApplicationPaths.DataProducts} />,
                     },
                     {
                         path: ApplicationPaths.Marketplace,

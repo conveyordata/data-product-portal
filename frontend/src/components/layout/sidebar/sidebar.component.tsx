@@ -33,9 +33,9 @@ export const Sidebar = () => {
             key: ApplicationPaths.Home,
         },
         {
-            label: <Link to={ApplicationPaths.DataProducts}>{t('Data Products')}</Link>,
+            label: <Link to={ApplicationPaths.Studio}>{t('Product Studio')}</Link>,
             icon: <DataProductOutlined />,
-            key: ApplicationPaths.DataProducts,
+            key: ApplicationPaths.Studio,
         },
         {
             label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
