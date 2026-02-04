@@ -9,7 +9,7 @@ import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } 
 export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity | undefined): string {
     switch (type) {
         case EventReferenceEntity.Dataset:
-            return t('Output port');
+            return t('Output Port');
         case EventReferenceEntity.DataProduct:
             return t('Data Product');
         case EventReferenceEntity.DataOutput:
@@ -91,19 +91,19 @@ export function getEventTypeDisplayName(
                 <Trans
                     t={t}
                     i18nKey="EventDataOutputCreated"
-                    defaults="Technical asset created: now linked with the <element>{{entity}}</element> {{entity_type}}"
+                    defaults="Technical Asset created: now linked with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
                 />
             );
         case EventType.DATA_OUTPUT_UPDATED:
-            return <Trans t={t} i18nKey="EventDataOutputUpdated" defaults="Technical asset updated" />;
+            return <Trans t={t} i18nKey="EventDataOutputUpdated" defaults="Technical Asset updated" />;
         case EventType.DATA_OUTPUT_REMOVED:
             return (
                 <Trans
                     t={t}
                     i18nKey="EventDataOutputRemoved"
-                    defaults="Technical asset removed: link removed with the <element>{{entity}}</element> {{entity_type}}"
+                    defaults="Technical Asset removed: link removed with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
                 />
@@ -151,13 +151,13 @@ export function getEventTypeDisplayName(
             );
 
         case EventType.DATA_PRODUCT_CREATED:
-            return <Trans t={t} i18nKey="EventDataProductCreated" defaults="Data product created" />;
+            return <Trans t={t} i18nKey="EventDataProductCreated" defaults="Data Product created" />;
         case EventType.DATA_PRODUCT_UPDATED:
-            return <Trans t={t} i18nKey="EventDataProductUpdated" defaults="Data product updated" />;
+            return <Trans t={t} i18nKey="EventDataProductUpdated" defaults="Data Product updated" />;
         case EventType.DATA_PRODUCT_REMOVED:
-            return <Trans t={t} i18nKey="EventDataProductRemoved" defaults="Data product removed" />;
+            return <Trans t={t} i18nKey="EventDataProductRemoved" defaults="Data Product removed" />;
         case EventType.DATA_PRODUCT_SETTING_UPDATED:
-            return <Trans t={t} i18nKey="EventDataProductSettingUpdated" defaults="Data product setting updated" />;
+            return <Trans t={t} i18nKey="EventDataProductSettingUpdated" defaults="Data Product setting updated" />;
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
             return (
                 <Trans

@@ -16,7 +16,7 @@ function LinkToDataProductNode({ id }: { id: string }) {
     const { t } = useTranslation();
     return (
         <Link to={createDataProductIdPath(id, DataProductTabKeys.Explorer)} className={styles.link}>
-            <Button type="default">{t('View data product')}</Button>
+            <Button type="default">{t('View Data Product')}</Button>
         </Link>
     );
 }
@@ -25,7 +25,7 @@ function LinkToDatasetNode({ id }: { id: string }) {
     const { t } = useTranslation();
     return (
         <Link to={createDatasetIdPath(id, DatasetTabKeys.Explorer)} className={styles.link}>
-            <Button type="default">{t('View output port')}</Button>
+            <Button type="default">{t('View Output Port')}</Button>
         </Link>
     );
 }
@@ -34,7 +34,7 @@ function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: stri
     const { t } = useTranslation();
     return (
         <Link to={createDataOutputIdPath(id, product_id, DataOutputTabKeys.Explorer)} className={styles.link}>
-            <Button type="default">{t('View technical asset')}</Button>
+            <Button type="default">{t('View Technical Asset')}</Button>
         </Link>
     );
 }

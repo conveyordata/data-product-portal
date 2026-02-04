@@ -75,7 +75,7 @@ const getAccessTypeOptions = (t: TFunction) => {
     return [
         {
             label: (
-                <Tooltip title={t('Public output ports are visible to everyone and are free to use by anyone')}>
+                <Tooltip title={t('Public Output Ports are visible to everyone and are free to use by anyone')}>
                     {getDatasetAccessTypeLabel(t, DatasetAccess.Public)}
                 </Tooltip>
             ),
@@ -83,7 +83,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         },
         {
             label: (
-                <Tooltip title={t('Restricted output ports are visible to everyone but require permission to use')}>
+                <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
                     {getDatasetAccessTypeLabel(t, DatasetAccess.Restricted)}
                 </Tooltip>
             ),
@@ -91,7 +91,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         },
         {
             label: (
-                <Tooltip title={t('Private output ports are only visible to owners and users with access')}>
+                <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
                     {getDatasetAccessTypeLabel(t, DatasetAccess.Private)}
                 </Tooltip>
             ),
@@ -180,8 +180,8 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 const response = await createDataset(request).unwrap();
 
                 modalCallbackOnSubmit?.();
-                dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
-                // If dataProductId was provided, navigate back to the data product page
+                dispatchMessage({ content: t('Output Port created successfully'), type: 'success' });
+                // If dataProductId was provided, navigate back to the Data Product page
                 if (dataOutputId && dataProductId) {
                     await requestDatasetsAccessForDataOutput({
                         dataOutputId: dataOutputId,
@@ -197,7 +197,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 }
             } else if (mode === 'edit' && datasetId && currentDataset) {
                 if (!canEdit) {
-                    dispatchMessage({ content: t('You are not allowed to edit this output port'), type: 'error' });
+                    dispatchMessage({ content: t('You are not allowed to edit this Output Port'), type: 'error' });
                     return;
                 }
 
@@ -212,14 +212,14 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 };
 
                 const response = await updateDataset({ dataset: request, id: datasetId }).unwrap();
-                dispatchMessage({ content: t('Output port updated successfully'), type: 'success' });
+                dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
 
                 navigate(createDatasetIdPath(response.id));
             }
             form.resetFields();
         } catch (_e) {
             const errorMessage =
-                mode === 'edit' ? t('Failed to update output port') : t('Failed to create output port');
+                mode === 'edit' ? t('Failed to update Output Port') : t('Failed to create Output Port');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -243,11 +243,11 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         if (canDelete && currentDataset) {
             try {
                 await deleteDataset(currentDataset).unwrap();
-                dispatchMessage({ content: t('Output port deleted successfully'), type: 'success' });
+                dispatchMessage({ content: t('Output Port deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to delete output port, please try again later'),
+                    content: t('Failed to delete Output Port, please try again later'),
                     type: 'error',
                 });
             }
@@ -316,11 +316,11 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             <Form.Item<DatasetCreateFormSchema>
                 name={'name'}
                 label={t('Name')}
-                tooltip={t('The name of your output port')}
+                tooltip={t('The name of your Output Port')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the output port'),
+                        message: t('Please provide the name of the Output Port'),
                     },
                 ]}
             >
@@ -328,7 +328,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             </Form.Item>
             <NamespaceFormItem
                 form={form}
-                tooltip={t('The namespace of the output port')}
+                tooltip={t('The namespace of the Output Port')}
                 max_length={namespaceLengthLimits?.max_length}
                 editToggleDisabled={mode === 'edit'}
                 canEditNamespace={canEditNamespace}
@@ -340,11 +340,11 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 <Form.Item<DatasetCreateFormSchema>
                     name={'owners'}
                     label={t('Owners')}
-                    tooltip={t('The owners of the output port')}
+                    tooltip={t('The owners of the Output Port')}
                     rules={[
                         {
                             required: true,
-                            message: t('Please select at least one owner for the output port'),
+                            message: t('Please select at least one owner for the Output Port'),
                         },
                     ]}
                 >
@@ -364,7 +364,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the status of the output port'),
+                        message: t('Please select the status of the Output Port'),
                     },
                 ]}
             >
@@ -381,11 +381,11 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             <Form.Item<DatasetCreateFormSchema>
                 name={'access_type'}
                 label={t('Access Type')}
-                tooltip={t('The access type of the output port')}
+                tooltip={t('The access type of the Output Port')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the access type of the output port'),
+                        message: t('Please select the access type of the Output Port'),
                     },
                 ]}
             >
@@ -394,7 +394,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             <Form.Item<DatasetCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
-                    placeholder={t('Select output port tags')}
+                    placeholder={t('Select Output Port tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
@@ -403,11 +403,11 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             <Form.Item<DatasetCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the output port')}
+                tooltip={t('A description for the Output Port')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input a description of the output port'),
+                        message: t('Please provide a description for the Output Port'),
                     },
                     {
                         max: MAX_DESCRIPTION_INPUT_LENGTH,
@@ -422,7 +422,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     <Row>
                         <Col>
                             <Popconfirm
-                                title={t('Are you sure you want to delete this output port?')}
+                                title={t('Are you sure you want to delete this Output Port?')}
                                 onConfirm={handleDeleteDataset}
                                 okText={t('Yes')}
                                 cancelText={t('No')}

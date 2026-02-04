@@ -4,12 +4,16 @@ import { useTranslation } from 'react-i18next';
 const { Text } = Typography;
 
 type Props = {
-    suggestions: string[];
+    suggestions: string[] | undefined;
 };
 
 export function SearchSuggestions({ suggestions }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
+
+    if (!suggestions) {
+        return null;
+    }
 
     return (
         <ConfigProvider
@@ -30,7 +34,7 @@ export function SearchSuggestions({ suggestions }: Props) {
                     <Carousel autoplay dots={false} dotPlacement={'start'}>
                         {suggestions.map((item) => (
                             <Text strong key={item}>
-                                {t(item)}
+                                {item}
                             </Text>
                         ))}
                     </Carousel>

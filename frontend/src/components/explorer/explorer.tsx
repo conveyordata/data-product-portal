@@ -62,7 +62,10 @@ function parseNodes(nodes: NodeContract[], t: TFunction, plugins: UiElementMetad
                     };
                     break;
                 default:
-                    dispatchMessage({ content: t(`Unknown node type: ${node.type}`), type: 'error' });
+                    dispatchMessage({
+                        content: t('Unknown node type: {{ nodeType }}', { nodeType: node.type }),
+                        type: 'error',
+                    });
             }
 
             return parseRegularNode(

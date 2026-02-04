@@ -98,8 +98,9 @@ export function UsageTab({ datasetId }: Props) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    documentation.
+                                    documentation
                                 </Typography.Link>
+                                .
                             </Trans>
                         }
                         type="info"

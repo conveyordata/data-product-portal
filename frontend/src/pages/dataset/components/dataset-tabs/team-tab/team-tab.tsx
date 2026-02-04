@@ -82,9 +82,9 @@ export function TeamTab({ datasetId }: Props) {
                     user_id: user.id,
                     role_id: role_id,
                 }).unwrap();
-                dispatchMessage({ content: t('User has been granted access to the output port'), type: 'success' });
+                dispatchMessage({ content: t('User has been granted access to the Output Port'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to grant access to the output port'), type: 'error' });
+                dispatchMessage({ content: t('Failed to grant access to the Output Port'), type: 'error' });
             }
         },
         [addUserToDataset, datasetId, t],

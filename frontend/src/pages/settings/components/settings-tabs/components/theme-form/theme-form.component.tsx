@@ -95,7 +95,7 @@ export function ThemeSettingsForm() {
                     rules={[
                         {
                             required: true,
-                            message: t('Please input the name of the Data Product Portal'),
+                            message: t('Please provide the name for your Data Product Portal'),
                         },
                     ]}
                 >

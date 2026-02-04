@@ -140,7 +140,7 @@ export const Breadcrumbs = () => {
                         title: '',
                     });
 
-                    // Case for data product and dataset
+                    // Case for Data Product and Output Port
                     if (
                         dataProduct &&
                         !isFetchingDataProduct &&

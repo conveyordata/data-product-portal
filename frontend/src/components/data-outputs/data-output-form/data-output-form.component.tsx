@@ -67,11 +67,11 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         if (canDelete && currentDataOutput && dataProduct) {
             try {
                 await deleteDataOutput(currentDataOutput.id).unwrap();
-                dispatchMessage({ content: t('Technical asset deleted successfully'), type: 'success' });
+                dispatchMessage({ content: t('Technical Asset deleted successfully'), type: 'success' });
                 navigate(createDataProductIdPath(dataProduct.id));
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to delete technical asset, please try again later'),
+                    content: t('Failed to delete Technical Asset, please try again later'),
                     type: 'error',
                 });
             }
@@ -82,7 +82,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         try {
             if (dataOutputId && currentDataOutput) {
                 if (!canEdit) {
-                    dispatchMessage({ content: t('You are not allowed to edit this technical asset'), type: 'error' });
+                    dispatchMessage({ content: t('You are not allowed to edit this Technical Asset'), type: 'error' });
                     return;
                 }
 
@@ -96,14 +96,14 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     dataOutput: request,
                     dataOutputId: dataOutputId,
                 }).unwrap();
-                dispatchMessage({ content: t('Technical asset updated successfully'), type: 'success' });
+                dispatchMessage({ content: t('Technical Asset updated successfully'), type: 'success' });
 
                 navigate(createDataOutputIdPath(response.id, currentDataOutput.owner.id));
             }
 
             form.resetFields();
         } catch (_e) {
-            const errorMessage = 'Failed to create technical asset';
+            const errorMessage = 'Failed to create Technical Asset';
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -147,11 +147,11 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
                 label={t('Name')}
-                tooltip={t('The name of your technical asset')}
+                tooltip={t('The name of your Technical Asset')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the technical asset'),
+                        message: t('Please provide the name of the Technical Asset'),
                     },
                 ]}
             >
@@ -159,7 +159,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             </Form.Item>
             <NamespaceFormItem
                 form={form}
-                tooltip={t('The namespace of the technical asset')}
+                tooltip={t('The namespace of the Technical Asset')}
                 max_length={namespaceLengthLimits?.max_length}
                 editToggleDisabled
                 canEditNamespace={false}
@@ -167,11 +167,11 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the technical asset')}
+                tooltip={t('A description for the Technical Asset')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input a description of the technical asset'),
+                        message: t('Please provide a description for the Technical Asset'),
                     },
                     {
                         max: MAX_DESCRIPTION_INPUT_LENGTH,
@@ -183,11 +183,11 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select
-                    tokenSeparators={[',']}
-                    placeholder={t('Select technical asset tags')}
+                    placeholder={t('Select Technical Asset tags')}
                     mode={'multiple'}
+                    tokenSeparators={[',']}
                     options={tagSelectOptions}
-                    filterOption={selectFilterOptionByLabel}
+                    showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item>
@@ -212,7 +212,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     </Button>
                     {canDelete && (
                         <Popconfirm
-                            title={t('Are you sure you want to delete this technical asset?')}
+                            title={t('Are you sure you want to delete this Technical Asset?')}
                             onConfirm={handleDeleteDataOutput}
                             okText={t('Yes')}
                             cancelText={t('No')}

@@ -101,7 +101,7 @@ export function DataOutputConfigurationForm({
         if (required && !isHidden) {
             rules.push({
                 required: true,
-                message: t(`Please input ${label.toLowerCase()}`),
+                message: t('Please provide {{ label }}', { label: label.toLowerCase() }),
             });
         }
 

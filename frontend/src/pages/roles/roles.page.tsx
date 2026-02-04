@@ -29,7 +29,7 @@ export function RoleConfiguration() {
             icon: <DataProductOutlined />,
         },
         {
-            label: t('Output port'),
+            label: t('Output Port'),
             key: Scope.DATASET,
             icon: <DatasetOutlined />,
         },

@@ -21,7 +21,7 @@ export function DatasetCardTooltip({ dataset_id, number_of_data_products }: Prop
                 ) : null
             }
         >
-            {t('{{count}} data products', { count: number_of_data_products })}
+            {t('{{count}} Data Products', { count: number_of_data_products })}
         </Tooltip>
     );
 }

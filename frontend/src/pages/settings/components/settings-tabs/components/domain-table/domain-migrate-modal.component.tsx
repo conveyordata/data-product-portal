@@ -75,7 +75,7 @@ export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props
 
                 <Form.Item
                     name="toId"
-                    label={t('Migrate existing data products & output ports')}
+                    label={t('Migrate existing Data Products & Output Ports')}
                     rules={[{ required: true, message: t('Please provide a value') }]}
                 >
                     <Select>

@@ -87,7 +87,7 @@ export const getDatasetDataProductsColumns = ({
                         <Flex>
                             <Popconfirm
                                 title={t('Allow Data Product Access')}
-                                description={t('Are you sure you want to allow access to data product {{name}}?', {
+                                description={t('Are you sure you want to allow access to Data Product {{name}}?', {
                                     name: data_product.name,
                                 })}
                                 onConfirm={() => onAcceptDataProductDatasetLink({ dataset_id, data_product_id, id })}
@@ -103,7 +103,7 @@ export const getDatasetDataProductsColumns = ({
                             </Popconfirm>
                             <Popconfirm
                                 title={t('Deny Data Product Access')}
-                                description={t('Are you sure you want to deny access to data product {{name}}?', {
+                                description={t('Are you sure you want to deny access to Data Product {{name}}?', {
                                     name: data_product.name,
                                 })}
                                 onConfirm={() => onRejectDataProductDatasetLink({ dataset_id, data_product_id, id })}
@@ -124,7 +124,7 @@ export const getDatasetDataProductsColumns = ({
                     return (
                         <Popconfirm
                             title={t('Revoke Data Product Access')}
-                            description={t('Are you sure you want to revoke access from data product {{name}}?', {
+                            description={t('Are you sure you want to revoke access from Data Product {{name}}?', {
                                 name: data_product.name,
                             })}
                             onConfirm={() => onRejectDataProductDatasetLink({ dataset_id, data_product_id, id })}

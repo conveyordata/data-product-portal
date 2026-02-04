@@ -138,7 +138,7 @@ export const getDataProductSettingsTableColumns = ({
                         <Popconfirm
                             title={t('Remove')}
                             description={t(
-                                'Are you sure you want to delete the data product setting? This will remove the setting from all the data products',
+                                'Are you sure you want to delete the Data Product setting? This will remove the setting from all the Data Products',
                             )}
                             onConfirm={() => handleRemove(record)}
                             placement={'leftTop'}

@@ -28,7 +28,7 @@ export const SelectableTabs = ({ activeKey, onTabChange }: SelectableTabsProps) 
         {
             key: 'dataset',
             icon: <DatasetOutlined />,
-            title: t('Output port'),
+            title: t('Output Port'),
         },
         {
             key: 'dataProduct',

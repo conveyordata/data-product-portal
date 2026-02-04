@@ -1,13 +1,14 @@
 import { type Node, useReactFlow } from '@xyflow/react';
 import { Select, Tag } from 'antd';
-import type { MouseEvent } from 'react';
-import { useEffect, useMemo } from 'react';
+import { type MouseEvent, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DataProductContract } from '@/types/data-product';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
 import { CustomNodeTypes } from '../../charts/node-editor/node-types';
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
+
+const { CheckableTag } = Tag;
 
 export type SidebarFilters = {
     dataProductsEnabled: boolean;
@@ -43,8 +44,8 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
 
     useEffect(() => {
         if (!nodeId) return;
-        const timeout = setTimeout(() => {
-            fitView({
+        const timeout = setTimeout(async () => {
+            await fitView({
                 ...defaultFitViewOptions,
                 nodes: [{ id: nodeId }],
             });
@@ -71,7 +72,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
         const groups = {
             Domains: nodes.filter((node) => node.type === CustomNodeTypes.DomainNode),
             'Data Products': nodes.filter((node) => node.type === CustomNodeTypes.DataProductNode),
-            Datasets: nodes.filter((node) => node.type === CustomNodeTypes.DatasetNode),
+            'Output Ports': nodes.filter((node) => node.type === CustomNodeTypes.DatasetNode),
             'Technical Assets': nodes.filter((node) => node.type === CustomNodeTypes.DataOutputNode),
         };
 
@@ -83,23 +84,42 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
         return groups;
     }, [nodes]);
 
+    const translateGroupName = useCallback(
+        (group: string) => {
+            switch (group) {
+                case 'Domains':
+                    return t('Domains');
+                case 'Data Products':
+                    return t('Data Products');
+                case 'Output Ports':
+                    return t('Output Ports');
+                case 'Technical Assets':
+                    return t('Technical Assets');
+                default:
+                    return t('Undefined group');
+            }
+        },
+        [t],
+    );
+
+    const selectionOptions = useMemo(
+        () =>
+            Object.entries(groupedNodes)
+                .filter(([_, nodes]) => nodes.length > 0)
+                .map(([groupName, nodes]) => ({
+                    label: translateGroupName(groupName),
+                    value: groupName,
+                    options: nodes.map((node) => ({
+                        label: node.data.name,
+                        value: node.id,
+                    })),
+                })),
+        [groupedNodes, translateGroupName],
+    );
+
     return (
         <div className={styles.sidebarContainer}>
-            {/* {
-                <Tag.CheckableTag
-                    checked={sidebarFilters.domainsEnabled}
-                    className={styles.checkableTag}
-                    onChange={(e) => {
-                        onFilterChange({
-                            ...sidebarFilters,
-                            domainsEnabled: e.valueOf(),
-                        });
-                    }}
-                >
-                    {t('Domains')}
-                </Tag.CheckableTag>
-            } */}
-            <Tag.CheckableTag
+            <CheckableTag
                 checked={sidebarFilters.dataProductsEnabled}
                 className={styles.checkableTag}
                 onChange={(e) => {
@@ -110,8 +130,8 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
                 }}
             >
                 {t('Data Products')}
-            </Tag.CheckableTag>
-            <Tag.CheckableTag
+            </CheckableTag>
+            <CheckableTag
                 checked={sidebarFilters.datasetsEnabled}
                 className={styles.checkableTag}
                 onChange={(e) => {
@@ -121,33 +141,21 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
                     });
                 }}
             >
-                {t('Output ports')}
-            </Tag.CheckableTag>
+                {t('Output Ports')}
+            </CheckableTag>
             <Select
                 placeholder={t('Select a node')}
-                value={nodeId ?? undefined}
+                value={nodeId}
                 className={styles.select}
                 showSearch={{
                     filterOption: (input: string, option?: { value: string; label: string }) =>
                         (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
                 }}
                 onSelect={(value: string) => {
-                    nodeClick(undefined, { id: value } as Node); // Use the setNodeId function from the parent
+                    nodeClick(undefined, { id: value } as Node);
                 }}
-            >
-                {Object.entries(groupedNodes).map(
-                    ([groupName, nodes]) =>
-                        nodes.length > 0 && (
-                            <Select.OptGroup key={groupName} label={t(groupName)}>
-                                {nodes.map((node) => (
-                                    <Select.Option key={node.id} label={node.data.name} value={node.id}>
-                                        {String(node.data.name)}
-                                    </Select.Option>
-                                ))}
-                            </Select.OptGroup>
-                        ),
-                )}
-            </Select>
+                options={selectionOptions}
+            />
             <NodeContext className={styles.p} nodeId={nodeId} getNodeDataForSideBar={getNodeDataForSideBar} />
         </div>
     );

@@ -44,9 +44,7 @@ export default function SearchPage({
                 />
             </Col>
             <Col span={14}>{actions}</Col>
-            <Col span={10}>
-                {searchSuggestions && !searched && <SearchSuggestions suggestions={searchSuggestions} />}
-            </Col>
+            <Col span={10}>{!searched && <SearchSuggestions suggestions={searchSuggestions} />}</Col>
             <Col span={24}>{children}</Col>
         </Row>
     );
