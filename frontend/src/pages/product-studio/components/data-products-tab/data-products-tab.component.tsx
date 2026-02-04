@@ -43,9 +43,9 @@ export function DataProductsTab() {
     const navigate = useNavigate();
     const currentUser = useSelector(selectCurrentUser);
 
-    const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
-    const [showAllProducts, setShowAllProducts] = useQueryState('showAll', parseAsBoolean.withDefault(false));
-    const [selectedRole, setSelectedRole] = useQueryState('role', parseAsString);
+    const [searchTerm, setSearchTerm] = useQueryState('dp-search', parseAsString.withDefault(''));
+    const [showAllProducts, setShowAllProducts] = useQueryState('dp-showAll', parseAsBoolean.withDefault(false));
+    const [selectedRole, setSelectedRole] = useQueryState('dp-role', parseAsString);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
     const { data: userDataProducts = [], isFetching: isFetchingUserProducts } = useGetUserDataProductsQuery(

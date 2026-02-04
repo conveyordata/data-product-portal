@@ -17,8 +17,11 @@ export function ProductStudio() {
         const hash = location.hash.slice(1);
         if (hash && Object.values(TabKeys).includes(hash as TabKeys)) {
             setActiveTab(hash);
+        } else if (!hash) {
+            // If no hash is present, set the default tab hash
+            navigate(`#${TabKeys.DataProducts}`, { replace: true });
         }
-    }, [location.hash]);
+    }, [location.hash, navigate]);
 
     const onTabChange = (key: string) => {
         setActiveTab(key);

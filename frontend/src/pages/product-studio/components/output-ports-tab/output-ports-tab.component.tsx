@@ -40,9 +40,9 @@ export function OutputPortsTab() {
     const navigate = useNavigate();
     const currentUser = useSelector(selectCurrentUser);
 
-    const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
-    const [showAllPorts, setShowAllPorts] = useQueryState('showAll', parseAsBoolean.withDefault(false));
-    const [selectedRole, setSelectedRole] = useQueryState('role', parseAsString);
+    const [searchTerm, setSearchTerm] = useQueryState('op-search', parseAsString.withDefault(''));
+    const [showAllPorts, setShowAllPorts] = useQueryState('op-showAll', parseAsBoolean.withDefault(false));
+    const [selectedRole, setSelectedRole] = useQueryState('op-role', parseAsString);
     const [selectedPortIds, setSelectedPortIds] = useState<string[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
 
