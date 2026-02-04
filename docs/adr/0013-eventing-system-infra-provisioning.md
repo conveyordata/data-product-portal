@@ -64,8 +64,16 @@ We provide no guarantees about the order of events atm.
 
 ### Option 6: Task queue implementation (Celery)
 * **Good, because** flexible, can be tailored to requirements, supports retries and durability
-* **Bad, because** adds operational complexity as we need to a broker and manage the client framework (taskiq,...)
-* **Bad, because** it introduces coupling between Portal and the tasks being executed, as we need to manage retries, failures,...
+* **Bad, because** adds operational complexity as we need to manage a broker and the client framework to process tasks (taskiq,...)
+* **Bad, because** it introduces coupling between Portal and the tasks being executed, as we need to manage retries, failures, ...
+* **Bad, because** Overkill as Portal does not need to care about the state management of tasks.
+  Clients can choose to implement state transitions if they want to inform the users
+
+### Option 7: Kafka as message broker
+* **Good, because** flexible and popular technology.
+* **Neutral, because** we cannot assume that every client has a Kafka broker that we can use.
+* **Bad, because** heavy to operate as it requires a lot of operational expertise
+* **Bad, because** overkill to set it up for the limited number of portal events.
 
 ## Event Flow Diagram
 ```mermaid
