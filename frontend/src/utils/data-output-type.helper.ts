@@ -1,37 +1,36 @@
 import type { TFunction } from 'i18next';
 
-import databricksBorderIcon from '@/assets/icons/databricks-border-icon.svg?react';
-import glueBorderIcon from '@/assets/icons/glue-border-icon.svg?react';
-import redshiftBorderIcon from '@/assets/icons/redshift-border-icon.svg?react';
-import s3BorderIcon from '@/assets/icons/s3-border-icon.svg?react';
-import snowflakeBorderIcon from '@/assets/icons/snowflake-border-icon.svg?react';
+import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
+import { getIcon } from './icon-loader';
 
-export function getDataOutputIcon(configuration_type: string | undefined) {
-    switch (configuration_type) {
-        case 'GlueDataOutput':
-            return glueBorderIcon;
-        case 'S3DataOutput':
-            return s3BorderIcon;
-        case 'DatabricksDataOutput':
-            return databricksBorderIcon;
-        case 'SnowflakeDataOutput':
-            return snowflakeBorderIcon;
-        case 'RedshiftDataOutput':
-            return redshiftBorderIcon;
+export function getDataOutputIcon(configuration_type: string | undefined, plugins?: UiElementMetadataResponse[]) {
+    if (!configuration_type || !plugins) {
+        return undefined;
     }
+
+    const plugin = plugins.find((p) => p.plugin === configuration_type);
+    if (!plugin) {
+        return undefined;
+    }
+
+    // Replace logo with border-icon
+    const borderIcon = plugin.icon_name.replace('logo', 'border-icon');
+    return getIcon(borderIcon);
 }
 
-export function getDataOutputType(configuration_type: string | undefined, t: TFunction) {
-    switch (configuration_type) {
-        case 'GlueDataOutput':
-            return t('Glue');
-        case 'SnowflakeDataOutput':
-            return t('Snowflake');
-        case 'S3DataOutput':
-            return t('S3');
-        case 'DatabricksDataOutput':
-            return t('Databricks');
-        case 'RedshiftDataOutput':
-            return t('Redshift');
+export function getDataOutputType(
+    configuration_type: string | undefined,
+    plugins: UiElementMetadataResponse[] | undefined,
+    t: TFunction,
+) {
+    if (!configuration_type || !plugins) {
+        return undefined;
     }
+
+    const plugin = plugins.find((p) => p.plugin === configuration_type);
+    if (!plugin) {
+        return undefined;
+    }
+
+    return t(plugin.display_name);
 }
