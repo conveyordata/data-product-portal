@@ -406,6 +406,8 @@
     "Search people by name": "Search people by name",
     "Showing {{range0}}-{{range1}} of {{count}} people_one": "Showing {{range0}}-{{range1}} of {{count}} person",
     "Showing {{range0}}-{{range1}} of {{count}} people_other": "Showing {{range0}}-{{range1}} of {{count}} people",
+    "My Data Products": "My Data Products",
+    "All Data Products": "All Data Products",
     "Search output ports by name or data product": "Search output ports by name or data product",
     "My Output Ports": "My Output Ports",
     "All Output Ports": "All Output Ports",

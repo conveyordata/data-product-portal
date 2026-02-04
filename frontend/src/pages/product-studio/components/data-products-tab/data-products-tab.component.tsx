@@ -1,15 +1,20 @@
 import { usePostHog } from '@posthog/react';
-import { Button, Flex, Input, Table } from 'antd';
-import { parseAsString, useQueryState } from 'nuqs';
+import { Button, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
+import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/data-products/data-products-table-columns.tsx';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetAllDataProductsQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import {
+    useGetAllDataProductsQuery,
+    useGetUserDataProductsQuery,
+} from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
@@ -36,12 +41,24 @@ export function DataProductsTab() {
     const { t } = useTranslation();
     const posthog = usePostHog();
     const navigate = useNavigate();
+    const currentUser = useSelector(selectCurrentUser);
 
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
+    const [showAllProducts, setShowAllProducts] = useQueryState('showAll', parseAsBoolean.withDefault(false));
     const [selectedRole, setSelectedRole] = useQueryState('role', parseAsString);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
-    const { data: dataProducts = [], isFetching } = useGetAllDataProductsQuery();
+    const { data: userDataProducts = [], isFetching: isFetchingUserProducts } = useGetUserDataProductsQuery(
+        currentUser?.id || '',
+        { skip: !currentUser || showAllProducts },
+    );
+    const { data: allDataProducts = [], isFetching: isFetchingAllProducts } = useGetAllDataProductsQuery(undefined, {
+        skip: !showAllProducts,
+    });
+
+    const dataProducts = showAllProducts ? allDataProducts : userDataProducts;
+    const isFetching = showAllProducts ? isFetchingAllProducts : isFetchingUserProducts;
+
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
 
@@ -70,13 +87,24 @@ export function DataProductsTab() {
     const handleRoleChange = (selected: { productIds: string[]; role: string }) => {
         setSelectedProductIds(selected.productIds);
         setSelectedRole(selected.role || null);
+        // Switch to "My Data Products" when a role is selected
+        if (selected.role) {
+            setShowAllProducts(false);
+        }
+    };
+
+    const handleShowAllChange = (e: RadioChangeEvent) => {
+        setShowAllProducts(e.target.value || null);
+        // Reset role filter when switching between views
+        setSelectedProductIds([]);
+        setSelectedRole(null);
     };
 
     return (
         <Flex vertical gap="small">
             {/* Search and Actions */}
             <Flex justify="space-between" align="center">
-                <Flex gap="middle" flex={1}>
+                <Flex gap="middle" flex={1} align="center">
                     <Input.Search
                         placeholder={t('Search data products by name')}
                         value={searchTerm || ''}
@@ -89,6 +117,10 @@ export function DataProductsTab() {
                         selectedRole={selectedRole || undefined}
                         onRoleChange={handleRoleChange}
                     />
+                    <Radio.Group value={showAllProducts} onChange={handleShowAllChange} optionType="button">
+                        <Radio.Button value={false}>{t('My Data Products')}</Radio.Button>
+                        <Radio.Button value={true}>{t('All Data Products')}</Radio.Button>
+                    </Radio.Group>
                 </Flex>
                 <Link
                     to={ApplicationPaths.DataProductNew}
