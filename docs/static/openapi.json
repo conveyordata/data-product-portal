@@ -17600,13 +17600,12 @@
           "quality_status": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/DataQualityStatus"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Quality Status"
+            ]
           }
         },
         "type": "object",
@@ -21286,13 +21285,12 @@
           "quality_status": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/DataQualityStatus"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Quality Status"
+            ]
           }
         },
         "type": "object",
@@ -21419,13 +21417,12 @@
           "quality_status": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/DataQualityStatus"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Quality Status"
+            ]
           }
         },
         "type": "object",
