@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from app.data_products.output_port_technical_assets_link.model import (
         DataOutputDatasetAssociation,
     )
+    from app.data_products.output_ports.data_quality.model import DataQualitySummary
     from app.data_products.output_ports.input_ports.model import (
         DataProductDatasetAssociation,
     )
@@ -90,6 +91,16 @@ class Dataset(Base, BaseORM):
     data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
     )
+    quality_summary: Mapped[Optional["DataQualitySummary"]] = relationship(
+        "DataQualitySummary",
+        foreign_keys="[DataQualitySummary.output_port_id]",
+        lazy="joined",
+    )
+
+    @property
+    def quality_status(self) -> Optional[str]:
+        """Returns the overall_status from the quality_summary if it exists."""
+        return self.quality_summary.overall_status if self.quality_summary else None
 
     @property
     def data_product_count(self) -> int:

@@ -123,12 +123,14 @@ class DatasetGet(BaseDatasetGet):
 class OutputPortsGet(BaseOutputPortGet):
     data_product_count: int
     data_product_name: str
+    quality_status: Optional[str]
 
 
 @deprecated("Use OutputPortsGet instead")
 class DatasetsGet(BaseDatasetGet):
     data_product_count: int
     data_product_name: str
+    quality_status: Optional[str]
 
 
 class GetDataProductOutputPortsResponse(ORMModel):
