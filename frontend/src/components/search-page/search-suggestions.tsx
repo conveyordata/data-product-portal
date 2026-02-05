@@ -4,16 +4,12 @@ import { useTranslation } from 'react-i18next';
 const { Text } = Typography;
 
 type Props = {
-    suggestions: string[] | undefined;
+    suggestions: string[];
 };
 
 export function SearchSuggestions({ suggestions }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
-
-    if (!suggestions) {
-        return null;
-    }
 
     return (
         <ConfigProvider

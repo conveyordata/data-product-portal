@@ -25,7 +25,7 @@ jobs:
         working-directory: ./backend
         run: cat .test.env >> $GITHUB_OUTPUT
 
-  test:
+  test-backend:
     name: Run backend tests
     runs-on: ubuntu-latest
     needs: [environment]
@@ -74,6 +74,27 @@ jobs:
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
         run: ./check_coverage.sh
+
+  test-frontend:
+    name: Run frontend tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout github repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: frontend/package.json
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm install
+        working-directory: frontend
+      - name: Run tests
+        run: npm run test:run
+        working-directory: frontend
+        env:
+          DEBUG_PRINT_LIMIT: 100000
 
   lint-golang:
     name: Run Go linters
