@@ -42,7 +42,7 @@ export function OutputPortsTab() {
 
     const [searchTerm, setSearchTerm] = useQueryState('op-search', parseAsString.withDefault(''));
     const [showAllPorts, setShowAllPorts] = useQueryState('op-showAll', parseAsBoolean.withDefault(false));
-    const [selectedRole, setSelectedRole] = useQueryState('op-role', parseAsString);
+    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedPortIds, setSelectedPortIds] = useState<string[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
 
@@ -54,7 +54,7 @@ export function OutputPortsTab() {
 
     // Set default to Owner role on initial load
     useEffect(() => {
-        if (isInitialized || !userDatasetRoles?.role_assignments || selectedRole !== null) {
+        if (isInitialized || !userDatasetRoles?.role_assignments) {
             return;
         }
 
@@ -67,12 +67,12 @@ export function OutputPortsTab() {
             const ownerRoleId = ownerAssignments[0].role?.id || '';
             const ownerPortIds = ownerAssignments.map((assignment) => assignment.output_port.id);
 
-            setSelectedRole(ownerRoleId);
+            setSelectedRoles([ownerRoleId]);
             setSelectedPortIds(ownerPortIds);
         }
 
         setIsInitialized(true);
-    }, [userDatasetRoles, selectedRole, isInitialized, setSelectedRole]);
+    }, [userDatasetRoles, isInitialized]);
 
     const { data: userOutputPorts = [], isFetching: isFetchingUserPorts } = useGetUserDatasetsQuery(
         currentUser?.id || '',
@@ -107,11 +107,11 @@ export function OutputPortsTab() {
         navigate(createDatasetIdPath(datasetId));
     };
 
-    const handleRoleChange = (selected: { productIds: string[]; role: string }) => {
+    const handleRoleChange = (selected: { productIds: string[]; roles: string[] }) => {
         setSelectedPortIds(selected.productIds);
-        setSelectedRole(selected.role || null);
-        // Switch to "My Output Ports" when a role is selected
-        if (selected.role) {
+        setSelectedRoles(selected.roles);
+        // Switch to "My Output Ports" when roles are selected
+        if (selected.roles.length > 0) {
             setShowAllPorts(false);
         }
     };
@@ -120,7 +120,7 @@ export function OutputPortsTab() {
         setShowAllPorts(e.target.value || null);
         // Reset role filter when switching between views
         setSelectedPortIds([]);
-        setSelectedRole(null);
+        setSelectedRoles([]);
     };
 
     return (
@@ -135,15 +135,11 @@ export function OutputPortsTab() {
                         allowClear
                         style={{ maxWidth: 400 }}
                     />
-                    <RoleFilter
-                        mode={'datasets'}
-                        selectedRole={selectedRole || undefined}
-                        onRoleChange={handleRoleChange}
-                    />
                     <Radio.Group value={showAllPorts} onChange={handleShowAllChange} optionType="button">
                         <Radio.Button value={false}>{t('My Output Ports')}</Radio.Button>
                         <Radio.Button value={true}>{t('All Output Ports')}</Radio.Button>
                     </Radio.Group>
+                    <RoleFilter mode={'datasets'} selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
                 </Flex>
             </Flex>
 

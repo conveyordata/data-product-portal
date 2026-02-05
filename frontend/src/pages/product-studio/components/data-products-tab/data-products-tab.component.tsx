@@ -45,7 +45,7 @@ export function DataProductsTab() {
 
     const [searchTerm, setSearchTerm] = useQueryState('dp-search', parseAsString.withDefault(''));
     const [showAllProducts, setShowAllProducts] = useQueryState('dp-showAll', parseAsBoolean.withDefault(false));
-    const [selectedRole, setSelectedRole] = useQueryState('dp-role', parseAsString);
+    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
     const { data: userDataProducts = [], isFetching: isFetchingUserProducts } = useGetUserDataProductsQuery(
@@ -84,11 +84,11 @@ export function DataProductsTab() {
         navigate(createDataProductIdPath(dataProductId));
     };
 
-    const handleRoleChange = (selected: { productIds: string[]; role: string }) => {
+    const handleRoleChange = (selected: { productIds: string[]; roles: string[] }) => {
         setSelectedProductIds(selected.productIds);
-        setSelectedRole(selected.role || null);
-        // Switch to "My Data Products" when a role is selected
-        if (selected.role) {
+        setSelectedRoles(selected.roles);
+        // Switch to "My Data Products" when roles are selected
+        if (selected.roles.length > 0) {
             setShowAllProducts(false);
         }
     };
@@ -97,7 +97,7 @@ export function DataProductsTab() {
         setShowAllProducts(e.target.value || null);
         // Reset role filter when switching between views
         setSelectedProductIds([]);
-        setSelectedRole(null);
+        setSelectedRoles([]);
     };
 
     return (
@@ -112,15 +112,11 @@ export function DataProductsTab() {
                         allowClear
                         style={{ maxWidth: 400 }}
                     />
-                    <RoleFilter
-                        mode={'data_products'}
-                        selectedRole={selectedRole || undefined}
-                        onRoleChange={handleRoleChange}
-                    />
                     <Radio.Group value={showAllProducts} onChange={handleShowAllChange} optionType="button">
                         <Radio.Button value={false}>{t('My Data Products')}</Radio.Button>
                         <Radio.Button value={true}>{t('All Data Products')}</Radio.Button>
                     </Radio.Group>
+                    <RoleFilter mode={'data_products'} selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
                 </Flex>
                 <Link
                     to={ApplicationPaths.DataProductNew}
