@@ -5125,7 +5125,7 @@
     "/api/data_product_types/{id}": {
       "get": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Get Data Product Type",
         "operationId": "get_data_product_type_api_data_product_types__id__get",
@@ -5167,7 +5167,7 @@
       },
       "put": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Update Data Product Type",
         "operationId": "update_data_product_type_api_data_product_types__id__put",
@@ -5219,7 +5219,7 @@
       },
       "delete": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Remove Data Product Type",
         "operationId": "remove_data_product_type_api_data_product_types__id__delete",
@@ -5261,7 +5261,7 @@
     "/api/data_product_types": {
       "get": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Get Data Products Types Old",
         "operationId": "get_data_products_types_old_api_data_product_types_get",
@@ -5285,7 +5285,7 @@
       },
       "post": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Create Data Product Type",
         "operationId": "create_data_product_type_api_data_product_types_post",
@@ -5340,7 +5340,7 @@
     "/api/data_product_types/migrate/{from_id}/{to_id}": {
       "put": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Migrate Data Product Type",
         "operationId": "migrate_data_product_type_api_data_product_types_migrate__from_id___to_id__put",
@@ -5392,7 +5392,7 @@
     "/api/v2/configuration/data_product_types/{id}": {
       "get": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Get Data Product Type",
         "operationId": "get_data_product_type",
@@ -5433,7 +5433,7 @@
       },
       "put": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Update Data Product Type",
         "operationId": "update_data_product_type",
@@ -5484,7 +5484,7 @@
       },
       "delete": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Remove Data Product Type",
         "operationId": "remove_data_product_type",
@@ -5525,7 +5525,7 @@
     "/api/v2/configuration/data_product_types": {
       "get": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Get Data Products Types",
         "operationId": "get_data_products_types",
@@ -5544,7 +5544,7 @@
       },
       "post": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Create Data Product Type",
         "operationId": "create_data_product_type",
@@ -5598,7 +5598,7 @@
     "/api/v2/configuration/data_product_types/migrate/{from_id}/{to_id}": {
       "put": {
         "tags": [
-          "Configuration - Data product types"
+          "Configuration - Data Product types"
         ],
         "summary": "Migrate Data Product Type",
         "operationId": "migrate_data_product_type",
@@ -5649,7 +5649,7 @@
     "/api/data_product_lifecycles": {
       "get": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Get Data Products Lifecycles Old",
         "operationId": "get_data_products_lifecycles_old_api_data_product_lifecycles_get",
@@ -5673,7 +5673,7 @@
       },
       "post": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Create Data Product Lifecycle",
         "operationId": "create_data_product_lifecycle_api_data_product_lifecycles_post",
@@ -5728,7 +5728,7 @@
     "/api/data_product_lifecycles/{id}": {
       "put": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Update Data Product Lifecycle",
         "operationId": "update_data_product_lifecycle_api_data_product_lifecycles__id__put",
@@ -5793,7 +5793,7 @@
       },
       "delete": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Remove Data Product Lifecycle",
         "operationId": "remove_data_product_lifecycle_api_data_product_lifecycles__id__delete",
@@ -5835,7 +5835,7 @@
     "/api/v2/configuration/data_product_lifecycles": {
       "get": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Get Data Products Lifecycles",
         "operationId": "get_data_products_lifecycles",
@@ -5854,7 +5854,7 @@
       },
       "post": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Create Data Product Lifecycle",
         "operationId": "create_data_product_lifecycle",
@@ -5908,7 +5908,7 @@
     "/api/v2/configuration/data_product_lifecycles/{id}": {
       "put": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Update Data Product Lifecycle",
         "operationId": "update_data_product_lifecycle",
@@ -5972,7 +5972,7 @@
       },
       "delete": {
         "tags": [
-          "Configuration - Data product lifecycles"
+          "Configuration - Data Product lifecycles"
         ],
         "summary": "Remove Data Product Lifecycle",
         "operationId": "remove_data_product_lifecycle",
@@ -6013,7 +6013,7 @@
     "/api/data_product_settings": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Get Data Products Settings Old",
         "operationId": "get_data_products_settings_old_api_data_product_settings_get",
@@ -6037,7 +6037,7 @@
       },
       "post": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Create Data Product Setting",
         "operationId": "create_data_product_setting_api_data_product_settings_post",
@@ -6079,7 +6079,7 @@
     "/api/data_product_settings/namespace_suggestion": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Get Data Product Settings Namespace Suggestion",
         "operationId": "get_data_product_settings_namespace_suggestion_api_data_product_settings_namespace_suggestion_get",
@@ -6122,7 +6122,7 @@
     "/api/data_product_settings/validate_namespace": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Validate Data Product Settings Namespace",
         "operationId": "validate_data_product_settings_namespace_api_data_product_settings_validate_namespace_get",
@@ -6173,7 +6173,7 @@
     "/api/data_product_settings/namespace_length_limits": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Get Data Product Settings Namespace Length Limits",
         "operationId": "get_data_product_settings_namespace_length_limits_api_data_product_settings_namespace_length_limits_get",
@@ -6195,7 +6195,7 @@
     "/api/data_product_settings/{id}": {
       "put": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Update Data Product Setting",
         "operationId": "update_data_product_setting_api_data_product_settings__id__put",
@@ -6247,7 +6247,7 @@
       },
       "delete": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Remove Data Product Setting",
         "operationId": "remove_data_product_setting_api_data_product_settings__id__delete",
@@ -6289,7 +6289,7 @@
     "/api/v2/configuration/data_product_settings": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Get Data Products Settings",
         "operationId": "get_data_products_settings",
@@ -6308,7 +6308,7 @@
       },
       "post": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Create Data Product Setting",
         "operationId": "create_data_product_setting",
@@ -6349,7 +6349,7 @@
     "/api/v2/configuration/data_product_settings/namespace_suggestion": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Get Data Product Settings Namespace Suggestion",
         "operationId": "get_data_product_settings_namespace_suggestion",
@@ -6392,7 +6392,7 @@
     "/api/v2/configuration/data_product_settings/validate_namespace": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Validate Data Product Settings Namespace",
         "operationId": "validate_data_product_settings_namespace",
@@ -6443,7 +6443,7 @@
     "/api/v2/configuration/data_product_settings/namespace_length_limits": {
       "get": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Get Data Product Settings Namespace Length Limits",
         "operationId": "get_data_product_settings_namespace_length_limits",
@@ -6465,7 +6465,7 @@
     "/api/v2/configuration/data_product_settings/{id}": {
       "put": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Update Data Product Setting",
         "operationId": "update_data_product_setting",
@@ -6516,7 +6516,7 @@
       },
       "delete": {
         "tags": [
-          "Configuration - Data product settings"
+          "Configuration - Data Product settings"
         ],
         "summary": "Remove Data Product Setting",
         "operationId": "remove_data_product_setting",
@@ -14223,7 +14223,7 @@
             "$ref": "#/components/schemas/Dataset"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_products__output_port_technical_assets_link__schema_response__DataOutput"
+            "$ref": "#/components/schemas/DataOutput"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -14801,6 +14801,9 @@
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/DataProduct"
           }
         },
         "type": "object",
@@ -14814,7 +14817,8 @@
           "owner_id",
           "platform_id",
           "service_id",
-          "configuration"
+          "configuration",
+          "owner"
         ],
         "title": "DataOutput",
         "deprecated": true
@@ -14975,7 +14979,7 @@
             "$ref": "#/components/schemas/Dataset"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_products__output_port_technical_assets_link__schema_response__DataOutput"
+            "$ref": "#/components/schemas/DataOutput"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -15175,7 +15179,7 @@
             "$ref": "#/components/schemas/DecisionStatus"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_products__output_ports__schema_response__DataOutput"
+            "$ref": "#/components/schemas/DatasetDataOutput"
           }
         },
         "type": "object",
@@ -17427,6 +17431,97 @@
         "title": "DatasetCuratedQueries",
         "deprecated": true
       },
+      "DatasetDataOutput": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TechnicalAssetStatus"
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Id"
+          },
+          "platform_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Platform Id"
+          },
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
+          },
+          "configuration": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              }
+            ],
+            "title": "Configuration",
+            "discriminator": {
+              "propertyName": "configuration_type",
+              "mapping": {
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              }
+            }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/DataProduct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "status",
+          "technical_mapping",
+          "owner_id",
+          "platform_id",
+          "service_id",
+          "configuration",
+          "owner"
+        ],
+        "title": "DatasetDataOutput",
+        "deprecated": true
+      },
       "DatasetGet": {
         "properties": {
           "id": {
@@ -19059,7 +19154,7 @@
           "data_output": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DataOutput"
+                "$ref": "#/components/schemas/TechnicalAsset"
               },
               {
                 "type": "null"
@@ -23072,188 +23167,6 @@
           "type"
         ],
         "title": "ValidationError"
-      },
-      "app__data_products__output_port_technical_assets_link__schema_response__DataOutput": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "technical_mapping",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration",
-          "owner"
-        ],
-        "title": "DataOutput",
-        "deprecated": true
-      },
-      "app__data_products__output_ports__schema_response__DataOutput": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "technical_mapping",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration",
-          "owner"
-        ],
-        "title": "DataOutput",
-        "deprecated": true
       }
     },
     "securitySchemes": {
