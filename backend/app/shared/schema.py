@@ -24,11 +24,12 @@ class ORMModel(BaseModel):
                 if isinstance(value, list) and len(value):
                     if self.is_pydantic(value[0]):
                         parsed_schema[key] = [
-                            schema.Meta.orm_model(**schema.dict()) for schema in value
+                            schema.Meta.orm_model(**schema.model_dump())
+                            for schema in value
                         ]
                 else:
                     if self.is_pydantic(value):
-                        parsed_schema[key] = value.Meta.orm_model(**value.dict())
+                        parsed_schema[key] = value.Meta.orm_model(**value.model_dump())
         except AttributeError:
             raise AttributeError(
                 "Found nested Pydantic model but Meta.orm_model was not specified."

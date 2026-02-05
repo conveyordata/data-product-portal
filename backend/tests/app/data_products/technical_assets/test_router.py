@@ -80,7 +80,7 @@ def data_output_payload_not_owner():
     }
 
 
-class TestDataOutputsRouter:
+class TestTechnicalAssetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_create_data_output_source_aligned(

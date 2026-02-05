@@ -76,9 +76,7 @@ class GetEventHistoryResponseItemOld(ORMModel):
                 exclude={"dataset", "data_output", "subject_type", "target_type"}
             ),
             output_port=self.dataset.convert() if self.dataset is not None else None,
-            technical_asset=self.data_output.convert()
-            if self.data_output is not None
-            else None,
+            technical_asset=self.data_output,
             subject_type=EventEntityType.from_old(self.subject_type),
             target_type=EventEntityType.from_old(self.target_type)
             if self.target_type is not None

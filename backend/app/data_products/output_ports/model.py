@@ -57,7 +57,7 @@ class Dataset(Base, BaseORM):
     assignments: Mapped[list["DatasetRoleAssignmentModel"]] = relationship(
         back_populates="dataset",
         cascade="all, delete-orphan",
-        order_by="DatasetRoleAssignment.decision, DatasetRoleAssignment.requested_on",
+        order_by="DatasetRoleAssignmentModel.decision, DatasetRoleAssignmentModel.requested_on",
         lazy="joined",
     )
     data_product_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(

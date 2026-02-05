@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 class Event(Base, BaseORM):
     __tablename__ = "events"
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
     deleted_subject_identifier: Mapped[str] = mapped_column(nullable=True)
@@ -59,7 +60,7 @@ class Event(Base, BaseORM):
     )
     data_output: Mapped["TechnicalAssetModel"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
-        "foreign(DataOutput.id), Event.subject_type == 'DATA_OUTPUT'),"
+        "foreign(TechnicalAssetModel.id), Event.subject_type == 'DATA_OUTPUT'),"
         "and_(Event.target_id == foreign(TechnicalAssetModel.id),"
         " Event.target_type == 'DATA_OUTPUT'))",
     )

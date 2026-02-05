@@ -57,19 +57,16 @@ class DataProduct(Base, BaseORM):
     assignments: Mapped[list["DataProductRoleAssignmentModel"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
-        order_by="DataProductRoleAssignment.decision, "
-        "DataProductRoleAssignment.requested_on",
+        order_by="DataProductRoleAssignmentModel.decision, DataProductRoleAssignmentModel.requested_on",
         lazy="raise",
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        "DataProductDatasetAssociation",
         back_populates="data_product",
         cascade="all, delete-orphan",
         order_by="DataProductDatasetAssociation.status.desc()",
         lazy="raise",
     )
     datasets: Mapped[list["Dataset"]] = relationship(
-        "Dataset",
         back_populates="data_product",
         cascade="all, delete-orphan",
         lazy="raise",
@@ -78,14 +75,12 @@ class DataProduct(Base, BaseORM):
         secondary=tag_data_product_table, back_populates="data_products", lazy="joined"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
-        "DataProductSettingValue",
         back_populates="data_product",
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.data_product_id",
         lazy="joined",
     )
     data_outputs: Mapped[list["TechnicalAssetModel"]] = relationship(
-        "DataOutput",
         back_populates="owner",
         cascade="all, delete-orphan",
         lazy="raise",

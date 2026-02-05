@@ -38,7 +38,7 @@ class DataOutputDatasetAssociation(Base, BaseORM):
     # Relationships
     data_output: Mapped["TechnicalAssetModel"] = relationship(
         back_populates="dataset_links",
-        order_by="DataOutput.name",
+        order_by="TechnicalAssetModel.name",
         lazy="joined",
     )
     dataset: Mapped["Dataset"] = relationship(

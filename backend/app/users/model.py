@@ -47,7 +47,6 @@ class User(Base, BaseORM):
     admin_expiry = Column(DateTime(timezone=False), nullable=True)
 
     notifications: Mapped[list["Notification"]] = relationship(
-        "Notification",
         back_populates="user",
         foreign_keys="Notification.user_id",
         lazy="raise",
@@ -55,8 +54,7 @@ class User(Base, BaseORM):
 
     # Relationships - Data Products
     data_product_roles: Mapped[list["DataProductRoleAssignmentModel"]] = relationship(
-        "DataProductRoleAssignment",
-        foreign_keys="DataProductRoleAssignment.user_id",
+        foreign_keys="DataProductRoleAssignmentModel.user_id",
         back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
@@ -71,8 +69,7 @@ class User(Base, BaseORM):
     )
 
     global_role: Mapped["GlobalRoleAssignmentModel"] = relationship(
-        "GlobalRoleAssignment",
-        foreign_keys="GlobalRoleAssignment.user_id",
+        foreign_keys="GlobalRoleAssignmentModel.user_id",
         back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
@@ -85,8 +82,7 @@ class User(Base, BaseORM):
 
     # Relationships - Datasets
     dataset_roles: Mapped[list["DatasetRoleAssignmentModel"]] = relationship(
-        "DatasetRoleAssignment",
-        foreign_keys="DatasetRoleAssignment.user_id",
+        foreign_keys="DatasetRoleAssignmentModel.user_id",
         back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
@@ -95,19 +91,16 @@ class User(Base, BaseORM):
     )
     datasets: Mapped[list["Dataset"]] = association_proxy("dataset_roles", "dataset")
     requested_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        "DataProductDatasetAssociation",
         foreign_keys="DataProductDatasetAssociation.requested_by_id",
         back_populates="requested_by",
         lazy="raise",
     )
     denied_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        "DataProductDatasetAssociation",
         foreign_keys="DataProductDatasetAssociation.denied_by_id",
         back_populates="denied_by",
         lazy="raise",
     )
     approved_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        "DataProductDatasetAssociation",
         foreign_keys="DataProductDatasetAssociation.approved_by_id",
         back_populates="approved_by",
         lazy="raise",
@@ -115,19 +108,16 @@ class User(Base, BaseORM):
 
     # Relationships - Data outputs
     requested_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        "DataOutputDatasetAssociation",
         foreign_keys="DataOutputDatasetAssociation.requested_by_id",
         back_populates="requested_by",
         lazy="raise",
     )
     denied_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        "DataOutputDatasetAssociation",
         foreign_keys="DataOutputDatasetAssociation.denied_by_id",
         back_populates="denied_by",
         lazy="raise",
     )
     approved_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        "DataOutputDatasetAssociation",
         foreign_keys="DataOutputDatasetAssociation.approved_by_id",
         back_populates="approved_by",
         lazy="raise",
