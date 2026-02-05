@@ -11265,7 +11265,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__authorization__role_assignments__global___schema__ListRoleAssignmentsResponse"
+                  "$ref": "#/components/schemas/ListGlobalRoleAssignmentsResponse"
                 }
               }
             }
@@ -11607,7 +11607,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
+                "$ref": "#/components/schemas/CreateDataProductRoleAssignmentOld"
               }
             }
           }
@@ -11969,7 +11969,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__ListRoleAssignmentsResponse"
+                  "$ref": "#/components/schemas/ListDataProductRoleAssignmentsResponse"
                 }
               }
             }
@@ -12051,7 +12051,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
+                "$ref": "#/components/schemas/CreateDataProductRoleAssignmentOld"
               }
             }
           }
@@ -12295,7 +12295,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
+                "$ref": "#/components/schemas/CreateOutputPortRoleAssignmentOld"
               }
             }
           }
@@ -12657,7 +12657,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__ListRoleAssignmentsResponse"
+                  "$ref": "#/components/schemas/ListOutputPortRoleAssignmentsResponse"
                 }
               }
             }
@@ -12739,7 +12739,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld"
+                "$ref": "#/components/schemas/CreateOutputPortRoleAssignmentOld"
               }
             }
           }
@@ -14351,6 +14351,27 @@
         ],
         "title": "CreateDataProductRoleAssignment"
       },
+      "CreateDataProductRoleAssignmentOld": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id"
+        ],
+        "title": "CreateDataProductRoleAssignmentOld",
+        "deprecated": true
+      },
       "CreateDataProductSettingResponse": {
         "properties": {
           "id": {
@@ -14530,6 +14551,27 @@
         ],
         "title": "CreateOutputPortRoleAssignment"
       },
+      "CreateOutputPortRoleAssignmentOld": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "role_id"
+        ],
+        "title": "CreateOutputPortRoleAssignmentOld",
+        "deprecated": true
+      },
       "CreateRole": {
         "properties": {
           "name": {
@@ -14689,6 +14731,97 @@
           "id"
         ],
         "title": "CreateTechnicalAssetResponse"
+      },
+      "DataOutput": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TechnicalAssetStatus"
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Id"
+          },
+          "platform_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Platform Id"
+          },
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
+          },
+          "configuration": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              }
+            ],
+            "title": "Configuration",
+            "discriminator": {
+              "propertyName": "configuration_type",
+              "mapping": {
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              }
+            }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/DataProduct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "status",
+          "technical_mapping",
+          "owner_id",
+          "platform_id",
+          "service_id",
+          "configuration",
+          "owner"
+        ],
+        "title": "DataOutput",
+        "deprecated": true
       },
       "DataOutputCreate": {
         "properties": {
@@ -15046,7 +15179,7 @@
             "$ref": "#/components/schemas/DecisionStatus"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_products__output_ports__schema_response__DataOutput"
+            "$ref": "#/components/schemas/DataOutput"
           }
         },
         "type": "object",
@@ -19530,6 +19663,54 @@
         ],
         "title": "LinkTechnicalAssetsToOutputPortResponse"
       },
+      "ListDataProductRoleAssignmentsResponse": {
+        "properties": {
+          "role_assignments": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductRoleAssignmentResponse"
+            },
+            "type": "array",
+            "title": "Role Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_assignments"
+        ],
+        "title": "ListDataProductRoleAssignmentsResponse"
+      },
+      "ListGlobalRoleAssignmentsResponse": {
+        "properties": {
+          "role_assignments": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalRoleAssignmentResponse"
+            },
+            "type": "array",
+            "title": "Role Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_assignments"
+        ],
+        "title": "ListGlobalRoleAssignmentsResponse"
+      },
+      "ListOutputPortRoleAssignmentsResponse": {
+        "properties": {
+          "role_assignments": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortRoleAssignmentResponse"
+            },
+            "type": "array",
+            "title": "Role Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role_assignments"
+        ],
+        "title": "ListOutputPortRoleAssignmentsResponse"
+      },
       "ModifyDataProductRoleAssignment": {
         "properties": {
           "role_id": {
@@ -19752,7 +19933,7 @@
                       "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignment"
                     },
                     {
-                      "$ref": "#/components/schemas/app__authorization__role_assignments__output_port__schema__RoleAssignment"
+                      "$ref": "#/components/schemas/RoleAssignment"
                     }
                   ]
                 },
@@ -20925,6 +21106,142 @@
           "prototype"
         ],
         "title": "Role"
+      },
+      "RoleAssignment": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Id"
+          },
+          "requested_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By Id"
+          },
+          "decided_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by",
+          "output_port_id",
+          "user_id",
+          "role_id",
+          "requested_by_id",
+          "decided_by_id"
+        ],
+        "title": "RoleAssignment"
       },
       "RoleAssignmentOld": {
         "properties": {
@@ -22607,6 +22924,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",
@@ -22616,22 +22940,6 @@
           "type"
         ],
         "title": "ValidationError"
-      },
-      "app__authorization__role_assignments__data_product__schema__ListRoleAssignmentsResponse": {
-        "properties": {
-          "role_assignments": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductRoleAssignmentResponse"
-            },
-            "type": "array",
-            "title": "Role Assignments"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role_assignments"
-        ],
-        "title": "ListRoleAssignmentsResponse"
       },
       "app__authorization__role_assignments__data_product__schema__RoleAssignment": {
         "properties": {
@@ -22769,287 +23077,7 @@
         ],
         "title": "RoleAssignment"
       },
-      "app__authorization__role_assignments__global___schema__ListRoleAssignmentsResponse": {
-        "properties": {
-          "role_assignments": {
-            "items": {
-              "$ref": "#/components/schemas/GlobalRoleAssignmentResponse"
-            },
-            "type": "array",
-            "title": "Role Assignments"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role_assignments"
-        ],
-        "title": "ListRoleAssignmentsResponse"
-      },
-      "app__authorization__role_assignments__output_port__schema__CreateRoleAssignmentOld": {
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "user_id",
-          "role_id"
-        ],
-        "title": "CreateRoleAssignmentOld",
-        "deprecated": true
-      },
-      "app__authorization__role_assignments__output_port__schema__ListRoleAssignmentsResponse": {
-        "properties": {
-          "role_assignments": {
-            "items": {
-              "$ref": "#/components/schemas/OutputPortRoleAssignmentResponse"
-            },
-            "type": "array",
-            "title": "Role Assignments"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role_assignments"
-        ],
-        "title": "ListRoleAssignmentsResponse"
-      },
-      "app__authorization__role_assignments__output_port__schema__RoleAssignment": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          },
-          "requested_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested By Id"
-          },
-          "decided_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "output_port",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by",
-          "output_port_id",
-          "user_id",
-          "role_id",
-          "requested_by_id",
-          "decided_by_id"
-        ],
-        "title": "RoleAssignment"
-      },
       "app__data_products__output_port_technical_assets_link__schema_response__DataOutput": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "technical_mapping",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration",
-          "owner"
-        ],
-        "title": "DataOutput",
-        "deprecated": true
-      },
-      "app__data_products__output_ports__schema_response__DataOutput": {
         "properties": {
           "id": {
             "type": "string",
