@@ -37,6 +37,7 @@ from app.data_products.output_ports.service import OutputPortService
 # Import enums - corrected paths
 from app.data_products.schema_response import (
     DataProductGet,
+    DataProductsGet,
     GetDataProductsResponseItem,
 )
 from app.data_products.service import DataProductService
@@ -140,7 +141,9 @@ def universal_search(
                     if query.lower() in dp.name.lower() or (
                         dp.description and query.lower() in dp.description.lower()
                     ):
-                        filtered_data_products.append(dp)
+                        filtered_data_products.append(
+                            DataProductsGet.model_validate(dp).convert()
+                        )
                         if len(filtered_data_products) >= limit:
                             break
 
@@ -252,10 +255,11 @@ def search_data_products(
                 if status and str(dp.status) != status:
                     continue
 
-                filtered_data_products.append(dp)
+                filtered_data_products.append(
+                    DataProductsGet.model_validate(dp).convert()
+                )
                 if len(filtered_data_products) >= limit:
                     break
-
             return {
                 "data_products": [
                     GetDataProductsResponseItem.model_validate(dp).model_dump()
@@ -459,7 +463,9 @@ def get_marketplace_overview() -> Dict[str, Any]:
                 },
                 "featured_content": {
                     "popular_data_products": [
-                        GetDataProductsResponseItem.model_validate(dp).model_dump()
+                        GetDataProductsResponseItem.model_validate(
+                            DataProductsGet.model_validate(dp).convert()
+                        ).model_dump()
                         for dp in popular_data_products
                     ],
                     "popular_datasets": [
@@ -515,7 +521,7 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
 
             return {
                 "data_product": GetDataProductsResponseItem.model_validate(
-                    data_product
+                    DataProductsGet.model_validate(data_product).convert()
                 ).model_dump(),
                 "analytics": {
                     "datasets_count": len(related_datasets),
