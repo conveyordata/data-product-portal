@@ -60,6 +60,6 @@ class Event(Base, BaseORM):
     data_output: Mapped["TechnicalAssetModel"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(DataOutput.id), Event.subject_type == 'DATA_OUTPUT'),"
-        "and_(Event.target_id == foreign(DataOutput.id),"
+        "and_(Event.target_id == foreign(TechnicalAssetModel.id),"
         " Event.target_type == 'DATA_OUTPUT'))",
     )
