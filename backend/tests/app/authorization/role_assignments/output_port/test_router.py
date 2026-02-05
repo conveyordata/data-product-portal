@@ -18,7 +18,9 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.output_port.schema import RoleAssignment
+    from app.authorization.role_assignments.output_port.schema import (
+        OutputPortRoleAssignment,
+    )
     from app.data_products.output_ports.model import Dataset
     from app.users.schema import User
 
@@ -32,7 +34,7 @@ class TestDatasetRoleAssignmentsRouter:
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id, user_id=user.id, role_id=role.id
         )
         response = client.get(OLD_ENDPOINT)
@@ -46,7 +48,7 @@ class TestDatasetRoleAssignmentsRouter:
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id, user_id=user.id, role_id=role.id
         )
         response = client.get(ENDPOINT)
@@ -231,7 +233,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -261,7 +263,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -290,7 +292,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -319,7 +321,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -346,7 +348,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -370,7 +372,7 @@ class TestDatasetRoleAssignmentsRouter:
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
         )
         user: User = UserFactory()
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=None,
@@ -398,7 +400,7 @@ class TestDatasetRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -425,7 +427,7 @@ class TestDatasetRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -555,7 +557,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -588,7 +590,7 @@ class TestDatasetRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
@@ -617,7 +619,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,

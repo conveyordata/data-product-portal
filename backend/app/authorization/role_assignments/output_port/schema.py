@@ -6,7 +6,9 @@ from warnings import deprecated
 from pydantic import BaseModel
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignmentModel,
+)
 from app.authorization.roles.schema import Role
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.shared.schema import ORMModel
@@ -14,7 +16,7 @@ from app.users.schema import User
 
 
 @deprecated("Use RequestRoleAssignment or CreateOutputPortRoleAssignment instead")
-class CreateRoleAssignmentOld(BaseModel):
+class CreateOutputPortRoleAssignmentOld(BaseModel):
     user_id: UUID
     role_id: UUID
 
@@ -52,7 +54,7 @@ class RoleAssignmentResponseOld(ORMModel):
     decided_by: Optional[User]
 
     class Meta:
-        orm_model = DatasetRoleAssignment
+        orm_model = DatasetRoleAssignmentModel
 
 
 class OutputPortRoleAssignmentResponse(ORMModel):
@@ -67,7 +69,7 @@ class OutputPortRoleAssignmentResponse(ORMModel):
     decided_by: Optional[User]
 
 
-class ListRoleAssignmentsResponse(ORMModel):
+class ListOutputPortRoleAssignmentsResponse(ORMModel):
     role_assignments: Sequence[OutputPortRoleAssignmentResponse]
 
 
@@ -80,7 +82,7 @@ class RoleAssignmentOld(RoleAssignmentResponseOld):
     decided_by_id: Optional[UUID]
 
 
-class RoleAssignment(OutputPortRoleAssignmentResponse):
+class OutputPortRoleAssignment(OutputPortRoleAssignmentResponse):
     output_port_id: UUID
     user_id: UUID
     role_id: Optional[UUID]
@@ -88,7 +90,7 @@ class RoleAssignment(OutputPortRoleAssignmentResponse):
     decided_by_id: Optional[UUID]
 
 
-class UpdateRoleAssignment(BaseModel):
+class UpdateOutputPortRoleAssignment(BaseModel):
     id: UUID
     role_id: Optional[UUID] = None
     decision: Optional[DecisionStatus] = None

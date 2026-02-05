@@ -6,7 +6,7 @@ from app.authorization.roles import ADMIN_UUID
 from app.core.authz.authorization import Authorization
 
 from ..auth import AuthAssignment
-from .schema import RoleAssignment
+from .schema import GlobalRoleAssignment
 
 
 @dataclass
@@ -20,7 +20,10 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
     """Dataclass to pass values separate from the DB session."""
 
     def __init__(
-        self, assignment: RoleAssignment, *, previous_role_id: Optional[UUID] = None
+        self,
+        assignment: GlobalRoleAssignment,
+        *,
+        previous_role_id: Optional[UUID] = None,
     ) -> None:
         super().__init__(
             user_id=assignment.user_id,

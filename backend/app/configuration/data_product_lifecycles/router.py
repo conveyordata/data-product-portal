@@ -111,7 +111,7 @@ def remove_data_product_lifecycle(
 
 
 _router = router
-router = APIRouter(tags=["Configuration - Data product lifecycles"])
+router = APIRouter(tags=["Configuration - Data Product lifecycles"])
 router.include_router(_router, prefix="/data_product_lifecycles", deprecated=True)
 router.include_router(_router, prefix="/v2/configuration/data_product_lifecycles")
 

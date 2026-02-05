@@ -11,14 +11,14 @@ from app.authorization.role_assignments.data_product.auth import (
 )
 from app.authorization.role_assignments.data_product.schema import (
     CreateDataProductRoleAssignment,
-    CreateRoleAssignmentOld,
+    CreateDataProductRoleAssignmentOld,
     DataProductRoleAssignmentResponse,
     DecideDataProductRoleAssignment,
     DeleteDataProductRoleAssignmentResponse,
-    ListRoleAssignmentsResponse,
+    ListDataProductRoleAssignmentsResponse,
     ModifyDataProductRoleAssignment,
     RequestDataProductRoleAssignment,
-    UpdateRoleAssignment,
+    UpdateDataProductRoleAssignment,
 )
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
@@ -113,8 +113,8 @@ def list_data_product_role_assignments(
     role_id: Optional[UUID] = None,
     decision: Optional[DecisionStatus] = None,
     db: Session = Depends(get_db_session),
-) -> ListRoleAssignmentsResponse:
-    return ListRoleAssignmentsResponse(
+) -> ListDataProductRoleAssignmentsResponse:
+    return ListDataProductRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
             data_product_id=data_product_id,
             user_id=user_id,
@@ -137,7 +137,7 @@ def list_data_product_role_assignments(
 )
 def request_assignment_old(
     id: UUID,
-    request: CreateRoleAssignmentOld,
+    request: CreateDataProductRoleAssignmentOld,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
@@ -212,7 +212,7 @@ def request_data_product_role_assignment(
 )
 def create_assignment_old(
     id: UUID,
-    request: CreateRoleAssignmentOld,
+    request: CreateDataProductRoleAssignmentOld,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
@@ -271,7 +271,7 @@ def create_data_product_role_assignment(
 
     if is_admin or user.id in (approver.id for approver in approvers):
         assignment = service.update_assignment(
-            UpdateRoleAssignment(
+            UpdateDataProductRoleAssignment(
                 id=role_assignment.id,
                 role_id=role_assignment.role_id,
                 decision=DecisionStatus.APPROVED,
@@ -342,7 +342,7 @@ def decide_data_product_role_assignment(
         )
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision), actor=user
+        UpdateDataProductRoleAssignment(id=id, decision=request.decision), actor=user
     )
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).add()
@@ -414,7 +414,7 @@ def modify_data_product_role_assignment(
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id), actor=user
+        UpdateDataProductRoleAssignment(id=id, role_id=request.role_id), actor=user
     )
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()

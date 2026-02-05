@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.model import Dataset
-from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.model import TechnicalAssetModel
 from app.events.enums import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
@@ -88,7 +88,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
     )
 
 
-@sql_event.listens_for(DataOutput, "before_delete")
+@sql_event.listens_for(TechnicalAssetModel, "before_delete")
 def _backup_data_output_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)

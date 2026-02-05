@@ -3,13 +3,16 @@ from typing import Optional
 from uuid import UUID
 
 from ..auth import ResourceAuthAssignment
-from .schema import RoleAssignment
+from .schema import DataProductRoleAssignment
 
 
 @dataclass
 class DataProductAuthAssignment(ResourceAuthAssignment):
     def __init__(
-        self, assignment: RoleAssignment, *, previous_role_id: Optional[UUID] = None
+        self,
+        assignment: DataProductRoleAssignment,
+        *,
+        previous_role_id: Optional[UUID] = None,
     ) -> None:
         role_id = self._assert_invariants(assignment, previous_role_id)
 

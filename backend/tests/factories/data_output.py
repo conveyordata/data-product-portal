@@ -1,6 +1,6 @@
 import factory
 
-from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.model import TechnicalAssetModel
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from tests import test_session
 from tests.factories.data_product import DataProductFactory
@@ -11,7 +11,7 @@ from tests.factories.tags import TagFactory
 
 class DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = DataOutput
+        model = TechnicalAssetModel
 
     id = factory.Faker("uuid4")
     name = factory.Faker("word")

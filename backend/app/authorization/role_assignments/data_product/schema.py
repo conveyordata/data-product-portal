@@ -6,7 +6,7 @@ from warnings import deprecated
 from pydantic import BaseModel
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
+    DataProductRoleAssignmentModel,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role
@@ -16,7 +16,7 @@ from app.users.schema import User
 
 
 @deprecated("Use RequestRoleAssignment or CreateDataProductRoleAssignment instead")
-class CreateRoleAssignmentOld(BaseModel):
+class CreateDataProductRoleAssignmentOld(BaseModel):
     user_id: UUID
     role_id: UUID
 
@@ -53,14 +53,14 @@ class DataProductRoleAssignmentResponse(ORMModel):
     decided_by: Optional[User]
 
     class Meta:
-        orm_model = DataProductRoleAssignment
+        orm_model = DataProductRoleAssignmentModel
 
 
-class ListRoleAssignmentsResponse(ORMModel):
+class ListDataProductRoleAssignmentsResponse(ORMModel):
     role_assignments: Sequence[DataProductRoleAssignmentResponse]
 
 
-class RoleAssignment(DataProductRoleAssignmentResponse):
+class DataProductRoleAssignment(DataProductRoleAssignmentResponse):
     data_product_id: UUID
     user_id: UUID
     role_id: Optional[UUID]
@@ -68,7 +68,7 @@ class RoleAssignment(DataProductRoleAssignmentResponse):
     decided_by_id: Optional[UUID]
 
 
-class UpdateRoleAssignment(BaseModel):
+class UpdateDataProductRoleAssignment(BaseModel):
     id: UUID
     role_id: Optional[UUID] = None
     decision: Optional[DecisionStatus] = None

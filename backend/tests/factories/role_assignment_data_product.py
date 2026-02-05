@@ -1,7 +1,7 @@
 import factory
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
+    DataProductRoleAssignmentModel,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.authz.authorization import Authorization
@@ -10,7 +10,7 @@ from tests import test_session
 
 class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = DataProductRoleAssignment
+        model = DataProductRoleAssignmentModel
 
     id = factory.Faker("uuid4")
     data_product_id = factory.Faker("uuid4")

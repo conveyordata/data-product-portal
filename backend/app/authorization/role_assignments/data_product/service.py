@@ -8,11 +8,11 @@ from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
+    DataProductRoleAssignmentModel,
 )
 from app.authorization.role_assignments.data_product.schema import (
-    RoleAssignment,
-    UpdateRoleAssignment,
+    DataProductRoleAssignment,
+    UpdateDataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.model import Role
@@ -28,8 +28,8 @@ class RoleAssignmentService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def get_assignment(self, id_: UUID) -> RoleAssignment:
-        return ensure_exists(id_, self.db, DataProductRoleAssignment)
+    def get_assignment(self, id_: UUID) -> DataProductRoleAssignment:
+        return ensure_exists(id_, self.db, DataProductRoleAssignmentModel)
 
     def list_assignments(
         self,
@@ -38,29 +38,29 @@ class RoleAssignmentService:
         user_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
-    ) -> Sequence[RoleAssignment]:
-        query = select(DataProductRoleAssignment)
+    ) -> Sequence[DataProductRoleAssignment]:
+        query = select(DataProductRoleAssignmentModel)
         if data_product_id is not None:
             query = query.where(
-                DataProductRoleAssignment.data_product_id == data_product_id
+                DataProductRoleAssignmentModel.data_product_id == data_product_id
             )
         if user_id is not None:
-            query = query.where(DataProductRoleAssignment.user_id == user_id)
+            query = query.where(DataProductRoleAssignmentModel.user_id == user_id)
         if role_id is not None:
-            query = query.where(DataProductRoleAssignment.role_id == role_id)
+            query = query.where(DataProductRoleAssignmentModel.role_id == role_id)
         if decision is not None:
-            query = query.where(DataProductRoleAssignment.decision == decision)
+            query = query.where(DataProductRoleAssignmentModel.decision == decision)
 
         return self.db.scalars(query).all()
 
     def create_assignment(
         self, data_product_id: UUID, role_id: UUID, user_id: UUID, *, actor: User
-    ) -> RoleAssignment:
+    ) -> DataProductRoleAssignment:
         self.ensure_is_data_product_scope(role_id)
         existing_assignment = self.db.scalar(
-            select(DataProductRoleAssignment).where(
-                DataProductRoleAssignment.user_id == user_id,
-                DataProductRoleAssignment.data_product_id == data_product_id,
+            select(DataProductRoleAssignmentModel).where(
+                DataProductRoleAssignmentModel.user_id == user_id,
+                DataProductRoleAssignmentModel.data_product_id == data_product_id,
             )
         )
         if existing_assignment:
@@ -75,7 +75,7 @@ class RoleAssignmentService:
                     ),
                 )
 
-        role_assignment = DataProductRoleAssignment(
+        role_assignment = DataProductRoleAssignmentModel(
             user_id=user_id,
             role_id=role_id,
             data_product_id=data_product_id,
@@ -86,7 +86,7 @@ class RoleAssignmentService:
         self.db.commit()
         return role_assignment
 
-    def delete_assignment(self, id_: UUID) -> RoleAssignment:
+    def delete_assignment(self, id_: UUID) -> DataProductRoleAssignment:
         assignment = self.get_assignment(id_)
         self._guard_against_illegal_owner_removal(assignment)
 
@@ -96,8 +96,8 @@ class RoleAssignmentService:
         return result
 
     def update_assignment(
-        self, request: UpdateRoleAssignment, *, actor: User
-    ) -> RoleAssignment:
+        self, request: UpdateDataProductRoleAssignment, *, actor: User
+    ) -> DataProductRoleAssignment:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
 
@@ -120,7 +120,9 @@ class RoleAssignmentService:
                 detail="Role not found for this scope",
             )
 
-    def _guard_against_illegal_owner_removal(self, assignment: RoleAssignment) -> None:
+    def _guard_against_illegal_owner_removal(
+        self, assignment: DataProductRoleAssignment
+    ) -> None:
         if (
             assignment.role is not None
             and assignment.role.prototype == Prototype.OWNER
@@ -135,8 +137,8 @@ class RoleAssignmentService:
     def _count_owners(self, data_product_id: UUID) -> int:
         query = (
             select(func.count())
-            .select_from(DataProductRoleAssignment)
-            .where(DataProductRoleAssignment.data_product_id == data_product_id)
+            .select_from(DataProductRoleAssignmentModel)
+            .where(DataProductRoleAssignmentModel.data_product_id == data_product_id)
             .join(Role)
             .where(Role.prototype == Prototype.OWNER)
         )
@@ -146,11 +148,11 @@ class RoleAssignmentService:
         self, user: User
     ) -> Sequence[DataProductRoleAssignmentPendingActionOld]:
         data_product_ids = (
-            select(DataProductRoleAssignment.data_product_id)
-            .join(DataProductRoleAssignment.role)
+            select(DataProductRoleAssignmentModel.data_product_id)
+            .join(DataProductRoleAssignmentModel.role)
             .where(
-                DataProductRoleAssignment.user_id == user.id,
-                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                DataProductRoleAssignmentModel.user_id == user.id,
+                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
                 Role.permissions.contains(
                     [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
                 ),
@@ -160,10 +162,14 @@ class RoleAssignmentService:
 
         actions = (
             self.db.scalars(
-                select(DataProductRoleAssignment)
-                .filter(DataProductRoleAssignment.decision == DecisionStatus.PENDING)
-                .filter(DataProductRoleAssignment.data_product_id.in_(data_product_ids))
-                .order_by(asc(DataProductRoleAssignment.requested_on))
+                select(DataProductRoleAssignmentModel)
+                .filter(
+                    DataProductRoleAssignmentModel.decision == DecisionStatus.PENDING
+                )
+                .filter(
+                    DataProductRoleAssignmentModel.data_product_id.in_(data_product_ids)
+                )
+                .order_by(asc(DataProductRoleAssignmentModel.requested_on))
             )
             .unique()
             .all()
@@ -177,13 +183,13 @@ class RoleAssignmentService:
             self.db.scalars(
                 select(UserModel)
                 .join(
-                    DataProductRoleAssignment,
-                    DataProductRoleAssignment.user_id == UserModel.id,
+                    DataProductRoleAssignmentModel,
+                    DataProductRoleAssignmentModel.user_id == UserModel.id,
                 )
-                .join(Role, DataProductRoleAssignment.role_id == Role.id)
+                .join(Role, DataProductRoleAssignmentModel.role_id == Role.id)
                 .where(
-                    DataProductRoleAssignment.data_product_id == data_product_id,
-                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                    DataProductRoleAssignmentModel.data_product_id == data_product_id,
+                    DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
                     Role.permissions.contains([action]),
                 )
             )

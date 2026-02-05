@@ -14,7 +14,7 @@ from .enums import EventReferenceEntity
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.data_products.output_ports.model import Dataset
-    from app.data_products.technical_assets.model import DataOutput
+    from app.data_products.technical_assets.model import TechnicalAssetModel
     from app.users.model import User
 
 
@@ -57,7 +57,7 @@ class Event(Base, BaseORM):
         "and_(Event.target_id == foreign(Dataset.id),"
         " Event.target_type == 'DATASET'))",
     )
-    data_output: Mapped["DataOutput"] = relationship(
+    data_output: Mapped["TechnicalAssetModel"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(DataOutput.id), Event.subject_type == 'DATA_OUTPUT'),"
         "and_(Event.target_id == foreign(DataOutput.id),"

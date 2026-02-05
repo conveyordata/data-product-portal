@@ -6,9 +6,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
+    DataProductRoleAssignmentModel,
 )
-from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignmentModel,
+)
 from app.data_products.model import DataProduct
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
@@ -17,10 +19,12 @@ from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation,
 )
 from app.data_products.output_ports.model import Dataset
-from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.model import TechnicalAssetModel
 from app.database.database import get_db_session
 
-Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], None]
+Model: TypeAlias = Union[
+    Type[DataProduct], Type[Dataset], Type[TechnicalAssetModel], None
+]
 
 
 class SubjectResolver(ABC):
@@ -76,7 +80,9 @@ class DatasetRoleAssignmentResolver(SubjectResolver):
         if obj != cls.DEFAULT:
             assignment = (
                 db.scalars(
-                    select(DatasetRoleAssignment).where(DatasetRoleAssignment.id == obj)
+                    select(DatasetRoleAssignmentModel).where(
+                        DatasetRoleAssignmentModel.id == obj
+                    )
                 )
                 .unique()
                 .one_or_none()
@@ -97,8 +103,8 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
         if obj != cls.DEFAULT:
             assignment = (
                 db.scalars(
-                    select(DataProductRoleAssignment).where(
-                        DataProductRoleAssignment.id == obj
+                    select(DataProductRoleAssignmentModel).where(
+                        DataProductRoleAssignmentModel.id == obj
                     )
                 )
                 .unique()
@@ -155,7 +161,9 @@ class DataOutputResolver(SubjectResolver):
         obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_output = (
-                db.scalars(select(DataOutput).where(DataOutput.id == obj))
+                db.scalars(
+                    select(TechnicalAssetModel).where(TechnicalAssetModel.id == obj)
+                )
                 .unique()
                 .one_or_none()
             )

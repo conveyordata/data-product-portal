@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
-from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.model import TechnicalAssetModel
 from app.database.database import Base
 from app.settings import settings
 
@@ -89,7 +89,7 @@ class NamespaceValidator:
 
 class DataOutputNamespaceValidator(NamespaceValidator):
     def __init__(self):
-        super().__init__(model=DataOutput)
+        super().__init__(model=TechnicalAssetModel)
 
     def _is_unique(
         self,
@@ -107,8 +107,8 @@ class DataOutputNamespaceValidator(NamespaceValidator):
             select(
                 exists().where(
                     and_(
-                        DataOutput.namespace == namespace,
-                        DataOutput.owner_id == data_product_id,
+                        TechnicalAssetModel.namespace == namespace,
+                        TechnicalAssetModel.owner_id == data_product_id,
                     )
                 )
             )

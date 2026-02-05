@@ -7,11 +7,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignmentModel
 from app.authorization.role_assignments.global_.schema import (
-    RoleAssignment,
+    GlobalRoleAssignment,
     RoleAssignmentRequest,
-    UpdateRoleAssignment,
+    UpdateGlobalRoleAssignment,
 )
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
@@ -23,8 +23,8 @@ class RoleAssignmentService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def get_assignment(self, id_: UUID) -> RoleAssignment:
-        return ensure_exists(id_, self.db, GlobalRoleAssignment)
+    def get_assignment(self, id_: UUID) -> GlobalRoleAssignment:
+        return ensure_exists(id_, self.db, GlobalRoleAssignmentModel)
 
     def list_assignments(
         self,
@@ -32,23 +32,23 @@ class RoleAssignmentService:
         user_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
-    ) -> Sequence[RoleAssignment]:
-        query = select(GlobalRoleAssignment)
+    ) -> Sequence[GlobalRoleAssignment]:
+        query = select(GlobalRoleAssignmentModel)
         if user_id is not None:
-            query = query.where(GlobalRoleAssignment.user_id == user_id)
+            query = query.where(GlobalRoleAssignmentModel.user_id == user_id)
         if role_id is not None:
-            query = query.where(GlobalRoleAssignment.role_id == role_id)
+            query = query.where(GlobalRoleAssignmentModel.role_id == role_id)
         if decision is not None:
-            query = query.where(GlobalRoleAssignment.decision == decision)
+            query = query.where(GlobalRoleAssignmentModel.decision == decision)
 
         return self.db.scalars(query).all()
 
     def create_assignment(
         self, request: RoleAssignmentRequest, *, actor: User
-    ) -> RoleAssignment:
+    ) -> GlobalRoleAssignment:
         self.ensure_is_global_scope(request.role_id)
         self.ensure_is_not_admin(request.role_id)
-        role_assignment = GlobalRoleAssignment(
+        role_assignment = GlobalRoleAssignmentModel(
             **request.model_dump(),
             requested_on=datetime.now(),
             requested_by_id=actor.id,
@@ -57,7 +57,7 @@ class RoleAssignmentService:
         self.db.commit()
         return role_assignment
 
-    def delete_assignment(self, id_: UUID) -> RoleAssignment:
+    def delete_assignment(self, id_: UUID) -> GlobalRoleAssignment:
         assignment = self.get_assignment(id_)
 
         self.db.delete(assignment)
@@ -65,8 +65,8 @@ class RoleAssignmentService:
         return assignment
 
     def update_assignment(
-        self, request: UpdateRoleAssignment, *, actor: User
-    ) -> RoleAssignment:
+        self, request: UpdateGlobalRoleAssignment, *, actor: User
+    ) -> GlobalRoleAssignment:
         assignment = self.get_assignment(request.id)
 
         if (role_id := request.role_id) is not None:

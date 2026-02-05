@@ -25,8 +25,10 @@ from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
-from app.data_products.technical_assets.model import DataOutput as DataOutputModel
-from app.data_products.technical_assets.model import ensure_data_output_exists
+from app.data_products.technical_assets.model import (
+    TechnicalAssetModel as DataOutputModel,
+)
+from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
     DataOutputResultStringRequest,
@@ -229,7 +231,7 @@ class DataOutputService:
     def update_data_output(
         self, data_product_id: UUID, id: UUID, data_output: DataOutputUpdate
     ) -> UpdateTechnicalAssetResponse:
-        current_data_output = ensure_data_output_exists(
+        current_data_output = ensure_technical_asset_exists(
             id, self.db, data_product_id=data_product_id
         )
         update_data_output = data_output.model_dump(exclude_unset=True)
@@ -245,7 +247,7 @@ class DataOutputService:
         return UpdateTechnicalAssetResponse(id=current_data_output.id)
 
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:
-        ensure_data_output_exists(id, self.db, data_product_id=data_product_id)
+        ensure_technical_asset_exists(id, self.db, data_product_id=data_product_id)
         graph = DataProductService(self.db).get_graph_data(data_product_id, level)
 
         for node in graph.nodes:

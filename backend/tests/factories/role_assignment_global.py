@@ -1,7 +1,7 @@
 import factory
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignmentModel
 from app.authorization.roles import ADMIN_UUID
 from app.core.authz.authorization import Authorization
 from tests import test_session
@@ -9,7 +9,7 @@ from tests import test_session
 
 class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = GlobalRoleAssignment
+        model = GlobalRoleAssignmentModel
 
     id = factory.Faker("uuid4")
     user_id = factory.Faker("uuid4")

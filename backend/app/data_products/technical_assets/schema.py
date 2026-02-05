@@ -1,5 +1,4 @@
 from uuid import UUID
-from warnings import deprecated
 
 from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_products.technical_assets.enums import TechnicalMapping
@@ -20,9 +19,3 @@ class TechnicalAsset(ORMModel):
 
     # Nested schemas
     configuration: DataOutputConfiguration
-
-
-@deprecated("Use TechnicalAsset instead")
-class DataOutput(TechnicalAsset):
-    def convert(self):
-        return TechnicalAsset(**self.model_dump())

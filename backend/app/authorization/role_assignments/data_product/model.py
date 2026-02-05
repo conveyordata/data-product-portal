@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from app.users.model import User
 
 
-class DataProductRoleAssignment(Base, BaseORM):
+class DataProductRoleAssignmentModel(Base, BaseORM):
     __tablename__ = "role_assignments_data_product"
     __table_args__ = (
         UniqueConstraint(

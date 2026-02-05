@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.users.model import User
 
 
-class GlobalRoleAssignment(Base, BaseORM):
+class GlobalRoleAssignmentModel(Base, BaseORM):
     __tablename__ = "role_assignments_global"
     __table_args__ = (UniqueConstraint("user_id", name="unique_global_assignment"),)
 

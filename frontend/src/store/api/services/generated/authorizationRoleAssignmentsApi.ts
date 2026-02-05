@@ -203,7 +203,7 @@ export type CreateGlobalRoleAssignmentApiResponse =
   /** status 200 Successful Response */ GlobalRoleAssignmentResponse;
 export type CreateGlobalRoleAssignmentApiArg = CreateGlobalRoleAssignment;
 export type ListGlobalRoleAssignmentsApiResponse =
-  /** status 200 Successful Response */ ListRoleAssignmentsResponse;
+  /** status 200 Successful Response */ ListGlobalRoleAssignmentsResponse;
 export type ListGlobalRoleAssignmentsApiArg = {
   userId?: string | null;
   roleId?: string | null;
@@ -233,7 +233,7 @@ export type ModifyDataProductRoleAssignmentApiArg = {
   modifyDataProductRoleAssignment: ModifyDataProductRoleAssignment;
 };
 export type ListDataProductRoleAssignmentsApiResponse =
-  /** status 200 Successful Response */ ListRoleAssignmentsResponse2;
+  /** status 200 Successful Response */ ListDataProductRoleAssignmentsResponse;
 export type ListDataProductRoleAssignmentsApiArg = {
   dataProductId?: string | null;
   userId?: string | null;
@@ -264,7 +264,7 @@ export type ModifyOutputPortRoleAssignmentApiArg = {
   modifyOutputPortRoleAssignment: ModifyOutputPortRoleAssignment;
 };
 export type ListOutputPortRoleAssignmentsApiResponse =
-  /** status 200 Successful Response */ ListRoleAssignmentsResponse3;
+  /** status 200 Successful Response */ ListOutputPortRoleAssignmentsResponse;
 export type ListOutputPortRoleAssignmentsApiArg = {
   outputPortId?: string | null;
   userId?: string | null;
@@ -289,6 +289,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -368,7 +370,7 @@ export type CreateGlobalRoleAssignment = {
   user_id: string;
   role_id: string | "admin";
 };
-export type ListRoleAssignmentsResponse = {
+export type ListGlobalRoleAssignmentsResponse = {
   role_assignments: GlobalRoleAssignmentResponse[];
 };
 export type DeleteGlobalRoleAssignmentResponse = {
@@ -421,7 +423,7 @@ export type DataProductRoleAssignmentResponse = {
 export type ModifyDataProductRoleAssignment = {
   role_id: string;
 };
-export type ListRoleAssignmentsResponse2 = {
+export type ListDataProductRoleAssignmentsResponse = {
   role_assignments: DataProductRoleAssignmentResponse[];
 };
 export type CreateDataProductRoleAssignment = {
@@ -471,7 +473,7 @@ export type OutputPortRoleAssignmentResponse = {
 export type ModifyOutputPortRoleAssignment = {
   role_id: string;
 };
-export type ListRoleAssignmentsResponse3 = {
+export type ListOutputPortRoleAssignmentsResponse = {
   role_assignments: OutputPortRoleAssignmentResponse[];
 };
 export type CreateOutputPortRoleAssignment = {

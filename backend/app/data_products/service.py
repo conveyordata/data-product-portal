@@ -60,7 +60,9 @@ from app.data_products.schema_response import (
     GetDataProductResponse,
     UpdateDataProductResponse,
 )
-from app.data_products.technical_assets.model import DataOutput as DataOutputModel
+from app.data_products.technical_assets.model import (
+    TechnicalAssetModel as DataOutputModel,
+)
 from app.data_products.technical_assets.schema_response import DataOutputGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph

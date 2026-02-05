@@ -13,7 +13,7 @@ from alembic import op
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignmentModel
 from app.authorization.role_assignments.global_.router import (
     create_global_role_assignment,
     decide_global_role_assignment,
@@ -43,7 +43,7 @@ def upgrade() -> None:
         # Check if the user already has the role
         existing_assignments = (
             session.execute(
-                sa.select(GlobalRoleAssignment).filter_by(user_id=api_bot.id)
+                sa.select(GlobalRoleAssignmentModel).filter_by(user_id=api_bot.id)
             )
             .scalars()
             .all()
@@ -77,7 +77,7 @@ def downgrade() -> None:
         # Check if the user has the admin role assignment
         existing_assignments = (
             session.execute(
-                sa.select(GlobalRoleAssignment).filter_by(
+                sa.select(GlobalRoleAssignmentModel).filter_by(
                     user_id=api_bot.id, role_id=ADMIN_UUID
                 )
             )

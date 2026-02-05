@@ -1,14 +1,16 @@
 import factory
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignmentModel,
+)
 from app.core.authz.authorization import Authorization
 from tests import test_session
 
 
 class DatasetRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = DatasetRoleAssignment
+        model = DatasetRoleAssignmentModel
 
     id = factory.Faker("uuid4")
     dataset_id = factory.Faker("uuid4")

@@ -41,7 +41,7 @@ from app.data_products.schema_response import (
     GetDataProductsResponseItem,
 )
 from app.data_products.service import DataProductService
-from app.data_products.technical_assets.model import ensure_data_output_exists
+from app.data_products.technical_assets.model import ensure_technical_asset_exists
 
 # Import Pydantic schemas - corrected paths
 from app.data_products.technical_assets.schema_response import (
@@ -392,7 +392,7 @@ def get_data_output_details(data_output_id: str) -> Dict[str, Any]:
     """Get detailed information about a specific data output."""
     try:
         db = next(get_db_session())
-        do = ensure_data_output_exists(UUID(data_output_id), db=db)
+        do = ensure_technical_asset_exists(UUID(data_output_id), db=db)
         try:
             data_output = DataOutputService(db).get_data_output(
                 do.owner_id,

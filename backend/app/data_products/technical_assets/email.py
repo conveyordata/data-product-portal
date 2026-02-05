@@ -5,14 +5,14 @@ import emailgen
 
 from app.core.email.send_mail import send_mail
 from app.data_products.output_ports.schema import Dataset
-from app.data_products.technical_assets.schema import DataOutput
+from app.data_products.technical_assets.schema import TechnicalAsset
 from app.settings import settings
 from app.users.schema import User
 
 
 def send_link_dataset_email(
     dataset: Dataset,
-    data_output: DataOutput,
+    data_output: TechnicalAsset,
     *,
     requester: User,
     approvers: Sequence[User],

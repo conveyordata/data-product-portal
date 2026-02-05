@@ -11,11 +11,13 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.data_product.model import (
-        DataProductRoleAssignment,
+        DataProductRoleAssignmentModel,
     )
-    from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+    from app.authorization.role_assignments.global_.model import (
+        GlobalRoleAssignmentModel,
+    )
     from app.authorization.role_assignments.output_port.model import (
-        DatasetRoleAssignment,
+        DatasetRoleAssignmentModel,
     )
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
@@ -52,7 +54,7 @@ class User(Base, BaseORM):
     )
 
     # Relationships - Data Products
-    data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
+    data_product_roles: Mapped[list["DataProductRoleAssignmentModel"]] = relationship(
         "DataProductRoleAssignment",
         foreign_keys="DataProductRoleAssignment.user_id",
         back_populates="user",
@@ -68,7 +70,7 @@ class User(Base, BaseORM):
         "data_product_roles", "data_product"
     )
 
-    global_role: Mapped["GlobalRoleAssignment"] = relationship(
+    global_role: Mapped["GlobalRoleAssignmentModel"] = relationship(
         "GlobalRoleAssignment",
         foreign_keys="GlobalRoleAssignment.user_id",
         back_populates="user",
@@ -82,7 +84,7 @@ class User(Base, BaseORM):
     )
 
     # Relationships - Datasets
-    dataset_roles: Mapped[list["DatasetRoleAssignment"]] = relationship(
+    dataset_roles: Mapped[list["DatasetRoleAssignmentModel"]] = relationship(
         "DatasetRoleAssignment",
         foreign_keys="DatasetRoleAssignment.user_id",
         back_populates="user",

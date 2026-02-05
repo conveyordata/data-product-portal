@@ -5,10 +5,10 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from app.authorization.role_assignments.data_product.schema import (
-    RoleAssignment as DataProductRoleAssignment,
+    DataProductRoleAssignment as DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.output_port.schema import (
-    RoleAssignment as DatasetRoleAssignment,
+    OutputPortRoleAssignment as DatasetRoleAssignment,
 )
 
 

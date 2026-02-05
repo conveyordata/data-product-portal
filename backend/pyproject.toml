@@ -67,10 +67,11 @@ optional = true
 poethepoet = "^0.40.0"
 
 [tool.poe.tasks]
+test = "pytest -v tests/"
 lint = "ruff check --fix"
 format = "ruff format"
 ruff = ["lint", "format"]
-test = "pytest -v tests/"
+ty = "uvx ty check"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 up = "docker compose -f test-compose.yaml up -d"
 down = "docker compose -f test-compose.yaml down"
