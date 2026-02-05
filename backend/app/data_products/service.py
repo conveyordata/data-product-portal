@@ -112,6 +112,7 @@ class DataProductService:
                 .selectinload(DatasetModel.data_output_links),
                 selectinload(DataProductModel.datasets).selectinload(DatasetModel.tags),
                 selectinload(DataProductModel.datasets).raiseload("*"),
+                selectinload(DataProductModel.assignments).raiseload("*"),
                 selectinload(DataProductModel.data_outputs).selectinload(
                     DataOutputModel.dataset_links
                 ),
