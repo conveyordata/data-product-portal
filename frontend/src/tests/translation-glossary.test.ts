@@ -27,7 +27,6 @@ const GLOSSARY_TERMS: GlossaryRule[] = [
 
 describe('Glossary Enforcement', () => {
     GLOSSARY_TERMS.forEach(({ expected, pattern }) => {
-
         it(`should enforce strict casing for "${expected}"`, () => {
             Object.entries(translations).forEach(([key, text]) => {
                 const matches = [...(text.match(pattern) ?? []), ...(key.match(pattern) ?? [])];
