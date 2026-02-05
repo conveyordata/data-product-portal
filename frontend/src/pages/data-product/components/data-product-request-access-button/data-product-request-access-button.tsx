@@ -38,10 +38,10 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
                     user_id: user.id,
                     role_id: role_id,
                 }).unwrap();
-                dispatchMessage({ content: t('User has requested access to the data product'), type: 'success' });
+                dispatchMessage({ content: t('User has requested access to the Data Product'), type: 'success' });
                 handleClose();
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to request access to the data product'), type: 'error' });
+                dispatchMessage({ content: t('Failed to request access to the Data Product'), type: 'error' });
             }
         },
         [requestAccessToDataProduct, dataProductId, t, handleClose],

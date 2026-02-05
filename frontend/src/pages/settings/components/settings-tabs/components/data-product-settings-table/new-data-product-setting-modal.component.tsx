@@ -48,31 +48,31 @@ const createText = (t: TFunction, scope: DataProductSettingScope, mode: Mode): S
     if (mode === 'create') {
         if (scope === 'dataproduct') {
             return {
-                title: t('Create New Data Product Setting'),
-                successMessage: t('Data product setting created successfully'),
-                errorMessage: t('Failed to create data product setting'),
+                title: t('Create new Data Product setting'),
+                successMessage: t('Data Product setting created successfully'),
+                errorMessage: t('Failed to create Data Product setting'),
                 submitButtonText: t('Create'),
             };
         }
         return {
-            title: t('Create New Output port Setting'),
-            successMessage: t('Output port setting created successfully'),
-            errorMessage: t('Failed to create output port setting'),
+            title: t('Create new Output Port setting'),
+            successMessage: t('Output Port setting created successfully'),
+            errorMessage: t('Failed to create Output Port setting'),
             submitButtonText: t('Create'),
         };
     }
     if (scope === 'dataproduct') {
         return {
-            title: t('Update Data Product Setting'),
-            successMessage: t('Data product setting updated successfully'),
-            errorMessage: t('Failed to update data product setting'),
+            title: t('Update Data Product setting'),
+            successMessage: t('Data Product setting updated successfully'),
+            errorMessage: t('Failed to update Data Product setting'),
             submitButtonText: t('Update'),
         };
     }
     return {
-        title: t('Update Output port Setting'),
-        successMessage: t('Output port setting updated successfully'),
-        errorMessage: t('Failed to update output port setting'),
+        title: t('Update Output Port setting'),
+        successMessage: t('Output Port setting updated successfully'),
+        errorMessage: t('Failed to update Output Port setting'),
         submitButtonText: t('Update'),
     };
 };

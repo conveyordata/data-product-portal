@@ -97,7 +97,7 @@ export function PendingItem({ pendingAction }: Props) {
                     description: (
                         <Typography.Text>
                             <Trans t={t}>
-                                Request for read access from the data product{' '}
+                                Request for read access from the Data Product{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
                                     to={createDataProductIdPath(pendingAction.data_product_id)}
@@ -112,14 +112,14 @@ export function PendingItem({ pendingAction }: Props) {
                             <Justification justification={pendingAction.justification} />
                             <Typography.Text>
                                 <Trans t={t}>
-                                    Accepting will grant the data product read access on the{' '}
+                                    Accepting will grant the Data Product read access on the{' '}
                                     <Link
                                         onClick={(e) => e.stopPropagation()}
                                         to={createDatasetIdPath(pendingAction.dataset_id)}
                                     >
                                         {pendingAction.dataset.name}
                                     </Link>{' '}
-                                    output port.
+                                    Output Port.
                                 </Trans>
                             </Typography.Text>
                         </Flex>
@@ -135,7 +135,7 @@ export function PendingItem({ pendingAction }: Props) {
                     description: (
                         <Typography.Text strong>
                             <Trans t={t}>
-                                Request for the creation of a link coming from the technical asset{' '}
+                                Request for the creation of a link coming from the Technical Asset{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
                                     to={createDataOutputIdPath(
@@ -151,14 +151,14 @@ export function PendingItem({ pendingAction }: Props) {
                     message: (
                         <Typography.Text>
                             <Trans t={t}>
-                                Accepting will create a link from the technical asset to the{' '}
+                                Accepting will create a link from the Technical Asset to the{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
                                     to={createDatasetIdPath(pendingAction.dataset_id)}
                                 >
                                     {pendingAction.dataset.name}
                                 </Link>{' '}
-                                output port.
+                                Output Port.
                             </Trans>
                         </Typography.Text>
                     ),
@@ -188,7 +188,7 @@ export function PendingItem({ pendingAction }: Props) {
                                 >
                                     {pendingAction.data_product.name}
                                 </Link>{' '}
-                                data product.
+                                Data Product.
                             </Trans>
                         </Typography.Text>
                     ),

@@ -92,7 +92,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                 ),
                 children: (
                     <Typography.Paragraph
-                        style={{ height: '44px' }} // To keep 2 rows for the data product height
+                        style={{ height: '44px' }} // To keep 2 rows for the Data Product height
                         ellipsis={{ rows: 2, tooltip: true }}
                     >
                         <Link to={createDataProductIdPath(dataset.data_product_id)} className={styles.link}>

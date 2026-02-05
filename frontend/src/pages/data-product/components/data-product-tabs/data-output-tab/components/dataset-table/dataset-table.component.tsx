@@ -72,7 +72,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
                 </Flex>
 
                 <Searchbar
-                    placeholder={t('Search output ports by name or description')}
+                    placeholder={t('Search Output Ports by name or description')}
                     formItemProps={{ initialValue: '', className: styles.searchBar }}
                     form={searchForm}
                 />
@@ -85,7 +85,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
             {filteredDatasets.length === 0 && (
                 <Flex justify={'center'}>
                     <Typography.Text type="secondary">
-                        {searchTerm ? t('No output ports found matching your search') : t('No output ports found')}
+                        {searchTerm ? t('No Output Ports found matching your search') : t('No Output Ports found')}
                     </Typography.Text>
                 </Flex>
             )}

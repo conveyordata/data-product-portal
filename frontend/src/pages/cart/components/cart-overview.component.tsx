@@ -22,10 +22,10 @@ function CartOverviewItem({ dataset, overlapping, selectedDataProductId }: CartO
 
     const warningTooltip = useMemo(() => {
         if (selectedDataProductId === dataset.data_product_id) {
-            return t('You can not request access to your own output ports');
+            return t('You can not request access to your own Output Ports');
         }
         if (overlapping) {
-            return t('The selected data product already has access, or an access request open for this output port');
+            return t('The selected Data Product already has access, or an access request open for this Output Port');
         }
         return null;
     }, [selectedDataProductId, dataset.data_product_id, overlapping, t]);
@@ -81,7 +81,7 @@ function CartOverviewItem({ dataset, overlapping, selectedDataProductId }: CartO
             items={[
                 {
                     key: 'data product',
-                    label: <Typography.Text strong>{t('Data product')}</Typography.Text>,
+                    label: <Typography.Text strong>{t('Data Product')}</Typography.Text>,
                     children: (
                         <Link to={createDataProductIdPath(dataset.data_product_id)} target={'_blank'}>
                             <Typography.Text>{dataset.data_product_name}</Typography.Text>
@@ -122,7 +122,7 @@ export const CartOverview = ({
             <List
                 footer={
                     <Flex justify={'flex-end'}>
-                        {t('{{count}} output ports', {
+                        {t('{{ count }} Output Ports', {
                             count: cartDatasets?.length || 0,
                         })}
                     </Flex>
@@ -130,7 +130,7 @@ export const CartOverview = ({
                 style={{ width: '100%' }}
                 loading={loading}
                 dataSource={cartDatasets}
-                locale={{ emptyText: t('No output ports in cart, go to the marketplace to add new output ports') }}
+                locale={{ emptyText: t('No Output Ports in cart, go to the marketplace to add new Output Ports') }}
                 rowKey={(ds) => ds.id}
                 renderItem={(dataset) => (
                     <List.Item>

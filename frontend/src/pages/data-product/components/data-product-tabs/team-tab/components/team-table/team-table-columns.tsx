@@ -142,7 +142,7 @@ export const getDataProductUsersTableColumns = ({
                     ) : (
                         <Popconfirm
                             title={t('Remove User')}
-                            description={t('Are you sure you want to remove {{name}} from the data product?', {
+                            description={t('Are you sure you want to remove {{name}} from the Data Product?', {
                                 name: user.first_name,
                             })}
                             onConfirm={() => onRemoveUserAccess(id)}

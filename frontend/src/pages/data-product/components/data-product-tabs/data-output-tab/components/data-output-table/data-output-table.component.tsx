@@ -73,7 +73,7 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                 </Flex>
 
                 <Searchbar
-                    placeholder={t('Search technical assets by name or namespace')}
+                    placeholder={t('Search Technical Assets by name or namespace')}
                     formItemProps={{ initialValue: '', className: styles.searchBar }}
                     form={searchForm}
                 />
@@ -93,8 +93,8 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                 <Flex justify={'center'}>
                     <Typography.Text type="secondary">
                         {searchTerm
-                            ? t('No technical assets found matching your search')
-                            : t('No technical assets found')}
+                            ? t('No Technical Assets found matching your search')
+                            : t('No Technical Assets found')}
                     </Typography.Text>
                 </Flex>
             )}

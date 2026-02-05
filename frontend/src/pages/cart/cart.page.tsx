@@ -162,7 +162,7 @@ function Cart() {
             submitFormIssues.push({
                 key: 'overlappingDatasetIds',
                 value: t(
-                    'There are currently {{count}} output ports in the cart, for which the selected Data product already has access, or has an access request.',
+                    'There are currently {{count}} Output Ports in the cart, for which the selected Data Product already has access, or has an access request.',
                     {
                         count: overlappingDatasetIds.length,
                     },
@@ -173,7 +173,7 @@ function Cart() {
             submitFormIssues.push({
                 key: 'selectedProductDatasetsInCart',
                 value: t(
-                    'There are currently {{count}} output ports, that are part of your selected Data product, please remove them.',
+                    'There are currently {{count}} Output Ports, that are part of your selected Data Product, please remove them.',
                     {
                         count: selectedProductDatasetsInCart.length,
                     },
@@ -207,17 +207,17 @@ function Cart() {
                         >
                             <Form.Item<CartFormData>
                                 name="dataProductId"
-                                label={t('Data product')}
-                                rules={[{ required: true, message: t('Please select a data product') }]}
+                                label={t('Data Product')}
+                                rules={[{ required: true, message: t('Please select a Data Product') }]}
                             >
                                 <Select
-                                    showSearch
-                                    placeholder={t('Select a data product')}
+                                    placeholder={t('Select a Data Product')}
                                     options={dataProductOptions}
                                     loading={isFetchingUserDataProducts}
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
+                                    showSearch={{
+                                        filterOption: (input, option) =>
+                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+                                    }}
                                     popupRender={(menu) => (
                                         <>
                                             <Button
@@ -226,7 +226,7 @@ function Cart() {
                                                 style={{ width: '100%' }}
                                                 onClick={createNewDataProduct}
                                             >
-                                                {t('Create new data product')}
+                                                {t('Create new Data Product')}
                                             </Button>
                                             <Divider style={{ margin: '8px 0' }} />
                                             {menu}
@@ -255,11 +255,11 @@ function Cart() {
                                 rules={[
                                     {
                                         required: true,
-                                        message: t('Please explain why you need access to these output ports'),
+                                        message: t('Please explain why you need access to these Output Ports'),
                                     },
                                 ]}
                             >
-                                <TextArea rows={4} placeholder="Explain why you need access to these output ports" />
+                                <TextArea rows={4} placeholder="Explain why you need access to these Output Ports" />
                             </Form.Item>
                             <Form.Item label={null}>
                                 <Flex gap={'small'}>

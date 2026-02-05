@@ -93,9 +93,9 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
             case Scope.GLOBAL:
                 return t('Delete {{ name }} global role', { name: role.name });
             case Scope.DATA_PRODUCT:
-                return t('Delete {{ name }} data product role', { name: role.name });
+                return t('Delete {{ name }} Data Product role', { name: role.name });
             case Scope.DATASET:
-                return t('Delete {{ name }} output port role', { name: role.name });
+                return t('Delete {{ name }} Output Port role', { name: role.name });
         }
     }, [role, t]);
 
@@ -112,7 +112,7 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
             case Scope.DATA_PRODUCT:
                 return (
                     <>
-                        <Text>{t('Please have a look at the following data products:')}</Text>
+                        <Text>{t('Please have a look at the following Data Products:')}</Text>
                         <List
                             bordered
                             dataSource={uniqueOrderedWithCount(
@@ -132,7 +132,7 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
             case Scope.DATASET:
                 return (
                     <>
-                        <Text>{t('Please have a look at the following output ports:')}</Text>
+                        <Text>{t('Please have a look at the following Output Ports:')}</Text>
                         <List
                             bordered
                             dataSource={uniqueOrderedWithCount(

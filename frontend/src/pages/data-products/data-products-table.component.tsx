@@ -74,7 +74,7 @@ export function DataProductsTable() {
         <SearchPage
             onChange={onSearch}
             title={t('Data Products')}
-            searchPlaceholder={t('Search data products by name')}
+            searchPlaceholder={t('Search Data Products by name')}
             actions={
                 <Flex justify={'space-between'}>
                     <RoleFilter mode={'data_products'} selectedRole={selectedRole} onRoleChange={handleRoleChange} />
@@ -98,12 +98,11 @@ export function DataProductsTable() {
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} data products', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} Data Products', {
                             range0: range[0],
                             range1: range[1],
-                            total: total,
+                            count: total,
                         }),
-                    // position: ['bottomRight'],
                 }}
                 rowKey={(record) => record.id}
                 loading={isFetching}

@@ -44,7 +44,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
             });
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to remove technical asset'),
+                content: t('Failed to remove Technical Asset'),
                 type: 'error',
             });
         }
@@ -55,12 +55,12 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
             try {
                 await unlinkDataset({ dataOutputId: dataOutput.id, datasetId, datasetLinkId }).unwrap();
                 dispatchMessage({
-                    content: t('Output port unlinked successfully'),
+                    content: t('Output Port unlinked successfully'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to unlink output port'),
+                    content: t('Failed to unlink Output Port'),
                     type: 'error',
                 });
             }
@@ -100,7 +100,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
             return (
                 <Flex vertical>
                     {t(
-                        'Are you sure you want to delete this technical asset? This asset is still used in the following output ports:',
+                        'Are you sure you want to delete this Technical Asset? This asset is still used in the following Output Ports:',
                     )}
                     <List
                         size="small"
@@ -113,7 +113,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
             );
         }
         return t(
-            'Are you sure you want to delete this technical asset? This can have impact on downstream dependencies',
+            'Are you sure you want to delete this Technical Asset? This can have impact on downstream dependencies',
         );
     };
 
@@ -163,7 +163,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                             items={[
                                 {
                                     key: '1',
-                                    label: t('{{count}} linked output ports', {
+                                    label: t('{{count}} linked Output Ports', {
                                         count: dataOutput.dataset_links.length,
                                     }),
                                     /*    style: {

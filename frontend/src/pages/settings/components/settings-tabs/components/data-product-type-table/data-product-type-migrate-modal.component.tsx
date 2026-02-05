@@ -75,7 +75,7 @@ export function CreateDataProductTypeMigrateModal({ isOpen, onClose, migrateFrom
 
                 <Form.Item
                     name="toId"
-                    label={t('Migrate existing data products')}
+                    label={t('Migrate existing Data Products')}
                     rules={[{ required: true, message: t('Please provide a value') }]}
                 >
                     <Select>

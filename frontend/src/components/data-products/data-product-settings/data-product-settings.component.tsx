@@ -167,7 +167,7 @@ export function DataProductSettings({ id, scope }: Props) {
                             rules={[
                                 {
                                     required: true,
-                                    message: t('Please input the value'),
+                                    message: t('Please provide the value'),
                                 },
                             ]}
                         >

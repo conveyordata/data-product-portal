@@ -34,11 +34,11 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
             try {
                 await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
                 dispatchMessage({
-                    content: t('Output port {{name}} has been removed from technical asset', { name }),
+                    content: t('Output Port {{name}} has been removed from Technical Asset', { name }),
                     type: 'success',
                 });
             } catch (error) {
-                console.error('Failed to remove dataset from technical asset', error);
+                console.error('Failed to remove dataset from Technical Asset', error);
             }
         },
         [dataOutputId, removeDatasetFromDataOutput, t],
@@ -49,7 +49,7 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
             try {
                 await removeDatasetFromDataOutput({ datasetId, dataOutputId }).unwrap();
                 dispatchMessage({
-                    content: t('Request to link output port {{name}} has been cancelled', { name }),
+                    content: t('Request to link Output Port {{name}} has been cancelled', { name }),
                     type: 'success',
                 });
             } catch (error) {
@@ -60,13 +60,13 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
     );
 
     const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');
-    const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Output port');
+    const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Output Port');
     const popupDescription =
         status === DecisionStatus.Pending
-            ? t('Are you sure you want to cancel the request to link {{name}} to the technical asset?', {
+            ? t('Are you sure you want to cancel the request to link {{name}} to the Technical Asset?', {
                   name: dataset.name,
               })
-            : t('Are you sure you want to remove {{name}} from the technical asset?', {
+            : t('Are you sure you want to remove {{name}} from the Technical Asset?', {
                   name: dataset.name,
               });
     const onConfirm =

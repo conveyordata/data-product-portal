@@ -493,13 +493,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                     name: 'Approve Data Product Access',
-                    description: 'Allows the role to accept or reject a read access request from a data product',
+                    description: 'Allows the role to accept or reject a read access request from a Data Product',
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
                     name: 'Revoke Data Product Access',
-                    description: 'Allows the role to revoke read access from a data product again',
+                    description: 'Allows the role to revoke read access from a Data Product again',
                 },
                 {
                     type: 'Group',
@@ -516,7 +516,7 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__UPDATE_DATA_QUALITY,
                     name: 'Insert data quality results',
-                    description: 'Allows inserting data quality results for an output port',
+                    description: 'Allows inserting data quality results for an Output Port',
                 },
             ];
             break;

@@ -86,10 +86,10 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
                     placement: ['topEnd'],
                     className: styles.pagination,
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} history items', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} history items', {
                             range0: range[0],
                             range1: range[1],
-                            total: total,
+                            count: total,
                         }),
                 }}
             />

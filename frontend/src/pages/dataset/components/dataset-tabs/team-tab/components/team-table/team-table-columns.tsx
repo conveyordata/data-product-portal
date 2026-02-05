@@ -138,7 +138,7 @@ export const getDatasetTeamColumns = ({
                     ) : (
                         <Popconfirm
                             title={t('Remove User')}
-                            description={t('Are you sure you want to remove {{name}} from the output port?', {
+                            description={t('Are you sure you want to remove {{name}} from the Output Port?', {
                                 name: user.first_name,
                             })}
                             onConfirm={() => onRemoveUserAccess(id)}
