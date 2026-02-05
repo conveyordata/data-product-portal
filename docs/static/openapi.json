@@ -14801,9 +14801,6 @@
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct"
           }
         },
         "type": "object",
@@ -14817,8 +14814,7 @@
           "owner_id",
           "platform_id",
           "service_id",
-          "configuration",
-          "owner"
+          "configuration"
         ],
         "title": "DataOutput",
         "deprecated": true
@@ -15179,7 +15175,7 @@
             "$ref": "#/components/schemas/DecisionStatus"
           },
           "data_output": {
-            "$ref": "#/components/schemas/DataOutput"
+            "$ref": "#/components/schemas/app__data_products__output_ports__schema_response__DataOutput"
           }
         },
         "type": "object",
@@ -16135,6 +16131,142 @@
           "approved_by"
         ],
         "title": "DataProductOutputPortPendingAction"
+      },
+      "DataProductRoleAssignment": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Id"
+          },
+          "requested_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By Id"
+          },
+          "decided_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by",
+          "data_product_id",
+          "user_id",
+          "role_id",
+          "requested_by_id",
+          "decided_by_id"
+        ],
+        "title": "DataProductRoleAssignment"
       },
       "DataProductRoleAssignmentPendingAction": {
         "properties": {
@@ -18927,7 +19059,7 @@
           "data_output": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/app__data_products__technical_assets__schema__DataOutput"
+                "$ref": "#/components/schemas/DataOutput"
               },
               {
                 "type": "null"
@@ -19930,10 +20062,10 @@
                 "items": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/app__authorization__role_assignments__data_product__schema__RoleAssignment"
+                      "$ref": "#/components/schemas/DataProductRoleAssignment"
                     },
                     {
-                      "$ref": "#/components/schemas/RoleAssignment"
+                      "$ref": "#/components/schemas/OutputPortRoleAssignment"
                     }
                   ]
                 },
@@ -20504,6 +20636,142 @@
           "query_count"
         ],
         "title": "OutputPortQueryStatsUpdate"
+      },
+      "OutputPortRoleAssignment": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested On"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided On"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Id"
+          },
+          "requested_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By Id"
+          },
+          "decided_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port",
+          "user",
+          "role",
+          "decision",
+          "requested_on",
+          "requested_by",
+          "decided_on",
+          "decided_by",
+          "output_port_id",
+          "user_id",
+          "role_id",
+          "requested_by_id",
+          "decided_by_id"
+        ],
+        "title": "OutputPortRoleAssignment"
       },
       "OutputPortRoleAssignmentResponse": {
         "properties": {
@@ -21106,142 +21374,6 @@
           "prototype"
         ],
         "title": "Role"
-      },
-      "RoleAssignment": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          },
-          "requested_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested By Id"
-          },
-          "decided_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "output_port",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by",
-          "output_port_id",
-          "user_id",
-          "role_id",
-          "requested_by_id",
-          "decided_by_id"
-        ],
-        "title": "RoleAssignment"
       },
       "RoleAssignmentOld": {
         "properties": {
@@ -22941,142 +23073,6 @@
         ],
         "title": "ValidationError"
       },
-      "app__authorization__role_assignments__data_product__schema__RoleAssignment": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          },
-          "requested_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested By Id"
-          },
-          "decided_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by",
-          "data_product_id",
-          "user_id",
-          "role_id",
-          "requested_by_id",
-          "decided_by_id"
-        ],
-        "title": "RoleAssignment"
-      },
       "app__data_products__output_port_technical_assets_link__schema_response__DataOutput": {
         "properties": {
           "id": {
@@ -23168,7 +23164,7 @@
         "title": "DataOutput",
         "deprecated": true
       },
-      "app__data_products__technical_assets__schema__DataOutput": {
+      "app__data_products__output_ports__schema_response__DataOutput": {
         "properties": {
           "id": {
             "type": "string",
@@ -23237,6 +23233,9 @@
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
             }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/DataProduct"
           }
         },
         "type": "object",
@@ -23250,7 +23249,8 @@
           "owner_id",
           "platform_id",
           "service_id",
-          "configuration"
+          "configuration",
+          "owner"
         ],
         "title": "DataOutput",
         "deprecated": true
