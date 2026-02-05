@@ -520,8 +520,8 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
             ]
 
             return {
-                "data_product": GetDataProductsResponseItem.model_validate(
-                    DataProductsGet.model_validate(data_product).convert()
+                "data_product": DataProductGet.model_validate(
+                    data_product
                 ).model_dump(),
                 "analytics": {
                     "datasets_count": len(related_datasets),
