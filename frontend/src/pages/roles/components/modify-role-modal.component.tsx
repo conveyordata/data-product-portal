@@ -23,9 +23,9 @@ export function ModifyRoleModal({ role, isOpen, onClose }: Props) {
             case Scope.GLOBAL:
                 return t('Update {{ name }} global role', { name: role.name });
             case Scope.DATA_PRODUCT:
-                return t('Update {{ name }} data product role', { name: role.name });
+                return t('Update {{ name }} Data Product role', { name: role.name });
             case Scope.DATASET:
-                return t('Update {{ name }} output port role', { name: role.name });
+                return t('Update {{ name }} Output Port role', { name: role.name });
         }
     }, [role, t]);
 

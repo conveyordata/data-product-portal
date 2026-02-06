@@ -10,7 +10,7 @@ import { usePostHog } from '@posthog/react';
 import type { TourProps } from 'antd';
 import { Badge, Flex, Tabs, Tour, Typography } from 'antd';
 import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
@@ -155,29 +155,29 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const steps: TourProps['steps'] = useMemo(() => {
         return [
             {
-                title: t('Your first data product!'),
+                title: t('Your first Data Product!'),
                 description: t(
-                    'Congratulations on creating your first data product! This tour will introduce you to the key features that will help you manage and improve your data product effectively.',
+                    'Congratulations on creating your first Data Product! This tour will introduce you to the key features that will help you manage and improve your Data Product effectively.',
                 ),
             },
             {
                 title: t('Provide About'),
                 description: t(
-                    'The About page of your data product functions as a wiki page. Any relevant information about the data product can be documented here for easy reference by team members and stakeholders.',
+                    'The About page of your Data Product functions as a wiki page. Any relevant information about the Data Product can be documented here for easy reference by team members and stakeholders.',
                 ),
                 target: () => aboutRef.current,
             },
             {
                 title: t('Register an Input Port'),
                 description: t(
-                    'This tab lists the input ports for your data product. You can request access to additional input ports here.',
+                    'This tab lists the Input Ports for your Data Product. You can request access to additional Input Ports here.',
                 ),
                 target: () => inputPortRef.current,
             },
             {
                 title: t('Register an Output Port'),
                 description: t(
-                    'Define the output ports for your data product and populate them with technical assets by dragging and dropping. Output ports will automatically show up in the marketplace.',
+                    'Define the Output Ports for your Data Product and populate them with Technical Assets by dragging and dropping. Output Ports will automatically show up in the marketplace.',
                 ),
                 target: () => outputPortRef.current,
             },
@@ -189,11 +189,11 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 target: () => teamRef.current,
             },
             {
-                title: t('🎉 You have finished the tour! 🎉'),
+                title: `🎉 ${t('You have finished the tour!')} 🎉`,
                 description: (
                     <Typography>
                         <Typography.Paragraph>
-                            {t('You are all set to start managing your data product!')}
+                            {t('You are all set to start managing your Data Product!')}
                         </Typography.Paragraph>
                         <Paragraph>
                             {t('We have shown you the main features, but feel free to explore further on your own.')}
@@ -202,17 +202,23 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                             {t('With what you have learned you can:')}
                             <ul>
                                 <li>{t('Write a comprehensive about page.')}</li>
-                                <li>{t('Register input ports to bring data into your data product.')}</li>
-                                <li>{t('Define output ports to expose data from your data product.')}</li>
+                                <li>{t('Register Input Ports to bring data into your Data Product.')}</li>
+                                <li>{t('Define Output Ports to expose data from your Data Product.')}</li>
                                 <li>{t('Set up your team to manage access and collaboration.')}</li>
                             </ul>
                         </Paragraph>
                         <Paragraph>
-                            {t('If there are some concepts you are unsure about, please refer to our ')}{' '}
-                            <Link target="_blank" rel="noopener noreferrer" href="https://docs.dataproductportal.com">
-                                {t('documentation')}
-                            </Link>{' '}
-                            {t(' or reach out to support.')}
+                            <Trans t={t}>
+                                If there are some concepts you are unsure about, please refer to our{' '}
+                                <Link
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    href="https://docs.dataproductportal.com"
+                                >
+                                    documentation
+                                </Link>{' '}
+                                or reach out to support.
+                            </Trans>
                         </Paragraph>
                     </Typography>
                 ),

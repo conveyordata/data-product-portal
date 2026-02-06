@@ -30,7 +30,7 @@ export function SearchSuggestions({ suggestions }: Props) {
                     <Carousel autoplay dots={false} dotPlacement={'start'}>
                         {suggestions.map((item) => (
                             <Text strong key={item}>
-                                {t(item)}
+                                {item}
                             </Text>
                         ))}
                     </Carousel>

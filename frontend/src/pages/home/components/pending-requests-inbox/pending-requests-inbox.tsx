@@ -100,10 +100,10 @@ export function PendingRequestsInbox() {
                         size="small"
                         className={styles.pagination}
                         showTotal={(total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{total}} pending requests', {
+                            t('Showing {{range0}}-{{range1}} of {{count}} pending requests', {
                                 range0: range[0],
                                 range1: range[1],
-                                total: total,
+                                count: total,
                             })
                         }
                     />

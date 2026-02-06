@@ -85,7 +85,7 @@ export function DataProduct() {
                         {canEdit && (
                             <CircleIconButton
                                 icon={<EditOutlined />}
-                                tooltip={t('Edit data product')}
+                                tooltip={t('Edit Data Product')}
                                 onClick={navigateToEditPage}
                             />
                         )}
@@ -98,7 +98,7 @@ export function DataProduct() {
                 </Flex>
                 {/* Main content */}
                 <Flex className={styles.mainContent}>
-                    {/* Data product description */}
+                    {/* Data Product description */}
                     <Flex vertical className={styles.overview}>
                         <DataProductDescription
                             lifecycle={dataProduct.lifecycle}

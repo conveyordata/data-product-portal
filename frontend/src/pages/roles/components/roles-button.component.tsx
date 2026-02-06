@@ -18,9 +18,9 @@ export function CreateRoleButton({ scope }: RolesButtonProps) {
             case Scope.GLOBAL:
                 return t('Create new global role');
             case Scope.DATA_PRODUCT:
-                return t('Create new data product role');
+                return t('Create new Data Product role');
             case Scope.DATASET:
-                return t('Create new output port role');
+                return t('Create new Output Port role');
             default:
                 throw new Error('Invalid scope');
         }

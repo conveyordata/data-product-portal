@@ -49,10 +49,10 @@ export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
                     placement: ['topEnd'],
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} Output Ports', {
                             range0: range[0],
                             range1: range[1],
-                            total: total,
+                            count: total,
                         }),
                     className: styles.pagination,
                 }}

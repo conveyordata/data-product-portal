@@ -71,7 +71,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
                 if (!dataProduct) return;
 
                 await deleteRoleAssignment(id).unwrap();
-                dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
+                dispatchMessage({ content: t('User access to Data Product has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
             }
@@ -158,10 +158,10 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
                     placement: ['topEnd'],
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} team members', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} team members', {
                             range0: range[0],
                             range1: range[1],
-                            total: total,
+                            count: total,
                         }),
                     className: styles.pagination,
                 }}

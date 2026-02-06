@@ -93,7 +93,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
             await Promise.all(linkPromises);
 
             dispatchMessage({
-                content: t('{{count}} technical assets linked successfully', { count: selectedOutputs.size }),
+                content: t('{{count}} Technical Assets linked successfully', { count: selectedOutputs.size }),
                 type: 'success',
             });
 
@@ -101,7 +101,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
             onClose();
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to link technical assets'),
+                content: t('Failed to link Technical Assets'),
                 type: 'error',
             });
         }
@@ -109,7 +109,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
 
     return (
         <Modal
-            title={t('Link technical assets to {{name}}', { name: datasetName })}
+            title={t('Link Technical Assets to {{name}}', { name: datasetName })}
             open
             onCancel={onClose}
             width={600}
@@ -130,14 +130,14 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
         >
             <Searchbar
                 form={searchForm}
-                placeholder={t('Search technical assets')}
+                placeholder={t('Search Technical Assets')}
                 formItemProps={{ initialValue: '' }}
             />
 
             {filteredDataOutputs.length > 0 && (
                 <Flex justify="space-between" align="center">
                     <Typography.Text type="secondary">
-                        {t('{{count}} available technical assets', { count: filteredDataOutputs.length })}
+                        {t('{{count}} available Technical Assets', { count: filteredDataOutputs.length })}
                     </Typography.Text>
                     <Button type="link" onClick={handleSelectAll}>
                         {selectedOutputs.size === filteredDataOutputs.length ? t('Deselect All') : t('Select All')}
@@ -152,14 +152,14 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
                     size: 'small',
                     position: 'bottom',
                     showTotal: (total: number, range: [number, number]) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} Technical Assets', {
                             range0: range[0],
                             range1: range[1],
-                            total: total,
+                            count: total,
                         }),
                     onChange: handleCurrentPageChange,
                 }}
-                locale={{ emptyText: t('No technical assets available') }}
+                locale={{ emptyText: t('No Technical Assets available') }}
                 renderItem={(output) => (
                     <List.Item>
                         <Flex align="center" gap={12} style={{ width: '100%' }}>

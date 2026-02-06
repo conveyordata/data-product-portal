@@ -49,9 +49,9 @@ export function DataProductSettingsTable({ scope }: Props) {
         async (setting: DataProductSettingsGetItem) => {
             try {
                 await onRemoveDataProductSetting(setting.id);
-                dispatchMessage({ content: t('Data product lifecycle removed successfully'), type: 'success' });
+                dispatchMessage({ content: t('Data Product lifecycle removed successfully'), type: 'success' });
             } catch (_) {
-                dispatchMessage({ content: t('Could not remove data product lifecycle'), type: 'error' });
+                dispatchMessage({ content: t('Could not remove Data Product lifecycle'), type: 'error' });
             }
         },
         [t, onRemoveDataProductSetting],
@@ -72,7 +72,7 @@ export function DataProductSettingsTable({ scope }: Props) {
             <Flex justify={'space-between'} align={'center'}>
                 <Typography.Title level={3}>{t('Custom Settings')}</Typography.Title>
                 <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                    {t('Add Custom Setting')}
+                    {t('Add custom setting')}
                 </Button>
             </Flex>
             <Table<DataProductSettingsGetItem>

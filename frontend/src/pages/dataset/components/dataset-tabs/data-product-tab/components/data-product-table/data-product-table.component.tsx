@@ -62,12 +62,12 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
             try {
                 await removeDatasetFromDataProduct({ datasetId, dataProductId, datasetLinkId }).unwrap();
                 dispatchMessage({
-                    content: t('Output port {{name}} has been removed from data product', { name }),
+                    content: t('Output Port {{name}} has been removed from Data Product', { name }),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to remove output port from data product'),
+                    content: t('Failed to remove Output Port from Data Product'),
                     type: 'error',
                 });
             }
@@ -111,10 +111,10 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
                 placement: ['topEnd'],
                 size: 'small',
                 showTotal: (total, range) =>
-                    t('Showing {{range0}}-{{range1}} of {{total}} data products', {
+                    t('Showing {{range0}}-{{range1}} of {{count}} Data Products', {
                         range0: range[0],
                         range1: range[1],
-                        total: total,
+                        count: total,
                     }),
                 className: styles.pagination,
             }}

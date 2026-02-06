@@ -44,12 +44,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await approveDataProductLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Output port request has been successfully approved'),
+                    content: t('Output Port request has been successfully approved'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to approve data product output port link'),
+                    content: t('Failed to approve Data Product Output Port link'),
                     type: 'error',
                 });
             }
@@ -62,12 +62,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await rejectDataProductLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Output port access request has been successfully rejected'),
+                    content: t('Output Port access request has been successfully rejected'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to reject data product output port link'),
+                    content: t('Failed to reject Data Product Output Port link'),
                     type: 'error',
                 });
             }
@@ -80,12 +80,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await approveDataOutputLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Output port request has been successfully approved'),
+                    content: t('Output Port request has been successfully approved'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to approve technical asset output port link'),
+                    content: t('Failed to approve Technical Asset Output Port link'),
                     type: 'error',
                 });
             }
@@ -98,12 +98,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await rejectDataOutputLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Output port access request has been successfully rejected'),
+                    content: t('Output Port access request has been successfully rejected'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to reject technical asset output port link'),
+                    content: t('Failed to reject Technical Asset Output Port link'),
                     type: 'error',
                 });
             }
@@ -120,9 +120,9 @@ export const usePendingActionHandlers = () => {
                         decision: DecisionStatus.Approved,
                     },
                 }).unwrap();
-                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
+                dispatchMessage({ content: t('User has been granted access to the Data Product'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
+                dispatchMessage({ content: t('Failed to grant user access to the Data Product'), type: 'error' });
             }
         },
         [decideDataProductRoleAssignment, t],
@@ -137,9 +137,9 @@ export const usePendingActionHandlers = () => {
                         decision: DecisionStatus.Denied,
                     },
                 }).unwrap();
-                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
+                dispatchMessage({ content: t('User access to the Data Product has been denied'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
+                dispatchMessage({ content: t('Failed to deny user access to the Data Product'), type: 'error' });
             }
         },
         [decideDataProductRoleAssignment, t],
@@ -154,9 +154,9 @@ export const usePendingActionHandlers = () => {
                         decision: DecisionStatus.Approved,
                     },
                 }).unwrap();
-                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
+                dispatchMessage({ content: t('User has been granted access to the Data Product'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
+                dispatchMessage({ content: t('Failed to grant user access to the Data Product'), type: 'error' });
             }
         },
         [decideDatasetRoleAssignment, t],
@@ -171,9 +171,9 @@ export const usePendingActionHandlers = () => {
                         decision: DecisionStatus.Denied,
                     },
                 }).unwrap();
-                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
+                dispatchMessage({ content: t('User access to the Data Product has been denied'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
+                dispatchMessage({ content: t('Failed to deny user access to the Data Product'), type: 'error' });
             }
         },
         [decideDatasetRoleAssignment, t],

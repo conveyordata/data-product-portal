@@ -1,5 +1,5 @@
 import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Typography } from 'antd';
-import { useCallback, useState } from 'react';
+import { type DragEvent, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
@@ -50,12 +50,12 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
         try {
             await removeDataset(dataset).unwrap();
             dispatchMessage({
-                content: t('Output port {{name}} has been successfully removed', { name: dataset.name }),
+                content: t('Output Port {{name}} has been successfully removed', { name: dataset.name }),
                 type: 'success',
             });
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to remove output port'),
+                content: t('Failed to remove Output Port'),
                 type: 'error',
             });
         }
@@ -67,12 +67,12 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
             try {
                 await unlinkDataset({ dataOutputId, datasetId: dataset.id }).unwrap();
                 dispatchMessage({
-                    content: t('Technical asset unlinked successfully'),
+                    content: t('Technical Asset unlinked successfully'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to unlink technical asset'),
+                    content: t('Failed to unlink Technical Asset'),
                     type: 'error',
                 });
             }
@@ -80,9 +80,9 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
         [unlinkDataset, dataset, t],
     );
 
-    const handleDragOver = (event: React.DragEvent) => {
+    const handleDragOver = (event: DragEvent) => {
         event.preventDefault();
-        // Check if the dragged technical asset is already linked to this dataset
+        // Check if the dragged Technical Asset is already linked to this dataset
         if (draggedDataOutputId && dataset) {
             const isAlreadyLinked = dataset.data_output_links?.some(
                 (link) => link.data_output.id === draggedDataOutputId,
@@ -118,7 +118,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
 
                 if (isAlreadyLinked) {
                     dispatchMessage({
-                        content: t('Technical asset {{name}} is already linked to this output port', {
+                        content: t('Technical Asset {{name}} is already linked to this Output Port', {
                             name: dragData.name,
                         }),
                         type: 'warning',
@@ -128,7 +128,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
 
                 const result = await linkDataset({ dataOutputId: dragData.id, datasetId: dataset.id }).unwrap();
                 dispatchMessage({
-                    content: t('Technical asset {{name}} linked to output port successfully', { name: dragData.name }),
+                    content: t('Technical Asset {{name}} linked to Output Port successfully', { name: dragData.name }),
                     type: 'success',
                 });
                 // TODO make this dependable on access rights
@@ -140,7 +140,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
             }
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to link technical asset to output port'),
+                content: t('Failed to link Technical Asset to Output Port'),
                 type: 'error',
             });
         }
@@ -194,7 +194,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                                     <Popconfirm
                                         title={t('Remove')}
                                         description={t(
-                                            'Are you sure you want to delete the output port? This can have impact on downstream dependencies',
+                                            'Are you sure you want to delete the Output Port? This can have impact on downstream dependencies',
                                         )}
                                         onConfirm={handleRemoveDataset}
                                         placement="topRight"
@@ -238,7 +238,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                             items={[
                                 {
                                     key: 0,
-                                    label: t('{{count}} linked technical assets', {
+                                    label: t('{{count}} linked Technical Assets', {
                                         count: dataset.data_output_links.length,
                                     }),
                                     children: (

@@ -127,7 +127,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     domain_id: values.domain_id,
                 };
                 const response = await createDataProduct(request).unwrap();
-                dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
+                dispatchMessage({ content: t('Data Product created successfully'), type: 'success' });
                 posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED);
 
                 if (fromMarketplace) {
@@ -140,7 +140,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 }
             } else if (mode === 'edit' && dataProductId) {
                 if (!canEdit) {
-                    dispatchMessage({ content: t('You are not allowed to edit this data product'), type: 'error' });
+                    dispatchMessage({ content: t('You are not allowed to edit this Data Product'), type: 'error' });
                     return;
                 }
 
@@ -158,14 +158,14 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     data_product_id: dataProductId,
                 }).unwrap();
 
-                dispatchMessage({ content: t('Data product updated successfully'), type: 'success' });
+                dispatchMessage({ content: t('Data Product updated successfully'), type: 'success' });
                 navigate(createDataProductIdPath(response.id));
             }
 
             form.resetFields();
         } catch (_e) {
             const errorMessage =
-                mode === 'edit' ? t('Failed to update data product') : t('Failed to create data product');
+                mode === 'edit' ? t('Failed to update Data Product') : t('Failed to create Data Product');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -187,11 +187,11 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         if (canDelete && currentDataProduct) {
             try {
                 await deleteDataProduct(currentDataProduct?.id).unwrap();
-                dispatchMessage({ content: t('Data product deleted successfully'), type: 'success' });
+                dispatchMessage({ content: t('Data Product deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Studio);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to delete data product, please try again later'),
+                    content: t('Failed to delete Data Product, please try again later'),
                     type: 'error',
                 });
             }
@@ -259,11 +259,11 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             <Form.Item<DataProductCreateFormSchema>
                 name={'name'}
                 label={t('Name')}
-                tooltip={t('The name of your data product')}
+                tooltip={t('The name of your Data Product')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the data product'),
+                        message: t('Please provide the name of the Data Product'),
                     },
                 ]}
             >
@@ -271,7 +271,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             </Form.Item>
             <NamespaceFormItem
                 form={form}
-                tooltip={t('The namespace of the data product')}
+                tooltip={t('The namespace of the Data Product')}
                 max_length={namespaceLengthLimits?.max_length}
                 editToggleDisabled={mode === 'edit'}
                 canEditNamespace={canEditNamespace}
@@ -282,11 +282,11 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             <Form.Item<DataProductCreateFormSchema>
                 name={'owners'}
                 label={t('Owners')}
-                tooltip={t('The owners of the data product')}
+                tooltip={t('The owners of the Data Product')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select at least one owner for the data product'),
+                        message: t('Please select at least one owner for the Data Product'),
                     },
                 ]}
             >
@@ -305,7 +305,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the type of the data product'),
+                        message: t('Please select the type of the Data Product'),
                     },
                 ]}
             >
@@ -322,7 +322,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the status of the data product'),
+                        message: t('Please select the status of the Data Product'),
                     },
                 ]}
             >
@@ -342,7 +342,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the domain of the data product'),
+                        message: t('Please select the domain of the Data Product'),
                     },
                 ]}
             >
@@ -356,7 +356,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             <Form.Item<DataProductCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
-                    placeholder={t('Select data product tags')}
+                    placeholder={t('Select Data Product tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
@@ -365,11 +365,11 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             <Form.Item<DataProductCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the data product')}
+                tooltip={t('A description for the Data Product')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input a description of the data product'),
+                        message: t('Please provide a description for the Data Product'),
                     },
                     {
                         max: MAX_DESCRIPTION_INPUT_LENGTH,
@@ -384,7 +384,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     {mode !== 'create' && (
                         <Col>
                             <Popconfirm
-                                title={t('Are you sure you want to delete this data product?')}
+                                title={t('Are you sure you want to delete this Data Product?')}
                                 onConfirm={handleDeleteDataProduct}
                                 okText={t('Yes')}
                                 cancelText={t('No')}

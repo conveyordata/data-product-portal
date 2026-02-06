@@ -17,7 +17,7 @@ type Props = {
 
 export function ConfigurationSubForm({ form, configurationType, resultLabel, resultTooltip, children }: Props) {
     if (!configurationType) {
-        const errorMessage = 'Technical asset not configured correctly';
+        const errorMessage = 'Technical Asset not configured correctly';
         dispatchMessage({ content: errorMessage, type: 'error' });
     }
 

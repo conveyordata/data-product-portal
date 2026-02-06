@@ -137,14 +137,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         try {
             if (!platformsLoading) {
                 await createDataOutput({ id: dataProductId, dataOutput: values }).unwrap();
-                dispatchMessage({ content: t('Technical asset created successfully'), type: 'success' });
+                dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
                 navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
 
                 form.resetFields();
             }
         } catch (_e) {
-            const errorMessage = 'Failed to create technical asset';
+            const errorMessage = 'Failed to create Technical Asset';
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -249,11 +249,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
                 label={t('Name')}
-                tooltip={t('The name of your technical asset')}
+                tooltip={t('The name of your Technical Asset')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the technical asset'),
+                        message: t('Please provide the name of the Technical Asset'),
                     },
                 ]}
             >
@@ -261,7 +261,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <NamespaceFormItem
                 form={form}
-                tooltip={t('The namespace of the technical asset')}
+                tooltip={t('The namespace of the Technical Asset')}
                 max_length={namespaceLengthLimits?.max_length}
                 canEditNamespace={canEditNamespace}
                 toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
@@ -271,11 +271,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the technical asset')}
+                tooltip={t('A description for the Technical Asset')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input a description of the technical asset'),
+                        message: t('Please provide a description for the Technical Asset'),
                     },
                     {
                         max: MAX_DESCRIPTION_INPUT_LENGTH,
@@ -288,7 +288,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')} initialValue={[]}>
                 <Select
                     tokenSeparators={[',']}
-                    placeholder={t('Select technical asset tags')}
+                    placeholder={t('Select Technical Asset tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
