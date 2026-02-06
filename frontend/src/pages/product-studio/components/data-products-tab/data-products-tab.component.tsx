@@ -113,10 +113,16 @@ export function DataProductsTab() {
                         style={{ maxWidth: 400 }}
                     />
                     <Radio.Group value={showAllProducts} onChange={handleShowAllChange} optionType="button">
-                        <Radio.Button value={false}>{t('My Data Products')}</Radio.Button>
                         <Radio.Button value={true}>{t('All Data Products')}</Radio.Button>
+                        <Radio.Button value={false}>{t('My Data Products')}</Radio.Button>
                     </Radio.Group>
-                    <RoleFilter mode={'data_products'} selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
+                    {!showAllProducts && (
+                        <RoleFilter
+                            mode={'data_products'}
+                            selectedRoles={selectedRoles}
+                            onRoleChange={handleRoleChange}
+                        />
+                    )}
                 </Flex>
                 <Link
                     to={ApplicationPaths.DataProductNew}

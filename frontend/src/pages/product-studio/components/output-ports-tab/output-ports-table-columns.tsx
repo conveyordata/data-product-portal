@@ -87,11 +87,11 @@ export const getOutputPortTableColumns = ({
             width: '10%',
         },
         {
-            title: t('Usage'),
+            title: t('Consumers'),
             dataIndex: 'data_product_count',
             render: (count: number) => {
                 if (count === 0) {
-                    return <TableCellItem text={t('Not used')} />;
+                    return <TableCellItem text={t('No consumers yet')} />;
                 }
 
                 return <TableCellItem icon={<DataProductOutlined />} text={t('{{count}} products', { count })} />;

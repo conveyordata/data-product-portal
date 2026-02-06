@@ -136,10 +136,12 @@ export function OutputPortsTab() {
                         style={{ maxWidth: 400 }}
                     />
                     <Radio.Group value={showAllPorts} onChange={handleShowAllChange} optionType="button">
-                        <Radio.Button value={false}>{t('My Output Ports')}</Radio.Button>
                         <Radio.Button value={true}>{t('All Output Ports')}</Radio.Button>
+                        <Radio.Button value={false}>{t('My Output Ports')}</Radio.Button>
                     </Radio.Group>
-                    <RoleFilter mode={'datasets'} selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
+                    {!showAllPorts && (
+                        <RoleFilter mode={'datasets'} selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
+                    )}
                 </Flex>
             </Flex>
 
