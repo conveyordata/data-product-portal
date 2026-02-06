@@ -20,7 +20,7 @@ class TestPluginEndpoints:
         # Verify response structure
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 5
+        assert len(data["plugins"]) == 6
         assert all(
             plugin.get("not_configured", False) is True for plugin in data["plugins"]
         )
