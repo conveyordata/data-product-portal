@@ -12,10 +12,10 @@ from app.authorization.role_assignments.global_.schema import (
     DecideGlobalRoleAssignment,
     DeleteGlobalRoleAssignmentResponse,
     GlobalRoleAssignmentResponse,
-    ListRoleAssignmentsResponse,
+    ListGlobalRoleAssignmentsResponse,
     ModifyGlobalRoleAssignment,
     RoleAssignmentRequest,
-    UpdateRoleAssignment,
+    UpdateGlobalRoleAssignment,
 )
 from app.authorization.role_assignments.global_.service import RoleAssignmentService
 from app.authorization.roles import ADMIN_UUID
@@ -130,8 +130,8 @@ def list_global_role_assignments(
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
-) -> ListRoleAssignmentsResponse:
-    return ListRoleAssignmentsResponse(
+) -> ListGlobalRoleAssignmentsResponse:
+    return ListGlobalRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
             user_id=user_id, role_id=role_id
         )
@@ -180,7 +180,7 @@ def decide_global_role_assignment(
         )
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision), actor=user
+        UpdateGlobalRoleAssignment(id=id, decision=request.decision), actor=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -226,7 +226,7 @@ def modify_global_role_assignment(
 
     role_id = _resolve_role_id(request.role_id)
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=role_id), actor=user
+        UpdateGlobalRoleAssignment(id=id, role_id=role_id), actor=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:

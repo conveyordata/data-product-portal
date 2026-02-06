@@ -7,12 +7,12 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    DataOutputFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     RoleFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 
@@ -37,7 +37,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
@@ -54,7 +54,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory()
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
@@ -71,7 +71,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
@@ -81,7 +81,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
 
     def test_request_data_output_link_private_dataset_no_access(self, client):
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
@@ -90,7 +90,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     def test_request_data_output_link_private_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(
             access_type=OutputPortAccessType.PRIVATE, data_product=data_product
         )
@@ -107,7 +107,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     def test_request_data_output_remove(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -131,7 +131,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     @pytest.mark.usefixtures("admin")
     def test_request_data_output_link_by_admin(self, client):
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
 
         ds = DatasetFactory(data_product=data_product)
 
@@ -255,7 +255,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        data_output = DataOutputFactory(owner=ds.data_product)
+        data_output = TechnicalAssetFactory(owner=ds.data_product)
         link = DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
 
         response = self.remove_data_output_dataset_link(client, link.id)
@@ -264,7 +264,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     @pytest.mark.usefixtures("admin")
     def test_remove_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
-        data_output = DataOutputFactory(owner=ds.data_product)
+        data_output = TechnicalAssetFactory(owner=ds.data_product)
         link = DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
 
         response = self.remove_data_output_dataset_link(client, link.id)
@@ -272,7 +272,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
 
     def test_request_dataset_link_with_invalid_dataset_id(self, client):
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         response = self.request_data_output_dataset_link(
             client, data_output.id, self.invalid_id
         )
@@ -300,7 +300,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     def test_get_pending_actions(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
@@ -333,7 +333,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
@@ -350,7 +350,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        technical_asset = DataOutputFactory(owner=ds.data_product)
+        technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         link = DataOutputDatasetAssociationFactory(
             dataset=ds, data_output=technical_asset
         )
@@ -399,7 +399,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     def test_history_event_created_on_unlink_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

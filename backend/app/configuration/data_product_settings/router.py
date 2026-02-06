@@ -106,7 +106,7 @@ def remove_data_product_setting(
 
 
 _router = router
-router = APIRouter(tags=["Configuration - Data product settings"])
+router = APIRouter(tags=["Configuration - Data Product settings"])
 router.include_router(_router, prefix="/data_product_settings", deprecated=True)
 router.include_router(_router, prefix="/v2/configuration/data_product_settings")
 

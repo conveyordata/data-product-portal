@@ -30,9 +30,9 @@ from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.namespace.validation import (
-    DataOutputNamespaceValidator,
     NamespaceValidator,
     NamespaceValidityType,
+    TechnicalAssetNamespaceValidator,
 )
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
@@ -60,7 +60,9 @@ from app.data_products.schema_response import (
     GetDataProductResponse,
     UpdateDataProductResponse,
 )
-from app.data_products.technical_assets.model import DataOutput as DataOutputModel
+from app.data_products.technical_assets.model import (
+    TechnicalAsset as TechnicalAssetModel,
+)
 from app.data_products.technical_assets.schema_response import DataOutputGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -75,7 +77,7 @@ class DataProductService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DataProductModel)
-        self.data_output_namespace_validator = DataOutputNamespaceValidator()
+        self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
 
     def get_input_ports(self, data_product_id: UUID) -> Sequence[DatasetLinks]:
         ensure_data_product_exists(data_product_id, self.db)
@@ -113,10 +115,10 @@ class DataProductService:
                 selectinload(DataProductModel.datasets).selectinload(DatasetModel.tags),
                 selectinload(DataProductModel.datasets).raiseload("*"),
                 selectinload(DataProductModel.data_outputs).selectinload(
-                    DataOutputModel.dataset_links
+                    TechnicalAssetModel.dataset_links
                 ),
                 selectinload(DataProductModel.data_outputs).selectinload(
-                    DataOutputModel.environment_configurations
+                    TechnicalAssetModel.environment_configurations
                 ),
             ],
         )
@@ -486,15 +488,15 @@ class DataProductService:
     def get_data_outputs(self, id: UUID) -> Sequence[DataOutputGet]:
         return (
             self.db.scalars(
-                select(DataOutputModel)
+                select(TechnicalAssetModel)
                 .options(
-                    selectinload(DataOutputModel.environment_configurations),
-                    selectinload(DataOutputModel.dataset_links)
+                    selectinload(TechnicalAssetModel.environment_configurations),
+                    selectinload(TechnicalAssetModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociation.dataset)
                     .selectinload(DatasetModel.tags)
                     .raiseload("*"),
                 )
-                .filter(DataOutputModel.owner_id == id)
+                .filter(TechnicalAssetModel.owner_id == id)
             )
             .unique()
             .all()
@@ -573,9 +575,9 @@ class DataProductService:
         )
         data_outputs = (
             self.db.scalars(
-                select(DataOutputModel)
+                select(TechnicalAssetModel)
                 .options(
-                    joinedload(DataOutputModel.dataset_links)
+                    joinedload(TechnicalAssetModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociation.dataset)
                     .selectinload(DatasetModel.data_product_links)
                 )

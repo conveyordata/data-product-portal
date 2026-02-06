@@ -3,11 +3,11 @@ from typing import Optional, Protocol, Union
 from uuid import UUID
 
 from app.authorization.role_assignments.data_product.schema import (
-    RoleAssignment as DataProductRoleAssignment,
+    DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.schema import (
-    RoleAssignment as OutputPortRoleAssignment,
+    OutputPortRoleAssignment as OutputPortRoleAssignment,
 )
 from app.core.authz.authorization import Authorization
 

@@ -45,7 +45,9 @@ from app.data_products.output_ports.schema_response import (
     DatasetGet,
     DatasetsGet,
 )
-from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.model import (
+    TechnicalAsset as TechnicalAssetModel,
+)
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -62,8 +64,8 @@ def get_dataset_load_options() -> Sequence[ExecutableOption]:
         selectinload(DatasetModel.data_output_links)
         .selectinload(DataOutputDatasetAssociationModel.data_output)
         .options(
-            joinedload(DataOutput.configuration),
-            joinedload(DataOutput.owner),
+            joinedload(TechnicalAssetModel.configuration),
+            joinedload(TechnicalAssetModel.owner),
             raiseload("*"),
         ),
     ]

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.role_assignments.output_port.schema import (
-    UpdateRoleAssignment,
+    UpdateOutputPortRoleAssignment,
 )
 from app.authorization.role_assignments.output_port.service import RoleAssignmentService
 from app.authorization.roles.schema import Prototype, Scope
@@ -84,7 +84,9 @@ def _assign_owner_role_assignments(
             actor=actor,
         )
         assignment = assignment_service.update_assignment(
-            UpdateRoleAssignment(id=assignment.id, decision=DecisionStatus.APPROVED),
+            UpdateOutputPortRoleAssignment(
+                id=assignment.id, decision=DecisionStatus.APPROVED
+            ),
             actor=actor,
         )
         DatasetAuthAssignment(assignment).add()

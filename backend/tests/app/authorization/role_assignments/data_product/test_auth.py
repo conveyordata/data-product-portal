@@ -14,7 +14,9 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.data_product.schema import RoleAssignment
+    from app.authorization.role_assignments.data_product.schema import (
+        DataProductRoleAssignment,
+    )
     from app.data_products.model import DataProduct
     from app.users.schema import User
 
@@ -49,7 +51,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -70,7 +72,7 @@ class TestAuth:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,

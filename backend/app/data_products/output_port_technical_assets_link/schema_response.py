@@ -6,7 +6,6 @@ from warnings import deprecated
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.schema import Dataset
 from app.data_products.schema import DataProduct
-from app.data_products.technical_assets.schema import DataOutput as DataOutputBaseSchema
 from app.data_products.technical_assets.schema import (
     TechnicalAsset as TechnicalAssetBaseSchema,
 )
@@ -19,7 +18,7 @@ class TechnicalAsset(TechnicalAssetBaseSchema):
 
 
 @deprecated("Use TechnicalAsset instead")
-class DataOutput(DataOutputBaseSchema):
+class DataOutput(TechnicalAssetBaseSchema):
     # Nested schemas
     owner: DataProduct
 

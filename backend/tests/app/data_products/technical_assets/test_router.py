@@ -15,13 +15,13 @@ from app.data_products.technical_assets.schema_request import (
 )
 from app.settings import settings
 from tests.factories import (
-    DataOutputFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     PlatformServiceFactory,
     RoleFactory,
     TagFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
@@ -80,7 +80,7 @@ def data_output_payload_not_owner():
     }
 
 
-class TestDataOutputsRouter:
+class TestTechnicalAssetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_create_data_output_source_aligned(
@@ -151,7 +151,7 @@ class TestDataOutputsRouter:
         assert created_data_output.status_code == 403
 
     def test_get_data_outputs(self, client):
-        data_output = DataOutputFactory()
+        data_output = TechnicalAssetFactory()
         response = client.get(OLD_ENDPOINT)
         assert response.status_code == 200
         data = response.json()
@@ -159,14 +159,14 @@ class TestDataOutputsRouter:
         assert data[0]["id"] == str(data_output.id)
 
     def test_get_data_output_by_id(self, client: TestClient):
-        data_output = DataOutputFactory()
+        data_output = TechnicalAssetFactory()
 
         response = self.get_data_output_by_id(client, data_output.id)
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
 
     def test_get_technical_asset(self, client: TestClient):
-        data_output = DataOutputFactory()
+        data_output = TechnicalAssetFactory()
 
         response = self.get_technical_asset(
             client, data_output.owner.id, data_output.id
@@ -189,7 +189,7 @@ class TestDataOutputsRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         tag = TagFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         update_payload = {
             "name": "update",
             "description": "update",
@@ -201,14 +201,14 @@ class TestDataOutputsRouter:
         assert response.json()["id"] == str(data_output.id)
 
     def test_update_data_product_no_member(self, client: TestClient):
-        data_output = DataOutputFactory()
+        data_output = TechnicalAssetFactory()
         response = self.update_data_output(
             client, {"name": "update", "description": "update"}, data_output.id
         )
         assert response.status_code == 403
 
     def test_remove_data_output_no_access(self, client: TestClient):
-        data_output = DataOutputFactory()
+        data_output = TechnicalAssetFactory()
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 403
 
@@ -222,12 +222,12 @@ class TestDataOutputsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 200
 
     def test_update_status_not_owner(self, client: TestClient):
-        do = DataOutputFactory()
+        do = TechnicalAssetFactory()
         response = self.update_data_output_status(client, {"status": "active"}, do.id)
         assert response.status_code == 403
 
@@ -241,7 +241,7 @@ class TestDataOutputsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         response = self.get_data_output_by_id(client, data_output.id)
         assert response.json()["status"] == "active"
         _ = self.update_data_output_status(
@@ -251,7 +251,7 @@ class TestDataOutputsRouter:
         assert response.json()["status"] == "pending"
 
     def test_get_graph_data(self, client: TestClient):
-        data_output = DataOutputFactory()
+        data_output = TechnicalAssetFactory()
         response = client.get(f"{OLD_ENDPOINT}/{data_output.id}/graph")
         assert response.json()["edges"] == [
             {
@@ -347,7 +347,7 @@ class TestDataOutputsRouter:
             role_id=role.id,
             data_product_id=owner.id,
         )
-        DataOutputFactory(
+        TechnicalAssetFactory(
             namespace=data_output_payload["namespace"],
             owner=owner,
         )
@@ -447,7 +447,7 @@ class TestDataOutputsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         response = self.update_data_output_status(
             client, {"status": "pending"}, data_output.id
         )
@@ -468,7 +468,7 @@ class TestDataOutputsRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         tag = TagFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         update_payload = {
             "name": "update",
             "description": "update",
@@ -490,7 +490,7 @@ class TestDataOutputsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 200
 
@@ -507,7 +507,7 @@ class TestDataOutputsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         data_output_id = data_output.id
         data_output_name = data_output.name
 
@@ -546,7 +546,7 @@ class TestDataOutputsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product)
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
         role = RoleFactory(
@@ -581,7 +581,7 @@ class TestDataOutputsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product)  # Different owner
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
         role = RoleFactory(

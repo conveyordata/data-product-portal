@@ -20,7 +20,6 @@ from app.data_products.output_ports.input_ports.schema import (
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.schema import DataProduct
-from app.data_products.technical_assets.schema import DataOutput as DataOutputBaseSchema
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.shared.schema import ORMModel
 
@@ -31,7 +30,7 @@ class DataProductLink(DataProductDatasetAssociation):
 
 
 @deprecated("Use TechnicalAsset instead")
-class DataOutput(DataOutputBaseSchema):
+class DatasetDataOutput(TechnicalAsset):
     # Nested schemas
     owner: DataProduct
 
@@ -42,7 +41,7 @@ class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
 
 @deprecated("Use TechnicalAssetLink instead")
 class DataOutputLink(DataOutputDatasetAssociation):
-    data_output: DataOutput
+    data_output: DatasetDataOutput
 
     def convert(self):
         return TechnicalAssetLink(

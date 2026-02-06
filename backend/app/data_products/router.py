@@ -9,7 +9,7 @@ from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
 from app.authorization.role_assignments.data_product.schema import (
-    UpdateRoleAssignment,
+    UpdateDataProductRoleAssignment,
 )
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
@@ -195,7 +195,9 @@ def _assign_owner_role_assignments(
             actor=actor,
         )
         assignment = assignment_service.update_assignment(
-            UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED),
+            UpdateDataProductRoleAssignment(
+                id=response.id, decision=DecisionStatus.APPROVED
+            ),
             actor=actor,
         )
         DataProductAuthAssignment(assignment).add()

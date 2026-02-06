@@ -18,7 +18,9 @@ from tests.factories import (
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.data_product.schema import RoleAssignment
+    from app.authorization.role_assignments.data_product.schema import (
+        DataProductRoleAssignment,
+    )
     from app.data_products.model import DataProduct
     from app.users.schema import User
 
@@ -32,7 +34,7 @@ class TestDataProductRoleAssignmentsRouter:
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id, user_id=user.id, role_id=role.id
         )
         response = client.get(f"{ENDPOINT}")
@@ -151,7 +153,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -210,7 +212,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -236,7 +238,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -260,7 +262,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -282,7 +284,7 @@ class TestDataProductRoleAssignmentsRouter:
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
         )
         user: User = UserFactory()
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=None,
@@ -307,7 +309,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -327,7 +329,7 @@ class TestDataProductRoleAssignmentsRouter:
         owner: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.CUSTOM)
 
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=owner.id,
@@ -406,7 +408,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -435,7 +437,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
@@ -464,7 +466,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,

@@ -10,7 +10,9 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment,
+)
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
 from app.users.notifications.model import Notification as NotificationModel

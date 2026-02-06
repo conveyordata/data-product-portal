@@ -8,7 +8,7 @@ from app.core.authz import Authorization
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.global_.schema import RoleAssignment
+    from app.authorization.role_assignments.global_.schema import GlobalRoleAssignment
     from app.users.schema import User
 
 
@@ -44,7 +44,7 @@ class TestAuth:
         assert not authorizer.has_global_role(
             user_id=str(user.id), role_id=str(role.id)
         )
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -60,7 +60,7 @@ class TestAuth:
         user: User = UserFactory()
         admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
         assert not authorizer.has_admin_role(user_id=str(user.id))
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=admin.id,
             decision=DecisionStatus.APPROVED,
@@ -75,7 +75,7 @@ class TestAuth:
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
 
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
