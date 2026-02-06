@@ -9,7 +9,6 @@ from app.settings import settings
 from tests import test_session
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    TechnicalAssetFactory,
     DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -17,6 +16,7 @@ from tests.factories import (
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
     RoleFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 

@@ -1,4 +1,4 @@
-from tests.factories import TechnicalAssetFactory, DataProductFactory, DatasetFactory
+from tests.factories import DataProductFactory, DatasetFactory, TechnicalAssetFactory
 
 ENDPOINT = "/api/graph"
 

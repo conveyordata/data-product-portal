@@ -1,10 +1,10 @@
 import pytest
 
 from tests.factories import (
-    TechnicalAssetFactory,
     DataProductFactory,
     DatasetFactory,
     TagFactory,
+    TechnicalAssetFactory,
 )
 
 ENDPOINT = "/api/tags"

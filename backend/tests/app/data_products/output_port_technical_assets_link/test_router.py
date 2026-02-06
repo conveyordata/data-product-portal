@@ -7,12 +7,12 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    TechnicalAssetFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     RoleFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 

@@ -12,7 +12,6 @@ from app.core.authz import Action
 from app.core.namespace.validation import NamespaceValidityType
 from app.settings import settings
 from tests.factories import (
-    TechnicalAssetFactory,
     DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -27,6 +26,7 @@ from tests.factories import (
     PlatformFactory,
     RoleFactory,
     TagFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory

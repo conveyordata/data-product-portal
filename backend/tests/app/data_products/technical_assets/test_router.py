@@ -15,13 +15,13 @@ from app.data_products.technical_assets.schema_request import (
 )
 from app.settings import settings
 from tests.factories import (
-    TechnicalAssetFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     PlatformServiceFactory,
     RoleFactory,
     TagFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory

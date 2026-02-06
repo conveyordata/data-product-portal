@@ -6,17 +6,17 @@ from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_ENDPOINT,
 )
-from tests.factories import UserFactory
-from tests.factories import TechnicalAssetFactory
-from tests.factories import DataOutputDatasetAssociationFactory
-from tests.factories import DataProductFactory
-from tests.factories import DatasetFactory
-from tests.factories import RoleFactory
 from tests.factories import (
+    DataOutputDatasetAssociationFactory,
+    DataProductFactory,
     DataProductRoleAssignmentFactory,
+    DatasetFactory,
+    DatasetRoleAssignmentFactory,
+    GlobalRoleAssignmentFactory,
+    RoleFactory,
+    TechnicalAssetFactory,
+    UserFactory,
 )
-from tests.factories import DatasetRoleAssignmentFactory
-from tests.factories import GlobalRoleAssignmentFactory
 
 ENDPOINT = "/api/users"
 
