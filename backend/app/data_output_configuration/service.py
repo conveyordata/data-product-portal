@@ -22,7 +22,6 @@ class PluginService:
     ) -> Sequence[UIElementMetadataResponse]:
         """Generate UI metadata for all registered data output types"""
         data_output_configurations = AssetProviderPlugin.__subclasses__()
-
         return [
             metadata_response
             for plugin in data_output_configurations
@@ -58,6 +57,7 @@ class PluginService:
                 icon_name=platform_meta.icon_name,
                 parent_platform=platform_meta.parent_platform,
                 result_label=platform_meta.result_label,
+                has_menu=platform_meta.has_menu,
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,
             )
@@ -73,6 +73,7 @@ class PluginService:
                 result_label=platform_meta.result_label,
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,
+                has_menu=platform_meta.has_menu,
             )
 
     def get_platform_tiles(
@@ -80,12 +81,10 @@ class PluginService:
     ) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""
         all_metadata = self.get_all_technical_assets_ui_metadata()
-
         # Filter to only configured platforms
         configured_metadata = [
             meta for meta in all_metadata if self._has_config(meta, configs)
         ]
-
         # Build tile hierarchy
         return self._build_tile_hierarchy(configured_metadata)
 
@@ -112,7 +111,7 @@ class PluginService:
                 label=meta.display_name,
                 value=meta.platform,
                 icon_name=meta.icon_name,
-                has_menu=True,
+                has_menu=meta.has_menu,
                 has_config=True,
                 children=[],
             )

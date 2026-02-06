@@ -22131,6 +22131,10 @@
             "type": "string",
             "title": "Plugin"
           },
+          "has_menu": {
+            "type": "boolean",
+            "title": "Has Menu"
+          },
           "result_label": {
             "type": "string",
             "title": "Result Label",
@@ -22183,6 +22187,7 @@
         "required": [
           "ui_metadata",
           "plugin",
+          "has_menu",
           "platform",
           "display_name",
           "icon_name",
