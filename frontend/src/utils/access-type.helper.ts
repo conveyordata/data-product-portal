@@ -1,14 +1,14 @@
 import type { TFunction } from 'i18next';
 
-import { DatasetAccess } from '@/types/dataset';
+import { OutputPortAccessType } from '@/store/api/services/generated/dataProductsApi.ts';
 
-export const getDatasetAccessTypeLabel = (t: TFunction, accessType: DatasetAccess) => {
+export const getDatasetAccessTypeLabel = (t: TFunction, accessType: OutputPortAccessType) => {
     switch (accessType) {
-        case DatasetAccess.Public:
+        case OutputPortAccessType.Public:
             return t('Public');
-        case DatasetAccess.Restricted:
+        case OutputPortAccessType.Restricted:
             return t('Restricted');
-        case DatasetAccess.Private:
+        case OutputPortAccessType.Private:
             return t('Private');
         default:
             return t('Unknown');

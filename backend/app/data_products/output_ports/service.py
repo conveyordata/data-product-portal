@@ -28,6 +28,9 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation,
+)
+from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
@@ -511,3 +514,23 @@ class OutputPortService:
             ensure_data_product_exists(data_product_id, self.db)
             query = query.filter(DatasetModel.data_product_id == data_product_id)
         return self.db.scalars(query).unique().all()
+
+    def get_consuming_data_products(
+        self, output_port_id: UUID, data_product_id: UUID
+    ) -> Sequence[DataProductDatasetAssociation]:
+        dataset = self.db.scalar(
+            select(DatasetModel)
+            .where(DatasetModel.id == output_port_id)
+            .where(DatasetModel.data_product_id == data_product_id)
+            .options(
+                selectinload(DatasetModel.data_product_links).selectinload(
+                    DataProductDatasetAssociationModel.data_product
+                )
+            )
+        )
+        if not dataset:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Output port {output_port_id} not found",
+            )
+        return dataset.data_product_links

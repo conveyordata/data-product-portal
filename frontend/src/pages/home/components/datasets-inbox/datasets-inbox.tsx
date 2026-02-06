@@ -86,7 +86,7 @@ export function DatasetsInbox({ userId }: Props) {
         <div className={styles.section}>
             <div className={styles.sectionTitle}>
                 <Typography.Title level={3}>{t('Output Ports')}</Typography.Title>
-                <Link to={ApplicationPaths.Datasets}>
+                <Link to={ApplicationPaths.Marketplace}>
                     <Button className={styles.formButton}>{t('See All')}</Button>
                 </Link>
             </div>

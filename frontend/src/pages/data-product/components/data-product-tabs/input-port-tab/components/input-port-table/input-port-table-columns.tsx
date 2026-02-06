@@ -4,12 +4,12 @@ import type { TFunction } from 'i18next';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
-import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
+import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DatasetActionButton } from '@/pages/data-product/components/data-product-tabs/dataset-tab/components/dataset-table/dataset-action-button.component.tsx';
-import type { DatasetLink } from '@/types/data-product';
-import { createDatasetIdPath } from '@/types/navigation.ts';
+import { InputPortActionButton } from '@/pages/data-product/components/data-product-tabs/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
+import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
@@ -17,10 +17,10 @@ import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    datasetLinks: DatasetLink[];
+    inputPorts: InputPort[];
 };
-export const getDataProductDatasetsColumns = ({ t, datasetLinks }: Props): TableColumnsType<DatasetLink> => {
-    const sorter = new Sorter<DatasetLink>();
+export const getDataProductDatasetsColumns = ({ t, inputPorts }: Props): TableColumnsType<InputPort> => {
+    const sorter = new Sorter<InputPort>();
     return [
         {
             title: t('Id'),
@@ -30,21 +30,21 @@ export const getDataProductDatasetsColumns = ({ t, datasetLinks }: Props): Table
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { dataset, status }) => {
+            render: (_, { input_port, status }) => {
                 const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
-                        name={dataset.name}
-                        accessType={dataset.access_type}
+                        name={input_port.name}
+                        accessType={input_port.access_type}
                         isApproved={isDatasetRequestApproved}
                     />
                 );
                 return (
                     <TableCellAvatar
-                        popover={{ title: popoverTitle, content: dataset.description }}
-                        linkTo={createDatasetIdPath(dataset.id)}
+                        popover={{ title: popoverTitle, content: input_port.description }}
+                        linkTo={createMarketplaceOutputPortPath(input_port.id, input_port.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                        title={<DatasetTitle name={dataset.name} accessType={dataset.access_type} />}
+                        title={<OutputPortTitle name={input_port.name} accessType={input_port.access_type} />}
                         subtitle={
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
@@ -55,8 +55,8 @@ export const getDataProductDatasetsColumns = ({ t, datasetLinks }: Props): Table
                 );
             },
             width: '25%',
-            ...new FilterSettings(datasetLinks, (datasetLink) => getDecisionStatusLabel(t, datasetLink.status)),
-            sorter: sorter.stringSorter((datasetLink) => datasetLink.dataset.name),
+            ...new FilterSettings(inputPorts, (input_port) => getDecisionStatusLabel(t, input_port.status)),
+            sorter: sorter.stringSorter((input_port) => input_port.input_port.name),
             defaultSortOrder: 'ascend',
         },
         {
@@ -67,8 +67,10 @@ export const getDataProductDatasetsColumns = ({ t, datasetLinks }: Props): Table
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { dataset, data_product_id, status }) => {
-                return <DatasetActionButton dataset={dataset} dataProductId={data_product_id} status={status} />;
+            render: (_, { input_port, data_product_id, status }) => {
+                return (
+                    <InputPortActionButton output_port={input_port} dataProductId={data_product_id} status={status} />
+                );
             },
             fixed: 'right',
             width: 1,

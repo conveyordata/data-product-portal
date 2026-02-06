@@ -13,7 +13,7 @@ import {
     useListOutputPortRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import { type Role, useRemoveRoleMutation } from '@/store/api/services/generated/authorizationRolesApi.ts';
-import { ApplicationPaths, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+import { ApplicationPaths, createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation';
 import { Scope } from '@/types/roles';
 import styles from './delete-role-modal.module.scss';
 
@@ -140,7 +140,15 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                             )}
                             renderItem={(item: OutputPort & { count: number }) => (
                                 <List.Item>
-                                    <Link to={createDatasetIdPath(item.id, DatasetTabKeys.Team)}>{item.name}</Link>
+                                    <Link
+                                        to={createMarketplaceOutputPortPath(
+                                            item.id,
+                                            item.data_product_id,
+                                            DatasetTabKeys.Team,
+                                        )}
+                                    >
+                                        {item.name}
+                                    </Link>
                                     <Badge count={item.count} color={badgeColor} />
                                 </List.Item>
                             )}

@@ -10,9 +10,8 @@ export enum ApplicationPaths {
     DataProduct = '/studio/:dataProductId',
     DataProductNew = '/studio/new',
     DataProductEdit = '/studio/:dataProductId/edit',
-    Datasets = '/datasets',
-    Dataset = '/datasets/:datasetId',
-    DatasetEdit = '/datasets/:datasetId/edit',
+    MarketPlaceOutputPort = '/marketplace/:dataProductId/datasets/:datasetId',
+    MarketPlaceOutputPortEdit = '/marketplace/:dataProductId/datasets/:datasetId/edit',
     Marketplace = '/marketplace',
     MarketplaceCart = '/marketplace/cart',
     OutputPort = '/studio/:dataProductId/output-port/:datasetId',
@@ -30,7 +29,7 @@ export function createDataProductIdPath(
     dataProductId: string,
     tabKey: DataProductTabKeys = DataProductTabKeys.About,
 ): string {
-    return `${ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId))}#${tabKey}`;
+    return `${ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId))}?tab=${tabKey}`;
 }
 
 export function createDataOutputIdPath(
@@ -41,11 +40,19 @@ export function createDataOutputIdPath(
     return `${ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
         ':dataOutputId',
         encodeURIComponent(dataOutputId),
-    )}#${tabKey}`;
+    )}?tab=${tabKey}`;
 }
 
-export function createDatasetIdPath(datasetId: string, tabKey: DatasetTabKeys = DatasetTabKeys.About) {
-    return `${ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId))}#${tabKey}`;
+export function createMarketplaceOutputPortPath(
+    datasetId: string,
+    dataProductId: string,
+    tabKey: DatasetTabKeys = DatasetTabKeys.About,
+) {
+    const url = ApplicationPaths.MarketPlaceOutputPort.replace(':datasetId', encodeURIComponent(datasetId)).replace(
+        ':dataProductId',
+        encodeURIComponent(dataProductId),
+    );
+    return `${url}?tab=${tabKey}`;
 }
 
 export function createOutputPortPath(
@@ -56,7 +63,7 @@ export function createOutputPortPath(
     return `${ApplicationPaths.OutputPort.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
         ':datasetId',
         encodeURIComponent(datasetId),
-    )}#${tabKey}`;
+    )}?tab=${tabKey}`;
 }
 
 export enum DynamicPathParams {

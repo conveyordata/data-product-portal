@@ -1,7 +1,5 @@
 import { Modal, type ModalProps, Typography } from 'antd';
 
-import styles from './form-modal.module.scss';
-
 type Props = ModalProps & {
     onClose?: () => void;
     isOpen?: boolean;
@@ -17,18 +15,6 @@ export function FormModal({ title, onClose, isOpen, ...modalProps }: Props) {
     }
 
     return (
-        <Modal
-            className={styles.container}
-            centered
-            {...modalProps}
-            title={titleComponent({ title })}
-            open={isOpen}
-            onCancel={handleCloseModal}
-            classNames={{
-                container: styles.formModalContent,
-                header: styles.formModalHeader,
-                body: styles.formModalBody,
-            }}
-        />
+        <Modal centered {...modalProps} title={titleComponent({ title })} open={isOpen} onCancel={handleCloseModal} />
     );
 }

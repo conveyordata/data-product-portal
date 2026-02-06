@@ -8,13 +8,13 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type PlatformTile,
     useGetPlatformTilesQuery,
     useLazyGetPluginUrlQuery,
-} from '@/store/api/services/generated/pluginsApi';
+} from '@/store/api/services/generated/pluginsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';
@@ -31,7 +31,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const posthog = usePostHog();
 
     const user = useSelector(selectCurrentUser);
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: dataProduct } = useGetDataProductQuery(dataProductId);
     const { data: { platform_tiles: platformTilesData } = {}, isLoading: isLoadingPlatforms } =
         useGetPlatformTilesQuery();
 

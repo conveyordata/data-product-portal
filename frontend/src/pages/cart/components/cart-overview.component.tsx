@@ -7,7 +7,7 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { useAppDispatch } from '@/store';
 import { removeDatasetFromCart } from '@/store/features/cart/cart-slice.ts';
 import type { DatasetsGetContractSingle } from '@/types/dataset/datasets-get.contract.ts';
-import { createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+import { createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 
 type CartOverviewItemProps = {
@@ -67,7 +67,10 @@ function CartOverviewItem({ dataset, overlapping, selectedDataProductId }: CartO
             title={
                 <Tooltip title={warningTooltip}>
                     <Space size="small">
-                        <Link to={createDatasetIdPath(dataset.id)} target={'_blank'}>
+                        <Link
+                            to={createMarketplaceOutputPortPath(dataset.id, dataset.data_product_id)}
+                            target={'_blank'}
+                        >
                             <Typography.Text>{dataset.name}</Typography.Text>
                         </Link>
                         {warningTooltip !== null && (

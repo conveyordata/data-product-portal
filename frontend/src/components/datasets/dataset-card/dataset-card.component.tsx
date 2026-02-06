@@ -5,32 +5,37 @@ import { Link } from 'react-router';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useModal } from '@/hooks/use-modal';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
-    useRemoveDatasetFromDataOutputMutation,
-    useRequestDatasetAccessForDataOutputMutation,
-} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
-import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
-import { useGetDatasetByIdQuery, useRemoveDatasetMutation } from '@/store/features/datasets/datasets-api-slice.ts';
+    useGetOutputPortQuery,
+    useRemoveOutputPortMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import {
+    useApproveOutputPortTechnicalAssetLinkMutation,
+    useLinkOutputPortToTechnicalAssetMutation,
+    useUnlinkOutputPortFromTechnicalAssetMutation,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { createDatasetIdPath } from '@/types/navigation';
+import { createMarketplaceOutputPortPath } from '@/types/navigation';
 import { getBadgeStatus, getDecisionStatusBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 import { DataOutputLinkModal } from './data-output-link-modal.component';
 import styles from './dataset-card.module.scss';
 
 type Props = {
     datasetId: string;
+    dataProductId: string;
     draggedDataOutputId?: string | null;
 };
 
-export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
+export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
     const [dragOver, setDragOver] = useState(false);
     const [invalidDrop, setInvalidDrop] = useState(false);
     const { isVisible, handleOpen, handleClose } = useModal();
+    const [isRemoved, setIsRemoved] = useState(false);
 
-    const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
+    const { data: dataset, isLoading } = useGetOutputPortQuery({ id: datasetId, dataProductId }, { skip: isRemoved });
     const { data: deleteAccess } = useCheckAccessQuery({
         resource: datasetId,
         action: AuthorizationAction.OUTPUT_PORT__DELETE,
@@ -40,15 +45,16 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
         action: AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
     });
 
-    const [removeDataset, { isLoading: isRemoving }] = useRemoveDatasetMutation();
-    const [unlinkDataset] = useRemoveDatasetFromDataOutputMutation();
-    const [linkDataset] = useRequestDatasetAccessForDataOutputMutation();
-    const [approveLink] = useApproveDataOutputLinkMutation();
+    const [removeDataset, { isLoading: isRemoving }] = useRemoveOutputPortMutation();
+    const [unlinkDataset] = useUnlinkOutputPortFromTechnicalAssetMutation();
+    const [linkDataset] = useLinkOutputPortToTechnicalAssetMutation();
+    const [approveLink] = useApproveOutputPortTechnicalAssetLinkMutation();
 
     const handleRemoveDataset = useCallback(async () => {
+        setIsRemoved(true);
         if (!dataset) return;
         try {
-            await removeDataset(dataset).unwrap();
+            await removeDataset({ id: datasetId, dataProductId }).unwrap();
             dispatchMessage({
                 content: t('Output Port {{name}} has been successfully removed', { name: dataset.name }),
                 type: 'success',
@@ -59,13 +65,17 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                 type: 'error',
             });
         }
-    }, [removeDataset, dataset, t]);
+    }, [removeDataset, dataset, t, dataProductId, datasetId]);
 
     const handleRemoveDataOutputLink = useCallback(
         async (dataOutputId: string) => {
             if (!dataset) return;
             try {
-                await unlinkDataset({ dataOutputId, datasetId: dataset.id }).unwrap();
+                await unlinkDataset({
+                    outputPortId: datasetId,
+                    dataProductId,
+                    unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id: dataOutputId },
+                }).unwrap();
                 dispatchMessage({
                     content: t('Technical Asset unlinked successfully'),
                     type: 'success',
@@ -77,15 +87,15 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                 });
             }
         },
-        [unlinkDataset, dataset, t],
+        [unlinkDataset, dataset, t, dataProductId, datasetId],
     );
 
     const handleDragOver = (event: DragEvent) => {
         event.preventDefault();
         // Check if the dragged Technical Asset is already linked to this dataset
         if (draggedDataOutputId && dataset) {
-            const isAlreadyLinked = dataset.data_output_links?.some(
-                (link) => link.data_output.id === draggedDataOutputId,
+            const isAlreadyLinked = dataset.technical_asset_links?.some(
+                (link) => link.technical_asset_id === draggedDataOutputId,
             );
 
             if (isAlreadyLinked) {
@@ -114,7 +124,9 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
             const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
             if (dragData.type === 'data-output' && dataset) {
                 // Check if already linked
-                const isAlreadyLinked = dataset.data_output_links?.some((link) => link.data_output.id === dragData.id);
+                const isAlreadyLinked = dataset.technical_asset_links?.some(
+                    (link) => link.technical_asset_id === dragData.id,
+                );
 
                 if (isAlreadyLinked) {
                     dispatchMessage({
@@ -126,17 +138,25 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                     return;
                 }
 
-                const result = await linkDataset({ dataOutputId: dragData.id, datasetId: dataset.id }).unwrap();
+                await linkDataset({
+                    outputPortId: dataset.id,
+                    dataProductId,
+                    linkTechnicalAssetToOutputPortRequest: {
+                        technical_asset_id: dragData.id,
+                    },
+                }).unwrap();
                 dispatchMessage({
                     content: t('Technical Asset {{name}} linked to Output Port successfully', { name: dragData.name }),
                     type: 'success',
                 });
                 // TODO make this dependable on access rights
                 await approveLink({
-                    id: result.id,
-                    data_output_id: dragData.id,
-                    dataset_id: dataset.id,
-                });
+                    dataProductId,
+                    outputPortId: datasetId,
+                    approveLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                        technical_asset_id: dragData.id,
+                    },
+                }).unwrap();
             }
         } catch (_error) {
             dispatchMessage({
@@ -178,7 +198,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                             {' '}
                             {/*Min width is needed to ensure the elipsis of description*/}
                             <Flex justify="space-between" align="flex-start">
-                                <Link to={createDatasetIdPath(dataset.id)}>
+                                <Link to={createMarketplaceOutputPortPath(dataset.id, dataset.data_product_id)}>
                                     <Typography.Title level={5}>{dataset.name}</Typography.Title>
                                 </Link>
                                 <Flex gap="small">
@@ -232,19 +252,19 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                         status={getBadgeStatus(dataset.status)}
                         text={getStatusLabel(t, dataset.status)}
                     />
-                    {dataset.data_output_links && dataset.data_output_links.length > 0 && (
+                    {dataset.technical_asset_links && dataset.technical_asset_links.length > 0 && (
                         <Collapse
                             size={'small'}
                             items={[
                                 {
                                     key: 0,
                                     label: t('{{count}} linked Technical Assets', {
-                                        count: dataset.data_output_links.length,
+                                        count: dataset.technical_asset_links.length,
                                     }),
                                     children: (
                                         <List
                                             size="small"
-                                            dataSource={dataset.data_output_links}
+                                            dataSource={dataset.technical_asset_links}
                                             renderItem={(link) => (
                                                 <List.Item>
                                                     <Flex justify="space-between" style={{ width: '100%' }}>
@@ -253,14 +273,16 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                                                                 status={getDecisionStatusBadgeStatus(link.status)}
                                                                 size="small"
                                                             />
-                                                            <Typography.Text>{link.data_output.name}</Typography.Text>
+                                                            <Typography.Text>
+                                                                {link.technical_asset.name}
+                                                            </Typography.Text>
                                                         </Flex>
                                                         <Button
                                                             type="text"
                                                             size="small"
                                                             danger
                                                             onClick={() =>
-                                                                handleRemoveDataOutputLink(link.data_output.id)
+                                                                handleRemoveDataOutputLink(link.technical_asset_id)
                                                             }
                                                         >
                                                             {t('Remove')}
@@ -281,8 +303,9 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                 <DataOutputLinkModal
                     onClose={handleClose}
                     datasetId={datasetId}
+                    dataProductId={dataProductId}
                     datasetName={dataset.name}
-                    existingLinks={dataset.data_output_links || []}
+                    existingLinks={dataset.technical_asset_links || []}
                 />
             )}
         </>

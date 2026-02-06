@@ -2,29 +2,33 @@ import { List } from 'antd';
 import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { useGetInputPortsForOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createDataProductIdPath } from '@/types/navigation';
 import styles from './dataset-marketplace-card.module.scss';
 
 type Props = {
-    dataset_id: string;
+    outputPortId: string;
+    dataProductId: string;
 };
 
-export function DatasetProductList({ dataset_id }: Props) {
-    const { data: dataset } = useGetDatasetByIdQuery(dataset_id, { skip: !dataset_id });
+export function DatasetProductList({ outputPortId, dataProductId }: Props) {
+    const { data: { input_ports: inputPorts = [] } = {} } = useGetInputPortsForOutputPortQuery({
+        outputPortId: outputPortId,
+        dataProductId,
+    });
 
     const filteredProductLinks = useMemo(() => {
-        return dataset?.data_product_links.filter((link) => link.status === 'approved') || [];
-    }, [dataset]);
-    if (!dataset) return <LoadingSpinner />;
+        return inputPorts.filter((link) => link.status === 'approved') || [];
+    }, [inputPorts]);
+    if (!inputPorts) return <LoadingSpinner />;
     if (filteredProductLinks.length === 0) return null;
     return (
         <List
             dataSource={filteredProductLinks}
-            renderItem={(dataProduct) => (
+            renderItem={(inputPort) => (
                 <List.Item style={{ margin: 0 }}>
-                    <Link to={createDataProductIdPath(dataProduct.data_product_id)} className={styles.link}>
-                        {dataProduct.data_product.name}
+                    <Link to={createDataProductIdPath(inputPort.data_product_id)} className={styles.link}>
+                        {inputPort.data_product.name}
                     </Link>
                 </List.Item>
             )}

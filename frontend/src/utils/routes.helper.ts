@@ -10,8 +10,27 @@ export function isDataProductEditPage(path: string, dataProductId: string) {
     );
 }
 
-export function isDatasetEditPage(path: string, datasetId: string) {
-    return getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId) === path;
+export function isDatasetEditPage(path: string, datasetId?: string, dataProductId?: string) {
+    if (!datasetId || !dataProductId) {
+        return false;
+    }
+    return (
+        path ===
+        ApplicationPaths.MarketPlaceOutputPortEdit.replace(`:${DynamicPathParams.DatasetId}`, datasetId).replace(
+            `:${DynamicPathParams.DataProductId}`,
+            dataProductId,
+        )
+    );
+}
+
+export function isProductStudioOutputPortEditPage(path: string, datasetId: string, dataProductId: string) {
+    return (
+        path ===
+        ApplicationPaths.OutputPortEdit.replace(`:${DynamicPathParams.DatasetId}`, datasetId).replace(
+            `:${DynamicPathParams.DataProductId}`,
+            dataProductId,
+        )
+    );
 }
 
 export function isDataOutputEditPage(path: string, dataOutputId: string, dataProductId: string) {

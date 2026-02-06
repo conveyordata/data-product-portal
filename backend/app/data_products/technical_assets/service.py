@@ -17,6 +17,9 @@ from app.core.namespace.validation import (
 )
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
+    DataOutputDatasetAssociation,
+)
+from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
@@ -285,3 +288,22 @@ class DataOutputService:
             )
 
         return request.configuration.render_template(template)
+
+    def get_data_outputs_for_data_product(
+        self, data_product_id: UUID
+    ) -> Sequence[DataOutputGet]:
+        return (
+            self.db.scalars(
+                select(TechnicalAssetModel)
+                .options(
+                    selectinload(TechnicalAssetModel.environment_configurations),
+                    selectinload(TechnicalAssetModel.dataset_links)
+                    .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DatasetModel.tags)
+                    .raiseload("*"),
+                )
+                .filter(TechnicalAssetModel.owner_id == data_product_id)
+            )
+            .unique()
+            .all()
+        )

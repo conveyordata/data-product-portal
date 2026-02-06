@@ -4,42 +4,41 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import type { DatasetLink } from '@/types/data-product';
-import styles from './dataset-table.module.scss';
-import { getDataProductDatasetsColumns } from './dataset-table-columns.tsx';
+import { type InputPort, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import styles from './input-port-table.module.scss';
+import { getDataProductDatasetsColumns } from './input-port-table-columns.tsx';
 
 type Props = {
     dataProductId: string;
-    datasets: DatasetLink[];
+    inputPorts: InputPort[];
 };
-export function DatasetTable({ dataProductId, datasets }: Props) {
+export function InputPortTable({ dataProductId, inputPorts }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
 
-    const { pagination, handlePaginationChange } = useTablePagination(datasets, {
+    const { pagination, handlePaginationChange } = useTablePagination(inputPorts, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<DatasetLink>['onChange'] = (pagination) => {
+    const onChange: TableProps<InputPort>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
-    const columns: TableColumnsType<DatasetLink> = useMemo(() => {
+    const columns: TableColumnsType<InputPort> = useMemo(() => {
         return getDataProductDatasetsColumns({
             t,
-            datasetLinks: datasets,
+            inputPorts: inputPorts,
         });
-    }, [t, datasets]);
+    }, [t, inputPorts]);
 
     if (!dataProduct) return null;
 
     return (
-        <Table<DatasetLink>
+        <Table<InputPort>
             loading={isLoadingDataProduct}
             className={styles.datasetListTable}
             columns={columns}
-            dataSource={datasets}
+            dataSource={inputPorts}
             rowKey={({ id }) => id}
             onChange={onChange}
             pagination={{

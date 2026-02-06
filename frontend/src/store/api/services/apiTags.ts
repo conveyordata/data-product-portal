@@ -1,5 +1,10 @@
 import { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { dataProductsOutputPortsInputPortsTags } from '@/store/api/services/tags/dataProductsOutputPortsInputPortsTags.ts';
+import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProductsOutputPortsTags.ts';
+import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataProductsTechicalAssetsTags.ts';
+import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
+import { userNotificationsTags } from '@/store/api/services/tags/userNotificationsTags.ts';
 
 api.enhanceEndpoints({
     addTagTypes: Object.values(TagTypes),
@@ -21,16 +26,16 @@ api.enhanceEndpoints({
         },
 
         getRoles: {
-            providesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            providesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
         createRole: {
-            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
         removeRole: {
-            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
         updateRole: {
-            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
 
         listGlobalRoleAssignments: {
@@ -89,7 +94,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
-                { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct, id: result?.data_product?.id },
                 { type: TagTypes.History, id: result?.data_product?.id },
             ],
@@ -99,7 +103,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
-                { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct, id: result?.data_product?.id },
                 { type: TagTypes.History, id: result?.data_product?.id },
             ],
@@ -109,7 +112,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
-                { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct, id: result?.data_product?.id },
                 { type: TagTypes.History, id: result?.data_product?.id },
             ],
@@ -119,7 +121,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
-                { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct, id: result?.data_product_id },
                 { type: TagTypes.History, id: result?.data_product_id },
             ],
@@ -130,7 +131,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.OutputPortRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.OutputPortRoleAssignments, id: result?.id },
-                { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.OutputPort, id: result?.output_port?.id },
                 { type: TagTypes.History, id: result?.output_port?.id },
             ],
@@ -164,6 +164,16 @@ api.enhanceEndpoints({
                 { type: TagTypes.OutputPort, id: result?.output_port_id },
                 { type: TagTypes.History, id: result?.output_port_id },
             ],
+        },
+        listOutputPortRoleAssignments: {
+            providesTags: (response) => {
+                const items =
+                    response?.role_assignments?.map((item) => ({
+                        type: TagTypes.OutputPortRoleAssignments,
+                        id: item.id,
+                    })) || [];
+                return [...items, { type: TagTypes.OutputPortRoleAssignments, id: STATIC_TAG_ID.LIST }];
+            },
         },
 
         getDataProductsLifecycles: {
@@ -230,7 +240,6 @@ api.enhanceEndpoints({
             invalidatesTags: [
                 { type: TagTypes.Domain, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct },
-                { type: TagTypes.UserDataProducts },
                 { type: TagTypes.OutputPort },
                 { type: TagTypes.UserOutputPorts },
             ],
@@ -243,7 +252,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.Domain, id: fromId },
                 { type: TagTypes.Domain, id: toId },
                 { type: TagTypes.DataProduct as const },
-                { type: TagTypes.UserDataProducts as const },
                 { type: TagTypes.OutputPort as const },
                 { type: TagTypes.UserOutputPorts as const },
             ],
@@ -297,5 +305,11 @@ api.enhanceEndpoints({
         updateThemeSettings: {
             invalidatesTags: [{ type: TagTypes.ThemeSettings }],
         },
+
+        ...dataProductOutputPortTags,
+        ...dataProductTechnicalAssetsTags,
+        ...dataProductTags,
+        ...userNotificationsTags,
+        ...dataProductsOutputPortsInputPortsTags,
     },
 });

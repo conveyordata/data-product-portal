@@ -1,27 +1,26 @@
 import type { TFunction } from 'i18next';
 import type { ReactElement, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
-import type { EventContract } from '@/types/events/event.contract';
-import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import { EventEntityType, type GetEventHistoryResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
 import { EventType } from '@/types/events/event-types';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+import { createDataOutputIdPath, createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation';
 
-export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity | undefined): string {
+export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefined | null): string {
     switch (type) {
-        case EventReferenceEntity.Dataset:
+        case EventEntityType.OutputPort:
             return t('Output Port');
-        case EventReferenceEntity.DataProduct:
+        case EventEntityType.DataProduct:
             return t('Data Product');
-        case EventReferenceEntity.DataOutput:
+        case EventEntityType.TechnicalAsset:
             return t('Technical Asset');
-        case EventReferenceEntity.User:
+        case EventEntityType.User:
             return t('User');
         default:
             return t('Unknown');
     }
 }
 
-export function getSubjectDisplayLabel(record: EventContract): string {
+export function getSubjectDisplayLabel(record: GetEventHistoryResponseItem): string {
     const { subject_type, deleted_subject_identifier } = record;
 
     if (deleted_subject_identifier) {
@@ -29,49 +28,53 @@ export function getSubjectDisplayLabel(record: EventContract): string {
     }
 
     switch (subject_type) {
-        case EventReferenceEntity.User:
-            return record.user.email;
-        case EventReferenceEntity.DataProduct:
-            return record.data_product.name;
-        case EventReferenceEntity.DataOutput:
-            return record.data_output.name;
-        case EventReferenceEntity.Dataset:
-            return record.dataset.name;
+        case EventEntityType.User:
+            return record.user?.email || '';
+        case EventEntityType.DataProduct:
+            return record.data_product?.name || '';
+        case EventEntityType.TechnicalAsset:
+            return record.technical_asset?.name || '';
+        case EventEntityType.OutputPort:
+            return record.output_port?.name || '';
     }
 }
 
-export function getTargetDisplayLabel(record: EventContract): string {
+export function getTargetDisplayLabel(record: GetEventHistoryResponseItem): string {
     const { target_type, deleted_target_identifier } = record;
 
     if (deleted_target_identifier) {
-        return deleted_target_identifier;
+        return deleted_target_identifier || '';
     }
 
     switch (target_type) {
-        case EventReferenceEntity.User:
-            return record.user.email;
-        case EventReferenceEntity.DataProduct:
-            return record.data_product.name;
-        case EventReferenceEntity.DataOutput:
-            return record.data_output.name;
-        case EventReferenceEntity.Dataset:
-            return record.dataset.name;
+        case EventEntityType.User:
+            return record.user?.email || '';
+        case EventEntityType.DataProduct:
+            return record.data_product?.name || '';
+        case EventEntityType.TechnicalAsset:
+            return record.technical_asset?.name || '';
+        case EventEntityType.OutputPort:
+            return record.output_port?.name || '';
+        default:
+            return '';
     }
 }
 
 export function getEventReferenceEntityLinkPath(
     id: string,
     dataProductId: string | null,
-    type: EventReferenceEntity,
+    type: EventEntityType | null | undefined,
 ): string | null {
     switch (type) {
-        case EventReferenceEntity.Dataset:
-            return createDatasetIdPath(id);
-        case EventReferenceEntity.DataProduct:
+        case EventEntityType.OutputPort:
+            return dataProductId ? createMarketplaceOutputPortPath(id, dataProductId) : null;
+        case EventEntityType.DataProduct:
             return createDataProductIdPath(id);
-        case EventReferenceEntity.DataOutput:
+        case EventEntityType.TechnicalAsset:
             return dataProductId ? createDataOutputIdPath(id, dataProductId) : null;
-        case EventReferenceEntity.User:
+        case EventEntityType.User:
+            return null;
+        default:
             return null;
     }
 }
@@ -79,7 +82,7 @@ export function getEventReferenceEntityLinkPath(
 export function getEventTypeDisplayName(
     t: TFunction,
     event_type: EventType,
-    entity_reference: EventReferenceEntity | undefined,
+    entity_reference: EventEntityType | undefined | null,
     entity: string,
     element: ReactElement,
 ): ReactNode {
@@ -337,9 +340,9 @@ export function getEventTypeDisplayName(
 export function getNotificationDisplayName(
     t: TFunction,
     event_type: EventType,
-    subject_entity_reference: EventReferenceEntity,
+    subject_entity_reference: EventEntityType,
     subject_entity: string,
-    target_entity_reference: EventReferenceEntity,
+    target_entity_reference: EventEntityType | null | undefined,
     target_entity: string,
     subject: ReactElement,
     target: ReactElement,
@@ -496,10 +499,10 @@ export function getNotificationDisplayName(
 export function getEventTypeDisplayText(
     t: TFunction,
     event_type: EventType,
-    entity_reference: EventReferenceEntity,
     entity: string,
+    entity_reference?: EventEntityType | null,
 ): string {
-    const result = getEventTypeDisplayTranslation(t, event_type, entity_reference, entity);
+    const result = getEventTypeDisplayTranslation(t, event_type, entity, entity_reference);
 
     // Strip html tags
     return result.replace(/<[^>]*>/g, '');
@@ -508,8 +511,8 @@ export function getEventTypeDisplayText(
 function getEventTypeDisplayTranslation(
     t: TFunction,
     event_type: EventType,
-    entity_reference: EventReferenceEntity,
     entity: string,
+    entity_reference: EventEntityType | null | undefined,
 ): string {
     const entity_type = getTypeDisplayName(t, entity_reference);
 

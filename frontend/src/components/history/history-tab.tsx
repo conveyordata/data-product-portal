@@ -5,20 +5,19 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import type { EventContract } from '@/types/events/event.contract';
+import type { GetEventHistoryResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import { parseEventType } from '@/types/events/event-types.ts';
 import { getEventTypeDisplayText, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper.tsx';
 import { getHistoryColumns } from './history-table-columns';
 
-type Event = EventContract & { key: number };
-
 function filterHistory(
     t: TFunction,
-    events: EventContract[],
+    events: GetEventHistoryResponseItem[],
     searchTerm: string,
     resourceId: string,
     type: EventReferenceEntity,
-): Event[] {
+): GetEventHistoryResponseItem[] {
     const items = events.map((item, index) => ({ ...item, key: index }));
     if (!searchTerm) {
         return items;
@@ -34,7 +33,7 @@ function filterHistory(
             label = getTargetDisplayLabel(record);
         }
 
-        const text = getEventTypeDisplayText(t, record.name, record.target_type, label);
+        const text = getEventTypeDisplayText(t, parseEventType(record.name), label, record.target_type);
         return text.toLowerCase().includes(searchTerm.toLowerCase());
     });
 }
@@ -42,7 +41,7 @@ function filterHistory(
 type Props = {
     id: string;
     type: EventReferenceEntity;
-    history?: EventContract[];
+    history?: GetEventHistoryResponseItem[];
     isFetching: boolean;
 };
 export function HistoryTab({ id, type, history = [], isFetching }: Props) {
@@ -57,11 +56,14 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
         initialPagination: HISTORY_PAGINATION,
     });
 
-    const onChange: TableProps<Event>['onChange'] = (pagination) => {
+    const onChange: TableProps<GetEventHistoryResponseItem>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
-    const columns = useMemo(() => getHistoryColumns({ t, resourceId: id, type }), [t, id, type]) as ColumnsType<Event>;
+    const columns = useMemo(
+        () => getHistoryColumns({ t, resourceId: id, type }),
+        [t, id, type],
+    ) as ColumnsType<GetEventHistoryResponseItem>;
 
     return (
         <Flex vertical gap={'middle'}>
@@ -70,7 +72,7 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
                 allowClear
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Table<Event>
+            <Table<GetEventHistoryResponseItem>
                 loading={isFetching}
                 dataSource={filteredHistory}
                 columns={columns}

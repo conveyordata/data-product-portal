@@ -12,6 +12,7 @@ from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests import test_session
 from tests.factories import (
+    DataOutputDatasetAssociationFactory,
     DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -21,6 +22,7 @@ from tests.factories import (
     DomainFactory,
     GlobalRoleAssignmentFactory,
     RoleFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 
@@ -274,7 +276,10 @@ class TestDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
-        ds = DatasetFactory()
+        data_product = DataProductFactory()
+        data_output = TechnicalAssetFactory(owner=data_product)
+        ds = DatasetFactory(data_product=data_product)
+        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         dataset = self.get_dataset_by_id(client, ds.id)
         assert dataset.status_code == 200
@@ -284,7 +289,10 @@ class TestDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
-        ds = DatasetFactory()
+        data_product = DataProductFactory()
+        data_output = TechnicalAssetFactory(owner=data_product)
+        ds = DatasetFactory(data_product=data_product)
+        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         dataset = self.get_output_port(client, ds.id, ds.data_product.id)
         assert dataset.status_code == 200

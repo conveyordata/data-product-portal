@@ -1,23 +1,23 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import type { DataProductContract } from '@/types/data-product';
-import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
+import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { TagModel } from '@/types/tag';
 import styles from './dataset-description.module.scss';
 
 type Props = {
-    lifecycle: DataProductLifeCycleContract;
+    lifecycle: DataProductLifeCycle | null;
     accessType?: string;
     description: string;
-    data_product: DataProductContract;
+    data_product: GetDataProductResponse;
     domain: string;
     tags: TagModel[];
     namespace: string;
 };
 
-export function DatasetDescription({
+export function OutputPortDescription({
     lifecycle,
     accessType,
     description,
@@ -33,7 +33,7 @@ export function DatasetDescription({
             <Space className={styles.contentSubtitle}>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Status')}</Typography.Text>
-                    <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
+                    <Tag color={lifecycle?.color ?? 'default'}>{lifecycle?.name || t('Unknown')}</Tag>
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>

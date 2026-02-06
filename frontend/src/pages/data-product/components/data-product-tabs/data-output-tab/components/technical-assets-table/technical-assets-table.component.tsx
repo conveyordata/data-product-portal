@@ -1,24 +1,25 @@
 import { Button, Flex, Input, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DataOutputCard } from '@/components/data-outputs/data-output-card/data-output-card.component.tsx';
+import { TechnicalAssetCard } from '@/components/data-outputs/technical-asset-card/data-output-card.component.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetDataProductTechnicalAssetsQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataOutputsGetContract } from '@/types/data-output';
 import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup.tsx';
 
 type Props = {
     dataProductId: string;
-    dataOutputs: DataOutputsGetContract;
     onDragStart?: (dataOutputId: string) => void;
     onDragEnd?: () => void;
 };
 
-export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDragEnd }: Props) {
+export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: { technical_assets: technicalAssets = [] } = {} } =
+        useGetDataProductTechnicalAssetsQuery(dataProductId);
+    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
     const { isVisible, handleOpen, handleClose } = useModal();
     const { data: access } = useCheckAccessQuery(
         {
@@ -30,14 +31,14 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
     const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
     const filteredDataOutputs = useMemo(() => {
-        if (!searchTerm) return dataOutputs;
-        return dataOutputs.filter(
+        if (!searchTerm) return technicalAssets;
+        return technicalAssets.filter(
             (dataOutput) =>
                 dataOutput?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
                 dataOutput?.namespace?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
                 dataOutput?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         );
-    }, [dataOutputs, searchTerm]);
+    }, [technicalAssets, searchTerm]);
 
     if (!dataProduct) return null;
 
@@ -75,12 +76,12 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                 />
             </Flex>
 
-            {filteredDataOutputs.map((dataOutput) => (
-                <DataOutputCard
-                    key={dataOutput.id}
-                    dataOutput={dataOutput}
+            {filteredDataOutputs.map((technicalAsset) => (
+                <TechnicalAssetCard
+                    key={technicalAsset.id}
+                    technicalAsset={technicalAsset}
                     dataProductId={dataProductId}
-                    onDragStart={() => handleDragStart(dataOutput.id)}
+                    onDragStart={() => handleDragStart(technicalAsset.id)}
                     onDragEnd={handleDragEnd}
                 />
             ))}
