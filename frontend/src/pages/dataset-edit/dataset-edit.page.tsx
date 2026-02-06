@@ -6,7 +6,7 @@ import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-s
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 export function DatasetEdit() {
-    const { datasetId = '' } = useParams();
+    const { datasetId = '', dataProductId = '' } = useParams();
     const { data, isError } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
     const navigate = useNavigate();
 
@@ -18,7 +18,7 @@ export function DatasetEdit() {
     return (
         <>
             <Typography.Title level={3}>{data?.name}</Typography.Title>
-            <DatasetForm mode={'edit'} datasetId={datasetId} />
+            <DatasetForm mode={'edit'} datasetId={datasetId} dataProductId={dataProductId} />
         </>
     );
 }

@@ -1,9 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import type { DataOutputsGetContract } from '@/types/data-output';
 import type {
-    DataProductContract,
     DataProductCreate,
     DataProductCreateResponse,
     DataProductDatasetRemoveRequest,
@@ -18,7 +16,6 @@ import type {
     DataProductGetSignInUrlResponse,
     DataProductGetSnowflakeUrlRequest,
     DataProductGetSnowflakeUrlResponse,
-    DataProductsGetContract,
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
@@ -35,42 +32,6 @@ export const dataProductTags: string[] = [
 
 export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataProductTags }).injectEndpoints({
     endpoints: (builder) => ({
-        getAllDataProducts: builder.query<DataProductsGetContract, void>({
-            query: () => ({
-                url: ApiUrl.DataProducts,
-                method: 'GET',
-            }),
-            providesTags: (result = []) =>
-                result
-                    ? [
-                          { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
-                          ...result.map(({ id }) => ({ type: TagTypes.DataProduct as const, id })),
-                      ]
-                    : [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
-        }),
-        getUserDataProducts: builder.query<DataProductsGetContract, string>({
-            query: (userId) => ({
-                url: buildUrl(ApiUrl.UserDataProducts, { userId }),
-                method: 'GET',
-            }),
-            providesTags: [{ type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST }],
-        }),
-        getDataProductDataOutputs: builder.query<DataOutputsGetContract, string>({
-            query: (id) => ({
-                url: buildUrl(ApiUrl.DataProductsDataOutput, { dataProductId: id }),
-                method: 'GET',
-            }),
-        }),
-        getDataProductById: builder.query<DataProductContract, string>({
-            query: (id) => ({
-                url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
-                method: 'GET',
-            }),
-            providesTags: (_, __, id) => [
-                { type: TagTypes.DataProduct as const, id },
-                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-            ],
-        }),
         getDataProductHistory: builder.query<EventContract[], string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
@@ -211,19 +172,19 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 method: 'PUT',
                 data: { about },
             }),
-            onQueryStarted: async ({ dataProductId, about }, { dispatch, queryFulfilled }) => {
-                const patchResult = dispatch(
-                    dataProductsApiSlice.util.updateQueryData(
-                        'getDataProductById',
-                        dataProductId as string,
-                        (draft) => {
-                            draft.about = about;
-                        },
-                    ),
-                );
-
-                queryFulfilled.catch(patchResult.undo);
-            },
+            // onQueryStarted: async ({ dataProductId, about }, { dispatch, queryFulfilled }) => {
+            //     const patchResult = dispatch(
+            //         dataProductsApiSlice.util.updateQueryData(
+            //             'getDataProductById',
+            //             dataProductId as string,
+            //             (draft) => {
+            //                 draft.about = about;
+            //             },
+            //         ),
+            //     );
+            //
+            //     queryFulfilled.catch(patchResult.undo);
+            // },
             invalidatesTags: (_, __, { dataProductId }) => [
                 { type: TagTypes.DataProduct as const, id: dataProductId },
                 { type: TagTypes.History as const, id: dataProductId },
@@ -236,16 +197,12 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
 export const {
     useCreateDataProductMutation,
     useUpdateDataProductMutation,
-    useGetDataProductByIdQuery,
-    useGetAllDataProductsQuery,
     useGetDataProductSignInUrlMutation,
     useGetDataProductConveyorIDEUrlMutation,
     useRemoveDataProductMutation,
     useRemoveDatasetFromDataProductMutation,
     useRequestDatasetsAccessForDataProductMutation,
     useUpdateDataProductAboutMutation,
-    useGetUserDataProductsQuery,
-    useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useGetDataProductHistoryQuery,

@@ -140,10 +140,6 @@ class UpdateDataProductResponse(ORMModel):
     id: UUID
 
 
-class CreateTechnicalAssetResponse(ORMModel):
-    id: UUID
-
-
 class GetRoleResponse(ORMModel):
     role: str
 

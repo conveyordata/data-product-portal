@@ -8,12 +8,12 @@ import {
     type DataProductSettingsGetItem,
     useGetDataProductsSettingsQuery,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useCreateDataProductSettingValueMutation,
     useCreateDatasetSettingValueMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
@@ -28,7 +28,7 @@ type Props = {
 
 export function DataProductSettings({ id, scope }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(id || '', {
+    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductQuery(id || '', {
         skip: !id || scope !== 'dataproduct',
     });
     const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(id || '', {

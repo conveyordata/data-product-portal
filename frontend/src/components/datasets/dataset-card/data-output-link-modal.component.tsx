@@ -6,10 +6,10 @@ import { Searchbar } from '@/components/form';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
+import { useGetDataProductTechnicalAssetsQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { SearchForm } from '@/types/shared';
@@ -34,16 +34,18 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
     const [approveLink] = useApproveDataOutputLinkMutation();
 
     const dataProductId = dataset?.data_product_id || '';
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
+    const { data: { technical_assets: technicalAssets = [] } = {} } = useGetDataProductTechnicalAssetsQuery(
+        dataProductId,
+        { skip: !dataProductId },
+    );
 
     const existingLinkIds = useMemo(() => {
         return new Set(existingLinks.map((link) => link.data_output.id));
     }, [existingLinks]);
 
     const availableDataOutputs = useMemo(() => {
-        if (!dataProduct?.data_outputs) return [];
-        return dataProduct.data_outputs.filter((output) => !existingLinkIds.has(output.id));
-    }, [dataProduct?.data_outputs, existingLinkIds]);
+        return technicalAssets.filter((output) => !existingLinkIds.has(output.id));
+    }, [technicalAssets, existingLinkIds]);
 
     const filteredDataOutputs = useMemo(() => {
         if (!searchTerm) return availableDataOutputs;

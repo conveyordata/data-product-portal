@@ -1,15 +1,18 @@
 import { Col, Row } from 'antd';
 import { useState } from 'react';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { DataOutputTable } from './components/data-output-table/data-output-table.component';
-import { DatasetTable } from './components/dataset-table/dataset-table.component';
+import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useGetDataProductTechnicalAssetsQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { OutputPortsTable } from './components/output-ports-table/output-ports-table.component.tsx';
+import { TechnicalAssetsTable } from './components/technical-assets-table/technical-assets-table.component.tsx';
 
 type Props = {
     dataProductId: string;
 };
 
 export function DataOutputTab({ dataProductId }: Props) {
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: { output_ports: outputPorts = [] } = {} } = useGetDataProductOutputPortsQuery(dataProductId);
+    const { data: { technical_assets: technicalAssets = [] } = {} } =
+        useGetDataProductTechnicalAssetsQuery(dataProductId);
 
     const [draggedDataOutput, setDraggedDataOutput] = useState<string | null>(null);
 
@@ -24,16 +27,16 @@ export function DataOutputTab({ dataProductId }: Props) {
     return (
         <Row gutter={24}>
             <Col span={12}>
-                <DatasetTable
-                    datasets={dataProduct?.datasets ?? []}
+                <OutputPortsTable
+                    outputPorts={outputPorts}
                     dataProductId={dataProductId}
                     draggedDataOutputId={draggedDataOutput}
                 />
             </Col>
             <Col span={12}>
-                <DataOutputTable
+                <TechnicalAssetsTable
                     dataProductId={dataProductId}
-                    dataOutputs={dataProduct?.data_outputs ?? []}
+                    technicalAssets={technicalAssets}
                     onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
                 />

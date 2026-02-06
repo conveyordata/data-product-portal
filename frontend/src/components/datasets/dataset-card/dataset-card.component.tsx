@@ -178,7 +178,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                             {' '}
                             {/*Min width is needed to ensure the elipsis of description*/}
                             <Flex justify="space-between" align="flex-start">
-                                <Link to={createDatasetIdPath(dataset.id)}>
+                                <Link to={createDatasetIdPath(dataset.id, dataset.data_product_id)}>
                                     <Typography.Title level={5}>{dataset.name}</Typography.Title>
                                 </Link>
                                 <Flex gap="small">

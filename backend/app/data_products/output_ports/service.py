@@ -24,6 +24,9 @@ from app.core.namespace.validation import (
 )
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
+    DataOutputDatasetAssociation,
+)
+from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -47,6 +50,7 @@ from app.data_products.output_ports.schema_response import (
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
+from app.data_products.technical_assets.schema_response import DataOutputGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -511,3 +515,20 @@ class OutputPortService:
             ensure_data_product_exists(data_product_id, self.db)
             query = query.filter(DatasetModel.data_product_id == data_product_id)
         return self.db.scalars(query).unique().all()
+
+    def get_data_outputs_for_data_product(self, id: UUID) -> Sequence[DataOutputGet]:
+        return (
+            self.db.scalars(
+                select(TechnicalAssetModel)
+                .options(
+                    selectinload(TechnicalAssetModel.environment_configurations),
+                    selectinload(TechnicalAssetModel.dataset_links)
+                    .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DatasetModel.tags)
+                    .raiseload("*"),
+                )
+                .filter(TechnicalAssetModel.owner_id == id)
+            )
+            .unique()
+            .all()
+        )

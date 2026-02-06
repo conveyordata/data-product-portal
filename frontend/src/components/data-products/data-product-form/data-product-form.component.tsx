@@ -14,6 +14,7 @@ import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generate
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
@@ -24,7 +25,6 @@ import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useCreateDataProductMutation,
-    useGetDataProductByIdQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -52,7 +52,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const currentUser = useSelector(selectCurrentUser);
     const [fromMarketplace] = useQueryState('fromMarketplace', parseAsBoolean.withDefault(false));
 
-    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(
+    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductQuery(
         dataProductId || '',
         { skip: mode === 'create' || !dataProductId },
     );
@@ -240,7 +240,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         namespace: currentDataProduct?.namespace,
         description: currentDataProduct?.description,
         type_id: currentDataProduct?.type.id,
-        lifecycle_id: currentDataProduct?.lifecycle.id,
+        lifecycle_id: currentDataProduct?.lifecycle?.id,
         domain_id: currentDataProduct?.domain.id,
         tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
         owners: mode === 'edit' ? ownerIds : currentUser?.id ? [currentUser?.id] : [],

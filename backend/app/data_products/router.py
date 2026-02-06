@@ -2,7 +2,7 @@ from copy import deepcopy
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.auth import (
@@ -48,7 +48,6 @@ from app.data_products.schema_request import (
 )
 from app.data_products.schema_response import (
     CreateDataProductResponse,
-    CreateTechnicalAssetResponse,
     DataProductGet,
     DataProductsGet,
     DatasetLinks,
@@ -65,15 +64,13 @@ from app.data_products.schema_response import (
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
+from app.data_products.technical_assets.router import create_technical_asset
 from app.data_products.technical_assets.schema_request import (
-    CreateTechnicalAssetRequest,
     DataOutputCreate,
 )
 from app.data_products.technical_assets.schema_response import (
-    DataOutputGet,
-    GetTechnicalAssetsResponse,
+    CreateTechnicalAssetResponse,
 )
-from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -91,31 +88,6 @@ from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 router = APIRouter()
-
-
-@router.get("/namespace_suggestion", deprecated=True)
-def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return NamespaceSuggestion(
-        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
-    )
-
-
-@router.get("/validate_namespace", deprecated=True)
-def validate_data_product_namespace(
-    namespace: str, db: Session = Depends(get_db_session)
-) -> NamespaceValidation:
-    return NamespaceValidation(
-        validity=ResourceNameService(model=DataProductModel)
-        .validate_resource_name(namespace, db)
-        .validity
-    )
-
-
-@router.get("/namespace_length_limits", deprecated=True)
-def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
-    return NamespaceLengthLimits(
-        max_length=ResourceNameService.resource_name_length_limits().max_length
-    )
 
 
 @router.post(
@@ -445,7 +417,7 @@ def set_value_for_data_product(
 
 
 _router = router
-router = APIRouter(tags=["Data products"])
+router = APIRouter(tags=["Data Products"])
 old_route = "/data_products"
 route = "/v2/data_products"
 router.include_router(_router, prefix=old_route, deprecated=True)
@@ -626,7 +598,7 @@ def get_data_products_old(
 @router.get(route)
 def get_data_products(
     db: Session = Depends(get_db_session),
-    filter_to_user_with_assigment: Optional[UUID] = None,
+    filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
@@ -693,51 +665,6 @@ def create_data_output(
         db=db,
         authenticated_user=authenticated_user,
     )
-
-
-@router.post(
-    f"{route}/{{id}}/technical_asset",
-    responses={
-        200: {
-            "description": "DataOutput successfully created",
-            "content": {
-                "application/json": {
-                    "example": {"id": "random id of the new data_output"}
-                }
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
-                DataProductResolver,
-            )
-        )
-    ],
-)
-def create_technical_asset(
-    id: UUID,
-    technical_asset: CreateTechnicalAssetRequest,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> CreateTechnicalAssetResponse:
-    technical_asset = DataOutputService(db).create_data_output(id, technical_asset)
-    event_id = EventService(db).create_event(
-        CreateEvent(
-            name=EventType.DATA_OUTPUT_CREATED,
-            subject_id=technical_asset.id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
-            target_id=technical_asset.owner_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
-            actor_id=authenticated_user.id,
-        ),
-    )
-    NotificationService(db).create_data_product_notifications(
-        data_product_id=technical_asset.owner_id, event_id=event_id
-    )
-    RefreshInfrastructureLambda().trigger()
-    return CreateTechnicalAssetResponse(id=technical_asset.id)
 
 
 @router.get(
@@ -893,25 +820,6 @@ def get_snowflake_url(
 ) -> GetSnowflakeUrlResponse:
     return GetSnowflakeUrlResponse(
         snowflake_url=DataProductService(db).get_snowflake_url(id, environment)
-    )
-
-
-@router.get(f"{old_route}/{{id}}/data_outputs", deprecated=True)
-def get_data_outputs_old(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[DataOutputGet]:
-    return DataProductService(db).get_data_outputs(id)
-
-
-@router.get(f"{route}/{{id}}/technical_assets")
-def get_technical_assets(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> GetTechnicalAssetsResponse:
-    return GetTechnicalAssetsResponse(
-        technical_assets=[
-            DataOutputGet.model_validate(do).convert()
-            for do in get_data_outputs_old(id, db)
-        ]
     )
 
 
@@ -1079,4 +987,29 @@ def validate_data_output_namespace(
         validity=DataOutputResourceNameValidator()
         .validate_resource_name(resource_name=namespace, db=db, scope=id)
         .validity
+    )
+
+
+@router.get(f"{old_route}/namespace_suggestion", deprecated=True)
+def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return NamespaceSuggestion(
+        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
+    )
+
+
+@router.get(f"{old_route}/validate_namespace", deprecated=True)
+def validate_data_product_namespace(
+    namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return NamespaceValidation(
+        validity=ResourceNameService(model=DataProductModel)
+        .validate_resource_name(namespace, db)
+        .validity
+    )
+
+
+@router.get(f"{old_route}/namespace_length_limits", deprecated=True)
+def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
+    return NamespaceLengthLimits(
+        max_length=ResourceNameService.resource_name_length_limits().max_length
     )

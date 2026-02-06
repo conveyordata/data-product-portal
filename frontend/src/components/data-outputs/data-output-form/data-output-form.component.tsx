@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useResourceNameConstraintsQuery } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
@@ -11,7 +12,6 @@ import {
     useRemoveDataOutputMutation,
     useUpdateDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
@@ -32,7 +32,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         dataOutputId || '',
         { skip: !dataOutputId },
     );
-    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
+    const { data: dataProduct } = useGetDataProductQuery(currentDataOutput?.owner.id ?? '', {
         skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
     });
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();

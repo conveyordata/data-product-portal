@@ -1,13 +1,11 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-
-import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { TagModel } from '@/types/tag';
-
 import styles from './data-product-description.module.scss';
 
 type Props = {
-    lifecycle: DataProductLifeCycleContract;
+    lifecycle: DataProductLifeCycle | null;
     type: string;
     description: string;
     domain: string;
@@ -23,7 +21,7 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
             <Space className={styles.contentSubtitle}>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Status')}</Typography.Text>
-                    <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
+                    <Tag color={lifecycle?.color ?? 'default'}>{lifecycle?.name ?? t('Unknown')}</Tag>
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>

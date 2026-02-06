@@ -24,6 +24,7 @@ import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constant
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { OutputPortAccessType, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
@@ -33,7 +34,6 @@ import {
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
@@ -78,7 +78,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Public Output Ports are visible to everyone and are free to use by anyone')}>
-                    {getDatasetAccessTypeLabel(t, DatasetAccess.Public)}
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Public)}
                 </Tooltip>
             ),
             value: DatasetAccess.Public,
@@ -86,7 +86,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
-                    {getDatasetAccessTypeLabel(t, DatasetAccess.Restricted)}
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted)}
                 </Tooltip>
             ),
             value: DatasetAccess.Restricted,
@@ -94,7 +94,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
-                    {getDatasetAccessTypeLabel(t, DatasetAccess.Private)}
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Private)}
                 </Tooltip>
             ),
             value: DatasetAccess.Private,
@@ -109,7 +109,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetDatasetByIdQuery(datasetId || '', {
         skip: mode === 'create' || !datasetId,
     });
-    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId || '', {
+    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId || '', {
         skip: mode === 'edit' || !dataProductId,
     });
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
@@ -191,10 +191,10 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     });
                     navigate(createDataOutputIdPath(dataOutputId, dataProductId));
                 } else {
-                    if (dataProductId) {
+                    if (dataProductId && !datasetId) {
                         navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
                     } else {
-                        navigate(createDatasetIdPath(response.id));
+                        navigate(createDatasetIdPath(response.id, dataProductId || ''));
                     }
                 }
             } else if (mode === 'edit' && datasetId && currentDataset) {
@@ -216,7 +216,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 const response = await updateDataset({ dataset: request, id: datasetId }).unwrap();
                 dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
 
-                navigate(createDatasetIdPath(response.id));
+                navigate(createDatasetIdPath(response.id, currentDataset.data_product_id));
             }
             form.resetFields();
         } catch (_e) {
@@ -228,8 +228,8 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
 
     const onCancel = () => {
         form.resetFields();
-        if (mode === 'edit' && datasetId) {
-            navigate(createDatasetIdPath(datasetId));
+        if (mode === 'edit' && datasetId && dataProductId) {
+            navigate(createDatasetIdPath(datasetId, dataProductId));
         } else if (dataOutputId && dataProductId) {
             navigate(createDataOutputIdPath(dataOutputId, dataProductId));
         } else {

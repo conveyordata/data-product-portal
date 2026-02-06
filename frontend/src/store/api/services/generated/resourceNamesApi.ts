@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/pluginsApi";
+import { api } from "@/store/api/services/generated/dataProductsOutputPortsDataQualityApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     sanitizeResourceName: build.query<
@@ -55,6 +55,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];

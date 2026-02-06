@@ -21,10 +21,10 @@ function LinkToDataProductNode({ id }: { id: string }) {
     );
 }
 
-function LinkToDatasetNode({ id }: { id: string }) {
+function LinkToDatasetNode({ id, product_id }: { id: string; product_id: string }) {
     const { t } = useTranslation();
     return (
-        <Link to={createDatasetIdPath(id, DatasetTabKeys.Explorer)} className={styles.link}>
+        <Link to={createDatasetIdPath(id, product_id, DatasetTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View Output Port')}</Button>
         </Link>
     );

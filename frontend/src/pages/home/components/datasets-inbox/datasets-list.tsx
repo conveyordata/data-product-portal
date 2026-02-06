@@ -52,7 +52,7 @@ export const DatasetList = ({ datasets, isFetching, lastVisitedDatasets }: Datas
                                     : t('No recent activity')
                             }
                             icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                            linkTo={createDatasetIdPath(dataset.id)}
+                            linkTo={createDatasetIdPath(dataset.id, dataset.data_product_id)}
                         />
                         <div />
                     </>

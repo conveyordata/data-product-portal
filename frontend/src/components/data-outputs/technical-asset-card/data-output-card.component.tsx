@@ -4,27 +4,26 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import type { GetTechnicalAssetsResponseItemRead } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRemoveDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataOutputsGetContract } from '@/types/data-output';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDecisionStatusBadgeStatus } from '@/utils/status.helper';
-
 import styles from './data-output-card.module.scss';
 
 type Props = {
-    dataOutput: DataOutputsGetContract[0];
+    technicalAsset: GetTechnicalAssetsResponseItemRead;
     dataProductId: string;
     onDragStart?: () => void;
     onDragEnd?: () => void;
 };
 
-export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragEnd }: Props) {
+export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
     const { data: { plugins } = {} } = useGetPluginsQuery();
     const { data: deleteAccess } = useCheckAccessQuery({
@@ -37,9 +36,9 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
 
     const handleRemoveDataOutput = useCallback(async () => {
         try {
-            await removeDataOutput(dataOutput.id).unwrap();
+            await removeDataOutput(technicalAsset.id).unwrap();
             dispatchMessage({
-                content: t('Technical Asset {{name}} has been successfully removed', { name: dataOutput.name }),
+                content: t('Technical Asset {{name}} has been successfully removed', { name: technicalAsset.name }),
                 type: 'success',
             });
         } catch (_error) {
@@ -48,12 +47,12 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                 type: 'error',
             });
         }
-    }, [removeDataOutput, dataOutput.id, dataOutput.name, t]);
+    }, [removeDataOutput, technicalAsset.id, technicalAsset.name, t]);
 
     const handleRemoveDatasetLink = useCallback(
         async (datasetId: string, datasetLinkId: string) => {
             try {
-                await unlinkDataset({ dataOutputId: dataOutput.id, datasetId, datasetLinkId }).unwrap();
+                await unlinkDataset({ dataOutputId: technicalAsset.id, datasetId, datasetLinkId }).unwrap();
                 dispatchMessage({
                     content: t('Output Port unlinked successfully'),
                     type: 'success',
@@ -65,7 +64,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                 });
             }
         },
-        [unlinkDataset, dataOutput.id, t],
+        [unlinkDataset, technicalAsset.id, t],
     );
 
     const handleDragStart = (event: React.DragEvent) => {
@@ -73,8 +72,8 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
             'text/plain',
             JSON.stringify({
                 type: 'data-output',
-                id: dataOutput.id,
-                name: dataOutput.name,
+                id: technicalAsset.id,
+                name: technicalAsset.name,
             }),
         );
 
@@ -96,7 +95,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
     const canRemove = deleteAccess?.allowed ?? false;
 
     const getDeleteDescription = () => {
-        if (dataOutput.dataset_links && dataOutput.dataset_links.length > 0) {
+        if (technicalAsset.output_port_links && technicalAsset.output_port_links.length > 0) {
             return (
                 <Flex vertical>
                     {t(
@@ -104,9 +103,9 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                     )}
                     <List
                         size="small"
-                        dataSource={dataOutput.dataset_links}
+                        dataSource={technicalAsset.output_port_links}
                         renderItem={(link) => (
-                            <List.Item style={{ padding: '0 0', border: 'none' }}>• {link.dataset.name}</List.Item>
+                            <List.Item style={{ padding: '0 0', border: 'none' }}>• {link.output.name}</List.Item>
                         )}
                     />
                 </Flex>
@@ -125,19 +124,22 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                     <Flex justify="space-between" align="flex-start">
                         <Flex gap={'middle'} align="center">
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type, plugins)}
+                                iconComponent={getDataOutputIcon(
+                                    technicalAsset.configuration.configuration_type,
+                                    plugins,
+                                )}
                             />
                             <Flex>
-                                <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>
+                                <Link to={createDataOutputIdPath(technicalAsset.id, technicalAsset.owner_id)}>
                                     <Typography.Title
                                         level={5}
                                         ellipsis={{ tooltip: true, rows: 2 }}
                                         style={{ margin: 0 }}
                                     >
-                                        {dataOutput.result_string || ''}
+                                        {technicalAsset.result_string || ''}
                                     </Typography.Title>
                                     <Typography.Text ellipsis={{ tooltip: true }} type="secondary">
-                                        {dataOutput.name}
+                                        {technicalAsset.name}
                                     </Typography.Text>
                                 </Link>
                             </Flex>
@@ -157,14 +159,14 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                         </Popconfirm>
                     </Flex>
 
-                    {dataOutput.dataset_links && dataOutput.dataset_links.length > 0 && (
+                    {technicalAsset.output_port_links && technicalAsset.output_port_links.length > 0 && (
                         <Collapse
                             size={'small'}
                             items={[
                                 {
                                     key: '1',
                                     label: t('{{count}} linked Output Ports', {
-                                        count: dataOutput.dataset_links.length,
+                                        count: technicalAsset.output_port_links.length,
                                     }),
                                     /*    style: {
                                     paddingRight: 0,
@@ -177,7 +179,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                                     children: (
                                         <List
                                             size="small"
-                                            dataSource={dataOutput.dataset_links}
+                                            dataSource={technicalAsset.output_port_links}
                                             renderItem={(link) => (
                                                 <List.Item>
                                                     <Flex
@@ -190,14 +192,14 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                                                                 status={getDecisionStatusBadgeStatus(link.status)}
                                                                 size="small"
                                                             />
-                                                            <Typography.Text>{link.dataset.name}</Typography.Text>
+                                                            <Typography.Text>{link.output.name}</Typography.Text>
                                                         </Flex>
                                                         <Button
                                                             type="text"
                                                             size="small"
                                                             danger
                                                             onClick={() =>
-                                                                handleRemoveDatasetLink(link.dataset.id, link.id)
+                                                                handleRemoveDatasetLink(link.output.id, link.id)
                                                             }
                                                         >
                                                             {t('Remove')}

@@ -10,8 +10,14 @@ export function isDataProductEditPage(path: string, dataProductId: string) {
     );
 }
 
-export function isDatasetEditPage(path: string, datasetId: string) {
-    return getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId) === path;
+export function isDatasetEditPage(path: string, datasetId: string, dataProductId: string) {
+    return (
+        path ===
+        ApplicationPaths.DatasetEdit.replace(`:${DynamicPathParams.DatasetId}`, datasetId).replace(
+            `:${DynamicPathParams.DataProductId}`,
+            dataProductId,
+        )
+    );
 }
 
 export function isDataOutputEditPage(path: string, dataOutputId: string, dataProductId: string) {

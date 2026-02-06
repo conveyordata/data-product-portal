@@ -137,3 +137,7 @@ class GetTechnicalAssetsResponse(ORMModel):
 
 class UpdateTechnicalAssetResponse(ORMModel):
     id: UUID
+
+
+class CreateTechnicalAssetResponse(ORMModel):
+    id: UUID

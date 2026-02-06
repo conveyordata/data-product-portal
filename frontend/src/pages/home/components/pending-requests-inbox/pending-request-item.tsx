@@ -115,7 +115,10 @@ export function PendingItem({ pendingAction }: Props) {
                                     Accepting will grant the Data Product read access on the{' '}
                                     <Link
                                         onClick={(e) => e.stopPropagation()}
-                                        to={createDatasetIdPath(pendingAction.dataset_id)}
+                                        to={createDatasetIdPath(
+                                            pendingAction.dataset_id,
+                                            pendingAction.dataset.data_product_id,
+                                        )}
                                     >
                                         {pendingAction.dataset.name}
                                     </Link>{' '}
@@ -125,7 +128,11 @@ export function PendingItem({ pendingAction }: Props) {
                         </Flex>
                     ),
                     tag: t('{{name}} Output Port', { name: pendingAction.dataset.name }),
-                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.Producers),
+                    navigatePath: createDatasetIdPath(
+                        pendingAction.dataset_id,
+                        pendingAction.dataset.data_product_id,
+                        DatasetTabKeys.Producers,
+                    ),
                 };
 
             case PendingActionTypes.DataOutputDataset:
@@ -154,7 +161,10 @@ export function PendingItem({ pendingAction }: Props) {
                                 Accepting will create a link from the Technical Asset to the{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(pendingAction.dataset_id)}
+                                    to={createDatasetIdPath(
+                                        pendingAction.dataset_id,
+                                        pendingAction.dataset.data_product_id,
+                                    )}
                                 >
                                     {pendingAction.dataset.name}
                                 </Link>{' '}
@@ -163,7 +173,11 @@ export function PendingItem({ pendingAction }: Props) {
                         </Typography.Text>
                     ),
                     tag: t('{{name}} Output Port', { name: pendingAction.dataset.name }),
-                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.Consumers),
+                    navigatePath: createDatasetIdPath(
+                        pendingAction.dataset_id,
+                        pendingAction.dataset.data_product_id,
+                        DatasetTabKeys.Consumers,
+                    ),
                 };
 
             case PendingActionTypes.DataProductRoleAssignment:

@@ -62,7 +62,6 @@ from app.data_products.schema_response import (
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.data_products.technical_assets.schema_response import DataOutputGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -95,12 +94,21 @@ class DataProductService:
     def get_rolled_up_tags(self, data_product_id: UUID) -> set[Tag]:
         ensure_data_product_exists(data_product_id, self.db)
         rolled_up_tags = set()
-        for output_ports in OutputPortService(self.db).get_output_ports(
-            data_product_id
-        ):
-            rolled_up_tags.update(output_ports.tags)
-        for technical_asset in self.get_data_outputs(data_product_id):
-            rolled_up_tags.update(technical_asset.tags)
+
+        output_port_tags = self.db.scalars(
+            select(TagModel)
+            .join(DatasetModel.tags)
+            .where(DatasetModel.data_product_id == data_product_id)
+        ).all()
+        rolled_up_tags.update(output_port_tags)
+
+        technical_asset_tags = self.db.scalars(
+            select(TagModel)
+            .join(TechnicalAssetModel.tags)
+            .where(TechnicalAssetModel.owner_id == data_product_id)
+        ).all()
+        rolled_up_tags.update(technical_asset_tags)
+
         return rolled_up_tags
 
     def get_data_product_old(self, id: UUID) -> DataProductGet:
@@ -483,23 +491,6 @@ class DataProductService:
     def get_conveyor_ide_url(self, id: UUID) -> str:
         data_product = self.db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
-
-    def get_data_outputs(self, id: UUID) -> Sequence[DataOutputGet]:
-        return (
-            self.db.scalars(
-                select(TechnicalAssetModel)
-                .options(
-                    selectinload(TechnicalAssetModel.environment_configurations),
-                    selectinload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.dataset)
-                    .selectinload(DatasetModel.tags)
-                    .raiseload("*"),
-                )
-                .filter(TechnicalAssetModel.owner_id == id)
-            )
-            .unique()
-            .all()
-        )
 
     def get_env_platform_config(
         self, id: UUID, environment: str, platform_name: str

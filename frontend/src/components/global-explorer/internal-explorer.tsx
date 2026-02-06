@@ -33,7 +33,11 @@ function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void):
                     break;
                 case CustomNodeTypes.DatasetNode:
                     extra_attributes = {
-                        nodeToolbarActions: node.isMain ? '' : <LinkToDatasetNode id={node.data.id} />,
+                        nodeToolbarActions: node.isMain ? (
+                            ''
+                        ) : (
+                            <LinkToDatasetNode id={node.data.id} product_id={node.data.link_to_id} />
+                        ),
                         targetHandlePosition: Position.Right,
                         targetHandleId: 'left_t',
                     };

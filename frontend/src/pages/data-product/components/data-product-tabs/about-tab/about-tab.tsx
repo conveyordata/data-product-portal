@@ -5,11 +5,9 @@ import { EmptyList } from '@/components/empty/empty-list/empty-list.component.ts
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import {
-    useGetDataProductByIdQuery,
-    useUpdateDataProductAboutMutation,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+import { useUpdateDataProductAboutMutation } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 
@@ -19,7 +17,7 @@ type Props = {
 
 export function AboutTab({ dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
+    const { data: dataProduct, isFetching } = useGetDataProductQuery(dataProductId, { skip: !dataProductId });
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataProductAbout, { isLoading }] = useUpdateDataProductAboutMutation();
 

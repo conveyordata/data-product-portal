@@ -53,7 +53,11 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
     if (target_id && !(target_id === resourceId && type === target_type)) {
         const path = getEventReferenceEntityLinkPath(
             target_id,
-            target_type === EventReferenceEntity.DataOutput ? (record.data_output?.owner_id ?? null) : null,
+            target_type === EventReferenceEntity.DataOutput
+                ? (record.data_output?.owner_id ?? null)
+                : target_type === EventReferenceEntity.Dataset
+                  ? (record.dataset?.data_product_id ?? null)
+                  : null,
             target_type,
         );
 

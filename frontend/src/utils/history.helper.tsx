@@ -66,7 +66,7 @@ export function getEventReferenceEntityLinkPath(
 ): string | null {
     switch (type) {
         case EventReferenceEntity.Dataset:
-            return createDatasetIdPath(id);
+            return dataProductId ? createDatasetIdPath(id, dataProductId) : null;
         case EventReferenceEntity.DataProduct:
             return createDataProductIdPath(id);
         case EventReferenceEntity.DataOutput:
