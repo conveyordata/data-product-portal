@@ -7,3 +7,4 @@ class DataOutputTypes(str, Enum):
     GlueTechnicalAssetConfiguration = "GlueTechnicalAssetConfiguration"
     SnowflakeTechnicalAssetConfiguration = "SnowflakeTechnicalAssetConfiguration"
     RedshiftTechnicalAssetConfiguration = "RedshiftTechnicalAssetConfiguration"
+    PostgresTechnicalAssetConfiguration = "PostgresTechnicalAssetConfiguration"

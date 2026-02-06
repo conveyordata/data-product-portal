@@ -28,7 +28,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
-import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
@@ -66,12 +65,12 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
 
     // State
-    const [selectedDataPlatform, setSelectedDataPlatform] = useState<
-        CustomDropdownItemProps<DataPlatforms> | undefined
-    >(undefined);
-    const [selectedConfiguration, setSelectedConfiguration] = useState<
-        CustomDropdownItemProps<DataPlatforms> | undefined
-    >(undefined);
+    const [selectedDataPlatform, setSelectedDataPlatform] = useState<CustomDropdownItemProps<string> | undefined>(
+        undefined,
+    );
+    const [selectedConfiguration, setSelectedConfiguration] = useState<CustomDropdownItemProps<string> | undefined>(
+        undefined,
+    );
 
     // Form
     const [form] = Form.useForm();
@@ -100,9 +99,9 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             return [];
         }
 
-        const transformTile = (tile: PlatformTile): CustomDropdownItemProps<DataPlatform> => ({
+        const transformTile = (tile: PlatformTile): CustomDropdownItemProps<string> => ({
             label: t(tile.label),
-            value: tile.value as DataPlatform,
+            value: tile.value,
             icon: getIcon(tile.icon_name),
             hasMenu: tile.has_menu,
             hasConfig: tile.has_config,
@@ -113,7 +112,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     }, [platformTilesData, t]);
 
     const platformServiceConfigMap = useMemo(() => {
-        const map = new Map<DataPlatform, ServiceConfig>();
+        const map = new Map<string, ServiceConfig>();
 
         if (!platformConfig) {
             return map;
@@ -121,7 +120,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         for (const config of platformConfig) {
             const platform = (
                 config.platform.name === config.service.name ? config.platform.name : config.service.name
-            ).toLocaleLowerCase() as DataPlatform;
+            ).toLocaleLowerCase();
 
             map.set(platform, {
                 platform_id: config.platform.id,
@@ -153,7 +152,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
-    const onDataPlatformClick = (dropdown: CustomDropdownItemProps<DataPlatforms>) => {
+    const onDataPlatformClick = (dropdown: CustomDropdownItemProps<string>) => {
         if (selectedDataPlatform !== dropdown) {
             form.setFieldsValue({ configuration: undefined, result: undefined });
             setSelectedDataPlatform(dropdown);
@@ -167,7 +166,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         }
     };
 
-    const onConfigurationClick = (dropdown: CustomDropdownItemProps<DataPlatforms>) => {
+    const onConfigurationClick = (dropdown: CustomDropdownItemProps<string>) => {
         if (!platformsLoading) {
             if (selectedConfiguration !== dropdown) {
                 form.setFieldsValue({ configuration: undefined, result: undefined });
@@ -315,7 +314,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 <Radio.Group>
                     <Space wrap className={styles.radioButtonContainer}>
                         {dataPlatforms.map((dataPlatform) => (
-                            <DataOutputPlatformTile<DataPlatform>
+                            <DataOutputPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
                                 isDisabled={isLoading}
@@ -335,7 +334,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 <Radio.Group>
                     <Space wrap className={styles.radioButtonContainer}>
                         {selectedDataPlatform?.children?.map((dataPlatform) => (
-                            <DataOutputPlatformTile<DataPlatform>
+                            <DataOutputPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
                                 isDisabled={isLoading}

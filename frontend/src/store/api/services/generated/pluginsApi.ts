@@ -80,6 +80,7 @@ export type UiElementMetadataResponse = {
   not_configured?: boolean;
   ui_metadata: UiElementMetadata[];
   plugin: string;
+  has_menu: boolean;
   result_label?: string;
   result_tooltip?: string;
   platform: string;

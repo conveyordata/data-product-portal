@@ -8,18 +8,20 @@ import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './data-output-actions.module.scss';
 
-const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [
+// TODO: These catalog platforms should come from the backend plugin system
+// They are currently hardcoded because catalog integration platforms are not yet
+// part of the backend platform_tiles endpoint
+const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<string>[] => [
     {
         label: t('Collibra'),
-        value: DataPlatforms.Collibra,
+        value: 'collibra',
         icon: collibraLogo,
     },
-    { label: t('Datahub'), value: DataPlatforms.Datahub, icon: datahubLogo, disabled: true },
+    { label: t('Datahub'), value: 'datahub', icon: datahubLogo, disabled: true },
 ];
 
 type Props = {
