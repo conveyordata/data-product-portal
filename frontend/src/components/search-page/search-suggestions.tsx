@@ -1,4 +1,5 @@
 import { Card, Carousel, ConfigProvider, Space, Typography, theme } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
@@ -10,6 +11,11 @@ type Props = {
 export function SearchSuggestions({ suggestions }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
+
+    //Start on a random suggestion so people won't get bored by seeing the same suggestion over and over
+    const initialSuggestion: number = useMemo(() => {
+        return Math.floor(Math.random() * suggestions.length);
+    }, [suggestions]);
 
     return (
         <ConfigProvider
@@ -27,7 +33,7 @@ export function SearchSuggestions({ suggestions }: Props) {
                     <Text type="secondary" style={{ whiteSpace: 'nowrap' }}>
                         {t('Try searching for:')}
                     </Text>
-                    <Carousel autoplay dots={false} dotPlacement={'start'}>
+                    <Carousel autoplay dots={false} dotPlacement={'start'} initialSlide={initialSuggestion}>
                         {suggestions.map((item) => (
                             <Text strong key={item}>
                                 {item}

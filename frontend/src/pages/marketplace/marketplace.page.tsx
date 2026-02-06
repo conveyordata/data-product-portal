@@ -13,6 +13,25 @@ export function Marketplace() {
     const { t } = useTranslation();
     const posthog = usePostHog();
 
+    const searchSuggestions = useMemo(
+        () => [
+            t('How much money did we make this month?'),
+            t('Which product is our best-seller this year?'),
+            t('Who are our top biggest customers?'),
+            t('Are we running low on any inventory items?'),
+            t('Are we on track to hit our goals this year?'),
+            t('What was our most popular ad last year?'),
+            t('Are we GDPR compliant?'),
+            t('What is our customer retention rate?'),
+            t('Which product gets the most returns?'),
+            t('What are the top things customers are complaining about?'),
+            t('How many of our customer orders are currently delayed?'),
+            t('Do we have a forecast of our company expenses for next month?'),
+            t('What is currently sitting in our warehouse?'),
+        ],
+        [t],
+    );
+
     const pageSize = 12;
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +74,7 @@ export function Marketplace() {
             searchPlaceholder={t('Ask a business question to find the relevant data')}
             onSearch={handleSearchChange}
             loadingResults={datasetSearchResultLoading}
-            searchSuggestions={[t('Are we GDPR compliant'), t('I want to improve our productivity')]}
+            searchSuggestions={searchSuggestions}
         >
             {datasetSearchResultLoading || allDatasetsLoading ? (
                 <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
