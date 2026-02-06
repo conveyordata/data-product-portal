@@ -1,0 +1,101 @@
+from typing import ClassVar
+
+from app.data_output_configuration.base_schema import (
+    AssetProviderPlugin,
+    PlatformMetadata,
+)
+
+
+class ConveyorPlugin(AssetProviderPlugin):
+    name: ClassVar[str] = "ConveyorPlatform"
+    version: ClassVar[str] = "1.0"
+
+    _platform_metadata = PlatformMetadata(
+        display_name="Conveyor",
+        icon_name="conveyor-logo.svg",
+        platform_key="conveyor",
+        parent_platform=None,
+        has_menu=False,
+        detailed_name="Conveyor",
+    )
+
+    # @model_validator(mode="after")
+    # def validate_paths(self) -> Self:
+    #     if not self.database_path:
+    #         self.database_path = self.database
+    #     if not self.table_path:
+    #         self.table_path = self.table
+    #     if self.access_granularity == AccessGranularity.Schema:
+    #         self.table = "*"
+    #     return self
+
+    # def validate_configuration(self, data_product: DataProduct):
+    #     # If product aligned
+    #     if not self.database.startswith(data_product.namespace):
+    #         raise ValueError("Invalid database specified")
+
+    # def on_create(self):
+    #     pass
+
+    # def render_template(self, template, **context) -> str:
+    #     return super().render_template(template, **context).replace("-", "_")
+
+    # def get_configuration(
+    #     self, configs: list[SnowflakeConfig]
+    # ) -> Optional[SnowflakeConfig]:
+    #     return next(
+    #         (config for config in configs if config.identifier == self.database), None
+    #     )
+
+    # @classmethod
+    # def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
+    #     base_metadata = super().get_ui_metadata(db)
+    #     base_metadata += [
+    #         UIElementMetadata(
+    #             name="database",
+    #             label="Database",
+    #             type=UIElementType.Select,
+    #             required=True,
+    #             use_namespace_when_not_source_aligned=True,
+    #             select=UIElementSelect(options=cls.get_platform_options(db)),
+    #         ),
+    #         UIElementMetadata(
+    #             name="schema",
+    #             type=UIElementType.String,
+    #             label="Schema",
+    #             tooltip="The name of the schema to give write access to. Defaults to data product namespace",
+    #             required=True,
+    #         ),
+    #         UIElementMetadata(
+    #             name="access_granularity",
+    #             label="Access granularity",
+    #             type=UIElementType.Radio,
+    #             tooltip="Give write access to the entire schema or a single table",
+    #             required=True,
+    #             radio=UIElementRadio(
+    #                 initial_value=AccessGranularity.Schema,
+    #                 options=[
+    #                     SelectOption(
+    #                         label="Schema level", value=AccessGranularity.Schema
+    #                     ),
+    #                     SelectOption(
+    #                         label="Table level", value=AccessGranularity.Table
+    #                     ),
+    #                 ],
+    #             ),
+    #         ),
+    #         UIElementMetadata(
+    #             name="table",
+    #             label="Table",
+    #             type=UIElementType.String,
+    #             tooltip="The name of the table to give write access to",
+    #             required=True,
+    #             string=UIElementString(initial_value="*"),
+    #             depends_on=[
+    #                 FieldDependency(
+    #                     field_name="access_granularity", value=AccessGranularity.Table
+    #                 )
+    #             ],
+    #         ),
+    #     ]
+    #     return base_metadata

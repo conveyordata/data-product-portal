@@ -19,6 +19,7 @@ class UIElementMetadataResponse(ORMModel):
     not_configured: bool = False
     ui_metadata: Sequence[UIElementMetadata]
     plugin: str
+    has_menu: bool
     result_label: str = "Resulting path"
     result_tooltip: str = "The path you can access through this technical asset"
     platform: str  # e.g., "s3", "redshift", "snowflake"
