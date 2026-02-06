@@ -11,7 +11,7 @@ from app.shared.model import BaseORM, utcnow
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.data_products.output_ports.model import Dataset
-    from app.data_products.technical_assets.model import TechnicalAssetModel
+    from app.data_products.technical_assets.model import TechnicalAsset
 
 
 tag_data_product_table = Table(
@@ -55,7 +55,7 @@ class Tag(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = relationship(
         secondary=tag_data_product_table, lazy="raise", back_populates="tags"
     )
-    data_outputs: Mapped[list["TechnicalAssetModel"]] = relationship(
+    data_outputs: Mapped[list["TechnicalAsset"]] = relationship(
         secondary=tag_data_output_table, lazy="raise", back_populates="tags"
     )
 

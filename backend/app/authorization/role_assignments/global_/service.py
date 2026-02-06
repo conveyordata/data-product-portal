@@ -7,7 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignmentModel
+from app.authorization.role_assignments.global_.model import (
+    GlobalRoleAssignment as GlobalRoleAssignmentModel,
+)
 from app.authorization.role_assignments.global_.schema import (
     GlobalRoleAssignment,
     RoleAssignmentRequest,

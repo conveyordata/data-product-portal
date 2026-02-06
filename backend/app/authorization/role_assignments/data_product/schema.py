@@ -6,7 +6,7 @@ from warnings import deprecated
 from pydantic import BaseModel
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignmentModel,
+    DataProductRoleAssignment as DataProductRoleAssignmentModel,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role

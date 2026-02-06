@@ -7,11 +7,11 @@ from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignmentModel,
+    DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
-    DatasetRoleAssignmentModel,
+    DatasetRoleAssignment,
 )
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
@@ -71,9 +71,9 @@ class NotificationService:
         extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
         assignments = self.db.scalars(
-            select(DatasetRoleAssignmentModel).where(
-                DatasetRoleAssignmentModel.dataset_id == dataset_id,
-                DatasetRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+            select(DatasetRoleAssignment).where(
+                DatasetRoleAssignment.dataset_id == dataset_id,
+                DatasetRoleAssignment.decision == DecisionStatus.APPROVED,
             )
         ).all()
 
@@ -98,9 +98,9 @@ class NotificationService:
         extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
         assignments = self.db.scalars(
-            select(DataProductRoleAssignmentModel).where(
-                DataProductRoleAssignmentModel.data_product_id == data_product_id,
-                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+            select(DataProductRoleAssignment).where(
+                DataProductRoleAssignment.data_product_id == data_product_id,
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
             )
         ).all()
 

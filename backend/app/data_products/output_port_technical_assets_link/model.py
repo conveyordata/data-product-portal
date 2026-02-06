@@ -8,7 +8,7 @@ from app.database.database import Base
 
 if TYPE_CHECKING:
     from app.data_products.output_ports.model import Dataset
-    from app.data_products.technical_assets.model import TechnicalAssetModel
+    from app.data_products.technical_assets.model import TechnicalAsset
     from app.users.model import User
 
 import uuid
@@ -36,9 +36,9 @@ class DataOutputDatasetAssociation(Base, BaseORM):
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
     # Relationships
-    data_output: Mapped["TechnicalAssetModel"] = relationship(
+    data_output: Mapped["TechnicalAsset"] = relationship(
         back_populates="dataset_links",
-        order_by="TechnicalAssetModel.name",
+        order_by="TechnicalAsset.name",
         lazy="joined",
     )
     dataset: Mapped["Dataset"] = relationship(

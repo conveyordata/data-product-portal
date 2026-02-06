@@ -5,7 +5,9 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignmentModel
+from app.authorization.role_assignments.global_.model import (
+    GlobalRoleAssignment as GlobalRoleAssignmentModel,
+)
 from app.authorization.roles.schema import Role
 from app.shared.schema import ORMModel
 from app.users.schema import User

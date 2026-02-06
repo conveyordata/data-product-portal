@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
-    DatasetRoleAssignmentModel,
+    DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
 from app.authorization.role_assignments.output_port.schema import (
     RoleAssignmentOld,

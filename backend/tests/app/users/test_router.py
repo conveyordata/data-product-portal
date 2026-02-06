@@ -7,16 +7,16 @@ from tests.app.data_products.output_port_technical_assets_link.test_router impor
     DATA_OUTPUTS_ENDPOINT,
 )
 from tests.factories import UserFactory
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
-from tests.factories.data_product import DataProductFactory
-from tests.factories.dataset import DatasetFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_data_product import (
+from tests.factories import TechnicalAssetFactory
+from tests.factories import DataOutputDatasetAssociationFactory
+from tests.factories import DataProductFactory
+from tests.factories import DatasetFactory
+from tests.factories import RoleFactory
+from tests.factories import (
     DataProductRoleAssignmentFactory,
 )
-from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.factories import DatasetRoleAssignmentFactory
+from tests.factories import GlobalRoleAssignmentFactory
 
 ENDPOINT = "/api/users"
 
@@ -219,7 +219,7 @@ class TestUsersRouter:
     def test_get_pending_actions(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[

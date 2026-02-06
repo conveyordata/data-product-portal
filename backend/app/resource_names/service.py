@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapper, Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
-from app.data_products.technical_assets.model import TechnicalAssetModel
+from app.data_products.technical_assets.model import TechnicalAsset
 from app.settings import settings
 from app.shared.schema import ORMModel
 
@@ -93,7 +93,7 @@ class ResourceNameService:
 
 class DataOutputResourceNameValidator(ResourceNameService):
     def __init__(self):
-        super().__init__(model=TechnicalAssetModel)
+        super().__init__(model=TechnicalAsset)
 
     def _is_unique(
         self,
@@ -111,8 +111,8 @@ class DataOutputResourceNameValidator(ResourceNameService):
             select(
                 exists().where(
                     and_(
-                        TechnicalAssetModel.namespace == resource_name,
-                        TechnicalAssetModel.owner_id == data_product_id,
+                        TechnicalAsset.namespace == resource_name,
+                        TechnicalAsset.owner_id == data_product_id,
                     )
                 )
             )

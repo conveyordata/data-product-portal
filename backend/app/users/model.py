@@ -11,13 +11,13 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.data_product.model import (
-        DataProductRoleAssignmentModel,
+        DataProductRoleAssignment,
     )
     from app.authorization.role_assignments.global_.model import (
-        GlobalRoleAssignmentModel,
+        GlobalRoleAssignment,
     )
     from app.authorization.role_assignments.output_port.model import (
-        DatasetRoleAssignmentModel,
+        DatasetRoleAssignment,
     )
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
@@ -53,8 +53,8 @@ class User(Base, BaseORM):
     )
 
     # Relationships - Data Products
-    data_product_roles: Mapped[list["DataProductRoleAssignmentModel"]] = relationship(
-        foreign_keys="DataProductRoleAssignmentModel.user_id",
+    data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
+        foreign_keys="DataProductRoleAssignment.user_id",
         back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
@@ -68,8 +68,8 @@ class User(Base, BaseORM):
         "data_product_roles", "data_product"
     )
 
-    global_role: Mapped["GlobalRoleAssignmentModel"] = relationship(
-        foreign_keys="GlobalRoleAssignmentModel.user_id",
+    global_role: Mapped["GlobalRoleAssignment"] = relationship(
+        foreign_keys="GlobalRoleAssignment.user_id",
         back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
@@ -81,8 +81,8 @@ class User(Base, BaseORM):
     )
 
     # Relationships - Datasets
-    dataset_roles: Mapped[list["DatasetRoleAssignmentModel"]] = relationship(
-        foreign_keys="DatasetRoleAssignmentModel.user_id",
+    dataset_roles: Mapped[list["DatasetRoleAssignment"]] = relationship(
+        foreign_keys="DatasetRoleAssignment.user_id",
         back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user

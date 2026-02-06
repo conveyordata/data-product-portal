@@ -16,7 +16,7 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.model import (
-        DatasetRoleAssignmentModel,
+        DatasetRoleAssignment,
     )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
@@ -54,10 +54,10 @@ class Dataset(Base, BaseORM):
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
 
     # Relationships
-    assignments: Mapped[list["DatasetRoleAssignmentModel"]] = relationship(
+    assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
         back_populates="dataset",
         cascade="all, delete-orphan",
-        order_by="DatasetRoleAssignmentModel.decision, DatasetRoleAssignmentModel.requested_on",
+        order_by="DatasetRoleAssignment.decision, DatasetRoleAssignment.requested_on",
         lazy="joined",
     )
     data_product_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(

@@ -15,7 +15,7 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.data_product.model import (
-        DataProductRoleAssignmentModel,
+        DataProductRoleAssignment,
     )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         DataProductDatasetAssociation,
         Dataset,
     )
-    from app.data_products.technical_assets.model import TechnicalAssetModel
+    from app.data_products.technical_assets.model import TechnicalAsset
 
 
 class DataProduct(Base, BaseORM):
@@ -54,10 +54,10 @@ class DataProduct(Base, BaseORM):
         back_populates="data_products", lazy="joined"
     )
     domain: Mapped[Domain] = relationship(back_populates="data_products", lazy="joined")
-    assignments: Mapped[list["DataProductRoleAssignmentModel"]] = relationship(
+    assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
-        order_by="DataProductRoleAssignmentModel.decision, DataProductRoleAssignmentModel.requested_on",
+        order_by="DataProductRoleAssignment.decision, DataProductRoleAssignment.requested_on",
         lazy="raise",
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
@@ -80,7 +80,7 @@ class DataProduct(Base, BaseORM):
         order_by="DataProductSettingValue.data_product_id",
         lazy="joined",
     )
-    data_outputs: Mapped[list["TechnicalAssetModel"]] = relationship(
+    data_outputs: Mapped[list["TechnicalAsset"]] = relationship(
         back_populates="owner",
         cascade="all, delete-orphan",
         lazy="raise",

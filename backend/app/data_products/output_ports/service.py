@@ -45,7 +45,9 @@ from app.data_products.output_ports.schema_response import (
     DatasetGet,
     DatasetsGet,
 )
-from app.data_products.technical_assets.model import TechnicalAssetModel
+from app.data_products.technical_assets.model import (
+    TechnicalAsset as TechnicalAssetModel,
+)
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType

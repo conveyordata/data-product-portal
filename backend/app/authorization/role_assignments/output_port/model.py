@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from app.users.model import User
 
 
-class DatasetRoleAssignmentModel(Base, BaseORM):
+class DatasetRoleAssignment(Base, BaseORM):
     __tablename__ = "role_assignments_dataset"
     __table_args__ = (
         UniqueConstraint("dataset_id", "user_id", name="unique_dataset_assignment"),

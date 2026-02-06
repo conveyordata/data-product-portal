@@ -17,12 +17,12 @@ from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignmentModel,
+    DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignmentModel
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.authorization.role_assignments.output_port.model import (
-    DatasetRoleAssignmentModel,
+    DatasetRoleAssignment,
 )
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import CreateRole, Prototype, Scope
@@ -143,7 +143,7 @@ class RoleMigrationService:
             )
             decision, decided_by_id, decided_on = self.map_decision(membership)
             self.db.add(
-                DataProductRoleAssignmentModel(
+                DataProductRoleAssignment(
                     data_product_id=membership.data_product_id,
                     user_id=membership.user_id,
                     role_id=role_id,
@@ -190,7 +190,7 @@ class RoleMigrationService:
         for dataset in datasets:
             for owner in dataset.owners:
                 self.db.add(
-                    DatasetRoleAssignmentModel(
+                    DatasetRoleAssignment(
                         dataset_id=dataset.id,
                         user_id=owner.id,
                         role_id=owner_role.id,
@@ -214,7 +214,7 @@ class RoleMigrationService:
         for user in users:
             if user.is_admin:
                 self.db.add(
-                    GlobalRoleAssignmentModel(
+                    GlobalRoleAssignment(
                         user_id=user.id,
                         role_id=admin_role.id,
                         decision=DecisionStatus.APPROVED,
@@ -241,7 +241,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     session = Session(bind=op.get_bind())
-    session.execute(sa.delete(DataProductRoleAssignmentModel))
-    session.execute(sa.delete(DatasetRoleAssignmentModel))
-    session.execute(sa.delete(GlobalRoleAssignmentModel))
+    session.execute(sa.delete(DataProductRoleAssignment))
+    session.execute(sa.delete(DatasetRoleAssignment))
+    session.execute(sa.delete(GlobalRoleAssignment))
     session.commit()

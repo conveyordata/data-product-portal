@@ -8,7 +8,7 @@ from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignmentModel,
+    DataProductRoleAssignment as DataProductRoleAssignmentModel,
 )
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignment,
