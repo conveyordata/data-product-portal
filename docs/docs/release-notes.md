@@ -12,6 +12,7 @@ sidebar_position: 200
   For more details look at the [data quality documentation](./developer-guide/data-quality-information.md)
 - **[Technical Mapping]**: Reworked source aligned concepts to [technical mapping ](./concepts/technical-assets.md#%EF%B8%8F-technical-mapping)
 - **[Search]**: Improved search functionality in the marketplace, the search now understands the context of the search term.
+- **[Product Studio]**: The product studio is the new location to manage your data products and output ports. You can view and edit all your data assets in one convenient location.
 - **[Technical Asset Configuration]**: We have migrated away from a single table for configurations. Each plugin type now has it's own table. Make sure to write a migration script for your own technologies as well.
 
 ### bugfixes

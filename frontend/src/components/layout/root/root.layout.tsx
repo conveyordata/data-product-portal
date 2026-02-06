@@ -30,6 +30,7 @@ export default function RootLayout() {
             switch (pathname) {
                 case ApplicationPaths.Home:
                     return PosthogEvents.PATHNAME_CHANGED_HOMEPAGE;
+                case ApplicationPaths.Studio:
                 case ApplicationPaths.DataProducts:
                     return PosthogEvents.PATHNAME_CHANGED_DATA_PRODUCTS;
                 case ApplicationPaths.Datasets:

@@ -123,6 +123,9 @@ const datamindedThemeConfig: ThemeConfig = {
             subMenuItemBorderRadius: 10,
             itemMarginInline: 5,
         },
+        Select: {
+            optionSelectedBg: 'transparent',
+        },
         Table: {
             headerBorderRadius: 8,
         },

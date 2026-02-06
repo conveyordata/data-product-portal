@@ -64,7 +64,7 @@ export function DataProduct() {
     if (isLoading) return <LoadingSpinner />;
 
     if (!dataProduct) {
-        navigate(ApplicationPaths.DataProducts, { replace: true });
+        navigate(ApplicationPaths.Studio, { replace: true });
         return null;
     }
 

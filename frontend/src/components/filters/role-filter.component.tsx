@@ -1,7 +1,6 @@
-import { DownOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Dropdown, type MenuProps, Radio, type RadioChangeEvent } from 'antd';
-import { useMemo, useState } from 'react';
+import { Select } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { PosthogEvents } from '@/constants/posthog.constants';
@@ -12,15 +11,14 @@ import {
     useListDataProductRoleAssignmentsQuery,
     useListOutputPortRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import styles from './role-filter.component.module.scss';
 
 interface RoleFilterProps {
-    selectedRole: string | undefined;
-    onRoleChange: (selected: { productIds: string[]; role: string }) => void;
+    selectedRoles: string[];
+    onRoleChange: (selected: { productIds: string[]; roles: string[] }) => void;
     mode: 'data_products' | 'datasets';
 }
 
-export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps) {
+export function RoleFilter({ selectedRoles, onRoleChange, mode }: RoleFilterProps) {
     const { t } = useTranslation();
     const posthog = usePostHog();
 
@@ -33,8 +31,6 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
         { userId: currentUser?.id || '' },
         { skip: !currentUser || mode !== 'data_products' },
     );
-
-    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const uniqueUserRoles = useMemo(() => {
         const userRoles =
@@ -68,89 +64,40 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
     }, [userDataProductRoles, userDatasetRoles, mode]);
 
     if (uniqueUserRoles.length === 0) {
-        return <div style={{ display: 'flex' }} />;
+        return null;
     }
 
-    const menuItems: MenuProps['items'] = uniqueUserRoles.map((role) => ({
-        key: role.value,
-        label: <span className={selectedRole === role.value ? styles.dropdownSelected : undefined}>{role.label}</span>,
-        className: selectedRole === role.value ? styles.dropdownSelectedBg : undefined,
-    }));
-
-    const handleMenuClick: MenuProps['onClick'] = (info) => {
-        handleRoleFilterChange(info.key);
-    };
-
-    const handleRoleFilterChange = (roleId: string) => {
+    const handleRoleFilterChange = (roleIds: string[]) => {
         const event =
             mode === 'data_products' ? PosthogEvents.DATA_PRODUCTS_FILTER_USED : PosthogEvents.MARKETPLACE_FILTER_USED;
         posthog.capture(event, {
             filter_type: 'roles',
-            filter_value: roleId,
+            filter_value: roleIds,
         });
 
-        const selectedRoleData = uniqueUserRoles.find((role) => role.value === roleId);
-        const productIds = selectedRoleData ? selectedRoleData.productIds : [];
-        onRoleChange({ productIds: productIds, role: selectedRoleData?.value || '' });
+        // Get all product IDs for the selected roles
+        const allProductIds = roleIds.flatMap((roleId) => {
+            const roleData = uniqueUserRoles.find((role) => role.value === roleId);
+            return roleData ? roleData.productIds : [];
+        });
+
+        onRoleChange({ productIds: allProductIds, roles: roleIds });
     };
 
-    const handleRadioChange = (e: RadioChangeEvent) => {
-        if (e.target.value === 'all') {
-            onRoleChange({ productIds: [], role: '' });
-            setDropdownOpen(false);
-        }
-    };
-
-    const handleRoleRadioClick = () => {
-        setDropdownOpen(true);
-    };
-
-    const selectedRoleLabel = selectedRole
-        ? uniqueUserRoles.find((role) => role.value === selectedRole)?.label
-        : undefined;
-
-    const isRoleSelected = !!selectedRole;
+    const options = uniqueUserRoles.map((role) => ({
+        label: role.label,
+        value: role.value,
+    }));
 
     return (
-        <Radio.Group
-            value={selectedRole ? 'role' : 'all'}
-            onChange={handleRadioChange}
-            optionType="button"
-            buttonStyle="solid"
-            size={'middle'}
-        >
-            <Radio.Button value="all">{t('Show all')}</Radio.Button>
-            <Radio.Button value="role" className={styles.radioDropdownButton} onClick={handleRoleRadioClick}>
-                <Dropdown
-                    menu={{
-                        items: menuItems,
-                        onClick: (info) => {
-                            handleMenuClick(info);
-                            setDropdownOpen(false);
-                        },
-                        selectable: true,
-                        selectedKeys: selectedRole ? [selectedRole] : [],
-                    }}
-                    open={dropdownOpen}
-                    onOpenChange={setDropdownOpen}
-                    trigger={['click']}
-                >
-                    <Button
-                        type="text"
-                        className={`${styles.dropdownButton} ${isRoleSelected ? styles.dropdownButtonSelected : ''}`}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {t('Only where I am ')}
-                        {selectedRoleLabel && (
-                            <>
-                                {' > '}
-                                <span>{selectedRoleLabel}</span>
-                            </>
-                        )}
-                        <DownOutlined />
-                    </Button>
-                </Dropdown>
-            </Radio.Button>
-        </Radio.Group>
+        <Select
+            mode="multiple"
+            placeholder={t('Filter by role')}
+            value={selectedRoles}
+            onChange={handleRoleFilterChange}
+            options={options}
+            style={{ minWidth: 200 }}
+            allowClear
+        />
     );
 }

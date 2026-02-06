@@ -175,7 +175,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         if (mode === 'edit' && dataProductId) {
             navigate(createDataProductIdPath(dataProductId));
         } else {
-            navigate(ApplicationPaths.DataProducts);
+            navigate(ApplicationPaths.Studio);
         }
     };
 
@@ -188,7 +188,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             try {
                 await deleteDataProduct(currentDataProduct?.id).unwrap();
                 dispatchMessage({ content: t('Data Product deleted successfully'), type: 'success' });
-                navigate(ApplicationPaths.DataProducts);
+                navigate(ApplicationPaths.Studio);
             } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to delete Data Product, please try again later'),
