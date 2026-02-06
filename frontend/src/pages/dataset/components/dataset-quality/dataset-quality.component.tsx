@@ -30,7 +30,7 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
                         color={getQualityStatusColor(summary.overall_status)}
                         variant={'outlined'}
                     >
-                        {formatQualityStatus(summary.overall_status)}
+                        {formatQualityStatus(summary.overall_status, t)}
                     </Tag>
                     <Typography.Text type="secondary">
                         {formatDistanceToNow(new Date(summary.created_at), { addSuffix: true })}

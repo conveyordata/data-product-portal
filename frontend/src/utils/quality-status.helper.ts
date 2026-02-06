@@ -4,6 +4,7 @@ import {
     ExclamationCircleOutlined,
     QuestionCircleOutlined,
 } from '@ant-design/icons';
+import type { TFunction } from 'i18next';
 import type { DataQualityStatus } from '@/store/api/services/generated/outputPortDataQualityApi';
 
 export const getQualityStatusIcon = (status: DataQualityStatus) => {
@@ -36,18 +37,18 @@ export const getQualityStatusColor = (status: DataQualityStatus): string => {
     }
 };
 
-export const formatQualityStatus = (status: DataQualityStatus): string => {
+export const formatQualityStatus = (status: DataQualityStatus, t: TFunction): string => {
     switch (status) {
         case 'success':
-            return 'Passed';
+            return t('Passed');
         case 'failure':
-            return 'Failed';
+            return t('Failed');
         case 'error':
-            return 'Error';
+            return t('Error');
         case 'warning':
-            return 'Warning';
+            return t('Warning');
         case 'unknown':
         default:
-            return 'Unknown';
+            return t('Unknown');
     }
 };

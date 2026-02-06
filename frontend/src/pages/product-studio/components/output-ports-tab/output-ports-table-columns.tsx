@@ -114,7 +114,7 @@ export const getOutputPortTableColumns = ({
                         color={getQualityStatusColor(quality_status)}
                         icon={<CustomSvgIconLoader iconComponent={getQualityStatusIcon(quality_status)} />}
                     >
-                        {formatQualityStatus(quality_status)}
+                        {formatQualityStatus(quality_status, t)}
                     </Tag>
                 );
             },

@@ -49,7 +49,7 @@ export function DataProductsTab() {
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
     const { data: userDataProducts = [], isFetching: isFetchingUserProducts } = useGetUserDataProductsQuery(
-        currentUser?.id || '',
+        currentUser?.id ?? '',
         { skip: !currentUser || showAllProducts },
     );
     const { data: allDataProducts = [], isFetching: isFetchingAllProducts } = useGetAllDataProductsQuery(undefined, {
@@ -107,7 +107,7 @@ export function DataProductsTab() {
                 <Flex gap="middle" flex={1} align="center">
                     <Input.Search
                         placeholder={t('Search data products by name')}
-                        value={searchTerm || ''}
+                        value={searchTerm ?? ''}
                         onChange={onSearch}
                         allowClear
                         style={{ maxWidth: 400 }}
@@ -141,10 +141,10 @@ export function DataProductsTab() {
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} data products', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} data products', {
                             range0: range[0],
                             range1: range[1],
-                            total: total,
+                            count: total,
                         }),
                 }}
                 rowKey={(record) => record.id}

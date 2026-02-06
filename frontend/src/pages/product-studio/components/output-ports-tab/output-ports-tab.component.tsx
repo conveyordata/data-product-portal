@@ -48,7 +48,7 @@ export function OutputPortsTab() {
 
     // Fetch user's role assignments to find the Owner role
     const { data: userDatasetRoles } = useListOutputPortRoleAssignmentsQuery(
-        { userId: currentUser?.id || '' },
+        { userId: currentUser?.id ?? '' },
         { skip: !currentUser },
     );
 
@@ -64,7 +64,7 @@ export function OutputPortsTab() {
         );
 
         if (ownerAssignments.length > 0) {
-            const ownerRoleId = ownerAssignments[0].role?.id || '';
+            const ownerRoleId = ownerAssignments[0].role?.id ?? '';
             const ownerPortIds = ownerAssignments.map((assignment) => assignment.output_port.id);
 
             setSelectedRoles([ownerRoleId]);
@@ -75,7 +75,7 @@ export function OutputPortsTab() {
     }, [userDatasetRoles, isInitialized]);
 
     const { data: userOutputPorts = [], isFetching: isFetchingUserPorts } = useGetUserDatasetsQuery(
-        currentUser?.id || '',
+        currentUser?.id ?? '',
         { skip: !currentUser || showAllPorts },
     );
     const { data: allOutputPorts = [], isFetching: isFetchingAllPorts } = useGetAllDatasetsQuery(undefined, {
@@ -130,7 +130,7 @@ export function OutputPortsTab() {
                 <Flex gap="middle" flex={1} align="center">
                     <Input.Search
                         placeholder={t('Search output ports by name or data product')}
-                        value={searchTerm || ''}
+                        value={searchTerm ?? ''}
                         onChange={onSearch}
                         allowClear
                         style={{ maxWidth: 400 }}
@@ -156,10 +156,10 @@ export function OutputPortsTab() {
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} output ports', {
                             range0: range[0],
                             range1: range[1],
-                            total: total,
+                            count: total,
                         }),
                 }}
                 rowKey={(record) => record.id}
