@@ -17969,6 +17969,9 @@
                   "$ref": "#/components/schemas/SnowflakeConfig"
                 },
                 {
+                  "$ref": "#/components/schemas/PostgresConfig"
+                },
+                {
                   "$ref": "#/components/schemas/RedshiftConfig"
                 }
               ]
@@ -20636,6 +20639,34 @@
         ],
         "title": "PluginResponse",
         "description": "Response model for listing available plugins"
+      },
+      "PostgresConfig": {
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "title": "Identifier"
+          },
+          "database_name": {
+            "type": "string",
+            "title": "Database Name"
+          },
+          "bucket_identifier": {
+            "type": "string",
+            "title": "Bucket Identifier"
+          },
+          "s3_path": {
+            "type": "string",
+            "title": "S3 Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identifier",
+          "database_name",
+          "bucket_identifier",
+          "s3_path"
+        ],
+        "title": "PostgresConfig"
       },
       "Prototype": {
         "type": "integer",
