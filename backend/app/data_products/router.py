@@ -93,31 +93,6 @@ from app.users.schema import User
 router = APIRouter()
 
 
-@router.get("/namespace_suggestion", deprecated=True)
-def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return NamespaceSuggestion(
-        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
-    )
-
-
-@router.get("/validate_namespace", deprecated=True)
-def validate_data_product_namespace(
-    namespace: str, db: Session = Depends(get_db_session)
-) -> NamespaceValidation:
-    return NamespaceValidation(
-        validity=ResourceNameService(model=DataProductModel)
-        .validate_resource_name(namespace, db)
-        .validity
-    )
-
-
-@router.get("/namespace_length_limits", deprecated=True)
-def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
-    return NamespaceLengthLimits(
-        max_length=ResourceNameService.resource_name_length_limits().max_length
-    )
-
-
 @router.post(
     "",
     responses={
@@ -443,7 +418,7 @@ def set_value_for_data_product(
 
 
 _router = router
-router = APIRouter(tags=["Data products"])
+router = APIRouter(tags=["Data Products"])
 old_route = "/data_products"
 route = "/v2/data_products"
 router.include_router(_router, prefix=old_route, deprecated=True)
@@ -1077,4 +1052,29 @@ def validate_data_output_namespace(
         validity=DataOutputResourceNameValidator()
         .validate_resource_name(resource_name=namespace, db=db, scope=id)
         .validity
+    )
+
+
+@router.get(f"{old_route}/namespace_suggestion", deprecated=True)
+def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return NamespaceSuggestion(
+        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
+    )
+
+
+@router.get(f"{old_route}/validate_namespace", deprecated=True)
+def validate_data_product_namespace(
+    namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return NamespaceValidation(
+        validity=ResourceNameService(model=DataProductModel)
+        .validate_resource_name(namespace, db)
+        .validity
+    )
+
+
+@router.get(f"{old_route}/namespace_length_limits", deprecated=True)
+def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
+    return NamespaceLengthLimits(
+        max_length=ResourceNameService.resource_name_length_limits().max_length
     )

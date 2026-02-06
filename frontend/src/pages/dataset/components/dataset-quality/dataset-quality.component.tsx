@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import {
     type DataQualityStatus,
     useGetLatestDataQualitySummaryForOutputPortQuery,
-} from '@/store/api/services/generated/outputPortDataQualityApi.ts';
+} from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi.ts';
 
 interface Props {
     dataProductId: string;

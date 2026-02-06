@@ -21,16 +21,16 @@ api.enhanceEndpoints({
         },
 
         getRoles: {
-            providesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            providesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
         createRole: {
-            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
         removeRole: {
-            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
         updateRole: {
-            invalidatesTags: (_) => [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },
 
         listGlobalRoleAssignments: {
@@ -297,5 +297,68 @@ api.enhanceEndpoints({
         updateThemeSettings: {
             invalidatesTags: [{ type: TagTypes.ThemeSettings }],
         },
+
+        getDataProducts: {
+            providesTags: [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
+        },
+        getDataProduct: {
+            providesTags: (response) =>
+                response?.id ? [{ type: TagTypes.DataProduct as const, id: response?.id }] : [],
+        },
+        createDataProduct: {
+            invalidatesTags: [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
+        },
+        removeDataProduct: {
+            invalidatesTags: (_, __, id) => [
+                { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const, id },
+            ],
+        },
+        updateDataProduct: {
+            invalidatesTags: (resp) =>
+                resp?.id
+                    ? [
+                          { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                          { type: TagTypes.DataProduct as const, id: resp?.id },
+                      ]
+                    : [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductAbout: {
+            invalidatesTags: (resp) =>
+                resp?.id
+                    ? [
+                          { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                          { type: TagTypes.DataProduct as const, id: resp?.id },
+                      ]
+                    : [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductStatus: {
+            invalidatesTags: (resp) =>
+                resp?.id
+                    ? [
+                          { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                          { type: TagTypes.DataProduct as const, id: resp?.id },
+                      ]
+                    : [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
+        },
+        updateDataProductUsage: {
+            invalidatesTags: (resp) =>
+                resp?.id
+                    ? [
+                          { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                          { type: TagTypes.DataProduct as const, id: resp?.id },
+                      ]
+                    : [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
+        },
+        getDataProductEventHistory: {
+            providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
+        },
+        //TODO
+        //createTechnicalAsset
+        //unlinkInputPortFromDataProduct
+        //linkInputPortsToDataProduct
+        //getTechnicalAssets new one
+        //getDataProductInputPorts new one
+        //getDataProductRolledUpTags new one
     },
 });
