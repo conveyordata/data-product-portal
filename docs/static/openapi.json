@@ -14617,6 +14617,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14625,6 +14628,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -14733,6 +14737,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14741,6 +14748,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -14952,6 +14960,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14960,6 +14971,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -15116,6 +15128,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -15124,6 +15139,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -15209,6 +15225,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -15217,6 +15236,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -15327,6 +15347,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -15335,6 +15358,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -19063,6 +19087,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -19071,6 +19098,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -20668,6 +20696,54 @@
         ],
         "title": "PostgresConfig"
       },
+      "PostgresTechnicalAssetConfiguration": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "const": "PostgresTechnicalAssetConfiguration",
+            "title": "Configuration Type"
+          },
+          "database": {
+            "type": "string",
+            "title": "Database"
+          },
+          "schema": {
+            "type": "string",
+            "title": "Schema",
+            "default": ""
+          },
+          "table": {
+            "type": "string",
+            "title": "Table",
+            "default": "*"
+          },
+          "bucket_identifier": {
+            "type": "string",
+            "title": "Bucket Identifier",
+            "default": ""
+          },
+          "database_path": {
+            "type": "string",
+            "title": "Database Path",
+            "default": ""
+          },
+          "table_path": {
+            "type": "string",
+            "title": "Table Path",
+            "default": ""
+          },
+          "access_granularity": {
+            "$ref": "#/components/schemas/AccessGranularity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type",
+          "database",
+          "access_granularity"
+        ],
+        "title": "PostgresTechnicalAssetConfiguration"
+      },
       "Prototype": {
         "type": "integer",
         "enum": [
@@ -21672,6 +21748,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -21680,6 +21759,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -23045,6 +23125,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -23053,6 +23136,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -23136,6 +23220,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -23144,6 +23231,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
@@ -23227,6 +23315,9 @@
               },
               {
                 "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgresTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -23235,6 +23326,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "PostgresTechnicalAssetConfiguration": "#/components/schemas/PostgresTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"

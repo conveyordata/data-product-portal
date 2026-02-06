@@ -38,8 +38,8 @@ class PostgresTechnicalAssetConfiguration(AssetProviderPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
-        display_name="Postgresql",
-        icon_name="aws-postgresql-logo.svg",
+        display_name="PostgreSQL",
+        icon_name="postgresql-logo.svg",
         platform_key="postgresql",
         parent_platform=None,
         result_label="Resulting table",
