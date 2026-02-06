@@ -1,6 +1,7 @@
 import {
     CompassOutlined,
     HomeOutlined,
+    ProductOutlined,
     ShopOutlined,
     ShoppingCartOutlined,
     TeamOutlined,
@@ -11,7 +12,6 @@ import type { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadc
 import { type ReactNode, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
-import { DataProductOutlined } from '@/components/icons';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
@@ -69,7 +69,7 @@ export const Breadcrumbs = () => {
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space>
-                                <DataProductOutlined />
+                                <ProductOutlined />
                                 {t('Product Studio')}
                             </Space>
                         ),

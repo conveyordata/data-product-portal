@@ -129,7 +129,7 @@ export function OutputPortsTab() {
             <Flex justify="space-between" align="center">
                 <Flex gap="middle" flex={1} align="center">
                     <Input.Search
-                        placeholder={t('Search output ports by name or data product')}
+                        placeholder={t('Search Output Ports by name or Data Product')}
                         value={searchTerm ?? ''}
                         onChange={onSearch}
                         allowClear
@@ -144,7 +144,7 @@ export function OutputPortsTab() {
             </Flex>
 
             {/* Pending Requests Section */}
-            {/* TODO: Add pending requests specific to output ports */}
+            {/* TODO: Add pending requests specific to Output Ports */}
 
             {/* Table */}
             <Table
@@ -156,7 +156,7 @@ export function OutputPortsTab() {
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{count}} output ports', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} Output Ports', {
                             range0: range[0],
                             range1: range[1],
                             count: total,

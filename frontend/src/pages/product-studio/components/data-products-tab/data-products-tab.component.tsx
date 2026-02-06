@@ -106,7 +106,7 @@ export function DataProductsTab() {
             <Flex justify="space-between" align="center">
                 <Flex gap="middle" flex={1} align="center">
                     <Input.Search
-                        placeholder={t('Search data products by name')}
+                        placeholder={t('Search Data Products by name')}
                         value={searchTerm ?? ''}
                         onChange={onSearch}
                         allowClear
@@ -141,7 +141,7 @@ export function DataProductsTab() {
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{count}} data products', {
+                        t('Showing {{range0}}-{{range1}} of {{count}} Data Products', {
                             range0: range[0],
                             range1: range[1],
                             count: total,
