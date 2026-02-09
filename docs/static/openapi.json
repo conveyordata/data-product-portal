@@ -13367,7 +13367,7 @@
       }
     },
     "/api/v2/resource_names/sanitize": {
-      "post": {
+      "get": {
         "tags": [
           "Resource names"
         ],
@@ -13409,22 +13409,48 @@
       }
     },
     "/api/v2/resource_names/validate": {
-      "post": {
+      "get": {
         "tags": [
           "Resource names"
         ],
         "summary": "Validate Resource Name",
         "operationId": "validate_resource_name",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResourceNameValidationRequest"
-              }
+        "parameters": [
+          {
+            "name": "resource_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource Name"
             }
           },
-          "required": true
-        },
+          {
+            "name": "model",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ResourceNameModel"
+            }
+          },
+          {
+            "name": "data_product_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Data Product Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -20017,7 +20043,7 @@
       "NamespaceValidation": {
         "properties": {
           "validity": {
-            "$ref": "#/components/schemas/NamespaceValidityType"
+            "$ref": "#/components/schemas/ResourceNameValidityType"
           }
         },
         "type": "object",
@@ -20025,16 +20051,6 @@
           "validity"
         ],
         "title": "NamespaceValidation"
-      },
-      "NamespaceValidityType": {
-        "type": "string",
-        "enum": [
-          "VALID",
-          "INVALID_LENGTH",
-          "INVALID_CHARACTERS",
-          "DUPLICATE_NAMESPACE"
-        ],
-        "title": "NamespaceValidityType"
       },
       "Node": {
         "properties": {
@@ -21391,42 +21407,13 @@
         ],
         "title": "ResourceNameValidation"
       },
-      "ResourceNameValidationRequest": {
-        "properties": {
-          "resource_name": {
-            "type": "string",
-            "title": "Resource Name"
-          },
-          "data_product_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data Product Id"
-          },
-          "model": {
-            "$ref": "#/components/schemas/ResourceNameModel"
-          }
-        },
-        "type": "object",
-        "required": [
-          "resource_name",
-          "model"
-        ],
-        "title": "ResourceNameValidationRequest"
-      },
       "ResourceNameValidityType": {
         "type": "string",
         "enum": [
           "VALID",
           "INVALID_LENGTH",
           "INVALID_CHARACTERS",
-          "DUPLICATE_NAMESPACE"
+          "DUPLICATE"
         ],
         "title": "ResourceNameValidityType"
       },

@@ -4,21 +4,24 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import {
     type DataProductSettingCreate,
-    type DataProductSettingScope,
+    DataProductSettingScope,
     type DataProductSettingsGetItem,
     DataProductSettingType,
     type DataProductSettingUpdate,
     useCreateDataProductSettingMutation,
     useGetDataProductSettingsNamespaceLengthLimitsQuery,
     useLazyGetDataProductSettingsNamespaceSuggestionQuery,
-    useLazyValidateDataProductSettingsNamespaceQuery,
     useUpdateDataProductSettingMutation,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
+import {
+    ResourceNameModel,
+    type ResourceNameValidation,
+    useLazyValidateResourceNameQuery,
+} from '@/store/api/services/generated/resourceNamesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { NamespaceValidationResponse, ValidationType } from '@/types/namespace/namespace.ts';
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;
@@ -134,7 +137,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
     const nameValue = Form.useWatch<string>('name', form);
 
     const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductSettingsNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateDataProductSettingsNamespaceQuery();
+    const [validateNamespace] = useLazyValidateResourceNameQuery();
     const { data: namespaceLengthLimits } = useGetDataProductSettingsNamespaceLengthLimitsQuery();
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
@@ -210,14 +213,20 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
-    const validateNamespaceCallback: (namespace: string) => Promise<NamespaceValidationResponse> = useCallback(
-        async (namespace: string) => {
-            const resp = await validateNamespace({ namespace, scope }).unwrap();
-            return {
-                validity: resp.validity.toString() as ValidationType,
-            };
-        },
-        [validateNamespace, scope],
+    const convertScopeToModel = useCallback((scope: DataProductSettingScope) => {
+        switch (scope) {
+            case DataProductSettingScope.Dataproduct:
+                return ResourceNameModel.DataProduct;
+            case DataProductSettingScope.Dataset:
+                return ResourceNameModel.OutputPort;
+            default:
+                throw new Error('Invalid scope for data product setting');
+        }
+    }, []);
+    const validateNamespaceCallback: (namespace: string) => Promise<ResourceNameValidation> = useCallback(
+        async (namespace: string) =>
+            validateNamespace({ resourceName: namespace, model: convertScopeToModel(scope) }).unwrap(),
+        [validateNamespace, scope, convertScopeToModel],
     );
 
     return (
@@ -255,15 +264,15 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
                 >
                     <Input />
                 </Form.Item>
-                <NamespaceFormItem
+                <ResourceNameFormItem
                     form={form}
                     tooltip={t('The namespace of the setting')}
                     max_length={namespaceLengthLimits?.max_length}
                     editToggleDisabled={mode === 'edit'}
-                    canEditNamespace={canEditNamespace}
-                    toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                    canEditResourceName={canEditNamespace}
+                    toggleCanEditResourceName={() => setCanEditNamespace((prev) => !prev)}
                     validationRequired={mode === 'create'}
-                    validateNamespace={validateNamespaceCallback}
+                    validateResourceName={validateNamespaceCallback}
                 />
                 <Form.Item
                     name="tooltip"
