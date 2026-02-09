@@ -6,6 +6,11 @@ import { useDebouncedCallback } from 'use-debounce';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import {
+    type DataProductSettingCreate,
+    type DataProductSettingScope,
+    type DataProductSettingsGetItem,
+    DataProductSettingType,
+    type DataProductSettingUpdate,
     useCreateDataProductSettingMutation,
     useGetDataProductSettingsNamespaceLengthLimitsQuery,
     useLazyGetDataProductSettingsNamespaceSuggestionQuery,
@@ -13,11 +18,7 @@ import {
     useUpdateDataProductSettingMutation,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type {
-    DataProductSettingContract,
-    DataProductSettingScope,
-    DataProductSettingType,
-} from '@/types/data-product-setting';
+import type { NamespaceValidationResponse, ValidationType } from '@/types/namespace/namespace.ts';
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;
@@ -79,24 +80,24 @@ const createText = (t: TFunction, scope: DataProductSettingScope, mode: Mode): S
 
 const typeFormItem = (type: DataProductSettingType) => {
     switch (type) {
-        case 'checkbox':
+        case DataProductSettingType.Checkbox:
             return <Checkbox defaultChecked />;
-        case 'tags':
+        case DataProductSettingType.Tags:
             return <Select allowClear={false} defaultActiveFirstOption mode="tags" />;
-        case 'input':
+        case DataProductSettingType.Input:
             return <Input />;
         default:
             return <Input />;
     }
 };
 
-const parseInitialDefaultValue = (initial: DataProductSettingContract) => {
+const parseInitialDefaultValue = (initial: DataProductSettingsGetItem) => {
     switch (initial.type) {
-        case 'checkbox':
+        case DataProductSettingType.Checkbox:
             return initial.default === 'true';
-        case 'tags':
+        case DataProductSettingType.Tags:
             return initial.default.split(',').filter((tag) => tag.length > 0);
-        case 'input':
+        case DataProductSettingType.Input:
             return initial.default;
         default:
             return initial.default;
@@ -105,11 +106,11 @@ const parseInitialDefaultValue = (initial: DataProductSettingContract) => {
 
 const initialDefaultValue = (type: DataProductSettingType) => {
     switch (type) {
-        case 'checkbox':
+        case DataProductSettingType.Checkbox:
             return true;
-        case 'tags':
+        case DataProductSettingType.Tags:
             return [];
-        case 'input':
+        case DataProductSettingType.Input:
             return '';
         default:
             return '';
@@ -121,7 +122,7 @@ type Props = {
     isOpen: boolean;
     mode: Mode;
     scope: DataProductSettingScope;
-    initial?: DataProductSettingContract;
+    initial?: DataProductSettingsGetItem;
 };
 
 export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Props) {
@@ -158,7 +159,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
     const handleFinish = async (values: DataProductSettingValueForm) => {
         try {
             if (mode === 'create' || !initial) {
-                const newSetting: DataProductSettingContract = {
+                const newSetting: DataProductSettingCreate = {
                     ...values,
                     default: values.default.toString(),
                     scope: scope,
@@ -166,13 +167,13 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
                 };
                 await createDataProductSetting(newSetting);
             } else {
-                const updateSetting: DataProductSettingContract = {
+                const updateSetting: DataProductSettingUpdate = {
                     ...initial,
                     ...values,
                     default: values.default.toString(),
                 };
                 await updateDataProductSetting({
-                    id: updateSetting.id,
+                    id: initial.id,
                     dataProductSettingUpdate: {
                         ...updateSetting,
                     },
@@ -209,8 +210,13 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
-    const validateNamespaceCallback = useCallback(
-        (namespace: string) => validateNamespace({ namespace, scope }).unwrap(),
+    const validateNamespaceCallback: (namespace: string) => Promise<NamespaceValidationResponse> = useCallback(
+        async (namespace: string) => {
+            const resp = await validateNamespace({ namespace, scope }).unwrap();
+            return {
+                validity: resp.validity.toString() as ValidationType,
+            };
+        },
         [validateNamespace, scope],
     );
 

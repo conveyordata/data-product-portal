@@ -9,7 +9,7 @@ import type { DataOutputLink } from '@/types/dataset';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
+import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper';
 
 import styles from './data-output-table.module.scss';
@@ -51,7 +51,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataProductIdPath(data_output.owner_id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIcon(data_output.owner.type.icon_key)}
+                                iconComponent={getDataProductTypeIconOld(data_output.owner.type.icon_key)}
                                 hasRoundBorder
                                 size={'default'}
                             />

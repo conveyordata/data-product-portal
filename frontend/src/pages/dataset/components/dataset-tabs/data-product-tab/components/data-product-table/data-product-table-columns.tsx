@@ -7,7 +7,7 @@ import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset
 import type { DataProductLink } from '@/types/dataset';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper.ts';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -50,7 +50,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataProductIdPath(data_product.id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIcon(data_product?.type?.icon_key)}
+                                iconComponent={getDataProductTypeIconOld(data_product?.type?.icon_key)}
                                 hasRoundBorder
                                 size={'default'}
                             />

@@ -7,7 +7,7 @@ import type { DataProductStatus, DataProductsGetContract } from '@/types/data-pr
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import type { DataProductTypeContract } from '@/types/data-product-type';
 import type { DomainContract } from '@/types/domain';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
@@ -85,7 +85,7 @@ export const getDataProductTableColumns = ({
             title: t('Type'),
             dataIndex: 'type',
             render: (type: DataProductTypeContract) => {
-                const icon = getDataProductTypeIcon(type.icon_key);
+                const icon = getDataProductTypeIconOld(type.icon_key);
                 return <TableCellItem reactSVGComponent={icon} text={type.name} />;
             },
             ellipsis: true,

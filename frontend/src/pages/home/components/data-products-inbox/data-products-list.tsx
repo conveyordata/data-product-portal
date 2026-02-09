@@ -8,7 +8,7 @@ import styles from '@/pages/home/components/data-products-inbox/data-products-in
 import { getLastVisitedItemDate } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import type { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper.ts';
 import { formatDate } from '@/utils/date.helper.ts';
 import type { LastVisitedItem } from '@/utils/local-storage.helper.ts';
 
@@ -53,7 +53,7 @@ export const DataProductsList = ({ dataProducts, isFetching, lastVisitedDataProd
                             }
                             icon={
                                 <CustomSvgIconLoader
-                                    iconComponent={getDataProductTypeIcon(project?.type?.icon_key)}
+                                    iconComponent={getDataProductTypeIconOld(project?.type?.icon_key)}
                                     hasRoundBorder
                                     size={'default'}
                                 />

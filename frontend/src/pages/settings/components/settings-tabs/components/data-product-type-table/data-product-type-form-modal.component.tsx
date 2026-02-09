@@ -3,13 +3,14 @@ import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
+    DataProductIconKey,
     type DataProductTypeCreate,
     type DataProductTypeGet,
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
 } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
+import { dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import styles from './data-product-type-table.module.scss';
 
@@ -123,7 +124,7 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
                 >
                     <Select>
                         {dataProductIcons
-                            .filter((icon) => icon !== DataProductIcon.Default)
+                            .filter((icon) => icon !== DataProductIconKey.Default)
                             .map((icon) => (
                                 <Option key={icon} value={icon}>
                                     <Icon component={getDataProductTypeIcon(icon)} className={styles.iconSelect} />

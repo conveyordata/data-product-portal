@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
+    type DataProductSettingScope,
     type DataProductSettingsGetItem,
     useGetDataProductsSettingsQuery,
     useRemoveDataProductSettingMutation,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import type { DataProductSettingContract, DataProductSettingScope } from '@/types/data-product-setting';
 import styles from './data-product-settings-table.module.scss';
 import { getDataProductSettingsTableColumns } from './data-product-settings-table-columns.tsx';
 import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';
@@ -27,7 +27,7 @@ export function DataProductSettingsTable({ scope }: Props) {
     }, [dataProductSettings, scope]);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [initial, setInitial] = useState<DataProductSettingContract | undefined>(undefined);
+    const [initial, setInitial] = useState<DataProductSettingsGetItem | undefined>(undefined);
     const [onRemoveDataProductSetting] = useRemoveDataProductSettingMutation();
 
     const handleAdd = () => {
@@ -37,7 +37,7 @@ export function DataProductSettingsTable({ scope }: Props) {
     };
 
     const handleEdit = useCallback(
-        (setting: DataProductSettingContract) => () => {
+        (setting: DataProductSettingsGetItem) => () => {
             setMode('edit');
             setInitial(setting);
             handleOpen();

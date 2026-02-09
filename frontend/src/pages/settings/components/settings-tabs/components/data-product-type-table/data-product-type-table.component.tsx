@@ -9,7 +9,6 @@ import {
     useRemoveDataProductTypeMutation,
 } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import type { DataProductTypesGetContract } from '@/types/data-product-type';
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
 import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
 import styles from './data-product-type-table.module.scss';
@@ -26,8 +25,8 @@ export function DataProductTypeTable() {
     } = useModal();
     const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [initial, setInitial] = useState<DataProductTypesGetContract | undefined>(undefined);
-    const [migrateFrom, setMigrateFrom] = useState<DataProductTypesGetContract | undefined>(undefined);
+    const [initial, setInitial] = useState<DataProductTypesGetItem | undefined>(undefined);
+    const [migrateFrom, setMigrateFrom] = useState<DataProductTypesGetItem | undefined>(undefined);
 
     const handleAdd = () => {
         setMode('create');
@@ -35,13 +34,13 @@ export function DataProductTypeTable() {
         handleOpen();
     };
 
-    const handleEdit = (tag: DataProductTypesGetContract) => () => {
+    const handleEdit = (tag: DataProductTypesGetItem) => () => {
         setMode('edit');
         setInitial(tag);
         handleOpen();
     };
 
-    const handleRemove = async (type: DataProductTypesGetContract) => {
+    const handleRemove = async (type: DataProductTypesGetItem) => {
         try {
             if (type.data_product_count > 0) {
                 setMigrateFrom(type);
