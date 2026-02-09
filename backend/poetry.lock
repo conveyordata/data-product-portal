@@ -2548,14 +2548,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.8.2"
+version = "7.8.3"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.8.2-py3-none-any.whl", hash = "sha256:d3fa69f7e15830a8e19cd4de4e7b40982838efa5d0f448133be3115bd556feef"},
-    {file = "posthog-7.8.2.tar.gz", hash = "sha256:d36472763750d8da60ebc3cbf6349a91222ba6a43dfdbdcdb6a9f03796514239"},
+    {file = "posthog-7.8.3-py3-none-any.whl", hash = "sha256:1840796e4f7e14dd91ec5fdeb939712c3383fe9e758cfcdeb0317d8f30f7b901"},
+    {file = "posthog-7.8.3.tar.gz", hash = "sha256:2b85e818bf818ac2768a890b772b7c12d4f909797226acd9327d66a319dbcf83"},
 ]
 
 [package.dependencies]
@@ -4157,4 +4157,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "14cdadbd38a349b6ccf82bbcd4de33140ca362f2e9acc6756721bdf9117f3eea"
+content-hash = "b24a777b133601bd14ca59701d26577a06ab361c5737533aee4978d2e16d5eb5"
