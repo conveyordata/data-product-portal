@@ -88,10 +88,6 @@ export function DataProductsTab() {
     const handleRoleChange = (selected: { productIds: string[]; roles: string[] }) => {
         setSelectedProductIds(selected.productIds);
         setSelectedRoles(selected.roles);
-        // Switch to "My Data Products" when roles are selected
-        if (selected.roles.length > 0) {
-            setShowAllProducts(false);
-        }
     };
 
     const handleShowAllChange = (e: RadioChangeEvent) => {

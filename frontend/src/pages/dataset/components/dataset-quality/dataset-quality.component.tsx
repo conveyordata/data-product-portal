@@ -1,10 +1,9 @@
 import { ExportOutlined } from '@ant-design/icons';
-import { Button, Flex, Tag, Typography } from 'antd';
+import { Button, Flex, Typography } from 'antd';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
+import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
 import { useGetLatestDataQualitySummaryForOutputPortQuery } from '@/store/api/services/generated/outputPortDataQualityApi.ts';
-import { formatQualityStatus, getQualityStatusColor, getQualityStatusIcon } from '@/utils/quality-status.helper';
 
 interface Props {
     dataProductId: string;
@@ -25,13 +24,7 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
             <Typography.Title level={5}>{t('Quality Status')}</Typography.Title>
             {summary ? (
                 <Flex vertical gap="small" align="flex-start">
-                    <Tag
-                        icon={<CustomSvgIconLoader iconComponent={getQualityStatusIcon(summary.overall_status)} />}
-                        color={getQualityStatusColor(summary.overall_status)}
-                        variant={'outlined'}
-                    >
-                        {formatQualityStatus(summary.overall_status, t)}
-                    </Tag>
+                    <QualityBadge quality_status={summary.overall_status} />
                     <Typography.Text type="secondary">
                         {formatDistanceToNow(new Date(summary.created_at), { addSuffix: true })}
                     </Typography.Text>

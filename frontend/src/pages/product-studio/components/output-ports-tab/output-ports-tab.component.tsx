@@ -117,10 +117,6 @@ export function OutputPortsTab() {
     const handleRoleChange = (selected: { productIds: string[]; roles: string[] }) => {
         setSelectedPortIds(selected.productIds);
         setSelectedRoles(selected.roles);
-        // Switch to "My Output Ports" when roles are selected
-        if (selected.roles.length > 0) {
-            setShowAllPorts(false);
-        }
     };
 
     const handleShowAllChange = (e: RadioChangeEvent) => {

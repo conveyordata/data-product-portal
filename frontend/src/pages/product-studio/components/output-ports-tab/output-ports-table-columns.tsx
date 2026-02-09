@@ -2,11 +2,10 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 import { DataProductOutlined } from '@/components/icons';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
 import type { DataQualityStatus } from '@/store/api/services/generated/outputPortDataQualityApi';
 import type { DatasetsGetContract, DatasetsGetContractSingle } from '@/types/dataset/datasets-get.contract';
-import { formatQualityStatus, getQualityStatusColor, getQualityStatusIcon } from '@/utils/quality-status.helper';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
@@ -109,14 +108,7 @@ export const getOutputPortTableColumns = ({
                         </Tag>
                     );
                 }
-                return (
-                    <Tag
-                        color={getQualityStatusColor(quality_status)}
-                        icon={<CustomSvgIconLoader iconComponent={getQualityStatusIcon(quality_status)} />}
-                    >
-                        {formatQualityStatus(quality_status, t)}
-                    </Tag>
-                );
+                return <QualityBadge quality_status={quality_status} />;
             },
             width: '10%',
         },

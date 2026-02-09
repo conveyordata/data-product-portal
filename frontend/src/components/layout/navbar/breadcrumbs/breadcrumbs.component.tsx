@@ -65,7 +65,6 @@ export const Breadcrumbs = () => {
 
             switch (path) {
                 case ApplicationPaths.Studio:
-                case ApplicationPaths.DataProducts:
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space>
@@ -145,8 +144,7 @@ export const Breadcrumbs = () => {
                     if (
                         dataProduct &&
                         !isFetchingDataProduct &&
-                        (pathnames.includes(ApplicationPaths.DataProducts.replace('/', '')) ||
-                            pathnames.includes(ApplicationPaths.Studio.replace('/', '')))
+                        pathnames.includes(ApplicationPaths.Studio.replace('/', ''))
                     ) {
                         if (
                             isDataProductEditPage(path, dataProduct.id) ||
