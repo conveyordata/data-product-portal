@@ -1,11 +1,12 @@
+import { ToolOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
+import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
+import Paragraph from 'antd/es/typography/Paragraph';
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
-
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/data-products/data-products-table-columns.tsx';
@@ -99,6 +100,16 @@ export function DataProductsTab() {
         setSelectedProductIds([]);
         setSelectedRoles([]);
     };
+    const createButton = (
+        <Link
+            to={ApplicationPaths.DataProductNew}
+            onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
+        >
+            <Button type={'primary'} disabled={!canCreateDataProduct}>
+                {t('Create Data Product')}
+            </Button>
+        </Link>
+    );
 
     return (
         <Flex vertical gap="small">
@@ -124,14 +135,7 @@ export function DataProductsTab() {
                         />
                     )}
                 </Flex>
-                <Link
-                    to={ApplicationPaths.DataProductNew}
-                    onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
-                >
-                    <Button type={'primary'} disabled={!canCreateDataProduct}>
-                        {t('Create Data Product')}
-                    </Button>
-                </Link>
+                {filteredDataProducts.length > 0 && createButton}
             </Flex>
 
             {/* Pending Requests Section */}
@@ -157,6 +161,27 @@ export function DataProductsTab() {
                 loading={isFetching}
                 rowHoverable
                 size={'small'}
+                locale={{
+                    emptyText: (
+                        <Empty
+                            styles={{ image: { height: 50 } }}
+                            image={<ToolOutlined style={{ fontSize: 50 }} />}
+                            description={
+                                <>
+                                    <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
+                                        {t('Ready to build your first Data Product?')}
+                                    </Paragraph>
+                                    <Paragraph style={{ opacity: 0.45 }}>
+                                        {t(
+                                            "It looks like you don't have any data products yet. Create one to start managing your data assets.",
+                                        )}
+                                    </Paragraph>
+                                    {createButton}
+                                </>
+                            }
+                        />
+                    ),
+                }}
             />
         </Flex>
     );
