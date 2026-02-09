@@ -98,15 +98,6 @@ export type DomainUpdate = {
   name: string;
   description: string;
 };
-export type DataProductStatus = "pending" | "active" | "archived";
-export type DataProductIconKey =
-  | "reporting"
-  | "processing"
-  | "exploration"
-  | "ingestion"
-  | "machine_learning"
-  | "analytics"
-  | "default";
 export type DataProductType = {
   id: string;
   name: string;
@@ -127,6 +118,20 @@ export type GetDomainResponse = {
   description: string;
   data_products: DataProduct[];
 };
+export enum DataProductStatus {
+  Pending = "pending",
+  Active = "active",
+  Archived = "archived",
+}
+export enum DataProductIconKey {
+  Reporting = "reporting",
+  Processing = "processing",
+  Exploration = "exploration",
+  Ingestion = "ingestion",
+  MachineLearning = "machine_learning",
+  Analytics = "analytics",
+  Default = "default",
+}
 export const {
   useGetDomainsQuery,
   useLazyGetDomainsQuery,

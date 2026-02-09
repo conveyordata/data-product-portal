@@ -2,8 +2,10 @@ import { Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { DataProductTypesGetItem } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import type { DataProductIcon, DataProductTypesGetContract } from '@/types/data-product-type';
+import type {
+    DataProductIconKey,
+    DataProductTypesGetItem,
+} from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
@@ -11,8 +13,8 @@ const iconColumnWidth = 30;
 
 type Props = {
     t: TFunction;
-    handleRemove: (type: DataProductTypesGetContract) => void;
-    handleEdit: (type: DataProductTypesGetContract) => () => void;
+    handleRemove: (type: DataProductTypesGetItem) => void;
+    handleEdit: (type: DataProductTypesGetItem) => () => void;
 };
 
 export const getDataProductTypeTableColumns = ({
@@ -31,7 +33,7 @@ export const getDataProductTypeTableColumns = ({
             title: t('Icon'),
             dataIndex: 'icon_key',
             width: iconColumnWidth,
-            render: (icon_key: DataProductIcon) => {
+            render: (icon_key: DataProductIconKey) => {
                 const icon = getDataProductTypeIcon(icon_key);
                 return <TableCellItem reactSVGComponent={icon} />;
             },

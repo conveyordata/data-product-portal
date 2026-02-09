@@ -2,14 +2,14 @@ import type { Node, NodeProps, Position } from '@xyflow/react';
 import type { ReactNode } from 'react';
 
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
-import type { DataProductIcon } from '@/types/data-product-type';
+import type { DataProductIconKey } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import type { DataProductRoleAssignment } from '@/types/roles';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
 export type DataProductNodeProps = Node<{
     id: string;
     name: string;
-    icon_key: DataProductIcon;
+    icon_key: DataProductIconKey;
     isMainNode?: boolean;
     nodeToolbarActions?: ReactNode;
     targetHandlePosition?: Position;

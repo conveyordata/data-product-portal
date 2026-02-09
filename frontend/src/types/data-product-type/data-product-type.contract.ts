@@ -1,3 +1,5 @@
+import { DataProductIconKey } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
+
 export enum DataProductIcon {
     Reporting = 'reporting',
     Processing = 'processing',
@@ -8,7 +10,7 @@ export enum DataProductIcon {
     Default = 'default',
 }
 
-export const dataProductIcons = Object.values(DataProductIcon);
+export const dataProductIcons = Object.values(DataProductIconKey);
 
 export interface DataProductTypeContract {
     id: string;

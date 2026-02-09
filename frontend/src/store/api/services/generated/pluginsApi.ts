@@ -37,7 +37,6 @@ export type PlatformTile = {
 export type PlatformTileResponse = {
   platform_tiles: PlatformTile[];
 };
-export type UiElementType = "string" | "select" | "checkbox" | "radio";
 export type UiElementCheckbox = {
   initial_value?: boolean | null;
 };
@@ -63,7 +62,7 @@ export type FieldDependency = {
 };
 export type UiElementMetadata = {
   label: string;
-  type: UiElementType;
+  type: UIElementType;
   required: boolean;
   name: string;
   tooltip?: string | null;
@@ -102,6 +101,12 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
+export enum UIElementType {
+  String = "string",
+  Select = "select",
+  Checkbox = "checkbox",
+  Radio = "radio",
+}
 export const {
   useGetPlatformTilesQuery,
   useLazyGetPlatformTilesQuery,

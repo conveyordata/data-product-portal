@@ -3,15 +3,14 @@ import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type { DataProductSettingsGetItem } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
-import type { DataProductSettingContract } from '@/types/data-product-setting';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
     isLoading?: boolean;
     isDisabled?: boolean;
-    handleEdit: (record: DataProductSettingContract) => () => void;
-    handleRemove: (record: DataProductSettingContract) => void;
+    handleEdit: (record: DataProductSettingsGetItem) => () => void;
+    handleRemove: (record: DataProductSettingsGetItem) => void;
 };
 
 const defaultItem = (setting: DataProductSettingsGetItem) => {
