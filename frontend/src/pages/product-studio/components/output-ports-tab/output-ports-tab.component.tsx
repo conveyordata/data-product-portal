@@ -198,7 +198,7 @@ export function OutputPortsTab() {
                                     </Paragraph>
                                     <Paragraph style={{ opacity: 0.45 }}>
                                         {t(
-                                            'Output Ports are a way for others to access a flavour of your data product. You can select an existing data product to add a new flavour to it or create a new Data Product to get started.',
+                                            'Output Ports are a way for others to access a flavour of your Data Product. You can select an existing Data Product to add a new flavour to it or create a new Data Product to get started.',
                                         )}
                                     </Paragraph>
                                     {createDataProductButton}

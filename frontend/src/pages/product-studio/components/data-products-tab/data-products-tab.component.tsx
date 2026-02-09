@@ -173,7 +173,7 @@ export function DataProductsTab() {
                                     </Paragraph>
                                     <Paragraph style={{ opacity: 0.45 }}>
                                         {t(
-                                            "It looks like you don't have any data products yet. Create one to start managing your data assets.",
+                                            "It looks like you don't have any Data Products yet. Create one to start managing your data assets.",
                                         )}
                                     </Paragraph>
                                     {createButton}
