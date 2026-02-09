@@ -1,5 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v7';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, RouterProvider, useParams } from 'react-router';
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
 import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
@@ -22,6 +22,12 @@ import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
 import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
+
+function DataProductsRedirect() {
+    const params = useParams();
+    const splatPath = params['*'] || '';
+    return <Navigate to={`/studio/${splatPath}`} replace />;
+}
 
 const router = createBrowserRouter([
     {
@@ -72,8 +78,8 @@ const router = createBrowserRouter([
                         ],
                     },
                     {
-                        path: ApplicationPaths.DataProducts,
-                        element: <Navigate to={ApplicationPaths.Studio} />,
+                        path: `${ApplicationPaths.DataProducts}/*`,
+                        element: <DataProductsRedirect />,
                     },
                     {
                         path: ApplicationPaths.Marketplace,
