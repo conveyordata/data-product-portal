@@ -12,7 +12,6 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetUserDataProductsQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract';
@@ -52,10 +51,6 @@ export function OutputPortsTab() {
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedPortIds, setSelectedPortIds] = useState<string[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
-    const { data: userDataProducts = [], isFetching: isFetchingUserProducts } = useGetUserDataProductsQuery(
-        currentUser?.id ?? '',
-        { skip: !currentUser },
-    );
 
     // Fetch user's role assignments to find the Owner role
     const { data: userDatasetRoles } = useListOutputPortRoleAssignmentsQuery(
@@ -94,7 +89,7 @@ export function OutputPortsTab() {
     });
 
     const outputPorts = showAllPorts ? allOutputPorts : userOutputPorts;
-    const isFetching = showAllPorts ? isFetchingAllPorts : isFetchingUserPorts || isFetchingUserProducts;
+    const isFetching = showAllPorts ? isFetchingAllPorts : isFetchingUserPorts;
 
     const onSearch = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,10 +113,6 @@ export function OutputPortsTab() {
     const navigateToOutputPort = (datasetId: string) => {
         navigate(createDatasetIdPath(datasetId));
     };
-    const { data: access_create_dataset } = useCheckAccessQuery({
-        action: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,
-    });
-    const canCreateOutputPort = access_create_dataset?.allowed ?? false;
 
     const handleRoleChange = (selected: { productIds: string[]; roles: string[] }) => {
         setSelectedPortIds(selected.productIds);
@@ -145,16 +136,6 @@ export function OutputPortsTab() {
         >
             <Button type={'primary'} disabled={!canCreateDataProduct}>
                 {t('Create a Data Product first')}
-            </Button>
-        </Link>
-    );
-    const createOutputPortButton = (
-        <Link
-            to={ApplicationPaths.DataProductNew}
-            onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
-        >
-            <Button type={'primary'} disabled={!canCreateOutputPort}>
-                {t('Create Output Port')}
             </Button>
         </Link>
     );
@@ -211,31 +192,17 @@ export function OutputPortsTab() {
                             styles={{ image: { height: 50 } }}
                             image={<DeploymentUnitOutlined style={{ fontSize: 50 }} />}
                             description={
-                                userDataProducts.length === 0 ? (
-                                    <>
-                                        <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
-                                            {t('Share your data with the organisation')}
-                                        </Paragraph>
-                                        <Paragraph style={{ opacity: 0.45 }}>
-                                            {t(
-                                                'Output Ports are a way for others to access a flavour of your data product. You can select an existing data product to add a new flavour to it or create a new Data Product to get started.',
-                                            )}
-                                        </Paragraph>
-                                        {createDataProductButton}
-                                    </>
-                                ) : (
-                                    <>
-                                        <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
-                                            {t('Share your data with the organisation')}
-                                        </Paragraph>
-                                        <Paragraph style={{ opacity: 0.45 }}>
-                                            {t(
-                                                'Output Ports are a way for others to access a flavour of your data product. You can select an existing data product to add a new flavour to it or create a new Data Product to get started.',
-                                            )}
-                                        </Paragraph>
-                                        {createOutputPortButton}
-                                    </>
-                                )
+                                <>
+                                    <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
+                                        {t('Share your data with the organisation')}
+                                    </Paragraph>
+                                    <Paragraph style={{ opacity: 0.45 }}>
+                                        {t(
+                                            'Output Ports are a way for others to access a flavour of your data product. You can select an existing data product to add a new flavour to it or create a new Data Product to get started.',
+                                        )}
+                                    </Paragraph>
+                                    {createDataProductButton}
+                                </>
                             }
                         />
                     ),
