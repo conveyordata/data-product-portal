@@ -24,7 +24,7 @@ def find_model_name_collisions(app: FastAPI) -> dict[str, list[Type]]:
         # Check Request Body Models
         if hasattr(route, "dependant"):
             for dep in route.dependant.body_params:
-                extract_models(dep.type_, unique_models)
+                extract_models(dep.field_info.annotation, unique_models)
 
     # Group by class name
     name_map: dict[str, list[Type]] = {}

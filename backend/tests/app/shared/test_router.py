@@ -93,9 +93,8 @@ def test_no_old_names_in_request_or_response_schemas():
 
             # Check Request Body
             if route.body_field:
-                # type_to_check = getattr(route.body_field, "annotation", None) or route.body_field.type_
                 check_type(
-                    route.body_field.type_,
+                    route.body_field.field_info.annotation,
                     f"Route '{route.name}'/'{route.path}' [Request Body]",
                 )
 
