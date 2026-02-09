@@ -138,8 +138,6 @@ export function DataProductsTab() {
                 {filteredDataProducts.length > 0 && createButton}
             </Flex>
 
-            {/* Pending Requests Section */}
-
             {/* Table */}
             <Table<DataProductsGetContract[0]>
                 onRow={(record) => ({
