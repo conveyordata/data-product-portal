@@ -20575,9 +20575,9 @@
             "type": "string",
             "title": "Icon Name"
           },
-          "has_menu": {
+          "has_environments": {
             "type": "boolean",
-            "title": "Has Menu",
+            "title": "Has Environments",
             "default": true
           },
           "has_config": {
@@ -22020,9 +22020,9 @@
             "type": "string",
             "title": "Plugin"
           },
-          "has_menu": {
+          "has_environments": {
             "type": "boolean",
-            "title": "Has Menu"
+            "title": "Has Environments"
           },
           "result_label": {
             "type": "string",
@@ -22076,7 +22076,7 @@
         "required": [
           "ui_metadata",
           "plugin",
-          "has_menu",
+          "has_environments",
           "platform",
           "display_name",
           "icon_name",

@@ -277,8 +277,8 @@ class TestPlatformTilesEndpoint:
                     assert "value" in child
                     assert "icon_name" in child
 
-    def test_get_platform_tiles_has_menu_flag(self, client: TestClient):
-        """Test that tiles have has_menu flag for parent platforms"""
+    def test_get_platform_tiles_has_environments_flag(self, client: TestClient):
+        """Test that tiles have has_environments flag for parent platforms"""
         # Create AWS services
         response = client.get(f"{ENDPOINT}/platform-tiles")
 
@@ -291,7 +291,7 @@ class TestPlatformTilesEndpoint:
         aws_tile = next((t for t in tiles if t["value"] == "aws"), None)
 
         if aws_tile:
-            assert "has_menu" in aws_tile
-            # AWS has multiple children, so should have a menu
+            assert "has_environments" in aws_tile
+            # AWS has multiple children, so should have environments
             if aws_tile.get("children") and len(aws_tile["children"]) > 1:
-                assert aws_tile["has_menu"] is True
+                assert aws_tile["has_environments"] is True

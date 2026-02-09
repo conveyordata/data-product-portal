@@ -68,7 +68,7 @@ export function DataProductActions({ dataProductId }: Props) {
             label: t(tile.label),
             value: tile.value,
             icon: getIcon(tile.icon_name),
-            hasMenu: tile.has_menu,
+            hasEnvironments: tile.has_environments,
             hasConfig: tile.has_config,
             children: tile.children?.map(transformTile) || [],
         });

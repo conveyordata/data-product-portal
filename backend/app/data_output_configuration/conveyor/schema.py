@@ -15,6 +15,6 @@ class ConveyorPlugin(AssetProviderPlugin):
         icon_name="conveyor-logo.svg",
         platform_key="conveyor",
         parent_platform=None,
-        has_menu=False,
+        has_environments=False,
         detailed_name="Conveyor",
     )

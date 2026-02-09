@@ -12,7 +12,7 @@ export type CustomDropdownItemProps<T extends string = string> = {
         | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
         | ForwardRefExoticComponent<CustomIconComponentProps>;
     disabled?: boolean;
-    hasMenu?: boolean;
+    hasEnvironments?: boolean;
     hasConfig?: boolean;
     children?: CustomDropdownItemProps<string>[];
     form?: ComponentType;

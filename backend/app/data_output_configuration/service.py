@@ -57,7 +57,7 @@ class PluginService:
                 icon_name=platform_meta.icon_name,
                 parent_platform=platform_meta.parent_platform,
                 result_label=platform_meta.result_label,
-                has_menu=platform_meta.has_menu,
+                has_environments=platform_meta.has_environments,
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,
             )
@@ -73,7 +73,7 @@ class PluginService:
                 result_label=platform_meta.result_label,
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,
-                has_menu=platform_meta.has_menu,
+                has_environments=platform_meta.has_environments,
             )
 
     def get_platform_tiles(
@@ -111,7 +111,7 @@ class PluginService:
                 label=meta.display_name,
                 value=meta.platform,
                 icon_name=meta.icon_name,
-                has_menu=meta.has_menu,
+                has_environments=meta.has_environments,
                 has_config=True,
                 children=[],
             )
@@ -126,7 +126,7 @@ class PluginService:
                         label=meta.parent_platform.upper(),
                         value=meta.parent_platform,
                         icon_name=f"{meta.parent_platform}-logo.svg",
-                        has_menu=True,
+                        has_environments=True,
                         has_config=True,
                         children=[],
                     )
