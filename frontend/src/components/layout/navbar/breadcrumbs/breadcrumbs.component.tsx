@@ -30,7 +30,10 @@ export const Breadcrumbs = () => {
     const { pathname } = useLocation();
     const params = useParams<DynamicPathParams>();
     const pathnames = useMemo(
-        () => (pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x)),
+        () =>
+            pathname === ApplicationPaths.Home
+                ? [ApplicationPaths.Home]
+                : pathname.split('/').filter((x) => x && x !== 'output-port'),
         [pathname],
     );
     const { dataProductId = '', datasetId = '', dataOutputId = '' } = params;
@@ -62,7 +65,6 @@ export const Breadcrumbs = () => {
                 path,
                 title: pathname,
             };
-
             switch (path) {
                 case ApplicationPaths.Studio:
                     Object.assign(breadcrumbItem, {
@@ -139,7 +141,6 @@ export const Breadcrumbs = () => {
                     Object.assign(breadcrumbItem, {
                         title: '',
                     });
-
                     // Case for Data Product and Output Port
                     if (
                         dataProduct &&
@@ -148,7 +149,8 @@ export const Breadcrumbs = () => {
                     ) {
                         if (
                             isDataProductEditPage(path, dataProduct.id) ||
-                            (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id))
+                            (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id)) ||
+                            (dataset && isDatasetEditPage(path, dataset.id))
                         ) {
                             Object.assign(breadcrumbItem, {
                                 title: t('Edit'),
@@ -167,17 +169,31 @@ export const Breadcrumbs = () => {
                                     ),
                                 });
                             } else {
-                                Object.assign(breadcrumbItem, {
-                                    path: `${path}#${DataProductTabKeys.About}`,
-                                    title: (
-                                        <Typography.Text
-                                            ellipsis={{ tooltip: dataProduct.name }}
-                                            rootClassName={styles.title}
-                                        >
-                                            {dataProduct.name}
-                                        </Typography.Text>
-                                    ),
-                                });
+                                if (dataset && !isFetchingDataset && path.split('/').length === 4) {
+                                    Object.assign(breadcrumbItem, {
+                                        path: `${path}#${DatasetTabKeys.About}`,
+                                        title: (
+                                            <Typography.Text
+                                                ellipsis={{ tooltip: dataset.name }}
+                                                rootClassName={styles.title}
+                                            >
+                                                {dataset.name}
+                                            </Typography.Text>
+                                        ),
+                                    });
+                                } else {
+                                    Object.assign(breadcrumbItem, {
+                                        path: `${path}#${DataProductTabKeys.About}`,
+                                        title: (
+                                            <Typography.Text
+                                                ellipsis={{ tooltip: dataProduct.name }}
+                                                rootClassName={styles.title}
+                                            >
+                                                {dataProduct.name}
+                                            </Typography.Text>
+                                        ),
+                                    });
+                                }
                             }
                         }
                     }

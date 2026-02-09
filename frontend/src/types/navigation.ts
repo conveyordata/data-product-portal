@@ -15,6 +15,8 @@ export enum ApplicationPaths {
     DatasetEdit = '/datasets/:datasetId/edit',
     Marketplace = '/marketplace',
     MarketplaceCart = '/marketplace/cart',
+    OutputPort = '/studio/:dataProductId/output-port/:datasetId',
+    OutputPortEdit = '/studio/:dataProductId/output-port/:datasetId/edit',
     DataOutput = '/studio/:dataProductId/:dataOutputId',
     DataOutputEdit = '/studio/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
@@ -44,6 +46,17 @@ export function createDataOutputIdPath(
 
 export function createDatasetIdPath(datasetId: string, tabKey: DatasetTabKeys = DatasetTabKeys.About) {
     return `${ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId))}#${tabKey}`;
+}
+
+export function createOutputPortPath(
+    dataProductId: string,
+    datasetId: string,
+    tabKey: DatasetTabKeys = DatasetTabKeys.About,
+) {
+    return `${ApplicationPaths.OutputPort.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
+        ':datasetId',
+        encodeURIComponent(datasetId),
+    )}#${tabKey}`;
 }
 
 export enum DynamicPathParams {

@@ -75,6 +75,14 @@ const router = createBrowserRouter([
                                 path: ApplicationPaths.DataProductEdit,
                                 element: <DataProductEdit />,
                             },
+                            {
+                                path: ApplicationPaths.OutputPort,
+                                element: <Dataset />,
+                            },
+                            {
+                                path: ApplicationPaths.OutputPortEdit,
+                                element: <DatasetEdit />,
+                            },
                         ],
                     },
                     {

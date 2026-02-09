@@ -15,7 +15,7 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract';
-import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
+import { ApplicationPaths, createOutputPortPath } from '@/types/navigation.ts';
 import styles from './output-ports-tab.module.scss';
 import { getOutputPortTableColumns } from './output-ports-table-columns';
 
@@ -110,8 +110,8 @@ export function OutputPortsTab() {
     );
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
-    const navigateToOutputPort = (datasetId: string) => {
-        navigate(createDatasetIdPath(datasetId));
+    const navigateToOutputPort = (dataProductId: string, outputPortId: string) => {
+        navigate(createOutputPortPath(dataProductId, outputPortId));
     };
 
     const handleRoleChange = (selected: { productIds: string[]; roles: string[] }) => {
@@ -164,7 +164,7 @@ export function OutputPortsTab() {
             {/* Table */}
             <Table
                 onRow={(record) => ({
-                    onClick: () => navigateToOutputPort(record.id),
+                    onClick: () => navigateToOutputPort(record.data_product_id, record.id),
                 })}
                 columns={columns}
                 dataSource={filteredOutputPorts}
