@@ -43,7 +43,7 @@ const router = createBrowserRouter([
                         index: true,
                     },
                     {
-                        path: ApplicationPaths.DataProducts,
+                        path: ApplicationPaths.Studio,
                         children: [
                             {
                                 element: <ProductStudio />,
@@ -72,8 +72,8 @@ const router = createBrowserRouter([
                         ],
                     },
                     {
-                        path: ApplicationPaths.Studio,
-                        element: <Navigate to={ApplicationPaths.DataProducts} />,
+                        path: ApplicationPaths.DataProducts,
+                        element: <Navigate to={ApplicationPaths.Studio} />,
                     },
                     {
                         path: ApplicationPaths.Marketplace,
