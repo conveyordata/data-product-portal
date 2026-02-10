@@ -64,7 +64,7 @@ freezegun = "^1.5.5"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.40.0"
+poethepoet = "^0.41.0"
 
 [tool.poe.tasks]
 test = "pytest -v tests/"
