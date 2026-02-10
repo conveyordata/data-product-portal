@@ -52,14 +52,10 @@ from app.data_products.schema_response import (
     DataProductGet,
     DataProductsGet,
     DatasetLinks,
-    GetConveyorIdeUrlResponse,
-    GetDatabricksWorkspaceUrlResponse,
     GetDataProductInputPortsResponse,
     GetDataProductResponse,
     GetDataProductRolledUpTagsResponse,
     GetDataProductsResponse,
-    GetSigninUrlResponse,
-    GetSnowflakeUrlResponse,
     LinkDatasetsToDataProductPost,
     LinkInputPortsToDataProductPost,
     UpdateDataProductResponse,
@@ -738,162 +734,6 @@ def create_technical_asset(
     )
     RefreshInfrastructureLambda().trigger()
     return CreateTechnicalAssetResponse(id=technical_asset.id)
-
-
-@router.get(
-    f"{old_route}/{{id}}/signin_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def get_signin_url_old(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> str:
-    return get_signin_url(id, environment, db, authenticated_user).signin_url
-
-
-@router.get(
-    f"{route}/{{id}}/signin_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_signin_url(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> GetSigninUrlResponse:
-    return GetSigninUrlResponse(
-        signin_url=DataProductService(db).generate_signin_url(
-            id, environment, actor=authenticated_user
-        )
-    )
-
-
-@router.get(
-    f"{old_route}/{{id}}/conveyor_ide_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def get_conveyor_ide_url_old(id: UUID, db: Session = Depends(get_db_session)) -> str:
-    return get_conveyor_ide_url(id=id, db=db).ide_url
-
-
-@router.get(
-    f"{route}/{{id}}/conveyor_ide_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_conveyor_ide_url(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> GetConveyorIdeUrlResponse:
-    return GetConveyorIdeUrlResponse(
-        ide_url=DataProductService(db).get_conveyor_ide_url(id)
-    )
-
-
-@router.get(
-    f"{old_route}/{{id}}/databricks_workspace_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def get_databricks_workspace_url_old(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> str:
-    return get_databricks_workspace_url(id, environment, db).databricks_workspace_url
-
-
-@router.get(
-    f"{route}/{{id}}/databricks_workspace_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_databricks_workspace_url(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> GetDatabricksWorkspaceUrlResponse:
-    return GetDatabricksWorkspaceUrlResponse(
-        databricks_workspace_url=DataProductService(db).get_databricks_workspace_url(
-            id, environment
-        )
-    )
-
-
-@router.get(
-    f"{old_route}/{{id}}/snowflake_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def get_snowflake_url_old(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> str:
-    return get_snowflake_url(id, environment, db).snowflake_url
-
-
-@router.get(
-    f"{route}/{{id}}/snowflake_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_snowflake_url(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> GetSnowflakeUrlResponse:
-    return GetSnowflakeUrlResponse(
-        snowflake_url=DataProductService(db).get_snowflake_url(id, environment)
-    )
 
 
 @router.get(f"{old_route}/{{id}}/data_outputs", deprecated=True)
