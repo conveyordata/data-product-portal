@@ -10,9 +10,8 @@ import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
-import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetTechnicalAssetEventHistoryQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
-
 import styles from './data-output-tabs.module.scss';
 import { TechnologiesTab } from './technologies-tab/technologies-tab';
 
@@ -35,10 +34,8 @@ export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: P
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.Datasets);
-    const { data: dataOutputHistoryData, isLoading: isFetchingDataOutputHistory } = useGetDataOutputHistoryQuery(
-        technicalAssetId,
-        { skip: !technicalAssetId },
-    );
+    const { data: { events: dataOutputHistoryData = [] } = {}, isLoading: isFetchingDataOutputHistory } =
+        useGetTechnicalAssetEventHistoryQuery({ id: technicalAssetId, dataProductId }, { skip: !technicalAssetId });
 
     useEffect(() => {
         const hash = location.hash.slice(1);

@@ -16,7 +16,6 @@ import type {
     DataOutputUpdateRequest,
     DataOutputUpdateResponse,
 } from '@/types/data-output/data-output-update.contract';
-import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import { baseApiSlice } from '../api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
@@ -65,13 +64,6 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.History as const, id: arg.id },
             ],
-        }),
-        getDataOutputHistory: builder.query<EventContract[], string>({
-            query: (id) => ({
-                url: buildUrl(ApiUrl.DataOutputHistory, { dataOutputId: id }),
-                method: 'GET',
-            }),
-            providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
         }),
         getDataOutputGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
@@ -185,6 +177,5 @@ export const {
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
-    useGetDataOutputHistoryQuery,
     useLazyGetDataOutputResultStringQuery,
 } = dataOutputsApiSlice;

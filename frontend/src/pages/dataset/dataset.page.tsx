@@ -101,7 +101,7 @@ export function Dataset() {
                             ]}
                         />
                         {/*  Tabs  */}
-                        <DatasetTabs datasetId={outputPort.id} isLoading={isLoading} />
+                        <DatasetTabs datasetId={outputPort.id} dataProductId={dataProductId} isLoading={isLoading} />
                     </Flex>
                 </Flex>
             </Flex>

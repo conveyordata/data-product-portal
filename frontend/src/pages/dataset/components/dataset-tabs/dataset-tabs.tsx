@@ -21,7 +21,7 @@ import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-outp
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { UsageTab } from '@/pages/dataset/components/dataset-tabs/usage-tab/usage-tab.tsx';
-import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useGetOutputPortsEventHistoryQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
 import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';
@@ -37,16 +37,20 @@ type Tab = {
 
 type Props = {
     datasetId: string;
+    dataProductId: string;
     isLoading: boolean;
 };
 
-export function DatasetTabs({ datasetId, isLoading }: Props) {
+export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
-
-    const { data: datasetHistoryData, isLoading: isFetchingDatasetHistory } = useGetDatasetHistoryQuery(datasetId, {
-        skip: !datasetId,
-    });
+    const { data: { events: datasetHistoryData = [] } = {}, isLoading: isFetchingDatasetHistory } =
+        useGetOutputPortsEventHistoryQuery(
+            { id: datasetId, dataProductId },
+            {
+                skip: !datasetId,
+            },
+        );
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
     useEffect(() => {
