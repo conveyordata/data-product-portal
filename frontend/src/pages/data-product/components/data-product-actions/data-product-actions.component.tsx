@@ -102,7 +102,7 @@ export function DataProductActions({ dataProductId }: Props) {
                 pluginName: dataPlatform,
             }).unwrap();
             if (url) {
-                window.open(url, '_blank');
+                window.open(url.url, '_blank');
             } else {
                 dispatchMessage({ content: t('Failed to get platform url'), type: 'error' });
             }
@@ -115,7 +115,7 @@ export function DataProductActions({ dataProductId }: Props) {
         try {
             const url = await getPluginUrl({ id: dataProductId, pluginName: dataPlatform }).unwrap();
             if (url) {
-                window.open(url, '_blank');
+                window.open(url.url, '_blank');
             } else {
                 dispatchMessage({
                     type: 'error',

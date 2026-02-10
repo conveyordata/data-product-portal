@@ -13201,8 +13201,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "title": "Response Get Plugin Url Api V2 Plugins  Plugin Name  Url Get"
+                  "$ref": "#/components/schemas/URLResponse"
                 }
               }
             }
@@ -22341,6 +22340,20 @@
           "radio"
         ],
         "title": "UIElementType"
+      },
+      "URLResponse": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "URLResponse",
+        "description": "Response model for platform URLs"
       },
       "UnLinkTechnicalAssetToOutputPortRequest": {
         "properties": {

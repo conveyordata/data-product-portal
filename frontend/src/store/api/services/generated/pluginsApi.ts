@@ -36,7 +36,7 @@ export type GetPluginFormApiResponse =
   /** status 200 Successful Response */ UiElementMetadataResponse;
 export type GetPluginFormApiArg = string;
 export type GetPluginUrlApiResponse =
-  /** status 200 Successful Response */ string;
+  /** status 200 Successful Response */ UrlResponse;
 export type GetPluginUrlApiArg = {
   pluginName: string;
   id: string;
@@ -117,6 +117,9 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type UrlResponse = {
+  url: string;
 };
 export enum UIElementType {
   String = "string",

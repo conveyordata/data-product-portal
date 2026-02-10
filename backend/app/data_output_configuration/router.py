@@ -12,6 +12,7 @@ from app.data_output_configuration.schema_response import (
     PlatformTileResponse,
     PluginResponse,
     UIElementMetadataResponse,
+    URLResponse,
 )
 from app.data_output_configuration.service import PluginService
 from app.database.database import get_db_session
@@ -73,6 +74,8 @@ def get_plugin_url(
     environment: Optional[str] = None,
     db: Session = Depends(get_db_session),
     actor: User = Depends(get_authenticated_user),
-) -> str:
+) -> URLResponse:
     """Get the URL for the access tile of a specific plugin"""
-    return PluginService(db).get_url(plugin_name, id, db, actor, environment)
+    return URLResponse(
+        url=PluginService(db).get_url(plugin_name, id, db, actor, environment)
+    )
