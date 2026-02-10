@@ -10,7 +10,7 @@ class PlatformTile(ORMModel):
     label: str
     value: str  # platform identifier
     icon_name: str
-    has_menu: bool = True
+    has_environments: bool = True
     has_config: bool = True
     children: list["PlatformTile"] = []
 
@@ -19,6 +19,7 @@ class UIElementMetadataResponse(ORMModel):
     not_configured: bool = False
     ui_metadata: Sequence[UIElementMetadata]
     plugin: str
+    has_environments: bool
     result_label: str = "Resulting path"
     result_tooltip: str = "The path you can access through this technical asset"
     platform: str  # e.g., "s3", "redshift", "snowflake"
