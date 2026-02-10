@@ -110,7 +110,11 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                     </Space>
                 ),
                 children: (
-                    <DatasetCardTooltip dataset_id={dataset.id} number_of_data_products={dataset.data_product_count} />
+                    <DatasetCardTooltip
+                        outputPortId={dataset.id}
+                        dataProductId={dataset.data_product_id}
+                        number_of_data_products={dataset.data_product_count}
+                    />
                 ),
             },
         ];

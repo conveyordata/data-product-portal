@@ -1705,8 +1705,8 @@
         "tags": [
           "Data Products - Output ports"
         ],
-        "summary": "Remove Dataset",
-        "operationId": "remove_dataset",
+        "summary": "Remove Output Port",
+        "operationId": "remove_output_port",
         "parameters": [
           {
             "name": "data_product_id",
@@ -2497,6 +2497,114 @@
             }
           }
         }
+      }
+    },
+    "/api/data_products/namespace_suggestion": {
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Get Data Product Namespace Suggestion",
+        "operationId": "get_data_product_namespace_suggestion_api_data_products_namespace_suggestion_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceSuggestion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data_products/validate_namespace": {
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Validate Data Product Namespace",
+        "operationId": "validate_data_product_namespace_api_data_products_validate_namespace_get",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Namespace"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceValidation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data_products/namespace_length_limits": {
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Get Data Product Namespace Length Limits",
+        "operationId": "get_data_product_namespace_length_limits_api_data_products_namespace_length_limits_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamespaceLengthLimits"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/api/data_products": {
@@ -4759,114 +4867,6 @@
         }
       }
     },
-    "/api/data_products/namespace_suggestion": {
-      "get": {
-        "tags": [
-          "Data Products"
-        ],
-        "summary": "Get Data Product Namespace Suggestion",
-        "operationId": "get_data_product_namespace_suggestion_api_data_products_namespace_suggestion_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "name",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NamespaceSuggestion"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_products/validate_namespace": {
-      "get": {
-        "tags": [
-          "Data Products"
-        ],
-        "summary": "Validate Data Product Namespace",
-        "operationId": "validate_data_product_namespace_api_data_products_validate_namespace_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Namespace"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NamespaceValidation"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_products/namespace_length_limits": {
-      "get": {
-        "tags": [
-          "Data Products"
-        ],
-        "summary": "Get Data Product Namespace Length Limits",
-        "operationId": "get_data_product_namespace_length_limits_api_data_products_namespace_length_limits_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NamespaceLengthLimits"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/api/data_product_types/{id}": {
       "get": {
         "tags": [
@@ -6283,6 +6283,59 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Get Input Ports For Output Port",
+        "operationId": "get_input_ports_for_output_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInputPortsForOutputPortResponse"
+                }
               }
             }
           },
@@ -15791,6 +15844,23 @@
         ],
         "title": "DataProductIconKey"
       },
+      "DataProductInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DataProductType"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "DataProductInfo"
+      },
       "DataProductLifeCycle": {
         "properties": {
           "id": {
@@ -15947,6 +16017,9 @@
             "format": "uuid",
             "title": "Data Product Id"
           },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
           "dataset_id": {
             "type": "string",
             "format": "uuid",
@@ -15954,9 +16027,6 @@
           },
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct"
           }
         },
         "type": "object",
@@ -15964,9 +16034,9 @@
           "id",
           "justification",
           "data_product_id",
+          "data_product",
           "dataset_id",
-          "status",
-          "data_product"
+          "status"
         ],
         "title": "DataProductLink",
         "deprecated": true
@@ -17613,6 +17683,9 @@
             "format": "uuid",
             "title": "Data Product Id"
           },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProductInfo"
+          },
           "dataset_id": {
             "type": "string",
             "format": "uuid",
@@ -17630,6 +17703,7 @@
           "id",
           "justification",
           "data_product_id",
+          "data_product",
           "dataset_id",
           "status",
           "dataset"
@@ -19091,6 +19165,22 @@
         "title": "GetEventHistoryResponseItemOld",
         "deprecated": true
       },
+      "GetInputPortsForOutputPortResponse": {
+        "properties": {
+          "input_ports": {
+            "items": {
+              "$ref": "#/components/schemas/InputPort"
+            },
+            "type": "array",
+            "title": "Input Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_ports"
+        ],
+        "title": "GetInputPortsForOutputPortResponse"
+      },
       "GetOutputPortResponse": {
         "properties": {
           "id": {
@@ -19651,6 +19741,9 @@
             "format": "uuid",
             "title": "Data Product Id"
           },
+          "data_product": {
+            "$ref": "#/components/schemas/DataProductInfo"
+          },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
@@ -19668,6 +19761,7 @@
           "id",
           "justification",
           "data_product_id",
+          "data_product",
           "output_port_id",
           "status",
           "input_port"

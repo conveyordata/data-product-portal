@@ -27,21 +27,21 @@ import styles from './dataset.module.scss';
 export function Dataset() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { outputPortId = '', dataProductId = '' } = useParams();
+    const { datasetId = '', dataProductId = '' } = useParams();
 
     const { data: outputPort, isLoading } = useGetOutputPortQuery(
-        { dataProductId, id: outputPortId },
-        { skip: !dataProductId || !outputPortId },
+        { dataProductId, id: datasetId },
+        { skip: !dataProductId || !datasetId },
     );
     const { data: data_product, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId, {
         skip: !dataProductId,
     });
     const { data: edit_access } = useCheckAccessQuery(
         {
-            resource: outputPortId,
+            resource: datasetId,
             action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
         },
-        { skip: !outputPortId },
+        { skip: !datasetId },
     );
     const canEdit = edit_access?.allowed || false;
 
@@ -49,7 +49,7 @@ export function Dataset() {
 
     function navigateToDatasetEditPage() {
         navigate(
-            ApplicationPaths.DatasetEdit.replace(`:${DynamicPathParams.DatasetId}`, outputPortId).replace(
+            ApplicationPaths.DatasetEdit.replace(`:${DynamicPathParams.DatasetId}`, datasetId).replace(
                 `:${DynamicPathParams.DataProductId}`,
                 dataProductId,
             ),
@@ -58,10 +58,10 @@ export function Dataset() {
 
     useEffect(() => {
         setItemToLocalStorage(LocalStorageKeys.LastVisitedDatasets, {
-            id: outputPortId,
+            id: datasetId,
             timestamp: Date.now(),
         });
-    }, [outputPortId]);
+    }, [datasetId]);
 
     if (isLoading || isLoadingDataProduct) return <LoadingSpinner />;
 
@@ -107,8 +107,8 @@ export function Dataset() {
             </Flex>
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
-                <DatasetActions datasetId={outputPortId} />
-                <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={outputPortId} />
+                <DatasetActions datasetId={datasetId} />
+                <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
                 <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
             </Flex>
         </Flex>

@@ -50,6 +50,14 @@ const router = createBrowserRouter([
                                 index: true,
                             },
                             {
+                                path: ApplicationPaths.Dataset,
+                                element: <Dataset />,
+                            },
+                            {
+                                path: ApplicationPaths.DatasetEdit,
+                                element: <DatasetEdit />,
+                            },
+                            {
                                 path: ApplicationPaths.DataProduct,
                                 element: <DataProduct />,
                             },
@@ -90,14 +98,6 @@ const router = createBrowserRouter([
                             {
                                 element: <Marketplace />,
                                 index: true,
-                            },
-                            {
-                                path: ApplicationPaths.Dataset,
-                                element: <Dataset />,
-                            },
-                            {
-                                path: ApplicationPaths.DatasetEdit,
-                                element: <DatasetEdit />,
                             },
                         ],
                     },

@@ -450,6 +450,37 @@ class TestDataProductsDatasetsRouter:
         history = self.get_data_product_history(client, link.data_product_id).json()
         assert len(history) == 1
 
+    def test_get_input_ports_for_output_port(self, client):
+        # Create a dataset (output port) with a data product
+        ds = DatasetFactory()
+
+        # Create multiple data products that consume this dataset
+        consuming_dp1 = DataProductFactory()
+        consuming_dp2 = DataProductFactory()
+
+        # Create associations (links) between consuming data products and the dataset
+        DataProductDatasetAssociationFactory(
+            dataset=ds, data_product=consuming_dp1, status=DecisionStatus.APPROVED
+        )
+        DataProductDatasetAssociationFactory(
+            dataset=ds, data_product=consuming_dp2, status=DecisionStatus.APPROVED
+        )
+
+        # Get the input ports for the output port
+        response = client.get(
+            DATA_PRODUCTS_DATASETS_ENDPOINT.format(ds.data_product.id, ds.id)
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "input_ports" in data
+        assert len(data["input_ports"]) == 2
+
+        # Verify the consuming data product IDs are in the response
+        consuming_dp_ids = {ip["data_product_id"] for ip in data["input_ports"]}
+        assert str(consuming_dp1.id) in consuming_dp_ids
+        assert str(consuming_dp2.id) in consuming_dp_ids
+
     def test_history_event_created_on_unlink_request(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(

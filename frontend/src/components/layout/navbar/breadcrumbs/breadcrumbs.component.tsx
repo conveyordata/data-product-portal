@@ -17,8 +17,8 @@ import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/dat
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { ApplicationPaths, type DynamicPathParams } from '@/types/navigation.ts';
 import { isDataOutputEditPage, isDataProductEditPage, isDatasetEditPage } from '@/utils/routes.helper.ts';
 import styles from './breadcrumbs.module.scss';
@@ -37,10 +37,16 @@ export const Breadcrumbs = () => {
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId, {
         skip: !dataProductId,
     });
-    const { data: dataOutput, isFetching: isFetchingDataOutput } = useGetDataOutputByIdQuery(dataOutputId, {
-        skip: !dataOutputId,
-    });
-    const { data: dataset, isFetching: isFetchingDataset } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+    const { data: dataOutput, isFetching: isFetchingDataOutput } = useGetTechnicalAssetQuery(
+        { id: dataOutputId, dataProductId },
+        {
+            skip: !dataOutputId || !dataProductId,
+        },
+    );
+    const { data: dataset, isFetching: isFetchingDataset } = useGetOutputPortQuery(
+        { id: datasetId, dataProductId },
+        { skip: !datasetId || !dataProductId },
+    );
 
     const homeItem: BreadcrumbItemType = useMemo(
         () => ({

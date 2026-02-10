@@ -3,8 +3,11 @@ import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { DataProductType, GetDataProductsResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { DataProductStatus } from '@/types/data-product';
+import type {
+    DataProductStatus,
+    DataProductType,
+    GetDataProductsResponseItem,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import type { DomainContract } from '@/types/domain';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';

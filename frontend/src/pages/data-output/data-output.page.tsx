@@ -10,9 +10,9 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
@@ -27,7 +27,10 @@ export function DataOutput() {
     const navigate = useNavigate();
     const { dataOutputId = '', dataProductId = '' } = useParams();
 
-    const { data: dataOutput, isLoading } = useGetDataOutputByIdQuery(dataOutputId, { skip: !dataOutputId });
+    const { data: dataOutput, isLoading } = useGetTechnicalAssetQuery(
+        { id: dataOutputId, dataProductId },
+        { skip: !dataOutputId },
+    );
     const { data: dataProduct } = useGetDataProductQuery(dataProductId, { skip: !dataProductId });
     const { data: { plugins } = {} } = useGetPluginsQuery();
 

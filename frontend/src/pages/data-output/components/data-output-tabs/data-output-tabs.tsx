@@ -66,7 +66,7 @@ export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: P
                 label: t('Technical information'),
                 key: TabKeys.Technologies,
                 icon: <CodeOutlined />,
-                children: <TechnologiesTab dataOutputId={technicalAssetId} />,
+                children: <TechnologiesTab technicalAssetId={technicalAssetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('History'),

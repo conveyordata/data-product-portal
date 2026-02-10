@@ -14,7 +14,12 @@ import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generate
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    useCreateDataProductMutation,
+    useGetDataProductQuery,
+    useRemoveDataProductMutation,
+    useUpdateDataProductMutation,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
@@ -23,11 +28,6 @@ import {
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import {
-    useCreateDataProductMutation,
-    useRemoveDataProductMutation,
-    useUpdateDataProductMutation,
-} from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
@@ -157,8 +157,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     tag_ids: values.tag_ids,
                 };
                 const response = await updateDataProduct({
-                    dataProduct: request,
-                    data_product_id: dataProductId,
+                    dataProductUpdate: request,
+                    id: dataProductId,
                 }).unwrap();
 
                 dispatchMessage({ content: t('Data Product updated successfully'), type: 'success' });

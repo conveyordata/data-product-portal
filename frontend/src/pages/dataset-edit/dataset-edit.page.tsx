@@ -2,12 +2,15 @@ import { Typography } from 'antd';
 import { useNavigate, useParams } from 'react-router';
 
 import { DatasetForm } from '@/components/datasets/dataset-form/dataset-form.component';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 export function DatasetEdit() {
     const { datasetId = '', dataProductId = '' } = useParams();
-    const { data, isError } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+    const { data, isError } = useGetOutputPortQuery(
+        { id: datasetId, dataProductId },
+        { skip: !datasetId || !dataProductId },
+    );
     const navigate = useNavigate();
 
     if (!datasetId || isError) {

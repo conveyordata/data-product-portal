@@ -79,7 +79,12 @@ export function OutputPortsTable({ dataProductId, outputPorts, draggedDataOutput
             </Flex>
 
             {filteredDatasets.map((dataset) => (
-                <DatasetCard key={dataset.id} datasetId={dataset.id} draggedDataOutputId={draggedDataOutputId} />
+                <DatasetCard
+                    key={dataset.id}
+                    dataProductId={dataProductId}
+                    datasetId={dataset.id}
+                    draggedDataOutputId={draggedDataOutputId}
+                />
             ))}
 
             {filteredDatasets.length === 0 && (

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DataOutputForm } from '@/components/data-products/data-output-form/data-output-form.component';
 import { DataProductDataOutputLinkPopup } from '@/components/data-products/data-product-data-output-link-popup/data-product-data-output-link-popup.component';
-import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { CreateTechnicalAssetRequest } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 
 type Props = {
     onClose: () => void;
@@ -14,7 +14,7 @@ type Props = {
 
 export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
     const { t } = useTranslation();
-    const ref = useRef<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>>(null);
+    const ref = useRef<FormInstance<CreateTechnicalAssetRequest> | null>(null);
 
     return (
         <DataProductDataOutputLinkPopup

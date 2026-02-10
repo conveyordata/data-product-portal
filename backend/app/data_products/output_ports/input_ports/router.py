@@ -18,7 +18,12 @@ from app.data_products.output_ports.input_ports.schema_request import (
     DenyOutputPortAsInputPortRequest,
     RemoveOutputPortAsInputPortRequest,
 )
+from app.data_products.output_ports.input_ports.schema_response import (
+    GetInputPortsForOutputPortResponse,
+)
 from app.data_products.output_ports.input_ports.service import DataProductDatasetService
+from app.data_products.output_ports.service import OutputPortService
+from app.data_products.schema_response import DatasetLinks
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -30,6 +35,22 @@ from app.users.schema import User
 router = APIRouter(tags=["Data Products - Output ports - Input ports"])
 old_route = "/data_product_dataset_links"
 route = "/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports"
+
+
+@router.get(route)
+def get_input_ports_for_output_port(
+    data_product_id: UUID,
+    output_port_id: UUID,
+    db: Session = Depends(get_db_session),
+) -> GetInputPortsForOutputPortResponse:
+    return GetInputPortsForOutputPortResponse(
+        input_ports=[
+            DatasetLinks.model_validate(x).convert()
+            for x in OutputPortService(db).get_consuming_data_products(
+                output_port_id, data_product_id
+            )
+        ]
+    )
 
 
 @router.post(

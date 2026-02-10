@@ -102,9 +102,9 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}`,
       }),
     }),
-    removeDataset: build.mutation<
-      RemoveDatasetApiResponse,
-      RemoveDatasetApiArg
+    removeOutputPort: build.mutation<
+      RemoveOutputPortApiResponse,
+      RemoveOutputPortApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}`,
@@ -247,9 +247,9 @@ export type GetOutputPortApiArg = {
   dataProductId: string;
   id: string;
 };
-export type RemoveDatasetApiResponse =
+export type RemoveOutputPortApiResponse =
   /** status 200 Successful Response */ any;
-export type RemoveDatasetApiArg = {
+export type RemoveOutputPortApiArg = {
   dataProductId: string;
   id: string;
 };
@@ -811,7 +811,7 @@ export const {
   useCreateOutputPortMutation,
   useGetOutputPortQuery,
   useLazyGetOutputPortQuery,
-  useRemoveDatasetMutation,
+  useRemoveOutputPortMutation,
   useUpdateOutputPortMutation,
   useGetOutputPortsEventHistoryQuery,
   useLazyGetOutputPortsEventHistoryQuery,

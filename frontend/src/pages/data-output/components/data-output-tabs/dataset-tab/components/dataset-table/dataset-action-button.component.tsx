@@ -1,20 +1,20 @@
 import { Button, Popconfirm } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useUnlinkOutputPortFromTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import type { OutputPort } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useRemoveDatasetFromDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';
 
 type Props = {
     outputPort: OutputPort;
-    technicalAssetIt: string;
-    dataProductId: string | undefined;
+    technicalAssetId: string;
+    dataProductId: string;
     status: DecisionStatus;
 };
-export function DatasetActionButton({ outputPort, technicalAssetIt, dataProductId, status }: Props) {
+export function DatasetActionButton({ outputPort, technicalAssetId, dataProductId, status }: Props) {
     const { t } = useTranslation();
 
     const { data: access } = useCheckAccessQuery(
@@ -26,12 +26,16 @@ export function DatasetActionButton({ outputPort, technicalAssetIt, dataProductI
     );
     const canRevoke = access?.allowed ?? false;
 
-    const [removeDatasetFromDataOutput, { isLoading }] = useRemoveDatasetFromDataOutputMutation();
+    const [removeDatasetFromDataOutput, { isLoading }] = useUnlinkOutputPortFromTechnicalAssetMutation();
 
     const handleRemoveDatasetFromDataOutput = useCallback(
         async (datasetId: string, name: string) => {
             try {
-                await removeDatasetFromDataOutput({ datasetId, dataOutputId: technicalAssetIt }).unwrap();
+                await removeDatasetFromDataOutput({
+                    dataProductId,
+                    outputPortId: datasetId,
+                    unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id: technicalAssetId },
+                }).unwrap();
                 dispatchMessage({
                     content: t('Output Port {{name}} has been removed from Technical Asset', { name }),
                     type: 'success',
@@ -40,13 +44,17 @@ export function DatasetActionButton({ outputPort, technicalAssetIt, dataProductI
                 console.error('Failed to remove dataset from Technical Asset', error);
             }
         },
-        [technicalAssetIt, removeDatasetFromDataOutput, t],
+        [technicalAssetId, removeDatasetFromDataOutput, t, dataProductId],
     );
 
     const handleCancelDatasetLinkRequest = useCallback(
         async (datasetId: string, name: string) => {
             try {
-                await removeDatasetFromDataOutput({ datasetId, dataOutputId: technicalAssetIt }).unwrap();
+                await removeDatasetFromDataOutput({
+                    dataProductId,
+                    outputPortId: datasetId,
+                    unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id: technicalAssetId },
+                }).unwrap();
                 dispatchMessage({
                     content: t('Request to link Output Port {{name}} has been cancelled', { name }),
                     type: 'success',
@@ -55,7 +63,7 @@ export function DatasetActionButton({ outputPort, technicalAssetIt, dataProductI
                 console.error('Failed to cancel dataset link request', error);
             }
         },
-        [technicalAssetIt, removeDatasetFromDataOutput, t],
+        [technicalAssetId, removeDatasetFromDataOutput, t, dataProductId],
     );
 
     const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');

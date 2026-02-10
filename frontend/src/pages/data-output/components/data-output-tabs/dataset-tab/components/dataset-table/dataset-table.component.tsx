@@ -4,19 +4,24 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import type { OutputPortLink } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import {
+    type OutputPortLink,
+    useGetTechnicalAssetQuery,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import styles from './dataset-table.module.scss';
 import { getDataOutputDatasetsColumns } from './dataset-table-columns.tsx';
 
 type Props = {
-    dataProductId: string | undefined;
+    dataProductId: string;
     dataOutputId: string;
     datasets: OutputPortLink[];
 };
 export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
     const { t } = useTranslation();
-    const { data: dataOutput, isLoading: isLoadingDataOutput } = useGetDataOutputByIdQuery(dataOutputId);
+    const { data: dataOutput, isLoading: isLoadingDataOutput } = useGetTechnicalAssetQuery({
+        id: dataOutputId,
+        dataProductId,
+    });
 
     const { pagination, handlePaginationChange } = useTablePagination(datasets, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,

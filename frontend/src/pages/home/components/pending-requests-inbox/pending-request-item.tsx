@@ -41,16 +41,20 @@ export function PendingItem({ pendingAction }: Props) {
         switch (pendingAction.pending_action_type) {
             case PendingActionTypes.DataProductDataset:
                 await handleAcceptDataProductDatasetLink({
-                    id: pendingAction.id,
-                    data_product_id: pendingAction.data_product_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.data_product_id,
+                    outputPortId: pendingAction.dataset_id,
+                    approveOutputPortAsInputPortRequest: {
+                        consuming_data_product_id: pendingAction.data_product.id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataOutputDataset:
                 await handleAcceptDataOutputDatasetLink({
-                    id: pendingAction.id,
-                    data_output_id: pendingAction.data_output_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.data_output.owner_id,
+                    outputPortId: pendingAction.dataset_id,
+                    approveLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                        technical_asset_id: pendingAction.data_output_id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataProductRoleAssignment:
@@ -67,16 +71,20 @@ export function PendingItem({ pendingAction }: Props) {
         switch (pendingAction.pending_action_type) {
             case PendingActionTypes.DataProductDataset:
                 await handleRejectDataProductDatasetLink({
-                    id: pendingAction.id,
-                    data_product_id: pendingAction.data_product_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.data_product_id,
+                    outputPortId: pendingAction.dataset_id,
+                    denyOutputPortAsInputPortRequest: {
+                        consuming_data_product_id: pendingAction.data_product.id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataOutputDataset:
                 await handleRejectDataOutputDatasetLink({
-                    id: pendingAction.id,
-                    data_output_id: pendingAction.data_output_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.data_output.owner_id,
+                    outputPortId: pendingAction.dataset_id,
+                    denyLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                        technical_asset_id: pendingAction.data_output_id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataProductRoleAssignment:

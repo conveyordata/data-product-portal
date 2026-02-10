@@ -1,6 +1,14 @@
 import { api } from "@/store/api/services/generated/dataProductsOutputPortsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    getInputPortsForOutputPort: build.query<
+      GetInputPortsForOutputPortApiResponse,
+      GetInputPortsForOutputPortApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports`,
+      }),
+    }),
     approveOutputPortAsInputPort: build.mutation<
       ApproveOutputPortAsInputPortApiResponse,
       ApproveOutputPortAsInputPortApiArg
@@ -35,6 +43,12 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
+export type GetInputPortsForOutputPortApiResponse =
+  /** status 200 Successful Response */ GetInputPortsForOutputPortResponse;
+export type GetInputPortsForOutputPortApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+};
 export type ApproveOutputPortAsInputPortApiResponse =
   /** status 200 Successful Response */ any;
 export type ApproveOutputPortAsInputPortApiArg = {
@@ -56,6 +70,42 @@ export type RemoveOutputPortAsInputPortApiArg = {
   outputPortId: string;
   removeOutputPortAsInputPortRequest: RemoveOutputPortAsInputPortRequest;
 };
+export type DataProductType = {
+  id: string;
+  name: string;
+  description: string;
+  icon_key: DataProductIconKey;
+};
+export type DataProductInfo = {
+  name: string;
+  type: DataProductType;
+};
+export type Tag = {
+  id: string;
+  value: string;
+};
+export type OutputPort = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  status: OutputPortStatus;
+  access_type: OutputPortAccessType;
+  data_product_id: string;
+  tags: Tag[];
+};
+export type InputPort = {
+  id: string;
+  justification: string;
+  data_product_id: string;
+  data_product: DataProductInfo;
+  output_port_id: string;
+  status: DecisionStatus;
+  input_port: OutputPort;
+};
+export type GetInputPortsForOutputPortResponse = {
+  input_ports: InputPort[];
+};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -75,7 +125,33 @@ export type DenyOutputPortAsInputPortRequest = {
 export type RemoveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
 };
+export enum DataProductIconKey {
+  Reporting = "reporting",
+  Processing = "processing",
+  Exploration = "exploration",
+  Ingestion = "ingestion",
+  MachineLearning = "machine_learning",
+  Analytics = "analytics",
+  Default = "default",
+}
+export enum DecisionStatus {
+  Approved = "approved",
+  Pending = "pending",
+  Denied = "denied",
+}
+export enum OutputPortStatus {
+  Pending = "pending",
+  Active = "active",
+  Archived = "archived",
+}
+export enum OutputPortAccessType {
+  Public = "public",
+  Restricted = "restricted",
+  Private = "private",
+}
 export const {
+  useGetInputPortsForOutputPortQuery,
+  useLazyGetInputPortsForOutputPortQuery,
   useApproveOutputPortAsInputPortMutation,
   useDenyOutputPortAsInputPortMutation,
   useRemoveOutputPortAsInputPortMutation,

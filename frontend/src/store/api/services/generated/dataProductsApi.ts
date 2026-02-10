@@ -603,10 +603,15 @@ export type GetDatabricksWorkspaceUrlResponse = {
 export type GetSnowflakeUrlResponse = {
   snowflake_url: string;
 };
+export type DataProductInfo = {
+  name: string;
+  type: DataProductType;
+};
 export type InputPort = {
   id: string;
   justification: string;
   data_product_id: string;
+  data_product: DataProductInfo;
   output_port_id: string;
   status: DecisionStatus;
   input_port: OutputPort;

@@ -30,10 +30,10 @@ import {
     useGetDataProductInputPortsQuery,
     useGetDataProductQuery,
     useGetDataProductsQuery,
+    useLinkInputPortsToDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
-import { useRequestDatasetsAccessForDataProductMutation } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
@@ -50,7 +50,7 @@ function Cart() {
 
     const { data: datasets, isFetching: fetchingDatasets } = useGetAllDatasetsQuery();
     const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
-        useRequestDatasetsAccessForDataProductMutation();
+        useLinkInputPortsToDataProductMutation();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
     const cartDatasets = useMemo(() => {
         if (cartDatasetIds.length === 0) {
@@ -96,9 +96,11 @@ function Cart() {
             cartSize: cartDatasets?.length,
         });
         requestDatasetAccessForDataProduct({
-            datasetIds: cartDatasets?.map((dataset) => dataset.id),
-            dataProductId: values.dataProductId,
-            justification: values.justification,
+            id: values.dataProductId,
+            linkInputPortsToDataProduct: {
+                input_ports: cartDatasets?.map((dataset) => dataset.id),
+                justification: values.justification,
+            },
         });
     };
     const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {

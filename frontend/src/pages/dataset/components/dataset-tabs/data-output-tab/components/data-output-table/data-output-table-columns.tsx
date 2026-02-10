@@ -3,23 +3,24 @@ import type { TFunction } from 'i18next';
 
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import type {
+    ApproveOutputPortTechnicalAssetLinkApiArg,
+    DenyOutputPortTechnicalAssetLinkApiArg,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
-import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import type { DataOutputLink } from '@/types/dataset';
-import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { createDataOutputIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper';
-
 import styles from './data-output-table.module.scss';
 
 type Props = {
     t: TFunction;
     plugins?: UiElementMetadataResponse[];
-    onRemoveDataOutputDatasetLink: (data_outputId: string, name: string, datasetLinkId: string) => void;
-    onAcceptDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void;
-    onRejectDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void;
+    onRemoveDataOutputDatasetLink: (data_outputId: string, name: string) => void;
+    onAcceptDataOutputDatasetLink: (request: ApproveOutputPortTechnicalAssetLinkApiArg) => void;
+    onRejectDataOutputDatasetLink: (request: DenyOutputPortTechnicalAssetLinkApiArg) => void;
     isLoading?: boolean;
     isDisabled?: boolean;
     canAccept?: boolean;
@@ -35,7 +36,7 @@ export const getDatasetDataProductsColumns = ({
     isLoading,
     canAccept,
     canRevoke,
-}: Props): TableColumnsType<DataOutputLink> => {
+}: Props): TableColumnsType<TechnicalAssetLink> => {
     return [
         {
             title: t('Id'),
@@ -43,47 +44,23 @@ export const getDatasetDataProductsColumns = ({
             hidden: true,
         },
         {
-            title: t('Produced by Data Product'),
-            dataIndex: 'dataproduct',
-            render: (_, { data_output, status }) => {
-                return (
-                    <TableCellAvatar
-                        linkTo={createDataProductIdPath(data_output.owner_id)}
-                        icon={
-                            <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIconOld(data_output.owner.type.icon_key)}
-                                hasRoundBorder
-                                size={'default'}
-                            />
-                        }
-                        title={data_output.owner.name}
-                        subtitle={
-                            <Badge
-                                status={getDecisionStatusBadgeStatus(status)}
-                                text={getDecisionStatusLabel(t, status)}
-                                className={styles.noSelect}
-                            />
-                        }
-                    />
-                );
-            },
-            width: '50%',
-        },
-        {
             title: t('Technical Asset name'),
             dataIndex: 'name',
-            render: (_, { data_output, status }) => {
+            render: (_, { technical_asset, status }) => {
                 return (
                     <TableCellAvatar
-                        popover={{ title: data_output.name, content: data_output.description }}
-                        linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
+                        popover={{ title: technical_asset.name, content: technical_asset.description }}
+                        linkTo={createDataOutputIdPath(technical_asset.id, technical_asset.owner_id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type, plugins)}
+                                iconComponent={getDataOutputIcon(
+                                    technical_asset.configuration.configuration_type,
+                                    plugins,
+                                )}
                                 size={'default'}
                             />
                         }
-                        title={data_output.name}
+                        title={technical_asset.name}
                         subtitle={
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
@@ -94,22 +71,30 @@ export const getDatasetDataProductsColumns = ({
                     />
                 );
             },
-            width: '50%',
+            width: '100%',
         },
         {
             title: t('Actions'),
             key: 'action',
             hidden: !canAccept && !canRevoke,
-            render: (_, { id, data_output, status, dataset_id, data_output_id }) => {
+            render: (_, { technical_asset, status, output_port_id, technical_asset_id }) => {
                 if (status === DecisionStatus.Pending) {
                     return (
                         <Flex>
                             <Popconfirm
                                 title={t('Allow Technical Asset Access')}
                                 description={t('Are you sure you want to allow access to Technical Asset {{name}}?', {
-                                    name: data_output.name,
+                                    name: technical_asset.name,
                                 })}
-                                onConfirm={() => onAcceptDataOutputDatasetLink({ dataset_id, data_output_id, id })}
+                                onConfirm={() =>
+                                    onAcceptDataOutputDatasetLink({
+                                        dataProductId: technical_asset.owner_id,
+                                        outputPortId: output_port_id,
+                                        approveLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                                            technical_asset_id: technical_asset_id,
+                                        },
+                                    })
+                                }
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -123,9 +108,17 @@ export const getDatasetDataProductsColumns = ({
                             <Popconfirm
                                 title={t('Deny Technical Asset Access')}
                                 description={t('Are you sure you want to deny access to Technical Asset {{name}}?', {
-                                    name: data_output.name,
+                                    name: technical_asset.name,
                                 })}
-                                onConfirm={() => onRejectDataOutputDatasetLink({ dataset_id, data_output_id, id })}
+                                onConfirm={() =>
+                                    onRejectDataOutputDatasetLink({
+                                        dataProductId: technical_asset.owner_id,
+                                        outputPortId: output_port_id,
+                                        denyLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                                            technical_asset_id: technical_asset_id,
+                                        },
+                                    })
+                                }
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -144,9 +137,17 @@ export const getDatasetDataProductsColumns = ({
                         <Popconfirm
                             title={t('Revoke Technical Asset Access')}
                             description={t('Are you sure you want to revoke access from Technical Asset {{name}}?', {
-                                name: data_output.name,
+                                name: technical_asset.name,
                             })}
-                            onConfirm={() => onRejectDataOutputDatasetLink({ dataset_id, data_output_id, id })}
+                            onConfirm={() =>
+                                onRejectDataOutputDatasetLink({
+                                    dataProductId: technical_asset.owner_id,
+                                    outputPortId: output_port_id,
+                                    denyLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                                        technical_asset_id: technical_asset_id,
+                                    },
+                                })
+                            }
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
@@ -164,7 +165,7 @@ export const getDatasetDataProductsColumns = ({
                     return (
                         <Button
                             type={'link'}
-                            onClick={() => onRemoveDataOutputDatasetLink(data_output_id, data_output.name, id)}
+                            onClick={() => onRemoveDataOutputDatasetLink(technical_asset_id, technical_asset.name)}
                         >
                             {t('Remove')}
                         </Button>

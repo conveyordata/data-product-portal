@@ -4,11 +4,13 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import type { GetTechnicalAssetsResponseItemRead } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import {
+    type GetTechnicalAssetsResponseItemRead,
+    useRemoveTechnicalAssetMutation,
+    useUnlinkOutputPortFromTechnicalAssetMutation,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRemoveDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
-import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createDataOutputIdPath } from '@/types/navigation';
@@ -31,12 +33,12 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
         action: AuthorizationAction.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
     });
 
-    const [removeDataOutput, { isLoading: isRemoving }] = useRemoveDataOutputMutation();
-    const [unlinkDataset] = useRemoveDataOutputDatasetLinkMutation();
+    const [removeDataOutput, { isLoading: isRemoving }] = useRemoveTechnicalAssetMutation();
+    const [unlinkDataset] = useUnlinkOutputPortFromTechnicalAssetMutation();
 
     const handleRemoveDataOutput = useCallback(async () => {
         try {
-            await removeDataOutput(technicalAsset.id).unwrap();
+            await removeDataOutput({ id: technicalAsset.id, dataProductId }).unwrap();
             dispatchMessage({
                 content: t('Technical Asset {{name}} has been successfully removed', { name: technicalAsset.name }),
                 type: 'success',
@@ -47,12 +49,16 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                 type: 'error',
             });
         }
-    }, [removeDataOutput, technicalAsset.id, technicalAsset.name, t]);
+    }, [removeDataOutput, technicalAsset.id, technicalAsset.name, t, dataProductId]);
 
     const handleRemoveDatasetLink = useCallback(
-        async (datasetId: string, datasetLinkId: string) => {
+        async (datasetId: string, technical_asset_id: string) => {
             try {
-                await unlinkDataset({ dataOutputId: technicalAsset.id, datasetId, datasetLinkId }).unwrap();
+                await unlinkDataset({
+                    outputPortId: datasetId,
+                    dataProductId,
+                    unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id },
+                }).unwrap();
                 dispatchMessage({
                     content: t('Output Port unlinked successfully'),
                     type: 'success',
@@ -64,7 +70,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                 });
             }
         },
-        [unlinkDataset, technicalAsset.id, t],
+        [unlinkDataset, dataProductId, t],
     );
 
     const handleDragStart = (event: React.DragEvent) => {
@@ -199,7 +205,10 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                                             size="small"
                                                             danger
                                                             onClick={() =>
-                                                                handleRemoveDatasetLink(link.output.id, link.id)
+                                                                handleRemoveDatasetLink(
+                                                                    link.output.id,
+                                                                    link.technical_asset_id,
+                                                                )
                                                             }
                                                         >
                                                             {t('Remove')}

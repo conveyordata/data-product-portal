@@ -65,7 +65,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 label: t('About'),
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
-                children: <AboutTab datasetId={datasetId} />,
+                children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: (
@@ -79,16 +79,16 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 children: <UsageTab datasetId={datasetId} />,
             },
             {
-                label: t('Producing Data Products'),
+                label: t('Technical assets'),
                 key: TabKeys.Producers,
                 icon: <DataOutputOutlined />,
-                children: <DataOutputTab datasetId={datasetId} />,
+                children: <DataOutputTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('Consuming Data Products'),
                 key: TabKeys.Consumers,
                 icon: <DataProductOutlined />,
-                children: <DataProductTab datasetId={datasetId} />,
+                children: <DataProductTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('Explorer'),
@@ -100,13 +100,13 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 label: t('Team'),
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
-                children: <TeamTab datasetId={datasetId} />,
+                children: <TeamTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('Settings'),
                 key: TabKeys.Settings,
                 icon: <SettingOutlined />,
-                children: <SettingsTab datasetId={datasetId} />,
+                children: <SettingsTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('History'),
@@ -122,7 +122,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 ),
             },
         ];
-    }, [datasetId, t, datasetHistoryData, isFetchingDatasetHistory]);
+    }, [datasetId, t, datasetHistoryData, isFetchingDatasetHistory, dataProductId]);
 
     if (isLoading) {
         return <LoadingSpinner />;

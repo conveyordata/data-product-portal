@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Searchbar } from '@/components/form';
-import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type OutputPortLink,
     useGetTechnicalAssetQuery,
@@ -30,7 +29,6 @@ export function DatasetTab({ technicalAssetId, dataProductId }: Props) {
     const { t } = useTranslation();
 
     const { data: technicalAsset } = useGetTechnicalAssetQuery({ id: technicalAssetId, dataProductId });
-    const { data: dataProduct } = useGetDataProductQuery(dataProductId);
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -46,7 +44,7 @@ export function DatasetTab({ technicalAssetId, dataProductId }: Props) {
                 form={searchForm}
             />
 
-            <DatasetTable dataProductId={dataProduct?.id} dataOutputId={technicalAssetId} datasets={filteredDatasets} />
+            <DatasetTable dataProductId={dataProductId} dataOutputId={technicalAssetId} datasets={filteredDatasets} />
         </Flex>
     );
 }

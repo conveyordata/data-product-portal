@@ -26,6 +26,15 @@ import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generate
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { OutputPortAccessType, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
+    type CreateOutputPortRequest,
+    type DatasetUpdate,
+    useCreateOutputPortMutation,
+    useGetOutputPortQuery,
+    useRemoveOutputPortMutation,
+    useUpdateOutputPortMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useLinkOutputPortToTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
     useLazyValidateResourceNameQuery,
@@ -33,21 +42,9 @@ import {
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import {
-    useCreateDatasetMutation,
-    useGetDatasetByIdQuery,
-    useRemoveDatasetMutation,
-    useUpdateDatasetMutation,
-} from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import {
-    DatasetAccess,
-    type DatasetCreateFormSchema,
-    type DatasetCreateRequest,
-    type DatasetUpdateRequest,
-} from '@/types/dataset';
+import { DatasetAccess, type DatasetCreateFormSchema } from '@/types/dataset';
 import {
     ApplicationPaths,
     createDataOutputIdPath,
@@ -66,7 +63,7 @@ type Props = {
     dataProductId?: string;
     dataOutputId?: string;
     modalCallbackOnSubmit?: () => void;
-    formRef?: Ref<FormInstance<DatasetCreateFormSchema>>;
+    formRef?: Ref<FormInstance<CreateOutputPortRequest>>;
 };
 
 const { TextArea } = Input;
@@ -106,24 +103,27 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetDatasetByIdQuery(datasetId || '', {
-        skip: mode === 'create' || !datasetId,
-    });
+    const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetOutputPortQuery(
+        { id: datasetId || '', dataProductId: dataProductId || '' },
+        {
+            skip: mode === 'create' || !datasetId || !dataProductId,
+        },
+    );
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId || '', {
         skip: mode === 'edit' || !dataProductId,
     });
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
-    const [requestDatasetsAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
-    const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
-    const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
+    const [createDataset, { isLoading: isCreating }] = useCreateOutputPortMutation();
+    const [requestDatasetsAccessForDataOutput] = useLinkOutputPortToTechnicalAssetMutation();
+    const [updateDataset, { isLoading: isUpdating }] = useUpdateOutputPortMutation();
+    const [deleteDataset, { isLoading: isArchiving }] = useRemoveOutputPortMutation();
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
 
-    const [form] = Form.useForm<DatasetCreateFormSchema>();
+    const [form] = Form.useForm<CreateOutputPortRequest>();
     const datasetNameValue = Form.useWatch('name', form);
 
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
@@ -166,28 +166,33 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     }));
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
-    const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
+    const onFinish: FormProps<CreateOutputPortRequest>['onFinish'] = async (values) => {
         try {
             if (mode === 'create' && dataProduct) {
-                const request: DatasetCreateRequest = {
+                const request: CreateOutputPortRequest = {
                     name: values.name,
                     namespace: values.namespace,
-                    data_product_id: dataProduct.id,
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
-                const response = await createDataset(request).unwrap();
+                const response = await createDataset({
+                    dataProductId: dataProduct.id,
+                    createOutputPortRequest: request,
+                }).unwrap();
 
                 modalCallbackOnSubmit?.();
                 dispatchMessage({ content: t('Output Port created successfully'), type: 'success' });
                 // If dataProductId was provided, navigate back to the Data Product page
                 if (dataOutputId && dataProductId) {
                     await requestDatasetsAccessForDataOutput({
-                        dataOutputId: dataOutputId,
-                        datasetId: response.id,
+                        dataProductId,
+                        outputPortId: response.id,
+                        linkTechnicalAssetToOutputPortRequest: {
+                            technical_asset_id: dataOutputId,
+                        },
                     });
                     navigate(createDataOutputIdPath(dataOutputId, dataProductId));
                 } else {
@@ -203,17 +208,20 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     return;
                 }
 
-                const request: DatasetUpdateRequest = {
+                const request: DatasetUpdate = {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
-                    data_product_id: currentDataset.data_product_id,
                     tag_ids: values.tag_ids,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
 
-                const response = await updateDataset({ dataset: request, id: datasetId }).unwrap();
+                const response = await updateDataset({
+                    datasetUpdate: request,
+                    id: datasetId,
+                    dataProductId: currentDataset.data_product_id,
+                }).unwrap();
                 dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
 
                 navigate(createDatasetIdPath(response.id, currentDataset.data_product_id));
@@ -237,14 +245,14 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         }
     };
 
-    const onFinishFailed: FormProps<DatasetCreateFormSchema>['onFinishFailed'] = () => {
+    const onFinishFailed: FormProps<CreateOutputPortRequest>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
     const handleDeleteDataset = async () => {
         if (canDelete && currentDataset) {
             try {
-                await deleteDataset(currentDataset).unwrap();
+                await deleteDataset({ dataProductId: currentDataset.data_product_id, id: currentDataset.id }).unwrap();
                 dispatchMessage({ content: t('Output Port deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
@@ -296,13 +304,13 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
         access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
-        lifecycle_id: currentDataset?.lifecycle.id,
+        lifecycle_id: currentDataset?.lifecycle?.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,
     };
 
     return (
-        <Form<DatasetCreateFormSchema>
+        <Form<CreateOutputPortRequest>
             form={form}
             ref={formRef}
             labelWrap
@@ -316,7 +324,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             disabled={isLoading || !canSubmit}
             initialValues={initialValues}
         >
-            <Form.Item<DatasetCreateFormSchema>
+            <Form.Item<CreateOutputPortRequest>
                 name={'name'}
                 label={t('Name')}
                 tooltip={t('The name of your Output Port')}

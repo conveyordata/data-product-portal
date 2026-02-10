@@ -15,7 +15,7 @@ import styles from './dataset-table.module.scss';
 
 type Props = {
     t: TFunction;
-    dataProductId: string | undefined;
+    dataProductId: string;
 };
 export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): TableColumnsType<OutputPortLink> => {
     return [
@@ -61,7 +61,7 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
                 return (
                     <DatasetActionButton
                         outputPort={output}
-                        technicalAssetIt={output_port_id}
+                        technicalAssetId={output_port_id}
                         dataProductId={dataProductId}
                         status={status}
                     />
