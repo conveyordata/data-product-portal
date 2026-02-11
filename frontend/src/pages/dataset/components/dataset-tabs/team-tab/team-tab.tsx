@@ -13,9 +13,9 @@ import {
     useListOutputPortRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';
@@ -44,13 +44,14 @@ function filterUsers(
 
 type Props = {
     datasetId: string;
+    dataProductId: string;
 };
 
-export function TeamTab({ datasetId }: Props) {
+export function TeamTab({ datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
-    const { data: dataset } = useGetDatasetByIdQuery(datasetId);
+    const { data: dataset } = useGetOutputPortQuery({ id: datasetId, dataProductId });
     const { data: roleAssignments, isFetching } = useListOutputPortRoleAssignmentsQuery({
         outputPortId: datasetId,
     });
@@ -110,7 +111,7 @@ export function TeamTab({ datasetId }: Props) {
                         </Button>
                     }
                 />
-                <TeamTable datasetId={datasetId} datasetUsers={filteredUsers} />
+                <TeamTable datasetId={datasetId} datasetUsers={filteredUsers} dataProductId={dataProductId} />
             </Flex>
             {isVisible && (
                 <UserPopup

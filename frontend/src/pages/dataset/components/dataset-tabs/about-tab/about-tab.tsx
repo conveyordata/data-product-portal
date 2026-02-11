@@ -5,20 +5,24 @@ import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import {
+    useGetOutputPortQuery,
+    useUpdateOutputPortAboutMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDatasetByIdQuery, useUpdateDatasetAboutMutation } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 
 type Props = {
     datasetId: string;
+    dataProductId: string;
 };
 
-export function AboutTab({ datasetId }: Props) {
+export function AboutTab({ datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataset, isFetching } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+    const { data: dataset, isFetching } = useGetOutputPortQuery({ id: datasetId, dataProductId });
     const currentUser = useSelector(selectCurrentUser);
-    const [updateDatasetAbout, { isLoading }] = useUpdateDatasetAboutMutation();
+    const [updateDatasetAbout, { isLoading }] = useUpdateOutputPortAboutMutation();
 
     const { data: edit_access } = useCheckAccessQuery(
         {
@@ -40,7 +44,11 @@ export function AboutTab({ datasetId }: Props) {
     async function handleSubmit(content: string) {
         if (canEdit) {
             try {
-                await updateDatasetAbout({ datasetId, about: content }).unwrap();
+                await updateDatasetAbout({
+                    id: datasetId,
+                    dataProductId,
+                    datasetAboutUpdate: { about: content },
+                }).unwrap();
                 dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Could not update about section'), type: 'error' });

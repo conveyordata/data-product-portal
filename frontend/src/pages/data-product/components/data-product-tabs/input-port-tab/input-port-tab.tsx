@@ -3,38 +3,37 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Searchbar } from '@/components/form';
+import { InputPortTable } from '@/pages/data-product/components/data-product-tabs/input-port-tab/components/input-port-table/input-port-table.component.tsx';
+import { type InputPort, useGetDataProductInputPortsQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DatasetLink } from '@/types/data-product';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
-import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
-import styles from './dataset-tab.module.scss';
+import styles from './input-port-tab.module.scss';
 
 type Props = {
     dataProductId: string;
 };
 
-function filterDatasets(datasetLinks: DatasetLink[], searchTerm: string) {
+function filterDatasets(datasetLinks: InputPort[], searchTerm: string) {
     return (
         datasetLinks.filter(
             (datasetLink) =>
-                datasetLink?.dataset?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                datasetLink?.dataset?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                datasetLink?.input_port?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                datasetLink?.input_port?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }
 
-export function DatasetTab({ dataProductId }: Props) {
+export function InputPortTab({ dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(dataProductId);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
     const filteredDatasets = useMemo(() => {
-        return filterDatasets(dataProduct?.dataset_links ?? [], searchTerm);
-    }, [dataProduct?.dataset_links, searchTerm]);
+        return filterDatasets(inputPorts, searchTerm);
+    }, [inputPorts, searchTerm]);
 
     const { data: access } = useCheckAccessQuery(
         {
@@ -60,7 +59,7 @@ export function DatasetTab({ dataProductId }: Props) {
                     </Link>
                 }
             />
-            <DatasetTable dataProductId={dataProductId} datasets={filteredDatasets} />
+            <InputPortTable dataProductId={dataProductId} inputPorts={filteredDatasets} />
         </Flex>
     );
 }

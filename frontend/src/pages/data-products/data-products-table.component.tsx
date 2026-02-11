@@ -7,23 +7,25 @@ import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/data-products/data-products-table-columns.tsx';
+import {
+    type GetDataProductsResponseItem,
+    useGetDataProductsQuery,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetAllDataProductsQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import styles from './data-products-table.module.scss';
 
 type SearchProps = GetProps<typeof Input.Search>;
 
-function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
+function filterDataProducts(dataProducts: GetDataProductsResponseItem[], searchTerm?: string) {
     if (!searchTerm) {
         return dataProducts;
     }
     return dataProducts.filter((dataProduct) => dataProduct.name.toLowerCase().includes(searchTerm.toLowerCase()));
 }
 
-function filterDataProductsByRoles(dataProducts: DataProductsGetContract, selectedProductIds: string[]) {
+function filterDataProductsByRoles(dataProducts: GetDataProductsResponseItem[], selectedProductIds: string[]) {
     if (!selectedProductIds.length) {
         return dataProducts;
     }
@@ -40,7 +42,7 @@ export function DataProductsTable() {
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined);
 
-    const { data: dataProducts = [], isFetching } = useGetAllDataProductsQuery();
+    const { data: { data_products: dataProducts = [] } = {}, isFetching } = useGetDataProductsQuery(undefined);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
 
@@ -89,7 +91,7 @@ export function DataProductsTable() {
                 </Flex>
             }
         >
-            <Table<DataProductsGetContract[0]>
+            <Table<GetDataProductsResponseItem>
                 onRow={(record) => ({
                     onClick: () => navigateToDataProduct(record.id),
                 })}

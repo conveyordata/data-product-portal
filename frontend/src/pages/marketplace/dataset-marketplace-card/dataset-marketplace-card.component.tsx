@@ -110,7 +110,11 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                     </Space>
                 ),
                 children: (
-                    <DatasetCardTooltip dataset_id={dataset.id} number_of_data_products={dataset.data_product_count} />
+                    <DatasetCardTooltip
+                        outputPortId={dataset.id}
+                        dataProductId={dataset.data_product_id}
+                        number_of_data_products={dataset.data_product_count}
+                    />
                 ),
             },
         ];
@@ -125,7 +129,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
             className={styles.marketplaceCardContainer}
             actions={[
                 <Tooltip key="details" title={t('View details')}>
-                    <Link to={createDatasetIdPath(dataset.id)}>
+                    <Link to={createDatasetIdPath(dataset.id, dataset.data_product_id)}>
                         <Button type="text" icon={<UnorderedListOutlined />} />
                     </Link>
                 </Tooltip>,
@@ -166,7 +170,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
             ]}
         >
             <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-                <Link to={createDatasetIdPath(dataset.id)}>
+                <Link to={createDatasetIdPath(dataset.id, dataset.data_product_id)}>
                     <Typography.Title level={5} style={{ marginBottom: 0 }}>
                         {dataset.name}
                     </Typography.Title>

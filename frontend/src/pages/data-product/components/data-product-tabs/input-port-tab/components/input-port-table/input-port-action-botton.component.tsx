@@ -1,20 +1,21 @@
 import { Button, Popconfirm } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import {
+    type OutputPort,
+    useUnlinkInputPortFromDataProductMutation,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRemoveDatasetFromDataProductMutation } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DatasetContract } from '@/types/dataset';
 import { DecisionStatus } from '@/types/roles';
 
 type Props = {
-    dataset: DatasetContract;
+    output_port: OutputPort;
     dataProductId: string;
     status: DecisionStatus;
 };
-export function DatasetActionButton({ dataset, dataProductId, status }: Props) {
+export function InputPortActionButton({ output_port, dataProductId, status }: Props) {
     const { t } = useTranslation();
 
     const { data: access } = useCheckAccessQuery(
@@ -26,12 +27,12 @@ export function DatasetActionButton({ dataset, dataProductId, status }: Props) {
     );
     const canRevoke = access?.allowed ?? false;
 
-    const [removeDatasetFromDataProduct, { isLoading }] = useRemoveDatasetFromDataProductMutation();
+    const [removeDatasetFromDataProduct, { isLoading }] = useUnlinkInputPortFromDataProductMutation();
 
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (datasetId: string, name: string) => {
             try {
-                await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
+                await removeDatasetFromDataProduct({ inputPortId: datasetId, id: dataProductId }).unwrap();
                 dispatchMessage({
                     content: t('Output Port {{name}} has been removed from Data Product', { name }),
                     type: 'success',
@@ -46,7 +47,7 @@ export function DatasetActionButton({ dataset, dataProductId, status }: Props) {
     const handleCancelDatasetLinkRequest = useCallback(
         async (datasetId: string, name: string) => {
             try {
-                await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
+                await removeDatasetFromDataProduct({ inputPortId: datasetId, id: dataProductId }).unwrap();
                 dispatchMessage({
                     content: t('Request to link Output Port {{name}} has been cancelled', { name }),
                     type: 'success',
@@ -63,10 +64,10 @@ export function DatasetActionButton({ dataset, dataProductId, status }: Props) {
     const popupDescription =
         status === DecisionStatus.Pending
             ? t('Are you sure you want to cancel the request to link {{name}} to the Data Product?', {
-                  name: dataset.name,
+                  name: output_port.name,
               })
             : t('Are you sure you want to remove {{name}} from the Data Product?', {
-                  name: dataset.name,
+                  name: output_port.name,
               });
     const onConfirm =
         status === DecisionStatus.Pending ? handleCancelDatasetLinkRequest : handleRemoveDatasetFromDataProduct;
@@ -75,7 +76,7 @@ export function DatasetActionButton({ dataset, dataProductId, status }: Props) {
         <Popconfirm
             title={popupTitle}
             description={popupDescription}
-            onConfirm={() => onConfirm(dataset.id, dataset.name)}
+            onConfirm={() => onConfirm(output_port.id, output_port.name)}
             placement={'leftTop'}
             okText={t('Confirm')}
             cancelText={t('Cancel')}

@@ -4,22 +4,23 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useUnlinkOutputPortFromTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataOutputLink } from '@/types/dataset';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 import styles from './data-output-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
+    dataProductId: string;
     datasetId: string;
-    dataOutputs: DataOutputLink[];
+    dataOutputs: TechnicalAssetLink[];
     isLoading?: boolean;
 };
 
-export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
+export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoading }: Props) {
     const { t } = useTranslation();
     const {
         handleAcceptDataOutputDatasetLink,
@@ -28,7 +29,7 @@ export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
         isRejectingDataOutputLink,
     } = usePendingActionHandlers();
     const [removeDatasetFromDataOutput, { isLoading: isRemovingDatasetFromDataProduct }] =
-        useRemoveDataOutputDatasetLinkMutation();
+        useUnlinkOutputPortFromTechnicalAssetMutation();
 
     const { data: accept_access } = useCheckAccessQuery(
         {
@@ -51,14 +52,18 @@ export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<DataOutputLink>['onChange'] = (pagination) => {
+    const onChange: TableProps<TechnicalAssetLink>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
     const handleRemoveDatasetFromDataOutput = useCallback(
-        async (dataOutputId: string, name: string, datasetLinkId: string) => {
+        async (dataOutputId: string, name: string) => {
             try {
-                await removeDatasetFromDataOutput({ datasetId, dataOutputId, datasetLinkId }).unwrap();
+                await removeDatasetFromDataOutput({
+                    outputPortId: datasetId,
+                    dataProductId,
+                    unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id: dataOutputId },
+                }).unwrap();
                 dispatchMessage({
                     content: t('Output Port {{name}} has been removed from Technical Asset', { name }),
                     type: 'success',
@@ -70,10 +75,10 @@ export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
                 });
             }
         },
-        [datasetId, removeDatasetFromDataOutput, t],
+        [datasetId, removeDatasetFromDataOutput, t, dataProductId],
     );
 
-    const columns: TableColumnsType<DataOutputLink> = useMemo(() => {
+    const columns: TableColumnsType<TechnicalAssetLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
             t,
             onAcceptDataOutputDatasetLink: handleAcceptDataOutputDatasetLink,
@@ -97,7 +102,7 @@ export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
 
     return (
         <Flex className={styles.datasetListContainer}>
-            <Table<DataOutputLink>
+            <Table<TechnicalAssetLink>
                 loading={isLoading}
                 className={styles.datasetListTable}
                 columns={columns}

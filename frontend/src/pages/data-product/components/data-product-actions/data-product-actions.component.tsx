@@ -9,9 +9,9 @@ import { DataProductRequestAccessButton } from '@/pages/data-product/components/
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useGetAllPlatformsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
-    useGetDataProductByIdQuery,
     useGetDataProductConveyorIDEUrlMutation,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useGetDataProductSignInUrlMutation,
@@ -33,7 +33,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const posthog = usePostHog();
 
     const user = useSelector(selectCurrentUser);
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: dataProduct } = useGetDataProductQuery(dataProductId);
     const { data: { platforms = [] } = {}, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();

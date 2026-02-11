@@ -8,13 +8,13 @@ import {
     type DataProductSettingsGetItem,
     useGetDataProductsSettingsQuery,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useCreateDataProductSettingValueMutation,
     useCreateDatasetSettingValueMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DataProductSettingValueCreateRequest, DataProductSettingValueForm } from '@/types/data-product-setting';
@@ -22,18 +22,22 @@ import styles from './data-product-settings.module.scss';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {
-    id: string | undefined;
+    id: string;
+    dataProductId?: string;
     scope: 'dataproduct' | 'dataset';
 };
 
-export function DataProductSettings({ id, scope }: Props) {
+export function DataProductSettings({ id, scope, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(id || '', {
+    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductQuery(id || '', {
         skip: !id || scope !== 'dataproduct',
     });
-    const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(id || '', {
-        skip: !id || scope !== 'dataset',
-    });
+    const { data: dataset, isFetching: isFetchingDS } = useGetOutputPortQuery(
+        { id: id || '', dataProductId: dataProductId || '' },
+        {
+            skip: !id || scope !== 'dataset' || !dataProductId,
+        },
+    );
     const { data: settings, isFetching } = useGetDataProductsSettingsQuery();
     const filteredSettings = useMemo(() => {
         return settings?.data_product_settings.filter((setting) => setting.scope === scope);

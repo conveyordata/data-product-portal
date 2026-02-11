@@ -10,8 +10,8 @@ import {
     useModifyOutputPortRoleAssignmentMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
@@ -20,11 +20,12 @@ import { getDatasetTeamColumns } from './team-table-columns';
 
 type Props = {
     datasetId: string;
+    dataProductId: string;
     datasetUsers: OutputPortRoleAssignmentResponse[];
 };
-export function TeamTable({ datasetId, datasetUsers }: Props) {
+export function TeamTable({ datasetId, datasetUsers, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataset, isLoading: isFetchingDataset } = useGetDatasetByIdQuery(datasetId);
+    const { data: dataset, isLoading: isFetchingDataset } = useGetOutputPortQuery({ id: datasetId, dataProductId });
     const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteOutputPortRoleAssignmentMutation();
     const [updateRoleAssignment] = useModifyOutputPortRoleAssignmentMutation();
 

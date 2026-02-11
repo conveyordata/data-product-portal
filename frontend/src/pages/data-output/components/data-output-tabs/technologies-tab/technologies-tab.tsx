@@ -1,9 +1,10 @@
 import { DataOutputTechnicalInfo } from '@/components/data-outputs/data-output-technical-info/data-output-technical-info.component';
 
 type Props = {
-    dataOutputId: string;
+    dataProductId: string;
+    technicalAssetId: string;
 };
 
-export function TechnologiesTab({ dataOutputId }: Props) {
-    return <DataOutputTechnicalInfo data_output_id={dataOutputId} />;
+export function TechnologiesTab({ technicalAssetId, dataProductId }: Props) {
+    return <DataOutputTechnicalInfo technicalAssetId={technicalAssetId} dataProductId={dataProductId} />;
 }

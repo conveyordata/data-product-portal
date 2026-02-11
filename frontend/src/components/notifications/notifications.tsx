@@ -2,16 +2,16 @@ import { BellOutlined, CheckOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import {
+    type GetUserNotificationsResponseItem,
+    useGetUserNotificationsQuery,
+} from '@/store/api/services/generated/usersNotificationsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
-    useGetNotificationsQuery,
     useRemoveAllNotificationsMutation,
     useRemoveNotificationMutation,
 } from '@/store/features/notifications/notifications-api-slice';
-import type { NotificationContract } from '@/types/notifications/notification.contract';
 import { formatDateToNowFromUTCString } from '@/utils/date.helper';
-
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
 
@@ -23,7 +23,7 @@ export function Notifications() {
     } = theme.useToken();
     const { t } = useTranslation();
 
-    const { data: notifications } = useGetNotificationsQuery();
+    const { data: { notifications = [] } = {} } = useGetUserNotificationsQuery();
 
     const [removeNotification] = useRemoveNotificationMutation();
     const [removeAllNotifications] = useRemoveAllNotificationsMutation();
@@ -52,7 +52,7 @@ export function Notifications() {
 
     const createNotificationItem = useCallback(
         (
-            notification: NotificationContract,
+            notification: GetUserNotificationsResponseItem,
             showActor: boolean,
             handleRemoveNotification: (id: string) => void,
             idx: number,

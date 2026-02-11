@@ -1,14 +1,14 @@
 import type { TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
-import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
+import type { TechnicalInfo } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 
 type Props = {
     t: TFunction;
     info_column: string;
 };
 
-export const getTechnicalInformationColumns = ({ t, info_column }: Props): TableColumnsType<TechnicalInfoContract> => {
+export const getTechnicalInformationColumns = ({ t, info_column }: Props): TableColumnsType<TechnicalInfo> => {
     return [
         {
             title: t('Id'),

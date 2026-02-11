@@ -316,7 +316,7 @@ def remove_dataset_old(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     ds = ensure_output_port_exists(id, db)
-    return remove_dataset(ds.data_product_id, id, db, authenticated_user)
+    return remove_output_port(ds.data_product_id, id, db, authenticated_user)
 
 
 @router.delete(
@@ -333,7 +333,7 @@ def remove_dataset_old(
         Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
     ],
 )
-def remove_dataset(
+def remove_output_port(
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session),

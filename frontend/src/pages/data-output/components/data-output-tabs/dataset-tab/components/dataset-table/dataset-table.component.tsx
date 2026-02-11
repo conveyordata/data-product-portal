@@ -4,29 +4,34 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
-import type { DataOutputDatasetLink } from '@/types/data-output';
+import {
+    type OutputPortLink,
+    useGetTechnicalAssetQuery,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import styles from './dataset-table.module.scss';
 import { getDataOutputDatasetsColumns } from './dataset-table-columns.tsx';
 
 type Props = {
-    dataProductId: string | undefined;
+    dataProductId: string;
     dataOutputId: string;
-    datasets: DataOutputDatasetLink[];
+    datasets: OutputPortLink[];
 };
 export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
     const { t } = useTranslation();
-    const { data: dataOutput, isLoading: isLoadingDataOutput } = useGetDataOutputByIdQuery(dataOutputId);
+    const { data: dataOutput, isLoading: isLoadingDataOutput } = useGetTechnicalAssetQuery({
+        id: dataOutputId,
+        dataProductId,
+    });
 
     const { pagination, handlePaginationChange } = useTablePagination(datasets, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<DataOutputDatasetLink>['onChange'] = (pagination) => {
+    const onChange: TableProps<OutputPortLink>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
-    const columns: TableColumnsType<DataOutputDatasetLink> = useMemo(() => {
+    const columns: TableColumnsType<OutputPortLink> = useMemo(() => {
         return getDataOutputDatasetsColumns({
             t,
             dataProductId,
@@ -37,7 +42,7 @@ export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
 
     return (
         <Flex className={styles.datasetListContainer}>
-            <Table<DataOutputDatasetLink>
+            <Table<OutputPortLink>
                 loading={isLoadingDataOutput}
                 className={styles.datasetListTable}
                 columns={columns}

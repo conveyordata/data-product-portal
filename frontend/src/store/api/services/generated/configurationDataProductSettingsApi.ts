@@ -139,7 +139,7 @@ export type NamespaceSuggestion = {
   namespace: string;
 };
 export type NamespaceValidation = {
-  validity: NamespaceValidityType;
+  validity: ResourceNameValidityType;
 };
 export type NamespaceLengthLimits = {
   max_length: number;
@@ -166,11 +166,11 @@ export enum DataProductSettingScope {
   Dataproduct = "dataproduct",
   Dataset = "dataset",
 }
-export enum NamespaceValidityType {
+export enum ResourceNameValidityType {
   Valid = "VALID",
   InvalidLength = "INVALID_LENGTH",
   InvalidCharacters = "INVALID_CHARACTERS",
-  DuplicateNamespace = "DUPLICATE_NAMESPACE",
+  Duplicate = "DUPLICATE",
 }
 export const {
   useGetDataProductsSettingsQuery,

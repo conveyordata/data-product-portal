@@ -140,7 +140,9 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                             )}
                             renderItem={(item: OutputPort & { count: number }) => (
                                 <List.Item>
-                                    <Link to={createDatasetIdPath(item.id, DatasetTabKeys.Team)}>{item.name}</Link>
+                                    <Link to={createDatasetIdPath(item.id, item.data_product_id, DatasetTabKeys.Team)}>
+                                        {item.name}
+                                    </Link>
                                     <Badge count={item.count} color={badgeColor} />
                                 </List.Item>
                             )}

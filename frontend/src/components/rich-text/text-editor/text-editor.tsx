@@ -16,7 +16,7 @@ import { TextEditorMenu } from '@/components/rich-text/text-editor-menu/text-edi
 import styles from './text-editor.module.scss';
 
 type Props = {
-    initialContent?: string;
+    initialContent?: string | null;
     isDisabled?: boolean;
     onSubmit?: (content: string) => void;
     isSubmitting?: boolean;
@@ -78,7 +78,7 @@ export const TextEditor = ({
         <div className={styles.editorContainer}>
             {isEditMode && <TextEditorMenu editor={editor} isDisabled={isDisabled} />}
             <div className={styles.editorContent}>
-                <EditorContent editor={editor} content={content} className={styles.content} />
+                <EditorContent editor={editor} content={content ?? undefined} className={styles.content} />
             </div>
             {isEditMode ? (
                 <Popover content={t('Save changes')}>

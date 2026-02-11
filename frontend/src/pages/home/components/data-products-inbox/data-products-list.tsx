@@ -6,14 +6,14 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { UsageListItem } from '@/components/list/usage-list-item/usage-list-item.component.tsx';
 import styles from '@/pages/home/components/data-products-inbox/data-products-inbox.module.scss';
 import { getLastVisitedItemDate } from '@/pages/home/helpers/last-visited-item-helper.ts';
-import type { DataProductsGetContract } from '@/types/data-product';
+import type { GetDataProductsResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { formatDate } from '@/utils/date.helper.ts';
 import type { LastVisitedItem } from '@/utils/local-storage.helper.ts';
 
 type DataProductListProps = {
-    dataProducts?: DataProductsGetContract;
+    dataProducts?: GetDataProductsResponseItem[];
     isFetching: boolean;
     lastVisitedDataProducts: LastVisitedItem[];
 };
@@ -35,17 +35,17 @@ export const DataProductsList = ({ dataProducts, isFetching, lastVisitedDataProd
                 ) : null
             }
             size={'small'}
-            renderItem={(project) => {
-                if (!project) return null;
-                const lastVisitedDate = getLastVisitedItemDate(lastVisitedDataProducts, project.id);
+            renderItem={(dataProduct) => {
+                if (!dataProduct) return null;
+                const lastVisitedDate = getLastVisitedItemDate(lastVisitedDataProducts, dataProduct.id);
                 const formattedDate = lastVisitedDate ? formatDate(lastVisitedDate) : undefined;
 
                 return (
                     <>
                         <UsageListItem
-                            key={project.id}
-                            itemId={project.id}
-                            title={project.name}
+                            key={dataProduct.id}
+                            itemId={dataProduct.id}
+                            title={dataProduct.name}
                             description={
                                 formattedDate
                                     ? t('Last opened on {{date}}', { date: formattedDate })
@@ -53,12 +53,12 @@ export const DataProductsList = ({ dataProducts, isFetching, lastVisitedDataProd
                             }
                             icon={
                                 <CustomSvgIconLoader
-                                    iconComponent={getDataProductTypeIconOld(project?.type?.icon_key)}
+                                    iconComponent={getDataProductTypeIcon(dataProduct?.type?.icon_key)}
                                     hasRoundBorder
                                     size={'default'}
                                 />
                             }
-                            linkTo={createDataProductIdPath(project.id)}
+                            linkTo={createDataProductIdPath(dataProduct.id)}
                         />
                         <div />
                     </>

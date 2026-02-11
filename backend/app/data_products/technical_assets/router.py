@@ -5,7 +5,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz import Action, Authorization, DataOutputResolver
+from app.core.authz import (
+    Action,
+    Authorization,
+    DataOutputResolver,
+    DataProductResolver,
+)
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
 from app.data_products.output_port_technical_assets_link.router import (
@@ -21,13 +26,16 @@ from app.data_products.output_port_technical_assets_link.schema_response import 
 )
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
+    CreateTechnicalAssetRequest,
     DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
+    CreateTechnicalAssetResponse,
     DataOutputGet,
     DataOutputsGet,
+    GetTechnicalAssetsResponse,
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
 )
@@ -53,6 +61,25 @@ router = APIRouter(tags=["Data Products - Technical assets"])
 @router.get(old_route, deprecated=True)
 def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutputsGet]:
     return DataOutputService(db).get_data_outputs()
+
+
+@router.get(route)
+def get_data_product_technical_assets(
+    data_product_id: UUID, db: Session = Depends(get_db_session)
+) -> GetTechnicalAssetsResponse:
+    return GetTechnicalAssetsResponse(
+        technical_assets=[
+            DataOutputGet.model_validate(do).convert()
+            for do in get_data_outputs_old(data_product_id, db)
+        ]
+    )
+
+
+@router.get("/data_products/{data_product_id}/data_outputs", deprecated=True)
+def get_data_outputs_old(
+    data_product_id: UUID, db: Session = Depends(get_db_session)
+) -> Sequence[DataOutputGet]:
+    return DataOutputService(db).get_data_outputs_for_data_product(data_product_id)
 
 
 @router.get(f"{old_route}/namespace_suggestion", deprecated=True)
@@ -423,3 +450,50 @@ def get_technical_asset_graph_data(
     level: int = 3,
 ) -> Graph:
     return DataOutputService(db).get_graph_data(data_product_id, id, level)
+
+
+@router.post(
+    route,
+    responses={
+        200: {
+            "description": "Technical asset successfully created",
+            "content": {
+                "application/json": {
+                    "example": {"id": "random id of the new technical asset"}
+                }
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
+                DataProductResolver,
+            )
+        )
+    ],
+)
+def create_technical_asset(
+    data_product_id: UUID,
+    technical_asset: CreateTechnicalAssetRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> CreateTechnicalAssetResponse:
+    technical_asset = DataOutputService(db).create_data_output(
+        data_product_id, technical_asset
+    )
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_OUTPUT_CREATED,
+            subject_id=technical_asset.id,
+            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            target_id=technical_asset.owner_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=technical_asset.owner_id, event_id=event_id
+    )
+    RefreshInfrastructureLambda().trigger()
+    return CreateTechnicalAssetResponse(id=technical_asset.id)

@@ -5,7 +5,6 @@ import explorationIcon from '@/assets/icons/exploration-icon.svg?react';
 import ingestionIcon from '@/assets/icons/ingestion-icon.svg?react';
 import robotIcon from '@/assets/icons/robot-icon.svg?react';
 import { DataProductIconKey } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import { DataProductIcon } from '@/types/data-product-type/data-product-type.contract';
 
 export function getDataProductTypeIcon(dataProductIcon?: DataProductIconKey) {
     if (!dataProductIcon) return chipIcon;
@@ -24,29 +23,6 @@ export function getDataProductTypeIcon(dataProductIcon?: DataProductIconKey) {
         case DataProductIconKey.Ingestion:
             return ingestionIcon;
         case DataProductIconKey.Default:
-            return chipIcon;
-        default:
-            return chipIcon;
-    }
-}
-
-export function getDataProductTypeIconOld(dataProductIcon?: DataProductIcon) {
-    if (!dataProductIcon) return chipIcon;
-
-    switch (dataProductIcon) {
-        case DataProductIcon.Reporting:
-            return chartPieIcon;
-        case DataProductIcon.Processing:
-            return chipIcon;
-        case DataProductIcon.Exploration:
-            return explorationIcon;
-        case DataProductIcon.Analytics:
-            return chartAnalytics;
-        case DataProductIcon.MachineLearning:
-            return robotIcon;
-        case DataProductIcon.Ingestion:
-            return ingestionIcon;
-        case DataProductIcon.Default:
             return chipIcon;
         default:
             return chipIcon;

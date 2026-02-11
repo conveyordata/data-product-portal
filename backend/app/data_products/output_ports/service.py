@@ -21,13 +21,18 @@ from app.core.authz import Authorization
 from app.core.embed.model import EMBEDDING_MODEL
 from app.core.namespace.validation import (
     NamespaceValidator,
-    NamespaceValidityType,
 )
 from app.data_products.model import ensure_data_product_exists
+from app.data_products.output_port_technical_assets_link.model import (
+    DataOutputDatasetAssociation,
+)
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation,
+)
 from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
@@ -48,9 +53,11 @@ from app.data_products.output_ports.schema_response import (
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
+from app.data_products.technical_assets.schema_response import DataOutputGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.resource_names.service import ResourceNameValidityType
 from app.search_output_ports.schema_response import SearchDatasets
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -275,7 +282,7 @@ class OutputPortService:
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, self.db
             ).validity
-        ) != NamespaceValidityType.VALID:
+        ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
@@ -322,7 +329,7 @@ class OutputPortService:
                     dataset.namespace, self.db
                 ).validity
             )
-            != NamespaceValidityType.VALID
+            != ResourceNameValidityType.VALID
         ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -511,3 +518,40 @@ class OutputPortService:
             ensure_data_product_exists(data_product_id, self.db)
             query = query.filter(DatasetModel.data_product_id == data_product_id)
         return self.db.scalars(query).unique().all()
+
+    def get_data_outputs_for_data_product(self, id: UUID) -> Sequence[DataOutputGet]:
+        return (
+            self.db.scalars(
+                select(TechnicalAssetModel)
+                .options(
+                    selectinload(TechnicalAssetModel.environment_configurations),
+                    selectinload(TechnicalAssetModel.dataset_links)
+                    .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DatasetModel.tags)
+                    .raiseload("*"),
+                )
+                .filter(TechnicalAssetModel.owner_id == id)
+            )
+            .unique()
+            .all()
+        )
+
+    def get_consuming_data_products(
+        self, output_port_id: UUID, data_product_id: UUID
+    ) -> Sequence[DataProductDatasetAssociation]:
+        dataset = self.db.scalar(
+            select(DatasetModel)
+            .where(DatasetModel.id == output_port_id)
+            .where(DatasetModel.data_product_id == data_product_id)
+            .options(
+                selectinload(DatasetModel.data_product_links).selectinload(
+                    DataProductDatasetAssociationModel.data_product
+                )
+            )
+        )
+        if not dataset:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Output port {output_port_id} not found",
+            )
+        return dataset.data_product_links

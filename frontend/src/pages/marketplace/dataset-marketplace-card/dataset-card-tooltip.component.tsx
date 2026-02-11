@@ -4,11 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { DatasetProductList } from './dataset-product-list.component';
 
 type Props = {
-    dataset_id: string;
+    outputPortId: string;
+    dataProductId: string;
     number_of_data_products?: number;
 };
 
-export function DatasetCardTooltip({ dataset_id, number_of_data_products }: Props) {
+export function DatasetCardTooltip({ outputPortId, dataProductId, number_of_data_products }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -17,7 +18,7 @@ export function DatasetCardTooltip({ dataset_id, number_of_data_products }: Prop
             color="white"
             title={
                 number_of_data_products && number_of_data_products > 0 ? (
-                    <DatasetProductList dataset_id={dataset_id} />
+                    <DatasetProductList outputPortId={outputPortId} dataProductId={dataProductId} />
                 ) : null
             }
         >

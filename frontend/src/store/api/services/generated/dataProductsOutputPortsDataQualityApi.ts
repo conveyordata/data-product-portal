@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/configurationTagsApi";
+import { api } from "@/store/api/services/generated/dataProductsOutputPortsInputPortsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getLatestDataQualitySummaryForOutputPort: build.query<

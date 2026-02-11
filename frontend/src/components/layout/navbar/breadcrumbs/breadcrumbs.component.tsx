@@ -16,9 +16,9 @@ import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrum
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { ApplicationPaths, type DynamicPathParams } from '@/types/navigation.ts';
 import { isDataOutputEditPage, isDataProductEditPage, isDatasetEditPage } from '@/utils/routes.helper.ts';
 import styles from './breadcrumbs.module.scss';
@@ -34,13 +34,19 @@ export const Breadcrumbs = () => {
         [pathname],
     );
     const { dataProductId = '', datasetId = '', dataOutputId = '' } = params;
-    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId, {
+    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId, {
         skip: !dataProductId,
     });
-    const { data: dataOutput, isFetching: isFetchingDataOutput } = useGetDataOutputByIdQuery(dataOutputId, {
-        skip: !dataOutputId,
-    });
-    const { data: dataset, isFetching: isFetchingDataset } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+    const { data: dataOutput, isFetching: isFetchingDataOutput } = useGetTechnicalAssetQuery(
+        { id: dataOutputId, dataProductId },
+        {
+            skip: !dataOutputId || !dataProductId,
+        },
+    );
+    const { data: dataset, isFetching: isFetchingDataset } = useGetOutputPortQuery(
+        { id: datasetId, dataProductId },
+        { skip: !datasetId || !dataProductId },
+    );
 
     const homeItem: BreadcrumbItemType = useMemo(
         () => ({
@@ -186,7 +192,7 @@ export const Breadcrumbs = () => {
                         !isFetchingDataset &&
                         pathnames.includes(ApplicationPaths.Datasets.replace('/', ''))
                     ) {
-                        if (isDatasetEditPage(path, dataset.id)) {
+                        if (isDatasetEditPage(path, dataset.id, dataset.data_product_id)) {
                             Object.assign(breadcrumbItem, {
                                 title: t('Edit'),
                             });

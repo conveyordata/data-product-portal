@@ -67,7 +67,7 @@ function CartOverviewItem({ dataset, overlapping, selectedDataProductId }: CartO
             title={
                 <Tooltip title={warningTooltip}>
                     <Space size="small">
-                        <Link to={createDatasetIdPath(dataset.id)} target={'_blank'}>
+                        <Link to={createDatasetIdPath(dataset.id, dataset.data_product_id)} target={'_blank'}>
                             <Typography.Text>{dataset.name}</Typography.Text>
                         </Link>
                         {warningTooltip !== null && (
