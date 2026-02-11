@@ -1,10 +1,10 @@
 import pytest
 
 from tests.factories import (
-    DataOutputFactory,
     DataProductFactory,
     DatasetFactory,
     TagFactory,
+    TechnicalAssetFactory,
 )
 
 ENDPOINT = "/api/tags"
@@ -62,7 +62,7 @@ class TestTagsRouter:
     @pytest.mark.usefixtures("admin")
     def test_remove_tag_coupled_with_data_output(self, client):
         tag = TagFactory()
-        DataOutputFactory(tags=[tag])
+        TechnicalAssetFactory(tags=[tag])
         response = self.remove_tag(client, tag.id)
         assert response.status_code == 200
 

@@ -81,15 +81,6 @@ export type MigrateDataProductTypeApiArg = {
   fromId: string;
   toId: string;
 };
-export type DataProductIconKey =
-  | "reporting"
-  | "processing"
-  | "exploration"
-  | "ingestion"
-  | "machine_learning"
-  | "analytics"
-  | "default";
-export type DataProductStatus = "pending" | "active" | "archived";
 export type DataProductType = {
   id: string;
   name: string;
@@ -115,6 +106,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -145,6 +138,20 @@ export type DataProductTypeCreate = {
   description: string;
   icon_key: DataProductIconKey;
 };
+export enum DataProductIconKey {
+  Reporting = "reporting",
+  Processing = "processing",
+  Exploration = "exploration",
+  Ingestion = "ingestion",
+  MachineLearning = "machine_learning",
+  Analytics = "analytics",
+  Default = "default",
+}
+export enum DataProductStatus {
+  Pending = "pending",
+  Active = "active",
+  Archived = "archived",
+}
 export const {
   useGetDataProductTypeQuery,
   useLazyGetDataProductTypeQuery,

@@ -12,7 +12,6 @@ from app.core.authz import Action
 from app.core.namespace.validation import NamespaceValidityType
 from app.settings import settings
 from tests.factories import (
-    DataOutputFactory,
     DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -27,6 +26,7 @@ from tests.factories import (
     PlatformFactory,
     RoleFactory,
     TagFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
@@ -222,7 +222,7 @@ class TestDataProductsRouter:
 
     def test_get_data_outputs(self, client):
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         response = self.get_data_outputs(client, data_product.id)
         assert response.status_code == 200
         assert len(response.json()) == 1
@@ -231,7 +231,7 @@ class TestDataProductsRouter:
 
     def test_get_technical_assets(self, client):
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         response = self.get_technical_assets(client, data_product.id)
         assert response.status_code == 200, f"Failed with response: {response.text}"
         assert len(response.json()) == 1
@@ -240,7 +240,7 @@ class TestDataProductsRouter:
     def test_get_data_outputs_linked_with_output_port(self, client):
         data_product = DataProductFactory()
         output_port = DatasetFactory(data_product=data_product)
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         DataOutputDatasetAssociationFactory(
             dataset=output_port,
             data_output=data_output,
@@ -625,7 +625,7 @@ class TestDataProductsRouter:
     def test_validate_data_output_namespace_duplicate(self, client):
         namespace = "test"
         data_product = DataProductFactory()
-        DataOutputFactory(owner=data_product, namespace=namespace)
+        TechnicalAssetFactory(owner=data_product, namespace=namespace)
         response = self.validate_data_output_namespace(
             client, namespace, data_product.id
         )
@@ -639,7 +639,7 @@ class TestDataProductsRouter:
         namespace = "test"
         data_product = DataProductFactory()
         other_data_product = DataProductFactory()
-        DataOutputFactory(owner=data_product, namespace=namespace)
+        TechnicalAssetFactory(owner=data_product, namespace=namespace)
         response = self.validate_data_output_namespace(
             client, namespace, other_data_product.id
         )
@@ -822,7 +822,7 @@ class TestDataProductsRouter:
 
     def test_get_rolled_up_tags(self, client: TestClient):
         data_product = DataProductFactory()
-        data_output = DataOutputFactory(owner=data_product)
+        data_output = TechnicalAssetFactory(owner=data_product)
         dataset = DatasetFactory(data_product=data_product)
         response = self.get_rolled_up_tags(client, dataset.data_product.id)
         assert response.status_code == 200, f"Response failed with: {response.text}"

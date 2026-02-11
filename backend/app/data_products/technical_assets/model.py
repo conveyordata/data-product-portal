@@ -25,7 +25,7 @@ from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 
-class DataOutput(Base, BaseORM):
+class TechnicalAsset(Base, BaseORM):
     __tablename__ = "data_outputs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -72,16 +72,18 @@ class DataOutput(Base, BaseORM):
     )
 
 
-def ensure_data_output_exists(
-    data_output_id: UUID,
+def ensure_technical_asset_exists(
+    technical_asset_id: UUID,
     db: Session,
     data_product_id: Optional[UUID] = None,
     **kwargs,
-) -> DataOutput:
-    data_output: DataOutput = ensure_exists(data_output_id, db, DataOutput, **kwargs)
-    if data_product_id is not None and data_output.owner_id != data_product_id:
+) -> TechnicalAsset:
+    asset: TechnicalAsset = ensure_exists(
+        technical_asset_id, db, TechnicalAsset, **kwargs
+    )
+    if data_product_id is not None and asset.owner_id != data_product_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Required item {data_output_id} does not exist",
+            detail=f"Required item {technical_asset_id} does not exist",
         )
-    return data_output
+    return asset

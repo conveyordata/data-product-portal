@@ -19,7 +19,7 @@ from app.data_products.output_port_technical_assets_link.schema_request import (
 from app.data_products.output_port_technical_assets_link.schema_response import (
     LinkTechnicalAssetsToOutputPortResponse,
 )
-from app.data_products.technical_assets.model import ensure_data_output_exists
+from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     DataOutputResultStringRequest,
     DataOutputStatusUpdate,
@@ -78,7 +78,7 @@ def get_data_output_result_string(
 
 @router.get(f"{old_route}/{{id}}", deprecated=True)
 def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutputGet:
-    do = ensure_data_output_exists(id, db)
+    do = ensure_technical_asset_exists(id, db)
     return DataOutputService(db).get_data_output(do.owner_id, id)
 
 
@@ -102,7 +102,7 @@ def get_data_output_event_history(
 def get_technical_asset_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
-    ensure_data_output_exists(id, db, data_product_id=data_product_id)
+    ensure_technical_asset_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
             GetEventHistoryResponseItemOld.model_validate(event).convert()
@@ -138,7 +138,7 @@ def remove_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_output = ensure_data_output_exists(id, db)
+    data_output = ensure_technical_asset_exists(id, db)
     return remove_technical_asset(data_output.owner_id, id, db, authenticated_user)
 
 
@@ -214,7 +214,7 @@ def update_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateTechnicalAssetResponse:
-    do = ensure_data_output_exists(id, db)
+    do = ensure_technical_asset_exists(id, db)
     return update_technical_asset(do.owner_id, id, data_output, db, authenticated_user)
 
 
@@ -286,7 +286,7 @@ def update_data_output_status(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    do = ensure_data_output_exists(id, db)
+    do = ensure_technical_asset_exists(id, db)
     return update_technical_asset_status(
         do.owner_id, id, data_output, db, authenticated_user
     )
@@ -358,7 +358,7 @@ def link_dataset_to_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> LinkTechnicalAssetsToOutputPortResponse:
-    do = ensure_data_output_exists(id, db)
+    do = ensure_technical_asset_exists(id, db)
     return link_output_port_to_technical_asset(
         do.owner_id,
         dataset_id,
@@ -395,7 +395,7 @@ def unlink_dataset_from_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    do = ensure_data_output_exists(id, db)
+    do = ensure_technical_asset_exists(id, db)
     return unlink_output_port_from_technical_asset(
         data_product_id=do.owner_id,
         output_port_id=dataset_id,
@@ -409,7 +409,7 @@ def unlink_dataset_from_data_output(
 def get_graph_data_old(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
-    do = ensure_data_output_exists(id, db)
+    do = ensure_technical_asset_exists(id, db)
     return get_technical_asset_graph_data(
         data_product_id=do.owner_id, id=id, db=db, level=level
     )

@@ -8,16 +8,16 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.role_assignments.output_port.schema import (
     CreateOutputPortRoleAssignment,
-    CreateRoleAssignmentOld,
+    CreateOutputPortRoleAssignmentOld,
     DecideOutputPortRoleAssignment,
     DeleteOutputPortRoleAssignmentResponse,
-    ListRoleAssignmentsResponse,
+    ListOutputPortRoleAssignmentsResponse,
     ModifyOutputPortRoleAssignment,
     OutputPortRoleAssignmentResponse,
     RequestOutputPortRoleAssignment,
     RoleAssignmentOld,
     RoleAssignmentResponseOld,
-    UpdateRoleAssignment,
+    UpdateOutputPortRoleAssignment,
 )
 from app.authorization.role_assignments.output_port.service import RoleAssignmentService
 from app.core.auth.auth import get_authenticated_user
@@ -125,8 +125,8 @@ def list_output_port_role_assignments(
     role_id: Optional[UUID] = None,
     decision: Optional[DecisionStatus] = None,
     db: Session = Depends(get_db_session),
-) -> ListRoleAssignmentsResponse:
-    return ListRoleAssignmentsResponse(
+) -> ListOutputPortRoleAssignmentsResponse:
+    return ListOutputPortRoleAssignmentsResponse(
         role_assignments=[
             convert_to_role_assignment(x)
             for x in RoleAssignmentService(db).list_assignments(
@@ -152,7 +152,7 @@ def list_output_port_role_assignments(
 )
 def request_assignment_old(
     id: UUID,
-    request: CreateRoleAssignmentOld,
+    request: CreateOutputPortRoleAssignmentOld,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentOld:
@@ -195,7 +195,9 @@ def request_output_port_role_assignment(
     return convert_to_role_assignment(
         request_assignment_old(
             request.output_port_id,
-            CreateRoleAssignmentOld(user_id=request.user_id, role_id=request.role_id),
+            CreateOutputPortRoleAssignmentOld(
+                user_id=request.user_id, role_id=request.role_id
+            ),
             db,
             authenticated_user,
         )
@@ -215,7 +217,7 @@ def request_output_port_role_assignment(
 )
 def create_assignment_old(
     id: UUID,
-    request: CreateRoleAssignmentOld,
+    request: CreateOutputPortRoleAssignmentOld,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponseOld:
@@ -249,7 +251,7 @@ def create_assignment_old(
 
     if is_admin or authenticated_user.id in (approver.id for approver in approvers):
         assignment = service.update_assignment(
-            UpdateRoleAssignment(
+            UpdateOutputPortRoleAssignment(
                 id=role_assignment.id,
                 role_id=role_assignment.role_id,
                 decision=DecisionStatus.APPROVED,
@@ -281,7 +283,9 @@ def create_output_port_role_assignment(
     return convert_to_role_assignment(
         create_assignment_old(
             request.output_port_id,
-            CreateRoleAssignmentOld(user_id=request.user_id, role_id=request.role_id),
+            CreateOutputPortRoleAssignmentOld(
+                user_id=request.user_id, role_id=request.role_id
+            ),
             db,
             authenticated_user,
         )
@@ -321,7 +325,7 @@ def decide_assignment_old(
         )
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision), actor=user
+        UpdateOutputPortRoleAssignment(id=id, decision=request.decision), actor=user
     )
     if assignment.decision is DecisionStatus.APPROVED:
         DatasetAuthAssignment(assignment).add()
@@ -395,7 +399,7 @@ def modify_assigned_role_old(
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id), actor=user
+        UpdateOutputPortRoleAssignment(id=id, role_id=request.role_id), actor=user
     )
     if assignment.decision is DecisionStatus.APPROVED:
         DatasetAuthAssignment(assignment, previous_role_id=original_role).swap()

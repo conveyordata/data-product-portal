@@ -8,10 +8,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment as DatasetRoleAssignmentModel,
+)
 from app.authorization.role_assignments.output_port.schema import (
     RoleAssignmentOld,
-    UpdateRoleAssignment,
+    UpdateOutputPortRoleAssignment,
 )
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype, Scope
@@ -26,7 +28,7 @@ class RoleAssignmentService:
         self.db = db
 
     def get_assignment(self, id_: UUID) -> RoleAssignmentOld:
-        return ensure_exists(id_, self.db, DatasetRoleAssignment)
+        return ensure_exists(id_, self.db, DatasetRoleAssignmentModel)
 
     def list_assignments(
         self,
@@ -36,15 +38,15 @@ class RoleAssignmentService:
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
     ) -> Sequence[RoleAssignmentOld]:
-        query = select(DatasetRoleAssignment)
+        query = select(DatasetRoleAssignmentModel)
         if dataset_id is not None:
-            query = query.where(DatasetRoleAssignment.dataset_id == dataset_id)
+            query = query.where(DatasetRoleAssignmentModel.dataset_id == dataset_id)
         if user_id is not None:
-            query = query.where(DatasetRoleAssignment.user_id == user_id)
+            query = query.where(DatasetRoleAssignmentModel.user_id == user_id)
         if role_id is not None:
-            query = query.where(DatasetRoleAssignment.role_id == role_id)
+            query = query.where(DatasetRoleAssignmentModel.role_id == role_id)
         if decision is not None:
-            query = query.where(DatasetRoleAssignment.decision == decision)
+            query = query.where(DatasetRoleAssignmentModel.decision == decision)
 
         return self.db.scalars(query).all()
 
@@ -53,9 +55,9 @@ class RoleAssignmentService:
     ) -> RoleAssignmentOld:
         self.ensure_is_dataset_scope(role_id)
         existing_assignment = self.db.scalar(
-            select(DatasetRoleAssignment).where(
-                DatasetRoleAssignment.user_id == user_id,
-                DatasetRoleAssignment.dataset_id == dataset_id,
+            select(DatasetRoleAssignmentModel).where(
+                DatasetRoleAssignmentModel.user_id == user_id,
+                DatasetRoleAssignmentModel.dataset_id == dataset_id,
             )
         )
         if existing_assignment:
@@ -69,7 +71,7 @@ class RoleAssignmentService:
                     detail=detail,
                 )
 
-        role_assignment = DatasetRoleAssignment(
+        role_assignment = DatasetRoleAssignmentModel(
             role_id=role_id,
             user_id=user_id,
             dataset_id=dataset_id,
@@ -90,7 +92,7 @@ class RoleAssignmentService:
         return result
 
     def update_assignment(
-        self, request: UpdateRoleAssignment, *, actor: User
+        self, request: UpdateOutputPortRoleAssignment, *, actor: User
     ) -> RoleAssignmentOld:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
@@ -123,8 +125,8 @@ class RoleAssignmentService:
     def _count_owners(self, dataset_id: UUID) -> int:
         query = (
             select(func.count())
-            .select_from(DatasetRoleAssignment)
-            .where(DatasetRoleAssignment.dataset_id == dataset_id)
+            .select_from(DatasetRoleAssignmentModel)
+            .where(DatasetRoleAssignmentModel.dataset_id == dataset_id)
             .join(Role)
             .where(Role.prototype == Prototype.OWNER)
         )
@@ -153,13 +155,13 @@ class RoleAssignmentService:
             self.db.scalars(
                 select(UserModel)
                 .join(
-                    DatasetRoleAssignment,
-                    DatasetRoleAssignment.user_id == UserModel.id,
+                    DatasetRoleAssignmentModel,
+                    DatasetRoleAssignmentModel.user_id == UserModel.id,
                 )
-                .join(Role, DatasetRoleAssignment.role_id == Role.id)
+                .join(Role, DatasetRoleAssignmentModel.role_id == Role.id)
                 .where(
-                    DatasetRoleAssignment.dataset_id == dataset_id,
-                    DatasetRoleAssignment.decision == DecisionStatus.APPROVED,
+                    DatasetRoleAssignmentModel.dataset_id == dataset_id,
+                    DatasetRoleAssignmentModel.decision == DecisionStatus.APPROVED,
                     Role.permissions.contains([action]),
                 )
             )

@@ -9,7 +9,9 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment as DatasetRoleAssignmentModel,
+)
 from app.core.authz import Action, Authorization
 from app.data_products.output_ports.input_ports.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
@@ -134,7 +136,7 @@ class DataProductDatasetService:
                 .where(
                     DataProductDatasetAssociationModel.dataset.has(
                         DatasetModel.assignments.any(
-                            DatasetRoleAssignment.user_id == user.id
+                            DatasetRoleAssignmentModel.user_id == user.id
                         )
                     )
                 )

@@ -21,7 +21,9 @@ from app.authorization.role_assignments.data_product.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
-from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment,
+)
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import CreateRole, Prototype, Scope
 from app.authorization.roles.service import RoleService

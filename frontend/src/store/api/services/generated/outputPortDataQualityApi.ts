@@ -54,12 +54,6 @@ export type OverwriteOutputPortDataQualitySummaryApiArg = {
   summaryId: string;
   outputPortDataQualitySummaryInput: OutputPortDataQualitySummary2;
 };
-export type DataQualityStatus =
-  | "success"
-  | "failure"
-  | "warning"
-  | "error"
-  | "unknown";
 export type DataQualityTechnicalAsset = {
   name: string;
   status: DataQualityStatus;
@@ -78,6 +72,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -104,6 +100,13 @@ export type OutputPortDataQualitySummary2 = {
     [key: string]: DataQualityStatus;
   } | null;
 };
+export enum DataQualityStatus {
+  Success = "success",
+  Failure = "failure",
+  Warning = "warning",
+  Error = "error",
+  Unknown = "unknown",
+}
 export const {
   useGetLatestDataQualitySummaryForOutputPortQuery,
   useLazyGetLatestDataQualitySummaryForOutputPortQuery,

@@ -101,6 +101,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -125,6 +127,12 @@ export type SnowflakeConfig = {
   identifier: string;
   database_name: string;
 };
+export type PostgresConfig = {
+  identifier: string;
+  database_name: string;
+  bucket_identifier: string;
+  s3_path: string;
+};
 export type RedshiftConfig = {
   identifier: string;
   database_name: string;
@@ -148,6 +156,7 @@ export type EnvironmentConfigsGetItem = {
     | AwsGlueConfig
     | DatabricksConfig
     | SnowflakeConfig
+    | PostgresConfig
     | RedshiftConfig
   )[];
   id: string;

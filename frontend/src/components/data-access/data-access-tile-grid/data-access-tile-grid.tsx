@@ -30,10 +30,8 @@ export function DataAccessTileGrid({
     const { data: { environments = [] } = {}, isLoading: isLoadingEnvironments } = useGetEnvironmentsQuery();
     const [accessDataForm] = Form.useForm<AccessDataForm>();
 
-    // TODO: Backend should provide a flag for "requires_environment" instead of using hasMenu as proxy
-    // For now, platforms with hasMenu=true require environment selection, hasMenu=false don't
     function getEnvironment(platform: CustomDropdownItemProps<string>) {
-        if (!platform.hasMenu) {
+        if (!platform.hasEnvironments) {
             return [];
         }
         return environments;

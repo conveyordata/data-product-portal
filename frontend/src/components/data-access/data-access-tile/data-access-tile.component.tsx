@@ -29,7 +29,7 @@ export function AccessDataTile<T extends string>({
 }: Props<T>) {
     const { t } = useTranslation();
     const isDisabledDropdown = isDisabled || dataPlatform.disabled;
-    const isMenuDisabled = dataPlatform.hasMenu;
+    const isMenuDisabled = dataPlatform.hasEnvironments;
 
     const items: MenuProps['items'] = useMemo(
         () => [

@@ -98,8 +98,6 @@ export type UpdateDataProductSettingApiArg = {
 export type RemoveDataProductSettingApiResponse =
   /** status 200 Successful Response */ any;
 export type RemoveDataProductSettingApiArg = string;
-export type DataProductSettingType = "checkbox" | "tags" | "input";
-export type DataProductSettingScope = "dataproduct" | "dataset";
 export type DataProductSettingsGetItem = {
   id: string;
   category: string;
@@ -121,6 +119,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -138,11 +138,6 @@ export type DataProductSettingCreate = {
 export type NamespaceSuggestion = {
   namespace: string;
 };
-export type NamespaceValidityType =
-  | "VALID"
-  | "INVALID_LENGTH"
-  | "INVALID_CHARACTERS"
-  | "DUPLICATE_NAMESPACE";
 export type NamespaceValidation = {
   validity: NamespaceValidityType;
 };
@@ -162,6 +157,21 @@ export type DataProductSettingUpdate = {
   order?: number;
   scope: DataProductSettingScope;
 };
+export enum DataProductSettingType {
+  Checkbox = "checkbox",
+  Tags = "tags",
+  Input = "input",
+}
+export enum DataProductSettingScope {
+  Dataproduct = "dataproduct",
+  Dataset = "dataset",
+}
+export enum NamespaceValidityType {
+  Valid = "VALID",
+  InvalidLength = "INVALID_LENGTH",
+  InvalidCharacters = "INVALID_CHARACTERS",
+  DuplicateNamespace = "DUPLICATE_NAMESPACE",
+}
 export const {
   useGetDataProductsSettingsQuery,
   useLazyGetDataProductsSettingsQuery,

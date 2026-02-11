@@ -7,7 +7,7 @@ from pydantic import NaiveDatetime
 
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.schema import DataProduct
-from app.data_products.technical_assets.schema import DataOutput, TechnicalAsset
+from app.data_products.technical_assets.schema import TechnicalAsset
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -68,7 +68,7 @@ class GetEventHistoryResponseItemOld(ORMModel):
     data_product: Optional[DataProduct] = None
     user: Optional[User] = None
     dataset: Optional[Dataset] = None
-    data_output: Optional[DataOutput] = None
+    data_output: Optional[TechnicalAsset] = None
 
     def convert(self) -> GetEventHistoryResponseItem:
         return GetEventHistoryResponseItem(
@@ -76,9 +76,7 @@ class GetEventHistoryResponseItemOld(ORMModel):
                 exclude={"dataset", "data_output", "subject_type", "target_type"}
             ),
             output_port=self.dataset.convert() if self.dataset is not None else None,
-            technical_asset=self.data_output.convert()
-            if self.data_output is not None
-            else None,
+            technical_asset=self.data_output,
             subject_type=EventEntityType.from_old(self.subject_type),
             target_type=EventEntityType.from_old(self.target_type)
             if self.target_type is not None

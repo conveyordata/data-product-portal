@@ -42,6 +42,7 @@ services.forEach(({ file, name }, i) => {
         exportName: 'api',
         apiFile: apiFile,
         apiImport: 'api',
+        useEnumType: !(file === 'authorizationRoleAssignments' || file === 'authorizationRoles' || file === 'users'),
     };
 });
 

@@ -1,5 +1,4 @@
 from .. import test_session
-from .data_output import DataOutputFactory
 from .data_outputs_datasets import DataOutputDatasetAssociationFactory
 from .data_product import DataProductFactory
 from .data_product_setting import DataProductSettingFactory
@@ -23,11 +22,11 @@ from .role_assignment_dataset import DatasetRoleAssignmentFactory
 from .role_assignment_global import GlobalRoleAssignmentFactory
 from .s3_data_output import S3DataOutputFactory
 from .tags import TagFactory
+from .technical_asset import TechnicalAssetFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
 
 factories = [
-    DataOutputFactory,
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductSettingFactory,
@@ -41,6 +40,7 @@ factories = [
     EnvPlatformConfigFactory,
     EnvPlatformServiceConfigFactory,
     EnvironmentFactory,
+    EventFactory,
     GlobalRoleAssignmentFactory,
     LifecycleFactory,
     PlatformFactory,
@@ -50,8 +50,8 @@ factories = [
     S3DataOutputFactory,
     TagFactory,
     UserFactory,
+    TechnicalAssetFactory,
     ThemeSettingsFactory,
-    EventFactory,
     NotificationFactory,
 ]
 

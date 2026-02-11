@@ -105,7 +105,7 @@ def migrate_data_product_type(
 
 
 _router = router
-router = APIRouter(tags=["Configuration - Data product types"])
+router = APIRouter(tags=["Configuration - Data Product types"])
 router.include_router(_router, prefix="/data_product_types", deprecated=True)
 router.include_router(_router, prefix="/v2/configuration/data_product_types")
 

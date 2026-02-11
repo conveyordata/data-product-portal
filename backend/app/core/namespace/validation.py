@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
-from app.data_products.technical_assets.model import DataOutput
+from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import Base
 from app.settings import settings
 
@@ -87,9 +87,9 @@ class NamespaceValidator:
         )
 
 
-class DataOutputNamespaceValidator(NamespaceValidator):
+class TechnicalAssetNamespaceValidator(NamespaceValidator):
     def __init__(self):
-        super().__init__(model=DataOutput)
+        super().__init__(model=TechnicalAsset)
 
     def _is_unique(
         self,
@@ -99,16 +99,16 @@ class DataOutputNamespaceValidator(NamespaceValidator):
     ) -> bool:
         if data_product_id is None:
             raise ValueError(
-                "DataOutputNamespaceValidator requires a data product ID "
-                "to check uniqueness with the data product as scope"
+                "TechnicalAssetNamespaceValidator requires a Data Product ID "
+                "to check uniqueness with the Data Product as scope"
             )
 
         return not db.scalar(
             select(
                 exists().where(
                     and_(
-                        DataOutput.namespace == namespace,
-                        DataOutput.owner_id == data_product_id,
+                        TechnicalAsset.namespace == namespace,
+                        TechnicalAsset.owner_id == data_product_id,
                     )
                 )
             )

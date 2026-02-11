@@ -43,12 +43,16 @@ class NotebookBuilderConveyor:
         return result.json().get("access_token")
 
     def test_and_reauth(self) -> None:
-        result = requests.get(
-            f"{self.conveyor_api}/environments",
-            headers={"Authorization": f"Bearer {self.token}"},
-            timeout=conveyor_timeout,
-        )
-        if result.status_code != 200:
+        failed = False
+        try:
+            result = requests.get(
+                f"{self.conveyor_api}/environments",
+                headers={"Authorization": f"Bearer {self.token}"},
+                timeout=conveyor_timeout,
+            )
+        except OSError:
+            failed = True
+        if failed or result.status_code != 200:
             self.token = self.authenticate()
         result = requests.get(
             f"{self.conveyor_api}/environments",

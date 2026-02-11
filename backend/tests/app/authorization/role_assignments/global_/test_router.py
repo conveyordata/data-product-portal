@@ -11,7 +11,7 @@ from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactor
 from tests.factories.dataset import DatasetFactory
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.global_.schema import RoleAssignment
+    from app.authorization.role_assignments.global_.schema import GlobalRoleAssignment
     from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/global"
@@ -21,7 +21,7 @@ class TestGlobalRoleAssignmentsRouter:
     def test_list_assignments(self, client: TestClient):
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id, role_id=role.id
         )
         response = client.get(f"{ENDPOINT}")
@@ -125,7 +125,7 @@ class TestGlobalRoleAssignmentsRouter:
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
         )
@@ -150,7 +150,7 @@ class TestGlobalRoleAssignmentsRouter:
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.PENDING,
@@ -175,7 +175,7 @@ class TestGlobalRoleAssignmentsRouter:
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
@@ -198,7 +198,7 @@ class TestGlobalRoleAssignmentsRouter:
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
@@ -221,7 +221,7 @@ class TestGlobalRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         new_role: Role = RoleFactory(scope=Scope.GLOBAL)
 
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -245,7 +245,7 @@ class TestGlobalRoleAssignmentsRouter:
         admin: Role = RoleFactory.admin()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user1.id,
             role_id=admin.id,
         )
@@ -269,7 +269,7 @@ class TestGlobalRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         admin: Role = RoleFactory.admin()
 
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
         )

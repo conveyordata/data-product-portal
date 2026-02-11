@@ -2,12 +2,12 @@ import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
+    type DataProductTypesGetItem,
     useGetDataProductsTypesQuery,
     useMigrateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
 } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { DataProductTypeContract } from '@/types/data-product-type';
 
 const { Option } = Select;
 
@@ -18,7 +18,7 @@ interface DataProductTypeMigrateFormValues {
 type Props = {
     onClose: () => void;
     isOpen: boolean;
-    migrateFrom: DataProductTypeContract;
+    migrateFrom: DataProductTypesGetItem;
 };
 export function CreateDataProductTypeMigrateModal({ isOpen, onClose, migrateFrom }: Props) {
     const { t } = useTranslation();
