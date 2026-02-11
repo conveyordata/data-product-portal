@@ -30,7 +30,7 @@ export type PlatformTile = {
   label: string;
   value: string;
   icon_name: string;
-  has_menu?: boolean;
+  has_environments?: boolean;
   has_config?: boolean;
   children?: PlatformTile[];
 };
@@ -79,6 +79,7 @@ export type UiElementMetadataResponse = {
   not_configured?: boolean;
   ui_metadata: UiElementMetadata[];
   plugin: string;
+  has_environments: boolean;
   result_label?: string;
   result_tooltip?: string;
   platform: string;

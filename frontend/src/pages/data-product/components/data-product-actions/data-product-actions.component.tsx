@@ -8,7 +8,7 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { useGetAllPlatformsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
+import { type PlatformTile, useGetPlatformTilesQuery } from '@/store/api/services/generated/pluginsApi';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,
@@ -19,9 +19,9 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
-import { getDataPlatforms } from '@/utils/data-platforms';
+import type { CustomDropdownItemProps } from '@/types/shared';
+import { getIcon } from '@/utils/icon-loader';
 import styles from './data-product-actions.module.scss';
 
 type Props = {
@@ -34,7 +34,8 @@ export function DataProductActions({ dataProductId }: Props) {
 
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const { data: { platforms = [] } = {}, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
+    const { data: { platform_tiles: platformTilesData } = {}, isLoading: isLoadingPlatforms } =
+        useGetPlatformTilesQuery();
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
@@ -57,11 +58,23 @@ export function DataProductActions({ dataProductId }: Props) {
     const canRequestAccess = request_access?.allowed ?? false;
     const canReadIntegrations = read_integrations?.allowed ?? false;
 
+    // Transform backend tiles to frontend format
     const dataPlatforms = useMemo(() => {
-        const names = platforms.map((platform) => platform.name.toLowerCase());
+        if (!platformTilesData) {
+            return [];
+        }
 
-        return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
-    }, [t, platforms]);
+        const transformTile = (tile: PlatformTile): CustomDropdownItemProps<string> => ({
+            label: t(tile.label),
+            value: tile.value,
+            icon: getIcon(tile.icon_name),
+            hasEnvironments: tile.has_environments,
+            hasConfig: tile.has_config,
+            children: tile.children?.map(transformTile) || [],
+        });
+
+        return platformTilesData.map(transformTile);
+    }, [platformTilesData, t]);
 
     const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useListDataProductRoleAssignmentsQuery({
         dataProductId: dataProductId,
@@ -81,13 +94,13 @@ export function DataProductActions({ dataProductId }: Props) {
         return null;
     }
 
-    async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
+    async function handleAccessToData(environment: string, dataPlatform: string) {
         posthog.capture(PosthogEvents.DATA_PRODUCTS_PLATFORM_ACCESS, {
             platform_name: dataPlatform,
         });
 
         switch (dataPlatform) {
-            case DataPlatforms.AWS:
+            case 'aws':
                 try {
                     const signInUrl = await getDataProductSignInUrl({ id: dataProductId, environment }).unwrap();
                     if (signInUrl) {
@@ -99,7 +112,7 @@ export function DataProductActions({ dataProductId }: Props) {
                     dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
                 }
                 break;
-            case DataPlatforms.Databricks:
+            case 'databricks':
                 try {
                     const signInUrl = await getDatabricksWorkspaceUrl({ id: dataProductId, environment }).unwrap();
                     if (signInUrl) {
@@ -111,7 +124,7 @@ export function DataProductActions({ dataProductId }: Props) {
                     dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
                 }
                 break;
-            case DataPlatforms.Snowflake:
+            case 'snowflake':
                 try {
                     const signInUrl = await getSnowflakeUrl({ id: dataProductId, environment }).unwrap();
                     if (signInUrl) {
@@ -128,9 +141,9 @@ export function DataProductActions({ dataProductId }: Props) {
         }
     }
 
-    async function handleTileClick(dataPlatform: DataPlatform) {
+    async function handleTileClick(dataPlatform: string) {
         switch (dataPlatform) {
-            case DataPlatforms.Conveyor:
+            case 'conveyor':
                 try {
                     const url = await getConveyorUrl({ id: dataProductId }).unwrap();
                     if (url) {
