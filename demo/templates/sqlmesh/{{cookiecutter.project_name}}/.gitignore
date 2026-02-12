@@ -1,0 +1,25 @@
+# SQLMesh
+*.duckdb
+*.duckdb.wal
+.sqlmesh/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

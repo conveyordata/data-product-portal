@@ -1,0 +1,66 @@
+services:
+  # S3-compatible storage using MinIO (simpler and more reliable than rustfs for POC)
+  rustfs:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - ./s3:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Provisioner service - handles portal webhooks
+  provisioner:
+    build:
+      context: ./provisioner
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      - PROV_DPP_API_URL=http://host.docker.internal:5050
+      - PROV_TEMPLATE_PATH=/templates/sqlmesh
+      - PROV_TEMPLATE_OUTPUT_PATH=/products
+      - S3_ENDPOINT=http://rustfs:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+    volumes:
+      - ./products:/products
+      - ./templates:/templates
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # VS Code in browser (Coder)
+  coder:
+    build:
+      context: ./coder
+      dockerfile: Dockerfile
+    ports:
+      - "8443:8080"
+    environment:
+      - PASSWORD=coder
+    volumes:
+      - ./products:/home/coder/workspace/products
+    command: code-server --auth password --bind-addr 0.0.0.0:8080 /home/coder/workspace
+
+  # RStudio server
+  rstudio:
+    image: rocker/rstudio:latest
+    ports:
+      - "8787:8787"
+    environment:
+      - PASSWORD=rstudio
+      - ROOT=TRUE
+    volumes:
+      - ./products:/home/rstudio/products
