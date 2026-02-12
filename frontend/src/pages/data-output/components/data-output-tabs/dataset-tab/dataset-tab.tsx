@@ -1,15 +1,12 @@
-import { Flex, Form } from 'antd';
-import { useMemo } from 'react';
+import { Flex, Input } from 'antd';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Searchbar } from '@/components/form';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import type { DataOutputDatasetLink } from '@/types/data-output';
-import type { SearchForm } from '@/types/shared';
 
 import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
-import styles from './dataset-tab.module.scss';
 
 function filterDatasets(datasetLinks: DataOutputDatasetLink[], searchTerm: string) {
     return (
@@ -33,21 +30,18 @@ export function DatasetTab({ dataOutputId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataOutput?.owner.id ?? '', {
         skip: !dataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
     });
-
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const [searchTerm, setSearchTerm] = useState<string>('');
     const filteredDatasets = useMemo(() => {
         return filterDatasets(dataOutput?.dataset_links ?? [], searchTerm);
     }, [dataOutput?.dataset_links, searchTerm]);
 
     return (
-        <Flex vertical className={`${styles.container} ${filteredDatasets.length === 0 && styles.paginationGap}`}>
-            <Searchbar
+        <Flex vertical gap="middle">
+            <Input.Search
                 placeholder={t('Search Output Ports by name')}
-                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
-                form={searchForm}
+                allowClear
+                onChange={(e) => setSearchTerm(e.target.value)}
             />
-
             <DatasetTable dataProductId={dataProduct?.id} dataOutputId={dataOutputId} datasets={filteredDatasets} />
         </Flex>
     );
