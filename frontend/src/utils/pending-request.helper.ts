@@ -1,9 +1,11 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Dataset } from '@/pages/dataset/dataset.page';
 import {
     useDecideDataProductRoleAssignmentMutation,
     useDecideOutputPortRoleAssignmentMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useApproveOutputPortAsInputPortMutation } from '@/store/api/services/generated/inputPortsApi';
 import {
     useApproveDataOutputLinkMutation,
     useRejectDataOutputLinkMutation,
@@ -12,6 +14,7 @@ import {
     useApproveDataProductLinkMutation,
     useRejectDataProductLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
+import { useGetDatasetByIdQuery, useLazyGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
@@ -30,10 +33,12 @@ export interface DatasetRoleRequest {
 export const usePendingActionHandlers = () => {
     const { t } = useTranslation();
 
-    const [approveDataProductLink, { isLoading: isApprovingDataProductLink }] = useApproveDataProductLinkMutation();
+    const [approveDataProductLink, { isLoading: isApprovingDataProductLink }] =
+        useApproveOutputPortAsInputPortMutation();
     const [rejectDataProductLink, { isLoading: isRejectingDataProductLink }] = useRejectDataProductLinkMutation();
     const [approveDataOutputLink, { isLoading: isApprovingDataOutputLink }] = useApproveDataOutputLinkMutation();
     const [rejectDataOutputLink, { isLoading: isRejectingDataOutputLink }] = useRejectDataOutputLinkMutation();
+    const [getDataset] = useLazyGetDatasetByIdQuery();
     const [decideDataProductRoleAssignment, { isLoading: isDecidingDataProductRoleAssignment }] =
         useDecideDataProductRoleAssignmentMutation();
     const [decideDatasetRoleAssignment, { isLoading: isDecidingDatasetRoleAssignment }] =
@@ -42,7 +47,12 @@ export const usePendingActionHandlers = () => {
     const handleAcceptDataProductDatasetLink = useCallback(
         async (request: DataProductDatasetLinkRequest) => {
             try {
-                await approveDataProductLink(request).unwrap();
+                const dataset = await getDataset(request.dataset_id).unwrap();
+                await approveDataProductLink({
+                    dataProductId: dataset.data_product_id,
+                    outputPortId: request.dataset_id,
+                    approveOutputPortAsInputPortRequest: { consuming_data_product_id: request.data_product_id },
+                }).unwrap();
                 dispatchMessage({
                     content: t('Output Port request has been successfully approved'),
                     type: 'success',

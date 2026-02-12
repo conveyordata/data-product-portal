@@ -226,4 +226,5 @@ export const {
     useLazyValidateDatasetNamespaceQuery,
     useGetDatasetNamespaceLengthLimitsQuery,
     useGetDatasetQueryStatsDailyQuery,
+    useLazyGetDatasetByIdQuery,
 } = datasetsApiSlice;

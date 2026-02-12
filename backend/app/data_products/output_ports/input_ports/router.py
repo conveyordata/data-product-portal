@@ -79,7 +79,7 @@ def approve_output_port_as_input_port(
     request: ApproveOutputPortAsInputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
+) -> ApproveOutputPortAsInputPortRequest:
     data_product_link = DataProductDatasetService(db).approve_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
@@ -103,6 +103,7 @@ def approve_output_port_as_input_port(
         extra_receiver_ids=[data_product_link.requested_by_id],
     )
     RefreshInfrastructureLambda().trigger()
+    return request
 
 
 @router.post(

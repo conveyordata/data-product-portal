@@ -15,6 +15,7 @@ const services = [
     { name: 'Configuration - Tags', file: 'configurationTags' },
     { name: 'Output Ports - Data Quality', file: 'outputPortDataQuality' },
     { name: 'Plugins', file: 'plugins' },
+    { name: 'Data Products - Output ports - Input ports', file: 'inputPorts' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
 ];
 
