@@ -1,8 +1,7 @@
-import { Button, Checkbox, Flex, Form, List, Modal, Typography } from 'antd';
+import { Button, Checkbox, Flex, Input, List, Modal, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Searchbar } from '@/components/form';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
@@ -12,7 +11,6 @@ import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { SearchForm } from '@/types/shared';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
 type Props = {
@@ -26,8 +24,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
     const { t } = useTranslation();
     const [selectedOutputs, setSelectedOutputs] = useState<Set<string>>(new Set());
 
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
     const { data: dataset } = useGetDatasetByIdQuery(datasetId);
     const { data: { plugins } = {} } = useGetPluginsQuery();
     const [linkDatasets, { isLoading: isLinking }] = useRequestDatasetAccessForDataOutputMutation();
@@ -128,10 +125,10 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
                 </Button>,
             ]}
         >
-            <Searchbar
-                form={searchForm}
+            <Input.Search
                 placeholder={t('Search Technical Assets')}
-                formItemProps={{ initialValue: '' }}
+                allowClear
+                onChange={(e) => setSearchTerm(e.target.value)}
             />
 
             {filteredDataOutputs.length > 0 && (

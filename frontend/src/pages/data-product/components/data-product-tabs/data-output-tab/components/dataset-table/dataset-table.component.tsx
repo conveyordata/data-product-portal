@@ -1,16 +1,13 @@
-import { Button, Flex, Form, Typography } from 'antd';
-import { useMemo } from 'react';
+import { Button, Flex, Input, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
-import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
-import type { SearchForm } from '@/types/shared';
 import { AddOutputPortPopup } from '../add-output-port-popup/add-output-port-popup';
-import styles from './dataset-table.module.scss';
 
 type Props = {
     dataProductId: string;
@@ -38,8 +35,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
         },
         { skip: !dataProductId },
     );
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
     const filteredDatasets = useMemo(() => {
         if (!searchTerm) return datasets;
         return datasets.filter(
@@ -70,11 +66,10 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
                         {t('Add Output Port')}
                     </Button>
                 </Flex>
-
-                <Searchbar
+                <Input.Search
                     placeholder={t('Search Output Ports by name or description')}
-                    formItemProps={{ initialValue: '', className: styles.searchBar }}
-                    form={searchForm}
+                    allowClear
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </Flex>
 

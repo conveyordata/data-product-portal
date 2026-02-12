@@ -1,16 +1,13 @@
-import { Flex, Form, Table, type TableProps } from 'antd';
+import { Flex, Input, Table, type TableProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { TFunction } from 'i18next';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import type { EventContract } from '@/types/events/event.contract';
 import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
-import type { SearchForm } from '@/types/shared';
 import { getEventTypeDisplayText, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper.tsx';
-import { Searchbar } from '../form';
-import styles from './history-tab.module.scss';
 import { getHistoryColumns } from './history-table-columns';
 
 type Event = EventContract & { key: number };
@@ -50,8 +47,7 @@ type Props = {
 };
 export function HistoryTab({ id, type, history = [], isFetching }: Props) {
     const { t } = useTranslation();
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
     const filteredHistory = useMemo(() => {
         return filterHistory(t, history, searchTerm, id, type);
@@ -68,11 +64,11 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
     const columns = useMemo(() => getHistoryColumns({ t, resourceId: id, type }), [t, id, type]) as ColumnsType<Event>;
 
     return (
-        <Flex vertical className={`${styles.container} ${filteredHistory?.length === 0 && styles.paginationGap}`}>
-            <Searchbar
-                form={searchForm}
-                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
+        <Flex vertical gap={'middle'}>
+            <Input.Search
                 placeholder={t('Search event history')}
+                allowClear
+                onChange={(e) => setSearchTerm(e.target.value)}
             />
             <Table<Event>
                 loading={isFetching}
@@ -84,7 +80,6 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
                     ...pagination,
                     size: 'small',
                     placement: ['topEnd'],
-                    className: styles.pagination,
                     showTotal: (total, range) =>
                         t('Showing {{range0}}-{{range1}} of {{count}} history items', {
                             range0: range[0],

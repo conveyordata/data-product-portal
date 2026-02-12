@@ -1,12 +1,10 @@
-import { Form, List, Select, Typography } from 'antd';
-import { useMemo } from 'react';
+import { Input, List, Select, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Searchbar } from '@/components/form';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import type { SearchForm } from '@/types/shared';
 import styles from './user-popup.module.scss';
 
 type Props = {
@@ -33,8 +31,8 @@ const handleUserListFilter = (users: UsersGet[], searchTerm: string) => {
 export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHide }: Props) {
     const { t } = useTranslation();
     const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
-    const [searchUsersForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchUsersForm);
+
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
     const filteredUsers = useMemo(() => {
         const filteredOutHiddenUsers = users.filter((user) => !userIdsToHide?.includes(user.id)) ?? [];
@@ -43,9 +41,10 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
 
     return (
         <FormModal title={t('Add User')} onClose={onClose} isOpen={isOpen} footer={(_, { CancelBtn }) => <CancelBtn />}>
-            <Searchbar
-                form={searchUsersForm}
-                formItemProps={{ initialValue: '', className: styles.searchFieldWrapper }}
+            <Input.Search
+                placeholder={t('Search users by email or name')}
+                allowClear
+                onChange={(e) => setSearchTerm(e.target.value)}
             />
             <div className={styles.userList}>
                 <List
