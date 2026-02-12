@@ -60,6 +60,7 @@ services:
     ports:
       - "8787:8787"
     environment:
+      - USER=rstudio
       - PASSWORD=rstudio
       - ROOT=TRUE
     volumes:
