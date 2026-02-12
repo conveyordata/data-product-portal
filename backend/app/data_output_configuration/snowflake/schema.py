@@ -1,8 +1,13 @@
+import json
 from typing import ClassVar, Literal, Optional, Self
 
+from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
+from app.configuration.environments.platform_configurations.service import (
+    EnvironmentPlatformConfigurationService,
+)
 from app.configuration.environments.platform_service_configurations.schema_response import (
     SnowflakeConfig,
 )
@@ -67,6 +72,20 @@ class SnowflakeTechnicalAssetConfiguration(AssetProviderPlugin):
 
     def on_create(self):
         pass
+
+    @classmethod
+    def get_url(cls, id, db, actor, environment=None) -> str:
+        config = json.loads(
+            EnvironmentPlatformConfigurationService(db).get_env_platform_config(
+                environment, "Snowflake"
+            )
+        )
+        if "login_url" not in config:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="login_url missing from Snowflake configuration",
+            )
+        return config["login_url"]
 
     def render_template(self, template, **context) -> str:
         return super().render_template(template, **context).replace("-", "_")

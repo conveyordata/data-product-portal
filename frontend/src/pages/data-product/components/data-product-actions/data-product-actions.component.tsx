@@ -8,15 +8,13 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { type PlatformTile, useGetPlatformTilesQuery } from '@/store/api/services/generated/pluginsApi';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
-    useGetDataProductByIdQuery,
-    useGetDataProductConveyorIDEUrlMutation,
-    useGetDataProductDatabricksWorkspaceUrlMutation,
-    useGetDataProductSignInUrlMutation,
-    useGetDataProductSnowflakeUrlMutation,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+    type PlatformTile,
+    useGetPlatformTilesQuery,
+    useLazyGetPluginUrlQuery,
+} from '@/store/api/services/generated/pluginsApi';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';
@@ -36,11 +34,8 @@ export function DataProductActions({ dataProductId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { data: { platform_tiles: platformTilesData } = {}, isLoading: isLoadingPlatforms } =
         useGetPlatformTilesQuery();
-    const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
-    const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
-    const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
-        useGetDataProductDatabricksWorkspaceUrlMutation();
-    const [getSnowflakeUrl, { isLoading: isSnowflakeLoading }] = useGetDataProductSnowflakeUrlMutation();
+
+    const [getPluginUrl, { isLoading }] = useLazyGetPluginUrlQuery();
 
     const { data: request_access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
@@ -94,75 +89,44 @@ export function DataProductActions({ dataProductId }: Props) {
         return null;
     }
 
-    async function handleAccessToData(environment: string, dataPlatform: string) {
+    // TODO: This function should make use of the environment string. If the environment string is available (i.e. Not conveyor) then the direct tile click should be disabled.
+    async function handleAccessToData(_environment: string, dataPlatform: string) {
         posthog.capture(PosthogEvents.DATA_PRODUCTS_PLATFORM_ACCESS, {
             platform_name: dataPlatform,
         });
 
-        switch (dataPlatform) {
-            case 'aws':
-                try {
-                    const signInUrl = await getDataProductSignInUrl({ id: dataProductId, environment }).unwrap();
-                    if (signInUrl) {
-                        window.open(signInUrl, '_blank');
-                    } else {
-                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                    }
-                } catch (_error) {
-                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                }
-                break;
-            case 'databricks':
-                try {
-                    const signInUrl = await getDatabricksWorkspaceUrl({ id: dataProductId, environment }).unwrap();
-                    if (signInUrl) {
-                        window.open(signInUrl, '_blank');
-                    } else {
-                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                    }
-                } catch (_error) {
-                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                }
-                break;
-            case 'snowflake':
-                try {
-                    const signInUrl = await getSnowflakeUrl({ id: dataProductId, environment }).unwrap();
-                    if (signInUrl) {
-                        window.open(signInUrl, '_blank');
-                    } else {
-                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                    }
-                } catch (_error) {
-                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                }
-                break;
-            default:
-                break;
+        try {
+            const url = await getPluginUrl({
+                id: dataProductId,
+                environment: _environment,
+                pluginName: dataPlatform,
+            }).unwrap();
+            if (url) {
+                window.open(url.url, '_blank');
+            } else {
+                dispatchMessage({ content: t('Failed to get platform url'), type: 'error' });
+            }
+        } catch (_error) {
+            dispatchMessage({ content: t('Failed to get platform url'), type: 'error' });
         }
     }
 
     async function handleTileClick(dataPlatform: string) {
-        switch (dataPlatform) {
-            case 'conveyor':
-                try {
-                    const url = await getConveyorUrl({ id: dataProductId }).unwrap();
-                    if (url) {
-                        window.open(url, '_blank');
-                    } else {
-                        dispatchMessage({
-                            type: 'error',
-                            content: t('Failed to get Conveyor url'),
-                        });
-                    }
-                } catch (_error) {
-                    dispatchMessage({
-                        type: 'error',
-                        content: t('Failed to get Conveyor url'),
-                    });
-                }
-                break;
-            default:
-                break;
+        try {
+            const url = await getPluginUrl({ id: dataProductId, pluginName: dataPlatform }).unwrap();
+            if (url) {
+                window.open(url.url, '_blank');
+            } else {
+                dispatchMessage({
+                    type: 'error',
+                    content: t('Failed to get platform url'),
+                });
+            }
+        } catch (_error) {
+            dispatchMessage({
+                type: 'error',
+                content: t('Failed to get platform url'),
+            });
         }
     }
 
@@ -178,13 +142,7 @@ export function DataProductActions({ dataProductId }: Props) {
                     onDataPlatformClick={handleAccessToData}
                     onTileClick={handleTileClick}
                     isDisabled={isLoading || !canReadIntegrations}
-                    isLoading={
-                        isLoading ||
-                        isConveyorLoading ||
-                        isDatabricksLoading ||
-                        isSnowflakeLoading ||
-                        isLoadingPlatforms
-                    }
+                    isLoading={isLoading || isLoadingPlatforms}
                 />
             </Flex>
         </Flex>
