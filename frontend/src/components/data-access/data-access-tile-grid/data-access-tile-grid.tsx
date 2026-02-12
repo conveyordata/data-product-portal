@@ -54,7 +54,13 @@ export function DataAccessTileGrid({
                             isDisabled={isDisabled || isLoading || isLoadingEnvironments || !canAccessData}
                             isLoading={isLoading || isLoadingEnvironments}
                             onMenuItemClick={onDataPlatformClick}
-                            onTileClick={onTileClick}
+                            onTileClick={
+                                dataPlatform.hasEnvironments
+                                    ? () => {
+                                          /* tileClick does nothing if tile has environments */
+                                      }
+                                    : onTileClick
+                            }
                         />
                     ))}
                 </Space>

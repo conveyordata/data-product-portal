@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.configuration.environments.service import EnvironmentService
 from app.core.auth.credentials import AWSCredentials
+from app.core.aws.get_url import get_aws_temporary_credentials
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.users.schema import User
@@ -35,6 +36,4 @@ class AuthService:
         role_arn = DataProductService(db).get_data_product_role_arn(
             data_product_id, environment
         )
-        return DataProductService.get_aws_temporary_credentials(
-            role_arn, actor=authorized_user
-        )
+        return get_aws_temporary_credentials(role_arn, actor=authorized_user)

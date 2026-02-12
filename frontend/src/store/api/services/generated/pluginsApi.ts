@@ -13,6 +13,15 @@ const injectedRtkApi = api.injectEndpoints({
     getPluginForm: build.query<GetPluginFormApiResponse, GetPluginFormApiArg>({
       query: (queryArg) => ({ url: `/api/v2/plugins/${queryArg}/form` }),
     }),
+    getPluginUrl: build.query<GetPluginUrlApiResponse, GetPluginUrlApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v2/plugins/${queryArg.pluginName}/url`,
+        params: {
+          id: queryArg.id,
+          environment: queryArg.environment,
+        },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -26,6 +35,13 @@ export type GetPluginsApiArg = void;
 export type GetPluginFormApiResponse =
   /** status 200 Successful Response */ UiElementMetadataResponse;
 export type GetPluginFormApiArg = string;
+export type GetPluginUrlApiResponse =
+  /** status 200 Successful Response */ UrlResponse;
+export type GetPluginUrlApiArg = {
+  pluginName: string;
+  id: string;
+  environment?: string | null;
+};
 export type PlatformTile = {
   label: string;
   value: string;
@@ -102,6 +118,9 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
+export type UrlResponse = {
+  url: string;
+};
 export enum UIElementType {
   String = "string",
   Select = "select",
@@ -115,4 +134,6 @@ export const {
   useLazyGetPluginsQuery,
   useGetPluginFormQuery,
   useLazyGetPluginFormQuery,
+  useGetPluginUrlQuery,
+  useLazyGetPluginUrlQuery,
 } = injectedRtkApi;

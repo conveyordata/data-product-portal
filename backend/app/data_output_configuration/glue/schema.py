@@ -1,11 +1,14 @@
 from typing import ClassVar, Literal, Optional, Self
+from uuid import UUID
 
+from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSGlueConfig,
 )
+from app.core.aws.get_url import get_aws_url
 from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     FieldDependency,
@@ -22,6 +25,7 @@ from app.data_output_configuration.glue.model import (
     GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
 )
 from app.data_products.schema import DataProduct
+from app.users.schema import User
 
 
 class GlueTechnicalAssetConfiguration(AssetProviderPlugin):
@@ -81,6 +85,17 @@ class GlueTechnicalAssetConfiguration(AssetProviderPlugin):
         return next(
             (config for config in configs if config.identifier == self.database), None
         )
+
+    @classmethod
+    def get_url(
+        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
+    ) -> str:
+        if environment is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Environment is required to get the URL for S3 technical asset configurations",
+            )
+        return get_aws_url(id, db, actor, environment)
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:

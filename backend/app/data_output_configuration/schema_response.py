@@ -40,3 +40,9 @@ class PlatformTileResponse(ORMModel):
     """Response model for platform tiles"""
 
     platform_tiles: Sequence[PlatformTile]
+
+
+class URLResponse(ORMModel):
+    """Response model for platform URLs"""
+
+    url: str

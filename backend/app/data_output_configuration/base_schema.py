@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Any, ClassVar, Optional
+from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -17,6 +18,7 @@ from app.platform_service_configurations.model import (
 )
 from app.platform_service_configurations.schema import PlatformServiceConfiguration
 from app.shared.schema import ORMModel
+from app.users.schema import User
 
 
 class FieldDependency(ORMModel):
@@ -119,6 +121,13 @@ class AssetProviderPlugin(ORMModel, ABC):
 
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
         """Get platform and environment specific configuration"""
+        raise NotImplementedError
+
+    @classmethod
+    def get_url(
+        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
+    ) -> str:
+        """Get the URL to the access tiles."""
         raise NotImplementedError
 
     @classmethod

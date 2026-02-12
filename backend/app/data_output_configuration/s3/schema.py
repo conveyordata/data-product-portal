@@ -1,10 +1,13 @@
 from typing import ClassVar, Literal, Optional
+from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSS3Config,
 )
+from app.core.aws.get_url import get_aws_url
 from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     PlatformMetadata,
@@ -18,6 +21,7 @@ from app.data_output_configuration.s3.model import (
     S3TechnicalAssetConfiguration as S3TechnicalAssetConfigurationModel,
 )
 from app.data_products.schema import DataProduct
+from app.users.schema import User
 
 
 class S3TechnicalAssetConfiguration(AssetProviderPlugin):
@@ -47,6 +51,17 @@ class S3TechnicalAssetConfiguration(AssetProviderPlugin):
 
     def on_create(self):
         pass
+
+    @classmethod
+    def get_url(
+        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
+    ) -> str:
+        if environment is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Environment is required to get the URL for S3 technical asset configurations",
+            )
+        return get_aws_url(id, db, actor, environment)
 
     def render_template(self, template, **context):
         return "/".join(
