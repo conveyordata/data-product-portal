@@ -2,6 +2,7 @@ import {
     CompassOutlined,
     FileSearchOutlined,
     HomeOutlined,
+    ProductOutlined,
     SettingOutlined,
     ShopOutlined,
     TeamOutlined,
@@ -13,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useMatches } from 'react-router';
 
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
-import { DataProductOutlined, ProductLogo } from '@/components/icons';
+import { ProductLogo } from '@/components/icons';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -33,9 +34,9 @@ export const Sidebar = () => {
             key: ApplicationPaths.Home,
         },
         {
-            label: <Link to={ApplicationPaths.DataProducts}>{t('Data Products')}</Link>,
-            icon: <DataProductOutlined />,
-            key: ApplicationPaths.DataProducts,
+            label: <Link to={ApplicationPaths.Studio}>{t('Product Studio')}</Link>,
+            icon: <ProductOutlined />,
+            key: ApplicationPaths.Studio,
         },
         {
             label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
