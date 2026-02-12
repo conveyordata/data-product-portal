@@ -1,3 +1,6 @@
 {
-  "project_name": "my-data-product"
+  "project_name": "my-data-product",
+  "s3_endpoint": "http://rustfs:9000",
+  "s3_bucket": "data-products",
+  "portal_url": "http://localhost:3000"
 }

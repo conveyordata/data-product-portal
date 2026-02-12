@@ -1,10 +1,30 @@
 gateways:
-  local:
+  s3_gateway:
     connection:
       type: duckdb
-      database: ./db.duckdb
+      # Database stored locally for performance (SQLMesh state)
+      # Data is exported to S3 for sharing with consumers
+      database: cnt_survey.duckdb
+      extensions:
+        - name: httpfs
+      secrets:
+        - type: s3
+          # Uses environment variables from .env file
+          endpoint: "${S3_ENDPOINT:localhost:9000}"
+          region: "us-east-1"
+          key_id: "${S3_ACCESS_KEY}"
+          secret: "${S3_SECRET_KEY}"
+          use_ssl: false
+          url_style: 'path'
 
-default_gateway: local
+default_gateway: s3_gateway
 
 model_defaults:
   dialect: duckdb
+  start: "2024-01-01"
+
+# Schemas for organizing models
+# After pipeline runs, use export_to_s3.py to push data to MinIO
+physical_schema_mapping:
+  staging: "staging"
+  data_mart: "data_mart"
