@@ -147,6 +147,61 @@ When a consumer data product requests access to another data product:
    ```
 4. **Approve** access links → Consumer credentials regenerated
 
+## Importing Existing SQLMesh Projects
+
+If you have an existing SQLMesh project to import:
+
+```bash
+./import_project.sh <source-directory> <data-product-name>
+```
+
+**Example:**
+```bash
+# 1. Create data product in portal first (to reserve namespace and get credentials)
+# 2. Import your existing project
+./import_project.sh ~/projects/my-sqlmesh-pipeline my-data-product
+
+# 3. The script will:
+#    - Copy project files to demo/products/my-data-product/
+#    - Preserve S3 credentials from scaffolded .env
+#    - Skip .git, __pycache__, venv, etc.
+```
+
+**Tips:**
+- Create the data product in the portal FIRST to get S3 credentials
+- Review and update `config.yaml` with S3 settings after import
+- Check `.env` file has the correct S3 credentials
+
+## Cleaning/Resetting the Demo
+
+To completely reset the demo to a clean state:
+
+```bash
+./clean.sh
+```
+
+This will:
+- ✅ Stop all services (docker compose down)
+- ✅ Remove all scaffolded data products from `products/`
+- ✅ Clear all S3 data
+- ✅ Remove Docker volumes
+- ⚙️  Optionally clear Docker build cache
+
+**⚠️  Warning**: This deletes ALL demo data. Your portal database (PostgreSQL) is not affected.
+
+After cleaning, restart with:
+```bash
+./start.sh
+```
+
+Or to start fresh with a new backend database too:
+```bash
+cd ..
+docker compose down -v  # Removes PostgreSQL data
+docker compose up postgresql -d
+# Then run backend and demo/start.sh
+```
+
 ## Configuration
 
 ### Environment Variables
