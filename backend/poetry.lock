@@ -989,14 +989,14 @@ valkey = ["valkey (>=6) ; python_version >= \"3.8\""]
 
 [[package]]
 name = "fastapi"
-version = "0.128.8"
+version = "0.129.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastapi-0.128.8-py3-none-any.whl", hash = "sha256:5618f492d0fe973a778f8fec97723f598aa9deee495040a8d51aaf3cf123ecf1"},
-    {file = "fastapi-0.128.8.tar.gz", hash = "sha256:3171f9f328c4a218f0a8d2ba8310ac3a55d1ee12c28c949650288aee25966007"},
+    {file = "fastapi-0.129.0-py3-none-any.whl", hash = "sha256:b4946880e48f462692b31c083be0432275cbfb6e2274566b1be91479cc1a84ec"},
+    {file = "fastapi-0.129.0.tar.gz", hash = "sha256:61315cebd2e65df5f97ec298c888f9de30430dd0612d59d6480beafbc10655af"},
 ]
 
 [package.dependencies]
@@ -4157,4 +4157,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "3e7168fc62d23780f71fa9e3adedd87d845a47c805adba2283f28a93d793f915"
+content-hash = "fddb152721afcb453b91c72c8c265ff982f1335180f0decfcb4f14172be95697"
