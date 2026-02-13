@@ -22,6 +22,7 @@ class CoderPlugin(AssetProviderPlugin):
         parent_platform=None,
         has_environments=False,
         detailed_name="VS Code - Coder",
+        show_in_form=False,
     )
 
     @classmethod

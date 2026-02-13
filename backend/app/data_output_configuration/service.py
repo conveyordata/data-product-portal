@@ -97,7 +97,8 @@ class PluginService:
         self, configs: Sequence[PlatformServiceConfiguration]
     ) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""
-        return self.get_all_technical_assets_ui_metadata()
+        assets = self.get_all_technical_assets_ui_metadata()
+        return self._build_tile_hierarchy(assets)
 
     def get_url(
         self,
