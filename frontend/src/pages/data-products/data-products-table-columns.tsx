@@ -93,10 +93,10 @@ export const getDataProductTableColumns = ({
             sorter: sorter.stringSorter((dp) => dp.type.name),
         },
         {
-            title: t('Access'),
+            title: t('Team'),
             dataIndex: 'user_count',
             render: (userCount: number) => {
-                return <TableCellItem icon={<TeamOutlined />} text={t('{{count}} users', { count: userCount })} />;
+                return <TableCellItem icon={<TeamOutlined />} text={t('{{count}} members', { count: userCount })} />;
             },
             sorter: sorter.numberSorter((dp) => dp.user_count),
         },

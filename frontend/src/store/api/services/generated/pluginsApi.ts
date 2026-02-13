@@ -49,6 +49,7 @@ export type PlatformTile = {
   has_environments?: boolean;
   has_config?: boolean;
   children?: PlatformTile[];
+  show_in_form?: boolean;
 };
 export type PlatformTileResponse = {
   platform_tiles: PlatformTile[];
@@ -103,6 +104,7 @@ export type UiElementMetadataResponse = {
   icon_name: string;
   parent_platform?: string | null;
   platform_tile?: PlatformTile | null;
+  show_in_form?: boolean;
   detailed_name: string;
 };
 export type PluginResponse = {

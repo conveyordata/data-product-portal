@@ -1,14 +1,10 @@
-import { Flex, Form } from 'antd';
-import { useMemo } from 'react';
+import { Flex, Input } from 'antd';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Searchbar } from '@/components/form';
 import { DataOutputTable } from '@/pages/dataset/components/dataset-tabs/data-output-tab/components/data-output-table/data-output-table.component';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import type { DataOutputLink } from '@/types/dataset';
-import type { SearchForm } from '@/types/shared';
-
-import styles from './data-output-tab.module.scss';
 
 function filterDataOutputs(dataOutputLinks: DataOutputLink[], searchTerm: string) {
     return (
@@ -26,9 +22,7 @@ type Props = {
 export function DataOutputTab({ datasetId }: Props) {
     const { t } = useTranslation();
     const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
-
+    const [searchTerm, setSearchTerm] = useState<string>('');
     const datasetDataOutputs = useMemo(() => {
         return dataset?.data_output_links || [];
     }, [dataset?.data_output_links]);
@@ -38,13 +32,12 @@ export function DataOutputTab({ datasetId }: Props) {
     }, [datasetDataOutputs, searchTerm]);
 
     return (
-        <Flex vertical className={`${styles.container} ${filteredDataOutputs.length === 0 && styles.paginationGap}`}>
-            <Searchbar
+        <Flex vertical gap={'middle'}>
+            <Input.Search
                 placeholder={t('Search Technical Assets by name')}
-                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
-                form={searchForm}
+                allowClear
+                onChange={(e) => setSearchTerm(e.target.value)}
             />
-
             <DataOutputTable dataOutputs={filteredDataOutputs} isLoading={isLoading} datasetId={datasetId} />
         </Flex>
     );

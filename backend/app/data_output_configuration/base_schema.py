@@ -103,6 +103,7 @@ class PlatformMetadata(ORMModel):
     result_label: str = "Resulting output"
     result_tooltip: str = "The output you can access through this technical asset"
     detailed_name: str
+    show_in_form: bool = True
 
 
 class AssetProviderPlugin(ORMModel, ABC):
@@ -114,6 +115,11 @@ class AssetProviderPlugin(ORMModel, ABC):
 
     # Platform metadata - should be overridden in subclasses
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
+
+    @classmethod
+    def only_tile(cls) -> bool:
+        """Whether this plugin is only meant to be shown as a tile in the UI, without detailed configuration options. This can be used for platforms that don't have technical assets, but you still want to show in the UI."""
+        return False
 
     def render_template(self, template: str, **context: dict[str, Any]) -> str:
         """Render a template with configuration values. Template is fetched from db, context is filled with the full technical asset configuration + env info as dict."""

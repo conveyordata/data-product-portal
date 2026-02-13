@@ -29,7 +29,7 @@ export const DataProductsList = ({ dataProducts, isFetching, lastVisitedDataProd
             split
             loadMore={
                 dataProducts?.length ? (
-                    <Link to={ApplicationPaths.DataProducts}>
+                    <Link to={`${ApplicationPaths.Studio}#data-products`}>
                         <Button type={'link'}>{t('Show More')}</Button>
                     </Link>
                 ) : null
