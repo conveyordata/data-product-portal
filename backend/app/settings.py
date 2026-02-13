@@ -69,6 +69,12 @@ class Settings(BaseSettings):
     # Device flow cleanup buffer in minutes
     DEVICE_CODE_FLOW_EXPIRY_MINUTES: int = 30
 
+    ENABLED_PLUGINS: list[str] = [
+        "ConveyorPlugin",
+        "GlueTechnicalAssetConfiguration",
+        "S3TechnicalAssetConfiguration",
+    ]
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

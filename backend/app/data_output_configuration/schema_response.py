@@ -13,6 +13,7 @@ class PlatformTile(ORMModel):
     has_environments: bool = True
     has_config: bool = True
     children: list["PlatformTile"] = []
+    show_in_form: bool = True  # Whether to show this platform in the configuration form, can be set to False for platforms that are only meant to be shown as tiles without detailed configuration options
 
 
 class UIElementMetadataResponse(ORMModel):
@@ -27,6 +28,7 @@ class UIElementMetadataResponse(ORMModel):
     icon_name: str  # Icon filename (e.g., "s3-logo.svg")
     parent_platform: Optional[str] = None  # e.g., "aws" for s3, redshift, glue
     platform_tile: Optional[PlatformTile] = None  # Complete tile structure
+    show_in_form: bool = True  # Whether to show this platform in the configuration form, can be set to False for platforms that are only meant to be shown as tiles without detailed configuration options
     detailed_name: str
 
 
