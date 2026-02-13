@@ -8,8 +8,9 @@ echo "This will:"
 echo "  1. Stop all demo services"
 echo "  2. Remove all scaffolded data products"
 echo "  3. Clear MinIO S3 data"
-echo "  4. Remove Docker volumes"
-echo "  5. Reset to clean state"
+echo "  4. Clear rendered documentation"
+echo "  5. Remove Docker volumes"
+echo "  6. Reset to clean state"
 echo ""
 
 # Confirm before proceeding

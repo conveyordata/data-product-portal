@@ -65,3 +65,28 @@ services:
       - ROOT=TRUE
     volumes:
       - ./products:/home/rstudio/products
+
+  # Quarto documentation renderer
+  quarto:
+    build:
+      context: ./quarto
+      dockerfile: Dockerfile
+    volumes:
+      - ./products:/products
+      - quarto-rendered:/rendered
+    restart: unless-stopped
+
+  # Nginx server for rendered documentation
+  docs:
+    image: nginx:alpine
+    ports:
+      - "8888:8888"
+    volumes:
+      - quarto-rendered:/rendered:ro
+      - ./quarto/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - quarto
+    restart: unless-stopped
+
+volumes:
+  quarto-rendered:

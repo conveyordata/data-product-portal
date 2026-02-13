@@ -64,6 +64,7 @@ docker compose up
 This starts:
 - **rustfs** (S3): http://localhost:9000 (console: http://localhost:9001)
 - **Provisioner**: http://localhost:8090
+- **Documentation**: http://localhost:8888/docs (auto-rendered Quarto docs)
 - **Coder** (VS Code): http://localhost:8443 (password: `coder`)
 - **RStudio**: http://localhost:8787 (user: `rstudio`, password: `rstudio`)
 
@@ -80,6 +81,8 @@ This starts:
    - Create S3 bucket and prefix: `data-products/my-data-product`
    - Generate AWS-style credentials
    - Write `.env` file with S3 configuration
+   - Create `docs/` directory with Quarto documentation
+   - Render documentation to http://localhost:8888/docs/my-data-product
 
 ### 4. Open in Development Environment
 
@@ -111,8 +114,18 @@ products/
     ├── .gitignore
     ├── README.md
     ├── config.yaml          # SQLMesh configuration
-    └── models/
-        └── example.sql      # Example SQLMesh model
+    ├── models/              # SQLMesh models
+    │   ├── example_staging.py
+    │   └── example_data_mart.py
+    ├── docs/                # Quarto documentation
+    │   ├── _quarto.yml      # Quarto config
+    │   ├── index.qmd        # Homepage
+    │   ├── data-dictionary.qmd
+    │   ├── usage-guide.qmd
+    │   └── styles.css
+    ├── export_to_s3.py      # Export script
+    ├── run.sh               # Pipeline runner
+    └── test_s3_access.py    # S3 access tester
 ```
 
 ### `.env` Contents
@@ -226,11 +239,57 @@ S3_SECRET_KEY=minioadmin
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
-| Portal | http://localhost:8080 | Default login |
+| Portal | http://localhost:5050 | Default login |
 | Provisioner | http://localhost:8090 | N/A (webhook only) |
+| Documentation | http://localhost:8888/docs | N/A (public) |
 | S3 (MinIO UI) | http://localhost:9001 | minioadmin / minioadmin |
 | Coder (VS Code) | http://localhost:8443 | coder |
 | RStudio | http://localhost:8787 | rstudio / rstudio |
+
+## Documentation
+
+Each data product automatically gets Quarto documentation that is rendered and served at:
+- **All docs index**: http://localhost:8888/docs
+- **Specific data product**: http://localhost:8888/docs/{data-product-name}
+
+### What's Included
+
+Every scaffolded data product includes a `docs/` directory with:
+- **index.qmd** - Homepage with overview and quick start
+- **data-dictionary.qmd** - Schema and table documentation
+- **usage-guide.qmd** - Guide for consumers and providers
+- **_quarto.yml** - Quarto configuration
+- **styles.css** - Custom styling
+
+### How It Works
+
+1. **Auto-rendering**: The `quarto` container watches `/products` for changes
+2. **Detection**: When a data product is created with a `docs/` directory, it's detected
+3. **Rendering**: Quarto renders the docs to HTML
+4. **Serving**: Nginx serves the rendered docs at port 8888
+
+### Customizing Documentation
+
+Edit the `.qmd` files in your data product's `docs/` directory:
+
+```bash
+cd products/my-data-product/docs
+# Edit index.qmd, data-dictionary.qmd, etc.
+```
+
+The docs will automatically re-render when you save changes. Refresh your browser to see updates.
+
+### Adding Pages
+
+1. Create a new `.qmd` file in `docs/`
+2. Add it to the navbar in `_quarto.yml`:
+   ```yaml
+   navbar:
+     left:
+       - text: "My New Page"
+         href: my-new-page.qmd
+   ```
+3. The page will be automatically rendered
 
 ## Troubleshooting
 

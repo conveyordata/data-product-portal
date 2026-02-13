@@ -1,0 +1,50 @@
+---
+title: "Data Dictionary"
+---
+
+## Overview
+
+This page documents the schema and structure of tables in the **{{ cookiecutter.project_name }}** data product.
+
+## Tables
+
+### example_staging
+
+Staging table with initial data transformations.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER | Unique identifier |
+| name | VARCHAR | Record name |
+| created_at | TIMESTAMP | Creation timestamp |
+
+**Location**: `s3://{{ cookiecutter.s3_bucket }}/{{ cookiecutter.project_name }}/staging/example_staging/*.parquet`
+
+### example_data_mart
+
+Business-ready aggregated data.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| category | VARCHAR | Category name |
+| count | INTEGER | Number of records |
+| last_updated | TIMESTAMP | Last update time |
+
+**Location**: `s3://{{ cookiecutter.s3_bucket }}/{{ cookiecutter.project_name }}/data_mart/example_data_mart/*.parquet`
+
+## Data Lineage
+
+```{mermaid}
+flowchart TD
+    A[Source Data] --> B[example_staging]
+    B --> C[example_data_mart]
+```
+
+## Refresh Schedule
+
+- **Frequency**: On-demand
+- **Method**: `./run.sh` or SQLMesh plan + export
+
+## Data Quality
+
+Data quality checks are implemented in the SQLMesh models. See the model files in the `models/` directory for details.

@@ -1,0 +1,22 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "{{ cookiecutter.project_name }}"
+  navbar:
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Data Dictionary"
+        href: data-dictionary.qmd
+      - text: "Usage Guide"
+        href: usage-guide.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    code-fold: true
+    code-tools: true

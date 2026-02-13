@@ -1,0 +1,75 @@
+---
+title: "{{ cookiecutter.project_name }}"
+subtitle: "Data Product Documentation"
+---
+
+## Overview
+
+Welcome to the documentation for the **{{ cookiecutter.project_name }}** data product.
+
+This data product is built using [SQLMesh](https://sqlmesh.com/) and stores data on S3.
+
+## Quick Start
+
+### Running the Pipeline
+
+```bash
+# Run the SQLMesh pipeline
+./run.sh
+
+# Or manually:
+python -m sqlmesh plan --auto-apply
+python export_to_s3.py
+```
+
+### Accessing the Data
+
+Data is exported to S3 as Parquet files:
+
+- **S3 Bucket**: `{{ cookiecutter.s3_bucket }}`
+- **Prefix**: `{{ cookiecutter.project_name }}`
+- **Endpoint**: `{{ cookiecutter.s3_endpoint }}`
+
+### Example: Reading Data
+
+```python
+import duckdb
+
+# Configure DuckDB with S3 credentials
+con = duckdb.connect()
+con.execute("INSTALL httpfs; LOAD httpfs;")
+con.execute(f"SET s3_endpoint='{{ cookiecutter.s3_endpoint }}'")
+con.execute(f"SET s3_access_key_id='YOUR_ACCESS_KEY'")
+con.execute(f"SET s3_secret_access_key='YOUR_SECRET_KEY'")
+
+# Read from S3
+df = con.execute("""
+    SELECT * FROM read_parquet('s3://{{ cookiecutter.s3_bucket }}/{{ cookiecutter.project_name }}/data_mart/*.parquet')
+""").df()
+
+print(df.head())
+```
+
+## Architecture
+
+```{mermaid}
+flowchart LR
+    A[Raw Data] --> B[SQLMesh Models]
+    B --> C[Local DuckDB]
+    C --> D[Export Script]
+    D --> E[S3 Parquet Files]
+    E --> F[Consumers]
+```
+
+## Data Models
+
+This data product includes the following models:
+
+- **Staging**: `example_staging` - Initial data transformations
+- **Data Mart**: `example_data_mart` - Business-ready aggregated data
+
+See the [Data Dictionary](data-dictionary.qmd) for detailed schema information.
+
+## Support
+
+For questions or issues, please contact the data product owner.

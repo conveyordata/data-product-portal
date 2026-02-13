@@ -1,0 +1,32 @@
+/* Custom styles for the data product documentation */
+
+:root {
+    --primary-color: #0066cc;
+    --secondary-color: #6c757d;
+}
+
+.navbar {
+    background-color: var(--primary-color);
+}
+
+code {
+    background-color: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+pre {
+    background-color: #f8f9fa;
+    border-left: 4px solid var(--primary-color);
+    padding: 1rem;
+}
+
+table {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}

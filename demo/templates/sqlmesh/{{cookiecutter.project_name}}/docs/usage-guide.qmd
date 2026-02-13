@@ -1,0 +1,118 @@
+---
+title: "Usage Guide"
+---
+
+## For Data Consumers
+
+### Prerequisites
+
+To consume data from **{{ cookiecutter.project_name }}**, you need:
+
+1. **Access approval** - Request access via the Data Product Portal
+2. **S3 credentials** - Provided after approval
+3. **DuckDB or compatible tool** - For reading Parquet files
+
+### Step 1: Request Access
+
+1. Navigate to the output port in the Data Product Portal
+2. Click "Request Access" as your consuming data product
+3. Wait for the data product owner to approve
+
+### Step 2: Configure Credentials
+
+After approval, you'll receive S3 credentials. Add them to your `.env` file:
+
+```bash
+S3_ENDPOINT_HOST={{ cookiecutter.s3_endpoint }}
+S3_ACCESS_KEY=your-access-key
+S3_SECRET_KEY=your-secret-key
+```
+
+### Step 3: Read the Data
+
+Use the provided example script or integrate into your own pipeline:
+
+```python
+# See example_consumer_access.py for a complete example
+import duckdb
+import os
+
+con = duckdb.connect()
+con.execute("INSTALL httpfs; LOAD httpfs;")
+con.execute(f"SET s3_endpoint='{os.getenv('S3_ENDPOINT_HOST')}'")
+con.execute(f"SET s3_access_key_id='{os.getenv('S3_ACCESS_KEY')}'")
+con.execute(f"SET s3_secret_access_key='{os.getenv('S3_SECRET_KEY')}'")
+
+# Read staging data
+staging_df = con.execute("""
+    SELECT * FROM read_parquet('s3://{{ cookiecutter.s3_bucket }}/{{ cookiecutter.project_name }}/staging/*.parquet')
+    LIMIT 10
+""").df()
+
+# Read data mart
+mart_df = con.execute("""
+    SELECT * FROM read_parquet('s3://{{ cookiecutter.s3_bucket }}/{{ cookiecutter.project_name }}/data_mart/*.parquet')
+""").df()
+```
+
+## For Data Providers
+
+### Updating the Data
+
+To update the data in this data product:
+
+1. **Modify SQLMesh models** in the `models/` directory
+2. **Run the pipeline**:
+   ```bash
+   ./run.sh
+   # Choose: Run plan and export to S3
+   ```
+3. **Verify export**:
+   ```bash
+   # Check S3 for updated files
+   aws s3 ls s3://{{ cookiecutter.s3_bucket }}/{{ cookiecutter.project_name }}/ \
+       --endpoint-url={{ cookiecutter.s3_endpoint }}
+   ```
+
+### Managing Access
+
+Access is managed through the Data Product Portal:
+
+1. **View pending requests** in the portal
+2. **Approve or deny** access requests
+3. **Monitor usage** (if logging is enabled)
+
+### Adding New Tables
+
+To add a new table to this data product:
+
+1. Create a new SQLMesh model in `models/`
+2. Run `sqlmesh plan` to apply changes
+3. Run `export_to_s3.py` to export the new table
+4. Update this documentation with the new table schema
+
+## Troubleshooting
+
+### Access Denied Errors
+
+If you get `AccessDenied` errors:
+
+1. Verify your credentials are correct
+2. Check that access has been approved in the portal
+3. Ensure you're reading from the correct S3 prefix
+
+### Empty Results
+
+If queries return no data:
+
+1. Check that the data product owner has exported data to S3
+2. Verify the S3 path is correct
+3. Check the `ACCESSIBLE_DATA_PRODUCTS.txt` file for approved paths
+
+### Performance Issues
+
+For large datasets:
+
+1. Use partition pruning in your queries
+2. Read only the columns you need: `SELECT col1, col2 FROM ...`
+3. Consider using DuckDB's query optimization features
