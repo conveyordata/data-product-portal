@@ -21147,6 +21147,11 @@
             "type": "array",
             "title": "Children",
             "default": []
+          },
+          "show_in_form": {
+            "type": "boolean",
+            "title": "Show In Form",
+            "default": true
           }
         },
         "type": "object",
@@ -22643,6 +22648,11 @@
                 "type": "null"
               }
             ]
+          },
+          "show_in_form": {
+            "type": "boolean",
+            "title": "Show In Form",
+            "default": true
           },
           "detailed_name": {
             "type": "string",
