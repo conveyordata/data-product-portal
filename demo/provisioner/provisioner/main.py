@@ -471,6 +471,55 @@ def handle_create_data_product(payload: Dict[str, Any]):
             "message": f"Failed to scaffold project: {str(e)}",
         }
 
+    if data_product_details.get("namespace") == "contact-survey-data":
+        # Copy git project over into scaffolded project
+
+        # Auto-create the output port and output tables
+        try:
+            # This is a bit of a hack - we want to auto-create the output port and tables for the contact-survey-data since it's used in the consumer demo, but we don't want to do this for every data product created from the template
+            logging.info("Auto-creating output port and tables for contact-survey-data")
+            # Fetch assigned roles for dp to get owners
+
+            roles = (
+                requests.get(
+                    f"{portal_url}/api/v2/authz/role_assignments/data_product",
+                    params={"data_product_id": data_product_id},
+                )
+                .json()
+                .get("role_assignments", [])
+            )
+            owners = [
+                owner.get("user").get("id")
+                for owner in roles
+                if owner.get("role", {}).get("name", "").lower() == "owner"
+            ]
+            output_port_payload = {
+                "name": "Contact Survey Data Mart",
+                "namespace": f"{namespace}-output",
+                "description": "Output port for the Contact Survey Data data product",
+                "tag_ids": [],
+                "access_type": "restricted",
+                "lifecycle_id": "00000000-0000-0000-0000-000000000001",
+                "owners": owners,
+            }
+
+            output_port_url = (
+                f"{portal_url}/api/v2/data_products/{data_product_id}/output_ports"
+            )
+            logging.info(f"Creating data output port at {output_port_url}")
+
+            output_port_response = requests.post(
+                output_port_url, json=output_port_payload
+            )
+            output_port_response.raise_for_status()
+            logging.info(
+                f"Successfully created data output port for data product {data_product_id}."
+            )
+        except Exception as e:
+            logging.error(f"Failed to auto create output port and tables: {e}")
+            if hasattr(e, "response") and e.response is not None:
+                logging.error(f"Response body: {e.response.text}")
+
     # Update the data product lifecycle to "Ready" state (keeping existing logic)
     lifecycles = get_lifecycles()
     ready_lifecycle = next((lc for lc in lifecycles if lc.get("name") == "Ready"), None)
@@ -503,52 +552,52 @@ def handle_create_data_product(payload: Dict[str, Any]):
             if e.response is not None:
                 logging.error(f"Response body: {e.response.text}")
 
-    # Optionally create PostgreSQL output port (keeping existing logic)
-    configs = get_platform_service_configurations()
-    postgres_config = next(
-        (c for c in configs if c.get("service", {}).get("name") == "PostgreSQL"), None
-    )
+    # # Optionally create PostgreSQL output port (keeping existing logic)
+    # configs = get_platform_service_configurations()
+    # postgres_config = next(
+    #     (c for c in configs if c.get("service", {}).get("name") == "PostgreSQL"), None
+    # )
 
-    if postgres_config:
-        platform_id = postgres_config.get("platform", {}).get("id")
-        service_id = postgres_config.get("service", {}).get("id")
-        schema_name = data_product_details.get("namespace", "").replace("-", "_")
+    # if postgres_config:
+    #     platform_id = postgres_config.get("platform", {}).get("id")
+    #     service_id = postgres_config.get("service", {}).get("id")
+    #     schema_name = data_product_details.get("namespace", "").replace("-", "_")
 
-        output_port_payload = {
-            "name": data_product_details.get("name"),
-            "namespace": data_product_details.get("namespace"),
-            "description": data_product_details.get("description"),
-            "tag_ids": [],
-            "status": "active",
-            "sourceAligned": True,
-            "platform_id": platform_id,
-            "service_id": service_id,
-            "configuration": {
-                "configuration_type": "PostgreSQLDataOutput",
-                "database": "dpp_demo",
-                "schema": schema_name,
-                "entire_schema": True,
-            },
-            "result": f"dpp_demo.{schema_name}.*",
-        }
+    #     output_port_payload = {
+    #         "name": data_product_details.get("name"),
+    #         "namespace": data_product_details.get("namespace"),
+    #         "description": data_product_details.get("description"),
+    #         "tag_ids": [],
+    #         "status": "active",
+    #         "sourceAligned": True,
+    #         "platform_id": platform_id,
+    #         "service_id": service_id,
+    #         "configuration": {
+    #             "configuration_type": "PostgreSQLDataOutput",
+    #             "database": "dpp_demo",
+    #             "schema": schema_name,
+    #             "entire_schema": True,
+    #         },
+    #         "result": f"dpp_demo.{schema_name}.*",
+    #     }
 
-        try:
-            output_port_url = (
-                f"{portal_url}/api/data_products/{data_product_id}/data_output"
-            )
-            logging.info(f"Creating data output port at {output_port_url}")
+    #     try:
+    #         output_port_url = (
+    #             f"{portal_url}/api/data_products/{data_product_id}/data_output"
+    #         )
+    #         logging.info(f"Creating data output port at {output_port_url}")
 
-            output_port_response = requests.post(
-                output_port_url, json=output_port_payload
-            )
-            output_port_response.raise_for_status()
-            logging.info(
-                f"Successfully created data output port for data product {data_product_id}."
-            )
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to create data output port: {e}")
-            if e.response is not None:
-                logging.error(f"Response body: {e.response.text}")
+    #         output_port_response = requests.post(
+    #             output_port_url, json=output_port_payload
+    #         )
+    #         output_port_response.raise_for_status()
+    #         logging.info(
+    #             f"Successfully created data output port for data product {data_product_id}."
+    #         )
+    #     except requests.exceptions.RequestException as e:
+    #         logging.error(f"Failed to create data output port: {e}")
+    #         if e.response is not None:
+    #             logging.error(f"Response body: {e.response.text}")
 
     return {
         "status": "success",

@@ -21,7 +21,8 @@ docker compose up -d
 
 ### Step 1: Create Provider Data Product
 
-1. **Create first data product** (e.g., "survey-data")
+1. **Create first data product** (e.g., "Contact Survey Data")
+   - Must use Contact Survey Data to auto create the output port
    - Portal calls webhook: `POST /api/data_products`
    - Provisioner creates:
      - S3 prefix: `s3://data-products/survey-data/`
