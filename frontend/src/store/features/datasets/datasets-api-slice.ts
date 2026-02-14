@@ -18,11 +18,6 @@ import type { DatasetsSearchContract } from '@/types/dataset/datasets-search.con
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type { QueryParams } from '@/types/http.ts';
-import type {
-    NamespaceLengthLimitsResponse,
-    NamespaceSuggestionResponse,
-    NamespaceValidationResponse,
-} from '@/types/namespace/namespace';
 
 export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct, TagTypes.History];
 
@@ -160,26 +155,6 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 method: 'GET',
             }),
         }),
-        validateDatasetNamespace: builder.query<NamespaceValidationResponse, string>({
-            query: (namespace) => ({
-                url: ApiUrl.DatasetNamespaceValidation,
-                method: 'GET',
-                params: { namespace },
-            }),
-        }),
-        getDatasetNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
-            query: (name) => ({
-                url: ApiUrl.DatasetNamespaceSuggestion,
-                method: 'GET',
-                params: { name },
-            }),
-        }),
-        getDatasetNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
-            query: () => ({
-                url: ApiUrl.DatasetNamespaceLimits,
-                method: 'GET',
-            }),
-        }),
         getDatasetQueryStatsDaily: builder.query<
             DatasetQueryStatsDailyResponses,
             {
@@ -222,8 +197,5 @@ export const {
     useGetUserDatasetsQuery,
     useGetDatasetGraphDataQuery,
     useGetDatasetHistoryQuery,
-    useLazyGetDatasetNamespaceSuggestionQuery,
-    useLazyValidateDatasetNamespaceQuery,
-    useGetDatasetNamespaceLengthLimitsQuery,
     useGetDatasetQueryStatsDailyQuery,
 } = datasetsApiSlice;

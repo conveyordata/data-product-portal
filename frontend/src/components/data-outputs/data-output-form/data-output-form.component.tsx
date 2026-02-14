@@ -1,14 +1,13 @@
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Skeleton, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-
-import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { useResourceNameConstraintsQuery } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useGetDataOutputByIdQuery,
-    useGetDataOutputNamespaceLengthLimitsQuery,
     useRemoveDataOutputMutation,
     useUpdateDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
@@ -61,7 +60,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
 
     const isLoading = isFetchingInitialValues || isFetchingTags;
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
-    const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
+    const { data: constraints } = useResourceNameConstraintsQuery();
 
     const handleDeleteDataOutput = async () => {
         if (canDelete && currentDataOutput && dataProduct) {
@@ -157,12 +156,12 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             >
                 <Input />
             </Form.Item>
-            <NamespaceFormItem
+            <ResourceNameFormItem
                 form={form}
                 tooltip={t('The namespace of the Technical Asset')}
-                max_length={namespaceLengthLimits?.max_length}
+                max_length={constraints?.max_length}
                 editToggleDisabled
-                canEditNamespace={false}
+                canEditResourceName={false}
             />
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}

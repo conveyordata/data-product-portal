@@ -24,11 +24,6 @@ import type {
 } from '@/types/data-product';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
-import type {
-    NamespaceLengthLimitsResponse,
-    NamespaceSuggestionResponse,
-    NamespaceValidationResponse,
-} from '@/types/namespace/namespace';
 
 export const dataProductTags: string[] = [
     TagTypes.DataProduct,
@@ -234,36 +229,6 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.History as const, id: dataProductId },
             ],
         }),
-        validateDataProductNamespace: builder.query<NamespaceValidationResponse, string>({
-            query: (namespace) => ({
-                url: ApiUrl.DataProductNamespaceValidation,
-                method: 'GET',
-                params: { namespace },
-            }),
-        }),
-        getDataProductNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
-            query: (name) => ({
-                url: ApiUrl.DataProductNamespaceSuggestion,
-                method: 'GET',
-                params: { name },
-            }),
-        }),
-        getDataProductNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
-            query: () => ({
-                url: ApiUrl.DataProductNamespaceLimits,
-                method: 'GET',
-            }),
-        }),
-        validateDataOutputNamespace: builder.query<
-            NamespaceValidationResponse,
-            { dataProductId: string; namespace: string }
-        >({
-            query: ({ dataProductId, namespace }) => ({
-                url: buildUrl(ApiUrl.DataProductDataOutputNamespaceValidation, { dataProductId }),
-                method: 'GET',
-                params: { namespace },
-            }),
-        }),
     }),
     overrideExisting: false,
 });
@@ -285,8 +250,4 @@ export const {
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useGetDataProductHistoryQuery,
     useGetDataProductSnowflakeUrlMutation,
-    useLazyGetDataProductNamespaceSuggestionQuery,
-    useLazyValidateDataProductNamespaceQuery,
-    useGetDataProductNamespaceLengthLimitsQuery,
-    useLazyValidateDataOutputNamespaceQuery,
 } = dataProductsApiSlice;

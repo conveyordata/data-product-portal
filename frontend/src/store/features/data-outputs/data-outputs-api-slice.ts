@@ -18,7 +18,6 @@ import type {
 } from '@/types/data-output/data-output-update.contract';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
-import type { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
 import { baseApiSlice } from '../api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { datasetsApiSlice } from '../datasets/datasets-api-slice';
@@ -165,19 +164,6 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.History as const, id: arg.datasetId },
             ],
         }),
-        getDataOutputNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
-            query: (name) => ({
-                url: ApiUrl.DataOutputNamespaceSuggestion,
-                method: 'GET',
-                params: { name },
-            }),
-        }),
-        getDataOutputNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
-            query: () => ({
-                url: ApiUrl.DataOutputNamespaceLimits,
-                method: 'GET',
-            }),
-        }),
         getDataOutputResultString: builder.query<string, DataOutputResultStringRequest>({
             query: (data) => ({
                 url: ApiUrl.DataOutputResultString,
@@ -200,7 +186,5 @@ export const {
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
     useGetDataOutputHistoryQuery,
-    useGetDataOutputNamespaceLengthLimitsQuery,
-    useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,
 } = dataOutputsApiSlice;

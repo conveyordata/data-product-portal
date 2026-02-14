@@ -639,15 +639,15 @@ class TestTechnicalAssetsRouter:
 
     @staticmethod
     def get_namespace_suggestion(client: TestClient, name) -> Response:
-        return client.post(f"/api/v2/resource_names/sanitize?name={name}")
+        return client.get(f"/api/v2/resource_names/sanitize?name={name}")
 
     @staticmethod
     def get_namespace_validation(
         client: TestClient, namespace, data_product_id
     ) -> Response:
-        return client.post(
+        return client.get(
             "/api/v2/resource_names/validate",
-            json={
+            params={
                 "resource_name": namespace,
                 "model": "technical_asset",
                 "data_product_id": data_product_id,
