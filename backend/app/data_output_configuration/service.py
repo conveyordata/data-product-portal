@@ -56,10 +56,6 @@ class PluginService:
         """Build a complete metadata response for a plugin"""
         try:
             platform_meta = plugin_class.get_platform_metadata()
-            if plugin_class.only_tile():
-                raise NotImplementedError(
-                    "Plugin is only a tile, skipping detailed metadata"
-                )
             return UIElementMetadataResponse(
                 ui_metadata=plugin_class.get_ui_metadata(self.db),
                 plugin=plugin_class.__name__,
