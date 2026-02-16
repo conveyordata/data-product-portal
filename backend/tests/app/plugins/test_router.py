@@ -20,7 +20,7 @@ class TestPluginEndpoints:
         # Verify response structure
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 6
+        assert len(data["plugins"]) == 7
 
     def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
         """Test GET /v2/plugins returns list of all available plugins"""
