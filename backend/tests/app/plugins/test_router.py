@@ -71,9 +71,9 @@ class TestPluginEndpoints:
         # not configured = true
         assert (
             next(p for p in data["plugins"] if p["plugin"] == "ConveyorPlugin").get(
-                "not_configured", False
+                "show_in_form", True
             )
-            is True
+            is False
         )
 
     def test_list_plugins_includes_all_platforms(self, client: TestClient):
