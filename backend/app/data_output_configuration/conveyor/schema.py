@@ -19,8 +19,3 @@ class ConveyorPlugin(AssetProviderPlugin):
         detailed_name="Conveyor",
         show_in_form=False,
     )
-
-    @classmethod
-    def only_tile(cls) -> bool:
-        """Conveyor is currently only shown as a tile in the UI, as it doesn't have technical assets or detailed configuration options."""
-        return True
