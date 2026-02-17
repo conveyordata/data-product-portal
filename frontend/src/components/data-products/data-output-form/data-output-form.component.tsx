@@ -91,8 +91,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
     // Get platform tiles from backend
-    const { data: { platform_tiles: platformTilesData } = {} } = useGetPlatformTilesQuery();
-
+    const { data: { platform_tiles: platformTilesDataUnfiltered } = {} } = useGetPlatformTilesQuery();
+    const platformTilesData = useMemo(() => {
+        if (!platformTilesDataUnfiltered) {
+            return [];
+        }
+        // Filter out platforms that are not meant to be shown in the form
+        return platformTilesDataUnfiltered.filter((tile) => tile.show_in_form);
+    }, [platformTilesDataUnfiltered]);
     // Transform backend tiles to frontend format with icon components
     const dataPlatforms = useMemo(() => {
         if (!platformTilesData) {

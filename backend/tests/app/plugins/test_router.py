@@ -20,7 +20,7 @@ class TestPluginEndpoints:
         # Verify response structure
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 6
+        assert len(data["plugins"]) == 3
 
     def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
         """Test GET /v2/plugins returns list of all available plugins"""
@@ -69,14 +69,11 @@ class TestPluginEndpoints:
         }
         assert expected_plugins.issubset(plugin_names)
         # not configured = true
-        assert "RedshiftTechnicalAssetConfiguration" in plugin_names
         assert (
-            next(
-                p
-                for p in data["plugins"]
-                if p["plugin"] == "RedshiftTechnicalAssetConfiguration"
-            ).get("not_configured", False)
-            is True
+            next(p for p in data["plugins"] if p["plugin"] == "ConveyorPlugin").get(
+                "show_in_form", True
+            )
+            is False
         )
 
     def test_list_plugins_includes_all_platforms(self, client: TestClient):
@@ -105,9 +102,6 @@ class TestPluginEndpoints:
         expected_plugins = {
             "S3TechnicalAssetConfiguration",
             "GlueTechnicalAssetConfiguration",
-            "RedshiftTechnicalAssetConfiguration",
-            "SnowflakeTechnicalAssetConfiguration",
-            "DatabricksTechnicalAssetConfiguration",
         }
         assert expected_plugins.issubset(plugin_names)
 

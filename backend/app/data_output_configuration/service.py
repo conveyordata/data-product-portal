@@ -11,6 +11,7 @@ from app.data_output_configuration.schema_response import (
     UIElementMetadataResponse,
 )
 from app.platform_service_configurations.schema import PlatformServiceConfiguration
+from app.settings import settings
 
 
 class PluginService:
@@ -22,9 +23,15 @@ class PluginService:
     ) -> Sequence[UIElementMetadataResponse]:
         """Generate UI metadata for all registered data output types"""
         data_output_configurations = AssetProviderPlugin.__subclasses__()
+        configured_plugins = settings.ENABLED_PLUGINS
+        configured_metadata = [
+            name
+            for name in data_output_configurations
+            if name.__name__ in configured_plugins
+        ]
         return [
             metadata_response
-            for plugin in data_output_configurations
+            for plugin in configured_metadata
             if (metadata_response := self._build_metadata_response(plugin)) is not None
         ]
 
@@ -60,6 +67,7 @@ class PluginService:
                 has_environments=platform_meta.has_environments,
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,
+                show_in_form=platform_meta.show_in_form,
             )
         except NotImplementedError:
             return UIElementMetadataResponse(
@@ -70,6 +78,7 @@ class PluginService:
                 display_name=platform_meta.display_name,
                 icon_name=platform_meta.icon_name,
                 parent_platform=platform_meta.parent_platform,
+                show_in_form=platform_meta.show_in_form,
                 result_label=platform_meta.result_label,
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,
@@ -82,22 +91,9 @@ class PluginService:
         """Build the complete platform tile structure for the UI"""
         all_metadata = self.get_all_technical_assets_ui_metadata()
         # Filter to only configured platforms
-        configured_metadata = [
-            meta for meta in all_metadata if self._has_config(meta, configs)
-        ]
-        # Build tile hierarchy
-        return self._build_tile_hierarchy(configured_metadata)
 
-    def _has_config(
-        self,
-        meta: UIElementMetadataResponse,
-        configs: Sequence[PlatformServiceConfiguration],
-    ) -> bool:
-        """Check if a platform has configuration"""
-        return any(
-            config.service.name.lower() == meta.display_name.lower()
-            for config in configs
-        )
+        # Build tile hierarchy
+        return self._build_tile_hierarchy(all_metadata)
 
     def _build_tile_hierarchy(
         self, metadata_list: Sequence[UIElementMetadataResponse]
@@ -113,6 +109,7 @@ class PluginService:
                 icon_name=meta.icon_name,
                 has_environments=meta.has_environments,
                 has_config=True,
+                show_in_form=meta.show_in_form,
                 children=[],
             )
 
@@ -128,6 +125,7 @@ class PluginService:
                         icon_name=f"{meta.parent_platform}-logo.svg",
                         has_environments=True,
                         has_config=True,
+                        show_in_form=meta.show_in_form,
                         children=[],
                     )
             else:

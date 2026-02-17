@@ -17,4 +17,5 @@ class ConveyorPlugin(AssetProviderPlugin):
         parent_platform=None,
         has_environments=False,
         detailed_name="Conveyor",
+        show_in_form=False,
     )
