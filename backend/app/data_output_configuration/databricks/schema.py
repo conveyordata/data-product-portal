@@ -92,7 +92,7 @@ class DatabricksTechnicalAssetConfiguration(AssetProviderPlugin):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    f"Workspace not configured fordomain {data_product.domain.name}"
+                    f"Workspace not configured for domain {data_product.domain.name}"
                 ),
             )
         return config[str(data_product.domain_id)]
