@@ -88,7 +88,7 @@ export function DataProductsInbox({ userId }: Props) {
         <div className={styles.section}>
             <div className={styles.sectionTitle}>
                 <Typography.Title level={3}>{t('Data Products')}</Typography.Title>
-                <Link to={ApplicationPaths.DataProducts}>
+                <Link to={`${ApplicationPaths.Studio}#data-products`}>
                     <Button className={styles.formButton}>{t('See All')}</Button>
                 </Link>
             </div>

@@ -103,6 +103,7 @@ class PlatformMetadata(ORMModel):
     result_label: str = "Resulting output"
     result_tooltip: str = "The output you can access through this technical asset"
     detailed_name: str
+    show_in_form: bool = True
 
 
 class AssetProviderPlugin(ORMModel, ABC):

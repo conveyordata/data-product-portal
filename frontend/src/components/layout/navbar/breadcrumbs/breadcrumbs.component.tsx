@@ -1,6 +1,7 @@
 import {
     CompassOutlined,
     HomeOutlined,
+    ProductOutlined,
     ShopOutlined,
     ShoppingCartOutlined,
     TeamOutlined,
@@ -11,7 +12,6 @@ import type { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadc
 import { type ReactNode, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
-import { DataProductOutlined } from '@/components/icons';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
@@ -30,7 +30,10 @@ export const Breadcrumbs = () => {
     const { pathname } = useLocation();
     const params = useParams<DynamicPathParams>();
     const pathnames = useMemo(
-        () => (pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x)),
+        () =>
+            pathname === ApplicationPaths.Home
+                ? [ApplicationPaths.Home]
+                : pathname.split('/').filter((x) => x && x !== 'output-port'),
         [pathname],
     );
     const { dataProductId = '', datasetId = '', dataOutputId = '' } = params;
@@ -62,14 +65,13 @@ export const Breadcrumbs = () => {
                 path,
                 title: pathname,
             };
-
             switch (path) {
-                case ApplicationPaths.DataProducts:
+                case ApplicationPaths.Studio:
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space>
-                                <DataProductOutlined />
-                                {t('Data Products')}
+                                <ProductOutlined />
+                                {t('Product Studio')}
                             </Space>
                         ),
                     });
@@ -139,16 +141,16 @@ export const Breadcrumbs = () => {
                     Object.assign(breadcrumbItem, {
                         title: '',
                     });
-
                     // Case for Data Product and Output Port
                     if (
                         dataProduct &&
                         !isFetchingDataProduct &&
-                        pathnames.includes(ApplicationPaths.DataProducts.replace('/', ''))
+                        pathnames.includes(ApplicationPaths.Studio.replace('/', ''))
                     ) {
                         if (
                             isDataProductEditPage(path, dataProduct.id) ||
-                            (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id))
+                            (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id)) ||
+                            (dataset && isDatasetEditPage(path, dataset.id))
                         ) {
                             Object.assign(breadcrumbItem, {
                                 title: t('Edit'),
@@ -167,17 +169,31 @@ export const Breadcrumbs = () => {
                                     ),
                                 });
                             } else {
-                                Object.assign(breadcrumbItem, {
-                                    path: `${path}#${DataProductTabKeys.About}`,
-                                    title: (
-                                        <Typography.Text
-                                            ellipsis={{ tooltip: dataProduct.name }}
-                                            rootClassName={styles.title}
-                                        >
-                                            {dataProduct.name}
-                                        </Typography.Text>
-                                    ),
-                                });
+                                if (dataset && !isFetchingDataset && path.split('/').length === 4) {
+                                    Object.assign(breadcrumbItem, {
+                                        path: `${path}#${DatasetTabKeys.About}`,
+                                        title: (
+                                            <Typography.Text
+                                                ellipsis={{ tooltip: dataset.name }}
+                                                rootClassName={styles.title}
+                                            >
+                                                {dataset.name}
+                                            </Typography.Text>
+                                        ),
+                                    });
+                                } else {
+                                    Object.assign(breadcrumbItem, {
+                                        path: `${path}#${DataProductTabKeys.About}`,
+                                        title: (
+                                            <Typography.Text
+                                                ellipsis={{ tooltip: dataProduct.name }}
+                                                rootClassName={styles.title}
+                                            >
+                                                {dataProduct.name}
+                                            </Typography.Text>
+                                        ),
+                                    });
+                                }
                             }
                         }
                     }

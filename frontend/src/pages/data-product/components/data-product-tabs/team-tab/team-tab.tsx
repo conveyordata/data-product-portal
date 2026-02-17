@@ -1,9 +1,8 @@
-import { Button, Flex, Form } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Button, Flex, Input } from 'antd';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { Searchbar } from '@/components/form';
 import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
@@ -20,7 +19,6 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';
-import type { SearchForm } from '@/types/shared';
 import styles from './team-tab.module.scss';
 
 function filterUsers(
@@ -53,8 +51,7 @@ export function TeamTab({ dataProductId }: Props) {
     });
     const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateDataProductRoleAssignmentMutation();
 
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const [searchTerm, setSearchTerm] = useState<string>('');
     const { data: { roles: DATA_PRODUCT_ROLES = [] } = {} } = useGetRolesQuery(Scope.DATA_PRODUCT);
 
     const filteredUsers = useMemo(() => {
@@ -92,22 +89,17 @@ export function TeamTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical className={`${styles.container} ${filteredUsers.length === 0 && styles.paginationGap}`}>
-                <Searchbar
-                    form={searchForm}
-                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
-                    placeholder={t('Search users by email or name')}
-                    actionButton={
-                        <Button
-                            type={'primary'}
-                            className={styles.formButton}
-                            onClick={handleOpen}
-                            disabled={!canAddUser}
-                        >
-                            {t('Add User')}
-                        </Button>
-                    }
-                />
+            <Flex vertical gap={'middle'}>
+                <Flex gap={'small'}>
+                    <Input.Search
+                        placeholder={t('Search users by email or name')}
+                        allowClear
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Button type={'primary'} className={styles.formButton} onClick={handleOpen} disabled={!canAddUser}>
+                        {t('Add User')}
+                    </Button>
+                </Flex>
                 <TeamTable dataProductId={dataProductId} dataProductUsers={filteredUsers} />
             </Flex>
             {isVisible && (

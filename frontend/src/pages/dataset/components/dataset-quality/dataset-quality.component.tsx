@@ -1,18 +1,9 @@
-import {
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-    ExclamationCircleOutlined,
-    ExportOutlined,
-    QuestionCircleOutlined,
-} from '@ant-design/icons';
-import { Button, Flex, Tag, Typography } from 'antd';
+import { ExportOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-
-import {
-    type DataQualityStatus,
-    useGetLatestDataQualitySummaryForOutputPortQuery,
-} from '@/store/api/services/generated/outputPortDataQualityApi.ts';
+import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
+import { useGetLatestDataQualitySummaryForOutputPortQuery } from '@/store/api/services/generated/outputPortDataQualityApi.ts';
 
 interface Props {
     dataProductId: string;
@@ -28,63 +19,12 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
 
     if (isLoading) return null;
 
-    const getStatusIcon = (status: DataQualityStatus) => {
-        switch (status) {
-            case 'success':
-                return <CheckCircleOutlined />;
-            case 'failure':
-                return <CloseCircleOutlined />;
-            case 'warning':
-                return <QuestionCircleOutlined />;
-            case 'error':
-                return <ExclamationCircleOutlined />;
-            case 'unknown':
-                return <QuestionCircleOutlined />;
-        }
-    };
-
-    const getStatusColor = (status: DataQualityStatus) => {
-        switch (status) {
-            case 'success':
-                return 'success';
-            case 'failure':
-                return 'error';
-            case 'error':
-                return 'error';
-            case 'warning':
-                return 'warning';
-            case 'unknown':
-                return 'info';
-        }
-    };
-
-    function formatStatus(overall_status: DataQualityStatus) {
-        switch (overall_status) {
-            case 'success':
-                return 'Passed';
-            case 'failure':
-                return 'Failed';
-            case 'error':
-                return 'Error';
-            case 'warning':
-                return 'Warning';
-            case 'unknown':
-                return 'Unknown';
-        }
-    }
-
     return (
         <Flex vertical gap="small">
             <Typography.Title level={5}>{t('Quality Status')}</Typography.Title>
             {summary ? (
                 <Flex vertical gap="small" align="flex-start">
-                    <Tag
-                        icon={getStatusIcon(summary.overall_status)}
-                        color={getStatusColor(summary.overall_status)}
-                        variant={'outlined'}
-                    >
-                        {formatStatus(summary.overall_status)}
-                    </Tag>
+                    <QualityBadge quality_status={summary.overall_status} />
                     <Typography.Text type="secondary">
                         {formatDistanceToNow(new Date(summary.created_at), { addSuffix: true })}
                     </Typography.Text>

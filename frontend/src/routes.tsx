@@ -1,5 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v7';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, RouterProvider, useParams } from 'react-router';
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
 import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
@@ -9,7 +9,6 @@ import Cart from '@/pages/cart/cart.page.tsx';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
-import { DataProductsTable } from '@/pages/data-products/data-products-table.component.tsx';
 import { Dataset } from '@/pages/dataset/dataset.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
@@ -17,11 +16,18 @@ import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
 import { Marketplace } from '@/pages/marketplace/marketplace.page.tsx';
 import { PeoplePage } from '@/pages/people/people-table.component.tsx';
+import { ProductStudio } from '@/pages/product-studio/product-studio.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
 import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
+
+function DataProductsRedirect() {
+    const params = useParams();
+    const splatPath = params['*'] || '';
+    return <Navigate to={`/studio/${splatPath}`} replace />;
+}
 
 const router = createBrowserRouter([
     {
@@ -43,10 +49,10 @@ const router = createBrowserRouter([
                         index: true,
                     },
                     {
-                        path: ApplicationPaths.DataProducts,
+                        path: ApplicationPaths.Studio,
                         children: [
                             {
-                                element: <DataProductsTable />,
+                                element: <ProductStudio />,
                                 index: true,
                             },
                             {
@@ -69,7 +75,19 @@ const router = createBrowserRouter([
                                 path: ApplicationPaths.DataProductEdit,
                                 element: <DataProductEdit />,
                             },
+                            {
+                                path: ApplicationPaths.OutputPort,
+                                element: <Dataset />,
+                            },
+                            {
+                                path: ApplicationPaths.OutputPortEdit,
+                                element: <DatasetEdit />,
+                            },
                         ],
+                    },
+                    {
+                        path: `${ApplicationPaths.DataProducts}/*`,
+                        element: <DataProductsRedirect />,
                     },
                     {
                         path: ApplicationPaths.Marketplace,

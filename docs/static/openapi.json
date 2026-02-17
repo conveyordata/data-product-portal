@@ -17619,6 +17619,16 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
+          },
+          "quality_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataQualityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -17637,7 +17647,8 @@
           "data_product_settings",
           "data_output_links",
           "data_product_count",
-          "data_product_name"
+          "data_product_name",
+          "quality_status"
         ],
         "title": "DatasetsGet",
         "deprecated": true
@@ -20747,6 +20758,11 @@
             "type": "array",
             "title": "Children",
             "default": []
+          },
+          "show_in_form": {
+            "type": "boolean",
+            "title": "Show In Form",
+            "default": true
           }
         },
         "type": "object",
@@ -21425,6 +21441,16 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
+          },
+          "quality_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataQualityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -21443,7 +21469,8 @@
           "data_product_settings",
           "data_output_links",
           "data_product_count",
-          "data_product_name"
+          "data_product_name",
+          "quality_status"
         ],
         "title": "SearchDatasets",
         "deprecated": true
@@ -21546,6 +21573,16 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
+          },
+          "quality_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataQualityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -21564,7 +21601,8 @@
           "data_product_settings",
           "technical_asset_links",
           "data_product_count",
-          "data_product_name"
+          "data_product_name",
+          "quality_status"
         ],
         "title": "SearchOutputPortsResponseItem"
       },
@@ -22221,6 +22259,11 @@
                 "type": "null"
               }
             ]
+          },
+          "show_in_form": {
+            "type": "boolean",
+            "title": "Show In Form",
+            "default": true
           },
           "detailed_name": {
             "type": "string",

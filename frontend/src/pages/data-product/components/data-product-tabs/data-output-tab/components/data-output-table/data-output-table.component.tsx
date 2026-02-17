@@ -1,16 +1,13 @@
-import { Button, Flex, Form, Typography } from 'antd';
-import { useMemo } from 'react';
+import { Button, Flex, Input, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataOutputCard } from '@/components/data-outputs/data-output-card/data-output-card.component.tsx';
-import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
-import type { SearchForm } from '@/types/shared';
 import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup.tsx';
-import styles from './data-output-table.module.scss';
 
 type Props = {
     dataProductId: string;
@@ -30,8 +27,7 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
         },
         { skip: !dataProductId },
     );
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
     const filteredDataOutputs = useMemo(() => {
         if (!searchTerm) return dataOutputs;
@@ -72,10 +68,10 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                     </Button>
                 </Flex>
 
-                <Searchbar
+                <Input.Search
                     placeholder={t('Search Technical Assets by name or namespace')}
-                    formItemProps={{ initialValue: '', className: styles.searchBar }}
-                    form={searchForm}
+                    allowClear
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </Flex>
 

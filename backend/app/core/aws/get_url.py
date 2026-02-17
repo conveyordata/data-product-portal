@@ -1,5 +1,4 @@
 import json
-from urllib import parse
 from uuid import UUID
 
 import httpx
@@ -54,20 +53,27 @@ def get_aws_url(id: UUID, db: Session, actor: User, environment: str) -> str:
     }
     json_dump = json.dumps(url_credentials)
 
-aws_signin_url = "https://signin.aws.amazon.com/federation"
-r = httpx.get(aws_signin_url, params={
-    "Action": "getSigninToken",
-    "SessionDuration": 900,
-    "Session": json_dump
-})
+    aws_signin_url = "https://signin.aws.amazon.com/federation"
+    r = httpx.get(
+        aws_signin_url,
+        params={
+            "Action": "getSigninToken",
+            "SessionDuration": 900,
+            "Session": json_dump,
+        },
+    )
 
     signin_token = json.loads(r.text)
 
-    request = httpx.Request('GET', aws_signin_url, params={
-        "Action": "login",
-        "Issuer": settings.HOST,
-        "Destination": "https://console.aws.amazon.com/athena/home#/query-editor",
-        "SigninToken": signin_token["SigninToken"],
-    })
-    
+    request = httpx.Request(
+        "GET",
+        aws_signin_url,
+        params={
+            "Action": "login",
+            "Issuer": settings.HOST,
+            "Destination": "https://console.aws.amazon.com/athena/home#/query-editor",
+            "SigninToken": signin_token["SigninToken"],
+        },
+    )
+
     return str(request.url)
