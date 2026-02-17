@@ -54,13 +54,12 @@ def get_aws_url(id: UUID, db: Session, actor: User, environment: str) -> str:
     }
     json_dump = json.dumps(url_credentials)
 
-    request_parameters = "?Action=getSigninToken"
-    SESSION_DURATION = 900
-    request_parameters += f"&SessionDuration={SESSION_DURATION}"
-    request_parameters += f"&Session={parse.quote_plus(json_dump)}"
-    request_url = "https://signin.aws.amazon.com/federation" + request_parameters
-
-    r = httpx.get(request_url)
+aws_signin_url = "https://signin.aws.amazon.com/federation"
+r = httpx.get(aws_signin_url, params={
+    "Action": "getSigninToken",
+    "SessionDuration": 900,
+    "Session": json_dump
+})
 
     signin_token = json.loads(r.text)
 
