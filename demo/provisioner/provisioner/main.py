@@ -1236,7 +1236,8 @@ def bootstrap_demo_data_product():
         "domain_id": "623e6fbf-3a06-434e-995c-b0336e71806e",
         "tag_ids": [],
         "owners": [
-            "b72fca38-17ff-4259-a075-5aaa5973343c"  # Assuming this is the admin user
+            "b72fca38-17ff-4259-a075-5aaa5973343c",
+            "d9f3aae2-391e-46c1-aec6-a7ae1114a7da",
         ],
     }
 
@@ -1259,6 +1260,13 @@ def bootstrap_demo_data_product():
             },
         )
 
+        requests.post(
+            f"{portal_url}/api/v2/data_products/eb8bb332-b05e-4529-af43-90f69a6a90bc/output_ports/eb8bb332-b05e-4529-af43-90f69a6a90bb/input_ports/approve",
+            json={
+                "consuming_data_product_id": data_product_id,
+            },
+        )
+
         response = requests.post(
             f"{portal_url}/api/v2/data_products/{data_product_id}/output_ports",
             json={
@@ -1266,11 +1274,29 @@ def bootstrap_demo_data_product():
                 "namespace": "cleaned-respondent-data",
                 "description": "Output port containing cleaned respondent-level data from the CoMix survey, including demographics and contact events",
                 "tag_ids": [],
+                "about": "<h1>Cleaned Respondent Data</h1><p>This output port provides access to the cleaned and validated respondent-level data from the CoMix survey. It includes demographic information, contact events, protective behaviors, and contextual data for each survey participant.</p><h3>Last Refreshed</h3><p>2026-03-26</p><h3>Schema</h3><ul><li><strong>respondent_id</strong>: Unique identifier for each survey respondent</li><li><strong>age_group</strong>: Age group of the respondent (e.g., 18-29, 30-39)</li><li><strong>household_size</strong>: Number of people in the respondent's household</li><li><strong>employment_status</strong>: Employment status (e.g., employed, unemployed, student)</li><li><strong>geographic_region</strong>: Geographic region of residence</li><li><strong>contact_events</strong>: Nested data structure containing details of each contact event reported by the respondent, including duration, location, physical contact, and conversation details</li><li><strong>protective_measures</strong>: Self-reported use of protective behaviors such as mask wearing and social distancing</li></ul>",
                 "access_type": "restricted",
                 "lifecycle_id": "00000000-0000-0000-0000-000000000001",
                 "owners": [
                     "b72fca38-17ff-4259-a075-5aaa5973343c"  # Assuming this is the admin user
                 ],
+            },
+        )
+
+        response = requests.get(
+            f"{portal_url}/api/v2/authz/role_assignments/data_product",
+            params={
+                "data_product_id": data_product_id,
+                "user_id": "b72fca38-17ff-4259-a075-5aaa5973343c",  # admin user
+                "role_id": "e43b6f7a-e776-49b2-9b51-117d8644d971",
+            },
+        )
+        requests.put(
+            f"{portal_url}/api/v2/authz/role_assignments/data_product/{response.json().get('role_assignments')[0].get('id')}",
+            json={
+                "data_product_id": data_product_id,
+                "user_id": "b72fca38-17ff-4259-a075-5aaa5973343c",
+                "role_id": "9ca3bfdd-2919-4190-a8bb-55e9ee7d70dd",
             },
         )
 

@@ -30,4 +30,4 @@ class RstudioPlugin(AssetProviderPlugin):
         cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
     ) -> str:
         data_product = db.get(DataProductModel, id)
-        return f"http://localhost:8787/?folder=/home/coder/workspace/products/{data_product.namespace}"
+        return f"http://localhost:8787?path=/home/rstudio/products/{data_product.namespace}"

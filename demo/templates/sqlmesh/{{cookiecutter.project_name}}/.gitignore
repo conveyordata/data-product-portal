@@ -17,6 +17,14 @@ venv/
 .env
 .env.local
 
+# R
+.Rhistory
+.RData
+.Rproj.user/
+.r_setup_complete
+*.Rcheck/
+*.tar.gz
+
 # IDE
 .vscode/
 .idea/
