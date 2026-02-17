@@ -4,11 +4,13 @@ from .databricks.schema import DatabricksTechnicalAssetConfiguration
 from .glue.schema import GlueTechnicalAssetConfiguration
 from .quarto.schema import QuartoPlugin
 from .redshift.schema import RedshiftTechnicalAssetConfiguration
+from .rstudio.schema import RstudioPlugin
 from .s3.schema import S3TechnicalAssetConfiguration
 from .snowflake.schema import SnowflakeTechnicalAssetConfiguration
 
 __all__ = [
     "CoderPlugin",
+    "RstudioPlugin",
     "ConveyorPlugin",
     "DatabricksTechnicalAssetConfiguration",
     "GlueTechnicalAssetConfiguration",

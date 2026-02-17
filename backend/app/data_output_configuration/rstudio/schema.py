@@ -11,17 +11,17 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.users.schema import User
 
 
-class CoderPlugin(AssetProviderPlugin):
-    name: ClassVar[str] = "CoderPlatform"
+class RstudioPlugin(AssetProviderPlugin):
+    name: ClassVar[str] = "RstudioPlugin"
     version: ClassVar[str] = "1.0"
 
     _platform_metadata = PlatformMetadata(
-        display_name="VS Code",
-        icon_name="coder-logo.svg",
-        platform_key="coder",
+        display_name="R Studio",
+        icon_name="rstudio-logo.svg",
+        platform_key="rstudio",
         parent_platform=None,
         has_environments=False,
-        detailed_name="VS Code - Coder",
+        detailed_name="R Studio - RStudio",
         show_in_form=False,
     )
 
@@ -30,4 +30,4 @@ class CoderPlugin(AssetProviderPlugin):
         cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
     ) -> str:
         data_product = db.get(DataProductModel, id)
-        return f"http://localhost:8443/?folder=/home/coder/workspace/products/{data_product.namespace}"
+        return f"http://localhost:8787/?folder=/home/coder/workspace/products/{data_product.namespace}"

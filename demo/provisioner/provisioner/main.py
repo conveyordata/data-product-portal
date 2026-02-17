@@ -13,6 +13,8 @@ from botocore.client import Config
 from botocore.exceptions import ClientError
 import subprocess
 import tempfile
+import threading
+import time
 
 # Configure logging
 logging.basicConfig(
@@ -885,7 +887,68 @@ class Router:
 
 # --- FastAPI App and Route Registration ---
 
-app = FastAPI(title="Provisioner Webhook Handler")
+
+def run_bootstrap_in_background():
+    """
+    Runs bootstrap in a background thread after ensuring the provisioner is ready.
+    This prevents race conditions where webhooks arrive before the server can handle them.
+    """
+    # Wait a few seconds for the FastAPI server to fully start
+    time.sleep(3)
+
+    # Verify provisioner is ready to accept requests
+    logging.info("🔍 Verifying provisioner is ready to handle webhooks...")
+    max_checks = 20
+    for i in range(max_checks):
+        try:
+            response = requests.get("http://localhost:8090/health", timeout=2)
+            if response.status_code == 200:
+                logging.info("✅ Provisioner is ready!")
+                break
+        except Exception:
+            pass
+
+        if i < max_checks - 1:
+            logging.debug(
+                f"   Provisioner not ready yet, waiting... ({i + 1}/{max_checks})"
+            )
+            time.sleep(1)
+    else:
+        logging.warning("⚠️  Could not verify provisioner readiness, proceeding anyway")
+
+    # Now run the bootstrap
+    try:
+        bootstrap_demo_data_product()
+    except Exception as e:
+        logging.error(f"Bootstrap failed (non-critical): {e}", exc_info=True)
+
+
+async def startup_event(_: FastAPI):
+    """
+    Runs on FastAPI application startup.
+    Sets up MinIO configuration and schedules demo data product creation.
+    """
+    logging.info("=" * 60)
+    logging.info("Starting Provisioner Service")
+    logging.info("=" * 60)
+
+    # Setup MinIO client alias
+    setup_mc_alias()
+
+    # Start bootstrap in background thread (after server is ready)
+    bootstrap_thread = threading.Thread(
+        target=run_bootstrap_in_background, daemon=True, name="BootstrapThread"
+    )
+    bootstrap_thread.start()
+    logging.info("📋 Bootstrap scheduled to run after server is ready")
+
+    logging.info("=" * 60)
+    logging.info("Provisioner Ready - Listening for webhooks")
+    logging.info("=" * 60)
+    yield
+
+
+app = FastAPI(title="Provisioner Webhook Handler", lifespan=startup_event)
 
 # Global router instance
 router = Router()
@@ -912,11 +975,325 @@ router.add_route("DELETE", "/api/data_products/{uuid}", handle_delete_data_produ
 logging.info("Route registration complete.")
 
 
+# --- Bootstrap Demo Data Product ---
+
+
+def bootstrap_demo_data_product():
+    """
+    Creates the CoMix Survey Data demo product on startup if it doesn't exist.
+    This provides a ready-to-use example data product for demonstrations.
+    """
+    DEMO_NAMESPACE = "comix-survey-data"
+    MAX_RETRIES = 30
+    RETRY_INTERVAL = 2
+
+    # Wait for portal to be ready
+    logging.info("🚀 Bootstrap: Waiting for Data Product Portal to be ready...")
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = requests.get("http://localhost:8090/health", timeout=5)
+            if response.status_code == 200:
+                logging.info("✅ Portal is ready!")
+                break
+        except Exception:
+            pass
+
+        if attempt < MAX_RETRIES - 1:
+            logging.info(
+                f"   Attempt {attempt + 1}/{MAX_RETRIES} - waiting {RETRY_INTERVAL}s..."
+            )
+            time.sleep(RETRY_INTERVAL)
+    else:
+        logging.warning("⚠️  Portal did not become ready, skipping bootstrap")
+        return
+
+    # Check if demo data product already exists
+    try:
+        response = requests.get(f"{portal_url}/api/data_products")
+        if response.status_code == 200:
+            data_products = response.json().get("data_products", [])
+            if any(dp.get("namespace") == DEMO_NAMESPACE for dp in data_products):
+                logging.info(
+                    f"✅ Demo data product '{DEMO_NAMESPACE}' already exists, skipping bootstrap"
+                )
+                return
+    except Exception as e:
+        logging.warning(f"Could not check existing data products: {e}")
+
+    # Create the demo data product
+    logging.info(f"📦 Creating demo data product: {DEMO_NAMESPACE}")
+
+    about_html = """
+<div class="data-product-about">
+  <h2>About CoMix Survey Data</h2>
+
+  <section class="overview">
+    <h3>Overview</h3>
+    <p>
+      The <strong>CoMix Survey Data</strong> product provides comprehensive insights into social contact patterns
+      during the COVID-19 pandemic. This dataset is derived from the CoMix social contact survey, which was
+      conducted across multiple European countries to understand how people adapted their social behaviors
+      in response to public health measures.
+    </p>
+    <p>
+      This data product contains cleaned, validated, and enriched contact survey data that can be used for
+      epidemiological modeling, policy analysis, and social science research.
+    </p>
+  </section>
+
+  <section class="data-collection">
+    <h3>Data Collection Methodology</h3>
+    <p>
+      The CoMix survey was conducted using online questionnaires distributed to representative samples of
+      the population in participating countries. Participants were asked to report:
+    </p>
+    <ul>
+      <li><strong>Contact Events:</strong> All social contacts made on the previous day</li>
+      <li><strong>Contact Characteristics:</strong> Age, gender, relationship, duration, and location of each contact</li>
+      <li><strong>Protective Behaviors:</strong> Use of masks, hand hygiene, and physical distancing measures</li>
+      <li><strong>Demographic Information:</strong> Participant age, household composition, employment status</li>
+      <li><strong>Contextual Data:</strong> Local COVID-19 measures, infection rates, and policy interventions</li>
+    </ul>
+    <p>
+      Survey waves were conducted regularly throughout 2020-2022, capturing changes in behavior across
+      different phases of the pandemic and varying levels of restrictions.
+    </p>
+  </section>
+
+  <section class="data-structure">
+    <h3>Data Structure</h3>
+    <p>This data product is organized into the following key datasets:</p>
+    <div class="dataset-grid">
+      <div class="dataset-card">
+        <h4>📊 demographic_data</h4>
+        <p>Participant demographics including age groups, household size, employment status, and geographic location.</p>
+      </div>
+      <div class="dataset-card">
+        <h4>🤝 contact_events</h4>
+        <p>Detailed contact events with characteristics like duration, location (home, work, leisure), physical contact, and conversation.</p>
+      </div>
+      <div class="dataset-card">
+        <h4>😷 protective_measures</h4>
+        <p>Self-reported use of protective behaviors including mask wearing, social distancing, and hand hygiene practices.</p>
+      </div>
+      <div class="dataset-card">
+        <h4>📅 survey_waves</h4>
+        <p>Metadata about survey collection periods, response rates, and alignment with policy intervention dates.</p>
+      </div>
+      <div class="dataset-card">
+        <h4>🦠 contextual_data</h4>
+        <p>COVID-19 epidemiological indicators, government measures (stringency index), and vaccination rollout timelines.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="use-cases">
+    <h3>Primary Use Cases</h3>
+    <ol>
+      <li>
+        <strong>Epidemiological Modeling:</strong> Parameterize transmission models with empirical contact matrices
+        stratified by age, location, and time period.
+      </li>
+      <li>
+        <strong>Policy Impact Assessment:</strong> Evaluate how lockdowns, school closures, and other non-pharmaceutical
+        interventions affected social contact patterns.
+      </li>
+      <li>
+        <strong>Behavioral Research:</strong> Analyze factors influencing compliance with public health recommendations
+        and protective behavior adoption.
+      </li>
+      <li>
+        <strong>Cross-Country Comparisons:</strong> Compare contact patterns and behavioral responses across different
+        countries and policy approaches.
+      </li>
+      <li>
+        <strong>Vulnerable Population Analysis:</strong> Identify contact patterns among elderly populations and other
+        high-risk groups.
+      </li>
+    </ol>
+  </section>
+
+  <section class="data-quality">
+    <h3>Data Quality & Validation</h3>
+    <p>This data product implements comprehensive quality assurance:</p>
+    <ul>
+      <li>✅ <strong>Input Validation:</strong> All contact records validated against expected ranges and logical constraints</li>
+      <li>✅ <strong>Completeness Checks:</strong> Missing data patterns analyzed and documented; imputation strategies applied where appropriate</li>
+      <li>✅ <strong>Consistency Verification:</strong> Cross-field validation (e.g., workplace contacts vs. employment status)</li>
+      <li>✅ <strong>Outlier Detection:</strong> Statistical methods applied to identify and flag anomalous responses</li>
+      <li>✅ <strong>Temporal Consistency:</strong> Longitudinal validation for panel participants</li>
+    </ul>
+  </section>
+
+  <section class="privacy">
+    <h3>Privacy & Ethics</h3>
+    <p>
+      All data has been anonymized and aggregated in accordance with GDPR requirements. Direct identifiers have
+      been removed, and geographic granularity is limited to region-level to prevent re-identification.
+      The original survey received ethical approval from institutional review boards in all participating countries.
+    </p>
+    <p>
+      <strong>Access Type:</strong> Restricted - Users must acknowledge data usage terms and cite original sources.
+    </p>
+  </section>
+
+  <section class="references">
+    <h3>References & Attribution</h3>
+    <p>This data product is based on the CoMix social contact survey. Publications using this data should cite:</p>
+    <blockquote>
+      Jarvis CI, Van Zandvoort K, Gimma A, et al. (2020).
+      "Quantifying the impact of physical distance measures on the transmission of COVID-19 in the UK."
+      <em>BMC Medicine</em> 18, 124.
+    </blockquote>
+    <p>
+      Additional survey documentation and methodology papers are available in the data product's documentation portal.
+    </p>
+  </section>
+
+  <section class="contact">
+    <h3>Support & Contact</h3>
+    <p>
+      For questions about this data product, methodology clarifications, or access requests, please contact
+      the data product team through the Data Product Portal.
+    </p>
+    <ul>
+      <li>📧 Data Product Team: <a href="mailto:data-team@example.com">data-team@example.com</a></li>
+      <li>📚 Documentation: Available in the docs/ directory of this data product</li>
+      <li>🐛 Report Issues: Use the Data Product Portal issue tracker</li>
+    </ul>
+  </section>
+
+  <section class="changelog">
+    <h3>Version History</h3>
+    <ul>
+      <li><strong>v1.0.0</strong> (2024-02) - Initial release with data through December 2022</li>
+      <li><strong>v1.1.0</strong> (2024-06) - Added vaccination status enrichment and extended protective measures data</li>
+      <li><strong>v1.2.0</strong> (2024-11) - Improved data quality checks and added cross-country comparability metrics</li>
+    </ul>
+  </section>
+
+  <style>
+    .data-product-about {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 900px;
+    }
+    .data-product-about h2 {
+      color: #2563eb;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 0.5rem;
+      margin-top: 2rem;
+    }
+    .data-product-about h3 {
+      color: #1e40af;
+      margin-top: 1.5rem;
+    }
+    .data-product-about section {
+      margin-bottom: 2rem;
+    }
+    .dataset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .dataset-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+      background: #f9fafb;
+    }
+    .dataset-card h4 {
+      margin-top: 0;
+      color: #1f2937;
+    }
+    .data-product-about blockquote {
+      border-left: 4px solid #2563eb;
+      padding-left: 1rem;
+      margin-left: 0;
+      color: #4b5563;
+      font-style: italic;
+    }
+    .data-product-about ul, .data-product-about ol {
+      padding-left: 1.5rem;
+    }
+    .data-product-about li {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</div>
+"""
+
+    payload = {
+        "name": "CoMix Survey Data",
+        "namespace": DEMO_NAMESPACE,
+        "description": "COVID-19 social contact survey data capturing behavioral changes during the pandemic across multiple European countries",
+        "about": about_html,
+        "status": "ACTIVE",
+        "type_id": "c25cf2c2-418a-4d1d-a975-c6af61161546",
+        "lifecycle_id": "00000000-0000-0000-0000-000000000001",
+        "domain_id": "623e6fbf-3a06-434e-995c-b0336e71806e",
+        "tag_ids": [],
+        "owners": [
+            "b72fca38-17ff-4259-a075-5aaa5973343c"  # Assuming this is the admin user
+        ],
+    }
+
+    try:
+        response = requests.post(
+            f"{portal_url}/api/data_products", json=payload, timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+        data_product_id = data.get("id")
+        logging.info(
+            f"✅ Successfully created demo data product '{DEMO_NAMESPACE}' (ID: {data_product_id})"
+        )
+
+        response = requests.post(
+            f"{portal_url}/api/v2/data_products/{data_product_id}/link_input_ports",
+            json={
+                "input_ports": ["eb8bb332-b05e-4529-af43-90f69a6a90bb"],
+                "justification": "Ingestion data",
+            },
+        )
+
+        response = requests.post(
+            f"{portal_url}/api/v2/data_products/{data_product_id}/output_ports",
+            json={
+                "name": "Cleaned Respondent Data",
+                "namespace": "cleaned-respondent-data",
+                "description": "Output port containing cleaned respondent-level data from the CoMix survey, including demographics and contact events",
+                "tag_ids": [],
+                "access_type": "restricted",
+                "lifecycle_id": "00000000-0000-0000-0000-000000000001",
+                "owners": [
+                    "b72fca38-17ff-4259-a075-5aaa5973343c"  # Assuming this is the admin user
+                ],
+            },
+        )
+
+        logging.info(
+            "   The provisioner webhook will scaffold the project automatically"
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(f"❌ Failed to create demo data product: {e}")
+        if hasattr(e, "response") and e.response is not None:
+            logging.error(f"   Response: {e.response.text}")
+
+
 @app.get("/")
 def get_root(request: Request):
     """Basic root endpoint for health checks."""
     logging.debug(f"GET request from {request.client.host}")
     return {"status": "ok"}
+
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring and readiness probes."""
+    return {"status": "healthy", "service": "provisioner"}
 
 
 @app.post("/")

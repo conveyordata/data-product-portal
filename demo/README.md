@@ -68,7 +68,23 @@ This starts:
 - **Coder** (VS Code): http://localhost:8443 (password: `coder`)
 - **RStudio**: http://localhost:8787 (user: `rstudio`, password: `rstudio`)
 
-### 3. Create a Data Product in Portal
+### 3. Demo Data Product (Auto-Created)
+
+When the provisioner starts, it automatically creates the **CoMix Survey Data** demo product with:
+- Comprehensive COVID-19 social contact survey data
+- Extensive about/documentation section
+- Auto-scaffolded SQLMesh project
+- S3 credentials and configuration
+- Quarto documentation
+
+Check the provisioner logs to see the bootstrap:
+```bash
+docker compose logs -f provisioner
+```
+
+**Creating Additional Data Products**
+
+To create more data products manually:
 
 1. Open the portal at http://localhost:8080
 2. Create a new data product with:
