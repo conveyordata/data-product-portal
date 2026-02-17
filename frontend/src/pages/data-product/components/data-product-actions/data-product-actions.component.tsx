@@ -89,7 +89,6 @@ export function DataProductActions({ dataProductId }: Props) {
         return null;
     }
 
-    // TODO: This function should make use of the environment string. If the environment string is available (i.e. Not conveyor) then the direct tile click should be disabled.
     async function handleAccessToData(_environment: string, dataPlatform: string) {
         posthog.capture(PosthogEvents.DATA_PRODUCTS_PLATFORM_ACCESS, {
             platform_name: dataPlatform,
