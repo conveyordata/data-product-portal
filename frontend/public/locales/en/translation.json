@@ -13,6 +13,7 @@
     "Failed to unlink Output Port": "Failed to unlink Output Port",
     "Are you sure you want to delete this Technical Asset? This asset is still used in the following Output Ports:": "Are you sure you want to delete this Technical Asset? This asset is still used in the following Output Ports:",
     "Are you sure you want to delete this Technical Asset? This can have impact on downstream dependencies": "Are you sure you want to delete this Technical Asset? This can have impact on downstream dependencies",
+    "This technical asset is in pending state, please consult your platform administrator to activate it": "This technical asset is in pending state, please consult your platform administrator to activate it",
     "Remove Technical Asset": "Remove Technical Asset",
     "Confirm": "Confirm",
     "Cancel": "Cancel",
