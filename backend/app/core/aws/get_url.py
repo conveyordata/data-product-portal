@@ -63,11 +63,11 @@ r = httpx.get(aws_signin_url, params={
 
     signin_token = json.loads(r.text)
 
-    request_parameters = "?Action=login"
-    request_parameters += f"&Issuer={settings.HOST}"
-    athena_link = "https://console.aws.amazon.com/athena/home#/query-editor"
-    request_parameters += f"&Destination={parse.quote_plus(athena_link)}"
-    request_parameters += f"&SigninToken={signin_token['SigninToken']}"
-    request_url = "https://signin.aws.amazon.com/federation" + request_parameters
-
-    return request_url
+    request = httpx.Request('GET', aws_signin_url, params={
+        "Action": "login",
+        "Issuer": settings.HOST,
+        "Destination": "https://console.aws.amazon.com/athena/home#/query-editor",
+        "SigninToken": signin_token["SigninToken"],
+    })
+    
+    return str(request.url)
