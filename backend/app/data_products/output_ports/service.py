@@ -21,7 +21,6 @@ from app.core.authz import Authorization
 from app.core.embed.model import EMBEDDING_MODEL
 from app.core.namespace.validation import (
     NamespaceValidator,
-    NamespaceValidityType,
 )
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
@@ -51,6 +50,7 @@ from app.data_products.technical_assets.model import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.resource_names.service import ResourceNameValidityType
 from app.search_output_ports.schema_response import SearchDatasets
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -275,7 +275,7 @@ class OutputPortService:
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, self.db
             ).validity
-        ) != NamespaceValidityType.VALID:
+        ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
@@ -322,7 +322,7 @@ class OutputPortService:
                     dataset.namespace, self.db
                 ).validity
             )
-            != NamespaceValidityType.VALID
+            != ResourceNameValidityType.VALID
         ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

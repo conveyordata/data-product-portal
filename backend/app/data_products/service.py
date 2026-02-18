@@ -20,7 +20,6 @@ from app.configuration.tags.schema import Tag
 from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.namespace.validation import (
     NamespaceValidator,
-    NamespaceValidityType,
     TechnicalAssetNamespaceValidator,
 )
 from app.data_products.model import DataProduct as DataProductModel
@@ -56,7 +55,7 @@ from app.data_products.technical_assets.schema_response import DataOutputGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.resource_names.service import ResourceNameService
+from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -207,7 +206,7 @@ class DataProductService:
             validity := ResourceNameService(model=DataProductModel)
             .validate_resource_name(data_product.namespace, self.db)
             .validity
-        ) != NamespaceValidityType.VALID:
+        ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
@@ -249,7 +248,7 @@ class DataProductService:
                 .validate_resource_name(data_product.namespace, self.db)
                 .validity
             )
-            != NamespaceValidityType.VALID
+            != ResourceNameValidityType.VALID
         ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

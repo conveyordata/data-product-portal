@@ -13,7 +13,6 @@ from app.configuration.platforms.platform_services.model import PlatformService
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
-    NamespaceValidityType,
     TechnicalAssetNamespaceValidator,
 )
 from app.data_products.model import DataProduct as DataProductModel
@@ -42,6 +41,7 @@ from app.data_products.technical_assets.schema_response import (
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.graph.graph import Graph
+from app.resource_names.service import ResourceNameValidityType
 from app.users.schema import User
 
 
@@ -96,7 +96,7 @@ class DataOutputService:
             validity := self.namespace_validator.validate_namespace(
                 data_output.namespace, self.db, id
             ).validity
-        ) != NamespaceValidityType.VALID:
+        ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
@@ -182,6 +182,11 @@ class DataOutputService:
             options=[selectinload(DatasetModel.data_product_links)],
         )
         data_output = self.get_data_output(data_product_id, id)
+        if data_output.status != TechnicalAssetStatus.ACTIVE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot link technical asset that is not active",
+            )
 
         if dataset.id in [
             link.dataset_id
