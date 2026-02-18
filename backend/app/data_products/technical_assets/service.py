@@ -182,6 +182,11 @@ class DataOutputService:
             options=[selectinload(DatasetModel.data_product_links)],
         )
         data_output = self.get_data_output(data_product_id, id)
+        if data_output.status != TechnicalAssetStatus.ACTIVE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot link technical asset that is not active",
+            )
 
         if dataset.id in [
             link.dataset_id

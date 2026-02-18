@@ -1,5 +1,5 @@
 import { HolderOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Typography } from 'antd';
+import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Tooltip, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -11,6 +11,7 @@ import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-ou
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
+import { DataOutputStatus } from '@/types/data-output';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDecisionStatusBadgeStatus } from '@/utils/status.helper';
@@ -94,6 +95,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
     };
 
     const canRemove = deleteAccess?.allowed ?? false;
+    const isActive = dataOutput.status === DataOutputStatus.Active;
 
     const getDeleteDescription = () => {
         if (dataOutput.dataset_links && dataOutput.dataset_links.length > 0) {
@@ -118,9 +120,25 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
     };
 
     return (
-        <Card className={styles.card} draggable onDragStart={handleDragStart} onDragEnd={handleDragEnd} size="small">
+        <Card
+            className={styles.card}
+            draggable={isActive}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            size="small"
+        >
             <Flex gap={'middle'}>
-                <HolderOutlined />
+                {isActive ? (
+                    <HolderOutlined />
+                ) : (
+                    <Tooltip
+                        title={t(
+                            'This technical asset is in pending state, please consult your platform administrator to activate it',
+                        )}
+                    >
+                        <HolderOutlined style={{ cursor: 'not-allowed', opacity: 0.5 }} />
+                    </Tooltip>
+                )}
                 <Flex vertical flex={1} gap={'middle'}>
                     <Flex justify="space-between" align="flex-start">
                         <Flex gap={'middle'} align="center">
