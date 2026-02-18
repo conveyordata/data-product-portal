@@ -1,14 +1,10 @@
 import copy
-import json
 from datetime import datetime
 from typing import Optional, Sequence
-from urllib import parse
 from uuid import UUID
 from warnings import deprecated
 
-import httpx
 import pytz
-from botocore.exceptions import ClientError
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload
@@ -18,17 +14,10 @@ from app.authorization.roles.schema import Prototype
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.configuration.environments.model import Environment as EnvironmentModel
-from app.configuration.environments.platform_configurations.model import (
-    EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
-)
-from app.configuration.platforms.model import Platform as PlatformModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
-from app.core.auth.credentials import AWSCredentials
-from app.core.aws.boto3_clients import get_client
-from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
+from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.namespace.validation import (
     NamespaceValidator,
     TechnicalAssetNamespaceValidator,
@@ -67,7 +56,6 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
-from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -418,71 +406,7 @@ class DataProductService:
 
     @deprecated("Should use generate_signin_url instead")
     def get_data_product_role_arn(self, id: UUID, environment: str) -> str:
-        return self._get_data_product_role_arn(id, environment)
-
-    def _get_data_product_role_arn(self, id: UUID, environment: str) -> str:
-        environment_context = (
-            self.db.execute(
-                select(EnvironmentModel).where(EnvironmentModel.name == environment)
-            )
-            .scalar_one()
-            .context
-        )
-        namespace = self.db.get(DataProductModel, id).namespace
-        role_arn = environment_context.replace("{{}}", namespace)
-        return role_arn
-
-    @classmethod
-    def get_aws_temporary_credentials(
-        cls, role_arn: str, *, actor: User
-    ) -> AWSCredentials:
-        email = actor.email
-        try:
-            response = get_client("sts").assume_role(
-                RoleArn=role_arn,
-                RoleSessionName=email,
-            )
-        except ClientError:
-            raise HTTPException(
-                status_code=status.HTTP_501_NOT_IMPLEMENTED,
-                detail="Please contact us on how to integrate with AWS",
-            )
-
-        return AWSCredentials(**response.get("Credentials"))
-
-    def generate_signin_url(self, id: UUID, environment: str, *, actor: User) -> str:
-        role = self._get_data_product_role_arn(id, environment)
-        json_credentials = self.get_aws_temporary_credentials(role, actor=actor)
-
-        url_credentials = {
-            "sessionId": json_credentials.AccessKeyId,
-            "sessionKey": json_credentials.SecretAccessKey,
-            "sessionToken": json_credentials.SessionToken,
-        }
-        json_dump = json.dumps(url_credentials)
-
-        request_parameters = "?Action=getSigninToken"
-        SESSION_DURATION = 900
-        request_parameters += f"&SessionDuration={SESSION_DURATION}"
-        request_parameters += f"&Session={parse.quote_plus(json_dump)}"
-        request_url = "https://signin.aws.amazon.com/federation" + request_parameters
-
-        r = httpx.get(request_url)
-
-        signin_token = json.loads(r.text)
-
-        request_parameters = "?Action=login"
-        request_parameters += f"&Issuer={settings.HOST}"
-        athena_link = "https://console.aws.amazon.com/athena/home#/query-editor"
-        request_parameters += f"&Destination={parse.quote_plus(athena_link)}"
-        request_parameters += f"&SigninToken={signin_token['SigninToken']}"
-        request_url = "https://signin.aws.amazon.com/federation" + request_parameters
-
-        return request_url
-
-    def get_conveyor_ide_url(self, id: UUID) -> str:
-        data_product = self.db.get(DataProductModel, id)
-        return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
+        return _get_data_product_role_arn(id, environment, self.db)
 
     def get_data_outputs(self, id: UUID) -> Sequence[DataOutputGet]:
         return (
@@ -500,53 +424,6 @@ class DataProductService:
             .unique()
             .all()
         )
-
-    def get_env_platform_config(
-        self, id: UUID, environment: str, platform_name: str
-    ) -> str:
-        environment_model = self.db.scalar(
-            select(EnvironmentModel).where(EnvironmentModel.name == environment)
-        )
-        platform = self.db.scalar(
-            select(PlatformModel).where(PlatformModel.name == platform_name)
-        )
-
-        stmt = select(EnvironmentPlatformConfigurationModel).where(
-            EnvironmentPlatformConfigurationModel.environment_id
-            == environment_model.id,
-            EnvironmentPlatformConfigurationModel.platform_id == platform.id,
-        )
-        config = self.db.scalar(stmt)
-        if not config:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=(
-                    f"Missing Platform Environment configuration for {platform_name}"
-                ),
-            )
-        return config.config
-
-    def get_databricks_workspace_url(self, id: UUID, environment: str) -> str:
-        platform_config = self.get_env_platform_config(id, environment, "Databricks")
-        data_product = self.db.get(DataProductModel, id)
-        config = json.loads(platform_config)["workspace_urls"]
-        if str(data_product.domain_id) not in config:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=(
-                    f"Workspace not configured fordomain {data_product.domain.name}"
-                ),
-            )
-        return config[str(data_product.domain_id)]
-
-    def get_snowflake_url(self, id: UUID, environment: str) -> str:
-        config = json.loads(self.get_env_platform_config(id, environment, "Snowflake"))
-        if "login_url" not in config:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="login_url missing from Snowflake configuration",
-            )
-        return config["login_url"]
 
     def get_graph_data(self, id: UUID, level: int) -> Graph:
         product = self.db.get(

@@ -4311,412 +4311,6 @@
         }
       }
     },
-    "/api/data_products/{id}/signin_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Signin Url Old",
-        "operationId": "get_signin_url_old_api_data_products__id__signin_url_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "title": "Response Get Signin Url Old Api Data Products  Id  Signin Url Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{id}/signin_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Signin Url",
-        "operationId": "get_signin_url",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetSigninUrlResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_products/{id}/conveyor_ide_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Conveyor Ide Url Old",
-        "operationId": "get_conveyor_ide_url_old_api_data_products__id__conveyor_ide_url_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "title": "Response Get Conveyor Ide Url Old Api Data Products  Id  Conveyor Ide Url Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{id}/conveyor_ide_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Conveyor Ide Url",
-        "operationId": "get_conveyor_ide_url",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetConveyorIdeUrlResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_products/{id}/databricks_workspace_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Databricks Workspace Url Old",
-        "operationId": "get_databricks_workspace_url_old_api_data_products__id__databricks_workspace_url_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "title": "Response Get Databricks Workspace Url Old Api Data Products  Id  Databricks Workspace Url Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{id}/databricks_workspace_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Databricks Workspace Url",
-        "operationId": "get_databricks_workspace_url",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDatabricksWorkspaceUrlResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_products/{id}/snowflake_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Snowflake Url Old",
-        "operationId": "get_snowflake_url_old_api_data_products__id__snowflake_url_get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "title": "Response Get Snowflake Url Old Api Data Products  Id  Snowflake Url Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{id}/snowflake_url": {
-      "get": {
-        "tags": [
-          "Data products"
-        ],
-        "summary": "Get Snowflake Url",
-        "operationId": "get_snowflake_url",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Environment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetSnowflakeUrlResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/data_products/{id}/data_outputs": {
       "get": {
         "tags": [
@@ -13582,6 +13176,75 @@
         }
       }
     },
+    "/api/v2/plugins/{plugin_name}/url": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Get Plugin Url",
+        "description": "Get the URL for the access tile of a specific plugin",
+        "operationId": "get_plugin_url",
+        "parameters": [
+          {
+            "name": "plugin_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plugin Name"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Environment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/URLResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/device/device_token": {
       "post": {
         "tags": [
@@ -18552,19 +18215,6 @@
         ],
         "title": "GetAllPlatformsResponse"
       },
-      "GetConveyorIdeUrlResponse": {
-        "properties": {
-          "ide_url": {
-            "type": "string",
-            "title": "Ide Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "ide_url"
-        ],
-        "title": "GetConveyorIdeUrlResponse"
-      },
       "GetDataProductInputPortsResponse": {
         "properties": {
           "input_ports": {
@@ -18816,19 +18466,6 @@
           "technical_asset_count"
         ],
         "title": "GetDataProductsResponseItem"
-      },
-      "GetDatabricksWorkspaceUrlResponse": {
-        "properties": {
-          "databricks_workspace_url": {
-            "type": "string",
-            "title": "Databricks Workspace Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "databricks_workspace_url"
-        ],
-        "title": "GetDatabricksWorkspaceUrlResponse"
       },
       "GetDomainResponse": {
         "properties": {
@@ -19358,32 +18995,6 @@
           "roles"
         ],
         "title": "GetRolesResponse"
-      },
-      "GetSigninUrlResponse": {
-        "properties": {
-          "signin_url": {
-            "type": "string",
-            "title": "Signin Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "signin_url"
-        ],
-        "title": "GetSigninUrlResponse"
-      },
-      "GetSnowflakeUrlResponse": {
-        "properties": {
-          "snowflake_url": {
-            "type": "string",
-            "title": "Snowflake Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "snowflake_url"
-        ],
-        "title": "GetSnowflakeUrlResponse"
       },
       "GetTechnicalAssetsResponse": {
         "properties": {
@@ -22759,6 +22370,20 @@
           "radio"
         ],
         "title": "UIElementType"
+      },
+      "URLResponse": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "URLResponse",
+        "description": "Response model for platform URLs"
       },
       "UnLinkTechnicalAssetToOutputPortRequest": {
         "properties": {

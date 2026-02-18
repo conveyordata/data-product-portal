@@ -1,7 +1,11 @@
-from typing import Optional, Sequence
+from typing import TYPE_CHECKING, Optional, Sequence
+from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
+if TYPE_CHECKING:
+    from app.users.schema import User
 
 from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
@@ -91,9 +95,47 @@ class PluginService:
         """Build the complete platform tile structure for the UI"""
         all_metadata = self.get_all_technical_assets_ui_metadata()
         # Filter to only configured platforms
-
-        # Build tile hierarchy
         return self._build_tile_hierarchy(all_metadata)
+
+    def get_url(
+        self,
+        plugin_name: str,
+        id: UUID,
+        db: Session,
+        actor: "User",
+        environment: Optional[str] = None,
+    ) -> str:
+        data_output_configurations = AssetProviderPlugin.__subclasses__()
+        plugin_class = next(
+            (
+                cls
+                for cls in data_output_configurations
+                if cls.get_platform_metadata().platform_key == plugin_name
+            ),
+            None,
+        )
+        # If no direct match, check if it's a parent platform
+        if not plugin_class:
+            plugin_class = next(
+                (
+                    cls
+                    for cls in data_output_configurations
+                    if cls.get_platform_metadata().parent_platform == plugin_name
+                ),
+                None,
+            )
+        if not plugin_class:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Plugin '{plugin_name}' not found",
+            )
+        try:
+            return plugin_class.get_url(id, db, actor, environment)
+        except NotImplementedError:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail=f"Plugin '{plugin_name}' does not implement URL retrieval",
+            )
 
     def _build_tile_hierarchy(
         self, metadata_list: Sequence[UIElementMetadataResponse]

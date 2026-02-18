@@ -30,6 +30,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.platform_service import PlatformServiceFactory
 
 OLD_ENDPOINT = "/api/data_products"
 ENDPOINT = "/api/v2/data_products"
@@ -192,6 +193,8 @@ class TestDataProductsRouter:
 
     def test_get_conveyor_ide_url(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        cvr = PlatformFactory(name="Conveyor")
+        PlatformServiceFactory(platform=cvr)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -479,6 +482,8 @@ class TestDataProductsRouter:
         EnvironmentFactory(name="production")
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
+        platform = PlatformFactory(name="s3")
+        PlatformServiceFactory(platform=platform)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
@@ -489,13 +494,14 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         response = client.get(
-            f"{OLD_ENDPOINT}/{data_product.id}/signin_url?environment=production"
+            f"/api/v2/plugins/aws/url?id={data_product.id}&environment=production"
         )
         assert response.status_code == 501 or response.status_code == 400
 
     def test_get_databricks_url(self, client):
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Databricks")
+        PlatformServiceFactory(platform=platform)
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -515,15 +521,15 @@ class TestDataProductsRouter:
             ),
         )
         response = client.get(
-            f"{OLD_ENDPOINT}/{data_product.id}/databricks_workspace_url?"
-            "environment=production"
+            f"/api/v2/plugins/databricks/url?id={data_product.id}&environment=production"
         )
         assert response.status_code == 200
-        assert response.json() == "test_1.com"
+        assert response.json()["url"] == "test_1.com"
 
     def test_get_snowflake_url(self, client):
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Snowflake")
+        PlatformServiceFactory(platform=platform)
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -541,10 +547,10 @@ class TestDataProductsRouter:
             config=json.dumps({"login_url": "test_1.com"}),
         )
         response = client.get(
-            f"{OLD_ENDPOINT}/{data_product.id}/snowflake_url?environment=production"
+            f"/api/v2/plugins/snowflake/url?id={data_product.id}&environment=production"
         )
         assert response.status_code == 200
-        assert response.json() == "test_1.com"
+        assert response.json()["url"] == "test_1.com"
 
     def test_get_namespace_suggestion_substitution(self, client):
         name = "test with spaces"
@@ -899,7 +905,7 @@ class TestDataProductsRouter:
 
     @staticmethod
     def get_conveyor_ide_url(client: TestClient, data_product_id):
-        return client.get(f"{OLD_ENDPOINT}/{data_product_id}/conveyor_ide_url")
+        return client.get(f"api/v2/plugins/conveyor/url?id={data_product_id}")
 
     @staticmethod
     def get_namespace_suggestion(client: TestClient, name):
