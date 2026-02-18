@@ -63,7 +63,8 @@ function filterBySearch(requests: PendingAction[], searchTerm: string): PendingA
             return (
                 action.user.first_name.toLowerCase().includes(lowerSearch) ||
                 action.user.last_name.toLowerCase().includes(lowerSearch) ||
-                action.user.email.toLowerCase().includes(lowerSearch)
+                action.user.email.toLowerCase().includes(lowerSearch) ||
+                action.role?.name.toLowerCase().includes(lowerSearch)
             );
         }
 

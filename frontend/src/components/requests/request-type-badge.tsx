@@ -1,8 +1,9 @@
-import { Badge, Flex } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
+import { Flex } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import type { PendingActionTypes } from '@/types/pending-actions/pending-actions';
-import { isOutputPortRequest } from '../../utils/request-utils';
+import { isOutputPortRequest, isRoleRequest } from '../../utils/request-utils';
 
 type Props = {
     type: PendingActionTypes;
@@ -13,25 +14,26 @@ export function RequestTypeBadge({ type }: Props) {
 
     if (isOutputPortRequest(type)) {
         return (
-            <Badge
-                count={
-                    <Flex>
-                        <DatasetOutlined style={{ fontSize: 12 }} />
-                        {t('Output Port')}
-                    </Flex>
-                }
-            />
+            <Flex gap="small">
+                <DatasetOutlined />
+                {t('Output Port')}
+            </Flex>
+        );
+    }
+
+    if (isRoleRequest(type)) {
+        return (
+            <Flex gap="small">
+                <TeamOutlined />
+                {t('Team')}
+            </Flex>
         );
     }
 
     return (
-        <Badge
-            count={
-                <Flex gap="small">
-                    <DataProductOutlined style={{ fontSize: 12 }} />
-                    {t('Data Product')}
-                </Flex>
-            }
-        />
+        <Flex gap="small">
+            <DataProductOutlined />
+            {t('Data Product')}
+        </Flex>
     );
 }

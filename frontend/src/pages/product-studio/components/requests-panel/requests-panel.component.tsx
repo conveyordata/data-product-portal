@@ -22,19 +22,8 @@ export function RequestsPanel() {
         return pendingActions;
     }, [pendingActions]);
 
-    // // Filter active access (approved or rejected)
-    // const activeAccess = useMemo(() => {
-    //     return pendingActions.filter(
-    //         (action) =>
-    //             (action.pending_action_type === PendingActionTypes.DataProductDataset ||
-    //                 action.pending_action_type === PendingActionTypes.DataOutputDataset) &&
-    //             (action.status === 'approved' || action.status === 'denied'),
-    //     );
-    // }, [pendingActions]);
-
     // Get counts for badges
     const pendingCount = pendingRequests.length;
-    // const activeCount = activeAccess.length;
 
     // View mode segmented control options
     const viewModeOptions = [
@@ -48,16 +37,6 @@ export function RequestsPanel() {
             ),
             value: 'pending' as ViewMode,
         },
-        // {
-        //     label: (
-        //         <Space size="small">
-        //             <span>✓</span>
-        //             {t('Manage Active Access')}
-        //             {activeCount > 0 && <span>({activeCount})</span>}
-        //         </Space>
-        //     ),
-        //     value: 'active' as ViewMode,
-        // },
     ];
 
     // Type filter segmented control options
@@ -112,15 +91,11 @@ export function RequestsPanel() {
             </Flex>
 
             {/* Views */}
-            {/* {viewMode === 'pending' ? ( */}
             <PendingAccessRequestsView
                 pendingRequests={pendingRequests}
                 typeFilter={typeFilter}
                 searchTerm={searchTerm}
             />
-            {/* ) : (
-                // <ManageActiveAccessView activeAccess={activeAccess} typeFilter={typeFilter} searchTerm={searchTerm} />
-            )} */}
         </div>
     );
 }

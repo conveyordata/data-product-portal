@@ -18,9 +18,7 @@ export function AccessRequestedCell({ action, outputPortName }: Props) {
             <div>
                 {t('Read access to ')}{' '}
                 {link?.datasetId && (
-                    <Link to={createOutputPortPath(link.dataProductId, link.datasetId)} style={{ color: '#1890ff' }}>
-                        {outputPortName}
-                    </Link>
+                    <Link to={createOutputPortPath(link.dataProductId, link.datasetId)}>{outputPortName}</Link>
                 )}
             </div>
         );
@@ -41,9 +39,7 @@ export function AccessRequestedCell({ action, outputPortName }: Props) {
             <div>
                 {roleName} {t('role on')}{' '}
                 {link?.datasetId && (
-                    <Link to={createOutputPortPath(link.dataProductId, link.datasetId)} style={{ color: '#1890ff' }}>
-                        {outputPortName}
-                    </Link>
+                    <Link to={createOutputPortPath(link.dataProductId, link.datasetId)}>{outputPortName}</Link>
                 )}
             </div>
         );
@@ -51,11 +47,7 @@ export function AccessRequestedCell({ action, outputPortName }: Props) {
 
     // DataOutputDataset
     if (link?.datasetId) {
-        return (
-            <Link to={createOutputPortPath(link.dataProductId, link.datasetId)} style={{ color: '#1890ff' }}>
-                {outputPortName}
-            </Link>
-        );
+        return <Link to={createOutputPortPath(link.dataProductId, link.datasetId)}>{outputPortName}</Link>;
     }
 
     return <div>{outputPortName}</div>;

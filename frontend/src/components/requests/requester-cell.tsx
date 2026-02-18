@@ -1,4 +1,4 @@
-import { Avatar, Space, Typography } from 'antd';
+import { Avatar, Space, Typography, theme } from 'antd';
 
 type Props = {
     name: string;
@@ -6,6 +6,10 @@ type Props = {
 };
 
 export function RequesterCell({ name, email }: Props) {
+    const { useToken } = theme;
+    const { token } = useToken();
+
+    const secondaryColor = token.colorPrimary;
     const initials = name
         .split(' ')
         .map((n) => n[0])
@@ -14,9 +18,7 @@ export function RequesterCell({ name, email }: Props) {
 
     return (
         <Space size="small">
-            <Avatar size="small" style={{ backgroundColor: '#1890ff' }}>
-                {initials}
-            </Avatar>
+            <Avatar style={{ backgroundColor: secondaryColor }}>{initials}</Avatar>
             <div>
                 <div>{name}</div>
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>

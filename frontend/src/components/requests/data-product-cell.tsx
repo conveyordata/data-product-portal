@@ -15,9 +15,5 @@ export function DataProductCell({ action, dataProductName }: Props) {
         return <div>{dataProductName}</div>;
     }
 
-    return (
-        <Link to={createDataProductIdPath(link.dataProductId)} style={{ color: '#1890ff' }}>
-            {dataProductName}
-        </Link>
-    );
+    return <Link to={createDataProductIdPath(link.dataProductId)}>{dataProductName}</Link>;
 }
