@@ -19,7 +19,7 @@ class ResourceNameValidityType(str, Enum):
     VALID = "VALID"
     INVALID_LENGTH = "INVALID_LENGTH"
     INVALID_CHARACTERS = "INVALID_CHARACTERS"
-    DUPLICATE_NAMESPACE = "DUPLICATE_NAMESPACE"
+    DUPLICATE = "DUPLICATE"
 
 
 class ResourceNameValidation(BaseModel):
@@ -76,7 +76,7 @@ class ResourceNameService:
         elif not re.match(r"^[a-z0-9+=,.@_-]+$", resource_name):
             validity = ResourceNameValidityType.INVALID_CHARACTERS
         elif not self._is_unique(resource_name, db, scope):
-            validity = ResourceNameValidityType.DUPLICATE_NAMESPACE
+            validity = ResourceNameValidityType.DUPLICATE
         else:
             validity = ResourceNameValidityType.VALID
 

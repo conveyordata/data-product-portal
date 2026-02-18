@@ -19,12 +19,17 @@ import { type Ref, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
-
-import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import {
+    ResourceNameModel,
+    useLazySanitizeResourceNameQuery,
+    useLazyValidateResourceNameQuery,
+    useResourceNameConstraintsQuery,
+} from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
@@ -32,9 +37,6 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
-    useGetDatasetNamespaceLengthLimitsQuery,
-    useLazyGetDatasetNamespaceSuggestionQuery,
-    useLazyValidateDatasetNamespaceQuery,
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
@@ -117,9 +119,9 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const [requestDatasetsAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
-    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDatasetNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateDatasetNamespaceQuery();
-    const { data: namespaceLengthLimits } = useGetDatasetNamespaceLengthLimitsQuery();
+    const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
+    const [validateResourceName] = useLazyValidateResourceNameQuery();
+    const { data: constraints } = useResourceNameConstraintsQuery();
 
     const [form] = Form.useForm<DatasetCreateFormSchema>();
     const datasetNameValue = Form.useWatch('name', form);
@@ -254,7 +256,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         }
     };
 
-    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), DEBOUNCE);
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
@@ -271,14 +273,15 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
-            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditNamespace, namespaceSuggestion]);
+    }, [form, mode, canEditNamespace, sanitizedResourceName]);
 
-    const validateNamespaceCallback = useCallback(
-        (namespace: string) => validateNamespace(namespace).unwrap(),
-        [validateNamespace],
+    const validateResourceNameCallback = useCallback(
+        (resourceName: string) =>
+            validateResourceName({ resourceName: resourceName, model: ResourceNameModel.OutputPort }).unwrap(),
+        [validateResourceName],
     );
     const datasetOwners = useGetDatasetOwnerIds(currentDataset?.id);
     const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
@@ -326,15 +329,15 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             >
                 <Input />
             </Form.Item>
-            <NamespaceFormItem
+            <ResourceNameFormItem
                 form={form}
                 tooltip={t('The namespace of the Output Port')}
-                max_length={namespaceLengthLimits?.max_length}
+                max_length={constraints?.max_length}
                 editToggleDisabled={mode === 'edit'}
-                canEditNamespace={canEditNamespace}
-                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                canEditResourceName={canEditNamespace}
+                toggleCanEditResourceName={() => setCanEditNamespace((prev) => !prev)}
                 validationRequired={mode === 'create'}
-                validateNamespace={validateNamespaceCallback}
+                validateResourceName={validateResourceNameCallback}
             />
             {mode === 'create' && (
                 <Form.Item<DatasetCreateFormSchema>

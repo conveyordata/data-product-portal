@@ -3,7 +3,7 @@ from copy import deepcopy
 import pytest
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
-from app.core.namespace.validation import NamespaceValidityType
+from app.resource_names.service import ResourceNameValidityType
 from tests.factories import DataProductSettingFactory
 
 ENDPOINT = "/api/data_product_settings"
@@ -103,7 +103,7 @@ class TestDataProductSettingsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.VALID
+        assert response.json()["validity"] == ResourceNameValidityType.VALID
 
     def test_validate_namespace_old_invalid_characters(self, client):
         namespace = "!"
@@ -112,7 +112,9 @@ class TestDataProductSettingsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
+        assert (
+            response.json()["validity"] == ResourceNameValidityType.INVALID_CHARACTERS
+        )
 
     def test_validate_namespace_old_invalid_length(self, client):
         namespace = "a" * 256
@@ -121,7 +123,7 @@ class TestDataProductSettingsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
+        assert response.json()["validity"] == ResourceNameValidityType.INVALID_LENGTH
 
     def test_validate_namespace_old_duplicate(self, client):
         namespace = "test"
@@ -133,7 +135,7 @@ class TestDataProductSettingsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
     def test_validate_namespace_old_duplicate_scoped_to_data_product(self, client):
         namespace = "test"
@@ -145,15 +147,13 @@ class TestDataProductSettingsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.VALID
+        assert response.json()["validity"] == ResourceNameValidityType.VALID
 
     def test_validate_namespace(self, client):
         namespace = "test"
-        response = self.validate_namespace(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
+        response = self.validate_namespace(client, namespace)
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.VALID
+        assert response.json()["validity"] == ResourceNameValidityType.VALID
 
     def test_validate_namespace_invalid_characters(self, client):
         namespace = "!"
@@ -162,40 +162,36 @@ class TestDataProductSettingsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
+        assert (
+            response.json()["validity"] == ResourceNameValidityType.INVALID_CHARACTERS
+        )
 
     def test_validate_namespace_invalid_length(self, client):
         namespace = "a" * 256
-        response = self.validate_namespace(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
+        response = self.validate_namespace(client, namespace)
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
+        assert response.json()["validity"] == ResourceNameValidityType.INVALID_LENGTH
 
     def test_validate_namespace_duplicate(self, client):
         namespace = "test"
         DataProductSettingFactory(
             namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
         )
-        response = self.validate_namespace(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
+        response = self.validate_namespace(client, namespace)
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
     def test_validate_namespace_duplicate_dataset(self, client):
         namespace = "test"
         DataProductSettingFactory(
             namespace=namespace, scope=DataProductSettingScope.DATASET
         )
-        response = self.validate_namespace_output_port(
-            client, namespace, DataProductSettingScope.DATASET
-        )
+        response = self.validate_namespace_output_port(client, namespace)
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
     def test_validate_namespace_duplicate_scoped_to_data_product(self, client):
         namespace = "test"
@@ -207,7 +203,7 @@ class TestDataProductSettingsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.VALID
+        assert response.json()["validity"] == ResourceNameValidityType.VALID
 
     @pytest.mark.usefixtures("admin")
     def test_create_data_product_setting_duplicate_namespace(
@@ -297,26 +293,22 @@ class TestDataProductSettingsRouter:
         )
 
     @staticmethod
-    def validate_namespace(client, namespace, scope: DataProductSettingScope):
-        return client.post(
+    def validate_namespace(client, namespace):
+        return client.get(
             "/api/v2/resource_names/validate",
-            json={
+            params={
                 "resource_name": namespace,
                 "model": "data_product_setting",
-                "scope": scope.value,
             },
         )
 
     @staticmethod
-    def validate_namespace_output_port(
-        client, namespace, scope: DataProductSettingScope
-    ):
-        return client.post(
+    def validate_namespace_output_port(client, namespace):
+        return client.get(
             "/api/v2/resource_names/validate",
-            json={
+            params={
                 "resource_name": namespace,
                 "model": "output_port_setting",
-                "scope": scope.value,
             },
         )
 
