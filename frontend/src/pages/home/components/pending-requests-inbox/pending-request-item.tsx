@@ -9,7 +9,7 @@ import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+import { createDataOutputIdPath, createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation';
 import { type PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 import { formatDate } from '@/utils/date.helper.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
@@ -41,16 +41,20 @@ export function PendingItem({ pendingAction }: Props) {
         switch (pendingAction.pending_action_type) {
             case PendingActionTypes.DataProductDataset:
                 await handleAcceptDataProductDatasetLink({
-                    id: pendingAction.id,
-                    data_product_id: pendingAction.data_product_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.dataset.data_product_id,
+                    outputPortId: pendingAction.dataset.id,
+                    approveOutputPortAsInputPortRequest: {
+                        consuming_data_product_id: pendingAction.data_product.id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataOutputDataset:
                 await handleAcceptDataOutputDatasetLink({
-                    id: pendingAction.id,
-                    data_output_id: pendingAction.data_output_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.data_output.owner_id,
+                    outputPortId: pendingAction.dataset_id,
+                    approveLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                        technical_asset_id: pendingAction.data_output_id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataProductRoleAssignment:
@@ -67,16 +71,20 @@ export function PendingItem({ pendingAction }: Props) {
         switch (pendingAction.pending_action_type) {
             case PendingActionTypes.DataProductDataset:
                 await handleRejectDataProductDatasetLink({
-                    id: pendingAction.id,
-                    data_product_id: pendingAction.data_product_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.dataset.data_product_id,
+                    outputPortId: pendingAction.dataset.id,
+                    denyOutputPortAsInputPortRequest: {
+                        consuming_data_product_id: pendingAction.data_product.id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataOutputDataset:
                 await handleRejectDataOutputDatasetLink({
-                    id: pendingAction.id,
-                    data_output_id: pendingAction.data_output_id,
-                    dataset_id: pendingAction.dataset_id,
+                    dataProductId: pendingAction.data_output.owner_id,
+                    outputPortId: pendingAction.dataset_id,
+                    denyLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                        technical_asset_id: pendingAction.data_output_id,
+                    },
                 });
                 break;
             case PendingActionTypes.DataProductRoleAssignment:
@@ -115,7 +123,10 @@ export function PendingItem({ pendingAction }: Props) {
                                     Accepting will grant the Data Product read access on the{' '}
                                     <Link
                                         onClick={(e) => e.stopPropagation()}
-                                        to={createDatasetIdPath(pendingAction.dataset_id)}
+                                        to={createMarketplaceOutputPortPath(
+                                            pendingAction.dataset_id,
+                                            pendingAction.dataset.data_product_id,
+                                        )}
                                     >
                                         {pendingAction.dataset.name}
                                     </Link>{' '}
@@ -125,7 +136,11 @@ export function PendingItem({ pendingAction }: Props) {
                         </Flex>
                     ),
                     tag: t('{{name}} Output Port', { name: pendingAction.dataset.name }),
-                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.Producers),
+                    navigatePath: createMarketplaceOutputPortPath(
+                        pendingAction.dataset_id,
+                        pendingAction.dataset.data_product_id,
+                        DatasetTabKeys.Producers,
+                    ),
                 };
 
             case PendingActionTypes.DataOutputDataset:
@@ -154,7 +169,10 @@ export function PendingItem({ pendingAction }: Props) {
                                 Accepting will create a link from the Technical Asset to the{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(pendingAction.dataset_id)}
+                                    to={createMarketplaceOutputPortPath(
+                                        pendingAction.dataset_id,
+                                        pendingAction.dataset.data_product_id,
+                                    )}
                                 >
                                     {pendingAction.dataset.name}
                                 </Link>{' '}
@@ -163,7 +181,11 @@ export function PendingItem({ pendingAction }: Props) {
                         </Typography.Text>
                     ),
                     tag: t('{{name}} Output Port', { name: pendingAction.dataset.name }),
-                    navigatePath: createDatasetIdPath(pendingAction.dataset_id, DatasetTabKeys.Consumers),
+                    navigatePath: createMarketplaceOutputPortPath(
+                        pendingAction.dataset_id,
+                        pendingAction.dataset.data_product_id,
+                        DatasetTabKeys.Consumers,
+                    ),
                 };
 
             case PendingActionTypes.DataProductRoleAssignment:

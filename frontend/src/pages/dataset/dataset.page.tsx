@@ -7,34 +7,35 @@ import { useNavigate, useParams } from 'react-router';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
-import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
+import { OutputPortAccessIcon } from '@/components/datasets/output-port-access-icon/output-port-access-icon.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.component';
-import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description';
+import { OutputPortDescription } from '@/pages/dataset/components/dataset-description/output-port-description.tsx';
 import { DatasetQuality } from '@/pages/dataset/components/dataset-quality/dataset-quality.component.tsx';
 import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper';
-import { getDynamicRoutePath } from '@/utils/routes.helper';
 import styles from './dataset.module.scss';
 
 export function Dataset() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { datasetId = '' } = useParams();
+    const { datasetId = '', dataProductId = '' } = useParams();
 
-    const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
-    const { data: data_product, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(
-        dataset?.data_product_id || '',
-        { skip: !dataset?.data_product_id },
+    const { data: outputPort, isLoading } = useGetOutputPortQuery(
+        { dataProductId, id: datasetId },
+        { skip: !dataProductId || !datasetId },
     );
+    const { data: data_product, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId, {
+        skip: !dataProductId,
+    });
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: datasetId,
@@ -44,10 +45,15 @@ export function Dataset() {
     );
     const canEdit = edit_access?.allowed || false;
 
-    const datasetOwners = useGetDatasetOwners(dataset?.id);
+    const datasetOwners = useGetDatasetOwners(outputPort?.id);
 
     function navigateToDatasetEditPage() {
-        navigate(getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId));
+        navigate(
+            ApplicationPaths.MarketPlaceOutputPortEdit.replace(`:${DynamicPathParams.DatasetId}`, datasetId).replace(
+                `:${DynamicPathParams.DataProductId}`,
+                dataProductId,
+            ),
+        );
     }
 
     useEffect(() => {
@@ -59,7 +65,7 @@ export function Dataset() {
 
     if (isLoading || isLoadingDataProduct) return <LoadingSpinner />;
 
-    if (!dataset || !data_product) return null;
+    if (!outputPort || !data_product) return null;
 
     return (
         <Flex className={styles.datasetContainer}>
@@ -67,8 +73,8 @@ export function Dataset() {
                 <Flex className={styles.datasetHeaderContainer}>
                     <Flex className={styles.datasetHeader}>
                         <CustomSvgIconLoader iconComponent={datasetBorderIcon} size="large" />
-                        <Typography.Title level={3}>{dataset?.name}</Typography.Title>
-                        <DatasetAccessIcon accessType={dataset.access_type} hasPopover />
+                        <Typography.Title level={3}>{outputPort?.name}</Typography.Title>
+                        <OutputPortAccessIcon accessType={outputPort.access_type} hasPopover />
                     </Flex>
                     {canEdit && (
                         <CircleIconButton
@@ -82,27 +88,27 @@ export function Dataset() {
                 <Flex className={styles.mainContent}>
                     {/* Dataset description */}
                     <Flex vertical className={styles.datasetOverview}>
-                        <DatasetDescription
-                            lifecycle={dataset.lifecycle}
+                        <OutputPortDescription
+                            lifecycle={outputPort.lifecycle}
                             data_product={data_product}
-                            description={dataset.description}
-                            domain={dataset.domain.name}
-                            namespace={dataset.namespace}
-                            accessType={getDatasetAccessTypeLabel(t, dataset.access_type)}
+                            description={outputPort.description}
+                            domain={outputPort.domain.name}
+                            namespace={outputPort.namespace}
+                            accessType={getDatasetAccessTypeLabel(t, outputPort.access_type)}
                             tags={[
-                                ...dataset.tags,
-                                ...dataset.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
+                                ...outputPort.tags,
+                                ...outputPort.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
                             ]}
                         />
                         {/*  Tabs  */}
-                        <DatasetTabs datasetId={dataset.id} isLoading={isLoading} />
+                        <DatasetTabs datasetId={outputPort.id} dataProductId={dataProductId} isLoading={isLoading} />
                     </Flex>
                 </Flex>
             </Flex>
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
                 <DatasetActions datasetId={datasetId} />
-                <DatasetQuality dataProductId={dataset?.data_product_id} datasetId={datasetId} />
+                <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
                 <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
             </Flex>
         </Flex>

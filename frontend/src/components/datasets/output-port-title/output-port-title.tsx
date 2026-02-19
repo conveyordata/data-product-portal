@@ -1,30 +1,28 @@
 import { Flex, Popover, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-
-import { DatasetAccess } from '@/types/dataset';
+import { OutputPortAccessType } from '@/store/api/services/generated/dataProductsApi.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
-
-import { DatasetAccessIcon } from '../dataset-access-icon/dataset-access-icon';
+import { OutputPortAccessIcon } from '../output-port-access-icon/output-port-access-icon.tsx';
 import styles from './dataset-title.module.scss';
 
 type Props = {
     name: string;
-    accessType: DatasetAccess;
+    accessType: OutputPortAccessType;
     hasIcon?: boolean;
     hasPopover?: boolean;
 };
 
-export function DatasetTitle({ name, accessType, hasIcon = true, hasPopover = false }: Props) {
+export function OutputPortTitle({ name, accessType, hasIcon = true, hasPopover = false }: Props) {
     const { t } = useTranslation();
 
     const title = (
         <Flex className={styles.datasetTitle}>
             <Typography.Text strong>{name}</Typography.Text>
-            {accessType !== DatasetAccess.Public && hasIcon && <DatasetAccessIcon accessType={accessType} />}
+            {accessType !== OutputPortAccessType.Public && hasIcon && <OutputPortAccessIcon accessType={accessType} />}
         </Flex>
     );
 
-    if (accessType === DatasetAccess.Public) {
+    if (accessType === OutputPortAccessType.Public) {
         return title;
     }
 

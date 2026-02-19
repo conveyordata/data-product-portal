@@ -3,22 +3,22 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
 import { useModal } from '@/hooks/use-modal';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import { AddOutputPortPopup } from '../add-output-port-popup/add-output-port-popup';
 
 type Props = {
     dataProductId: string;
-    datasets: DatasetsGetContract;
     draggedDataOutputId?: string | null;
 };
 
-export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: Props) {
+export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
+    const { data: { output_ports: outputPorts = [] } = {} } = useGetDataProductOutputPortsQuery(dataProductId);
     const { isVisible, handleOpen, handleClose } = useModal();
-    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
 
     const { data: access_create_dataset } = useCheckAccessQuery(
         {
@@ -37,13 +37,13 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
     );
     const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
     const filteredDatasets = useMemo(() => {
-        if (!searchTerm) return datasets;
-        return datasets.filter(
+        if (!searchTerm) return outputPorts;
+        return outputPorts.filter(
             (dataset) =>
                 dataset?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
                 dataset?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         );
-    }, [datasets, searchTerm]);
+    }, [outputPorts, searchTerm]);
 
     if (!dataProduct) return null;
 
@@ -72,11 +72,14 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </Flex>
-
             {filteredDatasets.map((dataset) => (
-                <DatasetCard key={dataset.id} datasetId={dataset.id} draggedDataOutputId={draggedDataOutputId} />
+                <DatasetCard
+                    key={dataset.id}
+                    dataProductId={dataProductId}
+                    datasetId={dataset.id}
+                    draggedDataOutputId={draggedDataOutputId}
+                />
             ))}
-
             {filteredDatasets.length === 0 && (
                 <Flex justify={'center'}>
                     <Typography.Text type="secondary">

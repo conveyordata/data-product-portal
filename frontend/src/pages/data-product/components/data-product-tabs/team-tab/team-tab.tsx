@@ -13,9 +13,9 @@ import {
     useListDataProductRoleAssignmentsQuery,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';
@@ -45,7 +45,7 @@ export function TeamTab({ dataProductId }: Props) {
     const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: dataProduct } = useGetDataProductQuery(dataProductId);
     const { data: roleAssignments, isFetching } = useListDataProductRoleAssignmentsQuery({
         dataProductId: dataProductId,
     });

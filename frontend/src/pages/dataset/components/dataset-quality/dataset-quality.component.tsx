@@ -3,7 +3,7 @@ import { Button, Flex, Typography } from 'antd';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
-import { useGetLatestDataQualitySummaryForOutputPortQuery } from '@/store/api/services/generated/outputPortDataQualityApi.ts';
+import { useGetLatestDataQualitySummaryForOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi.ts';
 
 interface Props {
     dataProductId: string;

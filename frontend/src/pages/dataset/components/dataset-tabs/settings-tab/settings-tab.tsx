@@ -5,13 +5,14 @@ import { DataProductSettings } from '@/components/data-products/data-product-set
 import styles from './settings-tab.module.scss';
 
 type Props = {
-    datasetId: string | undefined;
+    datasetId: string;
+    dataProductId: string;
 };
 
-export function SettingsTab({ datasetId }: Props) {
+export function SettingsTab({ datasetId, dataProductId }: Props) {
     return (
         <Flex vertical className={styles.container}>
-            <DataProductSettings id={datasetId} scope={'dataset'} />
+            <DataProductSettings id={datasetId} scope={'dataset'} dataProductId={dataProductId} />
         </Flex>
     );
 }

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 
 type Props = {
     dataProductId?: string;
@@ -10,8 +10,11 @@ type Props = {
 
 export function UsageTab({ dataProductId, datasetId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId ?? '', { skip: !dataProductId });
-    const { data: dataset } = useGetDatasetByIdQuery(datasetId ?? '', { skip: !datasetId });
+    const { data: dataProduct } = useGetDataProductQuery(dataProductId ?? '', { skip: !dataProductId });
+    const { data: dataset } = useGetOutputPortQuery(
+        { dataProductId: dataProductId ?? '', id: datasetId ?? '' },
+        { skip: !datasetId || !dataProductId },
+    );
 
     const content = dataProduct?.usage ?? dataset?.usage;
 

@@ -33,7 +33,7 @@ export default function RootLayout() {
                 case ApplicationPaths.Studio:
                 case ApplicationPaths.DataProducts:
                     return PosthogEvents.PATHNAME_CHANGED_DATA_PRODUCTS;
-                case ApplicationPaths.Datasets:
+                case ApplicationPaths.Marketplace:
                     return PosthogEvents.PATHNAME_CHANGED_MARKETPLACE;
                 case ApplicationPaths.Explorer:
                     return PosthogEvents.PATHNAME_CHANGED_EXPLORER;

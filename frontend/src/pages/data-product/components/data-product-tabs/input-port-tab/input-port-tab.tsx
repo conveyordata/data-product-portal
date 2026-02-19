@@ -2,34 +2,33 @@ import { Button, Flex, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { InputPortTable } from '@/pages/data-product/components/data-product-tabs/input-port-tab/components/input-port-table/input-port-table.component.tsx';
+import { type InputPort, useGetDataProductInputPortsQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DatasetLink } from '@/types/data-product';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
 
 type Props = {
     dataProductId: string;
 };
 
-function filterDatasets(datasetLinks: DatasetLink[], searchTerm: string) {
+function filterDatasets(datasetLinks: InputPort[], searchTerm: string) {
     return (
         datasetLinks.filter(
             (datasetLink) =>
-                datasetLink?.dataset?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                datasetLink?.dataset?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                datasetLink?.input_port?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                datasetLink?.input_port?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }
 
-export function DatasetTab({ dataProductId }: Props) {
+export function InputPortTab({ dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(dataProductId);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const filteredDatasets = useMemo(() => {
-        return filterDatasets(dataProduct?.dataset_links ?? [], searchTerm);
-    }, [dataProduct?.dataset_links, searchTerm]);
+        return filterDatasets(inputPorts, searchTerm);
+    }, [inputPorts, searchTerm]);
 
     const { data: access } = useCheckAccessQuery(
         {
@@ -49,13 +48,13 @@ export function DatasetTab({ dataProductId }: Props) {
                     allowClear
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Link to={ApplicationPaths.Datasets}>
+                <Link to={ApplicationPaths.Marketplace}>
                     <Button disabled={!canCreateDataset} type={'primary'}>
                         {t('Shop for new Output Ports')}
                     </Button>
                 </Link>
             </Flex>
-            <DatasetTable dataProductId={dataProductId} datasets={filteredDatasets} />
+            <InputPortTable dataProductId={dataProductId} inputPorts={filteredDatasets} />
         </Flex>
     );
 }

@@ -5,42 +5,45 @@ import { useTranslation } from 'react-i18next';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
+import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import {
+    useApproveOutputPortTechnicalAssetLinkMutation,
+    useGetDataProductTechnicalAssetsQuery,
+    useLinkOutputPortToTechnicalAssetMutation,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
-import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
 type Props = {
     onClose: () => void;
+    dataProductId: string;
     datasetId: string;
     datasetName: string;
-    existingLinks: Array<{ data_output: { id: string; name: string } }>;
+    existingLinks: TechnicalAssetLink[];
 };
 
-export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingLinks }: Props) {
+export function DataOutputLinkModal({ onClose, dataProductId, datasetId, datasetName, existingLinks }: Props) {
     const { t } = useTranslation();
     const [selectedOutputs, setSelectedOutputs] = useState<Set<string>>(new Set());
 
     const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
-    const { data: dataset } = useGetDatasetByIdQuery(datasetId);
     const { data: { plugins } = {} } = useGetPluginsQuery();
-    const [linkDatasets, { isLoading: isLinking }] = useRequestDatasetAccessForDataOutputMutation();
-    const [approveLink] = useApproveDataOutputLinkMutation();
+    const [linkDatasets, { isLoading: isLinking }] = useLinkOutputPortToTechnicalAssetMutation();
+    const [approveLink] = useApproveOutputPortTechnicalAssetLinkMutation();
 
-    const dataProductId = dataset?.data_product_id || '';
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
+    const { data: { technical_assets: technicalAssets = [] } = {} } = useGetDataProductTechnicalAssetsQuery(
+        dataProductId,
+        { skip: !dataProductId },
+    );
 
     const existingLinkIds = useMemo(() => {
-        return new Set(existingLinks.map((link) => link.data_output.id));
+        return new Set(existingLinks.map((link) => link.technical_asset_id));
     }, [existingLinks]);
 
     const availableDataOutputs = useMemo(() => {
-        if (!dataProduct?.data_outputs) return [];
-        return dataProduct.data_outputs.filter((output) => !existingLinkIds.has(output.id));
-    }, [dataProduct?.data_outputs, existingLinkIds]);
+        return technicalAssets.filter((output) => !existingLinkIds.has(output.id));
+    }, [technicalAssets, existingLinkIds]);
 
     const filteredDataOutputs = useMemo(() => {
         if (!searchTerm) return availableDataOutputs;
@@ -78,11 +81,19 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
     const handleSubmit = async () => {
         try {
             const linkPromises = Array.from(selectedOutputs).map(async (outputId) => {
-                const result = await linkDatasets({ dataOutputId: outputId, datasetId }).unwrap();
+                const result = await linkDatasets({
+                    dataProductId,
+                    outputPortId: datasetId,
+                    linkTechnicalAssetToOutputPortRequest: {
+                        technical_asset_id: outputId,
+                    },
+                }).unwrap();
                 await approveLink({
-                    id: result.id,
-                    data_output_id: outputId,
-                    dataset_id: datasetId,
+                    dataProductId,
+                    outputPortId: datasetId,
+                    approveLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                        technical_asset_id: outputId,
+                    },
                 }).unwrap();
                 return result;
             });

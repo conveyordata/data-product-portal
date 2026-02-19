@@ -26,12 +26,14 @@ import { CartOverview } from '@/pages/cart/components/cart-overview.component.ts
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
-import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import {
-    useGetDataProductByIdQuery,
-    useGetUserDataProductsQuery,
-    useRequestDatasetsAccessForDataProductMutation,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+    useGetDataProductInputPortsQuery,
+    useGetDataProductQuery,
+    useGetDataProductsQuery,
+    useLinkInputPortsToDataProductMutation,
+} from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
@@ -48,7 +50,7 @@ function Cart() {
 
     const { data: datasets, isFetching: fetchingDatasets } = useGetAllDatasetsQuery();
     const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
-        useRequestDatasetsAccessForDataProductMutation();
+        useLinkInputPortsToDataProductMutation();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
     const cartDatasets = useMemo(() => {
         if (cartDatasetIds.length === 0) {
@@ -58,12 +60,10 @@ function Cart() {
     }, [datasets, cartDatasetIds]);
 
     const currentUser = useSelector(selectCurrentUser);
-    const { data: userDataProducts, isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(
-        currentUser?.id ?? '',
-        {
-            skip: currentUser === null,
-        },
-    );
+    const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
+        useGetDataProductsQuery(currentUser?.id, {
+            skip: currentUser === null || !currentUser?.id,
+        });
     const [form] = Form.useForm<CartFormData>();
 
     type CartFormData = {
@@ -96,9 +96,11 @@ function Cart() {
             cartSize: cartDatasets?.length,
         });
         requestDatasetAccessForDataProduct({
-            datasetIds: cartDatasets?.map((dataset) => dataset.id),
-            dataProductId: values.dataProductId,
-            justification: values.justification,
+            id: values.dataProductId,
+            linkInputPortsToDataProduct: {
+                input_ports: cartDatasets?.map((dataset) => dataset.id),
+                justification: values.justification,
+            },
         });
     };
     const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {
@@ -121,7 +123,19 @@ function Cart() {
         });
     };
 
-    const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductByIdQuery(
+    const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductQuery(
+        selectedDataProductId ?? '',
+        {
+            skip: !selectedDataProductId || isFetchingUserDataProducts || userDataProducts === undefined,
+        },
+    );
+    const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(
+        selectedDataProductId ?? '',
+        {
+            skip: !selectedDataProductId || isFetchingUserDataProducts || userDataProducts === undefined,
+        },
+    );
+    const { data: { output_ports: selectedDataProductOutputPorts = [] } = {} } = useGetDataProductOutputPortsQuery(
         selectedDataProductId ?? '',
         {
             skip: !selectedDataProductId || isFetchingUserDataProducts || userDataProducts === undefined,
@@ -136,15 +150,15 @@ function Cart() {
         }
     });
 
-    const overlappingDatasetIds = useMemo(() => {
-        const datasetLinks = selectedDataProduct?.dataset_links ?? [];
-        return datasetLinks.filter((link) => cartDatasetIds.includes(link.dataset_id)).map((link) => link.dataset_id);
-    }, [cartDatasetIds, selectedDataProduct?.dataset_links]);
+    const overlappingOutputPortIds = useMemo(() => {
+        return inputPorts
+            .filter((link) => cartDatasetIds.includes(link.output_port_id))
+            .map((link) => link.output_port_id);
+    }, [cartDatasetIds, inputPorts]);
 
-    const selectedProductDatasetsInCart = useMemo(() => {
-        const selectedProductDatasets = selectedDataProduct?.datasets ?? [];
-        return selectedProductDatasets.filter((ds) => cartDatasetIds.includes(ds.id));
-    }, [selectedDataProduct?.datasets, cartDatasetIds]);
+    const selectedProductOutputPortsInCart = useMemo(() => {
+        return selectedDataProductOutputPorts.filter((ds) => cartDatasetIds.includes(ds.id));
+    }, [selectedDataProductOutputPorts, cartDatasetIds]);
 
     useEffect(() => {
         if (requestingAccessSuccess && selectedDataProductId) {
@@ -158,38 +172,38 @@ function Cart() {
 
     const submitFormIssues = useMemo(() => {
         const submitFormIssues = [];
-        if (overlappingDatasetIds.length > 0) {
+        if (overlappingOutputPortIds.length > 0) {
             submitFormIssues.push({
-                key: 'overlappingDatasetIds',
+                key: 'overlappingOutputPortId',
                 value: t(
                     'There are currently {{count}} Output Ports in the cart, for which the selected Data Product already has access, or has an access request.',
                     {
-                        count: overlappingDatasetIds.length,
+                        count: overlappingOutputPortIds.length,
                     },
                 ),
             });
         }
-        if (selectedProductDatasetsInCart.length > 0) {
+        if (selectedProductOutputPortsInCart.length > 0) {
             submitFormIssues.push({
-                key: 'selectedProductDatasetsInCart',
+                key: 'selectedProductOutputPortsInCart',
                 value: t(
                     'There are currently {{count}} Output Ports, that are part of your selected Data Product, please remove them.',
                     {
-                        count: selectedProductDatasetsInCart.length,
+                        count: selectedProductOutputPortsInCart.length,
                     },
                 ),
             });
         }
 
         return submitFormIssues;
-    }, [overlappingDatasetIds, selectedProductDatasetsInCart, t]);
+    }, [overlappingOutputPortIds, selectedProductOutputPortsInCart, t]);
     return (
         <Row gutter={16}>
             <Col span={10}>
                 <CartOverview
                     loading={fetchingDatasets}
                     cartDatasets={cartDatasets}
-                    overlappingDatasetIds={overlappingDatasetIds}
+                    overlappingDatasetIds={overlappingOutputPortIds}
                     selectedDataProductId={selectedDataProductId}
                 />
             </Col>
@@ -263,7 +277,7 @@ function Cart() {
                             </Form.Item>
                             <Form.Item label={null}>
                                 <Flex gap={'small'}>
-                                    <Link to={ApplicationPaths.Datasets} style={{ width: '100%' }}>
+                                    <Link to={ApplicationPaths.Marketplace} style={{ width: '100%' }}>
                                         <Button type="default" style={{ width: '100%' }}>
                                             {t('Continue browsing')}
                                         </Button>
