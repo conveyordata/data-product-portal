@@ -3,7 +3,7 @@ import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
-export const userNotificationsTags = {
+export const usersNotificationsTags = {
     getUserNotifications: {
         providesTags: [{ type: TagTypes.Notifications, id: STATIC_TAG_ID.CURRENT_USER }],
     },

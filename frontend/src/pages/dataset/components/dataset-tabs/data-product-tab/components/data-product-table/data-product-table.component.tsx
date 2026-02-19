@@ -60,7 +60,7 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
     };
 
     const handleRemoveDatasetFromDataProduct = useCallback(
-        async (dataProductId: string, name: string, consumingDataProductId: string) => {
+        async (dataProductId: string, consumingDataProductName: string, consumingDataProductId: string) => {
             try {
                 await removeDatasetFromDataProduct({
                     outputPortId: datasetId,
@@ -70,7 +70,7 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
                     },
                 }).unwrap();
                 dispatchMessage({
-                    content: t('Output Port {{name}} has been removed from Data Product', { name }),
+                    content: t('Removed Data Product {{name}} as Input Port', { name: consumingDataProductName }),
                     type: 'success',
                 });
             } catch (_error) {

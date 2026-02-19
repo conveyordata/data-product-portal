@@ -68,6 +68,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
+            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
         ],
     },
     denyOutputPortTechnicalAssetLink: {
@@ -78,6 +79,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
+            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
         ],
     },
     linkOutputPortToTechnicalAsset: {
@@ -88,6 +90,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
+            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
         ],
     },
     unlinkOutputPortFromTechnicalAsset: {
@@ -98,6 +101,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
+            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
         ],
     },
     createTechnicalAsset: {

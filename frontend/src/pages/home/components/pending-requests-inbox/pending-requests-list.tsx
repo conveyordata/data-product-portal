@@ -3,11 +3,19 @@ import type { PaginationConfig } from 'antd/es/pagination';
 import { useTranslation } from 'react-i18next';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type {
+    DataProductOutputPortPendingAction,
+    DataProductRoleAssignmentPendingAction,
+    TechnicalAssetOutputPortPendingAction,
+} from '@/store/api/services/generated/usersApi.ts';
 import { PendingItem } from './pending-request-item';
 
 type PendingRequestsListProps = {
-    pendingActions: PendingAction[];
+    pendingActions: (
+        | DataProductOutputPortPendingAction
+        | TechnicalAssetOutputPortPendingAction
+        | DataProductRoleAssignmentPendingAction
+    )[];
     pagination: PaginationConfig;
 };
 

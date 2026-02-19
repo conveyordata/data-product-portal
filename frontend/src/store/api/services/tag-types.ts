@@ -31,6 +31,7 @@ export enum TagTypes {
     ThemeSettings = 'ThemeSettings',
     History = 'History',
     Notifications = 'Notifications',
+    PendingAction = 'PendingAction',
 }
 
 export const STATIC_TAG_ID = {
