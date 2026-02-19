@@ -1,10 +1,10 @@
 import type { Node, Position, XYPosition } from '@xyflow/react';
 import type { ReactNode } from 'react';
-import type { NodeContract } from '@/types/graph/graph-contract';
+import type { Node as GraphNode } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { DataProductRoleAssignment } from '@/types/roles';
 
 export function sharedAttributes(
-    node: NodeContract,
+    node: GraphNode,
     setNodeId: (id: string) => void,
     domainsEnabled: boolean,
     centeredHandles: boolean,
@@ -29,7 +29,7 @@ export function sharedAttributes(
 }
 
 export function parseRegularNode(
-    node: NodeContract,
+    node: GraphNode,
     setNodeId: (id: string) => void,
     domainsEnabled: boolean,
     centeredHandles: boolean,
