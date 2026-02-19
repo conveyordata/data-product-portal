@@ -8,7 +8,6 @@ import type {
 } from '@/types/dataset/dataset-query-stats-daily.contract.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import type { DatasetsSearchContract } from '@/types/dataset/datasets-search.contract.ts';
-import type { GraphContract } from '@/types/graph/graph-contract';
 import type { QueryParams } from '@/types/http.ts';
 
 export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct, TagTypes.History];
@@ -56,12 +55,6 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             }),
             providesTags: [{ type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST }],
         }),
-        getDatasetGraphData: builder.query<GraphContract, string>({
-            query: (id) => ({
-                url: buildUrl(ApiUrl.DatasetGraph, { datasetId: id }),
-                method: 'GET',
-            }),
-        }),
         getDatasetQueryStatsDaily: builder.query<
             DatasetQueryStatsDailyResponses,
             {
@@ -97,6 +90,5 @@ export const {
     useGetAllDatasetsQuery,
     useGetDatasetQueryCuratedQueriesQuery,
     useGetUserDatasetsQuery,
-    useGetDatasetGraphDataQuery,
     useGetDatasetQueryStatsDailyQuery,
 } = datasetsApiSlice;

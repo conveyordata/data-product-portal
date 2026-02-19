@@ -12576,8 +12576,8 @@
         "tags": [
           "Graph"
         ],
-        "summary": "Get Graph Data",
-        "operationId": "get_graph_data_api_graph_get",
+        "summary": "Get Graph Data Old",
+        "operationId": "get_graph_data_old_api_graph_get",
         "deprecated": true,
         "parameters": [
           {
@@ -12664,13 +12664,13 @@
             }
           },
           {
-            "name": "dataset_nodes_enabled",
+            "name": "output_port_nodes_enabled",
             "in": "query",
             "required": false,
             "schema": {
               "type": "boolean",
               "default": true,
-              "title": "Dataset Nodes Enabled"
+              "title": "Output Port Nodes Enabled"
             }
           }
         ],
