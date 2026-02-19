@@ -182,7 +182,7 @@ export const getDatasetDataProductsColumns = ({
                             type={'link'}
                             onClick={() =>
                                 onRemoveDataProductDatasetLink(
-                                    input_port.id,
+                                    input_port.data_product_id,
                                     consuming_data_product.name,
                                     consuming_data_product_id,
                                 )

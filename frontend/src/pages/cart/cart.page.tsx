@@ -166,7 +166,7 @@ function Cart() {
             localStorage.removeItem(cartFormDataStorageKey);
             dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
 
-            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.OutputPorts));
+            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.InputPorts));
         }
     }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
 

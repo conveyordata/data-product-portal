@@ -4,7 +4,7 @@ from uuid import UUID
 from warnings import deprecated
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.data_products.output_ports.schema import Dataset
+from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import (
     TechnicalAsset as TechnicalAssetBaseSchema,
@@ -29,7 +29,9 @@ class DataOutput(TechnicalAssetBaseSchema):
 class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
     id: UUID
     output_port_id: UUID
+    output_port: OutputPort
     technical_asset_id: UUID
+    technical_asset: TechnicalAsset
     status: DecisionStatus
     requested_on: datetime
     denied_on: Optional[datetime]
@@ -65,6 +67,8 @@ class BaseDataOutputDatasetAssociationGet(ORMModel):
             **base,
             output_port_id=self.dataset_id,
             technical_asset_id=self.data_output_id,
+            output_port=self.dataset.convert(),
+            technical_asset=self.data_output.convert(),
         )
 
 

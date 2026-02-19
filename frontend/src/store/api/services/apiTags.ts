@@ -4,7 +4,8 @@ import { dataProductsOutputPortsInputPortsTags } from '@/store/api/services/tags
 import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProductsOutputPortsTags.ts';
 import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataProductsTechicalAssetsTags.ts';
 import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
-import { userNotificationsTags } from '@/store/api/services/tags/userNotificationsTags.ts';
+import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
+import { usersTags } from '@/store/api/services/tags/usersTags.ts';
 
 api.enhanceEndpoints({
     addTagTypes: Object.values(TagTypes),
@@ -257,25 +258,6 @@ api.enhanceEndpoints({
             ],
         },
 
-        getUsers: {
-            providesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
-        },
-        createUser: {
-            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
-        },
-        removeUser: {
-            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
-        },
-        setCanBecomeAdmin: {
-            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
-        },
-        markTourAsSeen: {
-            invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.CURRENT_USER }],
-        },
-        getCurrentUser: {
-            providesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.CURRENT_USER }],
-        },
-
         getTags: {
             providesTags: [{ type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST }],
         },
@@ -309,7 +291,8 @@ api.enhanceEndpoints({
         ...dataProductOutputPortTags,
         ...dataProductTechnicalAssetsTags,
         ...dataProductTags,
-        ...userNotificationsTags,
+        ...usersNotificationsTags,
+        ...usersTags,
         ...dataProductsOutputPortsInputPortsTags,
     },
 });
