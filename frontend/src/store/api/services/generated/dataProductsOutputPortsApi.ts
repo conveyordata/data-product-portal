@@ -534,10 +534,10 @@ export type GetOutputPortResponse = {
   tags: Tag[];
   domain: Domain;
   lifecycle: DataProductLifeCycle | null;
-  data_product_settings: OutputPortSettingValue[];
-  technical_asset_links: TechnicalAssetLink[];
   about: string | null;
   rolled_up_tags: Tag[];
+  data_product_settings: OutputPortSettingValue[];
+  technical_asset_links: TechnicalAssetLink[];
 };
 export type UpdateOutputPortResponse = {
   id: string;

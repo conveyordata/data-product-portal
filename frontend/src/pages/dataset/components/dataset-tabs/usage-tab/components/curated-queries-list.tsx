@@ -1,13 +1,12 @@
 import { Card, Empty, List } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import type { OutputPortCuratedQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import type { DatasetCuratedQueryContract } from '@/types/dataset';
 import { CuratedQueryItem, SQL_LINES_THRESHOLD } from './curated-query-item';
 
 type CuratedQueriesListProps = {
-    queries?: DatasetCuratedQueryContract[];
+    queries?: OutputPortCuratedQuery[];
     isLoading: boolean;
 };
 

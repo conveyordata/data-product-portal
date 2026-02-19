@@ -30,7 +30,7 @@ export function Home() {
                         <DataProductsInbox userId={currentUser.id} />
                     </Col>
                     <Col span={COL_SPAN}>
-                        <DatasetsInbox userId={currentUser.id} />
+                        <DatasetsInbox />
                     </Col>
                 </Row>
             </div>

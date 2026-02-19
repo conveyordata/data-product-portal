@@ -1,21 +1,16 @@
 import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Button, Tabs, Typography } from 'antd';
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { DatasetList } from '@/pages/home/components/datasets-inbox/datasets-list.tsx';
 import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
-import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import { getItemFromLocalStorage, type LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
 import styles from './datasets-inbox.module.scss';
-
-type Props = {
-    userId: string;
-};
 
 enum InboxTabKeys {
     LastViewed = 'last-viewed',
@@ -30,21 +25,22 @@ type DatasetInboxTab = {
     linkTo?: string;
 };
 
-export function DatasetsInbox({ userId }: Props) {
+export function DatasetsInbox() {
     const { t } = useTranslation();
     const posthog = usePostHog();
-    const { data: datasets, isFetching } = useGetAllDatasetsQuery();
-    const { data: userDatasets, isFetching: isFetchingOwnedDatasets } = useGetUserDatasetsQuery(userId);
+    const [activeTab, setActiveTab] = useState<InboxTabKeys>();
+    const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
+        currentUserAssigned: activeTab === InboxTabKeys.Owned,
+        limit: 1000,
+    });
 
-    const lastVisitedDatasets: LastVisitedItem[] = getItemFromLocalStorage(LocalStorageKeys.LastVisitedDatasets);
-    const filteredLastVisitedDatasets = useMemo(
-        () => filterOutNonMatchingItems(lastVisitedDatasets, datasets)?.slice(0, 4),
-        [datasets, lastVisitedDatasets],
-    );
-    const sortedOwnedDatasets = useMemo(
-        () => sortLastVisitedOwnedItems(lastVisitedDatasets, userDatasets)?.slice(0, 4),
-        [userDatasets, lastVisitedDatasets],
-    );
+    const lastVisitedOutputPorts: LastVisitedItem[] = getItemFromLocalStorage(LocalStorageKeys.LastVisitedDatasets);
+    const filteredDatasets = useMemo(() => {
+        if (activeTab === InboxTabKeys.Owned) {
+            return sortLastVisitedOwnedItems(lastVisitedOutputPorts, outputPorts)?.slice(0, 4);
+        }
+        return filterOutNonMatchingItems(lastVisitedOutputPorts, outputPorts)?.slice(0, 4);
+    }, [activeTab, outputPorts, lastVisitedOutputPorts]);
 
     const lastViewed: DatasetInboxTab = useMemo(
         () => ({
@@ -53,13 +49,13 @@ export function DatasetsInbox({ userId }: Props) {
             icon: <PartitionOutlined />,
             children: (
                 <DatasetList
-                    datasets={filteredLastVisitedDatasets}
+                    datasets={filteredDatasets}
                     isFetching={isFetching}
-                    lastVisitedDatasets={lastVisitedDatasets}
+                    lastVisitedDatasets={lastVisitedOutputPorts}
                 />
             ),
         }),
-        [filteredLastVisitedDatasets, isFetching, lastVisitedDatasets, t],
+        [filteredDatasets, isFetching, lastVisitedOutputPorts, t],
     );
 
     const owned: DatasetInboxTab = useMemo(
@@ -68,19 +64,17 @@ export function DatasetsInbox({ userId }: Props) {
             key: InboxTabKeys.Owned,
             children: (
                 <DatasetList
-                    datasets={sortedOwnedDatasets}
-                    isFetching={isFetchingOwnedDatasets}
-                    lastVisitedDatasets={lastVisitedDatasets}
+                    datasets={filteredDatasets}
+                    isFetching={isFetching}
+                    lastVisitedDatasets={lastVisitedOutputPorts}
                 />
             ),
             icon: <TeamOutlined />,
         }),
-        [isFetchingOwnedDatasets, lastVisitedDatasets, sortedOwnedDatasets, t],
+        [isFetching, lastVisitedOutputPorts, t, filteredDatasets],
     );
 
     const items: DatasetInboxTab[] = useMemo(() => [lastViewed, owned], [lastViewed, owned]);
-
-    if (isFetching) return <LoadingSpinner />;
 
     return (
         <div className={styles.section}>
@@ -93,6 +87,8 @@ export function DatasetsInbox({ userId }: Props) {
             <Tabs
                 defaultActiveKey={InboxTabKeys.LastViewed}
                 items={items}
+                activeKey={activeTab}
+                onTabClick={(activeKey) => setActiveTab(activeKey as InboxTabKeys)}
                 onChange={(activeKey) =>
                     posthog.capture(PosthogEvents.HOMEPAGE_DATASETS_TAB_CLICKED, { tab_name: activeKey })
                 }

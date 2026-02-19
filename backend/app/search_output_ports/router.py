@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Annotated, Sequence
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -17,24 +17,28 @@ router = APIRouter(tags=["Search Output ports"])
 
 @router.get("/v2/search/output_ports")
 def search_output_ports(
-    query: str = Query(min_length=3),
-    limit: int = Query(default=100, ge=1, le=100),
+    query: Annotated[str | None, Query(min_length=3)] = None,
+    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
+    current_user_assigned: bool = False,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> SearchOutputPortsResponse:
     return SearchOutputPortsResponse(
         output_ports=[
             SearchDatasets.model_validate(ds).convert()
-            for ds in search_data_sets(query, limit, db, user)
+            for ds in search_data_sets(query, limit, current_user_assigned, db, user)
         ]
     )
 
 
 @router.get("/datasets/search", deprecated=True)
 def search_data_sets(
-    query: str = Query(min_length=3),
-    limit: int = Query(default=100, ge=1, le=100),
+    query: Annotated[str | None, Query(min_length=3)] = None,
+    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
+    current_user_assigned: bool = False,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[SearchDatasets]:
-    return OutputPortService(db).search_datasets(query=query, limit=limit, user=user)
+    return OutputPortService(db).search_datasets(
+        query=query, limit=limit, user=user, current_user_assigned=current_user_assigned
+    )

@@ -7,13 +7,13 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { UsageListItem } from '@/components/list/usage-list-item/usage-list-item.component.tsx';
 import styles from '@/pages/home/components/datasets-inbox/datasets-inbox.module.scss';
 import { getLastVisitedItemDate } from '@/pages/home/helpers/last-visited-item-helper.ts';
-import type { DatasetsGetContract } from '@/types/dataset';
+import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { ApplicationPaths, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { formatDate } from '@/utils/date.helper.ts';
 import type { LastVisitedItem } from '@/utils/local-storage.helper.ts';
 
 type DatasetListProps = {
-    datasets?: DatasetsGetContract;
+    datasets?: SearchOutputPortsResponseItem[];
     isFetching: boolean;
     lastVisitedDatasets: LastVisitedItem[];
 };

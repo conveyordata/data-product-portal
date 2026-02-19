@@ -123,34 +123,43 @@ class OutputPortService:
         return dataset
 
     def search_datasets(
-        self, query: str, limit: int, user: UserModel
+        self,
+        query: Optional[str],
+        limit: int,
+        user: UserModel,
+        current_user_assigned: bool,
     ) -> Sequence[SearchDatasets]:
         """An attempt was made to use the elbow method to determine a cut-off for returned results.
         The results of this method were quite poor, hence the search currently works as a sorting operation only,
         no filtering is applied other than the limit.
         """
-        query_embedding = self.embedding_model.embed(query)
-        semantic_score = (
-            1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
-        ).label("semantic_score")
-        ts_query = func.websearch_to_tsquery("english", query)
-        keyword_score = func.coalesce(
-            func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32), 0
-        ).label("keyword_score")
+        ordered_by = DatasetModel.name.asc()
+        if query:
+            query_embedding = self.embedding_model.embed(query)
+            semantic_score = (
+                1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
+            ).label("semantic_score")
+            ts_query = func.websearch_to_tsquery("english", query)
+            keyword_score = func.coalesce(
+                func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32), 0
+            ).label("keyword_score")
 
-        semantic_weight = 2.0 / 3.0
-        keyword_weight = 1.0 - semantic_weight
-        hybrid_score = (
-            (semantic_weight * semantic_score) + (keyword_weight * keyword_score)
-        ).label("hybrid_score")
+            semantic_weight = 2.0 / 3.0
+            keyword_weight = 1.0 - semantic_weight
+            ordered_by = (
+                ((semantic_weight * semantic_score) + (keyword_weight * keyword_score))
+                .label("hybrid_score")
+                .desc()
+            )
 
         stmt = (
             select(DatasetModel)
-            .options(*get_dataset_load_options())
-            .order_by(hybrid_score.desc())
+            .order_by(ordered_by)
             # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .limit(limit * 2)
         )
+        if current_user_assigned:
+            stmt = stmt.where(DatasetModel.assignments.any(user_id=user.id))
         results = self.db.scalars(stmt).unique().all()
 
         visible_candidates: list[DatasetModel] = []
