@@ -88,7 +88,6 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
-
 frontendservice:
   type: NodePort
   port: 8080
@@ -104,22 +103,22 @@ ingress:
   pathType: Prefix
   hosts:
     - paths:
-      - path: /mcp
-        pathType: Prefix
-        name: data-product-portal
-        number: 5050
-      - path: /.well-known
-        pathType: Prefix
-        name: data-product-portal
-        number: 5050
-      - path: /api
-        pathType: Prefix
-        name: data-product-portal
-        number: 5050
-      - path: /
-        pathType: Prefix
-        name: frontend
-        number: 8080
+        - path: /mcp
+          pathType: Prefix
+          name: data-product-portal
+          number: 5050
+        - path: /.well-known
+          pathType: Prefix
+          name: data-product-portal
+          number: 5050
+        - path: /api
+          pathType: Prefix
+          name: data-product-portal
+          number: 5050
+        - path: /
+          pathType: Prefix
+          name: frontend
+          number: 8080
   tls: []
 
 resources: {}
@@ -141,11 +140,11 @@ autoscaling:
   targetMemoryUtilizationPercentage: 80
 
 frontendvolumes:
-- name: nginxcache
-- name: nginxrun
-- name: config
-  configMap:
-    name: frontend
+  - name: nginxcache
+  - name: nginxrun
+  - name: config
+    configMap:
+      name: frontend
 
 frontendvolumeMounts:
   - name: nginxcache
@@ -166,10 +165,9 @@ volumes:
   - name: tmpdir
     emptyDir: {}
 
-
 volumeMounts:
   - name: varlog
-    mountPath: /var/logs
+    mountPath: /var/log
   - name: sampledata
     mountPath: /sampledata
   - name: tmpdir
