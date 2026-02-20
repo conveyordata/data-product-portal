@@ -3,7 +3,7 @@ import { Divider, Flex, Input, Segmented, Space } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
-import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
+import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { PendingAccessRequestsView } from './pending-access-requests-view';
 
 type ViewMode = 'pending' | 'active';
@@ -15,12 +15,13 @@ export function RequestsPanel() {
     const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { data: pendingActions = [] } = useGetPendingActionsQuery();
+    const { data: { pending_actions } = {} } = useGetUserPendingActionsQuery();
 
     // Filter pending requests
     const pendingRequests = useMemo(() => {
-        return pendingActions;
-    }, [pendingActions]);
+        if (!pending_actions) return [];
+        return pending_actions;
+    }, [pending_actions]);
 
     // Get counts for badges
     const pendingCount = pendingRequests.length;

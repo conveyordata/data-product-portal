@@ -2,7 +2,12 @@ import { Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { type PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import {
+    PendingRequestType_DataProductOutputPort,
+    PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_TechnicalAssetOutputPort,
+} from '@/types/pending-actions/pending-request-types';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import { ExpandedRequestDetails } from '../../../../components/requests/expanded-request-details';
 import { useTableColumns } from '../../../../hooks/use-table-columns';
@@ -19,17 +24,13 @@ function filterByType(requests: PendingAction[], typeFilter: Props['typeFilter']
     if (typeFilter === 'outputPort') {
         return requests.filter(
             (action) =>
-                action.pending_action_type === PendingActionTypes.DataProductDataset ||
-                action.pending_action_type === PendingActionTypes.DataOutputDataset,
+                action.pending_action_type === PendingRequestType_DataProductOutputPort ||
+                action.pending_action_type === PendingRequestType_TechnicalAssetOutputPort,
         );
     }
 
     if (typeFilter === 'dataProduct') {
-        return requests.filter(
-            (action) =>
-                action.pending_action_type === PendingActionTypes.DataProductRoleAssignment ||
-                action.pending_action_type === PendingActionTypes.DatasetRoleAssignment,
-        );
+        return requests.filter((action) => action.pending_action_type === PendingRequestType_DataProductRoleAssignment);
     }
 
     return requests;
@@ -43,11 +44,11 @@ function filterBySearch(requests: PendingAction[], searchTerm: string): PendingA
     return requests.filter((action) => {
         // Check data link requests
         if (
-            action.pending_action_type === PendingActionTypes.DataProductDataset ||
-            action.pending_action_type === PendingActionTypes.DataOutputDataset
+            action.pending_action_type === PendingRequestType_DataProductOutputPort ||
+            action.pending_action_type === PendingRequestType_TechnicalAssetOutputPort
         ) {
             return (
-                action.dataset.name.toLowerCase().includes(lowerSearch) ||
+                action.output_port.name.toLowerCase().includes(lowerSearch) ||
                 ('data_product' in action && action.data_product.name.toLowerCase().includes(lowerSearch)) ||
                 action.requested_by.first_name.toLowerCase().includes(lowerSearch) ||
                 action.requested_by.last_name.toLowerCase().includes(lowerSearch) ||
@@ -56,10 +57,7 @@ function filterBySearch(requests: PendingAction[], searchTerm: string): PendingA
         }
 
         // Check role assignment requests
-        if (
-            action.pending_action_type === PendingActionTypes.DataProductRoleAssignment ||
-            action.pending_action_type === PendingActionTypes.DatasetRoleAssignment
-        ) {
+        if (action.pending_action_type === PendingRequestType_DataProductRoleAssignment) {
             return (
                 action.user.first_name.toLowerCase().includes(lowerSearch) ||
                 action.user.last_name.toLowerCase().includes(lowerSearch) ||

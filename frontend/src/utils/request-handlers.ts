@@ -1,69 +1,76 @@
-import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
-import { type PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
-import type { DataProductRoleRequest, DatasetRoleRequest } from './pending-request.helper';
+import type {
+    ApproveOutputPortAsInputPortApiArg,
+    DenyOutputPortAsInputPortApiArg,
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi';
+import type {
+    ApproveOutputPortTechnicalAssetLinkApiArg,
+    DenyOutputPortTechnicalAssetLinkApiArg,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi';
+import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import {
+    PendingRequestType_DataProductOutputPort,
+    PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_TechnicalAssetOutputPort,
+} from '@/types/pending-actions/pending-request-types';
+import type { DataProductRoleRequest } from './pending-request.helper';
 
 type ActionHandlers = {
-    handleAcceptDataProductDatasetLink: (req: DataProductDatasetLinkRequest) => Promise<void>;
-    handleRejectDataProductDatasetLink: (req: DataProductDatasetLinkRequest) => Promise<void>;
-    handleAcceptDataOutputDatasetLink: (req: DataOutputDatasetLinkRequest) => Promise<void>;
-    handleRejectDataOutputDatasetLink: (req: DataOutputDatasetLinkRequest) => Promise<void>;
+    handleAcceptDataProductDatasetLink: (req: ApproveOutputPortAsInputPortApiArg) => Promise<void>;
+    handleRejectDataProductDatasetLink: (req: DenyOutputPortAsInputPortApiArg) => Promise<void>;
+    handleAcceptDataOutputDatasetLink: (req: ApproveOutputPortTechnicalAssetLinkApiArg) => Promise<void>;
+    handleRejectDataOutputDatasetLink: (req: DenyOutputPortTechnicalAssetLinkApiArg) => Promise<void>;
     handleGrantAccessToDataProduct: (req: DataProductRoleRequest) => Promise<void>;
     handleDenyAccessToDataProduct: (req: DataProductRoleRequest) => Promise<void>;
-    handleGrantAccessToDataset: (req: DatasetRoleRequest) => Promise<void>;
-    handleDenyAccessToDataset: (req: DatasetRoleRequest) => Promise<void>;
 };
 
 export async function acceptRequest(action: PendingAction, handlers: ActionHandlers): Promise<void> {
     switch (action.pending_action_type) {
-        case PendingActionTypes.DataProductDataset:
+        case PendingRequestType_DataProductOutputPort:
             return handlers.handleAcceptDataProductDatasetLink({
-                id: action.id,
-                data_product_id: action.data_product_id,
-                dataset_id: action.dataset_id,
+                dataProductId: action.output_port.data_product_id,
+                outputPortId: action.output_port_id,
+                approveOutputPortAsInputPortRequest: {
+                    consuming_data_product_id: action.data_product_id,
+                },
             });
-        case PendingActionTypes.DataOutputDataset:
+        case PendingRequestType_TechnicalAssetOutputPort:
             return handlers.handleAcceptDataOutputDatasetLink({
-                id: action.id,
-                data_output_id: action.data_output_id,
-                dataset_id: action.dataset_id,
+                dataProductId: action.output_port.data_product_id,
+                outputPortId: action.output_port_id,
+                approveLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                    technical_asset_id: action.technical_asset_id,
+                },
             });
-        case PendingActionTypes.DataProductRoleAssignment:
+        case PendingRequestType_DataProductRoleAssignment:
             return handlers.handleGrantAccessToDataProduct({
                 assignment_id: action.id,
                 data_product_id: action.data_product.id,
-            });
-        case PendingActionTypes.DatasetRoleAssignment:
-            return handlers.handleGrantAccessToDataset({
-                assignment_id: action.id,
-                dataset_id: action.output_port.id,
             });
     }
 }
 
 export async function rejectRequest(action: PendingAction, handlers: ActionHandlers): Promise<void> {
     switch (action.pending_action_type) {
-        case PendingActionTypes.DataProductDataset:
+        case PendingRequestType_DataProductOutputPort:
             return handlers.handleRejectDataProductDatasetLink({
-                id: action.id,
-                data_product_id: action.data_product_id,
-                dataset_id: action.dataset_id,
+                dataProductId: action.output_port.data_product_id,
+                outputPortId: action.output_port_id,
+                denyOutputPortAsInputPortRequest: {
+                    consuming_data_product_id: action.data_product_id,
+                },
             });
-        case PendingActionTypes.DataOutputDataset:
+        case PendingRequestType_TechnicalAssetOutputPort:
             return handlers.handleRejectDataOutputDatasetLink({
-                id: action.id,
-                data_output_id: action.data_output_id,
-                dataset_id: action.dataset_id,
+                dataProductId: action.output_port.data_product_id,
+                outputPortId: action.output_port_id,
+                denyLinkBetweenTechnicalAssetAndOutputPortRequest: {
+                    technical_asset_id: action.technical_asset_id,
+                },
             });
-        case PendingActionTypes.DataProductRoleAssignment:
+        case PendingRequestType_DataProductRoleAssignment:
             return handlers.handleDenyAccessToDataProduct({
                 assignment_id: action.id,
                 data_product_id: action.data_product.id,
-            });
-        case PendingActionTypes.DatasetRoleAssignment:
-            return handlers.handleDenyAccessToDataset({
-                assignment_id: action.id,
-                dataset_id: action.output_port.id,
             });
     }
 }

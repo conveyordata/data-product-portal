@@ -1,7 +1,13 @@
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import {
+    type PendingRequestType,
+    PendingRequestType_DataProductOutputPort,
+    PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_TechnicalAssetOutputPort,
+} from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
 import { AccessRequestedCell } from '../components/requests/access-requested-cell';
 import { DataProductCell } from '../components/requests/data-product-cell';
@@ -52,22 +58,19 @@ export function useTableColumns({ onAccept, onReject }: UseTableColumnsParams): 
                 dataIndex: 'type',
                 key: 'type',
                 filters: [
-                    { text: t('Output Port'), value: PendingActionTypes.DataProductDataset },
-                    { text: t('Data Product'), value: PendingActionTypes.DataProductRoleAssignment },
+                    { text: t('Output Port'), value: PendingRequestType_DataProductOutputPort },
+                    { text: t('Data Product'), value: PendingRequestType_DataProductRoleAssignment },
                 ],
                 onFilter: (value, record) => {
-                    if (value === PendingActionTypes.DataProductDataset) {
+                    if (value === PendingRequestType_DataProductOutputPort) {
                         return (
-                            record.type === PendingActionTypes.DataProductDataset ||
-                            record.type === PendingActionTypes.DataOutputDataset
+                            record.type === PendingRequestType_DataProductOutputPort ||
+                            record.type === PendingRequestType_TechnicalAssetOutputPort
                         );
                     }
-                    return (
-                        record.type === PendingActionTypes.DataProductRoleAssignment ||
-                        record.type === PendingActionTypes.DatasetRoleAssignment
-                    );
+                    return record.type === PendingRequestType_DataProductRoleAssignment;
                 },
-                render: (type: PendingActionTypes) => <RequestTypeBadge type={type} />,
+                render: (type: PendingRequestType) => <RequestTypeBadge type={type} />,
             },
             {
                 title: t('Date'),

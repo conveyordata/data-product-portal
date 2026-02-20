@@ -2,11 +2,11 @@ import { TeamOutlined } from '@ant-design/icons';
 import { Flex } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
-import type { PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import type { PendingRequestType } from '@/types/pending-actions/pending-request-types';
 import { isOutputPortRequest, isRoleRequest } from '../../utils/request-utils';
 
 type Props = {
-    type: PendingActionTypes;
+    type: PendingRequestType;
 };
 
 export function RequestTypeBadge({ type }: Props) {

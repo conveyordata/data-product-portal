@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
-import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
+import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { DataProductsTab } from './components/data-products-tab/data-products-tab.component';
 import { OutputPortsTab } from './components/output-ports-tab/output-ports-tab.component';
 import { RequestsPanel } from './components/requests-panel/requests-panel.component';
@@ -15,7 +15,7 @@ export function ProductStudio() {
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<string>(TabKeys.DataProducts);
-    const { data: pendingActions } = useGetPendingActionsQuery();
+    const { data: { pending_actions } = {} } = useGetUserPendingActionsQuery();
 
     useEffect(() => {
         const hash = location.hash.slice(1);
@@ -32,7 +32,7 @@ export function ProductStudio() {
         navigate(`#${key}`, { replace: true });
     };
 
-    const pendingCount = pendingActions?.length ?? 0;
+    const pendingCount = pending_actions?.length ?? 0;
 
     const tabs = [
         {

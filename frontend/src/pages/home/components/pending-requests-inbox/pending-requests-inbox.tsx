@@ -6,11 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import {
-    type PendingRequestType,
-    PendingRequestTypeValues,
-} from '@/pages/home/components/pending-requests-inbox/pending-request-types.tsx';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
+import { type PendingRequestType, PendingRequestTypeValues } from '@/types/pending-actions/pending-request-types';
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
 import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
