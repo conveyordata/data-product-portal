@@ -5,7 +5,7 @@ import { DataProductOutlined } from '@/components/icons';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
 import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
-import type { DatasetsGetContract, DatasetsGetContractSingle } from '@/types/dataset/datasets-get.contract';
+import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
@@ -17,9 +17,9 @@ export const getOutputPortTableColumns = ({
     outputPorts: data,
 }: {
     t: TFunction;
-    outputPorts: DatasetsGetContract;
-}): TableColumnsType<DatasetsGetContractSingle> => {
-    const sorter = new Sorter<DatasetsGetContractSingle>();
+    outputPorts: SearchOutputPortsResponseItem[];
+}): TableColumnsType<SearchOutputPortsResponseItem> => {
+    const sorter = new Sorter<SearchOutputPortsResponseItem>();
     return [
         {
             title: t('Id'),

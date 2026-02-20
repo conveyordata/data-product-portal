@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns';
 
-import type { DatasetQueryStatsDailyResponse } from '@/types/dataset/dataset-query-stats-daily.contract';
+import type { OutputPortQueryStatsResponse } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 
 export type DayRange = number;
 export type Granularity = 'day' | 'week' | 'month';
@@ -18,7 +18,7 @@ export type ConsumerTotal = {
 };
 
 export function transformDataForChart(
-    responses: DatasetQueryStatsDailyResponse[],
+    responses: OutputPortQueryStatsResponse[],
     granularity: Granularity,
     unknownLabel: string,
 ): ChartDataPoint[] {

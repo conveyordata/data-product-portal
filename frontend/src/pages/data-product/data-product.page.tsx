@@ -1,4 +1,4 @@
-import Icon, { EditOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import Icon, { EditOutlined, LeftOutlined, ProductOutlined, RightOutlined } from '@ant-design/icons';
 import { Flex, Space, Typography } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
 import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
@@ -33,6 +34,21 @@ export function DataProduct() {
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId, {
         skip: !dataProductId,
     });
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        <ProductOutlined />
+                        {t('Product Studio')}
+                    </>
+                ),
+                path: ApplicationPaths.Studio,
+            },
+            { title: <>{dataProduct?.name}</> },
+        ]);
+    }, [setBreadcrumbs, dataProduct, t]);
     const { data: { rolled_up_tags: rolledUpTags = [] } = {} } = useGetDataProductRolledUpTagsQuery(dataProductId, {
         skip: !dataProductId,
     });

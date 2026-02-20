@@ -4,13 +4,21 @@ from typing import Final
 
 from sqlalchemy import text
 
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.schema_response import (
     GetDataProductOutputPortsResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
-from tests.factories import DatasetFactory
+from app.settings import settings
+from tests.factories import (
+    DatasetFactory,
+    DatasetRoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 EMBEDDING_LATENCY_BOUND: Final[float] = float(
     os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.000)
@@ -46,6 +54,33 @@ class TestOutputPortSearchRouter:
         assert returned_ops.issuperset(expected_ops), (
             f"{returned_ops} is not the superset of {expected_ops}"
         )
+
+    def test_search_output_ports_current_user_assigned(self, session, client):
+        ds_1, _, _ = self.setup(session)
+
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        DatasetRoleAssignmentFactory(
+            dataset=ds_1,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.get(
+            "/api/v2/search/output_ports", params={"current_user_assigned": True}
+        )
+        assert response.status_code == 200, response.text
+        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        assert len(output.output_ports) == 1
+
+    def test_search_output_ports_no_query(self, session, client):
+        output_ports = self.setup(session)
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        assert len(output.output_ports) == len(output_ports)
 
     def test_benchmark_output_ports(self, session, client):
         self.reseed(session)

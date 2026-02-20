@@ -70,8 +70,6 @@ class BaseOutputPortGet(ORMModel):
     tags: list[Tag]
     domain: Domain
     lifecycle: Optional[DataProductLifeCycle]
-    data_product_settings: list[OutputPortSettingValue]
-    technical_asset_links: list[TechnicalAssetLink]
 
 
 @deprecated("Use BaseOutputPortGet instead")
@@ -90,15 +88,13 @@ class BaseDatasetGet(ORMModel):
     domain: Domain
     lifecycle: Optional[DataProductLifeCycle]
 
-    # There can only be one
-    data_product_settings: list[DatasetSettingValue]
-    data_output_links: list[DataOutputLink]
-
 
 class GetOutputPortResponse(BaseOutputPortGet):
     about: Optional[str]
 
     rolled_up_tags: set[Tag]
+    data_product_settings: list[OutputPortSettingValue]
+    technical_asset_links: list[TechnicalAssetLink]
 
 
 @deprecated("Use GetOutputPortResponse instead")
@@ -108,6 +104,10 @@ class DatasetGet(BaseDatasetGet):
     # Nested schemas
     data_product_links: list[DataProductLink]
     rolled_up_tags: set[Tag]
+
+    # There can only be one
+    data_product_settings: list[DatasetSettingValue]
+    data_output_links: list[DataOutputLink]
 
     def convert(self):
         return GetOutputPortResponse(
@@ -131,6 +131,7 @@ class DatasetGet(BaseDatasetGet):
 
 class OutputPortsGet(BaseOutputPortGet):
     data_product_count: int
+    technical_assets_count: int
     data_product_name: str
     quality_status: Optional[DataQualityStatus]
 
@@ -138,6 +139,7 @@ class OutputPortsGet(BaseOutputPortGet):
 @deprecated("Use OutputPortsGet instead")
 class DatasetsGet(BaseDatasetGet):
     data_product_count: int
+    technical_assets_count: int
     data_product_name: str
     quality_status: Optional[DataQualityStatus]
 

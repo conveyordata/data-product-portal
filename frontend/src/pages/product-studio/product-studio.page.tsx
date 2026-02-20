@@ -1,9 +1,10 @@
-import { InboxOutlined } from '@ant-design/icons';
+import { InboxOutlined, ProductOutlined } from '@ant-design/icons';
 import { Badge, Tabs, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { DataProductsTab } from './components/data-products-tab/data-products-tab.component';
 import { OutputPortsTab } from './components/output-ports-tab/output-ports-tab.component';
@@ -12,6 +13,19 @@ import { TabKeys } from './product-studio-tabkeys';
 
 export function ProductStudio() {
     const { t } = useTranslation();
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        <ProductOutlined /> {t('Product Studio')}
+                    </>
+                ),
+            },
+        ]);
+    }, [setBreadcrumbs, t]);
+
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<string>(TabKeys.DataProducts);

@@ -1,17 +1,31 @@
+import { ShopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Empty, Flex, Pagination } from 'antd';
+import { Alert, Empty, Flex, Pagination } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDebounce } from 'use-debounce';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
-import { useGetAllDatasetsQuery, useSearchDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
 
 export function Marketplace() {
     const { t } = useTranslation();
     const posthog = usePostHog();
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        {' '}
+                        <ShopOutlined /> {t('Marketplace')}
+                    </>
+                ),
+            },
+        ]);
+    }, [setBreadcrumbs, t]);
 
     const searchSuggestions = useMemo(
         () => [
@@ -35,23 +49,16 @@ export function Marketplace() {
     const pageSize = 12;
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
-    const { data: datasets = [], isFetching: allDatasetsLoading } = useGetAllDatasetsQuery();
 
-    const { data: datasetSearchResult = [], isFetching: datasetSearchResultLoading } = useSearchDatasetsQuery(
-        {
-            query: debouncedSearchTerm,
-        },
-        { skip: debouncedSearchTerm?.length < 3 },
-    );
-
-    const finalDatasetResults = debouncedSearchTerm?.length >= 3 ? datasetSearchResult : datasets;
+    const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
+        query: searchTerm?.length >= 3 ? searchTerm : null,
+    });
 
     const paginatedOutputPorts = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
         const endIndex = startIndex + pageSize;
-        return finalDatasetResults.slice(startIndex, endIndex);
-    }, [finalDatasetResults, currentPage]);
+        return outputPorts.slice(startIndex, endIndex);
+    }, [outputPorts, currentPage]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -63,25 +70,34 @@ export function Marketplace() {
     };
 
     useEffect(() => {
-        if (debouncedSearchTerm?.length < 3) return;
+        if (searchTerm?.length < 3) return;
         posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
-            search_term: debouncedSearchTerm,
+            search_term: searchTerm,
         });
-    }, [posthog, debouncedSearchTerm]);
+    }, [posthog, searchTerm]);
     return (
         <SearchPage
             title={t('Marketplace')}
             searchPlaceholder={t('Ask a business question to find the relevant data')}
             onSearch={handleSearchChange}
-            loadingResults={datasetSearchResultLoading}
+            loadingResults={isFetching}
             searchSuggestions={searchSuggestions}
         >
-            {datasetSearchResultLoading || allDatasetsLoading ? (
+            {searchTerm && searchTerm.length < 3 && (
+                <>
+                    <Alert
+                        title={t('Search only works when providing at least 3 characters as a search term')}
+                        type="warning"
+                    />
+                    <br />
+                </>
+            )}
+            {isFetching ? (
                 <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
             ) : paginatedOutputPorts?.length > 0 ? (
                 <Flex wrap="wrap" gap={'small'}>
-                    {paginatedOutputPorts.map((dataset) => (
-                        <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
+                    {paginatedOutputPorts.map((outputPort) => (
+                        <DatasetMarketplaceCard key={outputPort.id} dataset={outputPort} />
                     ))}
                 </Flex>
             ) : (
@@ -90,7 +106,7 @@ export function Marketplace() {
                 </Flex>
             )}
 
-            {!datasetSearchResultLoading && finalDatasetResults.length > pageSize && (
+            {!isFetching && outputPorts.length > pageSize && (
                 <Flex
                     key="pagination-container"
                     justify={'flex-end'}
@@ -101,7 +117,7 @@ export function Marketplace() {
                     <Pagination
                         current={currentPage}
                         pageSize={pageSize}
-                        total={finalDatasetResults.length}
+                        total={outputPorts.length}
                         onChange={handlePageChange}
                         showSizeChanger={false} // Disable page size changer
                         showTotal={(total, range) =>

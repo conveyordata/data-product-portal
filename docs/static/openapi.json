@@ -229,10 +229,17 @@
           {
             "name": "query",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "minLength": 3,
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 3
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Query"
             }
           },
@@ -242,10 +249,20 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
+              "maximum": 1000,
               "minimum": 1,
               "default": 100,
               "title": "Limit"
+            }
+          },
+          {
+            "name": "current_user_assigned",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Current User Assigned"
             }
           }
         ],
@@ -285,10 +302,17 @@
           {
             "name": "query",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "minLength": 3,
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 3
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Query"
             }
           },
@@ -298,10 +322,20 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
+              "maximum": 1000,
               "minimum": 1,
               "default": 100,
               "title": "Limit"
+            }
+          },
+          {
+            "name": "current_user_assigned",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Current User Assigned"
             }
           }
         ],
@@ -17232,20 +17266,6 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DatasetSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "data_output_links": {
-            "items": {
-              "$ref": "#/components/schemas/DataOutputLink"
-            },
-            "type": "array",
-            "title": "Data Output Links"
-          },
           "about": {
             "anyOf": [
               {
@@ -17271,6 +17291,20 @@
             "type": "array",
             "uniqueItems": true,
             "title": "Rolled Up Tags"
+          },
+          "data_product_settings": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetSettingValue"
+            },
+            "type": "array",
+            "title": "Data Product Settings"
+          },
+          "data_output_links": {
+            "items": {
+              "$ref": "#/components/schemas/DataOutputLink"
+            },
+            "type": "array",
+            "title": "Data Output Links"
           }
         },
         "type": "object",
@@ -17286,11 +17320,11 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_settings",
-          "data_output_links",
           "about",
           "data_product_links",
-          "rolled_up_tags"
+          "rolled_up_tags",
+          "data_product_settings",
+          "data_output_links"
         ],
         "title": "DatasetGet",
         "deprecated": true
@@ -17588,23 +17622,13 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DatasetSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "data_output_links": {
-            "items": {
-              "$ref": "#/components/schemas/DataOutputLink"
-            },
-            "type": "array",
-            "title": "Data Output Links"
-          },
           "data_product_count": {
             "type": "integer",
             "title": "Data Product Count"
+          },
+          "technical_assets_count": {
+            "type": "integer",
+            "title": "Technical Assets Count"
           },
           "data_product_name": {
             "type": "string",
@@ -17634,9 +17658,8 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_settings",
-          "data_output_links",
           "data_product_count",
+          "technical_assets_count",
           "data_product_name",
           "quality_status"
         ],
@@ -18890,20 +18913,6 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/OutputPortSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "technical_asset_links": {
-            "items": {
-              "$ref": "#/components/schemas/TechnicalAssetLink"
-            },
-            "type": "array",
-            "title": "Technical Asset Links"
-          },
           "about": {
             "anyOf": [
               {
@@ -18922,6 +18931,20 @@
             "type": "array",
             "uniqueItems": true,
             "title": "Rolled Up Tags"
+          },
+          "data_product_settings": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortSettingValue"
+            },
+            "type": "array",
+            "title": "Data Product Settings"
+          },
+          "technical_asset_links": {
+            "items": {
+              "$ref": "#/components/schemas/TechnicalAssetLink"
+            },
+            "type": "array",
+            "title": "Technical Asset Links"
           }
         },
         "type": "object",
@@ -18937,10 +18960,10 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_settings",
-          "technical_asset_links",
           "about",
-          "rolled_up_tags"
+          "rolled_up_tags",
+          "data_product_settings",
+          "technical_asset_links"
         ],
         "title": "GetOutputPortResponse"
       },
@@ -21391,23 +21414,13 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DatasetSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "data_output_links": {
-            "items": {
-              "$ref": "#/components/schemas/DataOutputLink"
-            },
-            "type": "array",
-            "title": "Data Output Links"
-          },
           "data_product_count": {
             "type": "integer",
             "title": "Data Product Count"
+          },
+          "technical_assets_count": {
+            "type": "integer",
+            "title": "Technical Assets Count"
           },
           "data_product_name": {
             "type": "string",
@@ -21437,9 +21450,8 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_settings",
-          "data_output_links",
           "data_product_count",
+          "technical_assets_count",
           "data_product_name",
           "quality_status"
         ],
@@ -21523,23 +21535,13 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/OutputPortSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "technical_asset_links": {
-            "items": {
-              "$ref": "#/components/schemas/TechnicalAssetLink"
-            },
-            "type": "array",
-            "title": "Technical Asset Links"
-          },
           "data_product_count": {
             "type": "integer",
             "title": "Data Product Count"
+          },
+          "technical_assets_count": {
+            "type": "integer",
+            "title": "Technical Assets Count"
           },
           "data_product_name": {
             "type": "string",
@@ -21569,9 +21571,8 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_settings",
-          "technical_asset_links",
           "data_product_count",
+          "technical_assets_count",
           "data_product_name",
           "quality_status"
         ],

@@ -1,4 +1,11 @@
-import { BellOutlined, CheckCircleOutlined, MessageOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    BellOutlined,
+    CheckCircleOutlined,
+    MessageOutlined,
+    PlusOutlined,
+    ShopOutlined,
+    ShoppingCartOutlined,
+} from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import {
     Alert,
@@ -21,6 +28,7 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
@@ -33,8 +41,8 @@ import {
     useLinkInputPortsToDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
-import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 
@@ -47,17 +55,39 @@ function Cart() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        {' '}
+                        <ShopOutlined /> {t('Marketplace')}
+                    </>
+                ),
+                path: ApplicationPaths.Marketplace,
+            },
+            {
+                title: (
+                    <>
+                        <ShoppingCartOutlined /> {t('Cart')}
+                    </>
+                ),
+            },
+        ]);
+    }, [setBreadcrumbs, t]);
 
-    const { data: datasets, isFetching: fetchingDatasets } = useGetAllDatasetsQuery();
+    const { data: { output_ports: outputPorts = [] } = {}, isFetching: fetchingOutputPorts } =
+        useSearchOutputPortsQuery({ limit: 1000 });
     const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
         useLinkInputPortsToDataProductMutation();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
-    const cartDatasets = useMemo(() => {
+    const cartOutputPorts = useMemo(() => {
         if (cartDatasetIds.length === 0) {
             return [];
         }
-        return datasets?.filter((dataset) => cartDatasetIds.includes(dataset.id));
-    }, [datasets, cartDatasetIds]);
+        return outputPorts?.filter((dataset) => cartDatasetIds.includes(dataset.id));
+    }, [outputPorts, cartDatasetIds]);
 
     const currentUser = useSelector(selectCurrentUser);
     const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
@@ -72,8 +102,8 @@ function Cart() {
     };
     const initialValues: CartFormData | undefined = useMemo(() => {
         let data: CartFormData = {};
-        if (userDataProducts === undefined) {
-            return;
+        if (isFetchingUserDataProducts) {
+            return undefined;
         }
         const savedData = localStorage.getItem(cartFormDataStorageKey);
         if (savedData) {
@@ -86,19 +116,24 @@ function Cart() {
             data.dataProductId = undefined;
         }
         return data;
-    }, [createdProductId, userDataProducts]);
+    }, [createdProductId, userDataProducts, isFetchingUserDataProducts]);
 
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
-        if (!values.justification || !values.dataProductId || cartDatasets === undefined || cartDatasets.length === 0) {
+        if (
+            !values.justification ||
+            !values.dataProductId ||
+            cartOutputPorts === undefined ||
+            cartOutputPorts.length === 0
+        ) {
             return;
         }
         posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED, {
-            cartSize: cartDatasets?.length,
+            cartSize: cartOutputPorts?.length,
         });
         requestDatasetAccessForDataProduct({
             id: values.dataProductId,
             linkInputPortsToDataProduct: {
-                input_ports: cartDatasets?.map((dataset) => dataset.id),
+                input_ports: cartOutputPorts?.map((dataset) => dataset.id),
                 justification: values.justification,
             },
         });
@@ -114,7 +149,6 @@ function Cart() {
             };
         }) ?? [];
     const selectedDataProductId = Form.useWatch('dataProductId', form);
-
     const createNewDataProduct = () => {
         posthog.capture(PosthogEvents.CART_CREATE_DATA_PRODUCT);
         navigate({
@@ -201,8 +235,8 @@ function Cart() {
         <Row gutter={16}>
             <Col span={10}>
                 <CartOverview
-                    loading={fetchingDatasets}
-                    cartDatasets={cartDatasets}
+                    loading={fetchingOutputPorts}
+                    cartOutputPorts={cartOutputPorts}
                     overlappingDatasetIds={overlappingOutputPortIds}
                     selectedDataProductId={selectedDataProductId}
                 />
@@ -213,6 +247,7 @@ function Cart() {
                         <Skeleton />
                     ) : (
                         <Form<CartFormData>
+                            key={initialValues.dataProductId}
                             layout={'vertical'}
                             onFinish={onFinish}
                             form={form}
@@ -288,10 +323,10 @@ function Cart() {
                                         style={{ width: '100%' }}
                                         loading={isRequestingAccess}
                                         disabled={
-                                            fetchingDatasets ||
+                                            fetchingOutputPorts ||
                                             submitFormIssues.length > 0 ||
-                                            cartDatasets === undefined ||
-                                            cartDatasets?.length === 0
+                                            cartOutputPorts === undefined ||
+                                            cartOutputPorts?.length === 0
                                         }
                                     >
                                         {t('Submit access requests')}

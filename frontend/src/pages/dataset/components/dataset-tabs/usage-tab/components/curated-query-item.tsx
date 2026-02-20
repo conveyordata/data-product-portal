@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import sql from 'react-syntax-highlighter/dist/esm/languages/hljs/sql';
 import { magula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-
-import type { DatasetCuratedQueryContract } from '@/types/dataset';
+import type { OutputPortCuratedQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import styles from './curated-query-item.module.scss';
 
 SyntaxHighlighter.registerLanguage('sql', sql);
@@ -13,7 +12,7 @@ SyntaxHighlighter.registerLanguage('sql', sql);
 export const SQL_LINES_THRESHOLD = 10;
 
 type CuratedQueryItemProps = {
-    query: DatasetCuratedQueryContract;
+    query: OutputPortCuratedQuery;
     isExpanded: boolean;
     onToggle: () => void;
     onCopy: (text: string) => void;

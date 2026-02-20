@@ -3,16 +3,29 @@ from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, Enum, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
-from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    Session,
+    column_property,
+    deferred,
+    mapped_column,
+    relationship,
+)
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
+from app.data_products.output_port_technical_assets_link.model import (
+    DataOutputDatasetAssociation,
+)
 from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.model import (
+    DataProductDatasetAssociation,
+)
 from app.data_products.output_ports.status import OutputPortStatus
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
@@ -24,12 +37,6 @@ if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.model import DataProduct
-    from app.data_products.output_port_technical_assets_link.model import (
-        DataOutputDatasetAssociation,
-    )
-    from app.data_products.output_ports.input_ports.model import (
-        DataProductDatasetAssociation,
-    )
 
 
 class Dataset(Base, BaseORM):
@@ -103,17 +110,22 @@ class Dataset(Base, BaseORM):
         return self.quality_summary.overall_status if self.quality_summary else None
 
     @property
-    def data_product_count(self) -> int:
-        accepted_product_links = [
-            link
-            for link in self.data_product_links
-            if link.status == DecisionStatus.APPROVED
-        ]
-        return len(accepted_product_links)
-
-    @property
     def data_product_name(self) -> str:
         return self.data_product.name
+
+    data_product_count = column_property(
+        select(func.count(DataProductDatasetAssociation.id))
+        .where(DataProductDatasetAssociation.dataset_id == id)
+        .where(DataProductDatasetAssociation.status == DecisionStatus.APPROVED)
+        .correlate_except(DataProductDatasetAssociation)
+        .scalar_subquery()
+    )
+    technical_assets_count = column_property(
+        select(func.count(DataOutputDatasetAssociation.id))
+        .where(DataOutputDatasetAssociation.dataset_id == id)
+        .correlate_except(DataOutputDatasetAssociation)
+        .scalar_subquery()
+    )
 
 
 def ensure_output_port_exists(

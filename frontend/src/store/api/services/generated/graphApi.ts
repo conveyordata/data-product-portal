@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/resourceNamesApi";
+import { api } from "@/store/api/services/generated/outputPortsSearchApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getGraphData: build.query<GetGraphDataApiResponse, GetGraphDataApiArg>({

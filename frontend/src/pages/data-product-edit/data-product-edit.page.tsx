@@ -1,15 +1,36 @@
+import { ProductOutlined } from '@ant-design/icons';
 import { Flex, Space, Typography } from 'antd';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
-
 import { DataProductForm } from '@/components/data-products/data-product-form/data-product-form.component.tsx';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { ApplicationPaths } from '@/types/navigation.ts';
+import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import styles from './data-product-edit.module.scss';
 
 export function DataProductEdit() {
     const { dataProductId } = useParams();
     const { data: dataProduct, isError } = useGetDataProductQuery(dataProductId || '', { skip: !dataProductId });
     const navigate = useNavigate();
+
+    const { t } = useTranslation();
+
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        <ProductOutlined /> {t('Product Studio')}
+                    </>
+                ),
+                path: ApplicationPaths.Studio,
+            },
+            { title: <>{dataProduct?.name}</>, path: createDataProductIdPath(dataProductId ?? '') },
+            { title: t('Edit') },
+        ]);
+    }, [setBreadcrumbs, dataProduct, dataProductId, t]);
 
     if (!dataProductId || isError) {
         navigate(ApplicationPaths.Studio, { replace: true });

@@ -1,12 +1,13 @@
-import { SettingOutlined } from '@ant-design/icons';
+import { ProductOutlined, SettingOutlined } from '@ant-design/icons';
 import { Flex, Space, Typography } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -14,7 +15,7 @@ import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataPr
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
+import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
@@ -33,6 +34,22 @@ export function DataOutput() {
     );
     const { data: dataProduct } = useGetDataProductQuery(dataProductId, { skip: !dataProductId });
     const { data: { plugins } = {} } = useGetPluginsQuery();
+
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        <ProductOutlined /> {t('Product Studio')}
+                    </>
+                ),
+                path: ApplicationPaths.Studio,
+            },
+            { title: <>{dataProduct?.name}</>, path: createDataProductIdPath(dataProductId) },
+            { title: <>{dataOutput?.name}</> },
+        ]);
+    }, [setBreadcrumbs, dataProduct, dataOutput, dataProductId, t]);
 
     const dataOutputTypeIcon = useMemo(() => {
         return getDataOutputIcon(dataOutput?.configuration.configuration_type, plugins);
@@ -61,8 +78,9 @@ export function DataOutput() {
         }
     }
 
-    if (isLoading || !dataOutput || dataOutputOwners === undefined || dataOutputTypeIcon === undefined)
+    if (isLoading || !dataOutput) {
         return <LoadingSpinner />;
+    }
 
     return (
         <Flex className={styles.dataOutputContainer}>
@@ -71,7 +89,7 @@ export function DataOutput() {
                     <Space className={styles.header}>
                         <CustomSvgIconLoader iconComponent={dataOutputTypeIcon} size="large" />
                         <Typography.Title level={3} ellipsis={{ tooltip: dataOutput?.name, rows: 2 }}>
-                            {dataOutput.name}
+                            {dataOutput?.name}
                         </Typography.Title>
                     </Space>
                     {canEdit && (
