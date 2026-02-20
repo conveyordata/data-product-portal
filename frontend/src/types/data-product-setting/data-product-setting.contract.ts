@@ -15,8 +15,6 @@ export interface DataProductSettingContract {
     scope: DataProductSettingScope;
 }
 
-export interface DataProductSettingModel extends DataProductSettingContract {}
-
 export interface DataProductSettingValueContract {
     id: string;
     data_product: DataProductContract;
