@@ -1,6 +1,6 @@
 import { Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { DataQualityStatus } from '@/store/api/services/generated/outputPortDataQualityApi';
+import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
 import { formatQualityStatus, getQualityStatusColor, getQualityStatusIcon } from '@/utils/quality-status.helper';
 import { CustomSvgIconLoader } from '../icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 

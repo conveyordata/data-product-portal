@@ -11,6 +11,11 @@ import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type CreateTechnicalAssetRequest,
+    useCreateTechnicalAssetMutation,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     type PlatformTile,
     useGetPlatformTilesQuery,
@@ -22,13 +27,9 @@ import {
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
-import {
-    useCreateDataOutputMutation,
-    useLazyGetDataOutputResultStringQuery,
-} from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
+import { useLazyGetDataOutputResultStringQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
+import { type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
@@ -38,7 +39,7 @@ import styles from './data-output-form.module.scss';
 
 type Props = {
     mode: 'create';
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration> | null>;
+    formRef: RefObject<FormInstance<CreateTechnicalAssetRequest> | null>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
@@ -57,13 +58,12 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     // Data
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
-    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
+    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductQuery(dataProductId);
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const { data: { platform_service_configurations: platformConfig = [] } = {}, isLoading: platformsLoading } =
         useGetAllPlatformServiceConfigurationsQuery();
 
-    // Mutations
-    const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
+    const [createTechnicalAsset, { isLoading: isCreating }] = useCreateTechnicalAssetMutation();
 
     // State
     const [selectedDataPlatform, setSelectedDataPlatform] = useState<CustomDropdownItemProps<string> | undefined>(
@@ -139,10 +139,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         return map;
     }, [platformConfig]);
 
-    const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
+    const onSubmit: FormProps<CreateTechnicalAssetRequest>['onFinish'] = async (values) => {
         try {
             if (!platformsLoading) {
-                await createDataOutput({ id: dataProductId, dataOutput: values }).unwrap();
+                await createTechnicalAsset({ dataProductId, createTechnicalAssetRequest: values }).unwrap();
                 dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
                 navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
@@ -155,7 +155,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         }
     };
 
-    const onSubmitFailed: FormProps<DataOutputCreateFormSchema>['onFinishFailed'] = () => {
+    const onSubmitFailed: FormProps<CreateTechnicalAssetRequest>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
@@ -221,7 +221,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     );
 
     // Result string
-    const setResultString = useDebouncedCallback((values: DataOutputCreateFormSchema) => {
+    const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
             .then(() => {
                 const request = {
@@ -235,9 +235,9 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             .catch(() => form.setFieldValue('result', undefined));
     }, DEBOUNCE);
 
-    const onValuesChange: FormProps<DataOutputCreateFormSchema>['onValuesChange'] = (
+    const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (
         changed,
-        values: DataOutputCreateFormSchema,
+        values: CreateTechnicalAssetRequest,
     ) => {
         if (changed.configuration) {
             setResultString(values);

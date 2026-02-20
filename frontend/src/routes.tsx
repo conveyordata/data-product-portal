@@ -91,7 +91,7 @@ const router = createBrowserRouter([
                     },
                     {
                         path: ApplicationPaths.Marketplace,
-                        element: <Navigate to={ApplicationPaths.Datasets} />,
+                        element: <Navigate to={ApplicationPaths.Marketplace} />,
                     },
                     {
                         path: ApplicationPaths.MarketplaceCart,
@@ -103,18 +103,19 @@ const router = createBrowserRouter([
                         ],
                     },
                     {
-                        path: ApplicationPaths.Datasets,
+                        path: ApplicationPaths.Marketplace,
                         children: [
                             {
                                 element: <Marketplace />,
                                 index: true,
                             },
+
                             {
-                                path: ApplicationPaths.Dataset,
+                                path: ApplicationPaths.MarketPlaceOutputPort,
                                 element: <Dataset />,
                             },
                             {
-                                path: ApplicationPaths.DatasetEdit,
+                                path: ApplicationPaths.MarketPlaceOutputPortEdit,
                                 element: <DatasetEdit />,
                             },
                         ],

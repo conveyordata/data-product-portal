@@ -1,9 +1,9 @@
 import type { Edge } from '@xyflow/react';
 import type { GlobalToken } from 'antd';
 
-import type { EdgeContract } from '@/types/graph/graph-contract.ts';
+import type { Edge as GraphEdge } from '@/store/api/services/generated/graphApi.ts';
 
-function parseEdges(edges: EdgeContract[], token: GlobalToken): Edge[] {
+function parseEdges(edges: GraphEdge[], token: GlobalToken): Edge[] {
     return edges.map((edge) => {
         return {
             id: edge.id,

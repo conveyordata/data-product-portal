@@ -3,15 +3,17 @@ import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { DataProductStatus, DataProductsGetContract } from '@/types/data-product';
+import type {
+    DataProductStatus,
+    DataProductType,
+    GetDataProductsResponseItem,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import type { DataProductTypeContract } from '@/types/data-product-type';
 import type { DomainContract } from '@/types/domain';
-import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
-
 import styles from './data-products-table.module.scss';
 
 const iconColumnWidth = 30;
@@ -20,9 +22,9 @@ export const getDataProductTableColumns = ({
     dataProducts: data,
 }: {
     t: TFunction;
-    dataProducts: DataProductsGetContract;
-}): TableColumnsType<DataProductsGetContract[0]> => {
-    const sorter = new Sorter<DataProductsGetContract[0]>();
+    dataProducts: GetDataProductsResponseItem[];
+}): TableColumnsType<GetDataProductsResponseItem> => {
+    const sorter = new Sorter<GetDataProductsResponseItem>();
     return [
         {
             title: t('Id'),
@@ -84,8 +86,8 @@ export const getDataProductTableColumns = ({
         {
             title: t('Type'),
             dataIndex: 'type',
-            render: (type: DataProductTypeContract) => {
-                const icon = getDataProductTypeIconOld(type.icon_key);
+            render: (type: DataProductType) => {
+                const icon = getDataProductTypeIcon(type.icon_key);
                 return <TableCellItem reactSVGComponent={icon} text={type.name} />;
             },
             ellipsis: true,
@@ -106,7 +108,7 @@ export const getDataProductTableColumns = ({
             render: (datasetCount: number) => {
                 return <TableCellItem text={t('{{count}} Output Ports', { count: datasetCount })} />;
             },
-            sorter: sorter.numberSorter((dp) => dp.dataset_count),
+            sorter: sorter.numberSorter((dp) => dp.output_port_count),
         },
         {
             title: t('Produces'),

@@ -73,6 +73,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -225,10 +227,89 @@ export type DataProductOutputPortPendingAction = {
   approved_by: User | null;
   pending_action_type?: "DataProductOutputPort";
 };
+export type TechnicalAssetStatus = "pending" | "active" | "archived";
+export type TechnicalMapping = "default" | "custom";
+export type AccessGranularity = "schema" | "table";
+export type DatabricksTechnicalAssetConfiguration = {
+  configuration_type: "DatabricksTechnicalAssetConfiguration";
+  catalog: string;
+  schema?: string;
+  table?: string;
+  bucket_identifier?: string;
+  catalog_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type GlueTechnicalAssetConfiguration = {
+  configuration_type: "GlueTechnicalAssetConfiguration";
+  database: string;
+  database_suffix?: string;
+  table?: string;
+  bucket_identifier?: string;
+  database_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type RedshiftTechnicalAssetConfiguration = {
+  configuration_type: "RedshiftTechnicalAssetConfiguration";
+  database: string;
+  schema?: string;
+  table?: string;
+  bucket_identifier?: string;
+  database_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type S3TechnicalAssetConfiguration = {
+  configuration_type: "S3TechnicalAssetConfiguration";
+  bucket: string;
+  suffix?: string;
+  path: string;
+};
+export type SnowflakeTechnicalAssetConfiguration = {
+  configuration_type: "SnowflakeTechnicalAssetConfiguration";
+  database: string;
+  schema?: string;
+  table?: string;
+  bucket_identifier?: string;
+  database_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type TechnicalAsset = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  status: TechnicalAssetStatus;
+  technical_mapping: TechnicalMapping;
+  owner_id: string;
+  platform_id: string;
+  service_id: string;
+  configuration:
+    | ({
+        configuration_type: "DatabricksTechnicalAssetConfiguration";
+      } & DatabricksTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "GlueTechnicalAssetConfiguration";
+      } & GlueTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "RedshiftTechnicalAssetConfiguration";
+      } & RedshiftTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "S3TechnicalAssetConfiguration";
+      } & S3TechnicalAssetConfiguration)
+    | ({
+        configuration_type: "SnowflakeTechnicalAssetConfiguration";
+      } & SnowflakeTechnicalAssetConfiguration);
+  owner: DataProduct;
+};
 export type TechnicalAssetOutputPortPendingAction = {
   id: string;
   output_port_id: string;
+  output_port: OutputPort;
   technical_asset_id: string;
+  technical_asset: TechnicalAsset;
   status: DecisionStatus;
   requested_on: string;
   denied_on: string | null;

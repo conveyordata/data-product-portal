@@ -35,6 +35,9 @@ class DatasetDataOutput(TechnicalAsset):
     # Nested schemas
     owner: DataProduct
 
+    def convert(self):
+        return TechnicalAsset(**self.model_dump(exclude={"owner"}))
+
 
 class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
     technical_asset: TechnicalAsset
@@ -108,13 +111,19 @@ class DatasetGet(BaseDatasetGet):
 
     def convert(self):
         return GetOutputPortResponse(
-            **self.model_dump(
-                exclude={
-                    "data_output_links",
-                    "data_product_settings",
-                    "data_product_links",
-                }
-            ),
+            id=self.id,
+            namespace=self.namespace,
+            name=self.name,
+            description=self.description,
+            status=self.status,
+            usage=self.usage,
+            access_type=self.access_type,
+            data_product_id=self.data_product_id,
+            tags=self.tags,
+            domain=self.domain,
+            lifecycle=self.lifecycle,
+            about=self.about,
+            rolled_up_tags=self.rolled_up_tags,
             technical_asset_links=[dol.convert() for dol in self.data_output_links],
             data_product_settings=[s.convert() for s in self.data_product_settings],
         )

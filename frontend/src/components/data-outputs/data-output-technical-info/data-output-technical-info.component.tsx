@@ -1,26 +1,29 @@
 import { Table, type TableColumnsType } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+    type TechnicalInfo,
+    useGetTechnicalAssetQuery,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 import { getTechnicalInformationColumns } from './data-output-table-columns';
 import styles from './data-output-technical-info.module.scss';
 
 type Props = {
-    data_output_id: string;
+    technicalAssetId: string;
+    dataProductId: string;
 };
 
-export function DataOutputTechnicalInfo({ data_output_id }: Props) {
+export function DataOutputTechnicalInfo({ technicalAssetId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: data_output, isLoading } = useGetDataOutputByIdQuery(data_output_id);
+    const { data: technicalASset, isLoading } = useGetTechnicalAssetQuery({ id: technicalAssetId, dataProductId });
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
-    const technicalInfo = data_output?.technical_info || [];
+    const technicalInfo = technicalASset?.technical_info || [];
     const info_column =
-        uiMetadataGroups?.find((plugin) => plugin.plugin === data_output?.configuration.configuration_type)
+        uiMetadataGroups?.find((plugin) => plugin.plugin === technicalASset?.configuration.configuration_type)
             ?.detailed_name ?? 'Info';
 
-    const columns: TableColumnsType<TechnicalInfoContract> = useMemo(() => {
+    const columns: TableColumnsType<TechnicalInfo> = useMemo(() => {
         return getTechnicalInformationColumns({
             t,
             info_column,
@@ -28,7 +31,7 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
     }, [t, info_column]);
 
     return (
-        <Table<TechnicalInfoContract>
+        <Table<TechnicalInfo>
             loading={isLoading || isLoadingMetadata}
             className={styles.dataOutputListTable}
             columns={columns}

@@ -1,16 +1,14 @@
 import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-
+import type { TechnicalAssetStatus } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
-import type { DataOutputStatus } from '@/types/data-output';
 import type { TagModel } from '@/types/tag';
 import { getDataOutputType } from '@/utils/data-output-type.helper';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
-
 import styles from './data-output-description.module.scss';
 
 type Props = {
-    status: DataOutputStatus;
+    status: TechnicalAssetStatus;
     type: string;
     description: string;
     tags: TagModel[];

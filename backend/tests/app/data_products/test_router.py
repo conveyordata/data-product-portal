@@ -557,7 +557,7 @@ class TestDataProductsRouter:
         response = self.get_namespace_suggestion(client, name)
         body = response.json()
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert body["namespace"] == "test-with-spaces"
 
     def test_get_namespace_length_limits(self, client):
@@ -569,7 +569,7 @@ class TestDataProductsRouter:
         namespace = "test"
         response = self.validate_namespace_old(client, namespace)
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert response.json()["validity"] == ResourceNameValidityType.VALID
 
     def test_validate_namespace(self, client):

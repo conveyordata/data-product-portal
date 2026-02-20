@@ -65,7 +65,7 @@ export const axiosBaseQuery =
             method?: AxiosRequestConfig['method'];
             data?: AxiosRequestConfig['data'];
             body?: AxiosRequestConfig['data'];
-            params?: Record<string, string | number | undefined | null>;
+            params?: Record<string, string | number | boolean | undefined | null>;
             headers?: Headers;
         },
         unknown,

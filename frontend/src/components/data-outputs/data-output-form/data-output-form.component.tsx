@@ -4,40 +4,41 @@ import { useNavigate } from 'react-router';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type DataOutputUpdate,
+    useGetTechnicalAssetQuery,
+    useRemoveTechnicalAssetMutation,
+    useUpdateTechnicalAssetMutation,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useResourceNameConstraintsQuery } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import {
-    useGetDataOutputByIdQuery,
-    useRemoveDataOutputMutation,
-    useUpdateDataOutputMutation,
-} from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
-import type { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import styles from './data-output-form.module.scss';
 
 type Props = {
     mode: 'edit';
+    dataProductId: string;
     dataOutputId: string;
 };
 
-export function DataOutputForm({ mode, dataOutputId }: Props) {
+export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
-        dataOutputId || '',
-        { skip: !dataOutputId },
-    );
-    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
+    const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetTechnicalAssetQuery({
+        id: dataOutputId,
+        dataProductId: dataProductId,
+    });
+    const { data: dataProduct } = useGetDataProductQuery(currentDataOutput?.owner.id ?? '', {
         skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
     });
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
-    const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
+    const [updateDataOutput, { isLoading: isUpdating }] = useUpdateTechnicalAssetMutation();
+    const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveTechnicalAssetMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
 
     const { data: update_access } = useCheckAccessQuery(
@@ -65,7 +66,10 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const handleDeleteDataOutput = async () => {
         if (canDelete && currentDataOutput && dataProduct) {
             try {
-                await deleteDataOutput(currentDataOutput.id).unwrap();
+                await deleteDataOutput({
+                    dataProductId: currentDataOutput.owner_id,
+                    id: currentDataOutput.id,
+                }).unwrap();
                 dispatchMessage({ content: t('Technical Asset deleted successfully'), type: 'success' });
                 navigate(createDataProductIdPath(dataProduct.id));
             } catch (_error) {
@@ -86,14 +90,15 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 }
 
                 // TODO Figure out what fields are updatable and which are not
-                const request: DataOutputUpdateRequest = {
+                const request: DataOutputUpdate = {
                     name: values.name,
                     description: values.description,
                     tag_ids: values.tag_ids ?? [],
                 };
                 const response = await updateDataOutput({
-                    dataOutput: request,
-                    dataOutputId: dataOutputId,
+                    id: dataOutputId,
+                    dataProductId: currentDataOutput.owner_id,
+                    dataOutputUpdate: request,
                 }).unwrap();
                 dispatchMessage({ content: t('Technical Asset updated successfully'), type: 'success' });
 

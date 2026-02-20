@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/usersApi";
+import { api } from "@/store/api/services/generated/usersNotificationsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getDataProductsLifecycles: build.query<
@@ -72,6 +72,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];

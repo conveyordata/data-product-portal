@@ -2,17 +2,22 @@ import { Flex, Space, Typography } from 'antd';
 import { useNavigate, useParams } from 'react-router';
 
 import { DataOutputForm } from '@/components/data-outputs/data-output-form/data-output-form.component';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-
 import styles from './data-output-edit.module.scss';
 
 export function DataOutputEdit() {
-    const { dataOutputId } = useParams();
-    const { data: dataOutput, isError } = useGetDataOutputByIdQuery(dataOutputId || '', { skip: !dataOutputId });
+    const { dataOutputId, dataProductId } = useParams();
+    const { data: dataOutput, isError } = useGetTechnicalAssetQuery(
+        {
+            id: dataOutputId || '',
+            dataProductId: dataProductId || '',
+        },
+        { skip: !dataOutputId || !dataProductId },
+    );
     const navigate = useNavigate();
 
-    if (!dataOutputId || isError) {
+    if (!dataOutputId || !dataProductId || isError) {
         navigate(ApplicationPaths.Studio, { replace: true });
         return null;
     }
@@ -23,7 +28,7 @@ export function DataOutputEdit() {
                 {dataOutput?.name}
             </Typography.Title>
             <Space orientation="vertical" size="large" className={styles.container}>
-                <DataOutputForm dataOutputId={dataOutputId} mode="edit" />
+                <DataOutputForm dataOutputId={dataOutputId} dataProductId={dataProductId} mode="edit" />
             </Space>
         </Flex>
     );

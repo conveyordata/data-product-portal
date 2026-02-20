@@ -6,8 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
-import { PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import {
+    type PendingRequestType,
+    PendingRequestTypeValues,
+} from '@/pages/home/components/pending-requests-inbox/pending-request-types.tsx';
+import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
 import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
@@ -16,15 +19,15 @@ export function PendingRequestsInbox() {
     const { t } = useTranslation();
     const posthog = usePostHog();
     const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
-    const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
+    const [selectedTypes, setSelectedTypes] = useState<Set<PendingRequestType>>(new Set());
 
-    const { data: pendingActions, isFetching } = useGetPendingActionsQuery();
+    const { data: { pending_actions: pendingActions = [] } = {}, isFetching } = useGetUserPendingActionsQuery();
 
     const filteredPendingActions = useMemo(() => {
         if (!pendingActions) return [];
         return selectedTypes.size === 0
             ? pendingActions
-            : pendingActions.filter((item) => selectedTypes.has(item.pending_action_type));
+            : pendingActions.filter((item) => item.pending_action_type && selectedTypes.has(item.pending_action_type));
     }, [pendingActions, selectedTypes]);
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination([]);
@@ -46,16 +49,16 @@ export function PendingRequestsInbox() {
         });
         setActiveTab(key);
 
-        const typesSet = new Set<PendingActionTypes>();
+        const typesSet = new Set<PendingRequestType>();
         if (key === 'all') {
-            for (const type of Object.values(PendingActionTypes)) {
-                typesSet.add(type);
+            for (const t of PendingRequestTypeValues) {
+                typesSet.add(t);
             }
         } else if (key === 'dataProduct') {
-            typesSet.add(PendingActionTypes.DataProductRoleAssignment);
+            typesSet.add('DataProductRoleAssignment');
         } else if (key === 'dataset') {
-            typesSet.add(PendingActionTypes.DataProductDataset);
-            typesSet.add(PendingActionTypes.DataOutputDataset);
+            typesSet.add('DataProductOutputPort');
+            typesSet.add('TechnicalAssetOutputPort');
         }
 
         setSelectedTypes(typesSet);

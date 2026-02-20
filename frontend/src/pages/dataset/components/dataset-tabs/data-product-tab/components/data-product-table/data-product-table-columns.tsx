@@ -3,21 +3,24 @@ import type { TFunction } from 'i18next';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
-import type { DataProductLink } from '@/types/dataset';
+import type {
+    ApproveOutputPortAsInputPortApiArg,
+    DenyOutputPortAsInputPortApiArg,
+    InputPort,
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
-import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    dataProductLinks: DataProductLink[];
-    onAcceptDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void;
-    onRejectDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void;
-    onRemoveDataProductDatasetLink: (data_productId: string, name: string, datasetLinkId: string) => void;
+    dataProductLinks: InputPort[];
+    onAcceptDataProductDatasetLink: (request: ApproveOutputPortAsInputPortApiArg) => void;
+    onRejectDataProductDatasetLink: (request: DenyOutputPortAsInputPortApiArg) => void;
+    onRemoveDataProductDatasetLink: (data_productId: string, name: string, consumingDataProductId: string) => void;
     isLoading?: boolean;
     canApprove?: boolean;
     canRevoke?: boolean;
@@ -32,8 +35,8 @@ export const getDatasetDataProductsColumns = ({
     isLoading,
     canApprove,
     canRevoke,
-}: Props): TableColumnsType<DataProductLink> => {
-    const sorter = new Sorter<DataProductLink>();
+}: Props): TableColumnsType<InputPort> => {
+    const sorter = new Sorter<InputPort>();
     return [
         {
             title: t('Id'),
@@ -43,14 +46,14 @@ export const getDatasetDataProductsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { data_product, status }) => {
+            render: (_, { data_product, data_product_id, status }) => {
                 return (
                     <TableCellAvatar
-                        popover={{ title: data_product.name, content: data_product.description }}
-                        linkTo={createDataProductIdPath(data_product.id)}
+                        popover={{ title: data_product.name }}
+                        linkTo={createDataProductIdPath(data_product_id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIconOld(data_product?.type?.icon_key)}
+                                iconComponent={getDataProductTypeIcon(data_product?.type?.icon_key)}
                                 hasRoundBorder
                                 size={'default'}
                             />
@@ -81,16 +84,32 @@ export const getDatasetDataProductsColumns = ({
             hidden: !canApprove && !canRevoke,
             fixed: 'right',
             width: 1,
-            render: (_, { id, data_product, status, dataset_id, data_product_id }) => {
+            render: (
+                _,
+                {
+                    data_product: consuming_data_product,
+                    data_product_id: consuming_data_product_id,
+                    status,
+                    input_port,
+                },
+            ) => {
                 if (status === DecisionStatus.Pending) {
                     return (
                         <Flex>
                             <Popconfirm
                                 title={t('Allow Data Product Access')}
                                 description={t('Are you sure you want to allow access to Data Product {{name}}?', {
-                                    name: data_product.name,
+                                    name: consuming_data_product.name,
                                 })}
-                                onConfirm={() => onAcceptDataProductDatasetLink({ dataset_id, data_product_id, id })}
+                                onConfirm={() =>
+                                    onAcceptDataProductDatasetLink({
+                                        outputPortId: input_port.id,
+                                        dataProductId: input_port.data_product_id,
+                                        approveOutputPortAsInputPortRequest: {
+                                            consuming_data_product_id: consuming_data_product_id,
+                                        },
+                                    })
+                                }
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -104,9 +123,17 @@ export const getDatasetDataProductsColumns = ({
                             <Popconfirm
                                 title={t('Deny Data Product Access')}
                                 description={t('Are you sure you want to deny access to Data Product {{name}}?', {
-                                    name: data_product.name,
+                                    name: consuming_data_product.name,
                                 })}
-                                onConfirm={() => onRejectDataProductDatasetLink({ dataset_id, data_product_id, id })}
+                                onConfirm={() =>
+                                    onRejectDataProductDatasetLink({
+                                        outputPortId: input_port.id,
+                                        dataProductId: input_port.data_product_id,
+                                        denyOutputPortAsInputPortRequest: {
+                                            consuming_data_product_id: consuming_data_product_id,
+                                        },
+                                    })
+                                }
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -125,9 +152,17 @@ export const getDatasetDataProductsColumns = ({
                         <Popconfirm
                             title={t('Revoke Data Product Access')}
                             description={t('Are you sure you want to revoke access from Data Product {{name}}?', {
-                                name: data_product.name,
+                                name: consuming_data_product.name,
                             })}
-                            onConfirm={() => onRejectDataProductDatasetLink({ dataset_id, data_product_id, id })}
+                            onConfirm={() =>
+                                onRejectDataProductDatasetLink({
+                                    outputPortId: input_port.id,
+                                    dataProductId: input_port.data_product_id,
+                                    denyOutputPortAsInputPortRequest: {
+                                        consuming_data_product_id: consuming_data_product_id,
+                                    },
+                                })
+                            }
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
@@ -145,7 +180,13 @@ export const getDatasetDataProductsColumns = ({
                     return (
                         <Button
                             type={'link'}
-                            onClick={() => onRemoveDataProductDatasetLink(data_product.id, data_product.name, id)}
+                            onClick={() =>
+                                onRemoveDataProductDatasetLink(
+                                    input_port.data_product_id,
+                                    consuming_data_product.name,
+                                    consuming_data_product_id,
+                                )
+                            }
                         >
                             {t('Remove')}
                         </Button>

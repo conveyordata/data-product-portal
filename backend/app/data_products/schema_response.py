@@ -62,7 +62,7 @@ class DatasetLinks(DataProductDatasetAssociation):
     # Nested schemas
     dataset: Dataset
 
-    def convert(self):
+    def convert(self) -> "InputPort":
         base = self.model_dump(exclude={"dataset", "dataset_id"})
         return InputPort(
             **base,
@@ -137,10 +137,6 @@ class CreateDataProductResponse(ORMModel):
 
 
 class UpdateDataProductResponse(ORMModel):
-    id: UUID
-
-
-class CreateTechnicalAssetResponse(ORMModel):
     id: UUID
 
 
