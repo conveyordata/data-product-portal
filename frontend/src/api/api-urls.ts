@@ -3,7 +3,7 @@ export enum ApiUrl {
     DatasetSettingValue = '/api/datasets/:datasetId/settings/:settingId',
 }
 
-export type DynamicPathParams =
+type DynamicPathParams =
     | 'dataProductId'
     | 'dataProductTypeId'
     | 'dataOutputId'
