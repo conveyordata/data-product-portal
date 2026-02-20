@@ -48,15 +48,10 @@ export function DataProductsTab() {
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
-    const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserProducts } =
-        useGetDataProductsQuery(currentUser?.id ?? '', { skip: !currentUser || showAllProducts });
-    const { data: { data_products: allDataProducts = [] } = {}, isFetching: isFetchingAllProducts } =
-        useGetDataProductsQuery(undefined, {
-            skip: !showAllProducts,
-        });
-
-    const dataProducts = showAllProducts ? allDataProducts : userDataProducts;
-    const isFetching = showAllProducts ? isFetchingAllProducts : isFetchingUserProducts;
+    const { data: { data_products: dataProducts = [] } = {}, isFetching } = useGetDataProductsQuery(
+        showAllProducts ? undefined : (currentUser?.id ?? ''),
+        { skip: !currentUser || showAllProducts },
+    );
 
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
