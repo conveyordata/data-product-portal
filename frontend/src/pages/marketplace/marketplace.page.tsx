@@ -1,8 +1,10 @@
+import { ShopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Empty, Flex, Pagination } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
@@ -12,6 +14,19 @@ import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marke
 export function Marketplace() {
     const { t } = useTranslation();
     const posthog = usePostHog();
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        {' '}
+                        <ShopOutlined /> {t('Marketplace')}
+                    </>
+                ),
+            },
+        ]);
+    }, [setBreadcrumbs, t]);
 
     const searchSuggestions = useMemo(
         () => [

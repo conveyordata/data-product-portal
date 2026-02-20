@@ -1,14 +1,15 @@
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, ProductOutlined, ShopOutlined } from '@ant-design/icons';
 import { Flex, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
 import { OutputPortAccessIcon } from '@/components/datasets/output-port-access-icon/output-port-access-icon.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.component';
 import { OutputPortDescription } from '@/pages/dataset/components/dataset-description/output-port-description.tsx';
@@ -18,7 +19,7 @@ import { useGetDataProductQuery } from '@/store/api/services/generated/dataProdu
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { ApplicationPaths, DynamicPathParams } from '@/types/navigation';
+import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper';
@@ -44,6 +45,38 @@ export function Dataset() {
         { skip: !datasetId },
     );
     const canEdit = edit_access?.allowed || false;
+    const { pathname } = useLocation();
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        if (pathname.includes('studio')) {
+            setBreadcrumbs([
+                {
+                    title: (
+                        <>
+                            <ProductOutlined /> {t('Product Studio')}
+                        </>
+                    ),
+                    path: ApplicationPaths.Studio,
+                },
+                { title: <>{data_product?.name}</>, path: createDataProductIdPath(dataProductId) },
+                { title: <>{outputPort?.name}</> },
+            ]);
+        } else {
+            setBreadcrumbs([
+                {
+                    title: (
+                        <>
+                            {' '}
+                            <ShopOutlined /> {t('Marketplace')}
+                        </>
+                    ),
+                    path: ApplicationPaths.Marketplace,
+                },
+                { title: <>{data_product?.name}</>, path: createDataProductIdPath(dataProductId) },
+                { title: <>{outputPort?.name}</> },
+            ]);
+        }
+    }, [setBreadcrumbs, data_product, outputPort, dataProductId, pathname, t]);
 
     const datasetOwners = useGetDatasetOwners(outputPort?.id);
 
