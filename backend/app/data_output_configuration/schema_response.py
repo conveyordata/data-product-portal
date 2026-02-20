@@ -48,3 +48,7 @@ class URLResponse(ORMModel):
     """Response model for platform URLs"""
 
     url: str
+
+
+class RenderTechnicalAssetAccessPathResponse(ORMModel):
+    technical_asset_access_path: str

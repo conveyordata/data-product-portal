@@ -8,9 +8,13 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz.authorization import Authorization
 from app.core.authz.authorization import AuthorizationAction as Action
 from app.core.authz.resolvers import DataProductResolver
+from app.data_output_configuration.schema_request import (
+    RenderTechnicalAssetAccessPathRequest,
+)
 from app.data_output_configuration.schema_response import (
     PlatformTileResponse,
     PluginResponse,
+    RenderTechnicalAssetAccessPathResponse,
     UIElementMetadataResponse,
     URLResponse,
 )
@@ -78,4 +82,16 @@ def get_plugin_url(
     """Get the URL for the access tile of a specific plugin"""
     return URLResponse(
         url=PluginService(db).get_url(plugin_name, id, db, actor, environment)
+    )
+
+
+@router.post("/render_technical_asset_access_path")
+def render_technical_asset_access_path(
+    request: RenderTechnicalAssetAccessPathRequest,
+    db: Session = Depends(get_db_session),
+) -> RenderTechnicalAssetAccessPathResponse:
+    return RenderTechnicalAssetAccessPathResponse(
+        technical_asset_access_path=PluginService(
+            db
+        ).render_technical_asset_access_path(request)
     )

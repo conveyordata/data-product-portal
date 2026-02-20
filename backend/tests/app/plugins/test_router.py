@@ -1,5 +1,10 @@
 from fastapi.testclient import TestClient
 
+from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.s3.schema import S3TechnicalAssetConfiguration
+from app.data_output_configuration.schema_request import (
+    RenderTechnicalAssetAccessPathRequest,
+)
 from tests.factories import PlatformFactory
 from tests.factories.platform_service import PlatformServiceFactory
 from tests.factories.platform_service_config import PlatformServiceConfigFactory
@@ -286,3 +291,25 @@ class TestPlatformTilesEndpoint:
             # AWS has multiple children, so should have environments
             if aws_tile.get("children") and len(aws_tile["children"]) > 1:
                 assert aws_tile["has_environments"] is True
+
+    def test_render_technical_asset_access_path(self, client: TestClient):
+        service = PlatformServiceFactory(
+            result_string_template="{bucket}/{suffix}/{path}"
+        )
+        configuration = S3TechnicalAssetConfiguration(
+            bucket="bucket",
+            suffix="suffix",
+            path="path",
+            configuration_type=DataOutputTypes.S3TechnicalAssetConfiguration,
+        )
+        request = RenderTechnicalAssetAccessPathRequest(
+            platform_id=service.platform.id,
+            service_id=service.id,
+            configuration=configuration,
+        ).model_dump(mode="json")
+
+        response = client.post(
+            f"{ENDPOINT}/render_technical_asset_access_path", json=request
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["technical_asset_access_path"] == "bucket/suffix/path"
