@@ -1,5 +1,7 @@
 import { Col, Row } from 'antd';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -11,6 +13,11 @@ const COL_SPAN = 12;
 
 export function Home() {
     const currentUser = useSelector(selectCurrentUser);
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        //Home is set in the breadcrumb provider itself, but we need to set it to an empty list otherwise we keep the old breadcrumb
+        setBreadcrumbs([]);
+    }, [setBreadcrumbs]);
     if (!currentUser) return null;
 
     return (

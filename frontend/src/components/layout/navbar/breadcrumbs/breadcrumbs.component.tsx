@@ -1,299 +1,39 @@
-import {
-    CompassOutlined,
-    HomeOutlined,
-    ProductOutlined,
-    ShopOutlined,
-    ShoppingCartOutlined,
-    TeamOutlined,
-    UnorderedListOutlined,
-} from '@ant-design/icons';
-import { Breadcrumb, Space, Typography } from 'antd';
-import type { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
-import { type ReactNode, useCallback, useMemo } from 'react';
+import { HomeOutlined } from '@ant-design/icons';
+import { Breadcrumb } from 'antd';
+import type { BreadcrumbItemType } from 'antd/es/breadcrumb/Breadcrumb';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
-import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { ApplicationPaths, type DynamicPathParams } from '@/types/navigation.ts';
-import {
-    isDataOutputEditPage,
-    isDataProductEditPage,
-    isDatasetEditPage,
-    isProductStudioOutputPortEditPage,
-} from '@/utils/routes.helper.ts';
-import styles from './breadcrumbs.module.scss';
-
-type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
+import { ApplicationPaths } from '@/types/navigation.ts';
 
 export const Breadcrumbs = () => {
+    const { breadcrumbs } = useBreadcrumbs();
+
     const { t } = useTranslation();
-    const { pathname } = useLocation();
-    const params = useParams<DynamicPathParams>();
-    const pathnames = useMemo(
-        () =>
-            pathname === ApplicationPaths.Home
-                ? [ApplicationPaths.Home]
-                : pathname.split('/').filter((x) => x && x !== 'output-port'),
-        [pathname],
-    );
-    const { dataProductId = '', datasetId = '', dataOutputId = '' } = params;
-    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId, {
-        skip: !dataProductId,
-    });
-    const { data: dataOutput, isFetching: isFetchingDataOutput } = useGetTechnicalAssetQuery(
-        { id: dataOutputId, dataProductId },
-        {
-            skip: !dataOutputId || !dataProductId,
-        },
-    );
-    const { data: dataset, isFetching: isFetchingDataset } = useGetOutputPortQuery(
-        { id: datasetId, dataProductId },
-        { skip: !datasetId || !dataProductId },
-    );
 
-    const homeItem: BreadcrumbItemType = useMemo(
-        () => ({
-            path: ApplicationPaths.Home,
-            title: (
-                <Space>
-                    <HomeOutlined />
-                    {t('Home')}
-                </Space>
-            ),
-        }),
-        [t],
-    );
-
-    const renderBreadcrumbItem = useCallback(
-        (pathname: string, index: number) => {
-            const path = `/${pathnames.slice(0, index + 1).join('/')}`;
-            const breadcrumbItem: Partial<BreadcrumbItemType> = {
-                path,
-                title: pathname,
-            };
-            switch (path) {
-                case ApplicationPaths.Studio:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <ProductOutlined />
-                                {t('Product Studio')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.DataProductNew:
-                    Object.assign(breadcrumbItem, {
-                        title: t('New Data Product'),
-                    });
-                    break;
-                case ApplicationPaths.Marketplace:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <ShopOutlined />
-                                {t('Marketplace')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.MarketplaceCart:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <ShoppingCartOutlined />
-                                {t('Cart')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.AuditLogs:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <UnorderedListOutlined />
-                                {t('Audit Logs')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.Explorer:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <CompassOutlined />
-                                {t('Explorer')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                case ApplicationPaths.Settings:
-                    Object.assign(breadcrumbItem, {
-                        title: t('Settings'),
-                    });
-                    break;
-                case ApplicationPaths.People:
-                    Object.assign(breadcrumbItem, {
-                        title: (
-                            <Space>
-                                <TeamOutlined />
-                                {t('People')}
-                            </Space>
-                        ),
-                    });
-                    break;
-                default:
-                    Object.assign(breadcrumbItem, {
-                        title: '',
-                    });
-                    // Case for Data Product and Output Port
-                    if (
-                        dataProduct &&
-                        !isFetchingDataProduct &&
-                        pathnames.includes(ApplicationPaths.Studio.replace('/', ''))
-                    ) {
-                        if (
-                            isDataProductEditPage(path, dataProduct.id) ||
-                            (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id)) ||
-                            (dataset && isProductStudioOutputPortEditPage(path, dataset.id, dataset.data_product_id))
-                        ) {
-                            Object.assign(breadcrumbItem, {
-                                title: t('Edit'),
-                            });
-                        } else {
-                            if (dataOutput && !isFetchingDataOutput && path.split('/').length === 4) {
-                                Object.assign(breadcrumbItem, {
-                                    path: `${path}#${DataOutputTabKeys.Datasets}`,
-                                    title: (
-                                        <Typography.Text
-                                            ellipsis={{ tooltip: dataOutput.name }}
-                                            rootClassName={styles.title}
-                                        >
-                                            {dataOutput.name}
-                                        </Typography.Text>
-                                    ),
-                                });
-                            } else {
-                                if (dataset && !isFetchingDataset && path.split('/').length === 4) {
-                                    Object.assign(breadcrumbItem, {
-                                        path: `${path}#${DatasetTabKeys.About}`,
-                                        title: (
-                                            <Typography.Text
-                                                ellipsis={{ tooltip: dataset.name }}
-                                                rootClassName={styles.title}
-                                            >
-                                                {dataset.name}
-                                            </Typography.Text>
-                                        ),
-                                    });
-                                } else {
-                                    Object.assign(breadcrumbItem, {
-                                        path: `${path}#${DataProductTabKeys.About}`,
-                                        title: (
-                                            <Typography.Text
-                                                ellipsis={{ tooltip: dataProduct.name }}
-                                                rootClassName={styles.title}
-                                            >
-                                                {dataProduct.name}
-                                            </Typography.Text>
-                                        ),
-                                    });
-                                }
-                            }
-                        }
-                    }
-                    if (
-                        dataProduct &&
-                        !isFetchingDataProduct &&
-                        pathnames.includes(ApplicationPaths.Marketplace.replace('/', ''))
-                    ) {
-                        if (isDatasetEditPage(path, dataset?.id, dataset?.data_product_id)) {
-                            Object.assign(breadcrumbItem, {
-                                title: t('Edit'),
-                            });
-                        } else {
-                            if (dataset && !isFetchingDataset && path.split('/').length === 4) {
-                                Object.assign(breadcrumbItem, {
-                                    path: `${path}#${DatasetTabKeys.About}`,
-                                    title: (
-                                        <Typography.Text
-                                            ellipsis={{ tooltip: dataset.name }}
-                                            rootClassName={styles.title}
-                                        >
-                                            {dataset.name}
-                                        </Typography.Text>
-                                    ),
-                                });
-                            } else {
-                                if (path.split('/').length === 3) {
-                                    Object.assign(breadcrumbItem, {
-                                        path: `${path}#${DataProductTabKeys.About}`,
-                                        title: (
-                                            <Typography.Text
-                                                ellipsis={{ tooltip: dataProduct.name }}
-                                                rootClassName={styles.title}
-                                            >
-                                                {dataProduct.name}
-                                            </Typography.Text>
-                                        ),
-                                    });
-                                }
-                            }
-                        }
-                    }
-
-                    break;
-            }
-
-            if (breadcrumbItem.title === '') {
-                return null;
-            }
-
-            return breadcrumbItem;
-        },
-        [
-            t,
-            dataset,
-            dataProduct,
-            dataOutput,
-            pathnames,
-            isFetchingDataset,
-            isFetchingDataProduct,
-            isFetchingDataOutput,
-        ],
-    );
-
-    const items: BreadcrumbType[] = useMemo(() => {
-        if (pathnames[0] === ApplicationPaths.Home) {
-            return [homeItem];
-        }
-
-        return [
-            {
-                path: ApplicationPaths.Home,
-                title: (
-                    <Space>
-                        <HomeOutlined />
-                    </Space>
-                ),
-            },
-            ...pathnames.map((pathname, index) => renderBreadcrumbItem(pathname, index)),
-        ].filter(Boolean) as Partial<BreadcrumbItemType & BreadcrumbSeparatorType>[];
-    }, [renderBreadcrumbItem, pathnames, homeItem]);
+    const items: BreadcrumbItemType[] = breadcrumbs.map((crumb) => ({
+        title: crumb.title,
+        path: crumb.path,
+    }));
 
     return (
         <Breadcrumb
-            className={styles.breadcrumb}
             itemRender={(route, _params, routes) => {
                 const isLast = routes.indexOf(route) === routes.length - 1;
                 return <BreadcrumbLink to={route.path} isActive={isLast} title={route.title} />;
             }}
-            items={items}
+            items={[
+                {
+                    title: (
+                        <>
+                            <HomeOutlined />
+                            {items.length === 0 ? t('Home') : ''}
+                        </>
+                    ),
+                    path: ApplicationPaths.Home,
+                },
+                ...items,
+            ]}
             separator={'/'}
         />
     );

@@ -1,4 +1,11 @@
-import { BellOutlined, CheckCircleOutlined, MessageOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    BellOutlined,
+    CheckCircleOutlined,
+    MessageOutlined,
+    PlusOutlined,
+    ShopOutlined,
+    ShoppingCartOutlined,
+} from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import {
     Alert,
@@ -21,6 +28,7 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
@@ -47,6 +55,28 @@ function Cart() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
+
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        {' '}
+                        <ShopOutlined /> {t('Marketplace')}
+                    </>
+                ),
+                path: ApplicationPaths.Marketplace,
+            },
+            {
+                title: (
+                    <>
+                        <ShoppingCartOutlined /> {t('Cart')}
+                    </>
+                ),
+            },
+        ]);
+    }, [setBreadcrumbs, t]);
 
     const { data: datasets, isFetching: fetchingDatasets } = useGetAllDatasetsQuery();
     const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =

@@ -1,6 +1,8 @@
+import { TeamOutlined } from '@ant-design/icons';
 import { Table } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
 import {
     type GlobalRoleAssignmentResponse,
@@ -35,6 +37,20 @@ function filterUsers(users: UsersGet[], searchTerm?: string) {
 
 export function PeoplePage() {
     const { t } = useTranslation();
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        setBreadcrumbs([
+            {
+                title: (
+                    <>
+                        {' '}
+                        <TeamOutlined /> {t('People')}
+                    </>
+                ),
+            },
+        ]);
+    }, [setBreadcrumbs, t]);
+
     const { data: { users = [] } = {}, isFetching } = useGetUsersQuery();
     const { data: { roles = [] } = {} } = useGetRolesQuery(Scope.GLOBAL);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
