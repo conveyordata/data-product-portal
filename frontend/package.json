@@ -76,7 +76,7 @@
         "esbuild-runner": "^2.2.2",
         "i18next-parser": "^9.3.0",
         "msw": "^2.12.10",
-        "rollup-plugin-visualizer": "^6.0.8",
+        "rollup-plugin-visualizer": "^7.0.0",
         "sass": "^1.97.3",
         "typescript": "^5.9.3",
         "vite": "^7.3.1",
