@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
-import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -14,17 +14,20 @@ import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generate
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useCreateDataProductMutation,
-    useGetDataProductByIdQuery,
-    useGetDataProductNamespaceLengthLimitsQuery,
-    useLazyGetDataProductNamespaceSuggestionQuery,
-    useLazyValidateDataProductNamespaceQuery,
+    useGetDataProductQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+} from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    ResourceNameModel,
+    useLazySanitizeResourceNameQuery,
+    useLazyValidateResourceNameQuery,
+    useResourceNameConstraintsQuery,
+} from '@/store/api/services/generated/resourceNamesApi.ts';
+import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
@@ -49,7 +52,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const currentUser = useSelector(selectCurrentUser);
     const [fromMarketplace] = useQueryState('fromMarketplace', parseAsBoolean.withDefault(false));
 
-    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(
+    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductQuery(
         dataProductId || '',
         { skip: mode === 'create' || !dataProductId },
     );
@@ -62,14 +65,14 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
-    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateDataProductNamespaceQuery();
-    const { data: namespaceLengthLimits } = useGetDataProductNamespaceLengthLimitsQuery();
+    const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
+    const [validateResourceName] = useLazyValidateResourceNameQuery();
+    const { data: constraints } = useResourceNameConstraintsQuery();
 
     const [form] = Form.useForm<DataProductCreateFormSchema>();
     const dataProductNameValue = Form.useWatch('name', form);
 
-    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
+    const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
 
     const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const { data: update_access } = useCheckAccessQuery(
@@ -154,8 +157,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     tag_ids: values.tag_ids,
                 };
                 const response = await updateDataProduct({
-                    dataProduct: request,
-                    data_product_id: dataProductId,
+                    dataProductUpdate: request,
+                    id: dataProductId,
                 }).unwrap();
 
                 dispatchMessage({ content: t('Data Product updated successfully'), type: 'success' });
@@ -198,10 +201,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
-    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), DEBOUNCE);
 
     useEffect(() => {
-        if (mode === 'create' && !canEditNamespace) {
+        if (mode === 'create' && !canEditResourceName) {
             form.setFields([
                 {
                     name: 'namespace',
@@ -209,20 +212,21 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     errors: [],
                 },
             ]);
-            fetchNamespaceDebounced(dataProductNameValue ?? '');
+            fetchResourceNameDebounced(dataProductNameValue ?? '');
         }
-    }, [form, mode, canEditNamespace, dataProductNameValue, fetchNamespaceDebounced]);
+    }, [form, mode, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
 
     useEffect(() => {
-        if (mode === 'create' && !canEditNamespace) {
-            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+        if (mode === 'create' && !canEditResourceName) {
+            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditNamespace, namespaceSuggestion]);
+    }, [form, mode, canEditResourceName, sanitizedResourceName]);
 
-    const validateNamespaceCallback = useCallback(
-        (namespace: string) => validateNamespace(namespace).unwrap(),
-        [validateNamespace],
+    const resourceNameValidationCallback = useCallback(
+        (resourceName: string) =>
+            validateResourceName({ resourceName: resourceName, model: ResourceNameModel.DataProduct }).unwrap(),
+        [validateResourceName],
     );
 
     const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
@@ -236,7 +240,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         namespace: currentDataProduct?.namespace,
         description: currentDataProduct?.description,
         type_id: currentDataProduct?.type.id,
-        lifecycle_id: currentDataProduct?.lifecycle.id,
+        lifecycle_id: currentDataProduct?.lifecycle?.id,
         domain_id: currentDataProduct?.domain.id,
         tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
         owners: mode === 'edit' ? ownerIds : currentUser?.id ? [currentUser?.id] : [],
@@ -269,15 +273,15 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <Input />
             </Form.Item>
-            <NamespaceFormItem
+            <ResourceNameFormItem
                 form={form}
                 tooltip={t('The namespace of the Data Product')}
-                max_length={namespaceLengthLimits?.max_length}
+                max_length={constraints?.max_length}
                 editToggleDisabled={mode === 'edit'}
-                canEditNamespace={canEditNamespace}
-                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                canEditResourceName={canEditResourceName}
+                toggleCanEditResourceName={() => setCanEditResourceName((prev) => !prev)}
                 validationRequired={mode === 'create'}
-                validateNamespace={validateNamespaceCallback}
+                validateResourceName={resourceNameValidationCallback}
             />
             <Form.Item<DataProductCreateFormSchema>
                 name={'owners'}

@@ -19,38 +19,38 @@ import { type Ref, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
-
-import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { OutputPortAccessType, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type CreateOutputPortRequest,
+    type DatasetUpdate,
+    useCreateOutputPortMutation,
+    useGetOutputPortQuery,
+    useRemoveOutputPortMutation,
+    useUpdateOutputPortMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useLinkOutputPortToTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import {
+    ResourceNameModel,
+    useLazySanitizeResourceNameQuery,
+    useLazyValidateResourceNameQuery,
+    useResourceNameConstraintsQuery,
+} from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import {
-    useCreateDatasetMutation,
-    useGetDatasetByIdQuery,
-    useGetDatasetNamespaceLengthLimitsQuery,
-    useLazyGetDatasetNamespaceSuggestionQuery,
-    useLazyValidateDatasetNamespaceQuery,
-    useRemoveDatasetMutation,
-    useUpdateDatasetMutation,
-} from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import {
-    DatasetAccess,
-    type DatasetCreateFormSchema,
-    type DatasetCreateRequest,
-    type DatasetUpdateRequest,
-} from '@/types/dataset';
+import { DatasetAccess, type DatasetCreateFormSchema } from '@/types/dataset';
 import {
     ApplicationPaths,
     createDataOutputIdPath,
     createDataProductIdPath,
-    createDatasetIdPath,
+    createMarketplaceOutputPortPath,
+    createOutputPortPath,
 } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
@@ -64,7 +64,7 @@ type Props = {
     dataProductId?: string;
     dataOutputId?: string;
     modalCallbackOnSubmit?: () => void;
-    formRef?: Ref<FormInstance<DatasetCreateFormSchema>>;
+    formRef?: Ref<FormInstance<CreateOutputPortRequest>>;
 };
 
 const { TextArea } = Input;
@@ -76,7 +76,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Public Output Ports are visible to everyone and are free to use by anyone')}>
-                    {getDatasetAccessTypeLabel(t, DatasetAccess.Public)}
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Public)}
                 </Tooltip>
             ),
             value: DatasetAccess.Public,
@@ -84,7 +84,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
-                    {getDatasetAccessTypeLabel(t, DatasetAccess.Restricted)}
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted)}
                 </Tooltip>
             ),
             value: DatasetAccess.Restricted,
@@ -92,7 +92,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
-                    {getDatasetAccessTypeLabel(t, DatasetAccess.Private)}
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Private)}
                 </Tooltip>
             ),
             value: DatasetAccess.Private,
@@ -104,24 +104,27 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetDatasetByIdQuery(datasetId || '', {
-        skip: mode === 'create' || !datasetId,
-    });
-    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId || '', {
+    const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetOutputPortQuery(
+        { id: datasetId || '', dataProductId: dataProductId || '' },
+        {
+            skip: mode === 'create' || !datasetId || !dataProductId,
+        },
+    );
+    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId || '', {
         skip: mode === 'edit' || !dataProductId,
     });
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
-    const [requestDatasetsAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
-    const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
-    const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
-    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDatasetNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateDatasetNamespaceQuery();
-    const { data: namespaceLengthLimits } = useGetDatasetNamespaceLengthLimitsQuery();
+    const [createDataset, { isLoading: isCreating }] = useCreateOutputPortMutation();
+    const [requestDatasetsAccessForDataOutput] = useLinkOutputPortToTechnicalAssetMutation();
+    const [updateDataset, { isLoading: isUpdating }] = useUpdateOutputPortMutation();
+    const [deleteDataset, { isLoading: isArchiving }] = useRemoveOutputPortMutation();
+    const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
+    const [validateResourceName] = useLazyValidateResourceNameQuery();
+    const { data: constraints } = useResourceNameConstraintsQuery();
 
-    const [form] = Form.useForm<DatasetCreateFormSchema>();
+    const [form] = Form.useForm<CreateOutputPortRequest>();
     const datasetNameValue = Form.useWatch('name', form);
 
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
@@ -164,35 +167,40 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     }));
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
-    const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
+    const onFinish: FormProps<CreateOutputPortRequest>['onFinish'] = async (values) => {
         try {
             if (mode === 'create' && dataProduct) {
-                const request: DatasetCreateRequest = {
+                const request: CreateOutputPortRequest = {
                     name: values.name,
                     namespace: values.namespace,
-                    data_product_id: dataProduct.id,
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
-                const response = await createDataset(request).unwrap();
+                const response = await createDataset({
+                    dataProductId: dataProduct.id,
+                    createOutputPortRequest: request,
+                }).unwrap();
 
                 modalCallbackOnSubmit?.();
                 dispatchMessage({ content: t('Output Port created successfully'), type: 'success' });
                 // If dataProductId was provided, navigate back to the Data Product page
                 if (dataOutputId && dataProductId) {
                     await requestDatasetsAccessForDataOutput({
-                        dataOutputId: dataOutputId,
-                        datasetId: response.id,
+                        dataProductId,
+                        outputPortId: response.id,
+                        linkTechnicalAssetToOutputPortRequest: {
+                            technical_asset_id: dataOutputId,
+                        },
                     });
                     navigate(createDataOutputIdPath(dataOutputId, dataProductId));
                 } else {
-                    if (dataProductId) {
+                    if (dataProductId && !datasetId) {
                         navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
                     } else {
-                        navigate(createDatasetIdPath(response.id));
+                        navigate(createOutputPortPath(dataProductId || '', response.id));
                     }
                 }
             } else if (mode === 'edit' && datasetId && currentDataset) {
@@ -201,20 +209,23 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     return;
                 }
 
-                const request: DatasetUpdateRequest = {
+                const request: DatasetUpdate = {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
-                    data_product_id: currentDataset.data_product_id,
                     tag_ids: values.tag_ids,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
 
-                const response = await updateDataset({ dataset: request, id: datasetId }).unwrap();
+                const response = await updateDataset({
+                    datasetUpdate: request,
+                    id: datasetId,
+                    dataProductId: currentDataset.data_product_id,
+                }).unwrap();
                 dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
 
-                navigate(createDatasetIdPath(response.id));
+                navigate(createOutputPortPath(currentDataset.data_product_id, response.id));
             }
             form.resetFields();
         } catch (_e) {
@@ -226,25 +237,25 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
 
     const onCancel = () => {
         form.resetFields();
-        if (mode === 'edit' && datasetId) {
-            navigate(createDatasetIdPath(datasetId));
+        if (mode === 'edit' && datasetId && dataProductId) {
+            navigate(createMarketplaceOutputPortPath(datasetId, dataProductId));
         } else if (dataOutputId && dataProductId) {
-            navigate(createDataOutputIdPath(dataOutputId, dataProductId));
+            navigate(createOutputPortPath(dataOutputId, dataProductId));
         } else {
-            navigate(ApplicationPaths.Datasets);
+            navigate(ApplicationPaths.Marketplace);
         }
     };
 
-    const onFinishFailed: FormProps<DatasetCreateFormSchema>['onFinishFailed'] = () => {
+    const onFinishFailed: FormProps<CreateOutputPortRequest>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
     const handleDeleteDataset = async () => {
         if (canDelete && currentDataset) {
             try {
-                await deleteDataset(currentDataset).unwrap();
+                await deleteDataset({ dataProductId: currentDataset.data_product_id, id: currentDataset.id }).unwrap();
                 dispatchMessage({ content: t('Output Port deleted successfully'), type: 'success' });
-                navigate(ApplicationPaths.Datasets);
+                navigate(ApplicationPaths.Marketplace);
             } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to delete Output Port, please try again later'),
@@ -254,7 +265,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         }
     };
 
-    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), DEBOUNCE);
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
@@ -271,14 +282,15 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
-            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditNamespace, namespaceSuggestion]);
+    }, [form, mode, canEditNamespace, sanitizedResourceName]);
 
-    const validateNamespaceCallback = useCallback(
-        (namespace: string) => validateNamespace(namespace).unwrap(),
-        [validateNamespace],
+    const validateResourceNameCallback = useCallback(
+        (resourceName: string) =>
+            validateResourceName({ resourceName: resourceName, model: ResourceNameModel.OutputPort }).unwrap(),
+        [validateResourceName],
     );
     const datasetOwners = useGetDatasetOwnerIds(currentDataset?.id);
     const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
@@ -293,13 +305,13 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
         access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
-        lifecycle_id: currentDataset?.lifecycle.id,
+        lifecycle_id: currentDataset?.lifecycle?.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,
     };
 
     return (
-        <Form<DatasetCreateFormSchema>
+        <Form<CreateOutputPortRequest>
             form={form}
             ref={formRef}
             labelWrap
@@ -313,7 +325,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             disabled={isLoading || !canSubmit}
             initialValues={initialValues}
         >
-            <Form.Item<DatasetCreateFormSchema>
+            <Form.Item<CreateOutputPortRequest>
                 name={'name'}
                 label={t('Name')}
                 tooltip={t('The name of your Output Port')}
@@ -326,15 +338,15 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             >
                 <Input />
             </Form.Item>
-            <NamespaceFormItem
+            <ResourceNameFormItem
                 form={form}
                 tooltip={t('The namespace of the Output Port')}
-                max_length={namespaceLengthLimits?.max_length}
+                max_length={constraints?.max_length}
                 editToggleDisabled={mode === 'edit'}
-                canEditNamespace={canEditNamespace}
-                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                canEditResourceName={canEditNamespace}
+                toggleCanEditResourceName={() => setCanEditNamespace((prev) => !prev)}
                 validationRequired={mode === 'create'}
-                validateNamespace={validateNamespaceCallback}
+                validateResourceName={validateResourceNameCallback}
             />
             {mode === 'create' && (
                 <Form.Item<DatasetCreateFormSchema>

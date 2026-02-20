@@ -5,7 +5,7 @@ import { DataProductSettings } from '@/components/data-products/data-product-set
 import styles from './settings-tab.module.scss';
 
 type Props = {
-    dataProductId: string | undefined;
+    dataProductId: string;
 };
 
 export function SettingsTab({ dataProductId }: Props) {

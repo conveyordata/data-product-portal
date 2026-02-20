@@ -25,8 +25,8 @@ from app.configuration.data_product_settings.schema_response import (
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     DataProductSettingNamespaceValidator,
-    NamespaceValidityType,
 )
+from app.resource_names.service import ResourceNameValidityType
 
 
 class DataProductSettingService:
@@ -91,7 +91,7 @@ class DataProductSettingService:
             validity := self.namespace_validator.validate_namespace(
                 setting.namespace, self.db, setting.scope
             ).validity
-        ) != NamespaceValidityType.VALID:
+        ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
@@ -115,7 +115,7 @@ class DataProductSettingService:
                     setting.namespace, self.db, current_setting.scope
                 ).validity
             )
-            != NamespaceValidityType.VALID
+            != ResourceNameValidityType.VALID
         ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

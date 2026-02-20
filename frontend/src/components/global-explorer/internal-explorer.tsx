@@ -6,10 +6,10 @@ import { Flex, theme } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useState } from 'react';
 
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { CustomEdgeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
-import type { NodeContract } from '@/types/graph/graph-contract.ts';
+import type { Node as GraphNode } from '@/store/api/services/generated/graphApi.ts';
+import { NodeType, useGetGraphDataQuery } from '@/store/api/services/generated/graphApi.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from '../explorer/common';
 import styles from '../explorer/explorer.module.scss';
@@ -17,33 +17,37 @@ import { parseEdges } from '../explorer/utils';
 import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
 import { useNodeEditor } from './use-node-editor';
 
-function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void): Node[] {
+function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void): Node[] {
     // Parse regular nodes
     return nodes
-        .filter((node) => node.type !== CustomNodeTypes.DomainNode)
+        .filter((node) => node.type !== NodeType.DomainNode)
         .map((node) => {
             let extra_attributes = {};
             switch (node.type) {
-                case CustomNodeTypes.DataProductNode:
+                case NodeType.DataProductNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
                         targetHandlePosition: Position.Left,
                         assignments: node.data.assignments,
                     };
                     break;
-                case CustomNodeTypes.DatasetNode:
-                    extra_attributes = {
-                        nodeToolbarActions: node.isMain ? '' : <LinkToDatasetNode id={node.data.id} />,
-                        targetHandlePosition: Position.Right,
-                        targetHandleId: 'left_t',
-                    };
-                    break;
-                case CustomNodeTypes.DataOutputNode:
+                case NodeType.DatasetNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? (
                             ''
                         ) : (
-                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />
+                            <LinkToDatasetNode id={node.data.id} product_id={node.data.link_to_id || ''} />
+                        ),
+                        targetHandlePosition: Position.Right,
+                        targetHandleId: 'left_t',
+                    };
+                    break;
+                case NodeType.DataOutputNode:
+                    extra_attributes = {
+                        nodeToolbarActions: node.isMain ? (
+                            ''
+                        ) : (
+                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id || ''} />
                         ),
                         sourceHandlePosition: Position.Left,
                         isActive: true,
@@ -129,9 +133,9 @@ export default function InternalFullExplorer() {
 
     const { data: graph, isFetching } = useGetGraphDataQuery(
         {
-            includeDataProducts: sidebarFilters.dataProductsEnabled,
-            includeDatasets: sidebarFilters.datasetsEnabled,
-            includeDomains: sidebarFilters.domainsEnabled,
+            dataProductNodesEnabled: sidebarFilters.dataProductsEnabled,
+            outputPortNodesEnabled: sidebarFilters.datasetsEnabled,
+            domainNodesEnabled: sidebarFilters.domainsEnabled,
         },
         { skip: false },
     );

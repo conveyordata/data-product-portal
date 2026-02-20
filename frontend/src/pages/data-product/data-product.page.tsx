@@ -11,15 +11,17 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
 import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
 import { DataProductTabs } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
+import {
+    useGetDataProductQuery,
+    useGetDataProductRolledUpTagsQuery,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
-import { getDataProductTypeIconOld } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
-
 import styles from './data-product.module.scss';
 
 export function DataProduct() {
@@ -28,7 +30,12 @@ export function DataProduct() {
     const { dataProductId = '' } = useParams();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-    const { data: dataProduct, isLoading } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
+    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId, {
+        skip: !dataProductId,
+    });
+    const { data: { rolled_up_tags: rolledUpTags = [] } = {} } = useGetDataProductRolledUpTagsQuery(dataProductId, {
+        skip: !dataProductId,
+    });
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -40,7 +47,7 @@ export function DataProduct() {
     const canEdit = edit_access?.allowed || false;
 
     const dataProductTypeIcon = useMemo(() => {
-        return getDataProductTypeIconOld(dataProduct?.type?.icon_key);
+        return getDataProductTypeIcon(dataProduct?.type?.icon_key);
     }, [dataProduct?.type?.icon_key]);
 
     const dataProductOwners = useGetDataProductOwners(dataProduct?.id);
@@ -61,7 +68,7 @@ export function DataProduct() {
         });
     }, [dataProductId]);
 
-    if (isLoading) return <LoadingSpinner />;
+    if (isFetchingDataProduct) return <LoadingSpinner />;
 
     if (!dataProduct) {
         navigate(ApplicationPaths.Studio, { replace: true });
@@ -106,13 +113,10 @@ export function DataProduct() {
                             description={dataProduct.description}
                             domain={dataProduct.domain.name}
                             namespace={dataProduct.namespace}
-                            tags={[
-                                ...dataProduct.tags,
-                                ...dataProduct.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
-                            ]}
+                            tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
                         />
                         {/*  Tabs  */}
-                        <DataProductTabs dataProductId={dataProduct.id} isLoading={isLoading} />
+                        <DataProductTabs dataProductId={dataProduct.id} isLoading={isFetchingDataProduct} />
                     </Flex>
                 </Flex>
             </Flex>

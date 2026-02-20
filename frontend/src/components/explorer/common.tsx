@@ -8,7 +8,11 @@ import { Link } from 'react-router';
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+import {
+    createDataOutputIdPath,
+    createDataProductIdPath,
+    createMarketplaceOutputPortPath,
+} from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
 
@@ -21,10 +25,10 @@ function LinkToDataProductNode({ id }: { id: string }) {
     );
 }
 
-function LinkToDatasetNode({ id }: { id: string }) {
+function LinkToDatasetNode({ id, product_id }: { id: string; product_id: string }) {
     const { t } = useTranslation();
     return (
-        <Link to={createDatasetIdPath(id, DatasetTabKeys.Explorer)} className={styles.link}>
+        <Link to={createMarketplaceOutputPortPath(id, product_id, DatasetTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View Output Port')}</Button>
         </Link>
     );

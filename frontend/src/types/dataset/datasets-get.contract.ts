@@ -1,4 +1,4 @@
-import type { DataQualityStatus } from '@/store/api/services/generated/outputPortDataQualityApi';
+import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
 import type { DatasetContract } from '@/types/dataset';
 import type { TagContract } from '@/types/tag';
 

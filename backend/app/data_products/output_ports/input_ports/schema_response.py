@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.schema import DataProduct
+from app.data_products.schema_response import InputPort
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -61,3 +62,7 @@ class DataProductDatasetAssociationsGet(BaseDataProductDatasetAssociationGet):
 
 class DataProductOutputPortAssociationsGet(BaseDataProductOutputPortAssociationGet):
     pass
+
+
+class GetInputPortsForOutputPortResponse(ORMModel):
+    input_ports: Sequence[InputPort]

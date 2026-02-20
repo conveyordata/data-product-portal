@@ -1,31 +1,34 @@
 import type { BadgeProps } from 'antd';
 import type { TFunction } from 'i18next';
-
-import { DataOutputStatus } from '@/types/data-output';
-import { DataProductStatus } from '@/types/data-product';
+import { DataProductStatus, TechnicalAssetStatus } from '@/store/api/services/generated/dataProductsApi.ts';
+import { OutputPortStatus } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { DecisionStatus } from '@/types/roles';
-import type { Status } from '@/types/shared';
 
-export function getStatusLabel(t: TFunction, status: Status): string {
+export function getStatusLabel(
+    t: TFunction,
+    status: TechnicalAssetStatus | DataProductStatus | OutputPortStatus,
+): string {
     switch (status) {
-        case DataProductStatus.Pending || DataOutputStatus.Pending:
+        case DataProductStatus.Pending || TechnicalAssetStatus.Pending || OutputPortStatus.Pending:
             return t('Pending');
-        case DataProductStatus.Active || DataOutputStatus.Active:
+        case DataProductStatus.Active || TechnicalAssetStatus.Active || OutputPortStatus.Active:
             return t('Active');
-        case DataProductStatus.Deleted || DataOutputStatus.Deleted:
+        case DataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
             return t('Deleted');
         default:
             return t('Unknown');
     }
 }
 
-export function getBadgeStatus(status: Status): BadgeProps['status'] {
+export function getBadgeStatus(
+    status: TechnicalAssetStatus | DataProductStatus | OutputPortStatus,
+): BadgeProps['status'] {
     switch (status) {
-        case DataProductStatus.Pending || DataOutputStatus.Pending:
+        case DataProductStatus.Pending || TechnicalAssetStatus.Pending || OutputPortStatus.Pending:
             return 'processing';
-        case DataProductStatus.Active || DataOutputStatus.Active:
+        case DataProductStatus.Active || TechnicalAssetStatus.Active || OutputPortStatus.Active:
             return 'success';
-        case DataProductStatus.Deleted || DataOutputStatus.Deleted:
+        case DataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
             return 'error';
         default:
             return 'default';

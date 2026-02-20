@@ -3,22 +3,21 @@ import type { TFunction } from 'i18next';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
-import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
+import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { DatasetActionButton } from '@/pages/data-output/components/data-output-tabs/dataset-tab/components/dataset-table/dataset-action-button.component.tsx';
-import type { DataOutputDatasetLink } from '@/types/data-output';
-import { createDatasetIdPath } from '@/types/navigation.ts';
+import type { OutputPortLink } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
-
 import styles from './dataset-table.module.scss';
 
 type Props = {
     t: TFunction;
-    dataProductId: string | undefined;
+    dataProductId: string;
 };
-export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): TableColumnsType<DataOutputDatasetLink> => {
+export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): TableColumnsType<OutputPortLink> => {
     return [
         {
             title: t('Id'),
@@ -28,21 +27,21 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { dataset, status }) => {
+            render: (_, { output, status }) => {
                 const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
-                        name={dataset.name}
-                        accessType={dataset.access_type}
+                        name={output.name}
+                        accessType={output.access_type}
                         isApproved={isDatasetRequestApproved}
                     />
                 );
                 return (
                     <TableCellAvatar
-                        popover={{ title: popoverTitle, content: dataset.description }}
-                        linkTo={createDatasetIdPath(dataset.id)}
+                        popover={{ title: popoverTitle, content: output.description }}
+                        linkTo={createMarketplaceOutputPortPath(output.id, output.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                        title={<DatasetTitle name={dataset.name} accessType={dataset.access_type} />}
+                        title={<OutputPortTitle name={output.name} accessType={output.access_type} />}
                         subtitle={
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
@@ -58,11 +57,11 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { dataset, data_output_id, status }) => {
+            render: (_, { output, output_port_id, status }) => {
                 return (
                     <DatasetActionButton
-                        dataset={dataset}
-                        dataOutputId={data_output_id}
+                        outputPort={output}
+                        technicalAssetId={output_port_id}
                         dataProductId={dataProductId}
                         status={status}
                     />

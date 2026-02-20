@@ -10,14 +10,14 @@ import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
-import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetTechnicalAssetEventHistoryQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
-
 import styles from './data-output-tabs.module.scss';
 import { TechnologiesTab } from './technologies-tab/technologies-tab';
 
 type Props = {
-    dataOutputId: string;
+    technicalAssetId: string;
+    dataProductId: string;
     isLoading: boolean;
 };
 
@@ -28,16 +28,14 @@ type Tab = {
     children: ReactNode;
 };
 
-export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
+export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
 
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.Datasets);
-    const { data: dataOutputHistoryData, isLoading: isFetchingDataOutputHistory } = useGetDataOutputHistoryQuery(
-        dataOutputId,
-        { skip: !dataOutputId },
-    );
+    const { data: { events: dataOutputHistoryData = [] } = {}, isLoading: isFetchingDataOutputHistory } =
+        useGetTechnicalAssetEventHistoryQuery({ id: technicalAssetId, dataProductId }, { skip: !technicalAssetId });
 
     useEffect(() => {
         const hash = location.hash.slice(1);
@@ -56,19 +54,19 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 label: t('Output Ports'),
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
-                children: <DatasetTab dataOutputId={dataOutputId} />,
+                children: <DatasetTab dataProductId={dataProductId} technicalAssetId={technicalAssetId} />,
             },
             {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <CompassOutlined />,
-                children: <Explorer id={dataOutputId} type={'dataoutput'} />,
+                children: <Explorer id={technicalAssetId} type={'dataoutput'} />,
             },
             {
                 label: t('Technical information'),
                 key: TabKeys.Technologies,
                 icon: <CodeOutlined />,
-                children: <TechnologiesTab dataOutputId={dataOutputId} />,
+                children: <TechnologiesTab technicalAssetId={technicalAssetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('History'),
@@ -76,7 +74,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 icon: <HistoryOutlined />,
                 children: (
                     <HistoryTab
-                        id={dataOutputId}
+                        id={technicalAssetId}
                         type={EventReferenceEntity.DataOutput}
                         history={dataOutputHistoryData}
                         isFetching={isFetchingDataOutputHistory}
@@ -84,7 +82,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 ),
             },
         ];
-    }, [dataOutputId, t, dataOutputHistoryData, isFetchingDataOutputHistory]);
+    }, [technicalAssetId, t, dataOutputHistoryData, isFetchingDataOutputHistory, dataProductId]);
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -99,7 +97,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                     key,
                     children,
                     icon,
-                    disabled: !dataOutputId,
+                    disabled: !technicalAssetId,
                     className: styles.tabPane,
                 };
             })}

@@ -36,4 +36,11 @@ export const EventType = {
     DATASET_ROLE_ASSIGNMENT_DENIED: 'dataset_role_assignment_denied',
 } as const;
 
+export function parseEventType(value?: string): EventType {
+    if (!value || !(Object.values(EventType) as readonly string[]).includes(value)) {
+        throw new Error(`Unknown EventType: ${value}`);
+    }
+    return value as EventType;
+}
+
 export type EventType = (typeof EventType)[keyof typeof EventType];

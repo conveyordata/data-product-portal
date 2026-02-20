@@ -1,9 +1,8 @@
 import type { TableColumnsType } from 'antd';
 import dayjs from 'dayjs';
 import type { TFunction } from 'i18next';
-import type { EventContract } from '@/types/events/event.contract';
+import type { GetEventHistoryResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
-
 import { HistoryTableEventName } from './history-table-event-name';
 
 export interface HistoryColumnsProps {
@@ -12,11 +11,15 @@ export interface HistoryColumnsProps {
     type: EventReferenceEntity;
 }
 
-export const getHistoryColumns = ({ t, resourceId, type }: HistoryColumnsProps): TableColumnsType<EventContract> => [
+export const getHistoryColumns = ({
+    t,
+    resourceId,
+    type,
+}: HistoryColumnsProps): TableColumnsType<GetEventHistoryResponseItem> => [
     {
         title: t('Event description'),
         key: 'Detail',
-        render: (record: EventContract) => {
+        render: (record: GetEventHistoryResponseItem) => {
             return <HistoryTableEventName record={record} resourceId={resourceId} type={type} />;
         },
     },

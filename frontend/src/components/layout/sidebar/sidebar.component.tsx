@@ -39,9 +39,9 @@ export const Sidebar = () => {
             key: ApplicationPaths.Studio,
         },
         {
-            label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
+            label: <Link to={ApplicationPaths.Marketplace}>{t('Marketplace')}</Link>,
             icon: <ShopOutlined />,
-            key: ApplicationPaths.Datasets,
+            key: ApplicationPaths.Marketplace,
         },
         {
             label: <Link to={ApplicationPaths.Explorer}>{t('Explorer')}</Link>,

@@ -32,8 +32,3 @@ class ConveyorPlugin(AssetProviderPlugin):
     ) -> str:
         data_product = db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
-
-    @classmethod
-    def only_tile(cls) -> bool:
-        """Conveyor is currently only shown as a tile in the UI, as it doesn't have technical assets or detailed configuration options."""
-        return True

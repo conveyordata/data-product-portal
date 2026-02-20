@@ -406,7 +406,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
 
     # Fetch data product details from portal
     try:
-        response = requests.get(f"{portal_url}/api/data_products/{data_product_id}")
+        response = requests.get(f"{portal_url}/api/v2/data_products/{data_product_id}")
         response.raise_for_status()
         data_product_details = response.json()
         namespace = data_product_details.get("namespace")
@@ -540,7 +540,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
                 "tag_ids": [tag["id"] for tag in data_product_details.get("tags", [])],
             }
 
-            update_url = f"{portal_url}/api/data_products/{data_product_id}"
+            update_url = f"{portal_url}/api/v2/data_products/{data_product_id}"
             logging.info(f"Updating data product to 'Ready' state at {update_url}")
 
             update_response = requests.put(update_url, json=update_payload)
@@ -585,7 +585,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
 
     #     try:
     #         output_port_url = (
-    #             f"{portal_url}/api/data_products/{data_product_id}/data_output"
+    #             f"{portal_url}/api/v2/data_products/{data_product_id}/data_output"
     #         )
     #         logging.info(f"Creating data output port at {output_port_url}")
 
@@ -659,7 +659,7 @@ def handle_approve_link(
         # Fetch provider data product details
         try:
             provider_response = requests.get(
-                f"{portal_url}/api/data_products/{data_product_id}"
+                f"{portal_url}/api/v2/data_products/{data_product_id}"
             )
             provider_response.raise_for_status()
             provider_details = provider_response.json()
@@ -675,7 +675,7 @@ def handle_approve_link(
         # Fetch consumer data product details
         try:
             consumer_response = requests.get(
-                f"{portal_url}/api/data_products/{consumer_data_product_id}"
+                f"{portal_url}/api/v2/data_products/{consumer_data_product_id}"
             )
             consumer_response.raise_for_status()
             consumer_details = consumer_response.json()
@@ -958,7 +958,7 @@ router = Router()
 logging.info("Registering routes...")
 
 # Create data product - scaffolds new SQLMesh project with S3 configuration
-router.add_route("POST", "/api/data_products", handle_create_data_product)
+router.add_route("POST", "/api/v2/data_products", handle_create_data_product)
 
 # Approve input port - grants consumer access to provider's S3 data
 # Route pattern captures: data_product_id (provider), output_port_id
@@ -970,7 +970,7 @@ router.add_route(
 )
 
 # Delete data product - cleanup (placeholder for now)
-router.add_route("DELETE", "/api/data_products/{uuid}", handle_delete_data_product)
+router.add_route("DELETE", "/api/v2/data_products/{uuid}", handle_delete_data_product)
 
 logging.info("Route registration complete.")
 
@@ -1009,7 +1009,7 @@ def bootstrap_demo_data_product():
 
     # Check if demo data product already exists
     try:
-        response = requests.get(f"{portal_url}/api/data_products")
+        response = requests.get(f"{portal_url}/api/v2/data_products")
         if response.status_code == 200:
             data_products = response.json().get("data_products", [])
             if any(dp.get("namespace") == DEMO_NAMESPACE for dp in data_products):
@@ -1243,7 +1243,7 @@ def bootstrap_demo_data_product():
 
     try:
         response = requests.post(
-            f"{portal_url}/api/data_products", json=payload, timeout=10
+            f"{portal_url}/api/v2/data_products", json=payload, timeout=10
         )
         response.raise_for_status()
         data = response.json()

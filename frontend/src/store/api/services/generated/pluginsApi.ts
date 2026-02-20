@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/outputPortDataQualityApi";
+import { api } from "@/store/api/services/generated/configurationTagsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getPlatformTiles: build.query<

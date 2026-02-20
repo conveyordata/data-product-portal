@@ -1,23 +1,22 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dataset } from '@/pages/dataset/dataset.page';
 import {
     useDecideDataProductRoleAssignmentMutation,
     useDecideOutputPortRoleAssignmentMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { useApproveOutputPortAsInputPortMutation } from '@/store/api/services/generated/inputPortsApi';
 import {
-    useApproveDataOutputLinkMutation,
-    useRejectDataOutputLinkMutation,
-} from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
+    type ApproveOutputPortAsInputPortApiArg,
+    type DenyOutputPortAsInputPortApiArg,
+    useApproveOutputPortAsInputPortMutation,
+    useDenyOutputPortAsInputPortMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import {
-    useApproveDataProductLinkMutation,
-    useRejectDataProductLinkMutation,
-} from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import { useGetDatasetByIdQuery, useLazyGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+    type ApproveOutputPortTechnicalAssetLinkApiArg,
+    type DenyOutputPortTechnicalAssetLinkApiArg,
+    useApproveOutputPortTechnicalAssetLinkMutation,
+    useDenyOutputPortTechnicalAssetLinkMutation,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DecisionStatus } from '@/types/roles';
 
 export interface DataProductRoleRequest {
@@ -35,24 +34,20 @@ export const usePendingActionHandlers = () => {
 
     const [approveDataProductLink, { isLoading: isApprovingDataProductLink }] =
         useApproveOutputPortAsInputPortMutation();
-    const [rejectDataProductLink, { isLoading: isRejectingDataProductLink }] = useRejectDataProductLinkMutation();
-    const [approveDataOutputLink, { isLoading: isApprovingDataOutputLink }] = useApproveDataOutputLinkMutation();
-    const [rejectDataOutputLink, { isLoading: isRejectingDataOutputLink }] = useRejectDataOutputLinkMutation();
-    const [getDataset] = useLazyGetDatasetByIdQuery();
+    const [rejectDataProductLink, { isLoading: isRejectingDataProductLink }] = useDenyOutputPortAsInputPortMutation();
+    const [approveDataOutputLink, { isLoading: isApprovingDataOutputLink }] =
+        useApproveOutputPortTechnicalAssetLinkMutation();
+    const [rejectDataOutputLink, { isLoading: isRejectingDataOutputLink }] =
+        useDenyOutputPortTechnicalAssetLinkMutation();
     const [decideDataProductRoleAssignment, { isLoading: isDecidingDataProductRoleAssignment }] =
         useDecideDataProductRoleAssignmentMutation();
     const [decideDatasetRoleAssignment, { isLoading: isDecidingDatasetRoleAssignment }] =
         useDecideOutputPortRoleAssignmentMutation();
 
     const handleAcceptDataProductDatasetLink = useCallback(
-        async (request: DataProductDatasetLinkRequest) => {
+        async (request: ApproveOutputPortAsInputPortApiArg) => {
             try {
-                const dataset = await getDataset(request.dataset_id).unwrap();
-                await approveDataProductLink({
-                    dataProductId: dataset.data_product_id,
-                    outputPortId: request.dataset_id,
-                    approveOutputPortAsInputPortRequest: { consuming_data_product_id: request.data_product_id },
-                }).unwrap();
+                await approveDataProductLink(request).unwrap();
                 dispatchMessage({
                     content: t('Output Port request has been successfully approved'),
                     type: 'success',
@@ -68,7 +63,7 @@ export const usePendingActionHandlers = () => {
     );
 
     const handleRejectDataProductDatasetLink = useCallback(
-        async (request: DataProductDatasetLinkRequest) => {
+        async (request: DenyOutputPortAsInputPortApiArg) => {
             try {
                 await rejectDataProductLink(request).unwrap();
                 dispatchMessage({
@@ -86,7 +81,7 @@ export const usePendingActionHandlers = () => {
     );
 
     const handleAcceptDataOutputDatasetLink = useCallback(
-        async (request: DataOutputDatasetLinkRequest) => {
+        async (request: ApproveOutputPortTechnicalAssetLinkApiArg) => {
             try {
                 await approveDataOutputLink(request).unwrap();
                 dispatchMessage({
@@ -104,7 +99,7 @@ export const usePendingActionHandlers = () => {
     );
 
     const handleRejectDataOutputDatasetLink = useCallback(
-        async (request: DataOutputDatasetLinkRequest) => {
+        async (request: DenyOutputPortTechnicalAssetLinkApiArg) => {
             try {
                 await rejectDataOutputLink(request).unwrap();
                 dispatchMessage({

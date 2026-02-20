@@ -1,11 +1,11 @@
 import { Space, Typography, type TypographyProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { DatasetAccess } from '@/types/dataset';
+import { OutputPortAccessType } from '@/store/api/services/generated/dataProductsApi.ts';
 
 type Props = {
     name: string;
-    accessType: DatasetAccess;
+    accessType: OutputPortAccessType;
     titleProps?: TypographyProps['Text'];
     isApproved?: boolean;
 };
@@ -17,7 +17,7 @@ export function DatasetPopoverTitle({ name, accessType, titleProps, isApproved }
     return (
         <Space>
             <Typography.Text {...titleProps}>{name}</Typography.Text>
-            {accessType !== DatasetAccess.Public && <Typography.Text italic>({subtitle})</Typography.Text>}
+            {accessType !== OutputPortAccessType.Public && <Typography.Text italic>({subtitle})</Typography.Text>}
         </Space>
     );
 }

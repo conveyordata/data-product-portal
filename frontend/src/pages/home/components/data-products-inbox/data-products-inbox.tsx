@@ -4,13 +4,9 @@ import { Button, Tabs, Typography } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
-import {
-    useGetAllDataProductsQuery,
-    useGetUserDataProductsQuery,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDataProductsQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import { getItemFromLocalStorage, type LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
 import styles from './data-products-inbox.module.scss';
@@ -35,8 +31,11 @@ type InboxTab = {
 export function DataProductsInbox({ userId }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
-    const { data: dataProducts, isFetching } = useGetAllDataProductsQuery();
-    const { data: userDataProducts, isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(userId);
+    const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
+        useGetDataProductsQuery(userId);
+
+    const { data: { data_products: dataProducts = [] } = {}, isFetching: isFetchingAll } =
+        useGetDataProductsQuery(undefined);
 
     const lastVisitedDataProducts: LastVisitedItem[] = getItemFromLocalStorage(
         LocalStorageKeys.LastVisitedDataProducts,
@@ -57,12 +56,12 @@ export function DataProductsInbox({ userId }: Props) {
             children: (
                 <DataProductsList
                     dataProducts={filteredLastVisitedDataProducts}
-                    isFetching={isFetching}
+                    isFetching={isFetchingAll}
                     lastVisitedDataProducts={lastVisitedDataProducts}
                 />
             ),
         }),
-        [t, filteredLastVisitedDataProducts, isFetching, lastVisitedDataProducts],
+        [t, filteredLastVisitedDataProducts, isFetchingAll, lastVisitedDataProducts],
     );
 
     const owned: InboxTab = useMemo(
@@ -83,7 +82,6 @@ export function DataProductsInbox({ userId }: Props) {
 
     const items: InboxTab[] = useMemo(() => [lastViewed, owned], [lastViewed, owned]);
 
-    if (isFetching) return <LoadingSpinner />;
     return (
         <div className={styles.section}>
             <div className={styles.sectionTitle}>

@@ -3,33 +3,32 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DataOutputTable } from '@/pages/dataset/components/dataset-tabs/data-output-tab/components/data-output-table/data-output-table.component';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
-import type { DataOutputLink } from '@/types/dataset';
+import {
+    type TechnicalAssetLink,
+    useGetOutputPortQuery,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 
-function filterDataOutputs(dataOutputLinks: DataOutputLink[], searchTerm: string) {
+function filterDataOutputs(dataOutputLinks: TechnicalAssetLink[], searchTerm: string) {
     return (
         dataOutputLinks.filter(
             (item) =>
-                item?.data_output?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                item?.data_output?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                item?.technical_asset?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                item?.technical_asset?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }
 
 type Props = {
     datasetId: string;
+    dataProductId: string;
 };
-export function DataOutputTab({ datasetId }: Props) {
+export function DataOutputTab({ datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
+    const { data: dataset, isLoading } = useGetOutputPortQuery({ id: datasetId, dataProductId });
     const [searchTerm, setSearchTerm] = useState<string>('');
-    const datasetDataOutputs = useMemo(() => {
-        return dataset?.data_output_links || [];
-    }, [dataset?.data_output_links]);
-
     const filteredDataOutputs = useMemo(() => {
-        return filterDataOutputs(datasetDataOutputs, searchTerm);
-    }, [datasetDataOutputs, searchTerm]);
+        return filterDataOutputs(dataset?.technical_asset_links || [], searchTerm);
+    }, [dataset?.technical_asset_links, searchTerm]);
 
     return (
         <Flex vertical gap={'middle'}>
@@ -38,7 +37,12 @@ export function DataOutputTab({ datasetId }: Props) {
                 allowClear
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <DataOutputTable dataOutputs={filteredDataOutputs} isLoading={isLoading} datasetId={datasetId} />
+            <DataOutputTable
+                dataOutputs={filteredDataOutputs}
+                isLoading={isLoading}
+                datasetId={datasetId}
+                dataProductId={dataProductId}
+            />
         </Flex>
     );
 }

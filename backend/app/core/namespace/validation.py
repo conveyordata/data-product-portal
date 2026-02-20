@@ -10,18 +10,12 @@ from app.configuration.data_product_settings.enums import DataProductSettingScop
 from app.configuration.data_product_settings.model import DataProductSetting
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import Base
+from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 
 
-class NamespaceValidityType(str, Enum):
-    VALID = "VALID"
-    INVALID_LENGTH = "INVALID_LENGTH"
-    INVALID_CHARACTERS = "INVALID_CHARACTERS"
-    DUPLICATE_NAMESPACE = "DUPLICATE_NAMESPACE"
-
-
 class NamespaceValidation(BaseModel):
-    validity: NamespaceValidityType
+    validity: ResourceNameValidityType
 
 
 class NamespaceSuggestion(BaseModel):
@@ -68,13 +62,13 @@ class NamespaceValidator:
         scope: Optional[UUID | Enum] = None,
     ) -> NamespaceValidation:
         if not (len(namespace) <= self.max_length):
-            validity = NamespaceValidityType.INVALID_LENGTH
+            validity = ResourceNameValidityType.INVALID_LENGTH
         elif not re.match(r"^[a-z0-9+=,.@_-]+$", namespace):
-            validity = NamespaceValidityType.INVALID_CHARACTERS
+            validity = ResourceNameValidityType.INVALID_CHARACTERS
         elif not self._is_unique(namespace, db, scope):
-            validity = NamespaceValidityType.DUPLICATE_NAMESPACE
+            validity = ResourceNameValidityType.DUPLICATE
         else:
-            validity = NamespaceValidityType.VALID
+            validity = ResourceNameValidityType.VALID
 
         return NamespaceValidation(validity=validity)
 

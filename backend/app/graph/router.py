@@ -8,8 +8,8 @@ from app.graph.service import GraphService
 router = APIRouter(tags=["Graph"])
 
 
-@router.get("")
-def get_graph_data(
+@router.get("/graph", deprecated=True)
+def get_graph_data_old(
     db: Session = Depends(get_db_session),
     domain_nodes_enabled: bool = True,
     data_product_nodes_enabled: bool = True,
@@ -22,9 +22,15 @@ def get_graph_data(
     )
 
 
-_router = router
-router = APIRouter()
-old_route = "/graph"
-route = "/v2/graph"
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
+@router.get("/v2/graph")
+def get_graph_data(
+    db: Session = Depends(get_db_session),
+    domain_nodes_enabled: bool = True,
+    data_product_nodes_enabled: bool = True,
+    output_port_nodes_enabled: bool = True,
+) -> Graph:
+    return GraphService(db).get_graph_data(
+        domain_nodes_enabled=domain_nodes_enabled,
+        data_product_nodes_enabled=data_product_nodes_enabled,
+        dataset_nodes_enabled=output_port_nodes_enabled,
+    )

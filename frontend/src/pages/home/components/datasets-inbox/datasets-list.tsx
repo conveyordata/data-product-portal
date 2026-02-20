@@ -8,7 +8,7 @@ import { UsageListItem } from '@/components/list/usage-list-item/usage-list-item
 import styles from '@/pages/home/components/datasets-inbox/datasets-inbox.module.scss';
 import { getLastVisitedItemDate } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
-import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
+import { ApplicationPaths, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { formatDate } from '@/utils/date.helper.ts';
 import type { LastVisitedItem } from '@/utils/local-storage.helper.ts';
 
@@ -29,7 +29,7 @@ export const DatasetList = ({ datasets, isFetching, lastVisitedDatasets }: Datas
             split
             loadMore={
                 datasets?.length ? (
-                    <Link to={ApplicationPaths.Datasets}>
+                    <Link to={ApplicationPaths.Marketplace}>
                         <Button type={'link'}>{t('Show More')}</Button>
                     </Link>
                 ) : null
@@ -52,7 +52,7 @@ export const DatasetList = ({ datasets, isFetching, lastVisitedDatasets }: Datas
                                     : t('No recent activity')
                             }
                             icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                            linkTo={createDatasetIdPath(dataset.id)}
+                            linkTo={createMarketplaceOutputPortPath(dataset.id, dataset.data_product_id)}
                         />
                         <div />
                     </>

@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next';
 import { DataProductOutlined } from '@/components/icons';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
-import type { DataQualityStatus } from '@/store/api/services/generated/outputPortDataQualityApi';
+import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
 import type { DatasetsGetContract, DatasetsGetContractSingle } from '@/types/dataset/datasets-get.contract';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';

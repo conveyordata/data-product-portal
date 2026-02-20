@@ -1,5 +1,4 @@
 import json
-from urllib import parse
 from uuid import UUID
 
 import httpx
@@ -54,21 +53,27 @@ def get_aws_url(id: UUID, db: Session, actor: User, environment: str) -> str:
     }
     json_dump = json.dumps(url_credentials)
 
-    request_parameters = "?Action=getSigninToken"
-    SESSION_DURATION = 900
-    request_parameters += f"&SessionDuration={SESSION_DURATION}"
-    request_parameters += f"&Session={parse.quote_plus(json_dump)}"
-    request_url = "https://signin.aws.amazon.com/federation" + request_parameters
-
-    r = httpx.get(request_url)
+    aws_signin_url = "https://signin.aws.amazon.com/federation"
+    r = httpx.get(
+        aws_signin_url,
+        params={
+            "Action": "getSigninToken",
+            "SessionDuration": 900,
+            "Session": json_dump,
+        },
+    )
 
     signin_token = json.loads(r.text)
 
-    request_parameters = "?Action=login"
-    request_parameters += f"&Issuer={settings.HOST}"
-    athena_link = "https://console.aws.amazon.com/athena/home#/query-editor"
-    request_parameters += f"&Destination={parse.quote_plus(athena_link)}"
-    request_parameters += f"&SigninToken={signin_token['SigninToken']}"
-    request_url = "https://signin.aws.amazon.com/federation" + request_parameters
+    request = httpx.Request(
+        "GET",
+        aws_signin_url,
+        params={
+            "Action": "login",
+            "Issuer": settings.HOST,
+            "Destination": "https://console.aws.amazon.com/athena/home#/query-editor",
+            "SigninToken": signin_token["SigninToken"],
+        },
+    )
 
-    return request_url
+    return str(request.url)

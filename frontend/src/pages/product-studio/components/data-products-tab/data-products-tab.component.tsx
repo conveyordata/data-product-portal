@@ -11,24 +11,23 @@ import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/data-products/data-products-table-columns.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
-    useGetAllDataProductsQuery,
-    useGetUserDataProductsQuery,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+    type GetDataProductsResponseItem,
+    useGetDataProductsQuery,
+} from '@/store/api/services/generated/dataProductsApi.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import styles from './data-products-tab.module.scss';
 
-function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
+function filterDataProducts(dataProducts: GetDataProductsResponseItem[], searchTerm?: string) {
     if (!searchTerm) {
         return dataProducts;
     }
     return dataProducts.filter((dataProduct) => dataProduct.name.toLowerCase().includes(searchTerm.toLowerCase()));
 }
 
-function filterDataProductsByRoles(dataProducts: DataProductsGetContract, selectedProductIds: string[]) {
+function filterDataProductsByRoles(dataProducts: GetDataProductsResponseItem[], selectedProductIds: string[]) {
     if (!selectedProductIds.length) {
         return dataProducts;
     }
@@ -49,13 +48,12 @@ export function DataProductsTab() {
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
-    const { data: userDataProducts = [], isFetching: isFetchingUserProducts } = useGetUserDataProductsQuery(
-        currentUser?.id ?? '',
-        { skip: !currentUser || showAllProducts },
-    );
-    const { data: allDataProducts = [], isFetching: isFetchingAllProducts } = useGetAllDataProductsQuery(undefined, {
-        skip: !showAllProducts,
-    });
+    const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserProducts } =
+        useGetDataProductsQuery(currentUser?.id ?? '', { skip: !currentUser || showAllProducts });
+    const { data: { data_products: allDataProducts = [] } = {}, isFetching: isFetchingAllProducts } =
+        useGetDataProductsQuery(undefined, {
+            skip: !showAllProducts,
+        });
 
     const dataProducts = showAllProducts ? allDataProducts : userDataProducts;
     const isFetching = showAllProducts ? isFetchingAllProducts : isFetchingUserProducts;
@@ -135,7 +133,7 @@ export function DataProductsTab() {
             </Flex>
 
             {/* Table */}
-            <Table<DataProductsGetContract[0]>
+            <Table<GetDataProductsResponseItem>
                 onRow={(record) => ({
                     onClick: () => navigateToDataProduct(record.id),
                 })}
