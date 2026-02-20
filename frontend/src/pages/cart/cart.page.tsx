@@ -72,8 +72,8 @@ function Cart() {
     };
     const initialValues: CartFormData | undefined = useMemo(() => {
         let data: CartFormData = {};
-        if (userDataProducts === undefined) {
-            return;
+        if (isFetchingUserDataProducts) {
+            return undefined;
         }
         const savedData = localStorage.getItem(cartFormDataStorageKey);
         if (savedData) {
@@ -86,7 +86,7 @@ function Cart() {
             data.dataProductId = undefined;
         }
         return data;
-    }, [createdProductId, userDataProducts]);
+    }, [createdProductId, userDataProducts, isFetchingUserDataProducts]);
 
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
         if (!values.justification || !values.dataProductId || cartDatasets === undefined || cartDatasets.length === 0) {
@@ -114,7 +114,6 @@ function Cart() {
             };
         }) ?? [];
     const selectedDataProductId = Form.useWatch('dataProductId', form);
-
     const createNewDataProduct = () => {
         posthog.capture(PosthogEvents.CART_CREATE_DATA_PRODUCT);
         navigate({
@@ -213,6 +212,7 @@ function Cart() {
                         <Skeleton />
                     ) : (
                         <Form<CartFormData>
+                            key={initialValues.dataProductId}
                             layout={'vertical'}
                             onFinish={onFinish}
                             form={form}
