@@ -15,9 +15,9 @@ import { DatasetActions } from '@/pages/dataset/components/dataset-actions/datas
 import { OutputPortDescription } from '@/pages/dataset/components/dataset-description/output-port-description.tsx';
 import { DatasetQuality } from '@/pages/dataset/components/dataset-quality/dataset-quality.component.tsx';
 import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';

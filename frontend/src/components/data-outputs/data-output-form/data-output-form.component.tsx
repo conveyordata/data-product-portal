@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
@@ -12,7 +13,6 @@ import {
     useUpdateTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useResourceNameConstraintsQuery } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';

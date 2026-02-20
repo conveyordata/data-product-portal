@@ -10,8 +10,8 @@ import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import { Notifications } from '@/components/notifications/notifications';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useIsAdminQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useRevokeAdminMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import { useIsAdminQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 import styles from './user-menu.module.scss';
 

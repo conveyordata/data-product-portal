@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GetTechnicalAssetsResponseItemRead,
     TechnicalAssetStatus,
@@ -11,7 +12,6 @@ import {
     useUnlinkOutputPortFromTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createDataOutputIdPath } from '@/types/navigation';

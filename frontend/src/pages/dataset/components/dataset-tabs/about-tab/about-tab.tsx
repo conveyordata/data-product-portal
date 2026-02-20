@@ -5,11 +5,11 @@ import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     useGetOutputPortQuery,
     useUpdateOutputPortAboutMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 

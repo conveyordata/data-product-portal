@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type DataProductRoleAssignmentResponse,
     useDeleteDataProductRoleAssignmentMutation,
@@ -12,7 +13,6 @@ import {
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';

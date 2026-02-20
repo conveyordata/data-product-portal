@@ -2,7 +2,7 @@ import { Flex, Typography, theme } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
-import type { UserContract } from '@/types/users';
+import type { UserContract } from '@/types/users/user.contract';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 import styles from './user-access-overview.module.scss';
 

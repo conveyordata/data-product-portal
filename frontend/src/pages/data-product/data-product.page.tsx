@@ -12,11 +12,11 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
 import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
 import { DataProductTabs } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     useGetDataProductQuery,
     useGetDataProductRolledUpTagsQuery,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';

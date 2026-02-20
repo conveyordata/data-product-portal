@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router';
 
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths } from '@/types/navigation';
 

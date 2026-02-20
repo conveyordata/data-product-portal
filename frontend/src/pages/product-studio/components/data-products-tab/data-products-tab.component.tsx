@@ -11,11 +11,11 @@ import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/data-products/data-products-table-columns.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GetDataProductsResponseItem,
     useGetDataProductsQuery,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import styles from './data-products-tab.module.scss';

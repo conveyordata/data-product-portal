@@ -10,6 +10,7 @@ import { ResourceNameFormItem } from '@/components/resource-name/resource-name-f
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
@@ -27,7 +28,7 @@ import {
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';

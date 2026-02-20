@@ -1,9 +1,9 @@
 import { Button, Popconfirm } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useUnlinkOutputPortFromTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import type { OutputPort } from '@/store/api/services/generated/usersApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';

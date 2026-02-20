@@ -2,6 +2,7 @@ import type { ConfigFile } from '@rtk-query/codegen-openapi';
 
 const services = [
     { name: 'empty', file: 'empty' },
+    { name: 'Authorization', file: 'authorization' },
     { name: 'Authorization - Role assignments', file: 'authorizationRoleAssignments' },
     { name: 'Authorization - Roles', file: 'authorizationRoles' },
     { name: 'Users', file: 'users' },
@@ -23,6 +24,7 @@ const services = [
     { name: 'Resource names', file: 'resourceNames' },
     { name: 'Search Output ports', file: 'outputPortsSearch' },
     { name: 'Graph', file: 'graph' },
+    { name: 'Version', file: 'version' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
 ];
 
@@ -50,7 +52,12 @@ services.forEach(({ file, name }, i) => {
         exportName: 'api',
         apiFile: apiFile,
         apiImport: 'api',
-        useEnumType: !(file === 'authorizationRoleAssignments' || file === 'authorizationRoles' || file === 'users'),
+        useEnumType: !(
+            file === 'authorizationRoleAssignments' ||
+            file === 'authorization' ||
+            file === 'authorizationRoles' ||
+            file === 'users'
+        ),
     };
 });
 
