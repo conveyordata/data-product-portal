@@ -43,76 +43,70 @@ class GraphService:
             .unique()
             .all()
         )
-        data_products = {dp for domain in domains for dp in domain.data_products}
-
-        # Nodes are { data products + datasets + data outputs }
-        data_product_nodes = [
-            Node(
-                id=data_product_get.id,
-                data=NodeData(
-                    id=data_product_get.id,
-                    name=data_product_get.name,
-                    icon_key=data_product_get.type.icon_key,
-                    link_to_id=data_product_get.id,
-                    domain=data_product_get.domain.name,
-                    domain_id=data_product_get.domain.id,
-                    assignments=data_product_get.assignments,
-                    description=data_product_get.description,
-                ),
-                type=NodeType.dataProductNode,
-            )
-            for data_product_get in data_products
-        ]
-        # get all datasets
-        datasets = (
-            self.db.scalars(
-                select(Dataset).options(
-                    selectinload(Dataset.data_product_links),
-                    selectinload(Dataset.data_output_links),
-                    selectinload(Dataset.data_product).selectinload(DataProduct.domain),
-                )
-            )
-            .unique()
-            .all()
-        )
-        dataset_nodes = [
-            Node(
-                id=dataset_get.id,
-                data=NodeData(
-                    id=dataset_get.id,
-                    name=dataset_get.name,
-                    icon_key="dataset",
-                    link_to_id=dataset_get.id,
-                    domain=dataset_get.data_product.domain.name,
-                    domain_id=dataset_get.data_product.domain.id,
-                    # assignments=dataset_get.assignments,
-                    description=dataset_get.description,
-                ),
-                type=NodeType.datasetNode,
-            )
-            for dataset_get in datasets
-        ]
-
-        domain_nodes = [
-            Node(
-                id=domain_get.id,
-                data=NodeData(
-                    id=domain_get.id,
-                    name=domain_get.name,
-                    link_to_id=domain_get.id,
-                ),
-                type=NodeType.domainNode,
-            )
-            for domain_get in domains
-        ]
 
         nodes = []
         if domain_nodes_enabled:
-            nodes += domain_nodes
+            nodes += [
+                Node(
+                    id=domain_get.id,
+                    data=NodeData(
+                        id=domain_get.id,
+                        name=domain_get.name,
+                    ),
+                    type=NodeType.domainNode,
+                )
+                for domain_get in domains
+            ]
         if data_product_nodes_enabled:
-            nodes += data_product_nodes
+            data_products = {dp for domain in domains for dp in domain.data_products}
+            nodes += [
+                Node(
+                    id=data_product_get.id,
+                    data=NodeData(
+                        id=data_product_get.id,
+                        name=data_product_get.name,
+                        icon_key=data_product_get.type.icon_key,
+                        domain=data_product_get.domain.name,
+                        domain_id=data_product_get.domain.id,
+                        assignments=data_product_get.assignments,
+                        description=data_product_get.description,
+                    ),
+                    type=NodeType.dataProductNode,
+                )
+                for data_product_get in data_products
+            ]
         if dataset_nodes_enabled:
-            nodes += dataset_nodes
+            # get all datasets
+            datasets = (
+                self.db.scalars(
+                    select(Dataset).options(
+                        selectinload(Dataset.data_product_links),
+                        selectinload(Dataset.data_output_links),
+                        selectinload(Dataset.data_product).selectinload(
+                            DataProduct.domain
+                        ),
+                    )
+                )
+                .unique()
+                .all()
+            )
+            nodes += [
+                Node(
+                    id=dataset_get.id,
+                    data=NodeData(
+                        id=dataset_get.id,
+                        name=dataset_get.name,
+                        icon_key="dataset",
+                        link_to_id=dataset_get.data_product.id,
+                        domain=dataset_get.data_product.domain.name,
+                        domain_id=dataset_get.data_product.domain.id,
+                        # assignments=dataset_get.assignments,
+                        description=dataset_get.description,
+                    ),
+                    type=NodeType.datasetNode,
+                )
+                for dataset_get in datasets
+            ]
         edges: List[Edge] = []
         if data_product_nodes_enabled and dataset_nodes_enabled:
             for dataset_get in datasets:
