@@ -2,7 +2,13 @@ from typing import TYPE_CHECKING, Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from app.configuration.platforms.platform_services.model import PlatformService
+from app.data_output_configuration.schema_request import (
+    RenderTechnicalAssetAccessPathRequest,
+)
 
 if TYPE_CHECKING:
     from app.users.schema import User
@@ -180,3 +186,21 @@ class PluginService:
                 parent_tiles[parent_key].children = children
 
         return list(parent_tiles.values())
+
+    def render_technical_asset_access_path(
+        self, request: RenderTechnicalAssetAccessPathRequest
+    ) -> str:
+        template = self.db.scalar(
+            select(PlatformService.result_string_template).where(
+                PlatformService.id == request.service_id,
+                PlatformService.platform_id == request.platform_id,
+            )
+        )
+
+        if not template:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Template not found for the given platform and service",
+            )
+
+        return request.configuration.render_template(template)

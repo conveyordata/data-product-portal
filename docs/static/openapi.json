@@ -13222,6 +13222,47 @@
         }
       }
     },
+    "/api/v2/plugins/render_technical_asset_access_path": {
+      "post": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Render Technical Asset Access Path",
+        "operationId": "render_technical_asset_access_path",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenderTechnicalAssetAccessPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderTechnicalAssetAccessPathResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/device/device_token": {
       "post": {
         "tags": [
@@ -20939,6 +20980,70 @@
           "consuming_data_product_id"
         ],
         "title": "RemoveOutputPortAsInputPortRequest"
+      },
+      "RenderTechnicalAssetAccessPathRequest": {
+        "properties": {
+          "platform_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Platform Id"
+          },
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
+          },
+          "configuration": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              }
+            ],
+            "title": "Configuration",
+            "discriminator": {
+              "propertyName": "configuration_type",
+              "mapping": {
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "platform_id",
+          "service_id",
+          "configuration"
+        ],
+        "title": "RenderTechnicalAssetAccessPathRequest"
+      },
+      "RenderTechnicalAssetAccessPathResponse": {
+        "properties": {
+          "technical_asset_access_path": {
+            "type": "string",
+            "title": "Technical Asset Access Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technical_asset_access_path"
+        ],
+        "title": "RenderTechnicalAssetAccessPathResponse"
       },
       "RequestDataProductRoleAssignment": {
         "properties": {

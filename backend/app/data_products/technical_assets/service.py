@@ -9,7 +9,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.configuration.platforms.platform_services.model import PlatformService
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
@@ -33,7 +32,6 @@ from app.data_products.technical_assets.model import (
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
-    DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -269,25 +267,6 @@ class DataOutputService:
                 node.isMain = True
 
         return graph
-
-    def get_data_output_result_string(
-        self,
-        request: DataOutputResultStringRequest,
-    ) -> str:
-        template = self.db.scalar(
-            select(PlatformService.result_string_template).where(
-                PlatformService.id == request.service_id,
-                PlatformService.platform_id == request.platform_id,
-            )
-        )
-
-        if not template:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Template not found for the given platform and service",
-            )
-
-        return request.configuration.render_template(template)
 
     def get_data_outputs_for_data_product(
         self, data_product_id: UUID

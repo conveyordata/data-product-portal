@@ -13,6 +13,10 @@ from app.core.authz import (
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
+from app.data_output_configuration.schema_request import (
+    RenderTechnicalAssetAccessPathRequest,
+)
+from app.data_output_configuration.service import PluginService
 from app.data_products.output_port_technical_assets_link.router import (
     link_output_port_to_technical_asset,
     unlink_output_port_from_technical_asset,
@@ -100,7 +104,13 @@ def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
 def get_data_output_result_string(
     request: DataOutputResultStringRequest, db: Session = Depends(get_db_session)
 ) -> str:
-    return DataOutputService(db).get_data_output_result_string(request)
+    return PluginService(db).render_technical_asset_access_path(
+        RenderTechnicalAssetAccessPathRequest(
+            platform_id=request.platform_id,
+            service_id=request.service_id,
+            configuration=request.configuration,
+        )
+    )
 
 
 @router.get(f"{old_route}/{{id}}", deprecated=True)

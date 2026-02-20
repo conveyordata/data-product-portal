@@ -22,6 +22,16 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    renderTechnicalAssetAccessPath: build.mutation<
+      RenderTechnicalAssetAccessPathApiResponse,
+      RenderTechnicalAssetAccessPathApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/plugins/render_technical_asset_access_path`,
+        method: "POST",
+        body: queryArg,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -42,6 +52,10 @@ export type GetPluginUrlApiArg = {
   id: string;
   environment?: string | null;
 };
+export type RenderTechnicalAssetAccessPathApiResponse =
+  /** status 200 Successful Response */ RenderTechnicalAssetAccessPathResponse;
+export type RenderTechnicalAssetAccessPathApiArg =
+  RenderTechnicalAssetAccessPathRequest;
 export type PlatformTile = {
   label: string;
   value: string;
@@ -123,11 +137,84 @@ export type HttpValidationError = {
 export type UrlResponse = {
   url: string;
 };
+export type RenderTechnicalAssetAccessPathResponse = {
+  technical_asset_access_path: string;
+};
+export type DatabricksTechnicalAssetConfiguration = {
+  configuration_type: "DatabricksTechnicalAssetConfiguration";
+  catalog: string;
+  schema?: string;
+  table?: string;
+  bucket_identifier?: string;
+  catalog_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type GlueTechnicalAssetConfiguration = {
+  configuration_type: "GlueTechnicalAssetConfiguration";
+  database: string;
+  database_suffix?: string;
+  table?: string;
+  bucket_identifier?: string;
+  database_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type RedshiftTechnicalAssetConfiguration = {
+  configuration_type: "RedshiftTechnicalAssetConfiguration";
+  database: string;
+  schema?: string;
+  table?: string;
+  bucket_identifier?: string;
+  database_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type S3TechnicalAssetConfiguration = {
+  configuration_type: "S3TechnicalAssetConfiguration";
+  bucket: string;
+  suffix?: string;
+  path: string;
+};
+export type SnowflakeTechnicalAssetConfiguration = {
+  configuration_type: "SnowflakeTechnicalAssetConfiguration";
+  database: string;
+  schema?: string;
+  table?: string;
+  bucket_identifier?: string;
+  database_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
+export type RenderTechnicalAssetAccessPathRequest = {
+  platform_id: string;
+  service_id: string;
+  configuration:
+    | ({
+        configuration_type: "DatabricksTechnicalAssetConfiguration";
+      } & DatabricksTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "GlueTechnicalAssetConfiguration";
+      } & GlueTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "RedshiftTechnicalAssetConfiguration";
+      } & RedshiftTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "S3TechnicalAssetConfiguration";
+      } & S3TechnicalAssetConfiguration)
+    | ({
+        configuration_type: "SnowflakeTechnicalAssetConfiguration";
+      } & SnowflakeTechnicalAssetConfiguration);
+};
 export enum UIElementType {
   String = "string",
   Select = "select",
   Checkbox = "checkbox",
   Radio = "radio",
+}
+export enum AccessGranularity {
+  Schema = "schema",
+  Table = "table",
 }
 export const {
   useGetPlatformTilesQuery,
@@ -138,4 +225,5 @@ export const {
   useLazyGetPluginFormQuery,
   useGetPluginUrlQuery,
   useLazyGetPluginUrlQuery,
+  useRenderTechnicalAssetAccessPathMutation,
 } = injectedRtkApi;
