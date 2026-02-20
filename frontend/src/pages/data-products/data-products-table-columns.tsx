@@ -4,11 +4,11 @@ import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type {
+    DataProductLifeCycle,
     DataProductStatus,
     DataProductType,
     GetDataProductsResponseItem,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import type { DomainContract } from '@/types/domain';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
@@ -60,7 +60,7 @@ export const getDataProductTableColumns = ({
         {
             title: t('Status'),
             dataIndex: 'lifecycle',
-            render: (lifecycle: DataProductLifeCycleContract) => {
+            render: (lifecycle: DataProductLifeCycle) => {
                 if (lifecycle !== null) {
                     return (
                         <Tag color={lifecycle.color || 'default'} className={styles.tag}>

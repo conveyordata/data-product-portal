@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type OutputPortRoleAssignmentResponse,
     useDeleteOutputPortRoleAssignmentMutation,
@@ -11,7 +12,6 @@ import {
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';

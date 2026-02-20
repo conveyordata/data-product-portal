@@ -10,12 +10,12 @@ import { Link, useNavigate } from 'react-router';
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import {
     type SearchOutputPortsResponseItem,
     useSearchOutputPortsQuery,
 } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createOutputPortPath } from '@/types/navigation.ts';
 import styles from './output-ports-tab.module.scss';

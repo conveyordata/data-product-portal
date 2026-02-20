@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import collibraLogo from '@/assets/icons/collibra-logo.svg?react';
 import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 

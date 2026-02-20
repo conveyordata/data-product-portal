@@ -2,9 +2,7 @@ import { AppleOutlined, CodeOutlined, LinuxOutlined, WindowsOutlined } from '@an
 import { Button, Dropdown, Popover } from 'antd';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
-
+import { useGetVersionQuery } from '@/store/api/services/generated/versionApi.ts';
 import styles from './cli-download-button.module.scss';
 
 type DownloadItem = {

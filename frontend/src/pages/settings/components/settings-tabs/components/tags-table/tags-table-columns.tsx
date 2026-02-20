@@ -2,7 +2,7 @@ import { Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { TagContract } from '@/types/tag';
+import type { TagContract } from '@/types/tag/tag';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {

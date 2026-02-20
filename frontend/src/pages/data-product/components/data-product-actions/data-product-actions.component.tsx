@@ -7,6 +7,7 @@ import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-gr
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
@@ -14,7 +15,6 @@ import {
     useGetPlatformTilesQuery,
     useLazyGetPluginUrlQuery,
 } from '@/store/api/services/generated/pluginsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';

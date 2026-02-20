@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
+    type DataProductLifeCyclesGetItem,
     useGetDataProductsLifecyclesQuery,
     useRemoveDataProductLifecycleMutation,
 } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import styles from './data-product-lifecycles-table.module.scss';
 import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';
@@ -18,7 +18,7 @@ export function DataProductLifecyclesTable() {
     const { data: dataProductLifecycles = undefined, isFetching } = useGetDataProductsLifecyclesQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [initial, setInitial] = useState<DataProductLifeCycleContract | undefined>(undefined);
+    const [initial, setInitial] = useState<DataProductLifeCyclesGetItem | undefined>(undefined);
     const [onRemoveDataProductLifecycle] = useRemoveDataProductLifecycleMutation();
 
     const handleAdd = () => {
@@ -28,7 +28,7 @@ export function DataProductLifecyclesTable() {
     };
 
     const handleEdit = useCallback(
-        (lifeCycle: DataProductLifeCycleContract) => () => {
+        (lifeCycle: DataProductLifeCyclesGetItem) => () => {
             setMode('edit');
             setInitial(lifeCycle);
             handleOpen();
@@ -37,7 +37,7 @@ export function DataProductLifecyclesTable() {
     );
 
     const handleRemove = useCallback(
-        async (lifeCycle: DataProductLifeCycleContract) => {
+        async (lifeCycle: DataProductLifeCyclesGetItem) => {
             try {
                 await onRemoveDataProductLifecycle(lifeCycle.id);
                 dispatchMessage({ content: t('Lifecycle removed successfully'), type: 'success' });
@@ -61,7 +61,7 @@ export function DataProductLifecyclesTable() {
                     {t('Add Lifecycle')}
                 </Button>
             </Flex>
-            <Table<DataProductLifeCycleContract>
+            <Table<DataProductLifeCyclesGetItem>
                 dataSource={dataProductLifecycles?.data_product_life_cycles}
                 columns={columns}
                 rowKey={(record) => record.id}

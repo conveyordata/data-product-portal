@@ -10,7 +10,6 @@ import {
     useUpdateDataProductTypeMutation,
 } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import styles from './data-product-type-table.module.scss';
 
@@ -123,7 +122,7 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
                     rules={[{ required: true, message: t('Please provide an icon') }]}
                 >
                     <Select>
-                        {dataProductIcons
+                        {Object.values(DataProductIconKey)
                             .filter((icon) => icon !== DataProductIconKey.Default)
                             .map((icon) => (
                                 <Option key={icon} value={icon}>

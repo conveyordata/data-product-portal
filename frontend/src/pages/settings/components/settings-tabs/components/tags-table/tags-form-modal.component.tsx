@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { useCreateTagMutation, useUpdateTagMutation } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { TagContract } from '@/types/tag';
+import type { TagContract } from '@/types/tag/tag';
 
 interface TagsFormText {
     title: string;

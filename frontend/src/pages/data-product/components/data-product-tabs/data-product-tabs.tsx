@@ -26,9 +26,9 @@ import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-
 import { InputPortTab } from '@/pages/data-product/components/data-product-tabs/input-port-tab/input-port-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductEventHistoryQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useMarkTourAsSeenMutation } from '@/store/api/services/generated/usersApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import styles from './data-product-tabs.module.scss';
