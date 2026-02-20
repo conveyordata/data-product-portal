@@ -14,6 +14,7 @@ export interface TableRow {
     dataProductName: string;
     type: PendingRequestType | undefined;
     date: string;
+    justification?: string;
 }
 
 export function transformToTableRow(action: PendingAction): TableRow {
@@ -33,6 +34,7 @@ export function transformToTableRow(action: PendingAction): TableRow {
             outputPortName: action.output_port.name,
             dataProductName: action.data_product.name,
             date: action.requested_on,
+            justification: action.justification,
         };
     }
 

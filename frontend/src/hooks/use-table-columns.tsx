@@ -11,6 +11,7 @@ import {
 import { formatDate } from '@/utils/date.helper';
 import { AccessRequestedCell } from '../components/requests/access-requested-cell';
 import { DataProductCell } from '../components/requests/data-product-cell';
+import { JustificationCell } from '../components/requests/justification-cell';
 import { RequestActions } from '../components/requests/request-actions';
 import { RequestTypeBadge } from '../components/requests/request-type-badge';
 import { RequesterCell } from '../components/requests/requester-cell';
@@ -71,6 +72,13 @@ export function useTableColumns({ onAccept, onReject }: UseTableColumnsParams): 
                     return record.type === PendingRequestType_DataProductRoleAssignment;
                 },
                 render: (type: PendingRequestType) => <RequestTypeBadge type={type} />,
+            },
+            {
+                title: t('Business Justification'),
+                dataIndex: 'justification',
+                key: 'justification',
+                width: 400,
+                render: (justification: string | undefined) => <JustificationCell justification={justification} />,
             },
             {
                 title: t('Date'),
