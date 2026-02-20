@@ -6,6 +6,3 @@ export type DataProductSettingValueCreateRequest = {
     value: string;
 };
 export type DataProductSettingValueCreateResponse = DataProductSettingContract;
-
-export type DataProductSettingCreateRequest = Omit<DataProductSettingContract, 'id'>;
-export type DataProductSettingCreateResponse = DataProductSettingContract;

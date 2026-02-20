@@ -7,11 +7,11 @@ type CartState = {
 
 const DATASET_IDS_KEY = 'CartDatasetIds';
 
-export const saveDatasetIds = (datasetIds: string[]): void => {
+const saveDatasetIds = (datasetIds: string[]): void => {
     localStorage.setItem(DATASET_IDS_KEY, JSON.stringify(datasetIds));
 };
 
-export const loadDatasetIds = (): string[] => {
+const loadDatasetIds = (): string[] => {
     try {
         const stored = localStorage.getItem(DATASET_IDS_KEY);
         return stored ? JSON.parse(stored) : [];
@@ -21,7 +21,7 @@ export const loadDatasetIds = (): string[] => {
     }
 };
 
-export const clearDatasetIds = (): void => {
+const clearDatasetIds = (): void => {
     localStorage.removeItem(DATASET_IDS_KEY);
 };
 
