@@ -2,10 +2,10 @@ import { Alert, Col, Flex, Radio, type RadioChangeEvent, Row, Typography } from 
 import { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
-    useGetDatasetQueryCuratedQueriesQuery,
-    useGetDatasetQueryStatsDailyQuery,
-} from '@/store/features/datasets/datasets-api-slice';
-import type { DatasetQueryStatsGranularity } from '@/types/dataset/dataset-query-stats-daily.contract';
+    QueryStatsGranularity,
+    useGetOutputPortCuratedQueriesQuery,
+    useGetOutputPortQueryStatsQuery,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
     aggregateQueriesPerConsumer,
     createColorScaleConfig,
@@ -16,43 +16,43 @@ import { QueriesOverTimeChart } from './components/queries-over-time-chart';
 import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
 
 type Props = {
-    datasetId: string;
+    outputPortId: string;
+    dataProductId: string;
 };
 
-function getGranularityFromDayRange(dayRange: number): DatasetQueryStatsGranularity {
+function getGranularityFromDayRange(dayRange: number): QueryStatsGranularity {
     if (dayRange === 365) {
-        return 'month';
+        return QueryStatsGranularity.Month;
     }
     if (dayRange === 90) {
-        return 'week';
+        return QueryStatsGranularity.Week;
     }
-    return 'day';
+    return QueryStatsGranularity.Day;
 }
 
-export function UsageTab({ datasetId }: Props) {
+export function UsageTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
     const yearDayRange = 365;
     const [dayRange, setDayRange] = useState<number>(yearDayRange);
     const granularity = useMemo(() => getGranularityFromDayRange(dayRange), [dayRange]);
 
     const {
-        data: { dataset_query_stats_daily_responses: responses = [] } = {},
+        data: { output_port_query_stats_responses: responses = [] } = {},
         isLoading,
         isFetching,
-    } = useGetDatasetQueryStatsDailyQuery({
-        datasetId,
+    } = useGetOutputPortQueryStatsQuery({
+        dataProductId,
+        id: outputPortId,
         granularity,
         dayRange,
     });
 
-    const { data: curatedQueries, isLoading: areCuratedQueriesLoading } = useGetDatasetQueryCuratedQueriesQuery(
-        datasetId,
-        { skip: !datasetId },
-    );
+    const { data: { output_port_curated_queries: curatedQueries = [] } = {}, isLoading: areCuratedQueriesLoading } =
+        useGetOutputPortCuratedQueriesQuery({ id: outputPortId, dataProductId });
 
     const isLoadingState = isLoading || isFetching;
     const hasUsageData = Boolean(responses.length);
-    const hasCuratedQueries = Boolean(!areCuratedQueriesLoading && curatedQueries?.dataset_curated_queries?.length);
+    const hasCuratedQueries = Boolean(!areCuratedQueriesLoading && curatedQueries?.length);
     const unknownLabel = t('Unknown');
 
     const chartData = useMemo(() => {
@@ -125,10 +125,7 @@ export function UsageTab({ datasetId }: Props) {
                 />
             </Col>
             <Col span={24}>
-                <CuratedQueriesList
-                    queries={curatedQueries?.dataset_curated_queries}
-                    isLoading={areCuratedQueriesLoading}
-                />
+                <CuratedQueriesList queries={curatedQueries} isLoading={areCuratedQueriesLoading} />
             </Col>
         </Row>
     );

@@ -11,15 +11,17 @@ import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import {
+    type SearchOutputPortsResponseItem,
+    useSearchOutputPortsQuery,
+} from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract';
 import { ApplicationPaths, createOutputPortPath } from '@/types/navigation.ts';
 import styles from './output-ports-tab.module.scss';
 import { getOutputPortTableColumns } from './output-ports-table-columns';
 
-function filterOutputPorts(outputPorts: DatasetsGetContract, searchTerm?: string) {
+function filterOutputPorts(outputPorts: SearchOutputPortsResponseItem[], searchTerm?: string) {
     if (!searchTerm) {
         return outputPorts;
     }
@@ -30,7 +32,7 @@ function filterOutputPorts(outputPorts: DatasetsGetContract, searchTerm?: string
     );
 }
 
-function filterOutputPortsByRoles(outputPorts: DatasetsGetContract, selectedPortIds: string[]) {
+function filterOutputPortsByRoles(outputPorts: SearchOutputPortsResponseItem[], selectedPortIds: string[]) {
     if (!selectedPortIds.length) {
         return outputPorts;
     }
@@ -80,16 +82,10 @@ export function OutputPortsTab() {
         setIsInitialized(true);
     }, [userDatasetRoles, isInitialized]);
 
-    const { data: userOutputPorts = [], isFetching: isFetchingUserPorts } = useGetUserDatasetsQuery(
-        currentUser?.id ?? '',
-        { skip: !currentUser || showAllPorts },
-    );
-    const { data: allOutputPorts = [], isFetching: isFetchingAllPorts } = useGetAllDatasetsQuery(undefined, {
-        skip: !showAllPorts,
+    const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
+        currentUserAssigned: !showAllPorts,
+        limit: 1000,
     });
-
-    const outputPorts = showAllPorts ? allOutputPorts : userOutputPorts;
-    const isFetching = showAllPorts ? isFetchingAllPorts : isFetchingUserPorts;
 
     const onSearch = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {

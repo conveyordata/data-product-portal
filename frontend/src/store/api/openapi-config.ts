@@ -21,6 +21,7 @@ const services = [
     { name: 'Data Products - Output ports - Input ports', file: 'dataProductsOutputPortsInputPorts' },
     { name: 'Data Products - Output Ports - Data Quality', file: 'dataProductsOutputPortsDataQuality' },
     { name: 'Resource names', file: 'resourceNames' },
+    { name: 'Search Output ports', file: 'outputPortsSearch' },
     { name: 'Graph', file: 'graph' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
 ];

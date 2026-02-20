@@ -22,8 +22,6 @@ class SearchDatasets(DatasetsGet):
                     "data_product_settings",
                 }
             ),
-            technical_asset_links=[dol.convert() for dol in self.data_output_links],
-            data_product_settings=[s.convert() for s in self.data_product_settings],
         )
 
 

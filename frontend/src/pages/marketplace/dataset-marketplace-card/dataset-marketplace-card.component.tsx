@@ -17,14 +17,14 @@ import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { useAppDispatch } from '@/store';
+import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { addDatasetToCart, removeDatasetFromCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
-import type { DatasetsGetContract } from '@/types/dataset';
 import { createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { DatasetCardTooltip } from './dataset-card-tooltip.component';
 import styles from './dataset-marketplace-card.module.scss';
 
 type Props = {
-    dataset: DatasetsGetContract[0];
+    dataset: SearchOutputPortsResponseItem;
 };
 
 export function DatasetMarketplaceCard({ dataset }: Props) {
@@ -40,7 +40,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
         }
     };
 
-    function createCardDetails(dataset: DatasetsGetContract[0]) {
+    function createCardDetails(outputPort: SearchOutputPortsResponseItem) {
         const items: DescriptionsProps['items'] = [
             {
                 key: 'domain',
@@ -50,7 +50,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Domain')}
                     </Space>
                 ),
-                children: <Typography.Text ellipsis={{ tooltip: true }}>{dataset.domain.name}</Typography.Text>,
+                children: <Typography.Text ellipsis={{ tooltip: true }}>{outputPort.domain.name}</Typography.Text>,
             },
             {
                 key: 'status',
@@ -60,7 +60,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Status')}
                     </Space>
                 ),
-                children: <Tag color={dataset.lifecycle.color}>{dataset.lifecycle.name}</Tag>,
+                children: <Tag color={outputPort.lifecycle?.color}>{outputPort.lifecycle?.name}</Tag>,
             },
             {
                 key: 'access type',
@@ -70,7 +70,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Access type')}
                     </Space>
                 ),
-                children: <Typography.Text ellipsis={{ tooltip: true }}>{dataset.access_type}</Typography.Text>,
+                children: <Typography.Text ellipsis={{ tooltip: true }}>{outputPort.access_type}</Typography.Text>,
             },
             {
                 key: 'technical assets',
@@ -80,7 +80,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Technical Assets')}
                     </Space>
                 ),
-                children: dataset.data_output_links.length,
+                children: outputPort.technical_assets_count,
             },
             {
                 key: 'data product',
@@ -95,8 +95,8 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         style={{ height: '44px' }} // To keep 2 rows for the Data Product height
                         ellipsis={{ rows: 2, tooltip: true }}
                     >
-                        <Link to={createDataProductIdPath(dataset.data_product_id)} className={styles.link}>
-                            {dataset.data_product_name}
+                        <Link to={createDataProductIdPath(outputPort.data_product_id)} className={styles.link}>
+                            {outputPort.data_product_name}
                         </Link>
                     </Typography.Paragraph>
                 ),
@@ -111,9 +111,9 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                 ),
                 children: (
                     <DatasetCardTooltip
-                        outputPortId={dataset.id}
-                        dataProductId={dataset.data_product_id}
-                        number_of_data_products={dataset.data_product_count}
+                        outputPortId={outputPort.id}
+                        dataProductId={outputPort.data_product_id}
+                        number_of_data_products={outputPort.data_product_count}
                     />
                 ),
             },
@@ -180,7 +180,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                 </Typography.Paragraph>
                 <Space size={2} style={{ height: '22px' }}>
                     {dataset.tags?.map((tag) => (
-                        <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.value}>
+                        <Tag color={'success'} key={tag.value}>
                             {tag.value}
                         </Tag>
                     ))}
