@@ -44,7 +44,7 @@ import {
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { DatasetAccess, type DatasetCreateFormSchema } from '@/types/dataset';
+import { DatasetAccess } from '@/types/dataset';
 import {
     ApplicationPaths,
     createDataOutputIdPath,
@@ -349,7 +349,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 validateResourceName={validateResourceNameCallback}
             />
             {mode === 'create' && (
-                <Form.Item<DatasetCreateFormSchema>
+                <Form.Item<CreateOutputPortRequest>
                     name={'owners'}
                     label={t('Owners')}
                     tooltip={t('The owners of the Output Port')}
@@ -370,7 +370,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     />
                 </Form.Item>
             )}
-            <Form.Item<DatasetCreateFormSchema>
+            <Form.Item<CreateOutputPortRequest>
                 name={'lifecycle_id'}
                 label={t('Status')}
                 rules={[
@@ -390,7 +390,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     }))}
                 />
             </Form.Item>
-            <Form.Item<DatasetCreateFormSchema>
+            <Form.Item<CreateOutputPortRequest>
                 name={'access_type'}
                 label={t('Access Type')}
                 tooltip={t('The access type of the Output Port')}
@@ -403,7 +403,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             >
                 <Radio.Group options={accessTypeOptions} />
             </Form.Item>
-            <Form.Item<DatasetCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+            <Form.Item<CreateOutputPortRequest> name={'tag_ids'} label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select Output Port tags')}
@@ -412,7 +412,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
-            <Form.Item<DatasetCreateFormSchema>
+            <Form.Item<CreateOutputPortRequest>
                 name={'description'}
                 label={t('Description')}
                 tooltip={t('A description for the Output Port')}

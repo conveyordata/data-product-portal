@@ -117,7 +117,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     }));
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
-    const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
+    const onFinish: FormProps<DataProductCreate>['onFinish'] = async (values) => {
         try {
             if (mode === 'create') {
                 const request: DataProductCreate = {
