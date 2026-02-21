@@ -1028,22 +1028,22 @@ def bootstrap_demo_data_product():
   <h2>About CoMix Survey Data</h2>
 
   <section class="overview">
-    <h3>Overview</h3>
-    <p>
+    <br/><h3>Overview</h3>
+    <p/><p>
       The <strong>CoMix Survey Data</strong> product provides comprehensive insights into social contact patterns
       during the COVID-19 pandemic. This dataset is derived from the CoMix social contact survey, which was
       conducted across multiple European countries to understand how people adapted their social behaviors
       in response to public health measures.
     </p>
-    <p>
+    <p/><p>
       This data product contains cleaned, validated, and enriched contact survey data that can be used for
       epidemiological modeling, policy analysis, and social science research.
     </p>
   </section>
 
   <section class="data-collection">
-    <h3>Data Collection Methodology</h3>
-    <p>
+    <br/><h3>Data Collection Methodology</h3>
+    <p/><p>
       The CoMix survey was conducted using online questionnaires distributed to representative samples of
       the population in participating countries. Participants were asked to report:
     </p>
@@ -1054,41 +1054,41 @@ def bootstrap_demo_data_product():
       <li><strong>Demographic Information:</strong> Participant age, household composition, employment status</li>
       <li><strong>Contextual Data:</strong> Local COVID-19 measures, infection rates, and policy interventions</li>
     </ul>
-    <p>
+    <p/><p>
       Survey waves were conducted regularly throughout 2020-2022, capturing changes in behavior across
       different phases of the pandemic and varying levels of restrictions.
     </p>
   </section>
 
   <section class="data-structure">
-    <h3>Data Structure</h3>
-    <p>This data product is organized into the following key datasets:</p>
+    <br/><h3>Data Structure</h3>
+    <p/><p>This data product is organized into the following key datasets:</p>
     <div class="dataset-grid">
       <div class="dataset-card">
         <h4>📊 demographic_data</h4>
-        <p>Participant demographics including age groups, household size, employment status, and geographic location.</p>
+        <p/><p>Participant demographics including age groups, household size, employment status, and geographic location.</p>
       </div>
       <div class="dataset-card">
         <h4>🤝 contact_events</h4>
-        <p>Detailed contact events with characteristics like duration, location (home, work, leisure), physical contact, and conversation.</p>
+        <p/><p>Detailed contact events with characteristics like duration, location (home, work, leisure), physical contact, and conversation.</p>
       </div>
       <div class="dataset-card">
         <h4>😷 protective_measures</h4>
-        <p>Self-reported use of protective behaviors including mask wearing, social distancing, and hand hygiene practices.</p>
+        <p/><p>Self-reported use of protective behaviors including mask wearing, social distancing, and hand hygiene practices.</p>
       </div>
       <div class="dataset-card">
         <h4>📅 survey_waves</h4>
-        <p>Metadata about survey collection periods, response rates, and alignment with policy intervention dates.</p>
+        <p/><p>Metadata about survey collection periods, response rates, and alignment with policy intervention dates.</p>
       </div>
       <div class="dataset-card">
         <h4>🦠 contextual_data</h4>
-        <p>COVID-19 epidemiological indicators, government measures (stringency index), and vaccination rollout timelines.</p>
+        <p/><p>COVID-19 epidemiological indicators, government measures (stringency index), and vaccination rollout timelines.</p>
       </div>
     </div>
   </section>
 
   <section class="use-cases">
-    <h3>Primary Use Cases</h3>
+    <br/><h3>Primary Use Cases</h3>
     <ol>
       <li>
         <strong>Epidemiological Modeling:</strong> Parameterize transmission models with empirical contact matrices
@@ -1114,8 +1114,8 @@ def bootstrap_demo_data_product():
   </section>
 
   <section class="data-quality">
-    <h3>Data Quality & Validation</h3>
-    <p>This data product implements comprehensive quality assurance:</p>
+    <br/><h3>Data Quality & Validation</h3>
+    <p/><p>This data product implements comprehensive quality assurance:</p>
     <ul>
       <li>✅ <strong>Input Validation:</strong> All contact records validated against expected ranges and logical constraints</li>
       <li>✅ <strong>Completeness Checks:</strong> Missing data patterns analyzed and documented; imputation strategies applied where appropriate</li>
@@ -1126,33 +1126,33 @@ def bootstrap_demo_data_product():
   </section>
 
   <section class="privacy">
-    <h3>Privacy & Ethics</h3>
-    <p>
+    <br/><h3>Privacy & Ethics</h3>
+    <p/><p>
       All data has been anonymized and aggregated in accordance with GDPR requirements. Direct identifiers have
       been removed, and geographic granularity is limited to region-level to prevent re-identification.
       The original survey received ethical approval from institutional review boards in all participating countries.
     </p>
-    <p>
+    <p/><p>
       <strong>Access Type:</strong> Restricted - Users must acknowledge data usage terms and cite original sources.
     </p>
   </section>
 
   <section class="references">
-    <h3>References & Attribution</h3>
-    <p>This data product is based on the CoMix social contact survey. Publications using this data should cite:</p>
+    <br/><h3>References & Attribution</h3>
+    <p/><p>This data product is based on the CoMix social contact survey. Publications using this data should cite:</p>
     <blockquote>
       Jarvis CI, Van Zandvoort K, Gimma A, et al. (2020).
       "Quantifying the impact of physical distance measures on the transmission of COVID-19 in the UK."
       <em>BMC Medicine</em> 18, 124.
     </blockquote>
-    <p>
+    <p/><p>
       Additional survey documentation and methodology papers are available in the data product's documentation portal.
     </p>
   </section>
 
   <section class="contact">
-    <h3>Support & Contact</h3>
-    <p>
+    <br/><h3>Support & Contact</h3>
+    <p/><p>
       For questions about this data product, methodology clarifications, or access requests, please contact
       the data product team through the Data Product Portal.
     </p>
@@ -1164,7 +1164,7 @@ def bootstrap_demo_data_product():
   </section>
 
   <section class="changelog">
-    <h3>Version History</h3>
+    <br/><h3>Version History</h3>
     <ul>
       <li><strong>v1.0.0</strong> (2024-02) - Initial release with data through December 2022</li>
       <li><strong>v1.1.0</strong> (2024-06) - Added vaccination status enrichment and extended protective measures data</li>
@@ -1274,7 +1274,7 @@ def bootstrap_demo_data_product():
                 "namespace": "cleaned-respondent-data",
                 "description": "Output port containing cleaned respondent-level data from the CoMix survey, including demographics and contact events",
                 "tag_ids": [],
-                "about": "<h1>Cleaned Respondent Data</h1><p>This output port provides access to the cleaned and validated respondent-level data from the CoMix survey. It includes demographic information, contact events, protective behaviors, and contextual data for each survey participant.</p><h3>Last Refreshed</h3><p>2026-03-26</p><h3>Schema</h3><ul><li><strong>respondent_id</strong>: Unique identifier for each survey respondent</li><li><strong>age_group</strong>: Age group of the respondent (e.g., 18-29, 30-39)</li><li><strong>household_size</strong>: Number of people in the respondent's household</li><li><strong>employment_status</strong>: Employment status (e.g., employed, unemployed, student)</li><li><strong>geographic_region</strong>: Geographic region of residence</li><li><strong>contact_events</strong>: Nested data structure containing details of each contact event reported by the respondent, including duration, location, physical contact, and conversation details</li><li><strong>protective_measures</strong>: Self-reported use of protective behaviors such as mask wearing and social distancing</li></ul>",
+                "about": "<h1>Cleaned Respondent Data</h1><p/><p>This output port provides access to the cleaned and validated respondent-level data from the CoMix survey. It includes demographic information, contact events, protective behaviors, and contextual data for each survey participant.</p><br/><h3>Last Refreshed</h3><p/><p>2026-03-26</p><br/><h3>Schema</h3><ul><li><strong>respondent_id</strong>: Unique identifier for each survey respondent</li><li><strong>age_group</strong>: Age group of the respondent (e.g., 18-29, 30-39)</li><li><strong>household_size</strong>: Number of people in the respondent's household</li><li><strong>employment_status</strong>: Employment status (e.g., employed, unemployed, student)</li><li><strong>geographic_region</strong>: Geographic region of residence</li><li><strong>contact_events</strong>: Nested data structure containing details of each contact event reported by the respondent, including duration, location, physical contact, and conversation details</li><li><strong>protective_measures</strong>: Self-reported use of protective behaviors such as mask wearing and social distancing</li></ul>",
                 "access_type": "restricted",
                 "lifecycle_id": "00000000-0000-0000-0000-000000000001",
                 "owners": [
