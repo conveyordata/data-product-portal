@@ -4,7 +4,7 @@ import type { AuthProviderProps } from 'react-oidc-context';
 import { AppConfig } from '@/config/app-config.ts';
 
 const oidcCredentials = AppConfig.getOidcCredentials();
-export const oidcConfig: OidcClientSettings = {
+const oidcConfig: OidcClientSettings = {
     ...oidcCredentials,
     loadUserInfo: true,
     scope: 'openid profile email',

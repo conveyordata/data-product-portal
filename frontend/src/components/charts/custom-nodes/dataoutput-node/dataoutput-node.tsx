@@ -5,7 +5,7 @@ import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.t
 import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
-export type DataOutputNodeProps = Node<{
+type DataOutputNodeProps = Node<{
     id: string;
     name: string;
     isMainNode?: boolean;

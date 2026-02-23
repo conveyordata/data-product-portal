@@ -9,7 +9,3 @@ export type DataProductCreate = Pick<
 };
 
 export type DataProductCreateFormSchema = DataProductCreate;
-
-export type DataProductCreateResponse = {
-    id: string;
-};

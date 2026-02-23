@@ -9,15 +9,19 @@ import {
     type DataProductSettingsGetItem,
     useGetDataProductsSettingsQuery,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
-import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
-    useCreateDataProductSettingValueMutation,
-    useCreateDatasetSettingValueMutation,
-} from '@/store/features/data-product-settings/data-product-settings-api-slice';
+    type SetValueForDataProductApiArg,
+    useGetDataProductQuery,
+    useSetValueForDataProductMutation,
+} from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type SetValueForOutputPortApiArg,
+    useGetOutputPortQuery,
+    useSetValueForOutputPortMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { DataProductSettingValueCreateRequest, DataProductSettingValueForm } from '@/types/data-product-setting';
+import type { DataProductSettingValueForm } from '@/types/data-product-setting';
 import styles from './data-product-settings.module.scss';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
@@ -30,12 +34,12 @@ type Props = {
 export function DataProductSettings({ id, scope, dataProductId }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductQuery(id || '', {
-        skip: !id || scope !== 'dataproduct',
+        skip: scope !== 'dataproduct',
     });
-    const { data: dataset, isFetching: isFetchingDS } = useGetOutputPortQuery(
-        { id: id || '', dataProductId: dataProductId || '' },
+    const { data: outputPort, isFetching: isFetchingDS } = useGetOutputPortQuery(
+        { id: id, dataProductId: dataProductId ?? '' },
         {
-            skip: !id || scope !== 'dataset' || !dataProductId,
+            skip: scope !== 'dataset' || !dataProductId,
         },
     );
     const { data: settings, isFetching } = useGetDataProductsSettingsQuery();
@@ -48,22 +52,21 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             resource: id,
             action: AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS,
         },
-        { skip: !id || scope !== 'dataproduct' },
+        { skip: scope !== 'dataproduct' },
     );
-    const { data: dataset_access } = useCheckAccessQuery(
+    const { data: output_port_access } = useCheckAccessQuery(
         {
             resource: id,
             action: AuthorizationAction.OUTPUT_PORT__UPDATE_SETTINGS,
         },
-        { skip: !id || scope !== 'dataset' },
+        { skip: scope !== 'dataset' },
     );
 
     const canUpdateProductSettings = product_access?.allowed || scope === 'dataset';
-    const canUpdateDatasetSettings = dataset_access?.allowed || scope === 'dataproduct';
+    const canUpdateOutputPortSetting = output_port_access?.allowed || scope === 'dataproduct';
 
-    const [updateDataProductSetting] = useCreateDataProductSettingValueMutation();
-    const [updateDatasetSetting] = useCreateDatasetSettingValueMutation();
-    const updateSetting = scope === 'dataproduct' ? updateDataProductSetting : updateDatasetSetting;
+    const [updateDataProductSetting] = useSetValueForDataProductMutation();
+    const [updateOutputPortSetting] = useSetValueForOutputPortMutation();
 
     const [form] = Form.useForm();
     const timeoutRef = useRef<Timeout | null>(null);
@@ -80,7 +83,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             }
             if (scope === 'dataset') {
                 return filteredSettings.map((setting) => {
-                    const match = dataset?.data_product_settings?.find(
+                    const match = outputPort?.data_product_settings?.find(
                         (ds) => ds.data_product_setting_id === setting.id,
                     );
                     return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
@@ -88,38 +91,42 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             }
         }
         return [];
-    }, [filteredSettings, scope, dataProduct?.data_product_settings, dataset?.data_product_settings]);
+    }, [filteredSettings, scope, dataProduct?.data_product_settings, outputPort?.data_product_settings]);
 
     const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = useCallback(
         async (values: DataProductSettingValueForm) => {
             try {
-                let id = '';
-                if (dataProduct) {
-                    id = dataProduct.id;
-                }
-                if (dataset) {
-                    id = dataset.id;
-                }
-                if (id !== '') {
+                await Promise.all(
                     updatedSettings?.map(async (setting) => {
                         const key = `data_product_settings_id_${setting.id}`;
                         if (values[`value_${setting.id}`].toString() !== setting.value) {
-                            const request: DataProductSettingValueCreateRequest = {
-                                data_product_id: id,
-                                data_product_settings_id: values[key],
-                                value: values[`value_${setting.id}`].toString(),
-                            };
-                            await updateSetting(request).unwrap();
-                            // dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
+                            if (scope === 'dataset') {
+                                const request: SetValueForOutputPortApiArg = {
+                                    id: id,
+                                    dataProductId: dataProductId ?? '',
+                                    settingId: values[key],
+                                    value: values[`value_${setting.id}`].toString(),
+                                };
+                                return updateOutputPortSetting(request).unwrap();
+                            }
+                            if (scope === 'dataproduct') {
+                                const request: SetValueForDataProductApiArg = {
+                                    id: id,
+                                    settingId: values[key],
+                                    value: values[`value_${setting.id}`].toString(),
+                                };
+                                return updateDataProductSetting(request).unwrap();
+                            }
                         }
-                    });
-                }
+                    }) ?? [],
+                );
+                dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
             } catch (_e) {
                 const errorMessage = 'Failed to update setting';
                 dispatchMessage({ content: errorMessage, type: 'error' });
             }
         },
-        [dataProduct, dataset, updateSetting, updatedSettings],
+        [updateOutputPortSetting, updatedSettings, updateDataProductSetting, t, scope, id, dataProductId],
     );
 
     const onSubmitFailed: FormProps<DataProductSettingValueForm>['onFinishFailed'] = useCallback(() => {
@@ -236,7 +243,11 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                 labelWrap
                 labelAlign={'left'}
                 disabled={
-                    isFetching || isFetchingDP || isFetchingDS || !canUpdateProductSettings || !canUpdateDatasetSettings
+                    isFetching ||
+                    isFetchingDP ||
+                    isFetchingDS ||
+                    !canUpdateProductSettings ||
+                    !canUpdateOutputPortSetting
                 }
                 className={styles.form}
                 onValuesChange={(_, allValues) => {

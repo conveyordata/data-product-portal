@@ -1,5 +1,4 @@
 {
-    "by {{author}} on {{date}}": "by {{author}} on {{date}}",
     "Logo": "Data Product Portal",
     "Data Product Portal": "Data Product Portal",
     "Remove admin privileges": "Remove admin privileges",
@@ -76,6 +75,7 @@
     "Please provide a description for the Data Product": "Please provide a description for the Data Product",
     "Are you sure you want to delete this Data Product?": "Are you sure you want to delete this Data Product?",
     "Save": "Save",
+    "Setting updated successfully": "Setting updated successfully",
     "Please provide the value": "Please provide the value",
     "{{count}} Technical Assets linked successfully_one": "{{count}} Technical Asset linked successfully",
     "{{count}} Technical Assets linked successfully_other": "{{count}} Technical Assets linked successfully",
@@ -129,7 +129,6 @@
     "Access granted": "Access granted",
     "Permission required": "Permission required",
     "{{Type}} access": "{{Type}} access",
-    "Restricted access": "Restricted access",
     "View Data Product": "View Data Product",
     "View Output Port": "View Output Port",
     "View Technical Asset": "View Technical Asset",
