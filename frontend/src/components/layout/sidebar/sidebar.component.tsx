@@ -15,11 +15,10 @@ import { Link, useMatches } from 'react-router';
 
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { ProductLogo } from '@/components/icons';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
+import { useGetVersionQuery } from '@/store/api/services/generated/versionApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-
 import styles from './sidebar.module.scss';
 
 export const Sidebar = () => {

@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useModal } from '@/hooks/use-modal';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     useGetOutputPortQuery,
     useRemoveOutputPortMutation,
@@ -14,7 +15,6 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
     useUnlinkOutputPortFromTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation';

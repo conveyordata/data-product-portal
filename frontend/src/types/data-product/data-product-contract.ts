@@ -1,10 +1,9 @@
+import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
+import type { DataProductType } from '@/store/api/services/generated/usersNotificationsApi.ts';
 import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
 import type { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
-import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import type { DataProductTypeContract } from '@/types/data-product-type';
 import type { DomainContract } from '@/types/domain';
 import type { TagContract } from '@/types/tag';
-
 import type { DataProductSettingValueContract } from '../data-product-setting';
 import type { DatasetsGetContract } from '../dataset';
 
@@ -19,10 +18,10 @@ export interface DataProductContract {
     name: string;
     description: string;
     about: string;
-    type: DataProductTypeContract;
+    type: DataProductType;
     type_id: string;
     status: DataProductStatus;
-    lifecycle: DataProductLifeCycleContract;
+    lifecycle: DataProductLifeCycle;
     lifecycle_id: string;
     dataset_links: DatasetLink[];
     tag_ids: string[];

@@ -3,9 +3,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TechnicalAssetCard } from '@/components/data-outputs/technical-asset-card/data-output-card.component.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetDataProductTechnicalAssetsQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup.tsx';
 

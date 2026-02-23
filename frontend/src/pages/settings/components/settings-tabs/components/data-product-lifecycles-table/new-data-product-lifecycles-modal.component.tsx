@@ -7,8 +7,8 @@ import {
     useCreateDataProductLifecycleMutation,
     useUpdateDataProductLifecycleMutation,
 } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
+import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import styles from './data-product-lifecycles-table.module.scss';
 
 interface CreateLifecycleModalProps {
@@ -16,7 +16,7 @@ interface CreateLifecycleModalProps {
     t: TFunction;
     isOpen: boolean;
     mode: 'create' | 'edit';
-    initial?: DataProductLifeCycleContract;
+    initial?: DataProductLifeCycle;
 }
 interface LifeCycleFormText {
     title: string;
@@ -46,7 +46,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (lifeCycle: DataProductLifeCycleContract) => {
+    const handleFinish = async (lifeCycle: DataProductLifeCycle) => {
         try {
             if (mode === 'create') {
                 await createDataProductLifecycle(lifeCycle);

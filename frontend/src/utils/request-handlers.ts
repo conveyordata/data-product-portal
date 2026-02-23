@@ -6,7 +6,7 @@ import type {
     ApproveOutputPortTechnicalAssetLinkApiArg,
     DenyOutputPortTechnicalAssetLinkApiArg,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi';
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
     PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,

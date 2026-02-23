@@ -4,13 +4,13 @@ import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'reac
 import { useTranslation } from 'react-i18next';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type DataProductSettingsGetItem,
     useGetDataProductsSettingsQuery,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useCreateDataProductSettingValueMutation,
     useCreateDatasetSettingValueMutation,

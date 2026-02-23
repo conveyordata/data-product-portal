@@ -7,6 +7,7 @@ import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type DataProductRoleAssignmentResponse,
     useCreateDataProductRoleAssignmentMutation,
@@ -15,7 +16,6 @@ import {
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';

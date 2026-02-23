@@ -1,4 +1,4 @@
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
     type PendingRequestType,
     PendingRequestType_DataProductOutputPort,

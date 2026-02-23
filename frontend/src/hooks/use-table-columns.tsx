@@ -1,7 +1,7 @@
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
     type PendingRequestType,
     PendingRequestType_DataProductOutputPort,

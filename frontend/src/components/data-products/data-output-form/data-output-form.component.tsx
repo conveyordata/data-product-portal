@@ -20,6 +20,7 @@ import {
     type PlatformTile,
     useGetPlatformTilesQuery,
     useGetPluginsQuery,
+    useRenderTechnicalAssetAccessPathMutation,
 } from '@/store/api/services/generated/pluginsApi';
 import {
     ResourceNameModel,
@@ -27,7 +28,6 @@ import {
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { useLazyGetDataOutputResultStringQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import { createDataProductIdPath } from '@/types/navigation';
@@ -85,7 +85,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     // Result string
-    const [fetchResultString] = useLazyGetDataOutputResultStringQuery();
+    const [fetchResultString] = useRenderTechnicalAssetAccessPathMutation();
 
     const isLoading = platformsLoading || isLoadingMetadata || isCreating || isFetchingInitialValues || isFetchingTags;
 
@@ -231,7 +231,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 };
                 return fetchResultString(request).unwrap();
             })
-            .then((result) => form.setFieldValue('result', result))
+            .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
             .catch(() => form.setFieldValue('result', undefined));
     }, DEBOUNCE);
 

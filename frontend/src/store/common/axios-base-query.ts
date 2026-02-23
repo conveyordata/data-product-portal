@@ -6,7 +6,6 @@ import { User } from 'oidc-client-ts';
 import { AppConfig } from '@/config/app-config.ts';
 import { type NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
 import type { ApiError } from '@/types/api-result.ts';
-import type { Headers } from '@/types/http.ts';
 
 interface CustomAxiosError extends AxiosError {
     response?: AxiosResponse<ApiError>;
@@ -66,7 +65,7 @@ export const axiosBaseQuery =
             data?: AxiosRequestConfig['data'];
             body?: AxiosRequestConfig['data'];
             params?: Record<string, string | boolean | number | boolean | undefined | null>;
-            headers?: Headers;
+            headers?: { [key: string]: string | number };
         },
         unknown,
         unknown

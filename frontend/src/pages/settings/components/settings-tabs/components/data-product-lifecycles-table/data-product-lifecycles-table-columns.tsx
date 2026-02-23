@@ -2,15 +2,15 @@ import { Button, Checkbox, ColorPicker, Flex, Popconfirm, type TableColumnsType 
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { DataProductLifeCyclesGetItem } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
     isLoading?: boolean;
     isDisabled?: boolean;
-    handleEdit: (record: DataProductLifeCycleContract) => () => void;
-    handleRemove: (record: DataProductLifeCycleContract) => void;
+    handleEdit: (record: DataProductLifeCyclesGetItem) => () => void;
+    handleRemove: (record: DataProductLifeCyclesGetItem) => void;
 };
 
 export const getDataProductTableColumns = ({
@@ -19,8 +19,8 @@ export const getDataProductTableColumns = ({
     isLoading,
     handleEdit,
     handleRemove,
-}: Props): TableColumnsType<DataProductLifeCycleContract> => {
-    const sorter = new Sorter<DataProductLifeCycleContract>();
+}: Props): TableColumnsType<DataProductLifeCyclesGetItem> => {
+    const sorter = new Sorter<DataProductLifeCyclesGetItem>();
     return [
         {
             title: t('Id'),

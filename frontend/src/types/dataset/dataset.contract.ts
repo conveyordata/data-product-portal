@@ -1,8 +1,7 @@
+import type { DataProductLifeCycle } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import type { DataOutputLink, DataProductLink } from '@/types/dataset';
 import type { DomainContract } from '@/types/domain';
 import type { TagContract } from '@/types/tag';
-
-import type { DataProductLifeCycleContract } from '../data-product-lifecycle';
 import type { DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DatasetStatus {
@@ -29,7 +28,7 @@ export interface DatasetContract {
     tag_ids: string[];
     data_product_id: string;
     data_product_links: DataProductLink[];
-    lifecycle: DataProductLifeCycleContract;
+    lifecycle: DataProductLifeCycle;
     lifecycle_id: string;
     data_output_links: DataOutputLink[];
     access_type: DatasetAccess;

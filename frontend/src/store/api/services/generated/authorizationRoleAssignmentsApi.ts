@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/baseApi";
+import { api } from "@/store/api/services/generated/authorizationApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     becomeAdmin: build.mutation<BecomeAdminApiResponse, BecomeAdminApiArg>({

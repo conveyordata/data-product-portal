@@ -1,3 +1,9 @@
+import type {
+    DataProductOutputPortPendingAction,
+    DataProductRoleAssignmentPendingAction,
+    TechnicalAssetOutputPortPendingAction,
+} from '@/store/api/services/generated/usersApi';
+
 export const PendingRequestType_DataProductOutputPort = 'DataProductOutputPort';
 export const PendingRequestType_TechnicalAssetOutputPort = 'TechnicalAssetOutputPort';
 export const PendingRequestType_DataProductRoleAssignment = 'DataProductRoleAssignment';
@@ -8,3 +14,8 @@ export const PendingRequestTypeValues = [
 ] as const;
 
 export type PendingRequestType = (typeof PendingRequestTypeValues)[number];
+
+export type PendingAction =
+    | DataProductOutputPortPendingAction
+    | TechnicalAssetOutputPortPendingAction
+    | DataProductRoleAssignmentPendingAction;

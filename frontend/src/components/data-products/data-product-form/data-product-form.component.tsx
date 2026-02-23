@@ -1,15 +1,18 @@
+import { ProductOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
+import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space, Typography } from 'antd';
 import { parseAsBoolean, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
+import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
@@ -27,7 +30,6 @@ import {
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
@@ -52,9 +54,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const currentUser = useSelector(selectCurrentUser);
     const [fromMarketplace] = useQueryState('fromMarketplace', parseAsBoolean.withDefault(false));
 
+    const [deleteDataProduct, { isLoading: isDeleting, isSuccess: isDeleted }] = useRemoveDataProductMutation();
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductQuery(
         dataProductId || '',
-        { skip: mode === 'create' || !dataProductId },
+        { skip: mode === 'create' || !dataProductId || isDeleted || isDeleting },
     );
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
@@ -64,7 +67,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
-    const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
@@ -115,6 +117,37 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         disabled: owner.id === currentUser?.id,
     }));
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
+
+    const { setBreadcrumbs } = useBreadcrumbs();
+    useEffect(() => {
+        if (mode === 'edit') {
+            setBreadcrumbs([
+                {
+                    title: (
+                        <>
+                            <ProductOutlined /> {t('Product Studio')}
+                        </>
+                    ),
+                    path: ApplicationPaths.Studio,
+                },
+                { title: <>{currentDataProduct?.name}</>, path: createDataProductIdPath(dataProductId ?? '') },
+                { title: t('Edit') },
+            ]);
+        }
+        if (mode === 'create') {
+            setBreadcrumbs([
+                {
+                    title: (
+                        <>
+                            <ProductOutlined /> {t('Product Studio')}
+                        </>
+                    ),
+                    path: ApplicationPaths.Studio,
+                },
+                { title: t('New Data Product') },
+            ]);
+        }
+    }, [setBreadcrumbs, t, dataProductId, mode, currentDataProduct?.name]);
 
     const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -247,189 +280,197 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     };
 
     return (
-        <Form<DataProductCreateFormSchema>
-            form={form}
-            labelWrap
-            labelCol={FORM_GRID_WRAPPER_COLS}
-            wrapperCol={FORM_GRID_WRAPPER_COLS}
-            layout="vertical"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete={'off'}
-            requiredMark={'optional'}
-            disabled={isLoading || !canSubmit}
-            initialValues={initialValues}
-        >
-            <Form.Item<DataProductCreateFormSchema>
-                name={'name'}
-                label={t('Name')}
-                tooltip={t('The name of your Data Product')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please provide the name of the Data Product'),
-                    },
-                ]}
-            >
-                <Input />
-            </Form.Item>
-            <ResourceNameFormItem
+        <>
+            {mode === 'edit' && (
+                <Typography.Title level={3} className={styles.title}>
+                    {currentDataProduct?.name}
+                </Typography.Title>
+            )}
+            {mode === 'create' && <Typography.Title level={3}>{t('New Data Product')}</Typography.Title>}
+            <Form<DataProductCreateFormSchema>
                 form={form}
-                tooltip={t('The namespace of the Data Product')}
-                max_length={constraints?.max_length}
-                editToggleDisabled={mode === 'edit'}
-                canEditResourceName={canEditResourceName}
-                toggleCanEditResourceName={() => setCanEditResourceName((prev) => !prev)}
-                validationRequired={mode === 'create'}
-                validateResourceName={resourceNameValidationCallback}
-            />
-            <Form.Item<DataProductCreateFormSchema>
-                name={'owners'}
-                label={t('Owners')}
-                tooltip={t('The owners of the Data Product')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select at least one owner for the Data Product'),
-                    },
-                ]}
+                labelWrap
+                labelCol={FORM_GRID_WRAPPER_COLS}
+                wrapperCol={FORM_GRID_WRAPPER_COLS}
+                layout="vertical"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete={'off'}
+                requiredMark={'optional'}
+                disabled={isLoading || !canSubmit}
+                initialValues={initialValues}
             >
-                <Select
-                    loading={isFetchingUsers}
-                    mode={'multiple'}
-                    options={userSelectOptions}
-                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    disabled={mode !== 'create'}
-                    tokenSeparators={[',']}
+                <Form.Item<DataProductCreateFormSchema>
+                    name={'name'}
+                    label={t('Name')}
+                    tooltip={t('The name of your Data Product')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please provide the name of the Data Product'),
+                        },
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+                <ResourceNameFormItem
+                    form={form}
+                    tooltip={t('The namespace of the Data Product')}
+                    max_length={constraints?.max_length}
+                    editToggleDisabled={mode === 'edit'}
+                    canEditResourceName={canEditResourceName}
+                    toggleCanEditResourceName={() => setCanEditResourceName((prev) => !prev)}
+                    validationRequired={mode === 'create'}
+                    validateResourceName={resourceNameValidationCallback}
                 />
-            </Form.Item>
-            <Form.Item<DataProductCreateFormSchema>
-                name={'type_id'}
-                label={t('Type')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select the type of the Data Product'),
-                    },
-                ]}
-            >
-                <Select
-                    loading={isFetchingDataProductTypes}
-                    allowClear
-                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    options={dataProductTypeSelectOptions}
-                />
-            </Form.Item>
-            <Form.Item<DataProductCreateFormSchema>
-                name={'lifecycle_id'}
-                label={t('Status')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select the status of the Data Product'),
-                    },
-                ]}
-            >
-                <Select
-                    loading={isFetchingLifecycles}
-                    options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
-                        value: lifecycle.id,
-                        label: lifecycle.name,
-                    }))}
-                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    allowClear
-                />
-            </Form.Item>
-            <Form.Item<DataProductCreateFormSchema>
-                name={'domain_id'}
-                label={t('Domain')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select the domain of the Data Product'),
-                    },
-                ]}
-            >
-                <Select
-                    loading={isFetchingDomains}
-                    options={domainSelectOptions}
-                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    allowClear
-                />
-            </Form.Item>
-            <Form.Item<DataProductCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
-                <Select
-                    tokenSeparators={[',']}
-                    placeholder={t('Select Data Product tags')}
-                    mode={'multiple'}
-                    options={tagSelectOptions}
-                    showSearch={{ filterOption: selectFilterOptionByLabel }}
-                />
-            </Form.Item>
-            <Form.Item<DataProductCreateFormSchema>
-                name={'description'}
-                label={t('Description')}
-                tooltip={t('A description for the Data Product')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please provide a description for the Data Product'),
-                    },
-                    {
-                        max: MAX_DESCRIPTION_INPUT_LENGTH,
-                        message: t('Description must be less than 255 characters'),
-                    },
-                ]}
-            >
-                <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
-            </Form.Item>
-            <Form.Item>
-                <Row>
-                    {mode !== 'create' && (
+                <Form.Item<DataProductCreateFormSchema>
+                    name={'owners'}
+                    label={t('Owners')}
+                    tooltip={t('The owners of the Data Product')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please select at least one owner for the Data Product'),
+                        },
+                    ]}
+                >
+                    <Select
+                        loading={isFetchingUsers}
+                        mode={'multiple'}
+                        options={userSelectOptions}
+                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                        disabled={mode !== 'create'}
+                        tokenSeparators={[',']}
+                    />
+                </Form.Item>
+                <Form.Item<DataProductCreateFormSchema>
+                    name={'type_id'}
+                    label={t('Type')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please select the type of the Data Product'),
+                        },
+                    ]}
+                >
+                    <Select
+                        loading={isFetchingDataProductTypes}
+                        allowClear
+                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                        options={dataProductTypeSelectOptions}
+                    />
+                </Form.Item>
+                <Form.Item<DataProductCreateFormSchema>
+                    name={'lifecycle_id'}
+                    label={t('Status')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please select the status of the Data Product'),
+                        },
+                    ]}
+                >
+                    <Select
+                        loading={isFetchingLifecycles}
+                        options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
+                            value: lifecycle.id,
+                            label: lifecycle.name,
+                        }))}
+                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                        allowClear
+                    />
+                </Form.Item>
+                <Form.Item<DataProductCreateFormSchema>
+                    name={'domain_id'}
+                    label={t('Domain')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please select the domain of the Data Product'),
+                        },
+                    ]}
+                >
+                    <Select
+                        loading={isFetchingDomains}
+                        options={domainSelectOptions}
+                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                        allowClear
+                    />
+                </Form.Item>
+                <Form.Item<DataProductCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                    <Select
+                        tokenSeparators={[',']}
+                        placeholder={t('Select Data Product tags')}
+                        mode={'multiple'}
+                        options={tagSelectOptions}
+                        showSearch={{ filterOption: selectFilterOptionByLabel }}
+                    />
+                </Form.Item>
+                <Form.Item<DataProductCreateFormSchema>
+                    name={'description'}
+                    label={t('Description')}
+                    tooltip={t('A description for the Data Product')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please provide a description for the Data Product'),
+                        },
+                        {
+                            max: MAX_DESCRIPTION_INPUT_LENGTH,
+                            message: t('Description must be less than 255 characters'),
+                        },
+                    ]}
+                >
+                    <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                </Form.Item>
+                <Form.Item>
+                    <Row>
+                        {mode !== 'create' && (
+                            <Col>
+                                <Popconfirm
+                                    title={t('Are you sure you want to delete this Data Product?')}
+                                    onConfirm={handleDeleteDataProduct}
+                                    okText={t('Yes')}
+                                    cancelText={t('No')}
+                                >
+                                    <Button
+                                        className={styles.formButton}
+                                        type="default"
+                                        danger
+                                        loading={isDeleting}
+                                        disabled={isLoading || !canDelete}
+                                    >
+                                        {t('Delete')}
+                                    </Button>
+                                </Popconfirm>
+                            </Col>
+                        )}
+                        <Col flex="auto" />
                         <Col>
-                            <Popconfirm
-                                title={t('Are you sure you want to delete this Data Product?')}
-                                onConfirm={handleDeleteDataProduct}
-                                okText={t('Yes')}
-                                cancelText={t('No')}
-                            >
+                            <Space>
                                 <Button
                                     className={styles.formButton}
                                     type="default"
-                                    danger
-                                    loading={isArchiving}
-                                    disabled={isLoading || !canDelete}
+                                    onClick={onCancel}
+                                    loading={isCreating || isUpdating}
+                                    disabled={isLoading}
                                 >
-                                    {t('Delete')}
+                                    {t('Cancel')}
                                 </Button>
-                            </Popconfirm>
+                                <Button
+                                    className={styles.formButton}
+                                    type="primary"
+                                    htmlType={'submit'}
+                                    loading={isCreating || isUpdating}
+                                    disabled={isLoading || !canSubmit}
+                                >
+                                    {mode === 'edit' ? t('Save') : t('Create')}
+                                </Button>
+                            </Space>
                         </Col>
-                    )}
-                    <Col flex="auto" />
-                    <Col>
-                        <Space>
-                            <Button
-                                className={styles.formButton}
-                                type="default"
-                                onClick={onCancel}
-                                loading={isCreating || isUpdating}
-                                disabled={isLoading}
-                            >
-                                {t('Cancel')}
-                            </Button>
-                            <Button
-                                className={styles.formButton}
-                                type="primary"
-                                htmlType={'submit'}
-                                loading={isCreating || isUpdating}
-                                disabled={isLoading || !canSubmit}
-                            >
-                                {mode === 'edit' ? t('Save') : t('Create')}
-                            </Button>
-                        </Space>
-                    </Col>
-                </Row>
-            </Form.Item>
-        </Form>
+                    </Row>
+                </Form.Item>
+            </Form>
+        </>
     );
 }

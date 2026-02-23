@@ -47,12 +47,12 @@
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
         "elkjs": "^0.11.0",
-        "i18next": "^25.8.11",
+        "i18next": "^25.8.13",
         "i18next-http-backend": "^3.0.2",
         "js-sha256": "^0.11.1",
         "nuqs": "^2.8.8",
         "oidc-client-ts": "^3.4.1",
-        "posthog-js": "^1.351.4",
+        "posthog-js": "^1.352.0",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",
         "react-i18next": "^16.5.4",
@@ -64,7 +64,7 @@
         "web-worker": "^1.5.0"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.4.3",
+        "@biomejs/biome": "2.4.4",
         "@rtk-query/codegen-openapi": "^2.0.0",
         "@types/node": "^25.3.0",
         "@types/react": "^19.2.14",
@@ -76,7 +76,7 @@
         "esbuild-runner": "^2.2.2",
         "i18next-parser": "^9.3.0",
         "msw": "^2.12.10",
-        "rollup-plugin-visualizer": "^6.0.8",
+        "rollup-plugin-visualizer": "^7.0.0",
         "sass": "^1.97.3",
         "typescript": "^5.9.3",
         "vite": "^7.3.1",
@@ -84,7 +84,7 @@
         "vitest": "^4.0.18"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-musl": "^4.57.1"
+        "@rollup/rollup-linux-x64-musl": "^4.58.0"
     },
     "volta": {
         "node": "20.12.2"

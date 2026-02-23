@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { createDataProductIdPath } from '@/types/navigation';
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import { getRequestLink } from '../../utils/request-utils';
 
 type Props = {

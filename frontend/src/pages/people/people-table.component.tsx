@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GlobalRoleAssignmentResponse,
     useCreateGlobalRoleAssignmentMutation,
@@ -17,7 +18,6 @@ import {
     useGetUsersQuery,
     useSetCanBecomeAdminMutation,
 } from '@/store/api/services/generated/usersApi.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';

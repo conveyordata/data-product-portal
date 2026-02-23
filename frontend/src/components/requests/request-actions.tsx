@@ -1,7 +1,7 @@
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 
 type Props = {
     action: PendingAction;

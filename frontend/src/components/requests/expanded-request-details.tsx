@@ -1,6 +1,6 @@
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
     PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,

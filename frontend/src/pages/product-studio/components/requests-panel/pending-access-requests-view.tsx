@@ -2,7 +2,7 @@ import { Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import type { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
     PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,
