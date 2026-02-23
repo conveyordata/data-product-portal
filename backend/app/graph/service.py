@@ -57,7 +57,7 @@ class GraphService:
                 )
                 for domain_get in domains
             ]
-        if data_product_nodes_enabled:
+        if data_product_nodes_enabled or dataset_nodes_enabled:
             data_products = {dp for domain in domains for dp in domain.data_products}
             nodes += [
                 Node(
@@ -68,7 +68,7 @@ class GraphService:
                         icon_key=data_product_get.type.icon_key,
                         domain=data_product_get.domain.name,
                         domain_id=data_product_get.domain.id,
-                        assignments=data_product_get.assignments,
+                        assignments=data_product_get.sassignments,
                         description=data_product_get.description,
                     ),
                     type=NodeType.dataProductNode,
