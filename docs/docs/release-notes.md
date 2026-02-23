@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.5.0
+
 ### features
 - **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs.
 - **[Data quality]**: Support ingesting data quality summary data and showing the overall status on output ports.
