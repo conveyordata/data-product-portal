@@ -57,24 +57,25 @@ class GraphService:
                 )
                 for domain_get in domains
             ]
-        if data_product_nodes_enabled:
+        if data_product_nodes_enabled or dataset_nodes_enabled:
             data_products = {dp for domain in domains for dp in domain.data_products}
-            nodes += [
-                Node(
-                    id=data_product_get.id,
-                    data=NodeData(
+            if data_product_nodes_enabled:
+                nodes += [
+                    Node(
                         id=data_product_get.id,
-                        name=data_product_get.name,
-                        icon_key=data_product_get.type.icon_key,
-                        domain=data_product_get.domain.name,
-                        domain_id=data_product_get.domain.id,
-                        assignments=data_product_get.assignments,
-                        description=data_product_get.description,
-                    ),
-                    type=NodeType.dataProductNode,
-                )
-                for data_product_get in data_products
-            ]
+                        data=NodeData(
+                            id=data_product_get.id,
+                            name=data_product_get.name,
+                            icon_key=data_product_get.type.icon_key,
+                            domain=data_product_get.domain.name,
+                            domain_id=data_product_get.domain.id,
+                            assignments=data_product_get.assignments,
+                            description=data_product_get.description,
+                        ),
+                        type=NodeType.dataProductNode,
+                    )
+                    for data_product_get in data_products
+                ]
         if dataset_nodes_enabled:
             # get all datasets
             datasets = (
