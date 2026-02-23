@@ -396,7 +396,7 @@ class TestDatasetsRouter:
                 "domain": None,
                 "domain_id": None,
                 "assignments": None,
-                "link_to_id": None,
+                "link_to_id": dp.data_product_id,
             },
             "id": f"{str(dp.id)}_2",
             "isMain": False,
