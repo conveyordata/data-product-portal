@@ -13,7 +13,3 @@ export type DataOutputCreate = Pick<
 export type DataOutputCreateFormSchema = DataOutputCreate & {
     result: string;
 };
-
-export type DataOutputCreateResponse = {
-    id: string;
-};
