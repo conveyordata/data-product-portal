@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 
-export type DatasetNodeProps = Node<{
+type DatasetNodeProps = Node<{
     id: string;
     name: string;
     isMainNode?: boolean;
