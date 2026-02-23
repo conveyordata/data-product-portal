@@ -400,7 +400,11 @@ class OutputPortService:
             Node(
                 id=id,
                 isMain=True,
-                data=NodeData(id=id, name=dataset.name),
+                data=NodeData(
+                    id=id,
+                    name=dataset.name,
+                    link_to_id=dataset.data_product_id,
+                ),
                 type=NodeType.datasetNode,
             )
         ]
