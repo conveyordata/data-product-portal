@@ -19,7 +19,7 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DecisionStatus } from '@/types/roles';
 
-interface DataProductRoleRequest {
+export interface DataProductRoleRequest {
     assignment_id: string;
     data_product_id: string;
 }
