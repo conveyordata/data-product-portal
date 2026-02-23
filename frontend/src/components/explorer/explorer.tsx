@@ -94,11 +94,11 @@ function InternalExplorer({ id, type, dataProductId }: Props) {
         { id },
         { skip: type !== 'dataproduct' },
     );
-    const { data: datasetQuery, isFetching: isFetchingTechnicalAsset } = useGetTechnicalAssetGraphDataQuery(
+    const { data: datasetQuery, isFetching: isFetchingTechnicalAsset } = useGetOutputPortGraphDataQuery(
         { id, dataProductId: dataProductId || '' },
         { skip: type !== 'dataset' || !dataProductId },
     );
-    const { data: dataOutputQuery, isFetching: isFetchingOutputPort } = useGetOutputPortGraphDataQuery(
+    const { data: dataOutputQuery, isFetching: isFetchingOutputPort } = useGetTechnicalAssetGraphDataQuery(
         { id, dataProductId: dataProductId || '' },
         { skip: type !== 'dataoutput' || !dataProductId },
     );

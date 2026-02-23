@@ -60,7 +60,7 @@ export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: P
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <CompassOutlined />,
-                children: <Explorer id={technicalAssetId} type={'dataoutput'} />,
+                children: <Explorer id={technicalAssetId} type={'dataoutput'} dataProductId={dataProductId} />,
             },
             {
                 label: t('Technical information'),

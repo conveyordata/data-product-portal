@@ -462,6 +462,7 @@ class DataProductService:
                     data=NodeData(
                         id=upstream_datasets.dataset_id,
                         name=upstream_datasets.dataset.name,
+                        link_to_id=upstream_datasets.dataset.data_product_id,
                     ),
                     type=NodeType.datasetNode,
                 )
@@ -504,6 +505,7 @@ class DataProductService:
                             data=NodeData(
                                 id=f"{downstream_datasets.dataset_id}",
                                 name=downstream_datasets.dataset.name,
+                                link_to_id=downstream_datasets.dataset.data_product_id,
                             ),
                             type=NodeType.datasetNode,
                         )
@@ -555,6 +557,7 @@ class DataProductService:
                         data=NodeData(
                             id=downstream_dataset.id,
                             name=downstream_dataset.name,
+                            link_to_id=downstream_dataset.data_product_id,
                         ),
                         type=NodeType.datasetNode,
                     )

@@ -406,7 +406,7 @@ class TestDatasetsRouter:
             "data": {
                 "icon_key": None,
                 "id": str(ds.id),
-                "link_to_id": None,
+                "link_to_id": str(dp.id),
                 "name": ds.name,
                 "domain": None,
                 "domain_id": None,
