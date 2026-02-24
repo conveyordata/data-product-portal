@@ -17674,16 +17674,6 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
-          },
-          "quality_status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataQualityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -17701,8 +17691,7 @@
           "lifecycle",
           "data_product_count",
           "technical_assets_count",
-          "data_product_name",
-          "quality_status"
+          "data_product_name"
         ],
         "title": "DatasetsGet",
         "deprecated": true
@@ -21530,16 +21519,6 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
-          },
-          "quality_status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataQualityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -21557,8 +21536,7 @@
           "lifecycle",
           "data_product_count",
           "technical_assets_count",
-          "data_product_name",
-          "quality_status"
+          "data_product_name"
         ],
         "title": "SearchDatasets",
         "deprecated": true
@@ -21651,16 +21629,6 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
-          },
-          "quality_status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataQualityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -21678,8 +21646,7 @@
           "lifecycle",
           "data_product_count",
           "technical_assets_count",
-          "data_product_name",
-          "quality_status"
+          "data_product_name"
         ],
         "title": "SearchOutputPortsResponseItem"
       },

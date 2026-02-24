@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
     POSTHOG_ENABLED: bool = True
 
+    SLOW_QUERY_LOGGING_ENABLED: bool = False
+    SLOW_QUERY_THRESHOLD: float = 0.5
+
     # Device flow cleanup buffer in minutes
     DEVICE_CODE_FLOW_EXPIRY_MINUTES: int = 30
 

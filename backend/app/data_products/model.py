@@ -78,7 +78,7 @@ class DataProduct(Base, BaseORM):
         back_populates="data_product",
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.data_product_id",
-        lazy="joined",
+        lazy="selectin",
     )
     data_outputs: Mapped[list["TechnicalAsset"]] = relationship(
         back_populates="owner",

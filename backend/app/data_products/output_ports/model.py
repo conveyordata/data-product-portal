@@ -101,7 +101,7 @@ class Dataset(Base, BaseORM):
         back_populates="datasets", lazy="joined"
     )
     quality_summary: Mapped[Optional[DataQualitySummary]] = relationship(
-        foreign_keys=[DataQualitySummary.output_port_id], lazy="joined", uselist=False
+        foreign_keys=[DataQualitySummary.output_port_id], lazy="raise", uselist=False
     )
 
     @property

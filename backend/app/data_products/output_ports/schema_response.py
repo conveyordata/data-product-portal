@@ -13,7 +13,6 @@ from app.data_products.output_port_technical_assets_link.schema import (
     DataOutputDatasetAssociation,
     TechnicalAssetOutputPortAssociation,
 )
-from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.schema import (
     DataProductDatasetAssociation,
@@ -133,7 +132,6 @@ class OutputPortsGet(BaseOutputPortGet):
     data_product_count: int
     technical_assets_count: int
     data_product_name: str
-    quality_status: Optional[DataQualityStatus]
 
 
 @deprecated("Use OutputPortsGet instead")
@@ -141,7 +139,6 @@ class DatasetsGet(BaseDatasetGet):
     data_product_count: int
     technical_assets_count: int
     data_product_name: str
-    quality_status: Optional[DataQualityStatus]
 
 
 class GetDataProductOutputPortsResponse(ORMModel):
