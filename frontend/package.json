@@ -82,7 +82,7 @@
         "vitest": "^4.0.18"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-musl": "^4.58.0"
+        "@rollup/rollup-linux-x64-musl": "^4.59.0"
     },
     "volta": {
         "node": "20.12.2"
