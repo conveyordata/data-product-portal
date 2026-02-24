@@ -50,7 +50,7 @@ export function DataProductsTab() {
 
     const { data: { data_products: dataProducts = [] } = {}, isFetching } = useGetDataProductsQuery(
         showAllProducts ? undefined : (currentUser?.id ?? ''),
-        { skip: !currentUser || showAllProducts },
+        { skip: !currentUser },
     );
 
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
