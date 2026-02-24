@@ -72,7 +72,7 @@
         "esbuild": "^0.27.3",
         "esbuild-runner": "^2.2.2",
         "i18next-parser": "^9.4.0",
-        "knip": "^5.84.1",
+        "knip": "^5.85.0",
         "msw": "^2.12.10",
         "rollup-plugin-visualizer": "^7.0.0",
         "sass": "^1.97.3",
