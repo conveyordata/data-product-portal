@@ -9,7 +9,7 @@ import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProd
 import { useUnlinkOutputPortFromTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
+import { usePendingActionHandlers } from '@/utils/pending-action.helper.ts';
 import styles from './data-output-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
 

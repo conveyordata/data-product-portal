@@ -9,10 +9,9 @@
 }
 
 .list-item {
-    background-color: globals.$quaternary-color-fill;
     border: 1px solid globals.$border-color-secondary;
     border-radius: globals.$border-radius-lg;
-    margin-bottom: globals.$spacing-m;
+    margin: globals.$spacing-s;
     transition: border-color 0.3s;
     cursor: pointer;
 
