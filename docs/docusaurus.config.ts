@@ -74,7 +74,7 @@ const config: Config = {
 							path: "0.2.x"
 							},
               current: {
-                label: "Latest (0.4.x)",
+                label: "Latest (0.5.x)",
                 path: "/",
                 banner: 'none'
               },

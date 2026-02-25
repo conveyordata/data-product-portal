@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.5.0
+
+This migration can take some time, depending on the amount of output ports present, as embeddings are calculated for every output port.
+
 ### features
 - **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs. The old API is now deprecated and in the 0.6.0 the old API will be removed.
 - **[Data quality]**: Support ingesting data quality summary data and showing the overall status on output ports.
@@ -14,10 +18,17 @@ sidebar_position: 200
 - **[Search]**: Improved search functionality in the marketplace, the search now understands the context of the search term.
 - **[Product Studio]**: The product studio is the new location to manage your data products and output ports. You can view and edit all your data assets in one convenient location.
 - **[Technical Asset Configuration]**: We have migrated away from a single table for configurations. Each plugin type now has it's own table. Make sure to write a migration script for your own technologies as well.
+- **[Technical Integration Plugins]**: Technical integrations are now provided from the backend, including the behavior of the access tiles and form generation. They can be enabled or disabled via environment variables.
+- **[Docs]**: Added a FAQ section to the docs about Data Product thinking.
 
 ### bugfixes
 
 - **[Marketplace]**: Fixed an issue where long domains could result in inconsistent sizing of the cards
+- **[Team]**: Fixed an issue where added members did not get the correct rights assigned.
+
+### deprecations
+
+- **[API]**: Full v1 version of the API is deprecated and will be removed in 0.6.0
 
 ## 0.4.2
 
