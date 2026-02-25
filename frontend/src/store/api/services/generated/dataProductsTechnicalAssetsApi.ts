@@ -483,46 +483,6 @@ export type Edge = {
   sourceHandle?: string;
   targetHandle?: string;
 };
-export type Role = {
-  name: string;
-  scope: Scope;
-  description: string;
-  permissions: AuthorizationAction[];
-  id: string;
-  prototype: Prototype;
-};
-export type DataProductRoleAssignment = {
-  id: string;
-  data_product: DataProduct;
-  user: User;
-  role: Role | null;
-  decision: DecisionStatus;
-  requested_on: string | null;
-  requested_by: User | null;
-  decided_on: string | null;
-  decided_by: User | null;
-  data_product_id: string;
-  user_id: string;
-  role_id: string | null;
-  requested_by_id: string | null;
-  decided_by_id: string | null;
-};
-export type OutputPortRoleAssignment = {
-  id: string;
-  output_port: OutputPort;
-  user: User;
-  role: Role | null;
-  decision: DecisionStatus;
-  requested_on: string | null;
-  requested_by: User | null;
-  decided_on: string | null;
-  decided_by: User | null;
-  output_port_id: string;
-  user_id: string;
-  role_id: string | null;
-  requested_by_id: string | null;
-  decided_by_id: string | null;
-};
 export type NodeData = {
   id: string;
   name: string;
@@ -531,7 +491,6 @@ export type NodeData = {
   domain?: string | null;
   domain_id?: string | null;
   description?: string | null;
-  assignments?: (DataProductRoleAssignment | OutputPortRoleAssignment)[] | null;
 };
 export type Node = {
   id: string;
@@ -590,56 +549,6 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
-}
-export enum Scope {
-  Dataset = "dataset",
-  DataProduct = "data_product",
-  Domain = "domain",
-  Global = "global",
-}
-export enum AuthorizationAction {
-  $101 = 101,
-  $102 = 102,
-  $103 = 103,
-  $104 = 104,
-  $105 = 105,
-  $106 = 106,
-  $107 = 107,
-  $301 = 301,
-  $302 = 302,
-  $303 = 303,
-  $304 = 304,
-  $305 = 305,
-  $306 = 306,
-  $307 = 307,
-  $308 = 308,
-  $309 = 309,
-  $310 = 310,
-  $311 = 311,
-  $312 = 312,
-  $313 = 313,
-  $314 = 314,
-  $315 = 315,
-  $401 = 401,
-  $402 = 402,
-  $403 = 403,
-  $404 = 404,
-  $405 = 405,
-  $406 = 406,
-  $407 = 407,
-  $408 = 408,
-  $409 = 409,
-  $410 = 410,
-  $411 = 411,
-  $412 = 412,
-  $413 = 413,
-  $414 = 414,
-}
-export enum Prototype {
-  $0 = 0,
-  $1 = 1,
-  $2 = 2,
-  $3 = 3,
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",

@@ -63,7 +63,6 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
         return {
             name: String(data.name || ''),
             domain: String(data.domain || ''),
-            assignments: Array.isArray(data.assignments) ? data.assignments : [],
             description: String(data.description || ''),
         };
     }

@@ -134,8 +134,6 @@
     "View Technical Asset": "View Technical Asset",
     "Unknown node type: {{ nodeType }}": "Unknown node type: {{ nodeType }}",
     "Filter by role": "Filter by role",
-    "Members": "Members",
-    "{{first_name}} {{last_name}} as {{role_name}}": "{{first_name}} {{last_name}} as {{role_name}}",
     "Domains": "Domains",
     "Data Products": "Data Products",
     "Output Ports": "Output Ports",

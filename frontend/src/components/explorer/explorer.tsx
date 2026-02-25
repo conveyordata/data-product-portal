@@ -62,7 +62,6 @@ function parseNodes(nodes: GraphNode[], t: TFunction, plugins: UiElementMetadata
                     extra_attributes = {
                         targetHandlePosition: Position.Left,
                         nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
-                        assignments: node.data.assignments,
                         description: node.data.description,
                     };
                     break;

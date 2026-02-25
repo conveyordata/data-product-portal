@@ -1,6 +1,5 @@
-import { List, Typography } from 'antd';
+import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { DataProductRoleAssignment } from '@/types/roles';
 
 const { Text } = Typography;
 
@@ -13,7 +12,6 @@ export function NodeContext({
     getNodeDataForSideBar: (nodeId: string) => {
         name: string;
         domain: string;
-        assignments: DataProductRoleAssignment[];
         description: string;
     } | null;
     className?: string;
@@ -31,24 +29,6 @@ export function NodeContext({
             <Text strong>{t('Domain')}:</Text> {nodeData.domain}
             <br />
             <Text strong>{t('Description')}:</Text> {nodeData.description}
-            <br />
-            {nodeData.assignments?.length > 0 && (
-                <>
-                    <Text strong>{t('Members')}:</Text>
-                    <List
-                        dataSource={nodeData.assignments}
-                        renderItem={(member: DataProductRoleAssignment) => (
-                            <List.Item key={member.id}>
-                                {t('{{first_name}} {{last_name}} as {{role_name}}', {
-                                    first_name: member.user.first_name,
-                                    last_name: member.user.last_name,
-                                    role_name: member.role?.name,
-                                })}
-                            </List.Item>
-                        )}
-                    />
-                </>
-            )}
         </div>
     );
 }

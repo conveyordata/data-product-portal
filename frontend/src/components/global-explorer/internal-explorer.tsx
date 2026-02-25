@@ -7,7 +7,6 @@ import { type MouseEvent, useCallback, useEffect, useState } from 'react';
 
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes } from '@/components/charts/node-editor/node-types.ts';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import type { Node as GraphNode } from '@/store/api/services/generated/graphApi.ts';
 import { NodeType, useGetGraphDataQuery } from '@/store/api/services/generated/graphApi.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper';
@@ -28,7 +27,6 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void): No
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
                         targetHandlePosition: Position.Left,
-                        assignments: node.data.assignments,
                     };
                     break;
                 case NodeType.DatasetNode:
@@ -135,7 +133,6 @@ export default function InternalFullExplorer() {
         {
             dataProductNodesEnabled: sidebarFilters.dataProductsEnabled,
             outputPortNodesEnabled: sidebarFilters.datasetsEnabled,
-            domainNodesEnabled: sidebarFilters.domainsEnabled,
         },
         { skip: false },
     );
@@ -220,10 +217,6 @@ export default function InternalFullExplorer() {
         setTimeout(() => fitView(defaultFitViewOptions), 50);
     }, [fitView]);
 
-    if (isFetching) {
-        return <LoadingSpinner />;
-    }
-
     return (
         <Flex className={styles.nodeWrapper}>
             <Sidebar
@@ -235,6 +228,7 @@ export default function InternalFullExplorer() {
                 nodeClick={handleNodeClick}
             />
             <NodeEditor
+                isLoading={isFetching}
                 nodes={nodes}
                 edges={edges}
                 onConnect={onConnect}
