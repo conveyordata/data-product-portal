@@ -149,7 +149,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     }, [setBreadcrumbs, t, dataProductId, mode, currentDataProduct?.name]);
 
-    const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
+    const onFinish: FormProps<DataProductCreate>['onFinish'] = async (values) => {
         try {
             if (mode === 'create') {
                 const request: DataProductCreate = {

@@ -94,7 +94,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <CompassOutlined />,
-                children: <Explorer id={datasetId} type={'dataset'} />,
+                children: <Explorer id={datasetId} type={'dataset'} dataProductId={dataProductId} />,
             },
             {
                 label: t('Team'),

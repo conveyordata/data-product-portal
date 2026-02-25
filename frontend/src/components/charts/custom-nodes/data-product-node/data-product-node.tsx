@@ -6,7 +6,7 @@ import type { DataProductIconKey } from '@/store/api/services/generated/configur
 import type { DataProductRoleAssignment } from '@/types/roles';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
-export type DataProductNodeProps = Node<{
+type DataProductNodeProps = Node<{
     id: string;
     name: string;
     icon_key: DataProductIconKey;
