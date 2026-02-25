@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { edgeTypes, nodeTypes } from '@/components/charts/node-editor/node-types.ts';
-
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import styles from './node-editor.module.scss';
 
 const MIN_ZOOM = 0.1;
@@ -29,6 +29,7 @@ type Props = {
     onPaneClick?: ReactFlowProps['onPaneClick'];
     editorProps?: Omit<ReactFlowProps, 'nodes' | 'edges' | 'onConnect' | 'onNodesChange' | 'onEdgesChange'>;
     debug?: boolean;
+    isLoading?: boolean;
 };
 
 export function NodeEditor({
@@ -41,10 +42,14 @@ export function NodeEditor({
     onPaneClick,
     debug,
     editorProps,
+    isLoading,
 }: Props) {
     const { t } = useTranslation();
     const memoizedNodes = useMemo(() => nodes, [nodes]);
     const memoizedEdges = useMemo(() => edges, [edges]);
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
     return (
         <>
             <ReactFlow

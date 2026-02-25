@@ -11,12 +11,10 @@ router = APIRouter(tags=["Graph"])
 @router.get("/graph", deprecated=True)
 def get_graph_data_old(
     db: Session = Depends(get_db_session),
-    domain_nodes_enabled: bool = True,
     data_product_nodes_enabled: bool = True,
     dataset_nodes_enabled: bool = True,
 ) -> Graph:
     return GraphService(db).get_graph_data(
-        domain_nodes_enabled=domain_nodes_enabled,
         data_product_nodes_enabled=data_product_nodes_enabled,
         dataset_nodes_enabled=dataset_nodes_enabled,
     )
@@ -25,12 +23,10 @@ def get_graph_data_old(
 @router.get("/v2/graph")
 def get_graph_data(
     db: Session = Depends(get_db_session),
-    domain_nodes_enabled: bool = True,
     data_product_nodes_enabled: bool = True,
     output_port_nodes_enabled: bool = True,
 ) -> Graph:
     return GraphService(db).get_graph_data(
-        domain_nodes_enabled=domain_nodes_enabled,
         data_product_nodes_enabled=data_product_nodes_enabled,
         dataset_nodes_enabled=output_port_nodes_enabled,
     )

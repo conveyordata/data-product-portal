@@ -446,7 +446,6 @@ class TestDataProductsRouter:
                     "name": data_product.name,
                     "domain": None,
                     "domain_id": None,
-                    "assignments": None,
                     "description": None,
                 },
                 "id": str(data_product.id),

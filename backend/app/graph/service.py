@@ -1,13 +1,10 @@
 from typing import List
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.configuration.domains.model import Domain
 from app.core.logging import logger
-from app.data_products.model import DataProduct
-from app.data_products.output_ports.model import Dataset
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -20,150 +17,187 @@ class GraphService:
 
     def get_graph_data(
         self,
-        domain_nodes_enabled: bool = True,
         data_product_nodes_enabled: bool = True,
         dataset_nodes_enabled: bool = True,
     ) -> Graph:
-        if not (data_product_nodes_enabled or dataset_nodes_enabled):
-            return Graph(nodes=[], edges=[])
-        domains = (
-            self.db.scalars(
-                select(Domain).options(
-                    selectinload(Domain.data_products).selectinload(
-                        DataProduct.datasets
-                    ),
-                    selectinload(Domain.data_products).selectinload(
-                        DataProduct.dataset_links
-                    ),
-                    selectinload(Domain.data_products).selectinload(
-                        DataProduct.assignments
-                    ),
-                )
+        if not data_product_nodes_enabled and not dataset_nodes_enabled:
+            raise ValueError(
+                "At least one of dataproduct_nodes_enabled or dataset_nodes_enabled must be True"
             )
-            .unique()
-            .all()
-        )
-
-        nodes = []
-        if domain_nodes_enabled:
-            nodes += [
-                Node(
-                    id=domain_get.id,
-                    data=NodeData(
-                        id=domain_get.id,
-                        name=domain_get.name,
-                    ),
-                    type=NodeType.domainNode,
-                )
-                for domain_get in domains
-            ]
-        if data_product_nodes_enabled or dataset_nodes_enabled:
-            data_products = {dp for domain in domains for dp in domain.data_products}
-            if data_product_nodes_enabled:
-                nodes += [
-                    Node(
-                        id=data_product_get.id,
-                        data=NodeData(
-                            id=data_product_get.id,
-                            name=data_product_get.name,
-                            icon_key=data_product_get.type.icon_key,
-                            domain=data_product_get.domain.name,
-                            domain_id=data_product_get.domain.id,
-                            assignments=data_product_get.assignments,
-                            description=data_product_get.description,
-                        ),
-                        type=NodeType.dataProductNode,
-                    )
-                    for data_product_get in data_products
-                ]
-        if dataset_nodes_enabled:
-            # get all datasets
-            datasets = (
-                self.db.scalars(
-                    select(Dataset).options(
-                        selectinload(Dataset.data_product_links),
-                        selectinload(Dataset.data_output_links),
-                        selectinload(Dataset.data_product).selectinload(
-                            DataProduct.domain
-                        ),
+        nodes: List[Node] = []
+        if data_product_nodes_enabled:
+            data_products = (
+                self.db.execute(
+                    text(
+                        """
+                SELECT
+                    data_products.id as id,
+                    data_products.name as name,
+                    data_products.description as description,
+                    data_product_types.icon_key as icon_key,
+                    domains.name as domain_name,
+                    domains.id as domain_id
+                FROM data_products
+                LEFT JOIN data_product_types on data_products.type_id = data_product_types.id
+                LEFT JOIN domains on data_products.domain_id = domains.id
+                """
                     )
                 )
-                .unique()
+                .mappings()
                 .all()
             )
-            nodes += [
+            nodes = [
                 Node(
-                    id=dataset_get.id,
+                    id=data_product["id"],
                     data=NodeData(
-                        id=dataset_get.id,
-                        name=dataset_get.name,
-                        icon_key="dataset",
-                        link_to_id=dataset_get.data_product.id,
-                        domain=dataset_get.data_product.domain.name,
-                        domain_id=dataset_get.data_product.domain.id,
-                        # assignments=dataset_get.assignments,
-                        description=dataset_get.description,
+                        id=data_product["id"],
+                        name=data_product["name"],
+                        icon_key=data_product["icon_key"],
+                        domain=data_product["domain_name"],
+                        domain_id=data_product["domain_id"],
+                        # assignments=data_product_get.assignments,
+                        description=data_product["description"],
                     ),
-                    type=NodeType.datasetNode,
+                    type=NodeType.dataProductNode,
                 )
-                for dataset_get in datasets
+                for data_product in data_products
             ]
         edges: List[Edge] = []
-        if data_product_nodes_enabled and dataset_nodes_enabled:
-            for dataset_get in datasets:
-                dataset = dataset_get
-                edges.append(
-                    Edge(
-                        id=f"{dataset.data_product_id}-{dataset.id}",
-                        source=dataset.data_product_id,
-                        target=dataset.id,
-                        animated=True,
+        datasets = []
+        if dataset_nodes_enabled:
+            datasets = (
+                self.db.execute(
+                    text(
+                        """
+                SELECT datasets.id            as id,
+                       datasets.name          as name,
+                       datasets.data_product_id   as data_product_id,
+                       datasets.description   as description,
+                       domains.name                as domain_name,
+                       domains.id                  as domain_id
+                FROM datasets
+                LEFT JOIN data_products on data_products.id = datasets.data_product_id
+                LEFT JOIN domains on data_products.domain_id = domains.id
+                """
                     )
                 )
+                .mappings()
+                .all()
+            )
 
-            # Data sets -- are consumed by --> data products. Many-to-many.
-            for data_product in data_products:
-                for dataset_link in data_product.dataset_links:
-                    dataset = dataset_link.dataset
-                    edges.append(
-                        Edge(
-                            id=f"{dataset.id}-{data_product.id}",
-                            source=dataset.id,
-                            target=data_product.id,
-                            animated=dataset_link.status == DecisionStatus.APPROVED,
-                        )
+            nodes.extend(
+                [
+                    Node(
+                        id=dataset["id"],
+                        data=NodeData(
+                            id=dataset["id"],
+                            name=dataset["name"],
+                            icon_key="dataset",
+                            link_to_id=dataset["data_product_id"],
+                            domain=dataset["domain_name"],
+                            domain_id=dataset["domain_id"],
+                            description=dataset["description"],
+                        ),
+                        type=NodeType.datasetNode,
                     )
+                    for dataset in datasets
+                ]
+            )
+        if data_product_nodes_enabled and dataset_nodes_enabled:
+            edges.extend(
+                [
+                    Edge(
+                        id=f"{dataset['data_product_id']}-{dataset['id']}",
+                        source=dataset["data_product_id"],
+                        target=dataset["id"],
+                        animated=True,
+                    )
+                    for dataset in datasets
+                ]
+            )
+            data_product_links = (
+                self.db.execute(
+                    text(
+                        """
+                SELECT data_products_datasets.data_product_id as consumer_id,
+                       data_products_datasets.dataset_id as dataset_id,
+                       data_products_datasets.status          as status
+                FROM data_products_datasets
+                """
+                    )
+                )
+                .mappings()
+                .all()
+            )
+            edges.extend(
+                [
+                    Edge(
+                        id=f"{link['dataset_id']}-{link['consumer_id']}",
+                        source=link["dataset_id"],
+                        target=link["consumer_id"],
+                        animated=link.status == DecisionStatus.APPROVED,
+                    )
+                    for link in data_product_links
+                ]
+            )
 
-        elif not dataset_nodes_enabled and data_product_nodes_enabled:
-            # Data sets -- are consumed by --> data products. Many-to-many.
-            for data_product in data_products:
-                for dataset_link in data_product.dataset_links:
-                    parent = dataset_link.dataset.data_product_id
-                    edges.append(
-                        Edge(
-                            id=f"{parent}-{data_product.id}",
-                            source=parent,
-                            target=data_product.id,
-                            animated=dataset_link.status == DecisionStatus.APPROVED,
-                        )
+        elif data_product_nodes_enabled:
+            data_product_links = (
+                self.db.execute(
+                    text(
+                        """
+                SELECT
+                    data_products.id as producer_id,
+                    data_products_datasets.data_product_id as consumer_id,
+                    data_products_datasets.status as status
+                FROM data_products
+                JOIN datasets on data_products.id = datasets.data_product_id
+                JOIN data_products_datasets on datasets.id = data_products_datasets.dataset_id
+                """
                     )
-
-        elif not data_product_nodes_enabled and dataset_nodes_enabled:
-            for data_product in data_products:
-                for dataset_link in data_product.dataset_links:
-                    # If the data product has it's own dataset as children then we can show the link.
-                    dataset = dataset_link.dataset
-                    edges.extend(
-                        [
-                            Edge(
-                                id=f"{dataset.id}-{consumer.id}",
-                                source=dataset.id,
-                                target=consumer.id,
-                                animated=dataset_link.status == DecisionStatus.APPROVED,
-                            )
-                            for consumer in data_product.datasets
-                        ]
+                )
+                .mappings()
+                .all()
+            )
+            edges.extend(
+                [
+                    Edge(
+                        id=f"{link['consumer_id']}-{link['producer_id']}",
+                        source=link["consumer_id"],
+                        target=link["producer_id"],
+                        animated=link["status"] == DecisionStatus.APPROVED,
                     )
+                    for link in data_product_links
+                ]
+            )
         else:
-            edges = []
+            # Only dataset nodes enabled
+            data_product_links = (
+                self.db.execute(
+                    text(
+                        """
+                SELECT
+                    datasets.id as consumer_id,
+                    data_products_datasets.dataset_id as producer_id,
+                    data_products_datasets.status as status
+                FROM data_products_datasets
+                JOIN datasets on datasets.data_product_id = data_products_datasets.data_product_id
+                """
+                    )
+                )
+                .mappings()
+                .all()
+            )
+            edges.extend(
+                [
+                    Edge(
+                        id=f"{link['producer_id']}-{link['consumer_id']}",
+                        source=link["producer_id"],
+                        target=link["consumer_id"],
+                        animated=link.status == DecisionStatus.APPROVED,
+                    )
+                    for link in data_product_links
+                ]
+            )
+
         return Graph(nodes=set(nodes), edges=set(edges))
