@@ -153,22 +153,22 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
-          go-version-file: cli/go.mod
-          cache-dependency-path: cli/go.sum
+          go-version-file: cli/golang/go.mod
+          cache-dependency-path: cli/golang/go.sum
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
         with:
           distribution: goreleaser
           version: '~> v2'
           args: release --clean
-          workdir: cli
+          workdir: cli/golang
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload assets
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: Data product portal CLI
-          path: dist/*
+          path: cli/golang/dist/*
   release-docs:
     runs-on: ubuntu-24.04
     steps:
