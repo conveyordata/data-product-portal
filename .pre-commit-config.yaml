@@ -63,7 +63,7 @@ repos:
       files: ^backend\/.*\.py$
     - id: local-fe-check
       name: fe check
-      entry: bash -c "cd frontend && npm run check:fix"
+      entry: bash -c "cd frontend && npm run lint"
       language: system
       types: [text]
       files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
