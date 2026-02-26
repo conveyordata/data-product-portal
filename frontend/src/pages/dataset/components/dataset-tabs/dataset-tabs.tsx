@@ -79,7 +79,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 children: <UsageTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {
-                label: t('Technical assets'),
+                label: t('Technical Assets'),
                 key: TabKeys.Producers,
                 icon: <DataOutputOutlined />,
                 children: <DataOutputTab datasetId={datasetId} dataProductId={dataProductId} />,

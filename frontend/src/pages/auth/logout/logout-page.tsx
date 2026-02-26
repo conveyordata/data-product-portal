@@ -21,7 +21,7 @@ export function Logout() {
                 <Result
                     icon={<LogoText variant={'dark'} />}
                     title={<Typography.Title level={3}>{t('You Are Logged Out')}</Typography.Title>}
-                    subTitle={t('You need to be authenticated to access the data portal')}
+                    subTitle={t('You need to be authenticated to access the Data Product Portal')}
                     extra={[
                         <Button
                             key={'sign-in-button'}

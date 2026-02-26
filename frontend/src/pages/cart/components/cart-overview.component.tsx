@@ -121,11 +121,11 @@ export const CartOverview = ({
     };
 
     return (
-        <Card title={<Typography.Title level={3}>Checkout summary</Typography.Title>}>
+        <Card title={<Typography.Title level={3}>{t('Checkout summary')}</Typography.Title>}>
             <List
                 footer={
                     <Flex justify={'flex-end'}>
-                        {t('{{ count }} Output Ports', {
+                        {t('{{count}} Output Ports', {
                             count: cartOutputPorts?.length || 0,
                         })}
                     </Flex>
@@ -133,7 +133,7 @@ export const CartOverview = ({
                 style={{ width: '100%' }}
                 loading={loading}
                 dataSource={cartOutputPorts}
-                locale={{ emptyText: t('No Output Ports in cart, go to the marketplace to add new Output Ports') }}
+                locale={{ emptyText: t('No Output Ports in cart, go to the Marketplace to add new Output Ports') }}
                 rowKey={(ds) => ds.id}
                 renderItem={(dataset) => (
                     <List.Item>

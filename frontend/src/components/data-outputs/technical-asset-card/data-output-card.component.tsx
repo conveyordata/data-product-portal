@@ -138,7 +138,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                 ) : (
                     <Tooltip
                         title={t(
-                            'This technical asset is in pending state, please consult your platform administrator to activate it',
+                            'This Technical Asset is in pending state, please consult your platform administrator to activate it',
                         )}
                     >
                         <HolderOutlined style={{ cursor: 'not-allowed', opacity: 0.5 }} />

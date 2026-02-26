@@ -290,7 +290,9 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     },
                     {
                         max: MAX_DESCRIPTION_INPUT_LENGTH,
-                        message: t('Description must be less than 255 characters'),
+                        message: t('Description must be less than {{length}} characters', {
+                            length: MAX_DESCRIPTION_INPUT_LENGTH,
+                        }),
                     },
                 ]}
             >

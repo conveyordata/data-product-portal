@@ -28,7 +28,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     const [editDomain] = useUpdateDomainMutation();
 
     const createText: DomainFormText = {
-        title: t('Create New Domain'),
+        title: t('Create new Domain'),
         successMessage: t('Domain created successfully'),
         errorMessage: t('Failed to create Domain'),
         submitButtonText: t('Create'),
