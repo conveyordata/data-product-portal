@@ -1,5 +1,5 @@
 import { type Node, useReactFlow } from '@xyflow/react';
-import { Select, Tag } from 'antd';
+import { Flex, Segmented, Select } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DataProductContract } from '@/types/data-product';
@@ -7,8 +7,6 @@ import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
 import { CustomNodeTypes } from '../../charts/node-editor/node-types';
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
-
-const { CheckableTag } = Tag;
 
 export type SidebarFilters = {
     dataProductsEnabled: boolean;
@@ -117,35 +115,48 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
     );
 
     return (
-        <div className={styles.sidebarContainer}>
-            <CheckableTag
-                checked={sidebarFilters.dataProductsEnabled}
+        <Flex className={styles.sidebarContainer} vertical gap={'small'}>
+            <Segmented
                 className={styles.checkableTag}
-                onChange={(e) => {
-                    onFilterChange({
-                        ...sidebarFilters,
-                        dataProductsEnabled: e.valueOf(),
-                    });
+                options={[
+                    {
+                        label: t('All'),
+                        value: 'all',
+                    },
+                    {
+                        label: t('Data Products'),
+                        value: 'dataProducts',
+                    },
+                    {
+                        label: t('Output Ports'),
+                        value: 'outputPorts',
+                    },
+                ]}
+                onChange={(value) => {
+                    if (value === 'outputPorts') {
+                        onFilterChange({
+                            ...sidebarFilters,
+                            dataProductsEnabled: false,
+                            datasetsEnabled: true,
+                        });
+                    } else if (value === 'dataProducts') {
+                        onFilterChange({
+                            ...sidebarFilters,
+                            dataProductsEnabled: true,
+                            datasetsEnabled: false,
+                        });
+                    } else if (value === 'all') {
+                        onFilterChange({
+                            ...sidebarFilters,
+                            dataProductsEnabled: true,
+                            datasetsEnabled: true,
+                        });
+                    }
                 }}
-            >
-                {t('Data Products')}
-            </CheckableTag>
-            <CheckableTag
-                checked={sidebarFilters.datasetsEnabled}
-                className={styles.checkableTag}
-                onChange={(e) => {
-                    onFilterChange({
-                        ...sidebarFilters,
-                        datasetsEnabled: e.valueOf(),
-                    });
-                }}
-            >
-                {t('Output Ports')}
-            </CheckableTag>
+            />
             <Select
                 placeholder={t('Select a node')}
                 value={nodeId}
-                className={styles.select}
                 showSearch={{
                     filterOption: (input: string, option?: { value: string; label: string }) =>
                         (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
@@ -155,7 +166,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
                 }}
                 options={selectionOptions}
             />
-            <NodeContext className={styles.p} nodeId={nodeId} getNodeDataForSideBar={getNodeDataForSideBar} />
-        </div>
+            <NodeContext nodeId={nodeId} getNodeDataForSideBar={getNodeDataForSideBar} />
+        </Flex>
     );
 }
