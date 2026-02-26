@@ -25,7 +25,7 @@ export function CreateTagsModal({ isOpen, onClose, mode, initial }: Props) {
     const [editTag] = useUpdateTagMutation();
 
     const createText: TagsFormText = {
-        title: t('Create New Tag'),
+        title: t('Create new Tag'),
         successMessage: t('Tag created successfully'),
         errorMessage: t('Failed to create tag'),
         submitButtonText: t('Create'),
