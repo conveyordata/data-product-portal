@@ -1,7 +1,6 @@
 import type { Node, Position, XYPosition } from '@xyflow/react';
 import type { ReactNode } from 'react';
 import type { Node as GraphNode } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { DataProductRoleAssignment } from '@/types/roles';
 
 export function sharedAttributes(
     node: GraphNode,
@@ -39,7 +38,6 @@ export function parseRegularNode(
         sourceHandlePosition?: Position;
         isActive?: boolean;
         targetHandleId?: string;
-        assignments?: DataProductRoleAssignment[];
     },
 ): Node {
     const parsedNode = sharedAttributes(node, setNodeId, domainsEnabled, centeredHandles);

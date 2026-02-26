@@ -203,7 +203,7 @@ Please find the relevant info in [Getting Started](docs/docs/getting-started/ins
 To prepare a new release follow these steps, use the next minor or patch version (in this example 0.3.6):
 - Create a new branch from main called `chore/version_bump_036`
 - If you do a patch version bump: run `task bump-version -- 0.3.6` in root.
-- If you do a minor / major version bump: also run `task bump-docs -- 0.3.x` in root. *DO NOT REPLACE x in this case.*
+- If you do a minor / major version bump: also run (where Y is minor version -1 e.g. if updating to v0.5.0 run this for 0.4.x) `task bump-docs -- 0.Y.x` in root. *DO NOT REPLACE x in this case.*
 
 - PRs will be created automatically, add important changes manually to the [Changelog](docs/docs/release-notes.md).
 - Merge the version bump to main when approved.

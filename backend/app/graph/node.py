@@ -1,15 +1,8 @@
 from enum import Enum
-from typing import Optional, Sequence
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
-
-from app.authorization.role_assignments.data_product.schema import (
-    DataProductRoleAssignment,
-)
-from app.authorization.role_assignments.output_port.schema import (
-    OutputPortRoleAssignment,
-)
 
 
 class NodeData(BaseModel):
@@ -20,9 +13,6 @@ class NodeData(BaseModel):
     domain: Optional[str] = None
     domain_id: Optional[str | UUID] = None
     description: Optional[str] = None
-    assignments: Optional[
-        Sequence[DataProductRoleAssignment | OutputPortRoleAssignment]
-    ] = None
 
 
 class NodeType(str, Enum):

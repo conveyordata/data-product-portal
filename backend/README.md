@@ -33,6 +33,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5050,http://localhos
 AWS_DEFAULT_REGION=eu-west-1
 LOGGING_DIRECTORY=./tmp/logs
 HOST=http://localhost:3000/
+SLOW_QUERY_LOGGING_ENABLED=True
 ```
 
 ## Running the project
