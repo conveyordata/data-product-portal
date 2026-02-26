@@ -1,10 +1,12 @@
+import time
 from typing import Any, Type, TypeVar
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import Column, create_engine
+from sqlalchemy import Column, Engine, create_engine, event
 from sqlalchemy.orm import Mapper, Query, Session, declarative_base, sessionmaker
 
+from app.core.logging import logger
 from app.settings import settings
 from app.shared.model import BaseORM
 from app.shared.schema import ORMModel
@@ -33,6 +35,28 @@ def get_url(async_: bool = False) -> str:
 
 
 engine = create_engine(get_url(), connect_args={})
+
+
+@event.listens_for(Engine, "before_cursor_execute")
+def before_cursor_execute(conn, cursor, statement, parameters, context, execmany):
+    # Tag the start time onto the execution context
+    if settings.SLOW_QUERY_LOGGING_ENABLED:
+        context._query_start_time = time.perf_counter()
+
+
+@event.listens_for(Engine, "after_cursor_execute")
+def after_cursor_execute(conn, cursor, statement, parameters, context, execmany):
+    if not settings.SLOW_QUERY_LOGGING_ENABLED:
+        return
+    total_time = time.perf_counter() - context._query_start_time
+
+    # Only log if it exceeds our 500ms threshold
+    if total_time >= settings.SLOW_QUERY_THRESHOLD:
+        logger.warning(
+            f"🐢 SLOW QUERY DETECTED\n"
+            f"DURATION: {total_time:.4f}s\n"
+            f"STATEMENT: {statement}\n\n"
+        )
 
 
 class MyQuery(Query):
