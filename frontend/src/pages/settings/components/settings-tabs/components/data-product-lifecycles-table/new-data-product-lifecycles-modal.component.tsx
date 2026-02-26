@@ -31,7 +31,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
     const [editDataProductLifecycle] = useUpdateDataProductLifecycleMutation();
 
     const createText: LifeCycleFormText = {
-        title: t('Create New Lifecycle'),
+        title: t('Create new Lifecycle'),
         successMessage: t('Lifecycle created successfully'),
         errorMessage: t('Failed to create lifecycle'),
         submitButtonText: t('Create'),
