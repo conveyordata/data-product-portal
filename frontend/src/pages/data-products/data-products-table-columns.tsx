@@ -104,17 +104,17 @@ export const getDataProductTableColumns = ({
         },
         {
             title: t('Consumes'),
-            dataIndex: 'dataset_count',
-            render: (datasetCount: number) => {
-                return <TableCellItem text={t('{{count}} Output Ports', { count: datasetCount })} />;
+            dataIndex: 'output_port_count',
+            render: (outputPortCount: number) => {
+                return <TableCellItem text={t('{{count}} Output Ports', { count: outputPortCount })} />;
             },
             sorter: sorter.numberSorter((dp) => dp.output_port_count),
         },
         {
             title: t('Produces'),
-            dataIndex: 'data_outputs_count',
-            render: (dataOutputCount: number) => {
-                return <TableCellItem text={t('{{count}} Technical Assets', { count: dataOutputCount })} />;
+            dataIndex: 'technical_asset_count',
+            render: (technicalAssetCount: number) => {
+                return <TableCellItem text={t('{{count}} Technical Assets', { count: technicalAssetCount })} />;
             },
         },
     ];
