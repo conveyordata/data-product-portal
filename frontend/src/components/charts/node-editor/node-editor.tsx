@@ -44,7 +44,6 @@ export function NodeEditor({
         return <LoadingSpinner />;
     }
     return (
-        <>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -72,6 +71,5 @@ export function NodeEditor({
                 <Background />
                 <Controls position={'top-right'} showInteractive={false} fitViewOptions={defaultFitViewOptions} />
             </ReactFlow>
-        </>
     );
 }
