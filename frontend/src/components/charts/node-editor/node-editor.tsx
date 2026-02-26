@@ -2,9 +2,6 @@ import '@xyflow/react/dist/style.css';
 
 import type { Connection, Edge, EdgeChange, FitViewOptions, Node, NodeChange, ReactFlowProps } from '@xyflow/react';
 import { Background, ConnectionLineType, Controls, ReactFlow } from '@xyflow/react';
-import { Typography } from 'antd';
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { edgeTypes, nodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -40,21 +37,17 @@ export function NodeEditor({
     onEdgesChange,
     onNodeClick,
     onPaneClick,
-    debug,
     editorProps,
     isLoading,
 }: Props) {
-    const { t } = useTranslation();
-    const memoizedNodes = useMemo(() => nodes, [nodes]);
-    const memoizedEdges = useMemo(() => edges, [edges]);
     if (isLoading) {
         return <LoadingSpinner />;
     }
     return (
         <>
             <ReactFlow
-                nodes={memoizedNodes}
-                edges={memoizedEdges}
+                nodes={nodes}
+                edges={edges}
                 onConnect={onConnect}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
@@ -79,16 +72,6 @@ export function NodeEditor({
                 <Background />
                 <Controls position={'top-right'} showInteractive={false} fitViewOptions={defaultFitViewOptions} />
             </ReactFlow>
-            {debug && (
-                <>
-                    <Typography.Text strong>{t('Nodes')}</Typography.Text>
-                    {nodes.map((node) => (
-                        <div key={node.id}>
-                            Node {node.id} - x: {node.position.x.toFixed(2)}, y: {node.position.y.toFixed(2)}
-                        </div>
-                    ))}
-                </>
-            )}
         </>
     );
 }
