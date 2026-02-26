@@ -20,7 +20,7 @@ This migration can take some time, depending on the amount of output ports prese
 - **[Technical Asset Configuration]**: We have migrated away from a single table for configurations. Each plugin type now has it's own table. Make sure to write a migration script for your own technologies as well.
 - **[Technical Integration Plugins]**: Technical integrations are now provided from the backend, including the behavior of the access tiles and form generation. They can be enabled or disabled via environment variables.
 - **[Docs]**: Added a FAQ section to the docs about Data Product thinking.
-p
+
 ### bugfixes
 
 - **[Marketplace]**: Fixed an issue where long domains could result in inconsistent sizing of the cards
