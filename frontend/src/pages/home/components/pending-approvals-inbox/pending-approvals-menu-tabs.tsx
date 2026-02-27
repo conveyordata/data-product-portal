@@ -1,7 +1,7 @@
 import { AppstoreOutlined } from '@ant-design/icons';
-import { Tabs } from 'antd';
+import { Tabs, type TabsProps } from 'antd';
+import type { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 
 export type CustomPendingRequestsTabKey = 'all' | 'dataProduct' | 'dataset';
@@ -9,9 +9,11 @@ export type CustomPendingRequestsTabKey = 'all' | 'dataProduct' | 'dataset';
 interface SelectableTabsProps {
     activeKey: CustomPendingRequestsTabKey;
     onTabChange: (key: CustomPendingRequestsTabKey) => void;
+    extra?: ReactNode;
+    style?: CSSProperties;
 }
 
-export const SelectableTabs = ({ activeKey, onTabChange }: SelectableTabsProps) => {
+export const SelectableTabs = ({ activeKey, onTabChange, extra, style }: SelectableTabsProps) => {
     const { t } = useTranslation();
 
     const handleChange = (key: string) => {
@@ -19,34 +21,25 @@ export const SelectableTabs = ({ activeKey, onTabChange }: SelectableTabsProps) 
         onTabChange(typedKey);
     };
 
-    const items = [
+    const items: TabsProps['items'] = [
         {
             key: 'all',
             icon: <AppstoreOutlined />,
-            title: t('All Requests'),
+            label: t('All Requests'),
         },
         {
             key: 'dataset',
             icon: <DatasetOutlined />,
-            title: t('Output Port'),
+            label: t('Output Port'),
         },
         {
             key: 'dataProduct',
             icon: <DataProductOutlined />,
-            title: t('Data Product'),
+            label: t('Data Product'),
         },
     ];
 
     return (
-        <Tabs
-            activeKey={activeKey}
-            onChange={handleChange}
-            items={items.map(({ key, title, icon }) => ({
-                key,
-                label: title,
-                icon,
-                children: null,
-            }))}
-        />
+        <Tabs activeKey={activeKey} onChange={handleChange} items={items} tabBarExtraContent={extra} style={style} />
     );
 };

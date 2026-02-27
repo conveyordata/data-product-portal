@@ -2,28 +2,20 @@ import { List } from 'antd';
 import type { PaginationConfig } from 'antd/es/pagination';
 import { useTranslation } from 'react-i18next';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
-import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
-import type {
-    DataProductOutputPortPendingAction,
-    DataProductRoleAssignmentPendingAction,
-    TechnicalAssetOutputPortPendingAction,
-} from '@/store/api/services/generated/usersApi.ts';
-import { PendingItem } from './pending-request-item';
+import styles from '@/pages/home/components/pending-approvals-inbox/pending-approvals-inbox.module.scss';
+import type { PendingAction } from '@/pages/home/components/pending-approvals-inbox/pending-approvals-inbox.tsx';
+import { PendingItem } from '@/pages/home/components/pending-approvals-inbox/pending-approvals-item.tsx';
 
 type PendingRequestsListProps = {
-    pendingActions: (
-        | DataProductOutputPortPendingAction
-        | TechnicalAssetOutputPortPendingAction
-        | DataProductRoleAssignmentPendingAction
-    )[];
+    pendingActions: PendingAction[];
     pagination: PaginationConfig;
 };
 
-export const PendingRequestsList = ({ pendingActions, pagination }: PendingRequestsListProps) => {
+export const PendingApprovalsList = ({ pendingActions, pagination }: PendingRequestsListProps) => {
     const { t } = useTranslation();
 
     if (!pendingActions || pendingActions.length === 0) {
-        return <EmptyList description={t('No requests available.')} />;
+        return <EmptyList description={t('All requests handled!')} />;
     }
 
     return (

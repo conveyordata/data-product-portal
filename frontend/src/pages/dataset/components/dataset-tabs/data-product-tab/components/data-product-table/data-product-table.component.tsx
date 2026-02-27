@@ -11,7 +11,7 @@ import {
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
+import { usePendingActionHandlers } from '@/utils/pending-action.helper.ts';
 import styles from './data-product-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
 
