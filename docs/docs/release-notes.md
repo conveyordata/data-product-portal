@@ -8,6 +8,10 @@ sidebar_position: 200
 
 ## 0.5.1
 
+### features
+
+- **[Explorer]**: Improved the explorer loading times, on our sample data the call went from 10s to 50ms, a 95% reduction
+
 ### bugfixes
 
 - **[Product Studio]**: Missing counts for "produces" and "consumes" columns
