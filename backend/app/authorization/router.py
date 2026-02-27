@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from app.authorization.schema_response import AccessResponse, IsAdminResponse
 from app.core.auth.auth import get_authenticated_user
@@ -29,8 +29,8 @@ router = APIRouter()
 )
 def check_access(
     action: Action,
-    resource: Optional[UUID] = None,
-    domain: Optional[UUID] = None,
+    resource: Optional[UUID] = Query(None),
+    domain: Optional[UUID] = Query(None),
     user: User = Depends(get_authenticated_user),
 ) -> AccessResponse:
     """Allows the requesting user to check whether an access check will fail or succeed.

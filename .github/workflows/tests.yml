@@ -1,7 +1,7 @@
 name: Tests
 on:
   pull_request:
-    branches: ['*']
+    branches: ["*"]
 permissions:
   contents: read
 env:
@@ -58,9 +58,9 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          cache: 'poetry'
-          cache-dependency-path: 'backend/poetry.lock'
-          python-version-file: 'backend/.python-version'
+          cache: "poetry"
+          cache-dependency-path: "backend/poetry.lock"
+          python-version-file: "backend/.python-version"
       - name: Install dependencies
         working-directory: ./backend
         run: poetry install --no-interaction --with test
@@ -99,8 +99,8 @@ jobs:
   lint-golang:
     name: Run Go linters
     permissions:
-      contents: read  # for actions/checkout to fetch code
-      pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
+      contents: read # for actions/checkout to fetch code
+      pull-requests: read # for golangci/golangci-lint-action to fetch pull requests
     if: ${{ github.actor != 'dependabot[bot]' || contains(github.head_ref, 'dependabot/go_modules')}}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
@@ -122,6 +122,9 @@ jobs:
     name: Run pre-commit hooks
     runs-on: ubuntu-latest
     steps:
+    - name: Install Task # to run taskfile.yml
+      run: pip install go-task-bin
+
     - name: Git checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -131,12 +134,14 @@ jobs:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
         virtualenvs-in-project: true
+
     - name: Setup Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         cache: 'poetry'
         cache-dependency-path: 'backend/poetry.lock'
         python-version-file: 'backend/.python-version'
+
     - name: Install Python dependencies
       working-directory: backend
       run: poetry install --no-interaction
@@ -147,6 +152,17 @@ jobs:
         cache: 'npm'
         cache-dependency-path: 'frontend/package-lock.json'
         node-version-file: 'frontend/package.json'
+
+    - name: Install npm dependencies
+      working-directory: frontend
+      run: npm ci --ignore-scripts --legacy-peer-deps
+
+    - name: Setup Node.js
+      uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      with:
+        cache: "npm"
+        cache-dependency-path: "frontend/package-lock.json"
+        node-version-file: "frontend/package.json"
     - name: Install npm dependencies
       working-directory: frontend
       run: npm ci --ignore-scripts --legacy-peer-deps

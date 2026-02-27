@@ -1,0 +1,7 @@
+package: portalsdk
+generate:
+  client: true
+  always-prefix-enum-values: true
+output:
+  use-single-file: false
+  directory: portalsdk

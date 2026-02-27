@@ -1,0 +1,17 @@
+---
+page_title: "Provider: Data Product Portal"
+description: |-
+  The Data Product Portal provider allows you to manage resources in a Data Product Portal instance.
+---
+
+# Data Product Portal Provider
+
+The Data Product Portal provider is used to interact with a [Data Product Portal](https://github.com/conveyordata/data-product-portal) instance. It allows you to manage domains, data products, output ports, tags, and data product types.
+
+## Authentication
+
+The provider requires a base URL and an API key to authenticate with the Data Product Portal API.
+
+{{ tffile "examples/provider/provider.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

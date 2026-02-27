@@ -92,7 +92,7 @@ class LoggerConfig(BaseSettings):
 
     LOG_LEVEL: LogLevel = LogLevel.INFO
     LOG_CONFIG_FILE: str = "log_config.json"
-    LOGGING_DIRECTORY: str = "/var/logs"
+    LOGGING_DIRECTORY: str = "/var/log"
     SCARF_NO_ANALYTICS: bool = False
     DO_NOT_TRACK: bool = False
     SANDBOX: bool = False

@@ -167,8 +167,11 @@ tmp/
 terraform.tfstate
 state.tf
 
-# ASDF
-.tool-versions
+# Taskfile cache
+.task
+
+# ruff cache
+.ruff_cache/
 
 # yarn
 yarn.lock
