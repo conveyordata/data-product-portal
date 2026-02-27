@@ -8,6 +8,12 @@ sidebar_position: 200
 
 ## 0.5.1
 
+### bugfixes
+
+- **[Product Studio]**: Missing counts for "produces" and "consumes" columns
+- **[Marketplace]**: The existence of *private* output ports caused server errors for non-owning users.
+- **[Posthog]**: Platform access tiles were not tracked if environments were not present.
+
 ## 0.5.0
 
 This migration can take some time, depending on the amount of output ports present, as embeddings are calculated for every output port.
