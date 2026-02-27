@@ -184,3 +184,31 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
 
 
 use_route_names_as_operation_ids(app)
+if settings.OPENTELEMETRY_TRACES_ENABLED:
+    logger.info(
+        f"Tracing enabled setting it up with service name: ${settings.OPENTELEMETRY_TRACES_SERVICE_NAME}"
+    )
+    # Import inside to avoid loading OTEL modules when tracing is disabled
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+    resource = Resource.create(
+        {"service.name": settings.OPENTELEMETRY_TRACES_SERVICE_NAME}
+    )
+    provider = TracerProvider(resource=resource)
+
+    logger.info(
+        f"Setting up tracing with endpoint: {settings.OPENTELEMETRY_TRACES_ENDPOINT} insecure: {settings.OPENTELEMETRY_TRACES_ENDPOINT_INSECURE}"
+    )
+    exporter = OTLPSpanExporter(
+        endpoint=settings.OPENTELEMETRY_TRACES_ENDPOINT,
+        insecure=settings.OPENTELEMETRY_TRACES_ENDPOINT_INSECURE,
+    )
+    provider.add_span_processor(BatchSpanProcessor(exporter))
+    trace.set_tracer_provider(provider)
+
+    FastAPIInstrumentor.instrument_app(app)
