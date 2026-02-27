@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.5.1
+
 ## 0.5.0
 
 This migration can take some time, depending on the amount of output ports present, as embeddings are calculated for every output port.
