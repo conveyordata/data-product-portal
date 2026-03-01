@@ -68,14 +68,24 @@ const basicLayoutOptions = {
 const interDomainLayoutOptions = {
     'elk.algorithm': 'layered',
     'elk.direction': 'RIGHT',
-    'elk.spacing.nodeNode': '60.0',
+    'elk.hierarchyHandling': 'INCLUDE_CHILDREN', // Consider cross-domain edges for global left-to-right flow
+    'elk.spacing.nodeNode': '80.0',
+    'elk.layered.spacing.edgeNodeBetweenLayers': '50.0',
+    'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+    'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
+    'elk.portConstraints': 'FIXED_SIDE',
+    'elk.padding': '[top=50.0,left=50.0,bottom=50.0,right=50.0]',
 };
 
 // Layout options within a domain node.
 const intraDomainLayoutOptions = {
     'elk.algorithm': 'layered',
     'elk.direction': 'RIGHT',
+    'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
     'elk.spacing.nodeNode': '40.0',
+    'elk.layered.spacing.edgeNodeBetweenLayers': '50.0',
+    'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+    'elk.portConstraints': 'FIXED_SIDE',
 
     // A bit more padding at the top.
     // Most of the time, the label doesn't take up the whole height of the node, so this trick evens it out for short labels (taking up 1 instead of 2 lines).
