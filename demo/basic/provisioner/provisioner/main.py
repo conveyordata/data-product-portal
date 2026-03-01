@@ -14,13 +14,20 @@ logging.basicConfig(
 
 # get the namespace of the data product
 portal_url = os.environ.get("PROV_DPP_API_URL", "http://localhost:8080")
+
+# Calculate base directories relative to this script
+# Script is at demo/basic/provisioner/provisioner/main.py
+script_dir = os.path.dirname(os.path.abspath(__file__))
+provisioner_dir = os.path.dirname(script_dir)  # demo/basic/provisioner
+basic_demo_dir = os.path.dirname(provisioner_dir)  # demo/basic
+
 template_path = os.environ.get(
     "PROV_TEMPLATE_PATH",
-    "/Users/pascalknapen/Code/dataminded/data-product-portal/demo/provisioner/templates/dbt",
+    os.path.join(provisioner_dir, "templates", "dbt"),
 )
 tempplate_output_path = os.environ.get(
     "PROV_TEMPLATE_OUTPUT_PATH",
-    "/Users/pascalknapen/Code/dataminded/data-product-portal/demo/products",
+    os.path.join(basic_demo_dir, "products"),
 )
 
 # In-memory cache for data product lifecycles
@@ -111,7 +118,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
         }
 
     try:
-        response = requests.get(f"{portal_url}/api/data_products/{data_product_id}")
+        response = requests.get(f"{portal_url}/api/v2/data_products/{data_product_id}")
         response.raise_for_status()
         data_product_details = response.json()
         namespace = data_product_details.get("namespace")
@@ -157,7 +164,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
             "tag_ids": [tag["id"] for tag in data_product_details.get("tags", [])],
         }
 
-        update_url = f"{portal_url}/api/data_products/{data_product_id}"
+        update_url = f"{portal_url}/api/v2/data_products/{data_product_id}"
         logging.info(
             f"Updating data product to 'Ready' state at {update_url} with payload {update_payload}"
         )
@@ -196,46 +203,49 @@ def handle_create_data_product(payload: Dict[str, Any]):
     service_id = postgres_config.get("service", {}).get("id")
     schema_name = data_product_details.get("namespace", "").replace("-", "_")
 
-    output_port_payload = {
+    technical_asset_payload = {
         "name": data_product_details.get("name"),
         "namespace": data_product_details.get("namespace"),
         "description": data_product_details.get("description"),
         "tag_ids": [],
         "status": "active",
-        "sourceAligned": True,
+        "technical_mapping": "custom",
         "platform_id": platform_id,
         "service_id": service_id,
         "configuration": {
-            "configuration_type": "PostgreSQLDataOutput",
+            "configuration_type": "PostgreSQLTechnicalAssetConfiguration",
             "database": "dpp_demo",
             "schema": schema_name,
-            "entire_schema": True,
+            "access_granularity": "schema",
+            "table": "*",
         },
         "result": f"dpp_demo.{schema_name}.*",
     }
 
     try:
-        output_port_url = (
-            f"{portal_url}/api/data_products/{data_product_id}/data_output"
+        technical_asset_url = (
+            f"{portal_url}/api/v2/data_products/{data_product_id}/technical_assets"
         )
         logging.info(
-            f"Creating data output port at {output_port_url} with payload {output_port_payload}"
+            f"Creating technical asset at {technical_asset_url} with payload {technical_asset_payload}"
         )
 
-        output_port_response = requests.post(output_port_url, json=output_port_payload)
-        output_port_response.raise_for_status()
+        technical_asset_response = requests.post(
+            technical_asset_url, json=technical_asset_payload
+        )
+        technical_asset_response.raise_for_status()
 
         logging.info(
-            f"Successfully created data output port for data product {data_product_id}."
+            f"Successfully created technical asset for data product {data_product_id}."
         )
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"Failed to create data output port: {e}")
+        logging.error(f"Failed to create technical asset: {e}")
         if e.response is not None:
             logging.error(f"Response body: {e.response.text}")
         return {
             "status": "error",
-            "message": f"Failed to create data output port for id {data_product_id}",
+            "message": f"Failed to create technical asset for id {data_product_id}",
         }
 
     return {
@@ -249,6 +259,16 @@ def handle_approve_link(link_id: str, payload: Dict[str, Any]):
     """Handler for approving a data product link."""
     logging.info(f"Approving link {link_id} with payload: {payload}")
     return {"status": "success", "action": "approve_link", "link_id": link_id}
+
+
+def handle_update_data_product(product_id: str, payload: Dict[str, Any]):
+    """Handler for updating a data product."""
+    logging.info(f"Updating data product {product_id} with payload: {payload}")
+    return {
+        "status": "success",
+        "action": "update_data_product",
+        "product_id": product_id,
+    }
 
 
 def handle_delete_data_product(product_id: str, payload: Dict[str, Any]):
@@ -336,11 +356,14 @@ router = Router()
 # Register all routes here to make them easy to find.
 # This makes the application more extensible.
 logging.info("Registering routes...")
-router.add_route("POST", "/api/data_products", handle_create_data_product)
+router.add_route("POST", "/api/v2/data_products", handle_create_data_product)
+router.add_route("PUT", "/api/v2/data_products/{uuid}", handle_update_data_product)
 router.add_route(
-    "POST", "/api/data_product_dataset_links/approve/{uuid}", handle_approve_link
+    "POST",
+    "/api/v2/data_products/{uuid}/output_ports/{uuid}/input_ports/approve",
+    handle_approve_link,
 )
-router.add_route("DELETE", "/api/data_products/{uuid}", handle_delete_data_product)
+router.add_route("DELETE", "/api/v2/data_products/{uuid}", handle_delete_data_product)
 logging.info("Route registration complete.")
 
 
