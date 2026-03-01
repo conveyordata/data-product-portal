@@ -9,17 +9,17 @@ import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import {
-    PendingRequestType_DataProductOutputPort,
-    PendingRequestType_DataProductRoleAssignment,
-    PendingRequestType_TechnicalAssetOutputPort,
-} from '@/pages/home/components/pending-requests-inbox/pending-request-types.tsx';
 import type {
     DataProductOutputPortPendingAction,
     DataProductRoleAssignmentPendingAction,
     TechnicalAssetOutputPortPendingAction,
 } from '@/store/api/services/generated/usersApi.ts';
 import { createDataOutputIdPath, createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation';
+import {
+    PendingRequestType_DataProductOutputPort,
+    PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_TechnicalAssetOutputPort,
+} from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './pending-requests-inbox.module.scss';

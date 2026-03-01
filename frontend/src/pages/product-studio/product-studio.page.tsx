@@ -1,12 +1,14 @@
-import { ProductOutlined } from '@ant-design/icons';
-import { Tabs, Typography } from 'antd';
+import { InboxOutlined, ProductOutlined } from '@ant-design/icons';
+import { Badge, Tabs, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { DataProductsTab } from './components/data-products-tab/data-products-tab.component';
 import { OutputPortsTab } from './components/output-ports-tab/output-ports-tab.component';
+import { RequestsPanel } from './components/requests-panel/requests-panel.component';
 import { TabKeys } from './product-studio-tabkeys';
 
 export function ProductStudio() {
@@ -27,6 +29,7 @@ export function ProductStudio() {
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<string>(TabKeys.DataProducts);
+    const { data: { pending_actions } = {} } = useGetUserPendingActionsQuery();
 
     useEffect(() => {
         const hash = location.hash.slice(1);
@@ -43,6 +46,8 @@ export function ProductStudio() {
         navigate(`#${key}`, { replace: true });
     };
 
+    const pendingCount = pending_actions?.length ?? 0;
+
     const tabs = [
         {
             key: TabKeys.DataProducts,
@@ -55,6 +60,16 @@ export function ProductStudio() {
             label: t('Output Ports'),
             icon: <DatasetOutlined />,
             children: <OutputPortsTab />,
+        },
+        {
+            key: TabKeys.Requests,
+            label: (
+                <Badge count={pendingCount} offset={[10, 0]}>
+                    {t('Requests')}
+                </Badge>
+            ),
+            icon: <InboxOutlined />,
+            children: <RequestsPanel />,
         },
     ];
 
