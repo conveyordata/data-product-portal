@@ -16,6 +16,7 @@ The Data Product Portal manages data products and their output ports. It consist
 *   `backend/app/`: Python API. Follows Service-Router-Model-Schema pattern.
 *   `frontend/`: React SPA.
 *   `cli/`: Command-line tools (Go & Python).
+*   `demo/`: Demo setups.
 *   `docs/`: Docusaurus documentation and Architecture Decision Records (ADRs).
 *   `integrations/`: Platform-specific integration logic.
 *   `helm/`: Kubernetes deployment charts.
