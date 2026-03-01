@@ -172,3 +172,6 @@ state.tf
 
 # yarn
 yarn.lock
+
+# agent
+.gemini/
