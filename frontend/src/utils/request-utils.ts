@@ -5,12 +5,13 @@ import {
     PendingRequestType_DataProductRoleAssignment,
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
+import type { UserContract } from '@/types/users';
 
 export interface TableRow {
     key: string;
     pendingAction: PendingAction;
     description: string;
-    requestedBy: { name: string; email: string };
+    requestedBy: UserContract | null;
     date: string;
     dataProductName?: string;
     outputPortName?: string;
@@ -54,10 +55,7 @@ export function transformToTableRow(action: PendingAction): TableRow {
     if (action.pending_action_type === PendingRequestType_DataProductOutputPort) {
         return {
             ...baseRow,
-            requestedBy: {
-                name: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
-                email: action.requested_by.email,
-            },
+            requestedBy: action.requested_by,
             description: getRequestDescription(action),
             dataProductName: action.data_product.name,
             date: action.requested_on,
@@ -67,10 +65,7 @@ export function transformToTableRow(action: PendingAction): TableRow {
     if (action.pending_action_type === PendingRequestType_TechnicalAssetOutputPort) {
         return {
             ...baseRow,
-            requestedBy: {
-                name: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
-                email: action.requested_by.email,
-            },
+            requestedBy: action.requested_by,
             description: getRequestDescription(action),
             outputPortName: action.output_port.name,
             dataProductName: action.technical_asset.name,
@@ -81,10 +76,7 @@ export function transformToTableRow(action: PendingAction): TableRow {
     if (action.pending_action_type === PendingRequestType_DataProductRoleAssignment) {
         return {
             ...baseRow,
-            requestedBy: {
-                name: `${action.user.first_name} ${action.user.last_name}`,
-                email: action.user.email,
-            },
+            requestedBy: action.requested_by,
             description: getRequestDescription(action),
             outputPortName: '-',
             dataProductName: action.data_product.name,
@@ -93,10 +85,7 @@ export function transformToTableRow(action: PendingAction): TableRow {
     }
     return {
         ...baseRow,
-        requestedBy: {
-            name: '',
-            email: '',
-        },
+        requestedBy: action.requested_by,
         description: '',
         outputPortName: '',
         dataProductName: '',

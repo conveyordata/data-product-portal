@@ -1,30 +1,20 @@
-import { Avatar, Space, Typography, theme } from 'antd';
+import { Space, theme } from 'antd';
+import type { UserContract } from '@/types/users';
+import { UserAvatarWithEmail } from '../user-avatar/user-avatar-with-email.component';
 
 type Props = {
-    name: string;
-    email: string;
+    user: UserContract;
 };
 
-export function RequesterCell({ name, email }: Props) {
+export function RequesterCell({ user }: Props) {
     const { useToken } = theme;
     const { token } = useToken();
 
     const secondaryColor = token.colorPrimary;
-    const initials = name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase();
 
     return (
         <Space size="small">
-            <Avatar style={{ backgroundColor: secondaryColor }}>{initials}</Avatar>
-            <div>
-                <div>{name}</div>
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {email}
-                </Typography.Text>
-            </div>
+            <UserAvatarWithEmail user={user} color={secondaryColor} />
         </Space>
     );
 }

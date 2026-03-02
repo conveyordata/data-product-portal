@@ -20,10 +20,10 @@ export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsTyp
                 title: t('Requested by'),
                 dataIndex: 'requestedBy',
                 key: 'requestedBy',
-                sorter: (a, b) => a.requestedBy.name.localeCompare(b.requestedBy.name),
-                render: (requestedBy: { name: string; email: string }) => (
-                    <RequesterCell name={requestedBy.name} email={requestedBy.email} />
-                ),
+                sorter: (a, b) => a.requestedBy?.email.localeCompare(b.requestedBy?.email || '') || 0,
+                render: (requestedBy) => {
+                    return <RequesterCell user={requestedBy} />;
+                },
             },
             {
                 title: t('Access Requested'),
