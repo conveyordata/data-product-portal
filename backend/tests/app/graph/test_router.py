@@ -57,9 +57,7 @@ class TestGraphRouter:
         producer = DataProductFactory()
         dataset = DatasetFactory(data_product=producer)
         consumer = DataProductFactory()
-        DataProductDatasetAssociationFactory(
-            data_product=consumer, dataset=dataset
-        )
+        DataProductDatasetAssociationFactory(data_product=consumer, dataset=dataset)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
         assert response.status_code == 200, response.text
         edge = response.json()["edges"][0]
