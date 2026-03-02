@@ -16,25 +16,8 @@ import { type TableRow, transformToTableRow } from '../../../../utils/request-ut
 
 type Props = {
     pendingRequests: PendingAction[];
-    typeFilter: 'all' | 'outputPort' | 'dataProduct';
     searchTerm: string;
 };
-
-function filterByType(requests: PendingAction[], typeFilter: Props['typeFilter']): PendingAction[] {
-    if (typeFilter === 'outputPort') {
-        return requests.filter(
-            (action) =>
-                action.pending_action_type === PendingRequestType_DataProductOutputPort ||
-                action.pending_action_type === PendingRequestType_TechnicalAssetOutputPort,
-        );
-    }
-
-    if (typeFilter === 'dataProduct') {
-        return requests.filter((action) => action.pending_action_type === PendingRequestType_DataProductRoleAssignment);
-    }
-
-    return requests;
-}
 
 function filterBySearch(requests: PendingAction[], searchTerm: string): PendingAction[] {
     if (!searchTerm) return requests;
@@ -70,16 +53,15 @@ function filterBySearch(requests: PendingAction[], searchTerm: string): PendingA
     });
 }
 
-export function PendingAccessRequestsView({ pendingRequests, typeFilter, searchTerm }: Props) {
+export function PendingAccessRequestsView({ pendingRequests, searchTerm }: Props) {
     const { t } = useTranslation();
     const [reviewingAction, setReviewingAction] = useState<PendingAction | null>(null);
     const { pagination, handlePaginationChange } = useTablePagination([]);
     const handlers = usePendingActionHandlers();
 
     const filteredData = useMemo(() => {
-        const byType = filterByType(pendingRequests, typeFilter);
-        return filterBySearch(byType, searchTerm);
-    }, [pendingRequests, typeFilter, searchTerm]);
+        return filterBySearch(pendingRequests, searchTerm);
+    }, [pendingRequests, searchTerm]);
 
     const tableData: TableRow[] = useMemo(() => {
         return filteredData.map(transformToTableRow);
