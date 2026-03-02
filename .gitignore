@@ -175,3 +175,6 @@ yarn.lock
 
 # agent
 .gemini/
+
+# macos
+.DS_Store

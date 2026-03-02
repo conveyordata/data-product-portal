@@ -188,10 +188,20 @@ Update `backend/app/settings.py` to add your plugin to the list of available plu
 ```python
 class Settings(BaseSettings):
     # ...
-    plugins: list[str] = [
+    ENABLED_PLUGINS: list[str] = [
         # ... existing plugins
-        "PostgreSQL",
+        "PostgreSQLTechnicalAssetConfiguration",
     ]
+```
+
+### Enabling via Environment Variables
+
+Alternatively, you can override the enabled plugins using the `ENABLED_PLUGINS` environment variable. This is useful for different deployments or demo environments. The value should be a JSON-encoded list of strings.
+
+In your `.env` or `compose.yaml`:
+
+```env
+ENABLED_PLUGINS='["PostgreSQLTechnicalAssetConfiguration", "S3TechnicalAssetConfiguration"]'
 ```
 
 ---
