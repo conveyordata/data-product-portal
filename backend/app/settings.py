@@ -72,6 +72,11 @@ class Settings(BaseSettings):
     # Device flow cleanup buffer in minutes
     DEVICE_CODE_FLOW_EXPIRY_MINUTES: int = 30
 
+    OPENTELEMETRY_TRACES_ENABLED: bool = False
+    OPENTELEMETRY_TRACES_ENDPOINT: str = "http://localhost:4317"
+    OPENTELEMETRY_TRACES_ENDPOINT_INSECURE: bool = True
+    OPENTELEMETRY_TRACES_SERVICE_NAME: str = "dataproductportal"
+
     ENABLED_PLUGINS: list[str] = [
         "ConveyorPlugin",
         "GlueTechnicalAssetConfiguration",

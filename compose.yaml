@@ -51,3 +51,11 @@ services:
     depends_on:
       - backend
       - frontend
+
+  jaeger:
+    image: jaegertracing/jaeger:2.15.1
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317"   # OTLP gRPC receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true

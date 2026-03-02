@@ -49,6 +49,12 @@ posthog = "^7.9.4"
 authlib = "1.6.8"
 fastembed = "^0.7.4"
 pgvector = "^0.4.2"
+opentelemetry-api = "^1.39.1"
+opentelemetry-sdk = "^1.39.1"
+opentelemetry-exporter-otlp = "^1.39.1"
+opentelemetry-instrumentation-fastapi = "^0.60b1"
+opentelemetry-instrumentation-sqlalchemy = "^0.60b1"
+opentelemetry-distro = "^0.60b1"
 
 [tool.poetry.group.test]
 optional = true
