@@ -1,5 +1,5 @@
 import { type Node, useReactFlow } from '@xyflow/react';
-import { Flex, Segmented, Select } from 'antd';
+import { Flex, Segmented, Select, Switch } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DataProductContract } from '@/types/data-product';
@@ -153,6 +153,14 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
                     }
                 }}
             />
+            <Flex align="center" gap="small">
+                <Switch
+                    checked={sidebarFilters.domainsEnabled}
+                    onChange={(checked) => onFilterChange({ ...sidebarFilters, domainsEnabled: checked })}
+                    size="small"
+                />
+                <span>{t('Show Domains')}</span>
+            </Flex>
             <Select
                 placeholder={t('Select a node')}
                 value={nodeId}
