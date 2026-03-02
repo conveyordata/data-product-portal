@@ -16,7 +16,6 @@ export type SidebarFilters = {
 
 type Props = {
     nodes: Node[];
-    setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void;
     sidebarFilters: SidebarFilters;
     onFilterChange: (filters: SidebarFilters) => void;
     nodeId: string | null;
