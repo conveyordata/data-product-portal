@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+### bugfixes
+
+- **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view.
+
 ## 0.5.1
 
 ### features
