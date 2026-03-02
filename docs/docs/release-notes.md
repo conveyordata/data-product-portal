@@ -6,6 +6,14 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+
+- **[Postgresql]**: Postgresql plugin defining technical assets
+
+### bugfixes
+
+- **[Technical Asset]**: Radio button is selected but not captured causing validation issues
+
 ## 0.5.1
 
 ### features
