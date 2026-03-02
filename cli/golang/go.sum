@@ -7,8 +7,8 @@ github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.18 h1:F43zk1vemYIqPAwhj
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.18/go.mod h1:w1jdlZXrGKaJcNoL+Nnrj+k5wlpGXqnNrKoP22HvAug=
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.18 h1:xCeWVjj0ki0l3nruoyP2slHsGArMxeiiaoPN5QZH6YQ=
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.18/go.mod h1:r/eLGuGCBw6l36ZRWiw6PaZwPXb6YOj+i/7MizNl5/k=
-github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.58.1 h1:MVbhtr5+/WM5u3Z4rdIk/xQmy7NFSyZxNXcy5hCCuRE=
-github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.58.1/go.mod h1:mP260yaWr2aT73knlr44yaQEP52UPbVZppXzVO9k52g=
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.59.0 h1:x2/9lEGOqtf0Fa0aqKfJEr5e4dpafyt7ycgZfGFQxcA=
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.59.0/go.mod h1:mP260yaWr2aT73knlr44yaQEP52UPbVZppXzVO9k52g=
 github.com/aws/smithy-go v1.24.1 h1:VbyeNfmYkWoxMVpGUAbQumkODcYmfMRfZ8yQiH30SK0=
 github.com/aws/smithy-go v1.24.1/go.mod h1:LEj2LM3rBRQJxPZTB4KuzZkaZYnZPnvgIhb4pu07mx0=
 github.com/bmatcuk/doublestar v1.1.1/go.mod h1:UD6OnuiIn0yFxxA2le/rnRU1G4RaI4UvFv1sNto9p6w=
