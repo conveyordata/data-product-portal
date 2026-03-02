@@ -22,6 +22,7 @@ declare
     -- PLATFORMS
     postgresql_id uuid;
     postgresql_service_id uuid;
+    environment_id_dev uuid;
 
     -- DATA PRODUCTS
     sales_crm_customers_dp_id uuid;
@@ -105,6 +106,10 @@ begin
     INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('242d7e16-edd5-41e1-9e25-775ecc29706e', 'PostgreSQL', postgresql_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') returning id INTO postgresql_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('38c320c3-8b66-439f-abab-6b78d225ae27', postgresql_id, postgresql_service_id, '["dpp_demo"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
+    -- ENVIRONMENTS
+    INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', '', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO environment_id_dev;
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', environment_id_dev, postgresql_id, postgresql_service_id, '[{"identifier":"database", "host": "data-product-portal-postgresql-demo", "port": "5432", "admin_user": "postgres", "admin_pwd": "abc123"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
     -- GLOBAL ROLE ASSIGNMENTS
     -- Make john.scientist an admin
     INSERT into public.role_assignments_global (id, user_id, role_id, decision, requested_on, decided_on)
@@ -170,15 +175,15 @@ begin
     -- DATA OUTPUT CONFIGURATIONS
     SELECT gen_random_uuid() INTO sales_crm_customers_do_config_id;
     INSERT INTO public.data_output_configurations (id, configuration_type) VALUES (sales_crm_customers_do_config_id, 'PostgreSQLTechnicalAssetConfiguration');
-    INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", database_path, table_path, bucket_identifier, access_granularity, created_on, updated_on, deleted_at) VALUES (sales_crm_customers_do_config_id, 'dpp_demo', 'sales_crm_customers', '*', 'dpp_demo', '*', '', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (sales_crm_customers_do_config_id, 'dpp_demo', 'sales_crm_customers', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     SELECT gen_random_uuid() INTO sales_erp_orders_do_config_id;
     INSERT INTO public.data_output_configurations (id, configuration_type) VALUES (sales_erp_orders_do_config_id, 'PostgreSQLTechnicalAssetConfiguration');
-    INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", database_path, table_path, bucket_identifier, access_granularity, created_on, updated_on, deleted_at) VALUES (sales_erp_orders_do_config_id, 'dpp_demo', 'sales_erp_orders', '*', 'dpp_demo', '*', '', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (sales_erp_orders_do_config_id, 'dpp_demo', 'sales_erp_orders', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     SELECT gen_random_uuid() INTO logistics_wms_shipments_do_config_id;
     INSERT INTO public.data_output_configurations (id, configuration_type) VALUES (logistics_wms_shipments_do_config_id, 'PostgreSQLTechnicalAssetConfiguration');
-    INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", database_path, table_path, bucket_identifier, access_granularity, created_on, updated_on, deleted_at) VALUES (logistics_wms_shipments_do_config_id, 'dpp_demo', 'logistics_wms_shipments', '*', 'dpp_demo', '*', '', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (logistics_wms_shipments_do_config_id, 'dpp_demo', 'logistics_wms_shipments', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- DATA OUTPUTS
     INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'sales-crm-customers', 'Sales CRM Customers', 'Customer account information', 'ACTIVE', postgresql_id, postgresql_service_id, sales_crm_customers_dp_id, NULL, sales_crm_customers_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO sales_crm_customers_do_id;
