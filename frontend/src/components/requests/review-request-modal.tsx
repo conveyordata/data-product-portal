@@ -25,7 +25,7 @@ function getRequestDetails(action: PendingAction, t: (key: string, params?: Reco
             requesterEmail: action.requested_by.email,
             requestType: t('Output Port Access'),
             requestSummary: t(
-                'The Data Product {{dataProductName}} is requesting read access to the output port {{outputPortName}}.',
+                'The Data Product {{dataProductName}} is requesting read access to the Output Port {{outputPortName}}.',
                 {
                     dataProductName: action.data_product.name,
                     outputPortName: action.output_port.name,
@@ -46,7 +46,7 @@ function getRequestDetails(action: PendingAction, t: (key: string, params?: Reco
             requesterEmail: action.requested_by.email,
             requestType: t('Technical Asset Inclusion'),
             requestSummary: t(
-                'The Technical Asset {{assetName}} is requesting to be included in the output port {{outputPortName}}.',
+                'The Technical Asset {{assetName}} is requesting to be included in the Output Port {{outputPortName}}.',
                 {
                     assetName: action.technical_asset.name,
                     outputPortName: action.output_port.name,
