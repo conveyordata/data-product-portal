@@ -111,6 +111,10 @@ export function DataProductActions({ dataProductId }: Props) {
     }
 
     async function handleTileClick(dataPlatform: string) {
+        posthog.capture(PosthogEvents.DATA_PRODUCTS_PLATFORM_ACCESS, {
+            platform_name: dataPlatform,
+        });
+
         try {
             const url = await getPluginUrl({ id: dataProductId, pluginName: dataPlatform }).unwrap();
             if (url) {

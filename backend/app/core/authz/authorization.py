@@ -6,6 +6,7 @@ import casbin_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, LRUCache, cachedmethod
 from casbin import Enforcer
 from fastapi import Depends, HTTPException, Request, status
+from opentelemetry import trace
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -19,6 +20,8 @@ from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
 
 ID: TypeAlias = Union[str, UUID]
+
+tracer = trace.get_tracer(__name__)
 
 
 class Authorization(metaclass=Singleton):
@@ -72,8 +75,9 @@ class Authorization(metaclass=Singleton):
     def has_access(
         self, *, sub: str, dom: str, obj: str, act: AuthorizationAction
     ) -> bool:
-        enforcer: Enforcer = self._enforcer
-        return enforcer.enforce(sub, dom, obj, str(act))
+        with tracer.start_as_current_span("has_access"):
+            enforcer: Enforcer = self._enforcer
+            return enforcer.enforce(sub, dom, obj, str(act))
 
     def _after_update(self) -> None:
         """The cache should be purged when the casbin database is altered,

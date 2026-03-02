@@ -506,6 +506,11 @@ class OutputPortService:
             )
         ):
             return True
+        dataset = self.db.scalar(
+            select(DatasetModel)
+            .where(DatasetModel.id == dataset.id)
+            .options(selectinload(DatasetModel.data_product_links))
+        )
 
         consuming_data_products = {
             link.data_product

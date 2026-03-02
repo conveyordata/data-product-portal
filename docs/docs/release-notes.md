@@ -6,6 +6,18 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.5.1
+
+### features
+
+- **[Explorer]**: Improved the explorer loading times, on our sample data the call went from 10s to 50ms, a 95% reduction
+
+### bugfixes
+
+- **[Product Studio]**: Missing counts for "produces" and "consumes" columns
+- **[Marketplace]**: The existence of *private* output ports caused server errors for non-owning users.
+- **[Posthog]**: Platform access tiles were not tracked if environments were not present.
+
 ## 0.5.0
 
 This migration can take some time, depending on the amount of output ports present, as embeddings are calculated for every output port.
