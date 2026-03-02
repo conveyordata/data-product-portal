@@ -3,16 +3,15 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
-import { RequestActions } from '../components/requests/request-actions';
 import { RequesterCell } from '../components/requests/requester-cell';
+import { ReviewButton } from '../components/requests/review-button';
 import type { TableRow } from '../utils/request-utils';
 
 type UseTableColumnsParams = {
-    onAccept: (action: PendingAction) => void;
-    onReject: (action: PendingAction) => void;
+    onReview: (action: PendingAction) => void;
 };
 
-export function useTableColumns({ onAccept, onReject }: UseTableColumnsParams): ColumnsType<TableRow> {
+export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsType<TableRow> {
     const { t } = useTranslation();
 
     return useMemo(
@@ -45,10 +44,10 @@ export function useTableColumns({ onAccept, onReject }: UseTableColumnsParams): 
                 title: t('Actions'),
                 key: 'actions',
                 render: (_: unknown, record: TableRow) => (
-                    <RequestActions action={record.pendingAction} onAccept={onAccept} onReject={onReject} />
+                    <ReviewButton action={record.pendingAction} onReview={onReview} />
                 ),
             },
         ],
-        [t, onAccept, onReject],
+        [t, onReview],
     );
 }

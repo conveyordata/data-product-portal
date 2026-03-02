@@ -1,6 +1,7 @@
 import { Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ReviewRequestModal } from '@/components/requests/review-request-modal';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
@@ -9,7 +10,6 @@ import {
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
-import { ExpandedRequestDetails } from '../../../../components/requests/expanded-request-details';
 import { useTableColumns } from '../../../../hooks/use-table-columns';
 import { acceptRequest, rejectRequest } from '../../../../utils/request-handlers';
 import { type TableRow, transformToTableRow } from '../../../../utils/request-utils';
@@ -72,7 +72,7 @@ function filterBySearch(requests: PendingAction[], searchTerm: string): PendingA
 
 export function PendingAccessRequestsView({ pendingRequests, typeFilter, searchTerm }: Props) {
     const { t } = useTranslation();
-    const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
+    const [reviewingAction, setReviewingAction] = useState<PendingAction | null>(null);
     const { pagination, handlePaginationChange } = useTablePagination([]);
     const handlers = usePendingActionHandlers();
 
@@ -87,33 +87,35 @@ export function PendingAccessRequestsView({ pendingRequests, typeFilter, searchT
 
     const handleAccept = (action: PendingAction) => acceptRequest(action, handlers);
     const handleReject = (action: PendingAction) => rejectRequest(action, handlers);
+    const handleReview = (action: PendingAction) => setReviewingAction(action);
 
     const columns = useTableColumns({
-        onAccept: handleAccept,
-        onReject: handleReject,
+        onReview: handleReview,
     });
 
     return (
-        <Table
-            columns={columns}
-            dataSource={tableData}
-            size="small"
-            pagination={{
-                ...pagination,
-                onChange: (page, pageSize) => {
-                    handlePaginationChange({ current: page, pageSize });
-                },
-            }}
-            expandable={{
-                expandedRowRender: (record: TableRow) => <ExpandedRequestDetails action={record.pendingAction} />,
-                expandedRowKeys,
-                onExpand: (expanded, record) => {
-                    setExpandedRowKeys(expanded ? [record.key] : []);
-                },
-            }}
-            locale={{
-                emptyText: t('No pending requests.'),
-            }}
-        />
+        <>
+            <Table
+                columns={columns}
+                dataSource={tableData}
+                size="small"
+                pagination={{
+                    ...pagination,
+                    onChange: (page, pageSize) => {
+                        handlePaginationChange({ current: page, pageSize });
+                    },
+                }}
+                locale={{
+                    emptyText: t('No pending requests.'),
+                }}
+            />
+            <ReviewRequestModal
+                action={reviewingAction}
+                open={reviewingAction !== null}
+                onClose={() => setReviewingAction(null)}
+                onAccept={handleAccept}
+                onReject={handleReject}
+            />
+        </>
     );
 }
