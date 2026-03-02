@@ -1,25 +1,25 @@
 import { Position } from '@xyflow/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { Node as GraphNode } from '@/store/api/services/generated/graphApi';
-import { NodeType } from '@/store/api/services/generated/graphApi';
 import { parseRegularNode, sharedAttributes } from './node-parser.helper';
 
 // Minimal GraphNode factory — only fields the parser actually reads.
-const graphNode = (domain_id: string | null = null, domain: string | null = null): GraphNode => ({
-    id: 'node-1',
-    type: NodeType.DataProductNode,
-    isMain: false,
-    data: {
+// biome-ignore lint/suspicious/noExplicitAny: test factory avoids pulling in the full Redux store
+const graphNode = (domain_id: string | null = null, domain: string | null = null) =>
+    ({
         id: 'node-1',
-        name: 'Test Product',
-        icon_key: 'ANALYTICS',
-        domain_id,
-        domain,
-        description: null,
-        link_to_id: null,
-    },
-});
+        type: 'dataProductNode',
+        isMain: false,
+        data: {
+            id: 'node-1',
+            name: 'Test Product',
+            icon_key: 'ANALYTICS',
+            domain_id,
+            domain,
+            description: null,
+            link_to_id: null,
+        },
+    }) as any;
 
 const noop = vi.fn();
 
