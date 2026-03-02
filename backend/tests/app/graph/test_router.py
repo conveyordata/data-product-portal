@@ -51,3 +51,21 @@ class TestGraphRouter:
         assert response.status_code == 200, response.text
         assert len(response.json()["edges"]) == 1
         assert len(response.json()["nodes"]) == 2
+
+    def test_data_products_only_arrow_points_producer_to_consumer(self, client):
+        """Arrow should point from producer to consumer in Data Products only view."""
+        producer = DataProductFactory()
+        dataset = DatasetFactory(data_product=producer)
+        consumer = DataProductFactory()
+        DataProductDatasetAssociationFactory(
+            data_product=consumer, dataset=dataset
+        )
+        response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
+        assert response.status_code == 200, response.text
+        edge = response.json()["edges"][0]
+        assert edge["source"] == str(producer.id), (
+            "Edge source should be the producer (dataset owner)"
+        )
+        assert edge["target"] == str(consumer.id), (
+            "Edge target should be the consumer (dataset reader)"
+        )
