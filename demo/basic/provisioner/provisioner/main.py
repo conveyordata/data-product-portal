@@ -234,10 +234,27 @@ def handle_create_data_product(payload: Dict[str, Any]):
             technical_asset_url, json=technical_asset_payload
         )
         technical_asset_response.raise_for_status()
+        technical_asset_id = technical_asset_response.json().get("id")
 
         logging.info(
-            f"Successfully created technical asset for data product {data_product_id}."
+            f"Successfully created technical asset {technical_asset_id} for data product {data_product_id}."
         )
+
+        # Set technical asset status to active
+        try:
+            status_url = f"{portal_url}/api/v2/data_products/{data_product_id}/technical_assets/{technical_asset_id}/status"
+            status_payload = {"status": "active"}
+            logging.info(f"Setting technical asset status to active at {status_url}")
+            status_response = requests.put(status_url, json=status_payload)
+            status_response.raise_for_status()
+            logging.info(
+                f"Successfully set technical asset {technical_asset_id} status to active."
+            )
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to set technical asset status to active: {e}")
+            if e.response is not None:
+                logging.error(f"Response body: {e.response.text}")
+            # We don't return error here because the asset was at least created
 
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to create technical asset: {e}")
