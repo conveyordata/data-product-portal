@@ -33,37 +33,69 @@ Inside this directory, create the following files:
 Define the Pydantic schema for your new integration.
 
 ```python
-from typing import Annotated, Literal
+from typing import ClassVar, Literal, Optional, Self
 
-from pydantic import Field
+from pydantic import model_validator
+from sqlalchemy.orm import Session
 
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    PostgreSQLConfig,
+)
 from app.data_output_configuration.base_schema import (
-    BaseTechnicalAssetConfiguration,
-    ConfigurationSchemaBase,
+    AssetProviderPlugin,
+    FieldDependency,
+    PlatformMetadata,
+    SelectOption,
+    UIElementMetadata,
+    UIElementRadio,
+    UIElementSelect,
+    UIElementString,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.data_output_configuration.enums import AccessGranularity
+from app.data_output_configuration.enums import AccessGranularity, UIElementType
+from app.data_output_configuration.postgresql.model import (
+    PostgreSQLTechnicalAssetConfiguration as PostgreSQLTechnicalAssetConfigurationModel,
+)
 
-class PostgreSQLTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
-    configuration_type: Literal[
-        DataOutputTypes.PostgreSQLTechnicalAssetConfiguration
-    ] = DataOutputTypes.PostgreSQLTechnicalAssetConfiguration
+class PostgreSQLTechnicalAssetConfiguration(AssetProviderPlugin):
+    name: ClassVar[str] = "PostgreSQLTechnicalAssetConfiguration"
+    version: ClassVar[str] = "1.0"
 
-    database: str | None = None
-    schema_: str | None = Field(None, alias="schema")
-    table: str | None = None
+    database: str
+    schema: str = ""
+    configuration_type: Literal[DataOutputTypes.PostgreSQLTechnicalAssetConfiguration]
+    table: str = "*"
+    access_granularity: AccessGranularity
 
-    # Optional fields depending on your platform
-    bucket_identifier: str | None = None
-    database_path: str | None = None
-    table_path: str | None = None
-    access_granularity: AccessGranularity | None = None
+    _platform_metadata = PlatformMetadata(
+        display_name="PostgreSQL",
+        icon_name="postgresql-logo.svg",
+        platform_key="postgresql",
+        parent_platform=None,
+        result_label="Resulting table",
+        result_tooltip="The table you can access through this technical asset",
+        detailed_name="Schema",
+    )
+
+    class Meta:
+        orm_model = PostgreSQLTechnicalAssetConfigurationModel
 
     @classmethod
-    def get_form_schema(cls) -> ConfigurationSchemaBase:
-        # Define the form schema used to generate the frontend form
-        # ...
-        pass
+    def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
+        base_metadata = super().get_ui_metadata(db)
+        base_metadata += [
+            UIElementMetadata(
+                name="database",
+                label="Database",
+                type=UIElementType.Select,
+                required=True,
+                use_namespace_when_not_source_aligned=True,
+                options=cls.get_platform_options(db),
+                select=UIElementSelect(options=cls.get_platform_options(db)),
+            ),
+            # ... other UI elements
+        ]
+        return base_metadata
 ```
 
 ### `model.py`
@@ -81,8 +113,7 @@ class PostgreSQLTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     database: Mapped[str] = mapped_column(String, nullable=True)
     schema: Mapped[str] = mapped_column(String, nullable=True)
     table: Mapped[str] = mapped_column(String, nullable=True)
-
-    # ... other columns
+    access_granularity: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "PostgreSQLTechnicalAssetConfiguration",
