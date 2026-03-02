@@ -162,9 +162,9 @@ class GraphService:
             edges.extend(
                 [
                     Edge(
-                        id=f"{link['consumer_id']}-{link['producer_id']}",
-                        source=link["consumer_id"],
-                        target=link["producer_id"],
+                        id=f"{link['producer_id']}-{link['consumer_id']}",
+                        source=link["producer_id"],
+                        target=link["consumer_id"],
                         animated=link["status"] == DecisionStatus.APPROVED,
                     )
                     for link in data_product_links
