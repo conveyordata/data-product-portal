@@ -74,7 +74,9 @@ class TestGraphRouter:
         DataProductFactory(domain=domain)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
         assert response.status_code == 200, response.text
-        node = next(n for n in response.json()["nodes"] if n["type"] == "dataProductNode")
+        node = next(
+            n for n in response.json()["nodes"] if n["type"] == "dataProductNode"
+        )
         assert node["data"]["domain_id"] == str(domain.id)
         assert node["data"]["domain"] == domain.name
 
@@ -84,7 +86,9 @@ class TestGraphRouter:
         DatasetFactory(data_product=data_product)
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
-        dataset_node = next(n for n in response.json()["nodes"] if n["type"] == "datasetNode")
+        dataset_node = next(
+            n for n in response.json()["nodes"] if n["type"] == "datasetNode"
+        )
         assert dataset_node["data"]["domain_id"] == str(domain.id)
         assert dataset_node["data"]["domain"] == domain.name
 
