@@ -1,3 +1,4 @@
+import { Position } from '@xyflow/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { parseRegularNode, sharedAttributes } from './node-parser.helper';
@@ -55,7 +56,7 @@ describe('sharedAttributes — domainsEnabled', () => {
 
 describe('parseRegularNode', () => {
     it('merges extra_attributes into data', () => {
-        const extra = { targetHandlePosition: 'left' as any };
+        const extra = { targetHandlePosition: Position.Left };
         const node = parseRegularNode(graphNode('dom-1', 'Finance'), noop, true, false, extra);
         expect(node.data.targetHandlePosition).toBe('left');
     });
