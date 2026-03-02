@@ -20600,14 +20600,34 @@
       },
       "PostgreSQLConfig": {
         "properties": {
-          "database_name": {
+          "identifier": {
             "type": "string",
-            "title": "Database Name"
+            "title": "Identifier"
+          },
+          "host": {
+            "type": "string",
+            "title": "Host"
+          },
+          "port": {
+            "type": "string",
+            "title": "Port"
+          },
+          "admin_user": {
+            "type": "string",
+            "title": "Admin User"
+          },
+          "admin_pwd": {
+            "type": "string",
+            "title": "Admin Pwd"
           }
         },
         "type": "object",
         "required": [
-          "database_name"
+          "identifier",
+          "host",
+          "port",
+          "admin_user",
+          "admin_pwd"
         ],
         "title": "PostgreSQLConfig"
       },
@@ -20631,21 +20651,6 @@
             "type": "string",
             "title": "Table",
             "default": "*"
-          },
-          "bucket_identifier": {
-            "type": "string",
-            "title": "Bucket Identifier",
-            "default": ""
-          },
-          "database_path": {
-            "type": "string",
-            "title": "Database Path",
-            "default": ""
-          },
-          "table_path": {
-            "type": "string",
-            "title": "Table Path",
-            "default": ""
           },
           "access_granularity": {
             "$ref": "#/components/schemas/AccessGranularity"

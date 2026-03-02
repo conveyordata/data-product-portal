@@ -32,9 +32,6 @@ class PostgreSQLTechnicalAssetConfiguration(AssetProviderPlugin):
     schema: str = ""
     configuration_type: Literal[DataOutputTypes.PostgreSQLTechnicalAssetConfiguration]
     table: str = "*"
-    bucket_identifier: str = ""
-    database_path: str = ""
-    table_path: str = ""
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
@@ -52,11 +49,6 @@ class PostgreSQLTechnicalAssetConfiguration(AssetProviderPlugin):
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:
-        if not self.database_path:
-            self.database_path = self.database
-        if not self.table_path:
-            self.table_path = self.table
-
         if self.access_granularity == AccessGranularity.Schema:
             self.table = "*"
         return self

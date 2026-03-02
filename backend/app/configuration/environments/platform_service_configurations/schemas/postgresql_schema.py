@@ -1,5 +1,8 @@
-from app.shared.schema import ORMModel
+from .config_schema import BaseEnvironmentPlatformServiceConfigurationDetail
 
 
-class PostgreSQLConfig(ORMModel):
-    database_name: str
+class PostgreSQLConfig(BaseEnvironmentPlatformServiceConfigurationDetail):
+    host: str
+    port: str
+    admin_user: str
+    admin_pwd: str

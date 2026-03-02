@@ -1,8 +1,8 @@
-"""Migrate PostgreSQL configurations to separate table
+"""Postgres output port plugin
 
-Revision ID: postgresql_separate_table
+Revision ID: 491c8783a7bc
 Revises: 638303a2cb77
-Create Date: 2026-03-01 12:00:00.000000
+Create Date: 2026-03-02 14:54:51.833214
 
 """
 
@@ -15,7 +15,7 @@ from sqlalchemy.dialects import postgresql
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
-revision: str = "postgresql_separate_table"
+revision: str = "491c8783a7bc"
 down_revision: Union[str, None] = "638303a2cb77"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,9 +34,6 @@ def upgrade() -> None:
         sa.Column("database", sa.String(), nullable=True),
         sa.Column("schema", sa.String(), nullable=True),
         sa.Column("table", sa.String(), nullable=True),
-        sa.Column("bucket_identifier", sa.String(), nullable=True),
-        sa.Column("database_path", sa.String(), nullable=True),
-        sa.Column("table_path", sa.String(), nullable=True),
         sa.Column("access_granularity", sa.String(), nullable=True),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
@@ -65,5 +62,4 @@ def downgrade() -> None:
         WHERE configuration_type = 'PostgreSQLTechnicalAssetConfiguration'
         """
     )
-
     op.drop_table("postgresql_technical_asset_configurations")
