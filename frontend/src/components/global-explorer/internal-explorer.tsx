@@ -272,7 +272,6 @@ export default function InternalFullExplorer() {
         <Flex className={styles.nodeWrapper}>
             <Sidebar
                 nodes={nodes}
-                setNodes={setNodes}
                 onFilterChange={setSidebarFilters}
                 sidebarFilters={sidebarFilters}
                 nodeId={nodeId}
