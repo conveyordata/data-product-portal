@@ -35,6 +35,12 @@ def get_url(async_: bool = False) -> str:
 
 
 engine = create_engine(get_url(), connect_args={})
+if settings.OPENTELEMETRY_TRACES_ENABLED:
+    from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
+    SQLAlchemyInstrumentor().instrument(
+        engine=engine,
+    )
 
 
 @event.listens_for(Engine, "before_cursor_execute")

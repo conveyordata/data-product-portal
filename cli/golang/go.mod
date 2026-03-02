@@ -4,14 +4,14 @@ go 1.25.3
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.2
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.58.1
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.59.0
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/oapi-codegen/oapi-codegen/v2 v2.5.1
+	github.com/oapi-codegen/oapi-codegen/v2 v2.6.0
 	github.com/oapi-codegen/runtime v1.2.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
