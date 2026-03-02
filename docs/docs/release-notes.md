@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+
+- **[Explorer]**: Domain container nodes are now visible in the global graph explorer, grouping data products by domain with distinct colours
+
 ## 0.5.1
 
 ### features
