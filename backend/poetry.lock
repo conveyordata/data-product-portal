@@ -1030,14 +1030,14 @@ tqdm = ">=4.66,<5.0"
 
 [[package]]
 name = "fastmcp"
-version = "3.0.2"
+version = "3.1.0"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp-3.0.2-py3-none-any.whl", hash = "sha256:f513d80d4b30b54749fe8950116b1aab843f3c293f5cb971fc8665cb48dbb028"},
-    {file = "fastmcp-3.0.2.tar.gz", hash = "sha256:6bd73b4a3bab773ee6932df5249dcbcd78ed18365ed0aeeb97bb42702a7198d7"},
+    {file = "fastmcp-3.1.0-py3-none-any.whl", hash = "sha256:b1f73b56fd3b0cb2bd9e2a144fc650d5cc31587ed129d996db7710e464ae8010"},
+    {file = "fastmcp-3.1.0.tar.gz", hash = "sha256:e25264794c734b9977502a51466961eeecff92a0c2f3b49c40c070993628d6d0"},
 ]
 
 [package.dependencies]
@@ -1058,15 +1058,19 @@ pyperclip = ">=1.9.0"
 python-dotenv = ">=1.1.0"
 pyyaml = ">=6.0,<7.0"
 rich = ">=13.9.4"
+uncalled-for = ">=0.2.0"
 uvicorn = ">=0.35"
 watchfiles = ">=1.0.0"
 websockets = ">=15.0.1"
 
 [package.extras]
 anthropic = ["anthropic (>=0.40.0)"]
+apps = ["prefab-ui (>=0.6.0)"]
 azure = ["azure-identity (>=1.16.0)"]
+code-mode = ["pydantic-monty (>=0.0.7)"]
+gemini = ["google-genai (>=1.18.0)"]
 openai = ["openai (>=1.102.0)"]
-tasks = ["pydocket (>=0.17.2)"]
+tasks = ["pydocket (>=0.18.0)"]
 
 [[package]]
 name = "filelock"
@@ -4131,6 +4135,18 @@ files = [
 ]
 
 [[package]]
+name = "uncalled-for"
+version = "0.2.0"
+description = "Async dependency injection for Python functions"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "uncalled_for-0.2.0-py3-none-any.whl", hash = "sha256:2c0bd338faff5f930918f79e7eb9ff48290df2cb05fcc0b40a7f334e55d4d85f"},
+    {file = "uncalled_for-0.2.0.tar.gz", hash = "sha256:b4f8fdbcec328c5a113807d653e041c5094473dd4afa7c34599ace69ccb7e69f"},
+]
+
+[[package]]
 name = "urllib3"
 version = "2.6.3"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -4490,4 +4506,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "226b3d526fe811b73b15d3bf2af222353437c434a7832bae62006cd881636ba1"
+content-hash = "c1d4ba7ab798d3fbf68f5258054b751592b19457c33c0846d561893c5d0e4ff5"
