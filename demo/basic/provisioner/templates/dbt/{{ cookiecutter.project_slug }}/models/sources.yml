@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: sales_crm_customers
+    schema: sales_crm_customers
+    tables:
+      - name: customers
+  - name: logistics_wms_shipments
+    schema: logistics_wms_shipments
+    tables:
+      - name: shipments
+  - name: sales_erp_orders
+    schema: sales_erp_orders
+    tables:
+      - name: orders

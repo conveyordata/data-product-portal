@@ -133,6 +133,9 @@ export type RedshiftConfig = {
   bucket_identifier: string;
   s3_path: string;
 };
+export type PostgreSqlConfig = {
+  identifier: string;
+};
 export type Platform = {
   id: string;
   name: string;
@@ -151,6 +154,7 @@ export type EnvironmentConfigsGetItem = {
     | DatabricksConfig
     | SnowflakeConfig
     | RedshiftConfig
+    | PostgreSqlConfig
   )[];
   id: string;
   platform: Platform;
