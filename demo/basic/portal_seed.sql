@@ -23,6 +23,11 @@ declare
     postgresql_id uuid;
     postgresql_service_id uuid;
     environment_id_dev uuid;
+    aws_id uuid;
+    s3_service_id uuid;
+    glue_service_id uuid;
+    semantic_model_id uuid;
+    osi_sem_model_service_id uuid;
 
     -- DATA PRODUCTS
     sales_crm_customers_dp_id uuid;
@@ -105,6 +110,16 @@ begin
     INSERT INTO public.platforms (id, "name") VALUES ('99898d61-ba3b-4f30-a929-8356ccfe521f', 'PostgreSQL') returning id INTO postgresql_id;
     INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('242d7e16-edd5-41e1-9e25-775ecc29706e', 'PostgreSQL', postgresql_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') returning id INTO postgresql_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('38c320c3-8b66-439f-abab-6b78d225ae27', postgresql_id, postgresql_service_id, '["dpp_demo"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    INSERT INTO public.platforms (id, "name") VALUES (gen_random_uuid(), 'OSI') returning id INTO semantic_model_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES (gen_random_uuid(), 'OSI', semantic_model_id, '{model_name}', '{file_path}') returning id INTO osi_sem_model_service_id;
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), semantic_model_id, osi_sem_model_service_id, '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    SELECT id FROM public.platforms WHERE name = 'AWS' INTO aws_id;
+    SELECT id FROM public.platform_services WHERE platform_id = aws_id AND name = 'S3' INTO s3_service_id;
+    SELECT id FROM public.platform_services WHERE platform_id = aws_id AND name = 'Glue' INTO glue_service_id;
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', aws_id, s3_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', aws_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', '', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO environment_id_dev;

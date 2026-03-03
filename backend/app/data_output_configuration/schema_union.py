@@ -7,6 +7,9 @@ from app.data_output_configuration.databricks.schema import (
     DatabricksTechnicalAssetConfiguration,
 )
 from app.data_output_configuration.glue.schema import GlueTechnicalAssetConfiguration
+from app.data_output_configuration.osi_sem_model.schema import (
+    OSISemanticModelTechnicalAssetConfiguration,
+)
 from app.data_output_configuration.postgresql.schema import (
     PostgreSQLTechnicalAssetConfiguration,
 )
@@ -25,6 +28,7 @@ DataOutputs = Union[
     SnowflakeTechnicalAssetConfiguration,
     RedshiftTechnicalAssetConfiguration,
     PostgreSQLTechnicalAssetConfiguration,
+    OSISemanticModelTechnicalAssetConfiguration,
 ]
 
 DataOutputMap = {
@@ -34,6 +38,7 @@ DataOutputMap = {
     DataOutputTypes.SnowflakeTechnicalAssetConfiguration: SnowflakeTechnicalAssetConfiguration,
     DataOutputTypes.RedshiftTechnicalAssetConfiguration: RedshiftTechnicalAssetConfiguration,
     DataOutputTypes.PostgreSQLTechnicalAssetConfiguration: PostgreSQLTechnicalAssetConfiguration,
+    DataOutputTypes.OSISemanticModelTechnicalAssetConfiguration: OSISemanticModelTechnicalAssetConfiguration,
 }
 
 DataOutputConfiguration = Annotated[
