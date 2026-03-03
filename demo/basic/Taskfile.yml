@@ -1,0 +1,35 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install poetry dependencies
+    dir: products
+    cmds:
+      - poetry install
+
+  reset:
+    desc: Restart the entire setup
+    cmds:
+      - docker compose kill
+      - docker compose rm -f
+      - docker compose build
+      - docker compose up -d
+
+  prepare-demo:
+    desc: Prepare the demo
+    deps:
+      - install
+    cmds:
+      - docker compose up -d
+      - task: run-dbt
+        vars: { PROJECT: sales_crm_customers }
+      - task: run-dbt
+        vars: { PROJECT: sales_erp_orders }
+      - task: run-dbt
+        vars: { PROJECT: logistics_wms_shipments }
+
+  run-dbt:
+    internal: true
+    dir: products
+    cmds:
+      - poetry run dbt run --project-dir {{.PROJECT}} --profiles-dir {{.PROJECT}}

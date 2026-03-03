@@ -6,13 +6,14 @@ sidebar_position: 200
 
 ## Unreleased
 
-
 ### features
 
 - **[Explorer]**: Domain container nodes are now visible in the global graph explorer, grouping data products by domain with distinct colours
+- **[Postgresql]**: Postgresql plugin defining technical assets
 
 ### bugfixes
 
+- **[Technical Asset]**: Radio button is selected but not captured causing validation issues
 - **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view.
 
 

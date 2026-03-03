@@ -9,6 +9,9 @@ from app.configuration.environments.platform_service_configurations.schemas impo
     AWSS3Config,
     DatabricksConfig,
 )
+from app.configuration.environments.platform_service_configurations.schemas.postgresql_schema import (
+    PostgreSQLConfig,
+)
 from app.configuration.environments.platform_service_configurations.schemas.redshift_schema import (
     RedshiftConfig,
 )
@@ -21,7 +24,12 @@ from app.configuration.platforms.schema_response import Platform
 from app.shared.schema import ORMModel
 
 ConfigType = (
-    AWSS3Config | AWSGlueConfig | DatabricksConfig | SnowflakeConfig | RedshiftConfig
+    AWSS3Config
+    | AWSGlueConfig
+    | DatabricksConfig
+    | SnowflakeConfig
+    | RedshiftConfig
+    | PostgreSQLConfig
 )
 
 

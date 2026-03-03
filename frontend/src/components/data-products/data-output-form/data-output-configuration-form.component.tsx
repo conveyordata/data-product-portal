@@ -151,13 +151,7 @@ export function DataOutputConfigurationForm({
                 );
                 break;
             case 'radio':
-                inputComponent = (
-                    <Radio.Group
-                        defaultValue={radio?.initial_value || undefined}
-                        disabled={isDisabled ?? false}
-                        options={radioOptions}
-                    />
-                );
+                inputComponent = <Radio.Group disabled={isDisabled ?? false} options={radioOptions} />;
                 break;
             default:
                 inputComponent = <Input />;
@@ -177,7 +171,9 @@ export function DataOutputConfigurationForm({
                         ? string?.initial_value
                         : type === 'checkbox'
                           ? checkbox?.initial_value
-                          : undefined
+                          : type === 'radio'
+                            ? radio?.initial_value
+                            : undefined
                 }
                 required={type !== 'checkbox' && required && !isHidden}
             >
