@@ -269,3 +269,96 @@ By following these steps, you have successfully:
 - Generated the updated frontend models and added styling assets
 
 Your new integration will now be available when configuring data output ports in the Data Product Portal.
+
+---
+
+## Database & Service Architecture
+
+Understanding the underlying data model helps when debugging integration issues or seeding a new environment.
+
+### Table Overview
+
+| Table | Purpose |
+|---|---|
+| `platforms` | Top-level platform identity (e.g. `AWS`, `PostgreSQL`, `OSI`) |
+| `platform_services` | Services offered by a platform (e.g. `S3`, `Glue`). Holds `result_string_template` and `technical_info_template`. |
+| `platform_service_configs` | Available options for a service (e.g. the list of S3 bucket names). Required for every service, even if empty. |
+| `environments` | Deployment environments (e.g. `development`, `production`) |
+| `env_platform_service_configs` | Environment-specific connection details for a platform/service combination (e.g. host, credentials) |
+| `data_output_configurations` | Polymorphic base table for technical asset configurations. Each plugin has its own child table joined on `id`. |
+| `data_outputs` | The technical asset record itself — links a data product to a `platform`, `service`, and `data_output_configurations` row |
+
+### How Templates Work
+
+`platform_services.result_string_template` and `technical_info_template` are Python `.format()`-style strings rendered using the field names from the plugin's Pydantic schema. For example:
+
+- PostgreSQL: `"{database}.{schema}.{table}"` — fields `database`, `schema`, `table` come from `PostgreSQLTechnicalAssetConfiguration`
+- OSI Semantic Model: `"{model_name}"` — field `model_name` comes from `OSISemanticModelTechnicalAssetConfiguration`
+
+### `has_environments` Flag
+
+The `has_environments` flag on `PlatformMetadata` controls whether the plugin needs environment-specific platform configuration:
+
+| `has_environments` | `env_platform_service_configs` needed? | `platform_service_configs` needed? |
+|---|---|---|
+| `True` (default) | Yes — connection details per environment | Yes — list of available options (e.g. buckets) |
+| `False` | No | **Yes — still required, use `'[]'` as config** |
+
+The `platform_service_configs` row is always required because the frontend uses it to populate `platformConfig`, which is the source of truth for `platform_id` and `service_id` in the creation form. Without it, the platform tile will appear in the UI but the form will silently fail to set these IDs.
+
+---
+
+## Critical Naming Conventions
+
+The frontend resolves `platform_id` and `service_id` through two independent lookups, both driven by names. Getting these wrong causes silent failures during technical asset creation.
+
+### 1. `platform.name` must equal `display_name`
+
+The `platform_id` form field is populated by matching:
+```
+platformConfig.find(config => config.platform.name === tile.label)
+```
+`tile.label` comes from `_platform_metadata.display_name`. So:
+
+```python
+# In schema.py
+_platform_metadata = PlatformMetadata(display_name="OSI", ...)
+
+# In seed SQL / DB
+INSERT INTO platforms (name) VALUES ('OSI')  -- must match display_name exactly
+```
+
+### 2. `service.name.toLowerCase()` must equal `platform_key`
+
+The `service_id` is looked up via a map keyed by `service.name.toLowerCase()`, using `platform_key` as the lookup key:
+
+```python
+# In schema.py
+_platform_metadata = PlatformMetadata(platform_key="osi", ...)
+
+# In seed SQL / DB
+INSERT INTO platform_services (name) VALUES ('OSI')  -- 'OSI'.toLowerCase() == 'osi' == platform_key ✓
+```
+
+A mismatch here means the `service_id` is never set, and the subsequent `render_technical_asset_access_path` call returns a 422.
+
+### Summary Checklist for a New Integration
+
+When seeding a new environment (e.g. `demo/basic/portal_seed.sql`), ensure all three rows exist and names align:
+
+```sql
+-- 1. Platform — name must match _platform_metadata.display_name
+INSERT INTO platforms (name) VALUES ('MyPlatform');
+
+-- 2. Service — name.toLowerCase() must match _platform_metadata.platform_key
+INSERT INTO platform_services (name, platform_id, result_string_template, technical_info_template)
+VALUES ('myplatform', <platform_id>, '{field_name}', '{other_field}');
+
+-- 3. Config — required even if empty; without this the frontend cannot resolve platform_id/service_id
+INSERT INTO platform_service_configs (platform_id, service_id, config)
+VALUES (<platform_id>, <service_id>, '[]');
+
+-- 4. Only if has_environments=True: environment-specific connection details
+INSERT INTO env_platform_service_configs (environment_id, platform_id, service_id, config)
+VALUES (<env_id>, <platform_id>, <service_id>, '[{...connection details...}]');
+```
