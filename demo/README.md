@@ -35,6 +35,20 @@ The following components require regular updates to remain compatible with the c
 - **dbt Templates & Projects**: The dbt projects in `products/` and the cookiecutter templates in `provisioner/templates/` must be updated if dbt-core versions change or if the connection profiles need adjustment.
 - **SQL Seed Synchronization**: The `portal_seed.sql` files must be kept in sync with the backend's database models. If new required fields are added to `DataProduct` or `Dataset` models, the seed scripts must be updated accordingly.
 
+### [Agents Demo](./agents/README.md)
+**Goal**: Showcase how the Data Product Portal provisions AI agents alongside data products, using SwiftGear (an outdoor gear retailer) as the business scenario.
+- Each data product automatically gets a scoped PostgreSQL user, an OSI semantic model, and an Agno AI agent.
+- Agents use the semantic model to answer business questions correctly (e.g. monetary values in cents, retired inventory filters).
+- When a data product's input port access request is approved, the consumer agent gains cross-schema query access and inherits the provider's semantic model — enabling cross-domain analytics.
+- Includes a functional **Provisioner** that handles both product creation and link approval webhooks, and an **Agno Agent Server** that hot-reloads agent configs as access is granted.
+
+#### Toil & Maintenance
+
+- **Provisioner Service**: Must be maintained when the Portal's API or webhook payload structures change, particularly the approve-link handler.
+- **OSI Semantic Models**: The `products/*/osi.yml` files must be updated when source schemas or business logic change.
+- **Agent Config Volume**: The `agent_configs` Docker volume is ephemeral. After `docker compose down -v`, re-run `python setup/create_products.py` to regenerate.
+- **SQL Seed Synchronization**: `portal_seed.sql` must stay in sync with the Portal's database schema.
+
 
 # Events documentation
 

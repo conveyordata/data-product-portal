@@ -1,0 +1,15 @@
+version: "3"
+
+tasks:
+  reset:
+    desc: Full reset of the demo (kill, remove, rebuild, start)
+    cmds:
+      - docker compose kill
+      - docker compose rm -f
+      - docker compose build
+      - docker compose up -d
+
+  create-products:
+    desc: Create the 3 demo data products via portal API (triggers provisioner)
+    cmds:
+      - python setup/create_products.py
