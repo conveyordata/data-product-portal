@@ -282,14 +282,14 @@ crt = ["awscrt (==0.31.2)"]
 
 [[package]]
 name = "cachetools"
-version = "7.0.1"
+version = "7.0.2"
 description = "Extensible memoizing collections and decorators"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "cachetools-7.0.1-py3-none-any.whl", hash = "sha256:8f086515c254d5664ae2146d14fc7f65c9a4bce75152eb247e5a9c5e6d7b2ecf"},
-    {file = "cachetools-7.0.1.tar.gz", hash = "sha256:e31e579d2c5b6e2944177a0397150d312888ddf4e16e12f1016068f0c03b8341"},
+    {file = "cachetools-7.0.2-py3-none-any.whl", hash = "sha256:938dcad184827c5e94928c4fd5526e2b46692b7fb1ae94472da9131d0299343c"},
+    {file = "cachetools-7.0.2.tar.gz", hash = "sha256:7e7f09a4ca8b791d8bb4864afc71e9c17e607a28e6839ca1a644253c97dbeae0"},
 ]
 
 [[package]]
@@ -4490,4 +4490,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "af34bf9c6e90312c7c264978b8999c1eeb818e4fe5920bc157ecc0ed986b22ed"
+content-hash = "93dc4f34461ce851f49b106e580b24293c5f9e4d8d429d78b882b8c0376ede35"
