@@ -34,6 +34,7 @@ AWS_DEFAULT_REGION=eu-west-1
 LOGGING_DIRECTORY=./tmp/logs
 HOST=http://localhost:3000/
 SLOW_QUERY_LOGGING_ENABLED=True
+OPENTELEMETRY_TRACES_ENABLED=True
 ```
 
 ## Running the project
@@ -52,7 +53,7 @@ poetry install
 Required services can be started using docker compose:
 
 ```bash
-docker compose up -d postgresql mailhog
+docker compose up -d postgresql mailhog jaeger
 ```
 
 ### Populating the database

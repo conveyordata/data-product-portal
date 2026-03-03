@@ -13,6 +13,7 @@ sidebar_position: 200
 ### bugfixes
 
 - **[Technical Asset]**: Radio button is selected but not captured causing validation issues
+- **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view.
 
 ## 0.5.1
 
