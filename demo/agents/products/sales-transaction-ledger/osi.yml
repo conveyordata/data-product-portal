@@ -1,0 +1,151 @@
+semantic_model:
+  - name: sales_domain
+    description: Transactional and subscription revenue data
+    ai_context:
+      instructions: "All monetary values are stored in cents. Always divide by 100 for dollar amounts. Ignore 'calculated_total' as it contains legacy errors. ALWAYS calculate metrics (like average order value) yourself and challenge the user if their premise (e.g., 'If our average order is $150...') is numerically incorrect."
+
+    datasets:
+      - name: orders
+        source: sales_transaction_ledger.orders
+        primary_key: [order_id]
+        description: Customer order headers
+        fields:
+          - name: order_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_id
+          - name: customer_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: customer_id
+          - name: amount_dollars
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: "total_amount / 100.0"
+            description: Total order value in USD
+          - name: is_processing
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: "status IS NULL AND created_at IS NOT NULL"
+            description: True if the order is currently being processed
+          - name: status
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: status
+          - name: created_at
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: created_at
+            dimension:
+              is_time: true
+          - name: shipped_at
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: shipped_at
+            dimension:
+              is_time: true
+
+      - name: order_items
+        source: sales_transaction_ledger.order_items
+        primary_key: [item_id]
+        description: Line items for each order
+        fields:
+          - name: order_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_id
+          - name: sku
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: sku
+          - name: price_dollars
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: "price_cents / 100.0"
+          - name: quantity
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: quantity
+
+      - name: recurring_revenue
+        source: sales_transaction_ledger.recurring_revenue
+        primary_key: [subscription_id]
+        description: Subscription and recurring revenue tracking
+        fields:
+          - name: mrr_dollars
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: "COALESCE(mrr, 0) / 100.0"
+          - name: status
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: status
+          - name: is_trial
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: "status = 'TRIAL'"
+          - name: started_at
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: started_at
+            dimension:
+              is_time: true
+          - name: renewal_date
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: "started_at + INTERVAL '1 year'"
+            description: The date when the annual subscription is up for renewal
+          - name: ended_at
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: ended_at
+            dimension:
+              is_time: true
+
+    relationships:
+      - name: order_to_items
+        from: order_items
+        to: orders
+        from_columns: [order_id]
+        to_columns: [order_id]
+
+    metrics:
+      - name: total_revenue
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "SUM(orders.total_amount) / 100.0"
+        description: Total revenue in dollars
+
+      - name: average_order_value
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "(SUM(orders.total_amount) / 100.0) / COUNT(DISTINCT orders.order_id)"
+        description: Average value of an order in dollars
+
+      - name: churn_rate
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "COUNT(CASE WHEN recurring_revenue.status = 'CANCELED' THEN 1 END)::FLOAT / NULLIF(COUNT(CASE WHEN recurring_revenue.status != 'TRIAL' THEN 1 END), 0)"
+        description: Ratio of canceled subscriptions to total non-trial subscriptions.
+        ai_context:
+          instructions: "Always specify the time period (e.g., month, year) when reporting this metric. By default, it excludes trial accounts."

@@ -1,0 +1,96 @@
+services:
+  mailhog:
+    extends:
+      file: ../../compose.yaml
+      service: mailhog
+
+  backend:
+    extends:
+      file: ../../compose.yaml
+      service: backend
+    env_file:
+      - .env.portal
+    command: >
+      bash -c "python -m app.db_tool init --force /demo/agents/portal_seed.sql
+      && uvicorn app.main:app --host 0.0.0.0 --port 5050"
+    volumes:
+      - .:/demo/agents
+    depends_on:
+      mailhog:
+        condition: service_started
+      postgresql:
+        condition: service_healthy
+
+  frontend:
+    extends:
+      file: ../../compose.yaml
+      service: frontend
+    volumes:
+      - ../../frontend/config.docker.js:/app/dist/config.js
+
+  provisioner:
+    build: ./provisioner
+    env_file:
+      - .env.portal
+    volumes:
+      - ./products:/products
+      - agent_configs:/agent_configs
+    depends_on:
+      postgresql-demo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6060"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  agent:
+    build: ./agent
+    volumes:
+      - agent_configs:/agent_configs
+      - ./products:/products
+    ports:
+      - "7070:7070"
+    depends_on:
+      postgresql-demo:
+        condition: service_healthy
+
+  postgresql:
+    extends:
+      file: ../../compose.yaml
+      service: postgresql
+    env_file:
+      - .env.portal
+
+  postgresql-demo:
+    image: postgres:17.6
+    container_name: data-product-portal-postgresql-demo
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env.data_sources
+    volumes:
+      - postgresql-demo-data:/var/lib/postgresql/data
+      - ./data_sources_seed.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 2s
+      timeout: 1s
+      retries: 120
+
+  nginx:
+    extends:
+      file: ../../compose.yaml
+      service: nginx
+    ports:
+      - "8080:80"
+      - "5050:5050"
+      - "6060:6060"
+    depends_on:
+      - backend
+      - frontend
+      - provisioner
+
+volumes:
+  postgresql-demo-data:
+  agent_configs:
