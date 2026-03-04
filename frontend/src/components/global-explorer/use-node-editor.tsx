@@ -75,6 +75,8 @@ const interDomainLayoutOptions = {
     'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
     'elk.portConstraints': 'FIXED_SIDE',
     'elk.padding': '[top=50.0,left=50.0,bottom=50.0,right=50.0]',
+    'elk.aspectRatio': '1.6', // Prefer wider layouts so disconnected domains spread horizontally
+    'elk.layered.compaction.connectedComponents': 'true', // Compact disconnected components
 };
 
 // Layout options within a domain node.

@@ -2,7 +2,7 @@ import { Position } from '@xyflow/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { Node as GraphNode } from '@/store/api/services/generated/dataProductsApi';
-import { parseRegularNode, sharedAttributes } from './node-parser.helper';
+import { parseRegularNode, sharedAttributes } from '@/utils/node-parser.helper';
 
 // Minimal GraphNode factory — only fields the parser actually reads.
 // `import type` is erased at compile time so it does not trigger module execution.
