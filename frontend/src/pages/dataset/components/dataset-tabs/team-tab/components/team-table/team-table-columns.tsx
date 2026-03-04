@@ -2,7 +2,7 @@ import { Badge, Button, Popconfirm, Space, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form.tsx';
-import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
+import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { DecisionStatus, type OutputPortRoleAssignment, Prototype, Scope } from '@/types/roles';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper.ts';
@@ -50,7 +50,7 @@ export const getDatasetTeamColumns = ({
             title: t('Name'),
             dataIndex: 'user.first_name',
             render: (_, { user }) => {
-                return <UserAvatar name={`${user.first_name} ${user.last_name}`} email={user.email} />;
+                return <UserAvatarWithEmail user={user} />;
             },
             width: '50%',
             sorter: sorter.cascadedSorter(

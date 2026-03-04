@@ -1,5 +1,5 @@
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Badge, Dropdown, Flex, type MenuProps, Typography, theme } from 'antd';
+import { Badge, Dropdown, Flex, type MenuProps, Typography, theme } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'react-oidc-context';
@@ -8,12 +8,12 @@ import { useSelector } from 'react-redux';
 import { AdminButton } from '@/components/buttons/admin-button.tsx';
 import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import { Notifications } from '@/components/notifications/notifications';
+import { UserAvatar } from '@/components/user-avatar/user-avatar.component';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useIsAdminQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useRevokeAdminMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
-import styles from './user-menu.module.scss';
 
 const cognitoLogoutParams = AppConfig.getOidcCognitoLogoutParams();
 const isAuthDisabled = !AppConfig.isOidcEnabled();
@@ -27,7 +27,6 @@ export function UserMenu() {
     const {
         token: { colorErrorBorder, colorPrimary },
     } = theme.useToken();
-    const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
     const [revokeAdmin] = useRevokeAdminMutation();
 
     const { data: isAdmin } = useIsAdminQuery();
@@ -135,9 +134,7 @@ export function UserMenu() {
                             size="small"
                             offset={[-50, 0]}
                         >
-                            <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
-                                {userInitials || <UserOutlined />}
-                            </Avatar>
+                            <UserAvatar user={user} color={colorErrorBorder} />
                         </Badge>
                     }
                 </Dropdown>
