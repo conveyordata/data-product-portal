@@ -7,6 +7,7 @@ import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useUnlinkOutputPortFromTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
@@ -22,6 +23,7 @@ type Props = {
 
 export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoading }: Props) {
     const { t } = useTranslation();
+    const { data: { plugins } = { plugins: [] } } = useGetPluginsQuery();
     const {
         handleAcceptDataOutputDatasetLink,
         handleRejectDataOutputDatasetLink,
@@ -81,6 +83,7 @@ export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoadi
     const columns: TableColumnsType<TechnicalAssetLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
             t,
+            plugins,
             onAcceptDataOutputDatasetLink: handleAcceptDataOutputDatasetLink,
             onRejectDataOutputDatasetLink: handleRejectDataOutputDatasetLink,
             onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
@@ -98,6 +101,7 @@ export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoadi
         isApprovingDataOutputLink,
         canAccept,
         canRevoke,
+        plugins,
     ]);
 
     return (
