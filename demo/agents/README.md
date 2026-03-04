@@ -90,17 +90,26 @@ Portal UI
 
 ## Scenario Steps
 
-### 1. Start the Demo
+### 1. Configure Secrets
+
+The Agno agent server requires an Anthropic API key. Copy the example file and fill it in — it is gitignored and never committed:
 
 ```bash
 cd demo/agents
+cp .env.secret.example .env.secret
+# then edit .env.secret and set your ANTHROPIC_API_KEY
+```
+
+### 2. Start the Demo
+
+```bash
 docker compose up -d
 ```
 
 Wait for all services to be healthy, then create the three data products:
 
 ```bash
-python setup/create_products.py
+task create-products
 ```
 
 This triggers the provisioner for each product, which:
@@ -110,7 +119,7 @@ This triggers the provisioner for each product, which:
 - Writes an agent config YAML to the shared `agent_configs` volume
 - Advances the data product lifecycle to **Ready**
 
-### 2. Three Data Products, Three Agents
+### 3. Three Data Products, Three Agents
 
 After creation, the portal shows three data products, each with:
 
@@ -130,7 +139,7 @@ Try a trap question:
 
 The semantic model's instructions tell the agent to always filter out retired items and to challenge incorrect premises.
 
-### 3. Link Data Products (Cross-Domain Access)
+### 4. Link Data Products (Cross-Domain Access)
 
 To demonstrate access propagation, have the **Sales Transaction Ledger** request access to the **Inventory Snapshot** output port in the portal UI:
 

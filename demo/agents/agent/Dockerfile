@@ -12,9 +12,11 @@ ENV POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_HOME='/usr/local'
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y curl nodejs npm && \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y curl && \
     pip install poetry==2.2.1 && \
-    npm install -g mcp-server-postgres
+    curl -O https://storage.googleapis.com/genai-toolbox/v0.28.0/linux/amd64/toolbox && \
+    chmod +x toolbox && \
+    mv toolbox /usr/local/bin/toolbox
 
 COPY pyproject.toml ./
 RUN poetry install --no-root
