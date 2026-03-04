@@ -1,6 +1,7 @@
 import logging
 import re
 import os
+import threading
 import requests
 import psycopg2
 import yaml
@@ -22,6 +23,18 @@ demo_db_port = int(os.environ.get("PROV_DEMO_DB_PORT", "5432"))
 demo_db_name = os.environ.get("PROV_DEMO_DB_NAME", "dpp_demo")
 demo_db_admin_user = os.environ.get("PROV_DEMO_DB_ADMIN_USER", "postgres")
 demo_db_admin_password = os.environ.get("PROV_DEMO_DB_ADMIN_PASSWORD", "abc123")
+
+# Per-namespace locks to prevent concurrent YAML read-modify-write races
+_yaml_locks: Dict[str, threading.Lock] = {}
+_yaml_locks_mutex = threading.Lock()
+
+
+def get_yaml_lock(namespace: str) -> threading.Lock:
+    with _yaml_locks_mutex:
+        if namespace not in _yaml_locks:
+            _yaml_locks[namespace] = threading.Lock()
+        return _yaml_locks[namespace]
+
 
 # In-memory cache for data product lifecycles
 lifecycle_cache: Dict[str, Any] = {}
@@ -165,15 +178,21 @@ def write_agent_config(
 
     os.makedirs(agent_configs_path, exist_ok=True)
     config_path = os.path.join(agent_configs_path, f"{namespace}.yml")
-    with open(config_path, "w") as f:
-        yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+    with get_yaml_lock(namespace):
+        with open(config_path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
     logging.info(f"Wrote agent config to {config_path}")
 
 
 def handle_create_data_product(payload: Dict[str, Any]):
     """Handler for creating a data product."""
     logging.info("Creating data product")
-    response_data = json.loads(payload.get("response", "{}"))
+    try:
+        response_data = json.loads(payload.get("response") or "{}")
+    except (json.JSONDecodeError, TypeError):
+        response_data = {}
+    if not isinstance(response_data, dict):
+        response_data = {}
     data_product_id = response_data.get("id")
 
     if not data_product_id:
@@ -325,28 +344,34 @@ def handle_create_data_product(payload: Dict[str, Any]):
     }
 
 
-def handle_approve_link(provider_dp_id: str, dataset_id: str, payload: Dict[str, Any]):
+def handle_approve_link(
+    provider_dp_id: str, output_port_id: str, payload: Dict[str, Any]
+):
     """Handler for approving a data product input port link."""
     logging.info(
-        f"Approving link: provider_dp_id={provider_dp_id}, dataset_id={dataset_id}"
+        f"Approving link: provider_dp_id={provider_dp_id}, output_port_id={output_port_id}"
     )
 
-    # Extract consumer data product ID from payload
-    response_data = json.loads(payload.get("response", "{}"))
-    consumer_data_product_id = response_data.get("consumer_data_product_id")
-
-    if not consumer_data_product_id:
-        # Fall back: fetch the dataset and look for the consumer
-        try:
-            ds_response = requests.get(f"{portal_url}/api/v2/datasets/{dataset_id}")
-            ds_response.raise_for_status()
-            ds_data = ds_response.json()
-            # Try to extract from links
-            links = ds_data.get("data_output_links", [])
-            if links:
-                consumer_data_product_id = links[0].get("consumer_data_product_id")
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to fetch dataset {dataset_id}: {e}")
+    # The approve endpoint returns None, so response is empty — look up approved
+    # input ports directly from the portal instead.
+    consumer_data_product_id = None
+    try:
+        ip_response = requests.get(
+            f"{portal_url}/api/v2/data_products/{provider_dp_id}"
+            f"/output_ports/{output_port_id}/input_ports"
+        )
+        ip_response.raise_for_status()
+        input_ports = ip_response.json().get("input_ports", [])
+        # Pick the most recently approved link
+        approved = [ip for ip in input_ports if ip.get("status") == "approved"]
+        if approved:
+            # Sort by requested_on descending and take the latest
+            approved.sort(key=lambda x: x.get("requested_on", ""), reverse=True)
+            consumer_data_product_id = approved[0].get("data_product_id")
+    except requests.exceptions.RequestException as e:
+        logging.error(
+            f"Failed to fetch input ports for output port {output_port_id}: {e}"
+        )
 
     if not consumer_data_product_id:
         logging.warning(
@@ -355,7 +380,7 @@ def handle_approve_link(provider_dp_id: str, dataset_id: str, payload: Dict[str,
         return {
             "status": "success",
             "action": "approve_link",
-            "note": "no consumer found",
+            "note": "no approved consumer found",
         }
 
     # Get provider and consumer namespaces
@@ -397,19 +422,20 @@ def handle_approve_link(provider_dp_id: str, dataset_id: str, payload: Dict[str,
     # Update consumer agent config to include provider OSI file
     config_path = os.path.join(agent_configs_path, f"{consumer_namespace}.yml")
     if os.path.exists(config_path):
-        with open(config_path) as f:
-            config = yaml.safe_load(f)
+        with get_yaml_lock(consumer_namespace):
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
 
-        provider_osi = f"/products/{provider_namespace}/osi.yml"
-        osi_files = config.get("osi_files", [])
-        if provider_osi not in osi_files:
-            osi_files.append(provider_osi)
-            config["osi_files"] = osi_files
-            with open(config_path, "w") as f:
-                yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
-            logging.info(
-                f"Updated agent config for {consumer_namespace} with {provider_osi}"
-            )
+            provider_osi = f"/products/{provider_namespace}/osi.yml"
+            osi_files = config.get("osi_files", [])
+            if provider_osi not in osi_files:
+                osi_files.append(provider_osi)
+                config["osi_files"] = osi_files
+                with open(config_path, "w") as f:
+                    yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+                logging.info(
+                    f"Updated agent config for {consumer_namespace} with {provider_osi}"
+                )
     else:
         logging.warning(
             f"Agent config not found for consumer {consumer_namespace}: {config_path}"
@@ -423,6 +449,152 @@ def handle_approve_link(provider_dp_id: str, dataset_id: str, payload: Dict[str,
     }
 
 
+def handle_link_input_ports(consumer_dp_id: str, payload: Dict[str, Any]):
+    """Handler for POST /api/v2/data_products/{uuid}/link_input_ports.
+
+    Fires when a consumer data product links to output ports. Publicly-accessible
+    ports are auto-approved immediately, so we iterate the returned link IDs and
+    grant DB access + update the consumer agent YAML for every approved link.
+    """
+    logging.info(f"Handling link_input_ports for consumer {consumer_dp_id}")
+
+    # Parse the link association IDs from the webhook response
+    try:
+        response_data = json.loads(payload.get("response") or "{}")
+    except (json.JSONDecodeError, TypeError):
+        response_data = {}
+    if not isinstance(response_data, dict):
+        response_data = {}
+    new_link_ids = set(response_data.get("input_port_links", []))
+
+    if not new_link_ids:
+        logging.info("No input_port_links in response, nothing to do")
+        return {"status": "success", "action": "link_input_ports", "note": "no links"}
+
+    # Get consumer namespace
+    try:
+        consumer_resp = requests.get(
+            f"{portal_url}/api/v2/data_products/{consumer_dp_id}"
+        )
+        consumer_resp.raise_for_status()
+        consumer_namespace = consumer_resp.json().get("namespace")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to fetch consumer data product {consumer_dp_id}: {e}")
+        return {"status": "error", "message": str(e)}
+
+    consumer_schema = consumer_namespace.replace("-", "_")
+    consumer_user = f"{consumer_schema}_user"
+
+    # Get all input port associations for this consumer
+    try:
+        ip_resp = requests.get(
+            f"{portal_url}/api/v2/data_products/{consumer_dp_id}/input_ports"
+        )
+        ip_resp.raise_for_status()
+        all_input_ports = ip_resp.json().get("input_ports", [])
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to fetch input ports for {consumer_dp_id}: {e}")
+        return {"status": "error", "message": str(e)}
+
+    # Filter to only the newly linked AND approved ports
+    approved_links = [
+        ip
+        for ip in all_input_ports
+        if str(ip.get("id")) in new_link_ids and ip.get("status") == "approved"
+    ]
+
+    if not approved_links:
+        logging.info(
+            f"None of the {len(new_link_ids)} new links are approved yet — "
+            "likely pending manual approval"
+        )
+        return {
+            "status": "success",
+            "action": "link_input_ports",
+            "note": "no approved links",
+        }
+
+    # Resolve provider namespaces and grant DB access (outside the lock)
+    _cp = os.path.join(agent_configs_path, f"{consumer_namespace}.yml")
+    config_path: str | None = _cp if os.path.exists(_cp) else None
+    if config_path is None:
+        logging.warning(
+            f"Agent config not found for {consumer_namespace}; skipping YAML update"
+        )
+
+    granted_providers = []
+    for link in approved_links:
+        provider_dp_id = link.get("input_port", {}).get("data_product_id")
+        if not provider_dp_id:
+            logging.warning(
+                f"Could not extract provider DP id from link {link.get('id')}"
+            )
+            continue
+
+        # Get provider namespace
+        try:
+            provider_resp = requests.get(
+                f"{portal_url}/api/v2/data_products/{provider_dp_id}"
+            )
+            provider_resp.raise_for_status()
+            provider_namespace = provider_resp.json().get("namespace")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to fetch provider DP {provider_dp_id}: {e}")
+            continue
+
+        provider_schema = provider_namespace.replace("-", "_")
+
+        # Grant consumer user access to provider schema
+        try:
+            conn = get_db_connection()
+            conn.autocommit = True
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"GRANT USAGE ON SCHEMA {provider_schema} TO {consumer_user}"
+                )
+                cur.execute(
+                    f"GRANT SELECT ON ALL TABLES IN SCHEMA {provider_schema}"
+                    f" TO {consumer_user}"
+                )
+            conn.close()
+            logging.info(f"Granted {consumer_user} access to schema {provider_schema}")
+        except Exception as e:
+            logging.error(f"Failed to grant DB access for {provider_schema}: {e}")
+            continue
+
+        granted_providers.append(provider_namespace)
+
+    # Update agent YAML under lock so concurrent events don't clobber each other
+    processed = []
+    if config_path and granted_providers:
+        with get_yaml_lock(consumer_namespace):
+            with open(config_path) as f:
+                config = yaml.safe_load(f) or {}
+
+            osi_files = config.get("osi_files", [])
+            for provider_namespace in granted_providers:
+                provider_osi = f"/products/{provider_namespace}/osi.yml"
+                if provider_osi not in osi_files:
+                    osi_files.append(provider_osi)
+                    processed.append(provider_namespace)
+
+            if processed:
+                config["osi_files"] = osi_files
+                with open(config_path, "w") as f:
+                    yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+                logging.info(
+                    f"Updated agent config for {consumer_namespace}: added OSI files"
+                    f" for {processed}"
+                )
+
+    return {
+        "status": "success",
+        "action": "link_input_ports",
+        "consumer": consumer_namespace,
+        "providers_granted": processed,
+    }
+
+
 def handle_update_data_product(product_id: str, payload: Dict[str, Any]):
     logging.info(f"Updating data product {product_id}")
     return {
@@ -430,6 +602,43 @@ def handle_update_data_product(product_id: str, payload: Dict[str, Any]):
         "action": "update_data_product",
         "product_id": product_id,
     }
+
+
+def handle_update_about(product_id: str, payload: Dict[str, Any]):
+    """Handler for updating a data product's about text — re-syncs agent YAML instructions."""
+    logging.info(f"Updating about for data product {product_id}")
+
+    try:
+        response = requests.get(f"{portal_url}/api/v2/data_products/{product_id}")
+        response.raise_for_status()
+        dp = response.json()
+        namespace = dp.get("namespace")
+        about = dp.get("about", "")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to get data product details: {e}")
+        return {"status": "error", "message": str(e)}
+
+    config_path = os.path.join(agent_configs_path, f"{namespace}.yml")
+    if not os.path.exists(config_path):
+        logging.info(f"No agent config found for {namespace}, skipping about sync")
+        return {
+            "status": "success",
+            "action": "update_about",
+            "note": "no agent config",
+        }
+
+    instructions = re.sub(r"<[^>]+>", " ", about or "").strip()
+    instructions = re.sub(r"\s+", " ", instructions)
+
+    with get_yaml_lock(namespace):
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+        config["instructions"] = instructions
+        with open(config_path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+
+    logging.info(f"Synced agent instructions from updated about for {namespace}")
+    return {"status": "success", "action": "update_about", "namespace": namespace}
 
 
 def handle_delete_data_product(product_id: str, payload: Dict[str, Any]):
@@ -492,6 +701,12 @@ router = Router()
 logging.info("Registering routes...")
 router.add_route("POST", "/api/v2/data_products", handle_create_data_product)
 router.add_route("PUT", "/api/v2/data_products/{uuid}", handle_update_data_product)
+router.add_route("PUT", "/api/v2/data_products/{uuid}/about", handle_update_about)
+router.add_route(
+    "POST",
+    "/api/v2/data_products/{uuid}/link_input_ports",
+    handle_link_input_ports,
+)
 router.add_route(
     "POST",
     "/api/v2/data_products/{uuid}/output_ports/{uuid}/input_ports/approve",
