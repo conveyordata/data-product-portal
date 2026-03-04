@@ -3,15 +3,11 @@ import {
     CalendarOutlined,
     CheckOutlined,
     CloseOutlined,
-    DeploymentUnitOutlined,
     FileTextOutlined,
     InfoCircleOutlined,
-    LockOutlined,
-    ProductOutlined,
-    ToolOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Divider, Flex, Modal, Space, Tag, Typography } from 'antd';
+import { Button, Card, Divider, Flex, Modal, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
@@ -20,6 +16,7 @@ import {
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
+import { DataOutputOutlined, DataProductOutlined, DatasetOutlined } from '../icons';
 import styles from './requests.module.scss';
 
 type Props = {
@@ -65,13 +62,13 @@ function getRequestDetails(
             source: {
                 name: action.data_product.name,
                 type: t('Data Product'),
-                icon: <ProductOutlined />,
+                icon: <DataProductOutlined />,
                 badge: t('Requesting Access'),
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
-                icon: <DeploymentUnitOutlined />,
+                icon: <DatasetOutlined />,
                 badge: t('Your Resource'),
             },
             accessType: t('READ ACCESS'),
@@ -90,13 +87,13 @@ function getRequestDetails(
             source: {
                 name: action.technical_asset.name,
                 type: t('Technical Asset'),
-                icon: <ToolOutlined />,
+                icon: <DataOutputOutlined />,
                 badge: t('Requesting Inclusion'),
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
-                icon: <DeploymentUnitOutlined />,
+                icon: <DatasetOutlined />,
                 badge: t('Your Resource'),
             },
             accessType: t('INCLUDE'),
@@ -122,7 +119,7 @@ function getRequestDetails(
             target: {
                 name: action.data_product.name,
                 type: t('Data Product'),
-                icon: <ProductOutlined />,
+                icon: <DataProductOutlined />,
                 badge: t('Your Resource'),
             },
             accessType: t('ROLE: {{roleName}}', { roleName: roleName.toUpperCase() }),
@@ -181,7 +178,6 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             width={700}
             footer={
                 <Space>
-                    <Button onClick={onClose}>{t('Cancel')}</Button>
                     <Button danger icon={<CloseOutlined />} onClick={handleReject}>
                         {t('Decline')}
                     </Button>
@@ -193,16 +189,6 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
         >
             <Flex vertical gap="middle">
                 {/* Access Flow Visualization */}
-                <div>
-                    <Typography.Title level={5}>
-                        <LockOutlined /> {t('Access Flow')}
-                    </Typography.Title>
-                    <Alert
-                        title={t('Review carefully: You are granting access to your resource listed on the right.')}
-                        type="warning"
-                        showIcon
-                    />
-                </div>
                 <Flex align="center" justify="space-between" gap="middle">
                     {/* Source Card - Thing Requesting Access */}
                     <Card size="small" className={styles.accessCard} variant="outlined">
