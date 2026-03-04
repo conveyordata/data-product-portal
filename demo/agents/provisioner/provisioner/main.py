@@ -102,11 +102,12 @@ def create_technical_asset(
     service_id: str,
     configuration: Dict[str, Any],
     result: str,
+    namespace: str | None = None,
 ) -> str:
     """Create a technical asset and activate it. Returns the asset ID."""
     payload: Dict[str, Any] = {
         "name": data_product_details.get("name"),
-        "namespace": data_product_details.get("namespace"),
+        "namespace": namespace or data_product_details.get("namespace"),
         "description": data_product_details.get("description"),
         "tag_ids": [],
         "status": "active",
@@ -228,6 +229,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
                     "file_path": f"/products/{namespace}/osi.yml",
                 },
                 result=f"{name} Semantic Model",
+                namespace=f"{namespace}-semantic",
             )
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to create OSI technical asset: {e}")

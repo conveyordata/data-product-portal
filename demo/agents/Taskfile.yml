@@ -12,4 +12,4 @@ tasks:
   create-products:
     desc: Create the 3 demo data products via portal API (triggers provisioner)
     cmds:
-      - python setup/create_products.py
+      - uv run setup/create_products.py

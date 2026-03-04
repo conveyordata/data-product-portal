@@ -1,3 +1,7 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["requests"]
+# ///
 """
 Creates the 3 SwiftGear demo data products via the portal API.
 Run this after `docker compose up -d` and all services are healthy.
@@ -47,6 +51,22 @@ def get_domain_id(name: str) -> str:
     return match["id"]
 
 
+def get_lifecycle_id(name: str) -> str:
+    response = requests.get(
+        f"{PORTAL_URL}/api/v2/configuration/data_product_lifecycles"
+    )
+    response.raise_for_status()
+    lifecycles = response.json().get("data_product_life_cycles", [])
+    match = next((lc for lc in lifecycles if lc["name"] == name), None)
+    if not match:
+        raise ValueError(f"Lifecycle '{name}' not found")
+    return match["id"]
+
+
+# john.scientist is the admin user seeded in portal_seed.sql
+OWNER_ID = "b72fca38-17ff-4259-a075-5aaa5973343c"
+
+
 def create_data_product(
     name: str,
     namespace: str,
@@ -57,6 +77,7 @@ def create_data_product(
 ):
     type_id = get_type_id(type_name)
     domain_id = get_domain_id(domain_name)
+    lifecycle_id = get_lifecycle_id("Draft")
 
     payload = {
         "name": name,
@@ -65,6 +86,8 @@ def create_data_product(
         "about": about,
         "type_id": type_id,
         "domain_id": domain_id,
+        "lifecycle_id": lifecycle_id,
+        "owners": [OWNER_ID],
         "tag_ids": [],
     }
 

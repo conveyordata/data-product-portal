@@ -46,6 +46,8 @@ services:
 
   agent:
     build: ./agent
+    env_file:
+      - .env.secret
     volumes:
       - agent_configs:/agent_configs
       - ./products:/products

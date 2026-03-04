@@ -17,11 +17,26 @@ skill_path = os.path.abspath(
 )
 
 
+def make_fallback_agent() -> Agent:
+    return Agent(
+        name="Portal Assistant",
+        description="General assistant for the Data Product Portal demo.",
+        instructions=(
+            "You are a helpful assistant for the SwiftGear Data Product Portal demo. "
+            "Data product agents are provisioned automatically when data products are created in the portal. "
+            "If no data product agents are available yet, let the user know they should run `task create-products` first."
+        ),
+        model=Claude(id="claude-sonnet-4-5"),
+        add_datetime_to_context=True,
+        markdown=True,
+    )
+
+
 def load_dynamic_agents():
     agents = []
 
     if not os.path.isdir(yaml_dir):
-        return agents
+        return [make_fallback_agent()]
 
     for filename in os.listdir(yaml_dir):
         if not filename.endswith(".yml"):
@@ -42,7 +57,8 @@ def load_dynamic_agents():
             tools=[
                 MCPTools(
                     server_params=StdioServerParameters(
-                        command="mcp-server-postgres",
+                        command="toolbox",
+                        args=["--prebuilt", "postgres", "--stdio"],
                         env={
                             "POSTGRES_HOST": postgres_cfg.get("host", "localhost"),
                             "POSTGRES_PORT": str(postgres_cfg.get("port", 5432)),
@@ -62,7 +78,7 @@ def load_dynamic_agents():
         )
         agents.append(agent)
 
-    return agents
+    return agents or [make_fallback_agent()]
 
 
 agent_os = AgentOS(agents=load_dynamic_agents(), tracing=True)
