@@ -4,6 +4,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.configuration.platform_service_configurations.service import (
+    PlatformServiceConfigurationService,
+)
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.authorization import Authorization
 from app.core.authz.authorization import AuthorizationAction as Action
@@ -20,9 +23,6 @@ from app.data_output_configuration.schema_response import (
 )
 from app.data_output_configuration.service import PluginService
 from app.database.database import get_db_session
-from app.platform_service_configurations.service import (
-    PlatformServiceConfigurationService,
-)
 from app.users.schema import User
 
 router = APIRouter(
