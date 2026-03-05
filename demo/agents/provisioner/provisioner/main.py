@@ -167,6 +167,7 @@ def write_agent_config(
         "description": description,
         "instructions": instructions,
         "osi_files": [f"/products/{namespace}/osi.yml"],
+        "allowed_schemas": [schema_name],
         "postgres": {
             "host": demo_db_host,
             "port": demo_db_port,
@@ -431,11 +432,17 @@ def handle_approve_link(
             if provider_osi not in osi_files:
                 osi_files.append(provider_osi)
                 config["osi_files"] = osi_files
-                with open(config_path, "w") as f:
-                    yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
-                logging.info(
-                    f"Updated agent config for {consumer_namespace} with {provider_osi}"
-                )
+
+            schemas = config.get("allowed_schemas", [])
+            if provider_schema not in schemas:
+                schemas.append(provider_schema)
+                config["allowed_schemas"] = schemas
+
+            with open(config_path, "w") as f:
+                yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+            logging.info(
+                f"Updated agent config for {consumer_namespace} with {provider_osi}"
+            )
     else:
         logging.warning(
             f"Agent config not found for consumer {consumer_namespace}: {config_path}"
@@ -572,14 +579,19 @@ def handle_link_input_ports(consumer_dp_id: str, payload: Dict[str, Any]):
                 config = yaml.safe_load(f) or {}
 
             osi_files = config.get("osi_files", [])
+            schemas = config.get("allowed_schemas", [])
             for provider_namespace in granted_providers:
                 provider_osi = f"/products/{provider_namespace}/osi.yml"
                 if provider_osi not in osi_files:
                     osi_files.append(provider_osi)
                     processed.append(provider_namespace)
+                provider_schema = provider_namespace.replace("-", "_")
+                if provider_schema not in schemas:
+                    schemas.append(provider_schema)
 
             if processed:
                 config["osi_files"] = osi_files
+                config["allowed_schemas"] = schemas
                 with open(config_path, "w") as f:
                     yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
                 logging.info(
