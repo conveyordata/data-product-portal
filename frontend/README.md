@@ -9,6 +9,7 @@
 ## Prerequisites
 
 ### Configuration (config.local.js file)
+
 Both for local execution and local development, you need to specify some configuration arguments.
 All configuration values for this project are read from a `config.local.js` file in the frontend folder.
 You can use the following template to get started:
@@ -82,20 +83,19 @@ npm run dev
 ```
 
 ## Linting and Formatting
+
 This project has been set up using [biome](https://biomejs.dev) for linting and formatting.
 The configuration file is called [biome.json](biome.json).
 For ease of use we advise you to configure your IDE to use the above-mentioned files automatically on format or save actions.
-If you want manual linting/formatting, you can always execute the commands below.
+If you want manual linting/formatting, you can always execute the command below.
 
 ```bash
-# To detect issues
-npm run check
-
 # To detect issues and fix them automatically where possible
-npm run check:fix
+npm run biome
 ```
 
 ## Translations
+
 Static frontend translations are managed by using [i18next](https://www.i18next.com/).
 Currently, the only language available is English, but this can be extended over time.
 The English value of the translatable labels is deliberately being used as the translation key for ease of use.
@@ -105,6 +105,7 @@ The English value of the translatable labels is deliberately being used as the t
 #### Using the useTranslation hook
 
 Use the `t` function from the useTranslation hook in your components or hooks:
+
 ```jsx
 import { useTranslation } from 'react-i18next';
 
@@ -319,6 +320,7 @@ the [react-i18next documentation](https://react.i18next.com/getting-started).
 
 
 ## Data Tracking
+
 This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default.
 
 To enable tracking and help us improve the Data Product Portal, the config value `POSTHOG_ENABLED` must be set to true in the frontend configuration. This can be done in one of two ways:

@@ -8,7 +8,7 @@ export default function Justification({ justification }: Props) {
     const { t } = useTranslation();
     return (
         <Typography.Paragraph
-            style={{ whiteSpace: 'pre-wrap' }}
+            style={{ whiteSpace: 'pre-wrap', color: 'inherit', marginBottom: 0 }}
             ellipsis={{
                 rows: 5,
                 expandable: true,
