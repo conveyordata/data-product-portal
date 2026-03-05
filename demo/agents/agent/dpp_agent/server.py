@@ -24,6 +24,21 @@ def build_instructions(config: dict) -> str:
     osi_files = config.get("osi_files", [])
     osi_file_list = "\n".join(f"  - {f}" for f in osi_files)
 
+    allowed_schemas = config.get("allowed_schemas", [])
+    if allowed_schemas:
+        schema_list = ", ".join(f"`{s}`" for s in allowed_schemas)
+        schema_restriction = (
+            f"\n## Database Access\n\n"
+            f"You have direct database access to **only** these PostgreSQL schemas: {schema_list}. "
+            f"You cannot query any other schema — not even to list tables or check existence.\n\n"
+            f"**Important:** your OSI semantic model files may reference other schemas as cross-domain "
+            f"relationships. Those references are documentation metadata only. Do not describe those "
+            f"schemas as ones you 'can see', 'have access to', or 'can query'. If asked what schemas "
+            f"or tables you can query, list only the schemas above.\n"
+        )
+    else:
+        schema_restriction = ""
+
     return f"""You are the **{name}**, a specialized AI data expert embedded in SwiftGear's Data Product Portal.
 
 ## Identity & Expertise
@@ -46,7 +61,7 @@ Your models are located at:
 ## Business Context
 
 {product_context}
-
+{schema_restriction}
 ## Mandatory Protocol for ALL Data Questions
 
 For any question involving data, metrics, SQL, tables, analysis, or anything numerical:
@@ -66,6 +81,46 @@ Efficiency tip: read all relevant OSI files in a single batch call rather than o
 - For identity questions: be specific about your domain, tables, metrics, and any known data quirks.
 - Never guess column names or metric formulas — always derive them from the semantic model.
 """
+
+
+def make_admin_agent() -> Agent:
+    return Agent(
+        name="Generic Database Agent",
+        description="Full-access database agent for ad-hoc queries across all schemas.",
+        instructions=(
+            "You are a database assistant with full admin access to the PostgreSQL database. "
+            "Use the MCP postgres tools to answer questions about any table or schema."
+        ),
+        model=Claude(id="claude-sonnet-4-5"),
+        tools=[
+            MCPTools(
+                server_params=StdioServerParameters(
+                    command="toolbox",
+                    args=["--prebuilt", "postgres", "--stdio"],
+                    env={
+                        "POSTGRES_HOST": os.environ.get(
+                            "PROV_DEMO_DB_HOST", "postgresql-demo"
+                        ),
+                        "POSTGRES_PORT": os.environ.get("PROV_DEMO_DB_PORT", "5432"),
+                        "POSTGRES_DATABASE": os.environ.get(
+                            "PROV_DEMO_DB_NAME", "dpp_demo"
+                        ),
+                        "POSTGRES_USER": os.environ.get(
+                            "PROV_DEMO_DB_ADMIN_USER", "postgres"
+                        ),
+                        "POSTGRES_PASSWORD": os.environ.get(
+                            "PROV_DEMO_DB_ADMIN_PASSWORD", "abc123"
+                        ),
+                    },
+                )
+            ),
+        ],
+        db=SqliteDb(db_file="agno_generic_database_agent.db"),
+        add_datetime_to_context=True,
+        add_history_to_context=False,
+        num_history_runs=0,
+        markdown=True,
+    )
 
 
 def make_fallback_agent() -> Agent:
@@ -129,7 +184,7 @@ def load_dynamic_agents():
         )
         agents.append(agent)
 
-    return agents or [make_fallback_agent()]
+    return [make_admin_agent()] + (agents or [make_fallback_agent()])
 
 
 agent_os = AgentOS(agents=load_dynamic_agents(), tracing=True)

@@ -29,4 +29,4 @@ class AgnoPlugin(AssetProviderPlugin):
         cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
     ) -> str:
         data_product = db.get(DataProductModel, id)
-        return f"https://os.agno.com/chat?type=agent&id={data_product.namespace}"
+        return f"https://os.agno.com/chat?type=agent&id={data_product.namespace}-agent"
