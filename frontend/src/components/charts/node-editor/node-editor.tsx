@@ -44,32 +44,32 @@ export function NodeEditor({
         return <LoadingSpinner />;
     }
     return (
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onConnect={onConnect}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onNodeClick={onNodeClick}
-                onPaneClick={onPaneClick}
-                fitView
-                onInit={(instance) => instance.fitView(defaultFitViewOptions)}
-                minZoom={MIN_ZOOM}
-                maxZoom={MAX_ZOOM}
-                zoomOnPinch
-                zoomOnDoubleClick
-                connectionLineType={ConnectionLineType.SmoothStep}
-                fitViewOptions={defaultFitViewOptions}
-                className={styles.nodeEditor}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                elevateNodesOnSelect
-                nodesFocusable
-                attributionPosition={'bottom-left'}
-                {...editorProps}
-            >
-                <Background />
-                <Controls position={'top-right'} showInteractive={false} fitViewOptions={defaultFitViewOptions} />
-            </ReactFlow>
+        <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onConnect={onConnect}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodeClick={onNodeClick}
+            onPaneClick={onPaneClick}
+            fitView
+            onInit={(instance) => instance.fitView(defaultFitViewOptions)}
+            minZoom={MIN_ZOOM}
+            maxZoom={MAX_ZOOM}
+            zoomOnPinch
+            zoomOnDoubleClick
+            connectionLineType={ConnectionLineType.SmoothStep}
+            fitViewOptions={defaultFitViewOptions}
+            className={styles.nodeEditor}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            elevateNodesOnSelect
+            nodesFocusable
+            attributionPosition={'bottom-left'}
+            {...editorProps}
+        >
+            <Background />
+            <Controls position={'top-right'} showInteractive={false} fitViewOptions={defaultFitViewOptions} />
+        </ReactFlow>
     );
 }
