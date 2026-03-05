@@ -1,6 +1,8 @@
 import factory
 
-from app.platform_service_configurations.model import PlatformServiceConfiguration
+from app.configuration.platform_service_configurations.model import (
+    PlatformServiceConfiguration,
+)
 
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory

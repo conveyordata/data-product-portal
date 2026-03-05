@@ -4,10 +4,12 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.platform_service_configurations.model import (
+from app.configuration.platform_service_configurations.model import (
     PlatformServiceConfiguration as PlatformServiceConfigurationModel,
 )
-from app.platform_service_configurations.schema import PlatformServiceConfiguration
+from app.configuration.platform_service_configurations.schema import (
+    PlatformServiceConfiguration,
+)
 
 
 class PlatformServiceConfigurationService:
