@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr-b" markerWidth="3" markerHeight="3" refX="1.5" refY="1.5" orient="auto">
+      <polygon points="0,0 3,1.5 0,3" fill="currentColor"/>
+    </marker>
+  </defs>
+  <!-- Rounded rect border -->
+  <rect x="1.5" y="1.5" width="29" height="29" rx="4" fill="transparent" stroke="currentColor" stroke-width="1.5"/>
+  <!-- Blue hexagon (flat-top, scaled down to fit border) -->
+  <polygon points="9,12.3 23,12.3 25,16 23,19.7 9,19.7 7,16"
+           fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- Dots at hexagon vertices -->
+  <circle cx="9" cy="12.3" r="1.4" fill="currentColor"/>
+  <circle cx="23" cy="12.3" r="1.4" fill="currentColor"/>
+  <circle cx="25" cy="16" r="1.4" fill="currentColor"/>
+  <circle cx="23" cy="19.7" r="1.4" fill="currentColor"/>
+  <circle cx="9" cy="19.7" r="1.4" fill="currentColor"/>
+  <circle cx="7" cy="16" r="1.4" fill="currentColor"/>
+  <!-- Center hub -->
+  <circle cx="16" cy="16" r="1.8" fill="currentColor"/>
+  <!-- 8 spokes with inward arrows -->
+  <line x1="16" y1="10.5" x2="16" y2="14.0" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+  <line x1="20.0" y1="12.0" x2="17.8" y2="14.2" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+  <line x1="21.5" y1="16" x2="18.0" y2="16" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+  <line x1="20.0" y1="20.0" x2="17.8" y2="17.8" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+  <line x1="16" y1="21.5" x2="16" y2="18.0" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+  <line x1="12.0" y1="20.0" x2="14.2" y2="17.8" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+  <line x1="10.5" y1="16" x2="14.0" y2="16" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+  <line x1="12.0" y1="12.0" x2="14.2" y2="14.2" stroke="currentColor" stroke-width="1.0" marker-end="url(#arr-b)"/>
+</svg>
