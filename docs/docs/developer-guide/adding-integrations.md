@@ -356,9 +356,10 @@ Understanding the underlying data model helps when debugging integration issues 
 |---|---|
 | `platforms` | Top-level platform identity (e.g. `AWS`, `PostgreSQL`, `OSI`) |
 | `platform_services` | Services offered by a platform (e.g. `S3`, `Glue`). Holds `result_string_template` and `technical_info_template`. |
-| `platform_service_configs` | Available options for a service (e.g. the list of S3 bucket names). Required for every service, even if empty. |
+| `platform_service_configs` | Available options for a service (e.g. the list of S3 bucket names). Required for every service, even if empty. The names defined here are used to render technical asset forms via `get_platform_options`, and are often linked by an `"identifier"` field in `env_platform_service_configs`. |
 | `environments` | Deployment environments (e.g. `development`, `production`) |
-| `env_platform_service_configs` | Environment-specific connection details for a platform/service combination (e.g. host, credentials) |
+| `env_platform_configs` | Environment-specific details at the platform level (e.g. AWS account details, Snowflake credentials). |
+| `env_platform_service_configs` | Environment-specific connection details for a platform/service combination. Typically used alongside `platform_service_configs` — the entries here are matched by `"identifier"` in JSON to the options listed there. The correct config is looked up in each plugin's `technical_info` method. |
 | `data_output_configurations` | Polymorphic base table for technical asset configurations. Each plugin has its own child table joined on `id`. |
 | `data_outputs` | The technical asset record itself — links a data product to a `platform`, `service`, and `data_output_configurations` row |
 
@@ -371,7 +372,7 @@ Understanding the underlying data model helps when debugging integration issues 
 
 ### `has_environments` Flag
 
-The `has_environments` flag on `PlatformMetadata` controls whether the plugin needs environment-specific platform configuration:
+The `has_environments` flag on `PlatformMetadata` controls two things: whether the plugin needs environment-specific platform configuration, and whether the environment selector dropdown is shown on the platform tile in the UI.
 
 | `has_environments` | `env_platform_service_configs` needed? | `platform_service_configs` needed? |
 |---|---|---|
