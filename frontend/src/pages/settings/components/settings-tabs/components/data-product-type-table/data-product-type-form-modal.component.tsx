@@ -35,7 +35,7 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
     const [editDataProductType] = useUpdateDataProductTypeMutation();
 
     const createText: DataProductTypeFormText = {
-        title: t('Create New Type'),
+        title: t('Create new Type'),
         successMessage: t('Type created successfully'),
         errorMessage: t('Failed to create Type'),
         submitButtonText: t('Create'),

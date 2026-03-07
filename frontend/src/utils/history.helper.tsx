@@ -543,17 +543,17 @@ function getEventTypeDisplayTranslation(
             return t('EventDataProductSettingUpdated', { entity, entity_type });
 
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
-            return t('EventDataProductRoleAssignmentCreated', { entity, entity_type });
+            return t('EventDataProductRoleAssignmentCreated', { entity });
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED:
-            return t('EventDataProductRoleAssignmentUpdated', { entity, entity_type });
+            return t('EventDataProductRoleAssignmentUpdated', { entity });
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED:
-            return t('EventDataProductRoleAssignmentRemoved', { entity, entity_type });
+            return t('EventDataProductRoleAssignmentRemoved', { entity });
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED:
-            return t('EventDataProductRoleAssignmentRequested', { entity, entity_type });
+            return t('EventDataProductRoleAssignmentRequested', { entity });
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED:
-            return t('EventDataProductRoleAssignmentApproved', { entity, entity_type });
+            return t('EventDataProductRoleAssignmentApproved', { entity });
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED:
-            return t('EventDataProductRoleAssignmentDenied', { entity, entity_type });
+            return t('EventDataProductRoleAssignmentDenied', { entity });
 
         case EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED:
             return t('EventDataProductDatasetLinkRequested', { entity, entity_type });
@@ -565,17 +565,17 @@ function getEventTypeDisplayTranslation(
             return t('EventDataProductDatasetLinkRemoved', { entity, entity_type });
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
-            return t('EventDatasetRoleAssignmentCreated', { entity, entity_type });
+            return t('EventDatasetRoleAssignmentCreated', { entity });
         case EventType.DATASET_ROLE_ASSIGNMENT_UPDATED:
-            return t('EventDatasetRoleAssignmentUpdated', { entity, entity_type });
+            return t('EventDatasetRoleAssignmentUpdated', { entity });
         case EventType.DATASET_ROLE_ASSIGNMENT_REMOVED:
-            return t('EventDatasetRoleAssignmentRemoved', { entity, entity_type });
+            return t('EventDatasetRoleAssignmentRemoved', { entity });
         case EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED:
-            return t('EventDatasetRoleAssignmentRequested', { entity, entity_type });
+            return t('EventDatasetRoleAssignmentRequested', { entity });
         case EventType.DATASET_ROLE_ASSIGNMENT_APPROVED:
-            return t('EventDatasetRoleAssignmentApproved', { entity, entity_type });
+            return t('EventDatasetRoleAssignmentApproved', { entity });
         case EventType.DATASET_ROLE_ASSIGNMENT_DENIED:
-            return t('EventDatasetRoleAssignmentDenied', { entity, entity_type });
+            return t('EventDatasetRoleAssignmentDenied', { entity });
 
         case EventType.DATASET_CREATED:
             return t('EventDatasetCreated', { entity, entity_type });

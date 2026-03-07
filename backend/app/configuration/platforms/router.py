@@ -4,6 +4,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.configuration.platform_service_configurations.schema import (
+    GetAllPlatformServiceConfigurationsResponse,
+    PlatformServiceConfiguration,
+)
+from app.configuration.platform_service_configurations.service import (
+    PlatformServiceConfigurationService,
+)
 from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.platforms.platform_services.service import PlatformServiceService
 from app.configuration.platforms.schema_response import (
@@ -11,13 +18,6 @@ from app.configuration.platforms.schema_response import (
     Platform,
 )
 from app.database.database import get_db_session
-from app.platform_service_configurations.schema import (
-    GetAllPlatformServiceConfigurationsResponse,
-    PlatformServiceConfiguration,
-)
-from app.platform_service_configurations.service import (
-    PlatformServiceConfigurationService,
-)
 
 from .platform_services.schema_response import GetPlatformServicesResponse
 from .service import PlatformService as PlatformsService
