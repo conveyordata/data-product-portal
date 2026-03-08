@@ -113,7 +113,13 @@ FK_CONSTRAINTS = [
 
 
 def upgrade() -> None:
-    for constraint_name, source_table, source_col, target_table, target_col in FK_CONSTRAINTS:
+    for (
+        constraint_name,
+        source_table,
+        source_col,
+        target_table,
+        target_col,
+    ) in FK_CONSTRAINTS:
         op.drop_constraint(constraint_name, source_table, type_="foreignkey")
         op.create_foreign_key(
             constraint_name,
@@ -126,7 +132,13 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    for constraint_name, source_table, source_col, target_table, target_col in FK_CONSTRAINTS:
+    for (
+        constraint_name,
+        source_table,
+        source_col,
+        target_table,
+        target_col,
+    ) in FK_CONSTRAINTS:
         op.drop_constraint(constraint_name, source_table, type_="foreignkey")
         op.create_foreign_key(
             constraint_name,
