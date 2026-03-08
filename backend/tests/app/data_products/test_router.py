@@ -321,6 +321,34 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
+    def test_remove_data_product_with_tags(self, client, session):
+        """Regression test: deleting a data product with tags should cascade
+        delete the tag associations without FK violations."""
+        tag = TagFactory()
+        data_product = DataProductFactory(tags=[tag])
+        session.commit()
+
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        session.commit()
+
+        response = self.delete_data_product(client, data_product.id)
+        assert response.status_code == 200
+
+        # Tag itself should still exist, only the association is removed
+        from app.configuration.tags.model import Tag
+
+        remaining_tag = session.get(Tag, tag.id)
+        assert remaining_tag is not None
+
     def test_update_status_not_owner(self, client):
         data_product = DataProductFactory()
         response = self.update_data_product_status(
