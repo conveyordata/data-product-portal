@@ -8,6 +8,7 @@ from agno.db.sqlite import SqliteDb
 from agno.models.anthropic import Claude
 from agno.os import AgentOS
 from agno.team import Team
+from agno.team.mode import TeamMode
 from agno.tools.mcp import MCPTools
 from agno.skills import Skills, LocalSkills
 from agno.tools.file import FileTools
@@ -195,7 +196,7 @@ def make_data_team(agents: list[Agent]) -> Team:
             "A coordinated team of domain-specific data product agents for SwiftGear. "
             "Routes questions to the right specialist and synthesises cross-domain answers."
         ),
-        mode="route",
+        mode=TeamMode.route,
         model=Claude(id="claude-sonnet-4-5"),
         members=agents,
         instructions=(
