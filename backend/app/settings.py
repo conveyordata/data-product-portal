@@ -81,6 +81,7 @@ class Settings(BaseSettings):
         "ConveyorPlugin",
         "GlueTechnicalAssetConfiguration",
         "S3TechnicalAssetConfiguration",
+        "SnowflakeTechnicalAssetConfiguration",
     ]
 
 
