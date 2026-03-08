@@ -7,6 +7,7 @@ from agno.agent import Agent
 from agno.db.sqlite import SqliteDb
 from agno.models.anthropic import Claude
 from agno.os import AgentOS
+from agno.team import Team
 from agno.tools.mcp import MCPTools
 from agno.skills import Skills, LocalSkills
 from agno.tools.file import FileTools
@@ -187,5 +188,31 @@ def load_dynamic_agents():
     return [make_admin_agent()] + (agents or [make_fallback_agent()])
 
 
-agent_os = AgentOS(agents=load_dynamic_agents(), tracing=True)
+def make_data_team(agents: list[Agent]) -> Team:
+    return Team(
+        name="SwiftGear Data Team",
+        description=(
+            "A coordinated team of domain-specific data product agents for SwiftGear. "
+            "Routes questions to the right specialist and synthesises cross-domain answers."
+        ),
+        mode="route",
+        model=Claude(id="claude-sonnet-4-5"),
+        members=agents,
+        instructions=(
+            "You are the SwiftGear Data Team coordinator. "
+            "When a question touches a single data domain, delegate it directly to the relevant specialist agent. "
+            "When a question spans multiple domains, delegate sub-questions to each specialist and combine their answers into one coherent response. "
+            "Always cite which agent(s) provided the underlying data."
+        ),
+        markdown=True,
+        add_datetime_to_context=True,
+        show_members_responses=True,
+    )
+
+
+_dynamic_agents = load_dynamic_agents()
+_team_members = [a for a in _dynamic_agents if a.name != "Generic Database Agent"]
+_team = make_data_team(_team_members)
+
+agent_os = AgentOS(agents=_dynamic_agents, teams=[_team], tracing=True)
 app = agent_os.get_app()
