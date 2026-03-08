@@ -1,8 +1,8 @@
-"""Add CASCADE to foreign keys for delete operations
+"""add cascade deletes to foreign keys
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: 2cf5b5260cca
 Revises: 491c8783a7bc
-Create Date: 2026-03-08 12:00:00.000000
+Create Date: 2026-03-08 19:47:00.514598
 
 """
 
@@ -11,7 +11,7 @@ from typing import Sequence, Union
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "a1b2c3d4e5f6"
+revision: str = "2cf5b5260cca"
 down_revision: Union[str, None] = "491c8783a7bc"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
