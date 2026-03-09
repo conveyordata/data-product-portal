@@ -1,5 +1,4 @@
 import {
-    ArrowRightOutlined,
     CalendarOutlined,
     CheckOutlined,
     CloseOutlined,
@@ -7,7 +6,7 @@ import {
     InfoCircleOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Divider, Flex, Modal, Space, Tag, Typography } from 'antd';
+import { Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
@@ -33,6 +32,7 @@ type RequestDetails = {
     requestType: string;
     source: {
         name: string;
+        email: string;
         type: string;
         icon: React.ReactNode;
         badge?: string;
@@ -41,7 +41,6 @@ type RequestDetails = {
         name: string;
         type: string;
         icon: React.ReactNode;
-        badge: string;
     };
     accessType: string;
     justification: string;
@@ -61,17 +60,16 @@ function getRequestDetails(
             requestType: t('Output Port Access'),
             source: {
                 name: action.data_product.name,
+                email: action.requested_by.email,
                 type: t('Data Product'),
                 icon: <DataProductOutlined />,
-                badge: t('Requesting Access'),
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
                 icon: <DatasetOutlined />,
-                badge: t('Your Resource'),
             },
-            accessType: t('READ ACCESS'),
+            accessType: t('READ ONLY'),
             justification: action.justification || t('No justification provided'),
             hasJustification: true,
             requestedOn: action.requested_on,
@@ -86,15 +84,14 @@ function getRequestDetails(
             requestType: t('Technical Asset Inclusion'),
             source: {
                 name: action.technical_asset.name,
+                email: action.requested_by.email,
                 type: t('Technical Asset'),
                 icon: <DataOutputOutlined />,
-                badge: t('Requesting Inclusion'),
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
                 icon: <DatasetOutlined />,
-                badge: t('Your Resource'),
             },
             accessType: t('INCLUDE'),
             justification: '',
@@ -107,22 +104,21 @@ function getRequestDetails(
     if (action.pending_action_type === PendingRequestType_DataProductRoleAssignment) {
         const roleName = action.role ? action.role.name : t('a role');
         return {
-            requesterName: `${action.user.first_name} ${action.user.last_name}`,
-            requesterEmail: action.user.email,
+            requesterName: `${action.requested_by?.first_name} ${action.requested_by?.last_name}`,
+            requesterEmail: action.requested_by?.email || '',
             requestType: t('Role Assignment'),
             source: {
                 name: `${action.user.first_name} ${action.user.last_name}`,
+                email: action.user.email,
                 type: t('User'),
                 icon: <UserOutlined />,
-                badge: t('Requesting Role'),
             },
             target: {
                 name: action.data_product.name,
                 type: t('Data Product'),
                 icon: <DataProductOutlined />,
-                badge: t('Your Resource'),
             },
-            accessType: t('ROLE: {{roleName}}', { roleName: roleName.toUpperCase() }),
+            accessType: roleName,
             justification: '',
             hasJustification: false,
             requestedOn: action.requested_on || '',
@@ -138,12 +134,12 @@ function getRequestDetails(
             name: '',
             type: '',
             icon: null,
+            email: '',
         },
         target: {
             name: '',
             type: '',
             icon: null,
-            badge: '',
         },
         accessType: '',
         justification: '',
@@ -175,7 +171,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             title={details.title}
             open={open}
             onCancel={onClose}
-            width={700}
+            width={800}
             footer={
                 <Space>
                     <Button danger icon={<CloseOutlined />} onClick={handleReject}>
@@ -188,46 +184,62 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             }
         >
             <Flex vertical gap="middle">
-                {/* Access Flow Visualization */}
-                <Flex align="center" justify="space-between" gap="middle">
-                    {/* Source Card - Thing Requesting Access */}
-                    <Card size="small" className={styles.accessCard} variant="outlined">
-                        <Flex vertical gap="small">
-                            {details.source.badge && <Tag>{details.source.badge}</Tag>}
+                {/* 3-Tile Access Visualization using Antd Row/Col */}
+                <Row gutter={16}>
+                    {/* Requesting Consumer Tile */}
+                    <Col flex={'1.2 1 0%'}>
+                        <Card size="small" className={styles.accessCard} variant="outlined">
+                            <Typography.Text strong style={{ fontSize: 12 }}>
+                                {t('Requesting Consumer')}
+                            </Typography.Text>
                             <Flex align="center" gap="middle">
                                 <div className={styles.iconContainer}>{details.source.icon}</div>
                                 <Flex vertical>
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                        {details.source.type}
-                                    </Typography.Text>
                                     <Typography.Text strong>{details.source.name}</Typography.Text>
+                                    {details.source.email && (
+                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                            {details.source.email}
+                                        </Typography.Text>
+                                    )}
                                 </Flex>
                             </Flex>
-                        </Flex>
-                    </Card>
-
-                    {/* Arrow with Access Type */}
-                    <Flex vertical align="center" gap="small">
-                        <ArrowRightOutlined style={{ fontSize: 28 }} />
-                        <Tag>{details.accessType}</Tag>
-                    </Flex>
-
-                    {/* Target Card - Your Controlled Resource */}
-                    <Card size="small" className={styles.accessCard} variant="outlined">
-                        <Flex vertical gap="small">
-                            <Tag>{details.target.badge}</Tag>
+                        </Card>
+                    </Col>
+                    {/* Requests Role/Access Tile (smaller) */}
+                    <Col flex={'0.7 1 0%'} style={{ display: 'flex' }}>
+                        <Card size="small" className={styles.accessCard} variant="outlined" style={{ width: '100%' }}>
+                            <Typography.Text strong style={{ fontSize: 12 }}>
+                                {details.requestType === t('Role Assignment')
+                                    ? t('Requests Role')
+                                    : t('Requests Access')}
+                            </Typography.Text>
+                            <Flex align="center" justify="center">
+                                <Typography.Text strong style={{ fontSize: 16 }}>
+                                    {details.accessType}
+                                </Typography.Text>
+                            </Flex>
+                        </Card>
+                    </Col>
+                    {/* Requested Resource Tile */}
+                    <Col flex={'1.2 1 0%'}>
+                        <Card size="small" className={styles.accessCard} variant="outlined">
+                            <Typography.Text strong style={{ fontSize: 12 }}>
+                                {t('Requested Resource')}
+                            </Typography.Text>
                             <Flex align="center" gap="middle">
                                 <div className={styles.iconContainer}>{details.target.icon}</div>
-                                <Flex vertical flex={1}>
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                        {details.target.type}
-                                    </Typography.Text>
+                                <Flex vertical>
                                     <Typography.Text strong>{details.target.name}</Typography.Text>
+                                    {details.target.type && (
+                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                            {details.target.type}
+                                        </Typography.Text>
+                                    )}
                                 </Flex>
                             </Flex>
-                        </Flex>
-                    </Card>
-                </Flex>
+                        </Card>
+                    </Col>
+                </Row>
 
                 {/* Request Details */}
                 <div>
@@ -236,6 +248,20 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                     </Typography.Title>
                     <Card size="small" className={styles.detailCard} variant="outlined">
                         <Flex vertical gap="middle">
+                            {details.hasJustification && (
+                                <>
+                                    <Flex vertical gap="small">
+                                        <Flex gap="small">
+                                            <FileTextOutlined />
+                                            <Typography.Text strong>{t('Business Justification')}</Typography.Text>
+                                        </Flex>
+                                        <div className={styles.justificationContainer}>
+                                            <Typography.Text>{details.justification}</Typography.Text>
+                                        </div>
+                                    </Flex>
+                                    <Divider style={{ margin: 0 }} />
+                                </>
+                            )}
                             <Flex justify="space-between" gap="large">
                                 <Flex align="center" gap="middle">
                                     <div className={styles.detailIconContainer}>
@@ -264,21 +290,6 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                     </Flex>
                                 </Flex>
                             </Flex>
-
-                            {details.hasJustification && (
-                                <>
-                                    <Divider style={{ margin: 0 }} />
-                                    <Flex vertical gap="small">
-                                        <Flex gap="small">
-                                            <FileTextOutlined />
-                                            <Typography.Text strong>{t('Business Justification')}</Typography.Text>
-                                        </Flex>
-                                        <div className={styles.justificationContainer}>
-                                            <Typography.Text>{details.justification}</Typography.Text>
-                                        </div>
-                                    </Flex>
-                                </>
-                            )}
                         </Flex>
                     </Card>
                 </div>
