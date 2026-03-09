@@ -232,7 +232,9 @@ def create_assignment_old(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__CREATE_USER, resolver=DataProductResolver
+                Action.DATA_PRODUCT__CREATE_USER,
+                resolver=DataProductResolver,
+                object_id="data_product_id",
             )
         )
     ],
