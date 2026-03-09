@@ -15,7 +15,7 @@ class DatasetQueryStatsDaily(Base):
         ForeignKey("datasets.id", ondelete="CASCADE"), primary_key=True, index=True
     )
     consumer_data_product_id: Mapped[UUID] = mapped_column(
-        ForeignKey("data_products.id"), primary_key=True, index=True
+        ForeignKey("data_products.id", ondelete="CASCADE"), primary_key=True, index=True
     )
     query_count: Mapped[int] = mapped_column(Integer, default=0)
 
