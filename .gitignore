@@ -172,3 +172,9 @@ state.tf
 
 # yarn
 yarn.lock
+
+# agent
+.gemini/
+
+# macos
+.DS_Store

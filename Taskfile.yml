@@ -102,3 +102,19 @@ tasks:
       - task: update:open-api-spec
       - task: release:commit
       - task: release:pr
+
+  test:backend:
+    desc: "Run the tests for the backend"
+    dir: backend
+    cmds:
+      - poetry install --with test
+      - docker compose --file test-compose.yaml up -d
+      - poetry run pytest -v
+      - docker compose --file test-compose.yaml kill
+
+  test:frontend:
+    desc: "Run the tests for the frontend"
+    dir: frontend
+    cmds:
+      - npm install
+      - npm test run

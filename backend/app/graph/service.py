@@ -135,12 +135,11 @@ class GraphService:
                         id=f"{link['dataset_id']}-{link['consumer_id']}",
                         source=link["dataset_id"],
                         target=link["consumer_id"],
-                        animated=link.status == DecisionStatus.APPROVED,
+                        animated=link["status"] == DecisionStatus.APPROVED.name,
                     )
                     for link in data_product_links
                 ]
             )
-
         elif data_product_nodes_enabled:
             data_product_links = (
                 self.db.execute(
@@ -162,10 +161,10 @@ class GraphService:
             edges.extend(
                 [
                     Edge(
-                        id=f"{link['consumer_id']}-{link['producer_id']}",
-                        source=link["consumer_id"],
-                        target=link["producer_id"],
-                        animated=link["status"] == DecisionStatus.APPROVED,
+                        id=f"{link['producer_id']}-{link['consumer_id']}",
+                        source=link["producer_id"],
+                        target=link["consumer_id"],
+                        animated=link["status"] == DecisionStatus.APPROVED.name,
                     )
                     for link in data_product_links
                 ]
@@ -194,7 +193,7 @@ class GraphService:
                         id=f"{link['producer_id']}-{link['consumer_id']}",
                         source=link["producer_id"],
                         target=link["consumer_id"],
-                        animated=link.status == DecisionStatus.APPROVED,
+                        animated=link["status"] == DecisionStatus.APPROVED.name,
                     )
                     for link in data_product_links
                 ]

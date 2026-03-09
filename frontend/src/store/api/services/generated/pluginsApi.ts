@@ -160,6 +160,16 @@ export type GlueTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
+export type PostgreSqlTechnicalAssetConfiguration = {
+  configuration_type: "PostgreSQLTechnicalAssetConfiguration";
+  database: string;
+  schema_name?: string;
+  table?: string;
+  bucket_identifier?: string;
+  database_path?: string;
+  table_path?: string;
+  access_granularity: AccessGranularity;
+};
 export type RedshiftTechnicalAssetConfiguration = {
   configuration_type: "RedshiftTechnicalAssetConfiguration";
   database: string;
@@ -196,6 +206,9 @@ export type RenderTechnicalAssetAccessPathRequest = {
     | ({
         configuration_type: "GlueTechnicalAssetConfiguration";
       } & GlueTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
+      } & PostgreSqlTechnicalAssetConfiguration)
     | ({
         configuration_type: "RedshiftTechnicalAssetConfiguration";
       } & RedshiftTechnicalAssetConfiguration)

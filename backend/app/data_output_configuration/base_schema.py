@@ -8,15 +8,17 @@ from sqlalchemy.orm import Session
 from app.configuration.environments.platform_service_configurations.schema_response import (
     ConfigType,
 )
+from app.configuration.platform_service_configurations.model import (
+    PlatformServiceConfiguration as PlatformServiceConfigurationModel,
+)
+from app.configuration.platform_service_configurations.schema import (
+    PlatformServiceConfiguration,
+)
 from app.configuration.platforms.platform_services.model import (
     PlatformService as PlatformServiceModel,
 )
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.enums import UIElementType
-from app.platform_service_configurations.model import (
-    PlatformServiceConfiguration as PlatformServiceConfigurationModel,
-)
-from app.platform_service_configurations.schema import PlatformServiceConfiguration
 from app.shared.schema import ORMModel
 from app.users.schema import User
 

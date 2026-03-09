@@ -13,6 +13,9 @@ from app.data_output_configuration.schema_request import (
 if TYPE_CHECKING:
     from app.users.schema import User
 
+from app.configuration.platform_service_configurations.schema import (
+    PlatformServiceConfiguration,
+)
 from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
 )
@@ -20,7 +23,6 @@ from app.data_output_configuration.schema_response import (
     PlatformTile,
     UIElementMetadataResponse,
 )
-from app.platform_service_configurations.schema import PlatformServiceConfiguration
 from app.settings import settings
 
 

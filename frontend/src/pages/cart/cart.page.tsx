@@ -308,7 +308,10 @@ function Cart() {
                                     },
                                 ]}
                             >
-                                <TextArea rows={4} placeholder="Explain why you need access to these Output Ports" />
+                                <TextArea
+                                    rows={4}
+                                    placeholder={t('Explain why you need access to these Output Ports')}
+                                />
                             </Form.Item>
                             <Form.Item label={null}>
                                 <Flex gap={'small'}>
