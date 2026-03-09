@@ -46,16 +46,13 @@ class TestDataProductRoleAssignmentsRouter:
         assert data[0]["id"] == str(assignment.id)
 
     @pytest.mark.parametrize(
-        ("permissions", "should_update_casbin"),
+        "permissions",
         [
-            ([Action.DATA_PRODUCT__CREATE_USER], False),
-            (
-                [
-                    Action.DATA_PRODUCT__CREATE_USER,
-                    Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
-                ],
-                True,
-            ),
+            [Action.DATA_PRODUCT__CREATE_USER],
+            [
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
         ],
     )
     @patch(
@@ -65,7 +62,6 @@ class TestDataProductRoleAssignmentsRouter:
         self,
         mock_data_product_auth_assignment,
         permissions: list[Action],
-        should_update_casbin: bool,
         client: TestClient,
     ):
         data_product: DataProduct = DataProductFactory()
@@ -95,23 +91,20 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
         # Verify Casbin update behavior
-        if should_update_casbin:
+        if Action.DATA_PRODUCT__APPROVE_USER_REQUEST in permissions:
             mock_data_product_auth_assignment.assert_called_once()
             mock_data_product_auth_assignment.return_value.add.assert_called_once()
         else:
             mock_data_product_auth_assignment.assert_not_called()
 
     @pytest.mark.parametrize(
-        ("permissions", "should_update_casbin"),
+        "permissions",
         [
-            ([Action.DATA_PRODUCT__CREATE_USER], False),
-            (
-                [
-                    Action.DATA_PRODUCT__CREATE_USER,
-                    Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
-                ],
-                True,
-            ),
+            [Action.DATA_PRODUCT__CREATE_USER],
+            [
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
         ],
     )
     @patch(
@@ -121,7 +114,6 @@ class TestDataProductRoleAssignmentsRouter:
         self,
         mock_data_product_auth_assignment,
         permissions: list[Action],
-        should_update_casbin: bool,
         client: TestClient,
     ):
         data_product: DataProduct = DataProductFactory()
@@ -152,7 +144,7 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
         # Verify Casbin update behavior
-        if should_update_casbin:
+        if Action.DATA_PRODUCT__APPROVE_USER_REQUEST in permissions:
             mock_data_product_auth_assignment.assert_called_once()
             mock_data_product_auth_assignment.return_value.add.assert_called_once()
         else:
