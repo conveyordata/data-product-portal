@@ -416,6 +416,10 @@ def _parse_user_selection(
     if text in ("none", "no", "skip", "n/a", "0"):
         return []
 
+    # "all/every/each" takes priority over any numeric extraction
+    if any(w in text for w in ("all", "every", "each")):
+        return [p["id"] for p in presented_ports]
+
     selected_ids: list[str] = []
     # Try numeric indices
     numbers = re.findall(r"\b(\d+)\b", text)
@@ -430,10 +434,6 @@ def _parse_user_selection(
         if name_lower and name_lower in text:
             if p["id"] not in selected_ids:
                 selected_ids.append(p["id"])
-
-    # If nothing matched but the user said "all", take everything
-    if not selected_ids and any(w in text for w in ("all", "every", "each")):
-        selected_ids = [p["id"] for p in presented_ports]
 
     return selected_ids
 
