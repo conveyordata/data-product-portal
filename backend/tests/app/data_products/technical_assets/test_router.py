@@ -95,11 +95,30 @@ class TestTechnicalAssetsRouter:
             role_id=role.id,
             data_product_id=data_output_payload["owner_id"],
         )
-        created_data_output = self.create_data_output(client, data_output_payload)
+        created_data_output = self.create_data_output_old(client, data_output_payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
     def test_create_data_output_product_aligned(
+        self, data_output_payload, client: TestClient
+    ):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
+        payload = deepcopy(data_output_payload)
+        payload["technical_mapping"] = "default"
+
+        created_data_output = self.create_data_output_old(client, payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
+
+    def test_create_data_output_product_aligned_new(
         self, data_output_payload, client: TestClient
     ):
         role = RoleFactory(
@@ -132,7 +151,7 @@ class TestTechnicalAssetsRouter:
         payload.pop("technical_mapping")
         payload["sourceAligned"] = True
 
-        created_data_output = self.create_data_output(client, payload)
+        created_data_output = self.create_data_output_old(client, payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
         assert (
@@ -145,7 +164,7 @@ class TestTechnicalAssetsRouter:
     def test_create_data_output_not_product_owner(
         self, data_output_payload_not_owner, client: TestClient
     ):
-        created_data_output = self.create_data_output(
+        created_data_output = self.create_data_output_old(
             client, data_output_payload_not_owner
         )
         assert created_data_output.status_code == 403
@@ -353,7 +372,7 @@ class TestTechnicalAssetsRouter:
         create_payload = deepcopy(data_output_payload)
         create_payload["owner_id"] = str(owner.id)
 
-        response = self.create_data_output(client, create_payload)
+        response = self.create_data_output_old(client, create_payload)
         assert response.status_code == 400
 
     def test_create_data_output_invalid_characters_namespace(
@@ -371,7 +390,7 @@ class TestTechnicalAssetsRouter:
         create_payload = deepcopy(data_output_payload)
         create_payload["namespace"] = "!"
 
-        response = self.create_data_output(client, create_payload)
+        response = self.create_data_output_old(client, create_payload)
         assert response.status_code == 400
 
     def test_create_data_output_invalid_length_namespace(
@@ -389,7 +408,7 @@ class TestTechnicalAssetsRouter:
         create_payload = deepcopy(data_output_payload)
         create_payload["namespace"] = "a" * 256
 
-        response = self.create_data_output(client, create_payload)
+        response = self.create_data_output_old(client, create_payload)
         assert response.status_code == 400
 
     def test_history_event_created_on_data_output_creation(
@@ -404,7 +423,7 @@ class TestTechnicalAssetsRouter:
             role_id=role.id,
             data_product_id=data_output_payload["owner_id"],
         )
-        created_data_output = self.create_data_output(client, data_output_payload)
+        created_data_output = self.create_data_output_old(client, data_output_payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
@@ -423,7 +442,7 @@ class TestTechnicalAssetsRouter:
             role_id=role.id,
             data_product_id=data_output_payload["owner_id"],
         )
-        created_data_output = self.create_data_output(client, data_output_payload)
+        created_data_output = self.create_data_output_old(client, data_output_payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
@@ -600,10 +619,19 @@ class TestTechnicalAssetsRouter:
         mock_send_email.assert_called_once()
 
     @staticmethod
-    def create_data_output(client: TestClient, default_data_output_payload) -> Response:
+    def create_data_output_old(
+        client: TestClient, default_data_output_payload
+    ) -> Response:
         return client.post(
             f"/api/data_products/"
             f"{default_data_output_payload.get('owner_id')}/data_output",
+            json=default_data_output_payload,
+        )
+
+    @staticmethod
+    def create_data_output(client: TestClient, default_data_output_payload) -> Response:
+        return client.post(
+            f"/api/v2/data_products/{default_data_output_payload.get('owner_id')}/technical_assets",
             json=default_data_output_payload,
         )
 
