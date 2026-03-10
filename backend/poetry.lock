@@ -2779,14 +2779,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.9.8"
+version = "7.9.10"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.9.8-py3-none-any.whl", hash = "sha256:2735bcc3232e22c88034454e820c1739f4b29e606d55f31e56b52202650e4330"},
-    {file = "posthog-7.9.8.tar.gz", hash = "sha256:52b1fa5f3d3faf2ee2fb7f5eb375332905887f7c1e386ef45103448413bd3e57"},
+    {file = "posthog-7.9.10-py3-none-any.whl", hash = "sha256:2f3b997edb76a1adce2ebd9cf877a5e5ae6299f8e19bbfccf774a1ac14ce35e7"},
+    {file = "posthog-7.9.10.tar.gz", hash = "sha256:3d0627eedf502abd331ae9023c4a2f6dae11453f598064efa6e1e3eb932e1a6b"},
 ]
 
 [package.dependencies]
@@ -4516,4 +4516,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "e5c874bc206e5f2570dbeaaa0268e8ab18bd77c0fb3e8a1ab5a4af623033c888"
+content-hash = "4ad9c72c8e5784b9042c5034949f3ea27ffe30d7e0cf9decb8ea8e15d7c2c474"
