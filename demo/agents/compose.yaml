@@ -44,18 +44,43 @@ services:
       timeout: 3s
       retries: 10
 
-  agent:
-    build: ./agent
+  data-agents:
+    build: ./data-agents
     env_file:
       - .env.secret
+    environment:
+      - PORTAL_API_URL=http://backend:5050
+      - PORTAL_URL=http://localhost:8080
+      - DEFAULT_USERNAME=john.scientist@pharma.com
+      - AGENT_DATA_DIR=/agent_data
     volumes:
       - agent_configs:/agent_configs
       - ./products:/products
+      - agent_data:/agent_data
     ports:
       - "7070:7070"
     depends_on:
       postgresql-demo:
         condition: service_healthy
+      backend:
+        condition: service_started
+
+  intake:
+    build: ./intake
+    env_file:
+      - .env.secret
+    environment:
+      - PORTAL_API_URL=http://backend:5050
+      - PORTAL_URL=http://localhost:8080
+      - DEFAULT_USERNAME=john.scientist@pharma.com
+      - AGENT_DATA_DIR=/agent_data
+    volumes:
+      - agent_data:/agent_data
+    ports:
+      - "7071:7071"
+    depends_on:
+      backend:
+        condition: service_started
 
   postgresql:
     extends:
@@ -96,3 +121,4 @@ services:
 volumes:
   postgresql-demo-data:
   agent_configs:
+  agent_data:
