@@ -1,6 +1,5 @@
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
-    type PendingRequestType,
     PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,
     PendingRequestType_TechnicalAssetOutputPort,
@@ -13,8 +12,6 @@ export interface TableRow {
     description: string;
     requestedBy: UserContract | null;
     date: string;
-    dataProductName?: string;
-    outputPortName?: string;
 }
 
 /**
@@ -57,7 +54,6 @@ export function transformToTableRow(action: PendingAction): TableRow {
             ...baseRow,
             requestedBy: action.requested_by,
             description: getRequestDescription(action),
-            dataProductName: action.data_product.name,
             date: action.requested_on,
         };
     }
@@ -67,8 +63,6 @@ export function transformToTableRow(action: PendingAction): TableRow {
             ...baseRow,
             requestedBy: action.requested_by,
             description: getRequestDescription(action),
-            outputPortName: action.output_port.name,
-            dataProductName: action.technical_asset.name,
             date: action.requested_on,
         };
     }
@@ -78,8 +72,6 @@ export function transformToTableRow(action: PendingAction): TableRow {
             ...baseRow,
             requestedBy: action.requested_by,
             description: getRequestDescription(action),
-            outputPortName: '-',
-            dataProductName: action.data_product.name,
             date: action.requested_on || '',
         };
     }
@@ -87,37 +79,6 @@ export function transformToTableRow(action: PendingAction): TableRow {
         ...baseRow,
         requestedBy: action.requested_by,
         description: '',
-        outputPortName: '',
-        dataProductName: '',
         date: '',
     };
-}
-
-export function getRequestLink(action: PendingAction): { dataProductId: string; datasetId?: string } | null {
-    switch (action.pending_action_type) {
-        case PendingRequestType_DataProductOutputPort:
-            return {
-                dataProductId: action.output_port.data_product_id,
-                datasetId: action.output_port_id,
-            };
-        case PendingRequestType_TechnicalAssetOutputPort:
-            return {
-                dataProductId: action.technical_asset.owner_id,
-                datasetId: action.output_port_id,
-            };
-        case PendingRequestType_DataProductRoleAssignment:
-            return {
-                dataProductId: action.data_product.id,
-            };
-        default:
-            return null;
-    }
-}
-
-export function isOutputPortRequest(type: PendingRequestType): boolean {
-    return type === PendingRequestType_DataProductOutputPort || type === PendingRequestType_TechnicalAssetOutputPort;
-}
-
-export function isRoleRequest(type: PendingRequestType): boolean {
-    return type === PendingRequestType_DataProductRoleAssignment;
 }

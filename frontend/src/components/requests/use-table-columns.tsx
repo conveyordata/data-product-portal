@@ -1,11 +1,12 @@
+import { Space, theme } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
-import { RequesterCell } from '../components/requests/requester-cell';
-import { ReviewButton } from '../components/requests/review-button';
-import type { TableRow } from '../utils/request-utils';
+import type { TableRow } from '../../utils/request-utils';
+import { UserAvatarWithEmail } from '../user-avatar/user-avatar-with-email.component';
+import { ReviewButton } from './review-button';
 
 type UseTableColumnsParams = {
     onReview: (action: PendingAction) => void;
@@ -13,6 +14,10 @@ type UseTableColumnsParams = {
 
 export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsType<TableRow> {
     const { t } = useTranslation();
+    const { useToken } = theme;
+    const { token } = useToken();
+
+    const secondaryColor = token.colorPrimary;
 
     return useMemo(
         () => [
@@ -22,7 +27,11 @@ export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsTyp
                 key: 'requestedBy',
                 sorter: (a, b) => a.requestedBy?.email.localeCompare(b.requestedBy?.email || '') || 0,
                 render: (requestedBy) => {
-                    return <RequesterCell user={requestedBy} />;
+                    return (
+                        <Space size="small">
+                            <UserAvatarWithEmail user={requestedBy} color={secondaryColor} />
+                        </Space>
+                    );
                 },
             },
             {
@@ -48,6 +57,6 @@ export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsTyp
                 ),
             },
         ],
-        [t, onReview],
+        [t, onReview, secondaryColor],
     );
 }

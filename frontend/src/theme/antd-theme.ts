@@ -114,7 +114,7 @@ const datamindedThemeConfig: ThemeConfig = {
         Button: {
             borderRadius: 10,
             primaryShadow: 'none',
-            dangerShadow: 'none',
+            dangerShadow: 'none', // Remove shadow from danger buttons to align with design
         },
         Menu: {
             colorPrimaryBg: '#543EDC',

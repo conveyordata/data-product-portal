@@ -10,7 +10,7 @@ import {
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
-import { useTableColumns } from '../../../../hooks/use-table-columns';
+import { useTableColumns } from '../../../../components/requests/use-table-columns';
 import { acceptRequest, rejectRequest } from '../../../../utils/request-handlers';
 import { type TableRow, transformToTableRow } from '../../../../utils/request-utils';
 
