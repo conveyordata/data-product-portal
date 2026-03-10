@@ -72,7 +72,7 @@
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.27.3",
         "esbuild-runner": "^2.2.2",
-        "i18next-cli": "^1.49.3",
+        "i18next-cli": "^1.49.4",
         "knip": "^5.85.0",
         "msw": "^2.12.10",
         "rollup-plugin-visualizer": "^7.0.1",
