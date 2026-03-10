@@ -479,6 +479,7 @@ def get_technical_asset_graph_data(
             Authorization.enforce(
                 Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
                 DataProductResolver,
+                object_id="data_product_id",
             )
         )
     ],
