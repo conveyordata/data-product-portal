@@ -18,7 +18,7 @@ RUN apt-get update && apt-get upgrade -y && \
 COPY pyproject.toml ./
 RUN poetry install --no-root
 
-COPY ./intake ./intake
+COPY ./intake_agent ./intake_agent
 
 EXPOSE 7071
 
