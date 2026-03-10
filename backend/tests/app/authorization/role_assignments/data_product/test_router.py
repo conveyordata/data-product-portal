@@ -24,7 +24,8 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.users.schema import User
 
-ENDPOINT = "/api/role_assignments/data_product"
+OLD_ENDPOINT = "/api/role_assignments/data_product"
+ENDPOINT = "/api/v2/authz/role_assignments/data_product"
 ENDPOINT_DATA_PRODUCT = "/api/data_products"
 ENDPOINT_PENDING_ACTIONS = "/api/pending_actions"
 
@@ -37,7 +38,7 @@ class TestDataProductRoleAssignmentsRouter:
         assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id, user_id=user.id, role_id=role.id
         )
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
 
         assert response.status_code == 200
         data = response.json()
@@ -45,16 +46,13 @@ class TestDataProductRoleAssignmentsRouter:
         assert data[0]["id"] == str(assignment.id)
 
     @pytest.mark.parametrize(
-        ("permissions", "should_update_casbin"),
+        "permissions",
         [
-            ([Action.DATA_PRODUCT__CREATE_USER], False),
-            (
-                [
-                    Action.DATA_PRODUCT__CREATE_USER,
-                    Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
-                ],
-                True,
-            ),
+            [Action.DATA_PRODUCT__CREATE_USER],
+            [
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
         ],
     )
     @patch(
@@ -64,7 +62,6 @@ class TestDataProductRoleAssignmentsRouter:
         self,
         mock_data_product_auth_assignment,
         permissions: list[Action],
-        should_update_casbin: bool,
         client: TestClient,
     ):
         data_product: DataProduct = DataProductFactory()
@@ -80,7 +77,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}/{str(data_product.id)}",
+            f"{OLD_ENDPOINT}/{str(data_product.id)}",
             json={
                 "user_id": str(user.id),
                 "role_id": str(role.id),
@@ -94,7 +91,60 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
         # Verify Casbin update behavior
-        if should_update_casbin:
+        if Action.DATA_PRODUCT__APPROVE_USER_REQUEST in permissions:
+            mock_data_product_auth_assignment.assert_called_once()
+            mock_data_product_auth_assignment.return_value.add.assert_called_once()
+        else:
+            mock_data_product_auth_assignment.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "permissions",
+        [
+            [Action.DATA_PRODUCT__CREATE_USER],
+            [
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
+        ],
+    )
+    @patch(
+        "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
+    )
+    def test_create_assignment_new(
+        self,
+        mock_data_product_auth_assignment,
+        permissions: list[Action],
+        client: TestClient,
+    ):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=permissions,
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}",
+            json={
+                "data_product_id": str(data_product.id),
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["data_product"]["id"] == str(data_product.id)
+        assert data["user"]["id"] == str(user.id)
+        assert data["role"]["id"] == str(role.id)
+
+        # Verify Casbin update behavior
+        if Action.DATA_PRODUCT__APPROVE_USER_REQUEST in permissions:
             mock_data_product_auth_assignment.assert_called_once()
             mock_data_product_auth_assignment.return_value.add.assert_called_once()
         else:
@@ -112,7 +162,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}/request/{str(data_product.id)}",
+            f"{OLD_ENDPOINT}/request/{str(data_product.id)}",
             json={
                 "user_id": str(user.id),
                 "role_id": str(role.id),
@@ -133,7 +183,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}/request/{str(data_product.id)}",
+            f"{OLD_ENDPOINT}/request/{str(data_product.id)}",
             json={
                 "user_id": str(user.id),
                 "role_id": str(role.id),
@@ -159,14 +209,14 @@ class TestDataProductRoleAssignmentsRouter:
             role_id=role.id,
         )
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 2
 
         response = self.delete_data_product_role_assignment(client, assignment.id)
         assert response.status_code == 200
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 1
 
@@ -194,10 +244,10 @@ class TestDataProductRoleAssignmentsRouter:
             role_id=role.id,
         )
 
-        response = client.delete(f"{ENDPOINT}/{assignment_1.id}")
+        response = client.delete(f"{OLD_ENDPOINT}/{assignment_1.id}")
         assert response.status_code == status.HTTP_200_OK
 
-        response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
+        response = client.delete(f"{OLD_ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_decide_assignment(self, client: TestClient):
@@ -317,7 +367,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
+            f"{OLD_ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
         )
         assert response.status_code == 200
         data = response.json()
@@ -337,7 +387,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(role.id)}
+            f"{OLD_ENDPOINT}/{assignment.id}", json={"role_id": str(role.id)}
         )
         assert response.status_code == 403
 
@@ -354,7 +404,7 @@ class TestDataProductRoleAssignmentsRouter:
             role_id=role.id,
         )
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -362,7 +412,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 0
@@ -383,7 +433,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}/{str(data_product.id)}",
+            f"{OLD_ENDPOINT}/{str(data_product.id)}",
             json={
                 "user_id": str(user.id),
                 "role_id": str(role.id),
@@ -445,7 +495,7 @@ class TestDataProductRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
+            f"{OLD_ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
         )
         assert response.status_code == 200
 
@@ -472,7 +522,7 @@ class TestDataProductRoleAssignmentsRouter:
             role_id=role.id,
         )
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 2
 
@@ -515,7 +565,7 @@ class TestDataProductRoleAssignmentsRouter:
         role2: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}/{str(data_product.id)}",
+            f"{OLD_ENDPOINT}/{str(data_product.id)}",
             json={
                 "user_id": str(user_requester.id),
                 "role_id": str(role2.id),
@@ -526,7 +576,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.get(f"{ENDPOINT_PENDING_ACTIONS}")
         assert response.status_code == 200
         assert len(response.json()) == 0
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 2
@@ -551,14 +601,14 @@ class TestDataProductRoleAssignmentsRouter:
         role2: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}/{str(data_product.id)}",
+            f"{OLD_ENDPOINT}/{str(data_product.id)}",
             json={
                 "user_id": str(user_requester.id),
                 "role_id": str(role2.id),
             },
         )
         assert response.status_code == 200
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 2
@@ -574,31 +624,31 @@ class TestDataProductRoleAssignmentsRouter:
     @staticmethod
     def create_data_product_role_assignment(client: TestClient, json):
         return client.post(
-            f"{ENDPOINT}",
+            f"{OLD_ENDPOINT}",
             json=json,
         )
 
     @staticmethod
     def delete_data_product_role_assignment(client: TestClient, assignment_id):
-        return client.delete(f"{ENDPOINT}/{assignment_id}")
+        return client.delete(f"{OLD_ENDPOINT}/{assignment_id}")
 
     @staticmethod
     def approve_data_product_role_assignment(client: TestClient, assignment_id):
         return client.patch(
-            f"{ENDPOINT}/{assignment_id}/decide",
+            f"{OLD_ENDPOINT}/{assignment_id}/decide",
             json={"decision": DecisionStatus.APPROVED},
         )
 
     @staticmethod
     def deny_data_product_role_assignment(client: TestClient, assignment_id):
         return client.patch(
-            f"{ENDPOINT}/{assignment_id}/decide",
+            f"{OLD_ENDPOINT}/{assignment_id}/decide",
             json={"decision": DecisionStatus.DENIED},
         )
 
     @staticmethod
     def modify_data_product_role_assignment(client: TestClient, assignment_id, json):
-        return client.patch(f"{ENDPOINT}/{assignment_id}/role", json=json)
+        return client.patch(f"{OLD_ENDPOINT}/{assignment_id}/role", json=json)
 
     @staticmethod
     def get_data_product_history(client: TestClient, data_product_id):
