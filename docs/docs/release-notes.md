@@ -12,6 +12,7 @@ sidebar_position: 200
 
 ### bugfixes
 
+- **[Output ports]**: Linking and unlinking technical assets to output ports was denied.
 - **[Technical Asset Creation]**: Broken technical asset creation flow is fixed.
 - **[Add user to Data Product]**: Bad authorization resolves caused issues with this specific action.
 - **[Output ports]**: Technical asset tab missed icons
