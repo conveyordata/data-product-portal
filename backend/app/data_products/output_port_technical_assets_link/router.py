@@ -8,7 +8,10 @@ from sqlalchemy.orm import Session
 from app.authorization.role_assignments.output_port.service import RoleAssignmentService
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputDatasetAssociationResolver
-from app.core.authz.resolvers import DataOutputResolver, DatasetResolver
+from app.core.authz.resolvers import (
+    DataProductResolver,
+    DatasetResolver,
+)
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.output_port_technical_assets_link.schema_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
@@ -245,7 +248,8 @@ def get_user_pending_actions(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
-                DataOutputResolver,
+                DataProductResolver,
+                object_id="data_product_id",
             )
         ),
     ],
@@ -307,7 +311,8 @@ def link_output_port_to_technical_asset(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
-                DataOutputResolver,
+                DataProductResolver,
+                object_id="data_product_id",
             )
         ),
     ],
