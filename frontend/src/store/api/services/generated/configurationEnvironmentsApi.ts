@@ -135,6 +135,10 @@ export type RedshiftConfig = {
 };
 export type PostgreSqlConfig = {
   identifier: string;
+  host: string;
+  port: string;
+  admin_user: string;
+  admin_pwd: string;
 };
 export type Platform = {
   id: string;
