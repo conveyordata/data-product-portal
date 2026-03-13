@@ -131,7 +131,11 @@ function getRequestDetails(
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }: Props) {
     const { t } = useTranslation();
 
-    if (!action) return null;
+    if (!action) {
+        // throw exception
+        return null;
+        // throw new Error('ReviewRequestModal opened without a pending action');
+    }
 
     const details = getRequestDetails(action, t);
 
@@ -165,7 +169,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             }
         >
             {/* 3-Tile Access Visualization using Antd Row/Col */}
-            <Row gutter={16}>
+            <Row gutter={[16, 16]}>
                 {/* Requesting Consumer Tile */}
                 <Col span={9}>
                     <Card size="small" variant="outlined">
@@ -223,10 +227,8 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                         </Flex>
                     </Card>
                 </Col>
-            </Row>
 
-            {/* Request Details */}
-            <Row style={{ marginTop: 16 }}>
+                {/* Request Details */}
                 <Col span={24}>
                     <Typography.Title level={5}>
                         <InfoCircleOutlined /> {t('Request Details')}
