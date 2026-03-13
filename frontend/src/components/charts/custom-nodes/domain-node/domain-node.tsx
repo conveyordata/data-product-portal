@@ -34,8 +34,8 @@ export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
                         className={styles.nodeBox}
                         // override styles.nodeBox on the parts that need to be dynamic
                         style={{
-                            backgroundColor: backgroundColor, // although there is a default color specified in domain-node.module.scss
-                            borderColor: borderColor, // although there is a default color in domain-node.module.scss
+                            backgroundColor: backgroundColor,
+                            borderColor: borderColor,
                             height: height,
                             width: width,
                             visibility: 'visible',

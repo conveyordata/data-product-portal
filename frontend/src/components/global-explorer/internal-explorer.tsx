@@ -1,10 +1,10 @@
 import '@xyflow/react/dist/base.css';
 
+import { G2 } from '@ant-design/plots';
 import type { Edge, Node } from '@xyflow/react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useState } from 'react';
-
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import type { Node as GraphNode } from '@/store/api/services/generated/graphApi.ts';
@@ -16,18 +16,18 @@ import { parseEdges } from '../explorer/utils';
 import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
 import { useNodeEditor } from './use-node-editor';
 
-const DOMAIN_COLORS = [
-    { bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.3)' }, // blue
-    { bg: 'rgba(16, 185, 129, 0.08)', border: 'rgba(16, 185, 129, 0.3)' }, // green
-    { bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.3)' }, // amber
-    { bg: 'rgba(139, 92, 246, 0.08)', border: 'rgba(139, 92, 246, 0.3)' }, // purple
-    { bg: 'rgba(236, 72, 153, 0.08)', border: 'rgba(236, 72, 153, 0.3)' }, // pink
-    { bg: 'rgba(20, 184, 166, 0.08)', border: 'rgba(20, 184, 166, 0.3)' }, // teal
-    { bg: 'rgba(249, 115, 22, 0.08)', border: 'rgba(249, 115, 22, 0.3)' }, // orange
-    { bg: 'rgba(99, 102, 241, 0.08)', border: 'rgba(99, 102, 241, 0.3)' }, // indigo
-];
+function hexToRgba(hex: string, alpha: number): string {
+    const r = Number.parseInt(hex.slice(1, 3), 16);
+    const g = Number.parseInt(hex.slice(3, 5), 16);
+    const b = Number.parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, domainsEnabled: boolean): Node[] {
+    const category20 = G2.Light().category20 ?? [];
+    if (category20.length === 0) {
+        throw new Error('Category20 colors not available');
+    }
     // Synthesize domain container nodes
     const domainNodes: Node[] = [];
     if (domainsEnabled) {
@@ -40,7 +40,6 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, dom
         const sortedDomainIds = [...domainMap.keys()].sort();
         for (let i = 0; i < sortedDomainIds.length; i++) {
             const domainId = sortedDomainIds[i];
-            const color = DOMAIN_COLORS[i % DOMAIN_COLORS.length];
             domainNodes.push({
                 id: domainId,
                 position: { x: 0, y: 0 },
@@ -50,8 +49,8 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, dom
                 data: {
                     id: domainId,
                     name: domainMap.get(domainId),
-                    backgroundColor: color.bg,
-                    borderColor: color.border,
+                    backgroundColor: hexToRgba(category20[i % category20.length], 0.08),
+                    borderColor: hexToRgba(category20[i % category20.length], 0.3),
                 },
             });
         }
