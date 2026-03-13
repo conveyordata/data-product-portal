@@ -19,6 +19,7 @@ export enum TagTypes {
     DataProductTechnicalAssets = 'DataProductInputPorts',
     DataProductInputPorts = 'DataProductInputPorts',
     DataProductRolledUpTags = 'DataProductRolledUpTags',
+    DataProductSettings = 'DataProductSettings',
     OutputPortRoleAssignments = 'OutputPortRoleAssignments',
     Domain = 'Domain',
     TechnicalAsset = 'TechnicalAsset',

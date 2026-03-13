@@ -30,6 +30,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.data_product_setting_value import DataProductSettingValueFactory
 from tests.factories.platform_service import PlatformServiceFactory
 
 OLD_ENDPOINT = "/api/data_products"
@@ -413,7 +414,7 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 403
 
-    def test_dataset_set_custom_setting(self, client):
+    def test_dataproduct_set_custom_setting(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -432,6 +433,23 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         response = client.get(f"{OLD_ENDPOINT}/{data_product.id}")
         assert response.json()["data_product_settings"][0]["value"] == "false"
+
+    def test_get_data_product_settings(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_SETTINGS],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        dps = DataProductSettingValueFactory(data_product=data_product)
+        response = self.get_data_product_settings(client, data_product.id)
+        assert response.status_code == 200, response.text
+        assert response.json()["data_product_settings"][0]["value"] == dps.value
 
     def test_get_graph_data(self, client):
         data_product = DataProductFactory()
@@ -943,3 +961,7 @@ class TestDataProductsRouter:
     @staticmethod
     def get_rolled_up_tags(client: TestClient, data_product_id: UUID):
         return client.get(f"{ENDPOINT}/{data_product_id}/rolled_up_tags")
+
+    @staticmethod
+    def get_data_product_settings(client: TestClient, data_product_id: UUID):
+        return client.get(f"{ENDPOINT}/{data_product_id}/settings")

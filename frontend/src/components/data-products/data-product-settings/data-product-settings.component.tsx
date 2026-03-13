@@ -11,7 +11,7 @@ import {
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import {
     type SetValueForDataProductApiArg,
-    useGetDataProductQuery,
+    useGetDataProductSettingsQuery,
     useSetValueForDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
@@ -33,9 +33,10 @@ type Props = {
 
 export function DataProductSettings({ id, scope, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductQuery(id || '', {
-        skip: scope !== 'dataproduct',
-    });
+    const { data: { data_product_settings: dataProductSettings = [] } = {}, isFetching: isFetchingDP } =
+        useGetDataProductSettingsQuery(id || '', {
+            skip: scope !== 'dataproduct',
+        });
     const { data: outputPort, isFetching: isFetchingDS } = useGetOutputPortQuery(
         { id: id, dataProductId: dataProductId ?? '' },
         {
@@ -75,9 +76,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
         if (filteredSettings) {
             if (scope === 'dataproduct') {
                 return filteredSettings.map((setting) => {
-                    const match = dataProduct?.data_product_settings?.find(
-                        (dps) => dps.data_product_setting_id === setting.id,
-                    );
+                    const match = dataProductSettings.find((dps) => dps.data_product_setting_id === setting.id);
                     return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
                 });
             }
@@ -91,7 +90,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             }
         }
         return [];
-    }, [filteredSettings, scope, dataProduct?.data_product_settings, outputPort?.data_product_settings]);
+    }, [filteredSettings, scope, dataProductSettings, outputPort?.data_product_settings]);
 
     const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = useCallback(
         async (values: DataProductSettingValueForm) => {
