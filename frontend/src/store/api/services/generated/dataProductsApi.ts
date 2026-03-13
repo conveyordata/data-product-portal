@@ -143,6 +143,14 @@ const injectedRtkApi = api.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    getDataProductSettings: build.query<
+      GetDataProductSettingsApiResponse,
+      GetDataProductSettingsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg}/settings`,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -217,6 +225,9 @@ export type UnlinkInputPortFromDataProductApiArg = {
   id: string;
   inputPortId: string;
 };
+export type GetDataProductSettingsApiResponse =
+  /** status 200 Successful Response */ GetDataProductSettingsResponse;
+export type GetDataProductSettingsApiArg = string;
 export type CreateDataProductResponse = {
   id: string;
 };
@@ -263,24 +274,6 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
-export type DataProductSetting = {
-  id: string;
-  category: string;
-  type: DataProductSettingType;
-  tooltip: string;
-  namespace: string;
-  name: string;
-  default: string;
-  order?: number;
-  scope: DataProductSettingScope;
-};
-export type DataProductSettingValue = {
-  id: string;
-  data_product_setting_id: string;
-  value: string;
-  data_product_setting: DataProductSetting;
-  data_product_id: string;
-};
 export type GetDataProductsResponseItem = {
   id: string;
   name: string;
@@ -292,7 +285,6 @@ export type GetDataProductsResponseItem = {
   domain: Domain;
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
-  data_product_settings: DataProductSettingValue[];
   user_count: number;
   output_port_count: number;
   technical_asset_count: number;
@@ -324,7 +316,6 @@ export type GetDataProductResponse = {
   domain: Domain;
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
-  data_product_settings: DataProductSettingValue[];
   about: string | null;
 };
 export type DataProductAboutUpdate = {
@@ -421,11 +412,8 @@ export type GlueTechnicalAssetConfiguration = {
 export type PostgreSqlTechnicalAssetConfiguration = {
   configuration_type: "PostgreSQLTechnicalAssetConfiguration";
   database: string;
-  schema_name?: string;
+  schema?: string;
   table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
   access_granularity: AccessGranularity;
 };
 export type RedshiftTechnicalAssetConfiguration = {
@@ -523,6 +511,27 @@ export type GetDataProductInputPortsResponse = {
 export type GetDataProductRolledUpTagsResponse = {
   rolled_up_tags: Tag[];
 };
+export type DataProductSetting = {
+  id: string;
+  category: string;
+  type: DataProductSettingType;
+  tooltip: string;
+  namespace: string;
+  name: string;
+  default: string;
+  order?: number;
+  scope: DataProductSettingScope;
+};
+export type DataProductSettingValue = {
+  id: string;
+  data_product_setting_id: string;
+  value: string;
+  data_product_setting: DataProductSetting;
+  data_product_id: string;
+};
+export type GetDataProductSettingsResponse = {
+  data_product_settings: DataProductSettingValue[];
+};
 export enum DataProductStatus {
   Pending = "pending",
   Active = "active",
@@ -536,15 +545,6 @@ export enum DataProductIconKey {
   MachineLearning = "machine_learning",
   Analytics = "analytics",
   Default = "default",
-}
-export enum DataProductSettingType {
-  Checkbox = "checkbox",
-  Tags = "tags",
-  Input = "input",
-}
-export enum DataProductSettingScope {
-  Dataproduct = "dataproduct",
-  Dataset = "dataset",
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",
@@ -586,6 +586,15 @@ export enum DecisionStatus {
   Pending = "pending",
   Denied = "denied",
 }
+export enum DataProductSettingType {
+  Checkbox = "checkbox",
+  Tags = "tags",
+  Input = "input",
+}
+export enum DataProductSettingScope {
+  Dataproduct = "dataproduct",
+  Dataset = "dataset",
+}
 export const {
   useCreateDataProductMutation,
   useGetDataProductsQuery,
@@ -608,4 +617,6 @@ export const {
   useGetDataProductRolledUpTagsQuery,
   useLazyGetDataProductRolledUpTagsQuery,
   useUnlinkInputPortFromDataProductMutation,
+  useGetDataProductSettingsQuery,
+  useLazyGetDataProductSettingsQuery,
 } = injectedRtkApi;

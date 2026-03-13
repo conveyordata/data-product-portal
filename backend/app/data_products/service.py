@@ -14,6 +14,7 @@ from app.authorization.roles.schema import Prototype
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
+from app.configuration.data_product_settings.model import DataProductSettingValue
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
@@ -79,6 +80,16 @@ class DataProductService:
             .all()
         )
 
+    def get_data_product_settings(
+        self, data_product_id: UUID
+    ) -> Sequence[DataProductSettingValue]:
+        ensure_data_product_exists(data_product_id, self.db)
+        return self.db.scalars(
+            select(DataProductSettingValue).where(
+                DataProductSettingValue.data_product_id == data_product_id
+            )
+        ).all()
+
     def get_rolled_up_tags(self, data_product_id: UUID) -> set[Tag]:
         ensure_data_product_exists(data_product_id, self.db)
         rolled_up_tags = set()
@@ -115,6 +126,7 @@ class DataProductService:
                 selectinload(DataProductModel.data_outputs).selectinload(
                     TechnicalAssetModel.environment_configurations
                 ),
+                selectinload(DataProductModel.data_product_settings),
             ],
         )
         default_lifecycle = self.db.scalar(
@@ -145,6 +157,7 @@ class DataProductService:
         data_product = self.db.get(
             DataProductModel,
             id,
+            options=[selectinload(DataProductModel.data_product_settings)],
         )
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -169,6 +182,7 @@ class DataProductService:
             selectinload(DataProductModel.dataset_links).raiseload("*"),
             selectinload(DataProductModel.assignments).raiseload("*"),
             selectinload(DataProductModel.data_outputs).raiseload("*"),
+            selectinload(DataProductModel.data_product_settings).raiseload("*"),
         )
         if filter_to_user_with_assigment:
             query = query.filter(
