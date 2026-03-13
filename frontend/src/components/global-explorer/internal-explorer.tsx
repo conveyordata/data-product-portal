@@ -1,12 +1,12 @@
 import '@xyflow/react/dist/base.css';
 
+import { G2 } from '@ant-design/plots';
 import type { Edge, Node } from '@xyflow/react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useState } from 'react';
-
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { CustomEdgeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import type { Node as GraphNode } from '@/store/api/services/generated/graphApi.ts';
 import { NodeType, useGetGraphDataQuery } from '@/store/api/services/generated/graphApi.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper';
@@ -16,9 +16,48 @@ import { parseEdges } from '../explorer/utils';
 import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
 import { useNodeEditor } from './use-node-editor';
 
-function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void): Node[] {
+function hexToRgba(hex: string, alpha: number): string {
+    const r = Number.parseInt(hex.slice(1, 3), 16);
+    const g = Number.parseInt(hex.slice(3, 5), 16);
+    const b = Number.parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, domainsEnabled: boolean): Node[] {
+    const category20 = G2.Light().category20 ?? [];
+    if (category20.length === 0) {
+        throw new Error('Category20 colors not available');
+    }
+    // Synthesize domain container nodes
+    const domainNodes: Node[] = [];
+    if (domainsEnabled) {
+        const domainMap = new Map<string, string>();
+        for (const node of nodes) {
+            if (node.data.domain_id && node.data.domain && !domainMap.has(node.data.domain_id)) {
+                domainMap.set(node.data.domain_id, node.data.domain);
+            }
+        }
+        const sortedDomainIds = [...domainMap.keys()].sort();
+        for (let i = 0; i < sortedDomainIds.length; i++) {
+            const domainId = sortedDomainIds[i];
+            domainNodes.push({
+                id: domainId,
+                position: { x: 0, y: 0 },
+                type: CustomNodeTypes.DomainNode,
+                draggable: true,
+                deletable: false,
+                data: {
+                    id: domainId,
+                    name: domainMap.get(domainId),
+                    backgroundColor: hexToRgba(category20[i % category20.length], 0.08),
+                    borderColor: hexToRgba(category20[i % category20.length], 0.3),
+                },
+            });
+        }
+    }
+
     // Parse regular nodes
-    return nodes
+    const regularNodes = nodes
         .filter((node) => node.type !== NodeType.DomainNode)
         .map((node) => {
             let extra_attributes = {};
@@ -56,9 +95,10 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void): No
                 default:
                     throw new Error(`Unknown node type: ${node.type}`);
             }
-            // For now perma disable domains
-            return parseRegularNode(node, setNodeId, false, true, extra_attributes);
-        }); // Skip domain nodes for clarity and reduced clutter
+            return parseRegularNode(node, setNodeId, domainsEnabled, true, extra_attributes);
+        });
+
+    return [...domainNodes, ...regularNodes];
 }
 
 function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | null) {
@@ -83,19 +123,29 @@ function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | nu
         }
     });
 
+    // Domain nodes should stay visible if any of their children are connected
+    const domainNodeIds = new Set(nodes.filter((n) => n.type === CustomNodeTypes.DomainNode).map((n) => n.id));
+    const activeDomainIds = new Set(
+        nodes.filter((n) => n.parentId && connectedNodeIds.has(n.id)).map((n) => n.parentId as string),
+    );
+
     // Apply highlighting to nodes
-    const highlightedNodes = nodes.map((node) => ({
-        ...node,
-        data: {
-            ...node.data,
-            dimmed: !connectedNodeIds.has(node.id),
-        },
-        style: {
-            ...node.style,
-            opacity: connectedNodeIds.has(node.id) ? 1 : 0.3,
-            zIndex: connectedNodeIds.has(node.id) ? 10 : 1,
-        },
-    }));
+    const highlightedNodes = nodes.map((node) => {
+        const isConnected =
+            connectedNodeIds.has(node.id) || (domainNodeIds.has(node.id) && activeDomainIds.has(node.id));
+        return {
+            ...node,
+            data: {
+                ...node.data,
+                dimmed: !isConnected,
+            },
+            style: {
+                ...node.style,
+                opacity: isConnected ? 1 : 0.3,
+                zIndex: isConnected ? 10 : 1,
+            },
+        };
+    });
 
     // Apply highlighting to edges
     const highlightedEdges = edges.map((edge) => ({
@@ -141,7 +191,7 @@ export default function InternalFullExplorer() {
 
     const generateGraph = useCallback(async () => {
         if (graph) {
-            const nodes = parseFullNodes(graph.nodes, setNodeId);
+            const nodes = parseFullNodes(graph.nodes, setNodeId, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges, token);
 
             // Explicitly specify straight edge so it doesn't default to default edge (which is a Bézier curve)
@@ -221,7 +271,6 @@ export default function InternalFullExplorer() {
         <Flex className={styles.nodeWrapper}>
             <Sidebar
                 nodes={nodes}
-                setNodes={setNodes}
                 onFilterChange={setSidebarFilters}
                 sidebarFilters={sidebarFilters}
                 nodeId={nodeId}
