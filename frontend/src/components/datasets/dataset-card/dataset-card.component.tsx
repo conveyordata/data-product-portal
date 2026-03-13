@@ -44,6 +44,10 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
         resource: dataset?.data_product_id,
         action: AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
     });
+    const { data: revokeOutputPortAccess } = useCheckAccessQuery({
+        resource: dataProductId,
+        action: AuthorizationAction.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
+    });
 
     const [removeDataset, { isLoading: isRemoving }] = useRemoveOutputPortMutation();
     const [unlinkDataset] = useUnlinkOutputPortFromTechnicalAssetMutation();
@@ -181,6 +185,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
 
     const canLink = linkAccess?.allowed ?? false;
     const canRemove = deleteAccess?.allowed ?? false;
+    const canRevokeOutputPortAccess = revokeOutputPortAccess?.allowed ?? false;
 
     return (
         <>
@@ -281,6 +286,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                                                             type="text"
                                                             size="small"
                                                             danger
+                                                            disabled={!canRevokeOutputPortAccess}
                                                             onClick={() =>
                                                                 handleRemoveDataOutputLink(link.technical_asset_id)
                                                             }
