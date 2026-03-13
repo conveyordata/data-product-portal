@@ -8,7 +8,7 @@ import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrum
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { DataProductsTab } from './components/data-products-tab/data-products-tab.component';
 import { OutputPortsTab } from './components/output-ports-tab/output-ports-tab.component';
-import { RequestsPanel } from './components/requests-panel/requests-panel.component';
+import { PendingAccessRequestsView } from './components/requests-panel/pending-access-requests-view';
 import { TabKeys } from './product-studio-tabkeys';
 
 export function ProductStudio() {
@@ -69,7 +69,7 @@ export function ProductStudio() {
                 </Badge>
             ),
             icon: <InboxOutlined />,
-            children: <RequestsPanel />,
+            children: <PendingAccessRequestsView />,
         },
     ];
 

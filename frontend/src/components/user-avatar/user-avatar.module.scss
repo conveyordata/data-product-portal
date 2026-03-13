@@ -1,10 +1,5 @@
 @use '@/styles/globals';
 
-.user-avatar-container {
-    gap: globals.$column-gap-regular;
-    align-items: center;
-}
-
 .avatar {
     width: globals.$nav-avatar-size;
     min-width: globals.$nav-avatar-size;

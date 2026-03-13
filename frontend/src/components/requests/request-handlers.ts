@@ -12,7 +12,7 @@ import {
     PendingRequestType_DataProductRoleAssignment,
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
-import type { DataProductRoleRequest } from './pending-request.helper';
+import type { DataProductRoleRequest } from '../../utils/pending-request.helper';
 
 type ActionHandlers = {
     handleAcceptDataProductDatasetLink: (req: ApproveOutputPortAsInputPortApiArg) => Promise<void>;

@@ -1,8 +1,9 @@
-import { Table } from 'antd';
+import { Flex, Input, Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReviewRequestModal } from '@/components/requests/review-request-modal';
 import { useTablePagination } from '@/hooks/use-table-pagination';
+import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
     PendingRequestType_DataProductOutputPort,
@@ -10,14 +11,9 @@ import {
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
+import { acceptRequest, rejectRequest } from '../../../../components/requests/request-handlers';
+import { type TableRow, transformToTableRow } from '../../../../components/requests/request-utils';
 import { useTableColumns } from '../../../../components/requests/use-table-columns';
-import { acceptRequest, rejectRequest } from '../../../../utils/request-handlers';
-import { type TableRow, transformToTableRow } from '../../../../utils/request-utils';
-
-type Props = {
-    pendingRequests: PendingAction[];
-    searchTerm: string;
-};
 
 function filterBySearch(requests: PendingAction[], searchTerm: string): PendingAction[] {
     if (!searchTerm) return requests;
@@ -53,8 +49,11 @@ function filterBySearch(requests: PendingAction[], searchTerm: string): PendingA
     });
 }
 
-export function PendingAccessRequestsView({ pendingRequests, searchTerm }: Props) {
+export function PendingAccessRequestsView() {
     const { t } = useTranslation();
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const { data: { pending_actions: pendingRequests = [] } = {} } = useGetUserPendingActionsQuery();
     const [reviewingAction, setReviewingAction] = useState<PendingAction | null>(null);
     const { pagination, handlePaginationChange } = useTablePagination([]);
     const handlers = usePendingActionHandlers();
@@ -76,7 +75,15 @@ export function PendingAccessRequestsView({ pendingRequests, searchTerm }: Props
     });
 
     return (
-        <>
+        <Flex vertical gap="small">
+            {/* Toolbar with segmented controls and search */}
+            <Input.Search
+                placeholder={t('Search requests...')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ maxWidth: 400 }}
+                allowClear
+            />
             <Table
                 columns={columns}
                 dataSource={tableData}
@@ -98,6 +105,6 @@ export function PendingAccessRequestsView({ pendingRequests, searchTerm }: Props
                 onAccept={handleAccept}
                 onReject={handleReject}
             />
-        </>
+        </Flex>
     );
 }

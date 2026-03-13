@@ -4,8 +4,8 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
-import type { TableRow } from '../../utils/request-utils';
 import { UserAvatarWithEmail } from '../user-avatar/user-avatar-with-email.component';
+import type { TableRow } from './request-utils';
 import { ReviewButton } from './review-button';
 
 type UseTableColumnsParams = {

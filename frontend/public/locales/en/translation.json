@@ -471,7 +471,6 @@
     "Restricted Output Ports are visible to everyone but require permission to use": "Restricted $t(Output Ports) are visible to everyone but require permission to use",
     "Review": "Review",
     "Review Output Port Access Request": "Review $t(Output Port) Access Request",
-    "Review Request": "Review Request",
     "Review Role Assignment Request": "Review Role Assignment Request",
     "Review Technical Asset Request": "Review $t(Technical Asset) Request",
     "Revoke Access": "Revoke Access",

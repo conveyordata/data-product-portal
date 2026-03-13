@@ -6,7 +6,7 @@ import {
     InfoCircleOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
+import { Avatar, Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
@@ -16,7 +16,6 @@ import {
 } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
 import { DataOutputOutlined, DataProductOutlined, DatasetOutlined } from '../icons';
-import styles from './requests.module.scss';
 
 type Props = {
     action: PendingAction | null;
@@ -52,7 +51,7 @@ type RequestDetails = {
 function getRequestDetails(
     action: PendingAction,
     t: (key: string, params?: Record<string, string>) => string,
-): RequestDetails {
+): RequestDetails | undefined {
     if (action.pending_action_type === PendingRequestType_DataProductOutputPort) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
@@ -126,27 +125,7 @@ function getRequestDetails(
         };
     }
 
-    return {
-        requesterName: '',
-        requesterEmail: '',
-        requestType: '',
-        source: {
-            name: '',
-            type: '',
-            icon: null,
-            email: '',
-        },
-        target: {
-            name: '',
-            type: '',
-            icon: null,
-        },
-        accessType: '',
-        justification: '',
-        hasJustification: false,
-        requestedOn: '',
-        title: t('Review Request'),
-    };
+    return undefined;
 }
 
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }: Props) {
@@ -166,6 +145,8 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
         onClose();
     };
 
+    if (!details) return null;
+
     return (
         <Modal
             title={details.title}
@@ -183,70 +164,74 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                 </Space>
             }
         >
-            <Flex vertical gap="middle">
-                {/* 3-Tile Access Visualization using Antd Row/Col */}
-                <Row gutter={16}>
-                    {/* Requesting Consumer Tile */}
-                    <Col flex={'1.2 1 0%'}>
-                        <Card size="small" className={styles.accessCard} variant="outlined">
-                            <Typography.Text strong style={{ fontSize: 12 }}>
-                                {t('Requesting Consumer')}
-                            </Typography.Text>
-                            <Flex align="center" gap="middle">
-                                <div className={styles.iconContainer}>{details.source.icon}</div>
-                                <Flex vertical>
-                                    <Typography.Text strong>{details.source.name}</Typography.Text>
-                                    {details.source.email && (
-                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                            {details.source.email}
-                                        </Typography.Text>
-                                    )}
-                                </Flex>
+            {/* 3-Tile Access Visualization using Antd Row/Col */}
+            <Row gutter={16}>
+                {/* Requesting Consumer Tile */}
+                <Col span={9}>
+                    <Card size="small" variant="outlined">
+                        <Typography.Text strong style={{ fontSize: 12 }}>
+                            {t('Requesting Consumer')}
+                        </Typography.Text>
+                        <Flex align="center" gap="middle">
+                            <Avatar
+                                icon={details.source.icon}
+                                style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                            />
+                            <Flex vertical>
+                                <Typography.Text strong>{details.source.name}</Typography.Text>
+                                {details.source.email && (
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                        {details.source.email}
+                                    </Typography.Text>
+                                )}
                             </Flex>
-                        </Card>
-                    </Col>
-                    {/* Requests Role/Access Tile (smaller) */}
-                    <Col flex={'0.7 1 0%'} style={{ display: 'flex' }}>
-                        <Card size="small" className={styles.accessCard} variant="outlined" style={{ width: '100%' }}>
-                            <Typography.Text strong style={{ fontSize: 12 }}>
-                                {details.requestType === t('Role Assignment')
-                                    ? t('Requests Role')
-                                    : t('Requests Access')}
+                        </Flex>
+                    </Card>
+                </Col>
+                {/* Requests Role/Access Tile (smaller) */}
+                <Col span={6} style={{ display: 'flex' }}>
+                    <Card size="small" variant="outlined" style={{ flex: 1 }}>
+                        <Typography.Text strong style={{ fontSize: 12 }}>
+                            {details.requestType === t('Role Assignment') ? t('Requests Role') : t('Requests Access')}
+                        </Typography.Text>
+                        <Flex align="center" justify="center">
+                            <Typography.Text strong style={{ fontSize: 16 }}>
+                                {details.accessType}
                             </Typography.Text>
-                            <Flex align="center" justify="center">
-                                <Typography.Text strong style={{ fontSize: 16 }}>
-                                    {details.accessType}
-                                </Typography.Text>
+                        </Flex>
+                    </Card>
+                </Col>
+                {/* Requested Resource Tile */}
+                <Col span={9}>
+                    <Card size="small" variant="outlined">
+                        <Typography.Text strong style={{ fontSize: 12 }}>
+                            {t('Requested Resource')}
+                        </Typography.Text>
+                        <Flex align="center" gap="middle">
+                            <Avatar
+                                icon={details.target.icon}
+                                style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                            />
+                            <Flex vertical>
+                                <Typography.Text strong>{details.target.name}</Typography.Text>
+                                {details.target.type && (
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                        {details.target.type}
+                                    </Typography.Text>
+                                )}
                             </Flex>
-                        </Card>
-                    </Col>
-                    {/* Requested Resource Tile */}
-                    <Col flex={'1.2 1 0%'}>
-                        <Card size="small" className={styles.accessCard} variant="outlined">
-                            <Typography.Text strong style={{ fontSize: 12 }}>
-                                {t('Requested Resource')}
-                            </Typography.Text>
-                            <Flex align="center" gap="middle">
-                                <div className={styles.iconContainer}>{details.target.icon}</div>
-                                <Flex vertical>
-                                    <Typography.Text strong>{details.target.name}</Typography.Text>
-                                    {details.target.type && (
-                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                            {details.target.type}
-                                        </Typography.Text>
-                                    )}
-                                </Flex>
-                            </Flex>
-                        </Card>
-                    </Col>
-                </Row>
+                        </Flex>
+                    </Card>
+                </Col>
+            </Row>
 
-                {/* Request Details */}
-                <div>
+            {/* Request Details */}
+            <Row style={{ marginTop: 16 }}>
+                <Col span={24}>
                     <Typography.Title level={5}>
                         <InfoCircleOutlined /> {t('Request Details')}
                     </Typography.Title>
-                    <Card size="small" className={styles.detailCard} variant="outlined">
+                    <Card size="small" variant="outlined">
                         <Flex vertical gap="middle">
                             {details.hasJustification && (
                                 <>
@@ -255,18 +240,17 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                             <FileTextOutlined />
                                             <Typography.Text strong>{t('Business Justification')}</Typography.Text>
                                         </Flex>
-                                        <div className={styles.justificationContainer}>
-                                            <Typography.Text>{details.justification}</Typography.Text>
-                                        </div>
+                                        <Typography.Text code>{details.justification}</Typography.Text>
                                     </Flex>
                                     <Divider style={{ margin: 0 }} />
                                 </>
                             )}
                             <Flex justify="space-between" gap="large">
                                 <Flex align="center" gap="middle">
-                                    <div className={styles.detailIconContainer}>
-                                        <UserOutlined />
-                                    </div>
+                                    <Avatar
+                                        icon={<UserOutlined />}
+                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                    />
                                     <Flex vertical>
                                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                             {t('Requested By')}
@@ -279,9 +263,10 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                 </Flex>
 
                                 <Flex align="center" gap="middle">
-                                    <div className={styles.detailIconContainer}>
-                                        <CalendarOutlined />
-                                    </div>
+                                    <Avatar
+                                        icon={<CalendarOutlined />}
+                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                    />
                                     <Flex vertical>
                                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                             {t('Requested On')}
@@ -292,8 +277,8 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                             </Flex>
                         </Flex>
                     </Card>
-                </div>
-            </Flex>
+                </Col>
+            </Row>
         </Modal>
     );
 }
