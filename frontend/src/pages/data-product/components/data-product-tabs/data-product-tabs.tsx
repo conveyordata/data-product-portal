@@ -16,7 +16,6 @@ import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?r
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
 import { HistoryTab } from '@/components/history/history-tab';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
@@ -38,7 +37,6 @@ const { Paragraph, Link } = Typography;
 
 type Props = {
     dataProductId: string;
-    isLoading: boolean;
 };
 
 type Tab = {
@@ -49,7 +47,7 @@ type Tab = {
     children: ReactNode;
 };
 
-export function DataProductTabs({ dataProductId, isLoading }: Props) {
+export function DataProductTabs({ dataProductId }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
     const currentUser = useSelector(selectCurrentUser);
@@ -223,10 +221,6 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             },
         ];
     }, [t]);
-
-    if (isLoading) {
-        return <LoadingSpinner />;
-    }
 
     return (
         <>

@@ -84,7 +84,9 @@ export function DataProduct() {
         });
     }, [dataProductId]);
 
-    if (isFetchingDataProduct) return <LoadingSpinner />;
+    //Only show the spinner when we have no data product to show, if we have one, we want to continue
+    //Otherwise updating the settings for examples updates the whole page to a spinner, which is very weird
+    if (isFetchingDataProduct && !dataProduct) return <LoadingSpinner />;
 
     if (!dataProduct) {
         navigate(ApplicationPaths.Studio, { replace: true });
@@ -132,7 +134,7 @@ export function DataProduct() {
                             tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
                         />
                         {/*  Tabs  */}
-                        <DataProductTabs dataProductId={dataProduct.id} isLoading={isFetchingDataProduct} />
+                        <DataProductTabs dataProductId={dataProduct.id} />
                     </Flex>
                 </Flex>
             </Flex>
