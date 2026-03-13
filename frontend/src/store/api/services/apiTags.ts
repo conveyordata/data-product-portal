@@ -115,6 +115,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
                 { type: TagTypes.DataProduct, id: result?.data_product?.id },
                 { type: TagTypes.History, id: result?.data_product?.id },
+                { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             ],
         },
         deleteDataProductRoleAssignment: {
@@ -154,6 +155,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.UserOutputPorts, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.OutputPort, id: result?.output_port?.id },
                 { type: TagTypes.History, id: result?.output_port?.id },
+                { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             ],
         },
         deleteOutputPortRoleAssignment: {

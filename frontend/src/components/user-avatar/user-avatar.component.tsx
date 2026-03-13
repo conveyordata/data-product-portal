@@ -1,26 +1,19 @@
-import { Avatar, Flex, Typography } from 'antd';
-
+import { UserOutlined } from '@ant-design/icons';
+import { Avatar } from 'antd';
+import type { UserContract } from '@/types/users';
 import styles from './user-avatar.module.scss';
 
 type Props = {
-    name: string;
-    email: string;
+    user?: UserContract;
     color?: string;
     size?: 'small' | 'default' | 'large';
 };
 
-export function UserAvatar({ name, email, color, size = 'default' }: Props) {
+export function UserAvatar({ user, color, size = 'default' }: Props) {
+    const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
     return (
-        <Flex align="center" className={styles.userAvatarContainer}>
-            <Avatar size={size} className={styles.avatar} style={{ backgroundColor: color }}>
-                {name.charAt(0)}
-            </Avatar>
-            <Flex vertical>
-                <Typography.Text strong>{name}</Typography.Text>
-                <Typography.Text type="secondary" className={styles.email}>
-                    {email}
-                </Typography.Text>
-            </Flex>
-        </Flex>
+        <Avatar size={size} className={styles.avatar} style={{ backgroundColor: color }}>
+            {userInitials || <UserOutlined />}
+        </Avatar>
     );
 }

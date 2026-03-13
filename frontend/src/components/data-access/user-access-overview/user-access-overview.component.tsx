@@ -1,7 +1,7 @@
 import { Flex, Typography, theme } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 
-import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
+import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component';
 import type { UserContract } from '@/types/users/user.contract';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 import styles from './user-access-overview.module.scss';
@@ -33,12 +33,7 @@ export function UserAccessOverview({ users = [], title }: Props) {
                 {/*  user avatar */}
                 <Flex vertical className={styles.userAvatarList}>
                     {sorted.map((user) => (
-                        <UserAvatar
-                            key={user.id}
-                            name={`${user.first_name} ${user.last_name}`}
-                            email={user.email}
-                            color={token.colorPrimary}
-                        />
+                        <UserAvatarWithEmail key={user.id} user={user} color={token.colorPrimary} />
                     ))}
                 </Flex>
             </Flex>
