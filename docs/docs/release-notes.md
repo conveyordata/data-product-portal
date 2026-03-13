@@ -9,6 +9,7 @@ sidebar_position: 200
 ### features
 
 - **[Postgresql]**: Postgresql plugin defining technical assets
+- **[Docs]**: Adding an architecture overview
 
 ### bugfixes
 
