@@ -8,3 +8,6 @@ class DataOutputTypes(str, Enum):
     SnowflakeTechnicalAssetConfiguration = "SnowflakeTechnicalAssetConfiguration"
     RedshiftTechnicalAssetConfiguration = "RedshiftTechnicalAssetConfiguration"
     PostgreSQLTechnicalAssetConfiguration = "PostgreSQLTechnicalAssetConfiguration"
+    OSISemanticModelTechnicalAssetConfiguration = (
+        "OSISemanticModelTechnicalAssetConfiguration"
+    )
