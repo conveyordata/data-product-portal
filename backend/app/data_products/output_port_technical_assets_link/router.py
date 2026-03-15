@@ -22,6 +22,7 @@ from app.data_products.output_port_technical_assets_link.schema_response import 
 from app.data_products.output_port_technical_assets_link.service import (
     DataOutputDatasetService,
 )
+from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.technical_assets import email
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
@@ -282,10 +283,14 @@ def link_output_port_to_technical_asset(
         Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
     )
     if authenticated_user not in approvers:
+        dataset_for_email = db.get(DatasetModel, dataset_link.dataset_id)
+        data_output_for_email = DataOutputService(db).get_data_output(
+            data_product_id, dataset_link.data_output_id
+        )
         background_tasks.add_task(
             email.send_link_dataset_email(
-                dataset_link.dataset,
-                dataset_link.data_output,
+                dataset_for_email,
+                data_output_for_email,
                 requester=deepcopy(authenticated_user),
                 approvers=[deepcopy(approver) for approver in approvers],
             )

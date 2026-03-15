@@ -105,6 +105,11 @@ services:
       timeout: 1s
       retries: 120
 
+  jaeger:
+    extends:
+      file: ../../compose.yaml
+      service: jaeger
+
   nginx:
     extends:
       file: ../../compose.yaml

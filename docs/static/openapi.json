@@ -3272,6 +3272,22 @@
               ],
               "title": "Filter To User With Assigment"
             }
+          },
+          {
+            "name": "filter_is_ephemeral",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter Is Ephemeral"
+            }
           }
         ],
         "responses": {
@@ -4478,6 +4494,200 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/NamespaceValidation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/ephemeral_access": {
+      "get": {
+        "tags": [
+          "Ephemeral Access"
+        ],
+        "summary": "List Ephemeral Access",
+        "operationId": "list_ephemeral_access",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EphemeralAccessResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Ephemeral Access Api V2 Ephemeral Access Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Ephemeral Access"
+        ],
+        "summary": "Create Ephemeral Access",
+        "operationId": "create_ephemeral_access",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EphemeralDataProductCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateEphemeralAccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/ephemeral_access/{id}/output_ports": {
+      "post": {
+        "tags": [
+          "Ephemeral Access"
+        ],
+        "summary": "Add Output Ports To Ephemeral",
+        "operationId": "add_output_ports_to_ephemeral",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOutputPortsToEphemeral"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/ephemeral_access/{id}": {
+      "delete": {
+        "tags": [
+          "Ephemeral Access"
+        ],
+        "summary": "Revoke Ephemeral Access",
+        "operationId": "revoke_ephemeral_access",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/ephemeral_access/{id}/promote": {
+      "post": {
+        "tags": [
+          "Ephemeral Access"
+        ],
+        "summary": "Promote Ephemeral Access",
+        "operationId": "promote_ephemeral_access",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoteEphemeralAccessResponse"
                 }
               }
             }
@@ -13786,6 +13996,24 @@
         ],
         "title": "AccessResponse"
       },
+      "AddOutputPortsToEphemeral": {
+        "properties": {
+          "output_port_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Output Port Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_ids"
+        ],
+        "title": "AddOutputPortsToEphemeral"
+      },
       "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest": {
         "properties": {
           "technical_asset_id": {
@@ -14100,6 +14328,20 @@
           "id"
         ],
         "title": "CreateDomainResponse"
+      },
+      "CreateEphemeralAccessResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateEphemeralAccessResponse"
       },
       "CreateGlobalRoleAssignment": {
         "properties": {
@@ -18084,6 +18326,156 @@
         ],
         "title": "EnvironmentsGet"
       },
+      "EphemeralAccessPortResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port_name": {
+            "type": "string",
+            "title": "Output Port Name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "output_port_name",
+          "status",
+          "data_product_id"
+        ],
+        "title": "EphemeralAccessPortResponse"
+      },
+      "EphemeralAccessResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataProductStatus"
+          },
+          "is_ephemeral": {
+            "type": "boolean",
+            "title": "Is Ephemeral"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "ttl_hours": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ttl Hours"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          },
+          "input_ports": {
+            "items": {
+              "$ref": "#/components/schemas/EphemeralAccessPortResponse"
+            },
+            "type": "array",
+            "title": "Input Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "status",
+          "is_ephemeral",
+          "expires_at",
+          "ttl_hours",
+          "domain",
+          "input_ports"
+        ],
+        "title": "EphemeralAccessResponse"
+      },
+      "EphemeralDataProductCreate": {
+        "properties": {
+          "output_port_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Output Port Ids"
+          },
+          "ttl_hours": {
+            "type": "integer",
+            "title": "Ttl Hours",
+            "default": 8
+          },
+          "justification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Justification"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_ids"
+        ],
+        "title": "EphemeralDataProductCreate"
+      },
       "EventEntityType": {
         "type": "string",
         "enum": [
@@ -20723,6 +21115,20 @@
           "access_granularity"
         ],
         "title": "PostgreSQLTechnicalAssetConfiguration"
+      },
+      "PromoteEphemeralAccessResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PromoteEphemeralAccessResponse"
       },
       "Prototype": {
         "type": "integer",

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
+import { MyAccessSection } from '@/pages/home/components/my-access-section/my-access-section.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { PendingRequestsInbox } from './components/pending-requests-inbox/pending-requests-inbox';
 import styles from './home.module.scss';
@@ -33,6 +34,7 @@ export function Home() {
                         <DatasetsInbox />
                     </Col>
                 </Row>
+                <MyAccessSection />
             </div>
         </div>
     );

@@ -39,12 +39,12 @@ class DataOutputDatasetAssociation(Base, BaseORM):
     data_output: Mapped["TechnicalAsset"] = relationship(
         back_populates="dataset_links",
         order_by="TechnicalAsset.name",
-        lazy="joined",
+        lazy="raise",
     )
     dataset: Mapped["Dataset"] = relationship(
         back_populates="data_output_links",
         order_by="Dataset.name",
-        lazy="joined",
+        lazy="raise",
     )
     requested_by: Mapped["User"] = relationship(
         foreign_keys=[requested_by_id],

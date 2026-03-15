@@ -49,7 +49,9 @@ export function DataProductsTab() {
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
     const { data: { data_products: dataProducts = [] } = {}, isFetching } = useGetDataProductsQuery(
-        showAllProducts ? undefined : (currentUser?.id ?? ''),
+        showAllProducts
+            ? { filterIsEphemeral: false }
+            : { filterToUserWithAssigment: currentUser?.id ?? '', filterIsEphemeral: false },
         { skip: !currentUser },
     );
 

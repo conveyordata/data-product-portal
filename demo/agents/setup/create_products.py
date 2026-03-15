@@ -23,15 +23,30 @@ OWNER_ID = "b72fca38-17ff-4259-a075-5aaa5973343c"
 # ---------------------------------------------------------------------------
 
 
+def timed(label: str):
+    """Context manager that prints elapsed time for a block."""
+    import contextlib
+
+    @contextlib.contextmanager
+    def _ctx():
+        t0 = time.perf_counter()
+        yield
+        elapsed = time.perf_counter() - t0
+        print(f"  [{elapsed:.2f}s] {label}")
+
+    return _ctx()
+
+
 def wait_for_portal(max_retries=30, delay=2):
     print("Waiting for portal to be ready...")
+    t0 = time.perf_counter()
     for _ in range(max_retries):
         try:
             response = requests.get(
                 f"{PORTAL_URL}/api/v2/configuration/data_product_lifecycles"
             )
             if response.status_code == 200:
-                print("Portal is ready.")
+                print(f"  [{time.perf_counter() - t0:.2f}s] Portal is ready.")
                 return True
         except requests.exceptions.ConnectionError:
             pass
@@ -121,16 +136,19 @@ def create_data_product(
 def wait_for_technical_assets(dp_id: str, count: int = 2, max_retries=30, delay=2):
     """Poll until the data product has at least `count` technical assets."""
     print(f"  Waiting for provisioner to create {count} technical assets...")
-    for _ in range(max_retries):
+    t0 = time.perf_counter()
+    for attempt in range(max_retries):
         response = requests.get(
             f"{PORTAL_URL}/api/v2/data_products/{dp_id}/technical_assets"
         )
         response.raise_for_status()
         tas = response.json().get("technical_assets", [])
         if len(tas) >= count:
-            ids = [ta["id"] for ta in tas]
-            print(f"  Found {len(tas)} technical assets.")
-            return ids
+            elapsed = time.perf_counter() - t0
+            print(
+                f"  [{elapsed:.2f}s] Found {len(tas)} technical assets after {attempt + 1} poll(s)."
+            )
+            return [ta["id"] for ta in tas]
         time.sleep(delay)
     raise TimeoutError(f"Data product {dp_id} did not get {count} TAs in time.")
 
@@ -588,8 +606,10 @@ PRODUCTS = [
 def provision_product(product: dict):
     namespace = product["namespace"]
     print(f"\n[{product['name']}]")
+    t_product = time.perf_counter()
 
-    dp = create_data_product(**product)
+    with timed("create_data_product"):
+        dp = create_data_product(**product)
     dp_id = dp["id"]
 
     # Wait for provisioner to create the OSI + PostgreSQL technical assets
@@ -597,25 +617,30 @@ def provision_product(product: dict):
 
     # Create the output port
     op_cfg = OUTPUT_PORTS[namespace]
-    op_id = create_output_port(
-        dp_id=dp_id,
-        name=op_cfg["name"],
-        namespace=op_cfg["namespace"],
-        description=op_cfg["description"],
-        about=op_cfg["about"],
-        access_type=op_cfg["access_type"],
-    )
+    with timed("create_output_port"):
+        op_id = create_output_port(
+            dp_id=dp_id,
+            name=op_cfg["name"],
+            namespace=op_cfg["namespace"],
+            description=op_cfg["description"],
+            about=op_cfg["about"],
+            access_type=op_cfg["access_type"],
+        )
 
     # Link and approve both technical assets
-    for ta_id in ta_ids:
-        link_and_approve_ta(dp_id, op_id, ta_id)
-    print(f"  Linked and approved {len(ta_ids)} technical assets to output port.")
+    with timed(f"link_and_approve {len(ta_ids)} TAs"):
+        for ta_id in ta_ids:
+            link_and_approve_ta(dp_id, op_id, ta_id)
 
     # Set curated queries
-    set_curated_queries(dp_id, op_id, op_cfg["curated_queries"])
+    with timed("set_curated_queries"):
+        set_curated_queries(dp_id, op_id, op_cfg["curated_queries"])
+
+    print(f"  [{time.perf_counter() - t_product:.2f}s] total for {product['name']}")
 
 
 def main():
+    t_start = time.perf_counter()
     if not wait_for_portal():
         sys.exit(1)
 
@@ -625,6 +650,8 @@ def main():
         except Exception as e:
             print(f"Failed to provision {product['name']}: {e}")
             sys.exit(1)
+
+    print(f"\n[{time.perf_counter() - t_start:.2f}s] total")
 
     print(
         "\nAll data products, output ports, and curated queries created successfully."

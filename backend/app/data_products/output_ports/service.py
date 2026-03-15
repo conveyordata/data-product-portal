@@ -91,7 +91,9 @@ class OutputPortService:
         dataset = self.db.scalar(
             query.options(
                 selectinload(DatasetModel.data_product_links),
-                selectinload(DatasetModel.data_output_links),
+                selectinload(DatasetModel.data_output_links).selectinload(
+                    DataOutputDatasetAssociationModel.data_output
+                ),
             )
         )
 
@@ -393,7 +395,9 @@ class OutputPortService:
             .where(DatasetModel.data_product_id == data_product_id)
             .options(
                 selectinload(DatasetModel.data_product_links),
-                selectinload(DatasetModel.data_output_links),
+                selectinload(DatasetModel.data_output_links).selectinload(
+                    DataOutputDatasetAssociationModel.data_output
+                ),
             )
         )
         nodes = [

@@ -32,10 +32,9 @@ export function DataProductsInbox({ userId }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
     const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
-        useGetDataProductsQuery(userId);
+        useGetDataProductsQuery({ filterToUserWithAssigment: userId });
 
-    const { data: { data_products: dataProducts = [] } = {}, isFetching: isFetchingAll } =
-        useGetDataProductsQuery(undefined);
+    const { data: { data_products: dataProducts = [] } = {}, isFetching: isFetchingAll } = useGetDataProductsQuery({});
 
     const lastVisitedDataProducts: LastVisitedItem[] = getItemFromLocalStorage(
         LocalStorageKeys.LastVisitedDataProducts,

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { api } from "@/store/api/services/generated/versionApi";
+import { api } from "@/store/api/services/generated/ephemeralAccessApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({}),
   overrideExisting: false,

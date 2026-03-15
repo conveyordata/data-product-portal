@@ -5,7 +5,7 @@ from uuid import UUID
 import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
@@ -26,7 +26,11 @@ class DataOutputDatasetService:
         self.db = db
 
     def get_link_by_id(self, id: UUID) -> DataOutputDatasetAssociationModel:
-        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
+        current_link = self.db.get(
+            DataOutputDatasetAssociationModel,
+            id,
+            options=[selectinload(DataOutputDatasetAssociationModel.dataset)],
+        )
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -136,6 +140,12 @@ class DataOutputDatasetService:
                     )
                 )
                 .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+                .options(
+                    selectinload(
+                        DataOutputDatasetAssociationModel.dataset
+                    ).selectinload(DatasetModel.data_product),
+                    selectinload(DataOutputDatasetAssociationModel.data_output),
+                )
             )
             .unique()
             .all()

@@ -18,7 +18,8 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products`,
         params: {
-          filter_to_user_with_assigment: queryArg,
+          filter_to_user_with_assigment: queryArg.filterToUserWithAssigment,
+          filter_is_ephemeral: queryArg.filterIsEphemeral,
         },
       }),
     }),
@@ -152,7 +153,10 @@ export type CreateDataProductApiResponse =
 export type CreateDataProductApiArg = DataProductCreate;
 export type GetDataProductsApiResponse =
   /** status 200 Successful Response */ GetDataProductsResponse;
-export type GetDataProductsApiArg = (string | null) | undefined;
+export type GetDataProductsApiArg = {
+  filterToUserWithAssigment?: string | null;
+  filterIsEphemeral?: boolean | null;
+};
 export type RemoveDataProductApiResponse =
   /** status 200 Successful Response */ any;
 export type RemoveDataProductApiArg = string;

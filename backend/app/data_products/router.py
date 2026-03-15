@@ -624,12 +624,14 @@ def get_data_products_old(
 def get_data_products(
     db: Session = Depends(get_db_session),
     filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
+    filter_is_ephemeral: Optional[bool] = Query(default=None),
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
             DataProductsGet.model_validate(data_product_old).convert()
-            for data_product_old in get_data_products_old(
-                db, filter_to_user_with_assigment
+            for data_product_old in DataProductService(db).get_data_products(
+                filter_to_user_with_assigment=filter_to_user_with_assigment,
+                filter_is_ephemeral=filter_is_ephemeral,
             )
         ]
     )

@@ -16,6 +16,8 @@ import {
     Flex,
     Form,
     type FormProps,
+    Input,
+    Radio,
     Row,
     Select,
     Skeleton,
@@ -24,7 +26,7 @@ import {
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { parseAsString, useQueryState } from 'nuqs';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
@@ -41,12 +43,22 @@ import {
     useLinkInputPortsToDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useCreateEphemeralAccessMutation } from '@/store/api/services/generated/ephemeralAccessApi.ts';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 
 const cartFormDataStorageKey = 'cart-form-data';
+
+type CheckoutMode = 'existing' | 'new' | 'exploration';
+
+const TTL_OPTIONS = [
+    { value: 4, label: '4h' },
+    { value: 8, label: '8h' },
+    { value: 24, label: '24h' },
+    { value: 72, label: '72h' },
+];
 
 function Cart() {
     const { t } = useTranslation();
@@ -55,6 +67,7 @@ function Cart() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
+    const [checkoutMode, setCheckoutMode] = useState<CheckoutMode>('existing');
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
         setBreadcrumbs([
@@ -81,6 +94,8 @@ function Cart() {
         useSearchOutputPortsQuery({ limit: 1000 });
     const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
         useLinkInputPortsToDataProductMutation();
+    const [createEphemeralAccess, { isSuccess: ephemeralSuccess, isLoading: isCreatingEphemeral }] =
+        useCreateEphemeralAccessMutation();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
     const cartOutputPorts = useMemo(() => {
         if (cartDatasetIds.length === 0) {
@@ -91,14 +106,18 @@ function Cart() {
 
     const currentUser = useSelector(selectCurrentUser);
     const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
-        useGetDataProductsQuery(currentUser?.id, {
-            skip: currentUser === null || !currentUser?.id,
-        });
+        useGetDataProductsQuery(
+            { filterToUserWithAssigment: currentUser?.id, filterIsEphemeral: false },
+            { skip: currentUser === null || !currentUser?.id },
+        );
     const [form] = Form.useForm<CartFormData>();
 
     type CartFormData = {
         dataProductId?: string;
         justification?: string;
+        explorationQuestion?: string;
+        explorationName?: string;
+        ttlHours?: number;
     };
     const initialValues: CartFormData | undefined = useMemo(() => {
         let data: CartFormData = {};
@@ -119,12 +138,22 @@ function Cart() {
     }, [createdProductId, userDataProducts, isFetchingUserDataProducts]);
 
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
-        if (
-            !values.justification ||
-            !values.dataProductId ||
-            cartOutputPorts === undefined ||
-            cartOutputPorts.length === 0
-        ) {
+        if (cartOutputPorts === undefined || cartOutputPorts.length === 0) {
+            return;
+        }
+
+        if (checkoutMode === 'exploration') {
+            if (!values.explorationQuestion) return;
+            createEphemeralAccess({
+                output_port_ids: cartOutputPorts.map((ds) => ds.id),
+                justification: values.explorationQuestion,
+                ttl_hours: values.ttlHours ?? 8,
+                name: values.explorationName || undefined,
+            });
+            return;
+        }
+
+        if (!values.justification || !values.dataProductId) {
             return;
         }
         posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED, {
@@ -204,6 +233,15 @@ function Cart() {
         }
     }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
 
+    useEffect(() => {
+        if (ephemeralSuccess) {
+            dispatch(clearCart());
+            localStorage.removeItem(cartFormDataStorageKey);
+            dispatchMessage({ content: t('Exploration started successfully.'), type: 'success' });
+            navigate(ApplicationPaths.Home);
+        }
+    }, [ephemeralSuccess, dispatch, navigate, t]);
+
     const submitFormIssues = useMemo(() => {
         const submitFormIssues = [];
         if (overlappingOutputPortIds.length > 0) {
@@ -252,64 +290,130 @@ function Cart() {
                             onFinish={onFinish}
                             form={form}
                             onValuesChange={onValuesChange}
-                            initialValues={initialValues}
+                            initialValues={{ ...initialValues, ttlHours: 8 }}
                         >
-                            <Form.Item<CartFormData>
-                                name="dataProductId"
-                                label={t('Data Product')}
-                                rules={[{ required: true, message: t('Please select a Data Product') }]}
-                            >
-                                <Select
-                                    placeholder={t('Select a Data Product')}
-                                    options={dataProductOptions}
-                                    loading={isFetchingUserDataProducts}
-                                    showSearch={{
-                                        filterOption: (input, option) =>
-                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
-                                    }}
-                                    popupRender={(menu) => (
-                                        <>
-                                            <Button
-                                                type="text"
-                                                icon={<PlusOutlined />}
-                                                style={{ width: '100%' }}
-                                                onClick={createNewDataProduct}
-                                            >
-                                                {t('Create new Data Product')}
-                                            </Button>
-                                            <Divider style={{ margin: '8px 0' }} />
-                                            {menu}
-                                        </>
-                                    )}
-                                />
+                            <Form.Item label={t('What is this access for?')}>
+                                <Radio.Group
+                                    value={checkoutMode}
+                                    onChange={(e) => setCheckoutMode(e.target.value as CheckoutMode)}
+                                >
+                                    <Radio value="existing">{t('An existing data product')}</Radio>
+                                    <Radio value="new">{t('A new data product')}</Radio>
+                                    <Radio value="exploration">{t('An exploration')}</Radio>
+                                </Radio.Group>
                             </Form.Item>
-                            {submitFormIssues.length > 0 && (
+
+                            {checkoutMode === 'existing' && (
+                                <>
+                                    <Form.Item<CartFormData>
+                                        name="dataProductId"
+                                        label={t('Data Product')}
+                                        rules={[{ required: true, message: t('Please select a Data Product') }]}
+                                    >
+                                        <Select
+                                            placeholder={t('Select a Data Product')}
+                                            options={dataProductOptions}
+                                            loading={isFetchingUserDataProducts}
+                                            showSearch={{
+                                                filterOption: (input, option) =>
+                                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+                                            }}
+                                            popupRender={(menu) => (
+                                                <>
+                                                    <Button
+                                                        type="text"
+                                                        icon={<PlusOutlined />}
+                                                        style={{ width: '100%' }}
+                                                        onClick={createNewDataProduct}
+                                                    >
+                                                        {t('Create new Data Product')}
+                                                    </Button>
+                                                    <Divider style={{ margin: '8px 0' }} />
+                                                    {menu}
+                                                </>
+                                            )}
+                                        />
+                                    </Form.Item>
+                                    {submitFormIssues.length > 0 && (
+                                        <Alert
+                                            title={t('Cannot submit request')}
+                                            description={
+                                                <ul style={{ margin: 0, paddingLeft: 20 }}>
+                                                    {submitFormIssues.map((reason) => (
+                                                        <li key={reason.key}>{reason.value}</li>
+                                                    ))}
+                                                </ul>
+                                            }
+                                            type="warning"
+                                            showIcon
+                                            style={{ marginBottom: 16 }}
+                                        />
+                                    )}
+                                    <Form.Item<CartFormData>
+                                        name="justification"
+                                        label={t('Business justification')}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: t('Please explain why you need access to these Output Ports'),
+                                            },
+                                        ]}
+                                    >
+                                        <TextArea
+                                            rows={4}
+                                            placeholder={t('Explain why you need access to these Output Ports')}
+                                        />
+                                    </Form.Item>
+                                </>
+                            )}
+
+                            {checkoutMode === 'new' && (
                                 <Alert
-                                    title={t('Cannot submit request')}
-                                    description={
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {submitFormIssues.map((reason) => (
-                                                <li key={reason.key}>{reason.value}</li>
-                                            ))}
-                                        </ul>
-                                    }
-                                    type="warning"
+                                    message={t('Create a data product first')}
+                                    description={t(
+                                        'You will be redirected to create a new data product. Come back to the cart afterwards to link your output ports.',
+                                    )}
+                                    type="info"
                                     showIcon
                                     style={{ marginBottom: 16 }}
+                                    action={
+                                        <Button type="primary" onClick={createNewDataProduct}>
+                                            {t('Create Data Product')}
+                                        </Button>
+                                    }
                                 />
                             )}
-                            <Form.Item<CartFormData>
-                                name="justification"
-                                label={'Business justification'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t('Please explain why you need access to these Output Ports'),
-                                    },
-                                ]}
-                            >
-                                <TextArea rows={4} placeholder="Explain why you need access to these Output Ports" />
-                            </Form.Item>
+
+                            {checkoutMode === 'exploration' && (
+                                <>
+                                    <Form.Item<CartFormData>
+                                        name="explorationQuestion"
+                                        label={t('What are you trying to find out?')}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: t('Please describe your business question'),
+                                            },
+                                        ]}
+                                    >
+                                        <TextArea
+                                            rows={4}
+                                            placeholder={t('e.g. How much revenue did we generate last quarter?')}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item<CartFormData>
+                                        name="explorationName"
+                                        label={t('Name (optional)')}
+                                        tooltip={t('Leave blank for a random name')}
+                                    >
+                                        <Input maxLength={80} placeholder={t('e.g. Q1 Revenue Analysis')} />
+                                    </Form.Item>
+                                    <Form.Item<CartFormData> name="ttlHours" label={t('Duration')}>
+                                        <Select options={TTL_OPTIONS} style={{ width: 120 }} />
+                                    </Form.Item>
+                                </>
+                            )}
+
                             <Form.Item label={null}>
                                 <Flex gap={'small'}>
                                     <Link to={ApplicationPaths.Marketplace} style={{ width: '100%' }}>
@@ -317,20 +421,24 @@ function Cart() {
                                             {t('Continue browsing')}
                                         </Button>
                                     </Link>
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        style={{ width: '100%' }}
-                                        loading={isRequestingAccess}
-                                        disabled={
-                                            fetchingOutputPorts ||
-                                            submitFormIssues.length > 0 ||
-                                            cartOutputPorts === undefined ||
-                                            cartOutputPorts?.length === 0
-                                        }
-                                    >
-                                        {t('Submit access requests')}
-                                    </Button>
+                                    {checkoutMode !== 'new' && (
+                                        <Button
+                                            type="primary"
+                                            htmlType="submit"
+                                            style={{ width: '100%' }}
+                                            loading={isRequestingAccess || isCreatingEphemeral}
+                                            disabled={
+                                                fetchingOutputPorts ||
+                                                (checkoutMode === 'existing' && submitFormIssues.length > 0) ||
+                                                cartOutputPorts === undefined ||
+                                                cartOutputPorts?.length === 0
+                                            }
+                                        >
+                                            {checkoutMode === 'exploration'
+                                                ? t('Start exploration')
+                                                : t('Submit access requests')}
+                                        </Button>
+                                    )}
                                 </Flex>
                             </Form.Item>
                         </Form>

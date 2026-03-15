@@ -1,7 +1,8 @@
 import uuid
-from typing import TYPE_CHECKING
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -38,6 +39,11 @@ class DataProduct(Base, BaseORM):
         Enum(DataProductStatus), default=DataProductStatus.ACTIVE
     )
     usage = Column(String, nullable=True)
+    is_ephemeral = Column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    expires_at: Optional[datetime] = Column(DateTime, nullable=True)
+    ttl_hours: Optional[int] = Column(Integer, nullable=True)
 
     # Foreign keys
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))

@@ -21,6 +21,9 @@ from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
 from app.database import database
+from app.ephemeral_access.background_tasks import (
+    cleanup_expired_ephemeral_data_products,
+)
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
 from app.mcp.router import router as mcp_router
@@ -73,9 +76,13 @@ async def lifespan(_: FastAPI):
     backend_analytics(API_VERSION)
     admin_task = asyncio.create_task(check_expired_admins())
     device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
+    ephemeral_cleanup_task = asyncio.create_task(
+        cleanup_expired_ephemeral_data_products()
+    )
     yield
     admin_task.cancel()
     device_flow_cleanup_task.cancel()
+    ephemeral_cleanup_task.cancel()
 
 
 # Combine both lifespans

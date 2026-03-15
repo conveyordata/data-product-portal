@@ -42,6 +42,7 @@ export const Sidebar = () => {
             icon: <ShopOutlined />,
             key: ApplicationPaths.Marketplace,
         },
+        { type: 'divider' },
         {
             label: <Link to={ApplicationPaths.Explorer}>{t('Explorer')}</Link>,
             icon: <CompassOutlined />,

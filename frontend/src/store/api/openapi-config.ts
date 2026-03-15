@@ -25,6 +25,7 @@ const services = [
     { name: 'Search Output ports', file: 'outputPortsSearch' },
     { name: 'Graph', file: 'graph' },
     { name: 'Version', file: 'version' },
+    { name: 'Ephemeral Access', file: 'ephemeralAccess' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
 ];
 

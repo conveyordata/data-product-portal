@@ -106,7 +106,8 @@ class DataProductService:
             options=[
                 selectinload(DataProductModel.dataset_links)
                 .selectinload(DataProductDatasetModel.dataset)
-                .selectinload(DatasetModel.data_output_links),
+                .selectinload(DatasetModel.data_output_links)
+                .selectinload(DataOutputDatasetAssociation.data_output),
                 selectinload(DataProductModel.datasets).selectinload(DatasetModel.tags),
                 selectinload(DataProductModel.datasets).raiseload("*"),
                 selectinload(DataProductModel.data_outputs).selectinload(
@@ -159,6 +160,7 @@ class DataProductService:
     def get_data_products(
         self,
         filter_to_user_with_assigment: Optional[UUID] = None,
+        filter_is_ephemeral: Optional[bool] = None,
     ) -> Sequence[DataProductsGet]:
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -177,6 +179,8 @@ class DataProductService:
                     decision=DecisionStatus.APPROVED,
                 )
             )
+        if filter_is_ephemeral is not None:
+            query = query.filter(DataProductModel.is_ephemeral == filter_is_ephemeral)
         query = query.order_by(asc(DataProductModel.name))
 
         dps = self.db.scalars(query).unique().all()
