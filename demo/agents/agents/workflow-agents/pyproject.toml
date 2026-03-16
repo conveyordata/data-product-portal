@@ -1,5 +1,5 @@
 [project]
-name = "intake-agent"
+name = "workflow-agents"
 version = "0.1.0"
 description = ""
 authors = [
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "intake", from = "."}]
+packages = [{include = "workflow_agents"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

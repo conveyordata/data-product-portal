@@ -396,7 +396,17 @@ def handle_approve_link(
             f"{portal_url}/api/v2/data_products/{consumer_data_product_id}"
         )
         consumer_response.raise_for_status()
-        consumer_namespace = consumer_response.json().get("namespace")
+        consumer_dp = consumer_response.json()
+        if consumer_dp.get("is_ephemeral", False):
+            logging.info(
+                f"Skipping DB grant for ephemeral consumer {consumer_data_product_id}"
+            )
+            return {
+                "status": "success",
+                "action": "approve_link",
+                "note": "ephemeral consumer — DB grant skipped",
+            }
+        consumer_namespace = consumer_dp.get("namespace")
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to fetch data product details: {e}")
         return {"status": "error", "message": "Failed to fetch data product details"}
@@ -478,13 +488,21 @@ def handle_link_input_ports(consumer_dp_id: str, payload: Dict[str, Any]):
         logging.info("No input_port_links in response, nothing to do")
         return {"status": "success", "action": "link_input_ports", "note": "no links"}
 
-    # Get consumer namespace
+    # Get consumer namespace (and guard against ephemeral consumers)
     try:
         consumer_resp = requests.get(
             f"{portal_url}/api/v2/data_products/{consumer_dp_id}"
         )
         consumer_resp.raise_for_status()
-        consumer_namespace = consumer_resp.json().get("namespace")
+        consumer_dp_data = consumer_resp.json()
+        if consumer_dp_data.get("is_ephemeral", False):
+            logging.info(f"Skipping DB grant for ephemeral consumer {consumer_dp_id}")
+            return {
+                "status": "success",
+                "action": "link_input_ports",
+                "note": "ephemeral consumer — DB grant skipped",
+            }
+        consumer_namespace = consumer_dp_data.get("namespace")
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to fetch consumer data product {consumer_dp_id}: {e}")
         return {"status": "error", "message": str(e)}

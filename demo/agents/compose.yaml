@@ -65,8 +65,8 @@ services:
       backend:
         condition: service_started
 
-  intake:
-    build: ./agents/intake-agent
+  workflow-agents:
+    build: ./agents/workflow-agents
     env_file:
       - .env.secret
     environment:
@@ -74,12 +74,15 @@ services:
       - PORTAL_URL=http://localhost:8080
       - DEFAULT_USERNAME=john.scientist@pharma.com
       - AGENT_DATA_DIR=/agent_data
+      - DATA_AGENTS_URL=http://data-agents:7070
     volumes:
       - agent_data:/agent_data
     ports:
       - "7071:7071"
     depends_on:
       backend:
+        condition: service_started
+      data-agents:
         condition: service_started
 
   postgresql:

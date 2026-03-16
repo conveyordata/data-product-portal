@@ -18,8 +18,8 @@ RUN apt-get update && apt-get upgrade -y && \
 COPY pyproject.toml ./
 RUN poetry install --no-root
 
-COPY ./intake_agent ./intake_agent
+COPY ./workflow_agents ./workflow_agents
 
 EXPOSE 7071
 
-CMD ["uvicorn", "intake_agent.server:app", "--host", "0.0.0.0", "--port", "7071"]
+CMD ["uvicorn", "workflow_agents.server:app", "--host", "0.0.0.0", "--port", "7071"]

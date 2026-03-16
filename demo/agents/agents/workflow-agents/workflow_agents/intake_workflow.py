@@ -4,174 +4,22 @@ from __future__ import annotations
 
 import json
 import os
-import re
 from typing import Any
-
-import httpx
 
 from agno.agent import Agent
 from agno.db.sqlite import SqliteDb
 from agno.models.anthropic import Claude
 from agno.workflow import Condition, Step, StepInput, StepOutput, Workflow
 
-# ---------------------------------------------------------------------------
-# Portal REST client
-# ---------------------------------------------------------------------------
+from workflow_agents.helpers import (
+    _format_ports_list,
+    _fuzzy_match,
+    _parse_requirements_json,
+    _parse_user_selection,
+)
+from workflow_agents.portal_client import PortalClient
 
-_PORTAL_API_URL = os.environ.get("PORTAL_API_URL", "http://backend:5050")
-_PORTAL_ADMIN_USER = os.environ.get("PORTAL_ADMIN_USER", "")
-_PORTAL_ADMIN_PASSWORD = os.environ.get("PORTAL_ADMIN_PASSWORD", "")
 _AGENT_DATA_DIR = os.environ.get("AGENT_DATA_DIR", "/agent_data")
-
-
-class PortalClient:
-    """Thin wrapper around the Portal REST API using httpx."""
-
-    def __init__(self) -> None:
-        # In sandbox mode (OIDC_ENABLED=false) no credentials are required.
-        # Auth headers are set only when explicitly configured.
-        headers: dict[str, str] = {}
-        if _PORTAL_ADMIN_USER and _PORTAL_ADMIN_PASSWORD:
-            import base64
-
-            creds = base64.b64encode(
-                f"{_PORTAL_ADMIN_USER}:{_PORTAL_ADMIN_PASSWORD}".encode()
-            ).decode()
-            headers["Authorization"] = f"Basic {creds}"
-
-        self._client = httpx.Client(
-            base_url=_PORTAL_API_URL,
-            headers=headers,
-            timeout=30.0,
-        )
-
-    def get_domains(self) -> list[dict[str, Any]]:
-        resp = self._client.get("/api/v2/configuration/domains")
-        resp.raise_for_status()
-        return resp.json().get("domains", [])
-
-    def get_data_product_types(self) -> list[dict[str, Any]]:
-        resp = self._client.get("/api/v2/configuration/data_product_types")
-        resp.raise_for_status()
-        return resp.json().get("data_product_types", [])
-
-    def get_lifecycles(self) -> list[dict[str, Any]]:
-        resp = self._client.get("/api/v2/configuration/data_product_lifecycles")
-        resp.raise_for_status()
-        return resp.json().get("data_product_life_cycles", [])
-
-    def get_current_user(self) -> dict[str, Any]:
-        """Return the first user matching DEFAULT_USERNAME, or any user as fallback."""
-        default_email = os.environ.get("DEFAULT_USERNAME", "")
-        resp = self._client.get("/api/v2/users")
-        resp.raise_for_status()
-        users = resp.json().get("users", [])
-        if not users:
-            raise RuntimeError("No users found in Portal")
-        if default_email:
-            for u in users:
-                if u.get("email", "").lower() == default_email.lower():
-                    return u
-        return users[0]
-
-    def search_data_products(self, query: str) -> list[dict[str, Any]]:
-        resp = self._client.get("/api/v2/data_products")
-        resp.raise_for_status()
-        products = resp.json().get("data_products", [])
-        if not query:
-            return products
-        q = query.lower()
-        return [
-            p
-            for p in products
-            if q in (p.get("name") or "").lower()
-            or q in (p.get("description") or "").lower()
-        ]
-
-    def create_data_product(
-        self,
-        name: str,
-        namespace: str,
-        description: str,
-        domain_id: str,
-        type_id: str,
-        lifecycle_id: str,
-        owner_id: str,
-        about: str = "",
-    ) -> dict[str, Any]:
-        payload = {
-            "name": name,
-            "namespace": namespace,
-            "description": description,
-            "domain_id": domain_id,
-            "type_id": type_id,
-            "lifecycle_id": lifecycle_id,
-            "about": about,
-            "tag_ids": [],
-            "owners": [owner_id],
-        }
-        resp = self._client.post("/api/v2/data_products", json=payload)
-        resp.raise_for_status()
-        return resp.json()
-
-    def search_output_ports(self, query: str) -> list[dict[str, Any]]:
-        params: dict[str, Any] = {}
-        if query and len(query) >= 3:
-            params["query"] = query
-        resp = self._client.get("/api/v2/search/output_ports", params=params)
-        resp.raise_for_status()
-        return resp.json().get("output_ports", [])
-
-    def get_output_port(self, dataset_id: str) -> dict[str, Any]:
-        resp = self._client.get(f"/api/v2/datasets/{dataset_id}")
-        resp.raise_for_status()
-        return resp.json()
-
-    def request_output_port_access(
-        self,
-        consumer_data_product_id: str,
-        dataset_ids: list[str],
-        justification: str,
-    ) -> dict[str, Any]:
-        """Link output ports to the consumer data product (requesting access)."""
-        payload = {
-            "input_ports": dataset_ids,
-            "justification": justification,
-        }
-        resp = self._client.post(
-            f"/api/v2/data_products/{consumer_data_product_id}/link_input_ports",
-            json=payload,
-        )
-        resp.raise_for_status()
-        return resp.json()
-
-    def get_input_ports(self, consumer_data_product_id: str) -> list[dict[str, Any]]:
-        """Return input port links for the consumer data product."""
-        resp = self._client.get(
-            f"/api/v2/data_products/{consumer_data_product_id}/input_ports"
-        )
-        resp.raise_for_status()
-        return resp.json().get("input_ports", [])
-
-
-# ---------------------------------------------------------------------------
-# Helper utilities
-# ---------------------------------------------------------------------------
-
-
-def _fuzzy_match(
-    name: str, items: list[dict[str, Any]], key: str = "name"
-) -> dict[str, Any] | None:
-    """Case-insensitive substring match on items."""
-    name_lower = name.lower().strip()
-    for item in items:
-        if (item.get(key) or "").lower().strip() == name_lower:
-            return item
-    # Partial match fallback
-    for item in items:
-        if name_lower in (item.get(key) or "").lower():
-            return item
-    return None
 
 
 # ---------------------------------------------------------------------------
@@ -245,21 +93,6 @@ def _make_requirements_agent(portal: PortalClient) -> Agent:
         num_history_runs=10,
         markdown=True,
     )
-
-
-def _parse_requirements_json(text: str) -> dict[str, Any] | None:
-    """Extract the REQUIREMENTS_COMPLETE JSON block from agent output."""
-    match = re.search(
-        r"REQUIREMENTS_COMPLETE\s*```(?:json)?\s*(\{.*?\})\s*```",
-        text,
-        re.DOTALL,
-    )
-    if not match:
-        return None
-    try:
-        return json.loads(match.group(1))
-    except json.JSONDecodeError:
-        return None
 
 
 def requirements_executor(step_input: StepInput, session_state: dict) -> StepOutput:
@@ -390,52 +223,6 @@ def create_executor(step_input: StepInput, session_state: dict) -> StepOutput:
 # ---------------------------------------------------------------------------
 # Step 3: discover_ports
 # ---------------------------------------------------------------------------
-
-
-def _format_ports_list(ports: list[dict[str, Any]]) -> str:
-    lines = ["Here are the available output ports that match your use-case:\n"]
-    for i, p in enumerate(ports, 1):
-        dp_name = (p.get("data_product") or {}).get("name", "Unknown")
-        access = p.get("access_type", "unknown")
-        desc = p.get("description") or ""
-        lines.append(
-            f"{i}. **{p.get('name')}** (from *{dp_name}*) — {desc} [access: {access}]"
-        )
-    lines.append(
-        "\nWhich ones do you need access to? (list by number or name, or type 'none')"
-    )
-    return "\n".join(lines)
-
-
-def _parse_user_selection(
-    user_input: str,
-    presented_ports: list[dict[str, Any]],
-) -> list[str]:
-    """Parse user selection text → list of dataset IDs."""
-    text = (user_input or "").lower().strip()
-    if text in ("none", "no", "skip", "n/a", "0"):
-        return []
-
-    # "all/every/each" takes priority over any numeric extraction
-    if any(w in text for w in ("all", "every", "each")):
-        return [p["id"] for p in presented_ports]
-
-    selected_ids: list[str] = []
-    # Try numeric indices
-    numbers = re.findall(r"\b(\d+)\b", text)
-    for n in numbers:
-        idx = int(n) - 1
-        if 0 <= idx < len(presented_ports):
-            selected_ids.append(presented_ports[idx]["id"])
-
-    # Try name matches
-    for p in presented_ports:
-        name_lower = (p.get("name") or "").lower()
-        if name_lower and name_lower in text:
-            if p["id"] not in selected_ids:
-                selected_ids.append(p["id"])
-
-    return selected_ids
 
 
 def discover_executor(step_input: StepInput, session_state: dict) -> StepOutput:
