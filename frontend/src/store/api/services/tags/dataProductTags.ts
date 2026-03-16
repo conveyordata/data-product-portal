@@ -88,14 +88,10 @@ export const dataProductTags = {
     getDataProductRolledUpTags: {
         providesTags: (_, __, id) => [{ type: TagTypes.DataProductRolledUpTags, id }],
     },
+    getDataProductSettings: {
+        providesTags: (_, __, id) => [{ type: TagTypes.DataProductSettings, id }],
+    },
     setValueForDataProduct: {
-        invalidatesTags: (_, __, arg) => [
-            { type: TagTypes.DataProduct, id: arg.id },
-            { type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST },
-            {
-                type: TagTypes.History as const,
-                id: arg.id,
-            },
-        ],
+        invalidatesTags: (_, __, arg) => [{ type: TagTypes.DataProductSettings, id: arg.id }],
     },
 } satisfies EndpointDefinitions;

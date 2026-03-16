@@ -6,6 +6,9 @@ sidebar_position: 200
 
 ## Unreleased
 
+### breaking changes
+- **[API]**: The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.
+
 ### features
 
 - **[Postgresql]**: Postgresql plugin defining technical assets
@@ -19,7 +22,8 @@ sidebar_position: 200
 - **[Output ports]**: Technical asset tab missed icons
 - **[Technical Asset]**: Radio button is selected but not captured causing validation issues
 - **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view. Also fixed broken animations in the global explorer view.
-- **[Data Product]**: Fixed an issue where updating a setting would not refetch the data product, resulting in incorrect frotne end state.
+- **[Data Product]**: Fixed an issue where updating a setting would not invalidate the correct cache, resulting in a broken state
+- **[General]**: Improved the performance of several endpoints by ensuring we load less data.
 
 ## 0.5.1
 

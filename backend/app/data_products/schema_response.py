@@ -37,7 +37,6 @@ class BaseDataProductGet(ORMModel):
     domain: Domain
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
-    data_product_settings: list[DataProductSettingValue]
 
 
 class TechnicalAssetLinks(BaseTechnicalAssetGet):
@@ -84,10 +83,15 @@ class DataProductGet(BaseDataProductGet):
     data_outputs: list[DataOutputLinks]
     datasets: list[Dataset]
     rolled_up_tags: set[Tag]
+    data_product_settings: list[DataProductSettingValue]
 
 
 class GetDataProductResponse(BaseDataProductGet):
     about: Optional[str]
+
+
+class GetDataProductSettingsResponse(ORMModel):
+    data_product_settings: Sequence[DataProductSettingValue]
 
 
 class GetDataProductInputPortsResponse(ORMModel):

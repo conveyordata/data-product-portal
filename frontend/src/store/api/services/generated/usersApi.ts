@@ -253,11 +253,8 @@ export type GlueTechnicalAssetConfiguration = {
 export type PostgreSqlTechnicalAssetConfiguration = {
   configuration_type: "PostgreSQLTechnicalAssetConfiguration";
   database: string;
-  schema_name?: string;
+  schema?: string;
   table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
   access_granularity: AccessGranularity;
 };
 export type RedshiftTechnicalAssetConfiguration = {

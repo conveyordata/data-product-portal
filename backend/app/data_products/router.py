@@ -54,6 +54,7 @@ from app.data_products.schema_response import (
     GetDataProductInputPortsResponse,
     GetDataProductResponse,
     GetDataProductRolledUpTagsResponse,
+    GetDataProductSettingsResponse,
     GetDataProductsResponse,
     LinkDatasetsToDataProductPost,
     LinkInputPortsToDataProductPost,
@@ -856,4 +857,13 @@ def validate_data_output_namespace(
         validity=DataOutputResourceNameValidator()
         .validate_resource_name(resource_name=namespace, db=db, scope=id)
         .validity
+    )
+
+
+@router.get(f"{route}/{{id}}/settings")
+def get_data_product_settings(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> GetDataProductSettingsResponse:
+    return GetDataProductSettingsResponse(
+        data_product_settings=DataProductService(db).get_data_product_settings(id)
     )

@@ -4495,6 +4495,49 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/settings": {
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Get Data Product Settings",
+        "operationId": "get_data_product_settings",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataProductSettingsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/data_product_types/{id}": {
       "get": {
         "tags": [
@@ -15507,13 +15550,6 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
           "about": {
             "anyOf": [
               {
@@ -15553,6 +15589,13 @@
             "type": "array",
             "uniqueItems": true,
             "title": "Rolled Up Tags"
+          },
+          "data_product_settings": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductSettingValue"
+            },
+            "type": "array",
+            "title": "Data Product Settings"
           }
         },
         "type": "object",
@@ -15567,12 +15610,12 @@
           "domain",
           "type",
           "lifecycle",
-          "data_product_settings",
           "about",
           "dataset_links",
           "data_outputs",
           "datasets",
-          "rolled_up_tags"
+          "rolled_up_tags",
+          "data_product_settings"
         ],
         "title": "DataProductGet",
         "deprecated": true
@@ -16708,13 +16751,6 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
           "user_count": {
             "type": "integer",
             "title": "User Count"
@@ -16740,7 +16776,6 @@
           "domain",
           "type",
           "lifecycle",
-          "data_product_settings",
           "user_count",
           "dataset_count",
           "data_outputs_count"
@@ -18210,13 +18245,6 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
           "about": {
             "anyOf": [
               {
@@ -18241,7 +18269,6 @@
           "domain",
           "type",
           "lifecycle",
-          "data_product_settings",
           "about"
         ],
         "title": "GetDataProductResponse"
@@ -18262,6 +18289,22 @@
           "rolled_up_tags"
         ],
         "title": "GetDataProductRolledUpTagsResponse"
+      },
+      "GetDataProductSettingsResponse": {
+        "properties": {
+          "data_product_settings": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductSettingValue"
+            },
+            "type": "array",
+            "title": "Data Product Settings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product_settings"
+        ],
+        "title": "GetDataProductSettingsResponse"
       },
       "GetDataProductsResponse": {
         "properties": {
@@ -18335,13 +18378,6 @@
               }
             ]
           },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
           "user_count": {
             "type": "integer",
             "title": "User Count"
@@ -18367,7 +18403,6 @@
           "domain",
           "type",
           "lifecycle",
-          "data_product_settings",
           "user_count",
           "output_port_count",
           "technical_asset_count"
