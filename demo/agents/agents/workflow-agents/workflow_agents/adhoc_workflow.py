@@ -7,17 +7,23 @@ delegates the answer to the data-agents container via A2A (HTTP call).
 
 from __future__ import annotations
 
+import logging
 import os
 
-import httpx
-
+from agno.agent import RemoteAgent
 from agno.db.sqlite import SqliteDb
+from agno.models.anthropic import Claude
+from agno.team import Team
+from agno.team.mode import TeamMode
 from agno.workflow import Condition, Step, StepInput, StepOutput, Workflow
 
 from workflow_agents.helpers import _format_ports_list, _parse_user_selection
 from workflow_agents.portal_client import PortalClient
 
+logger = logging.getLogger(__name__)
+
 _AGENT_DATA_DIR = os.environ.get("AGENT_DATA_DIR", "/agent_data")
+os.makedirs(_AGENT_DATA_DIR, exist_ok=True)
 _PORTAL_URL = os.environ.get("PORTAL_URL", "http://localhost:8080")
 _DATA_AGENTS_URL = os.environ.get("DATA_AGENTS_URL", "http://data-agents:7070")
 
@@ -50,20 +56,17 @@ def identify_ports_executor(step_input: StepInput, session_state: dict) -> StepO
         presented = session_state["presented_ports"]
         selected_ids = _parse_user_selection(str(user_input), presented)
 
-        # Classify into auto-approvable (public) vs restricted
-        portal = PortalClient()
+        # Classify into auto-approvable (public) vs restricted using cached session data
+        port_lookup = {p["id"]: p for p in presented}
         restricted_ids: list[str] = []
         auto_approvable_ids: list[str] = []
 
         for dataset_id in selected_ids:
-            try:
-                port = portal.get_output_port(dataset_id)
-                access_type = (port.get("access_type") or "").lower()
-                if access_type == "restricted":
-                    restricted_ids.append(dataset_id)
-                else:
-                    auto_approvable_ids.append(dataset_id)
-            except Exception:
+            port = port_lookup.get(dataset_id, {})
+            access_type = (port.get("access_type") or "").lower()
+            if access_type == "restricted":
+                restricted_ids.append(dataset_id)
+            else:
                 auto_approvable_ids.append(dataset_id)
 
         session_state["selected_port_ids"] = selected_ids
@@ -107,7 +110,8 @@ def identify_ports_executor(step_input: StepInput, session_state: dict) -> StepO
             "id": p["id"],
             "name": p.get("name", ""),
             "access_type": p.get("access_type", ""),
-            "data_product": p.get("data_product", {}),
+            "data_product_id": str(p.get("data_product_id", "")),
+            "data_product_name": p.get("data_product_name", ""),
             "description": p.get("description", ""),
         }
         for p in visible_ports[:10]
@@ -248,7 +252,9 @@ def wait_for_approvals_executor(
 # ---------------------------------------------------------------------------
 
 
-def call_data_team_executor(step_input: StepInput, session_state: dict) -> StepOutput:
+async def call_data_team_executor(
+    step_input: StepInput, session_state: dict
+) -> StepOutput:
     selected_ids: list[str] = session_state.get("selected_port_ids", [])
     if not selected_ids:
         return StepOutput(
@@ -257,29 +263,88 @@ def call_data_team_executor(step_input: StepInput, session_state: dict) -> StepO
         )
 
     question = session_state.get("question", "")
+    presented_ports: list[dict] = session_state.get("presented_ports", [])
 
-    try:
-        response = httpx.post(
-            f"{_DATA_AGENTS_URL}/v1/teams/swiftgear-data-team/runs",
-            json={"message": question, "stream": False},
-            timeout=120.0,
-        )
-        response.raise_for_status()
-        answer = response.json().get("content", "")
-    except Exception as exc:
+    # Build namespace → agent name mapping from session state
+    port_map = {p["id"]: p for p in presented_ports}
+    portal = PortalClient()
+    members: list[RemoteAgent] = []
+    for port_id in selected_ids:
+        port = port_map.get(port_id, {})
+        namespace = None
+        dp_id = port.get("data_product_id", "")
+        if dp_id:
+            try:
+                dp = portal.get_data_product(dp_id)
+                namespace = dp.get("namespace")
+            except Exception:
+                pass
+        if namespace:
+            members.append(
+                RemoteAgent(
+                    base_url=_DATA_AGENTS_URL,
+                    agent_id=namespace,
+                )
+            )
+
+    if not members:
         return StepOutput(
-            content=f"Failed to reach the data team: {exc}",
+            content="Could not resolve any agent endpoints for selected ports.",
             success=False,
             stop=True,
         )
+
+    team = Team(
+        name="Ad-hoc Data Team",
+        mode=TeamMode.route,
+        model=Claude(id="claude-sonnet-4-5"),
+        members=members,
+        instructions=(
+            "You are an ad-hoc data coordinator. Route the user's question to the relevant "
+            "specialist agent(s) and synthesise a coherent answer. Only use the agents provided — "
+            "do not reference or suggest data outside the scope of the selected data products."
+        ),
+        markdown=True,
+    )
+
+    try:
+        response = await team.arun(question)
+    except Exception as exc:
+        logger.error("Ad-hoc team run failed: %s", exc, exc_info=True)
+        return StepOutput(
+            content=f"Failed to run ad-hoc team: {exc}", success=False, stop=True
+        )
+
+    # Extract answer text — RunResponse.content may be None, str, or a list of content blocks.
+    answer: str = ""
+    if response is not None:
+        content = getattr(response, "content", None)
+        if isinstance(content, str) and content.strip():
+            answer = content
+        elif isinstance(content, list):
+            # Flatten list of content blocks (e.g. TextArtifact objects)
+            parts = [str(item) for item in content if item]
+            answer = "\n".join(parts).strip()
+        # Fallback: scan messages for the last assistant turn
+        if not answer:
+            messages = getattr(response, "messages", None) or []
+            for msg in reversed(messages):
+                role = getattr(msg, "role", None)
+                msg_content = getattr(msg, "content", None)
+                if role == "assistant" and msg_content:
+                    answer = str(msg_content).strip()
+                    break
+
+    if not answer:
+        logger.warning("Ad-hoc team returned empty content; response=%r", response)
+        answer = "The data team did not return an answer. Please check that the data-agents service is running and the selected data product agents are available."
 
     ephemeral_id = session_state.get("ephemeral_dp_id", "")
     footer = (
         f"\n\n---\n*This access is recorded as an ephemeral data product "
         f"(`{ephemeral_id}`) and will expire in 8 hours.*"
     )
-
-    return StepOutput(content=str(answer) + footer, success=True)
+    return StepOutput(content=answer + footer, success=True)
 
 
 # ---------------------------------------------------------------------------

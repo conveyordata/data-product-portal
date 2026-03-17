@@ -114,8 +114,10 @@ def load_dynamic_agents():
 
         postgres_cfg = config.get("postgres", {})
 
+        namespace = Path(config_file).stem
         primary_schema = config.get("allowed_schemas", ["public"])[0]
         agent = Agent(
+            id=namespace,
             name=config["name"],
             description=config.get("description", ""),
             instructions=build_instructions(config),

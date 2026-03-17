@@ -24,7 +24,11 @@ def _fuzzy_match(
 def _format_ports_list(ports: list[dict[str, Any]]) -> str:
     lines = ["Here are the available output ports that match your use-case:\n"]
     for i, p in enumerate(ports, 1):
-        dp_name = (p.get("data_product") or {}).get("name", "Unknown")
+        dp_name = (
+            p.get("data_product_name")
+            or (p.get("data_product") or {}).get("name", "Unknown")
+            or "Unknown"
+        )
         access = p.get("access_type", "unknown")
         desc = p.get("description") or ""
         lines.append(
