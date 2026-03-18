@@ -25,15 +25,11 @@ class OIDCConfiguration:
         redirect_uri: Optional[str] = None,
     ):
         if oidc_enabled or get_boolean_variable("OIDC_ENABLED", False):
-            self.client_id = client_id if client_id else os.getenv("OIDC_CLIENT_ID")
-            self.client_secret = (
-                client_secret if client_secret else os.getenv("OIDC_CLIENT_SECRET")
-            )
-            self.authority = authority if authority else os.getenv("OIDC_AUTHORITY")
-            self.audience = audience if audience else os.getenv("OIDC_AUDIENCE")
-            self.redirect_uri = (
-                redirect_uri if redirect_uri else os.getenv("OIDC_REDIRECT_URI")
-            )
+            self.client_id = client_id or os.getenv("OIDC_CLIENT_ID")
+            self.client_secret = client_secret or os.getenv("OIDC_CLIENT_SECRET")
+            self.authority = authority or os.getenv("OIDC_AUTHORITY")
+            self.audience = audience or os.getenv("OIDC_AUDIENCE")
+            self.redirect_uri = redirect_uri or os.getenv("OIDC_REDIRECT_URI")
             self.oidc_enabled = oidc_enabled
             self.provider = provider
             self.configuration_url = (
@@ -43,17 +39,10 @@ class OIDCConfiguration:
             self.authorization_endpoint = json_config.get("authorization_endpoint")
             self.userinfo_endpoint = json_config.get("userinfo_endpoint")
             self.token_endpoint = json_config.get("token_endpoint")
-            if json_config.get("jwks_uri"):
-                self.jwks_keys = httpx.get(url=json_config.get("jwks_uri")).json()
-            else:
-                self.jwks_keys = httpx.get(
-                    url=f"{self.authority}/.well-known/jwks.json"
-                ).json()
-            self.jwks_uri = (
-                json_config.get("jwks_uri")
-                if json_config.get("jwks_uri")
-                else f"{self.authority}/.well-known/jwks.json"
+            self.jwks_uri = json_config.get(
+                "jwks_uri", f"{self.authority}/.well-known/jwks.json"
             )
+            self.jwks_keys = httpx.get(url=self.jwks_uri).json()
             self.oidc_dependency = OpenIdConnect(
                 openIdConnectUrl=self.configuration_url, auto_error=False
             )
