@@ -23,7 +23,7 @@ from tests.factories import (
 EMBEDDING_LATENCY_BOUND: Final[float] = float(
     os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.000)
 )  # seconds
-LATENCY_BOUND: Final[float] = 0.300  # seconds
+LATENCY_BOUND: Final[float] = float(os.getenv("TEST_LATENCY_BOUND", 0.300))  # seconds
 PRECISION_BOUND: Final[float] = 0.5
 RECALL_BOUND: Final[float] = 0.8
 

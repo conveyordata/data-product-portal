@@ -130,7 +130,7 @@ class OutputPortDataQualityService:
         technical_assets: list[DataQualityTechnicalAsset],
     ) -> tuple[int, int]:
         assets_with_checks = len(
-            [a for a in technical_assets if a.status not in [DataQualityStatus.UNKNOWN]]
+            [a for a in technical_assets if a.status != DataQualityStatus.UNKNOWN]
         )
         assets_with_issues = len(
             [
