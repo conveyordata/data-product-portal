@@ -42,3 +42,4 @@ data:
   POSTHOG_API_KEY: {{ .Values.posthog.key }}
   POSTHOG_HOST: {{ .Values.posthog.host }}
   INFRASTRUCTURE_LAMBDA_ARN: {{ .Values.infrastructure_lambda_arn }}
+  ENABLED_PLUGINS: {{ .Values.enabled_plugins | toJson | quote }}

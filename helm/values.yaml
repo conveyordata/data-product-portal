@@ -182,3 +182,8 @@ tolerations: []
 affinity: {}
 
 namespace_max_length: "!!string 64"
+
+enabled_plugins:
+- ConveyorPlugin
+- GlueTechnicalAssetConfiguration
+- S3TechnicalAssetConfiguration
