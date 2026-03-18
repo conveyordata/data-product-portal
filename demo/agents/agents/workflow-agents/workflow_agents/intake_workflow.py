@@ -19,8 +19,6 @@ from workflow_agents.helpers import (
 )
 from workflow_agents.portal_client import PortalClient
 
-_AGENT_DATA_DIR = os.environ.get("AGENT_DATA_DIR", "/agent_data")
-
 
 # ---------------------------------------------------------------------------
 # Step 1: gather_requirements
@@ -88,7 +86,7 @@ def _make_requirements_agent(portal: PortalClient) -> Agent:
         instructions=_REQUIREMENTS_SYSTEM_PROMPT,
         model=Claude(id="claude-sonnet-4-5"),
         tools=[toolkit],
-        db=SqliteDb(db_file=f"{_AGENT_DATA_DIR}/agno_intake_requirements_agent.db"),
+        db=SqliteDb(db_file="agno_intake_requirements_agent.db"),
         add_history_to_context=True,
         num_history_runs=10,
         markdown=True,
@@ -500,5 +498,5 @@ intake_workflow = Workflow(
         Step(name="handoff", executor=handoff_executor),
     ],
     session_state={},
-    db=SqliteDb(db_file=f"{_AGENT_DATA_DIR}/agno_intake_workflow.db"),
+    db=SqliteDb(db_file="agno_intake_workflow.db"),
 )

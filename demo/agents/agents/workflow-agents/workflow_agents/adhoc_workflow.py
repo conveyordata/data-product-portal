@@ -15,15 +15,20 @@ from agno.db.sqlite import SqliteDb
 from agno.models.anthropic import Claude
 from agno.team import Team
 from agno.team.mode import TeamMode
-from agno.workflow import Condition, Step, StepInput, StepOutput, Workflow
+from agno.workflow import (
+    Condition,
+    Step,
+    StepInput,
+    StepOutput,
+    Workflow,
+    WorkflowAgent,
+)
 
 from workflow_agents.helpers import _format_ports_list, _parse_user_selection
 from workflow_agents.portal_client import PortalClient
 
 logger = logging.getLogger(__name__)
 
-_AGENT_DATA_DIR = os.environ.get("AGENT_DATA_DIR", "/agent_data")
-os.makedirs(_AGENT_DATA_DIR, exist_ok=True)
 _PORTAL_URL = os.environ.get("PORTAL_URL", "http://localhost:8080")
 _DATA_AGENTS_URL = os.environ.get("DATA_AGENTS_URL", "http://data-agents:7070")
 
@@ -351,10 +356,16 @@ async def call_data_team_executor(
 # Workflow assembly
 # ---------------------------------------------------------------------------
 
+_adhoc_workflow_agent = WorkflowAgent(
+    model=Claude(id="claude-sonnet-4-5"),
+    num_history_runs=5,
+)
+
 adhoc_workflow = Workflow(
     id="adhoc",
     name="Ad-hoc Data Question",
     description="Answer an ad-hoc data question by identifying relevant output ports, creating ephemeral access, and delegating to the data team",
+    agent=_adhoc_workflow_agent,
     steps=[
         Step(name="identify_ports", executor=identify_ports_executor),
         Step(name="provision_ephemeral", executor=provision_ephemeral_executor),
@@ -368,5 +379,5 @@ adhoc_workflow = Workflow(
         Step(name="call_data_team", executor=call_data_team_executor),
     ],
     session_state={},
-    db=SqliteDb(db_file=f"{_AGENT_DATA_DIR}/agno_adhoc_workflow.db"),
+    db=SqliteDb(db_file="agno_adhoc_workflow.db"),
 )

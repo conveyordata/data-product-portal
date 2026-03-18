@@ -52,11 +52,9 @@ services:
       - PORTAL_API_URL=http://backend:5050
       - PORTAL_URL=http://localhost:8080
       - DEFAULT_USERNAME=john.scientist@pharma.com
-      - AGENT_DATA_DIR=/agent_data
     volumes:
       - agent_configs:/agent_configs
       - ./products:/products
-      - agent_data:/agent_data
     ports:
       - "7070:7070"
     depends_on:
@@ -73,10 +71,7 @@ services:
       - PORTAL_API_URL=http://backend:5050
       - PORTAL_URL=http://localhost:8080
       - DEFAULT_USERNAME=john.scientist@pharma.com
-      - AGENT_DATA_DIR=/agent_data
       - DATA_AGENTS_URL=http://data-agents:7070
-    volumes:
-      - agent_data:/agent_data
     ports:
       - "7071:7071"
     depends_on:
@@ -129,4 +124,3 @@ services:
 volumes:
   postgresql-demo-data:
   agent_configs:
-  agent_data:

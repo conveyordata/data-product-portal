@@ -5,7 +5,7 @@ tasks:
     desc: Full reset of the demo (kill, remove, rebuild, start)
     cmds:
       - docker compose down -v --remove-orphans
-      - docker volume rm agents_agent_data agents_agent_configs agents_postgresql-demo-data 2>/dev/null || true
+      - docker volume rm agents_agent_configs agents_postgresql-demo-data 2>/dev/null || true
       - docker compose build
       - docker compose up -d
 
