@@ -11,12 +11,14 @@ import {
 import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { Link, useMatches } from 'react-router';
-
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { ProductLogo } from '@/components/icons';
+import AnimatedWizard from '@/components/wizard/wizard.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetVersionQuery } from '@/store/api/services/generated/versionApi.ts';
+import { selectWizardEnabled } from '@/store/features/wizard/wizard-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import styles from './sidebar.module.scss';
@@ -25,6 +27,8 @@ export const Sidebar = () => {
     const { t } = useTranslation();
     const matches = useMatches();
     const { data: version } = useGetVersionQuery();
+
+    const showWizard = useSelector(selectWizardEnabled);
 
     let navigationMenuItems: MenuProps['items'] = [
         {
@@ -101,6 +105,12 @@ export const Sidebar = () => {
                 </Flex>
             </Flex>
             <Menu theme="dark" mode="vertical" selectedKeys={[rootPath]} items={navigationMenuItems} />
+
+            {showWizard && (
+                <Flex justify={'center'} align={'center'} style={{ height: '50%' }}>
+                    <AnimatedWizard />
+                </Flex>
+            )}
         </Layout.Sider>
     );
 };

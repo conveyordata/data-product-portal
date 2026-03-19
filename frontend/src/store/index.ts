@@ -8,13 +8,15 @@ import { api as generatedApiSlice } from '@/store/api/services/generated/complet
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import cartSlice from '@/store/features/cart/cart-slice.ts';
 import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
+import wizardSlice from '@/store/features/wizard/wizard-slice.ts';
 import { isDevMode } from '@/utils/env-mode.helper.ts';
 
 const store = configureStore({
     reducer: {
-        feedback: feedbackSlice,
         auth: authSlice,
         cart: cartSlice,
+        feedback: feedbackSlice,
+        wizard: wizardSlice,
         [baseApiSlice.reducerPath]: baseApiSlice.reducer,
         [generatedApiSlice.reducerPath]: generatedApiSlice.reducer,
     },
