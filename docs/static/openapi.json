@@ -14392,6 +14392,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14400,6 +14403,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -14525,6 +14529,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14533,6 +14540,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -14607,6 +14615,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14615,6 +14626,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -14830,6 +14842,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -14838,6 +14853,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -14998,6 +15014,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -15006,6 +15025,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -15095,6 +15115,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -15103,6 +15126,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -15217,6 +15241,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -15225,6 +15252,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -17121,6 +17149,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -17129,6 +17160,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -19029,6 +19061,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -19037,6 +19072,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -19806,6 +19842,30 @@
           "user"
         ],
         "title": "NotificationGet"
+      },
+      "OSISemanticModelTechnicalAssetConfiguration": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "const": "OSISemanticModelTechnicalAssetConfiguration",
+            "title": "Configuration Type"
+          },
+          "model_name": {
+            "type": "string",
+            "title": "Model Name",
+            "default": ""
+          },
+          "file_path": {
+            "type": "string",
+            "title": "File Path",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type"
+        ],
+        "title": "OSISemanticModelTechnicalAssetConfiguration"
       },
       "OutputPort": {
         "properties": {
@@ -20839,6 +20899,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -20847,6 +20910,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -22730,6 +22794,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -22738,6 +22805,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
@@ -22824,6 +22892,9 @@
               },
               {
                 "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
@@ -22832,6 +22903,7 @@
               "mapping": {
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",

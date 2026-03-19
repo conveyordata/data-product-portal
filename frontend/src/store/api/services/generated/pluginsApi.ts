@@ -160,6 +160,11 @@ export type GlueTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
+export type OsiSemanticModelTechnicalAssetConfiguration = {
+  configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
+  model_name?: string;
+  file_path?: string;
+};
 export type PostgreSqlTechnicalAssetConfiguration = {
   configuration_type: "PostgreSQLTechnicalAssetConfiguration";
   database: string;
@@ -203,6 +208,9 @@ export type RenderTechnicalAssetAccessPathRequest = {
     | ({
         configuration_type: "GlueTechnicalAssetConfiguration";
       } & GlueTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
+      } & OsiSemanticModelTechnicalAssetConfiguration)
     | ({
         configuration_type: "PostgreSQLTechnicalAssetConfiguration";
       } & PostgreSqlTechnicalAssetConfiguration)
