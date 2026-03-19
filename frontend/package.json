@@ -86,10 +86,10 @@
         "@rolldown/binding-linux-x64-gnu": "^1.0.0-rc.10"
     },
     "volta": {
-        "node": "20.12.2"
+        "node": "22.22.0"
     },
     "engines": {
-        "node": ">= 20.9",
+        "node": ">= 22.0",
         "npm": ">= 10.1"
     },
     "overrides": {
