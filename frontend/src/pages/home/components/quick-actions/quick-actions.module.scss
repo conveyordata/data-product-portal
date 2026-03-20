@@ -1,0 +1,102 @@
+$color-grey: #6b7280;
+
+$color-blue-background: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(239, 246, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+$color-blue-border: rgba(147, 197, 253, 0.3);
+$color-blue-primary: #3b82f6;
+$color-blue-primary-hover: #2563eb;
+
+$color-green-background: linear-gradient(135deg, rgba(209, 250, 229, 0.8) 0%, rgba(236, 253, 245, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+$color-green-border: rgba(110, 231, 183, 0.3);
+$color-green-primary: #10b981;
+$color-green-primary-hover: #059669;
+
+$color-orange-background: linear-gradient(135deg, rgba(254, 243, 199, 0.8) 0%, rgba(255, 251, 235, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+$color-orange-border: rgba(253, 186, 116, 0.3);
+$color-orange-primary: #f59e0b;
+$color-orange-primary-hover: #d97706;
+
+.sub-text {
+  color: $color-grey;
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  margin-bottom: 20px;
+
+  &.blue {
+    background-color: $color-blue-primary;
+  }
+
+  &.green {
+    background-color: $color-green-primary;
+  }
+
+  &.orange {
+    background-color: $color-orange-primary;
+  }
+}
+
+.card {
+  border-width: 1px;
+  border-style: solid;
+  height: 100%;
+
+  &.blue {
+    background: $color-blue-background;
+    border-color: $color-blue-border;
+  }
+
+  &.green {
+    background: $color-green-background;
+    border-color: $color-green-border
+  }
+
+  &.orange {
+    background: $color-orange-background;
+    border-color: $color-orange-border
+  }
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.button {
+  height: 44px;
+  display: flex;
+  justify-content: space-between;
+
+  &.blue {
+    background-color: $color-blue-primary;
+
+    &:hover {
+      background-color: $color-blue-primary-hover !important;
+    }
+  }
+
+  &.green {
+    background-color: $color-green-primary;
+
+    &:hover {
+      background-color: $color-green-primary-hover !important;
+    }
+  }
+
+  &.orange {
+    background-color: $color-orange-primary;
+
+    &:hover {
+      background-color: $color-orange-primary-hover !important;
+    }
+  }
+}
