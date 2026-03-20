@@ -245,6 +245,20 @@ class TestTechnicalAssetsRouter:
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 200
 
+    def test_remove_data_output_with_tags(self, client: TestClient):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        data_output = TechnicalAssetFactory(owner=data_product, tags=[TagFactory()])
+        response = self.delete_data_output(client, data_output.id)
+        assert response.status_code == 200
+
     def test_update_status_not_owner(self, client: TestClient):
         do = TechnicalAssetFactory()
         response = self.update_data_output_status(client, {"status": "active"}, do.id)
