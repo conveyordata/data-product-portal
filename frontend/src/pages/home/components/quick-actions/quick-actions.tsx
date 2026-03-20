@@ -38,7 +38,7 @@ export function QuickActions({ style }: Props) {
         {
             icon: <FundViewOutlined />,
             title: t('Manage Products'),
-            description: t('Monitor and maintain your data products.'),
+            description: t('Monitor and maintain your Data Products.'),
             primaryAction: { label: t('Product Studio'), route: ApplicationPaths.Studio },
             color: 'green',
         },

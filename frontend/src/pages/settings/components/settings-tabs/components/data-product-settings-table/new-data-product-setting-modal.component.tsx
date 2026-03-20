@@ -220,7 +220,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
             case DataProductSettingScope.Dataset:
                 return ResourceNameModel.OutputPort;
             default:
-                throw new Error('Invalid scope for data product setting');
+                throw new Error('Invalid scope for Data Product setting');
         }
     }, []);
     const validateNamespaceCallback: (namespace: string) => Promise<ResourceNameValidation> = useCallback(
