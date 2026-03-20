@@ -87,24 +87,30 @@ export const Sidebar = () => {
 
     return (
         <Layout.Sider className={styles.sidebarWrapper}>
-            <Flex className={styles.logoContainer}>
-                <ProductLogo className={clsx([styles.defaultIcon, styles.sidebarContent, styles.iconWrapper])} />
-                <Flex vertical className={styles.sidebarContent}>
-                    <Space className={styles.logoWrapper}>
-                        <Link to={ApplicationPaths.Home}>
-                            <SidebarLogo />
-                            {version ? version.version : ''}
-                        </Link>
-                    </Space>
-                </Flex>
-            </Flex>
-            <Menu theme="dark" mode="vertical" selectedKeys={[rootPath]} items={navigationMenuItems} />
+            <Flex vertical justify="space-between" style={{height: "100%"}}>
+                <div>
+                    <Flex className={styles.logoContainer}>
+                        <ProductLogo
+                            className={clsx([styles.defaultIcon, styles.sidebarContent, styles.iconWrapper])}
+                        />
+                        <Flex vertical className={styles.sidebarContent}>
+                            <Space className={styles.logoWrapper}>
+                                <Link to={ApplicationPaths.Home}>
+                                    <SidebarLogo />
+                                    {version ? version.version : ''}
+                                </Link>
+                            </Space>
+                        </Flex>
+                    </Flex>
+                    <Menu theme="dark" mode="vertical" selectedKeys={[rootPath]} items={navigationMenuItems} />
+                </div>
 
-            {showWizard && (
-                <Flex justify={'center'} align={'center'} style={{ height: '50%' }}>
-                    <AnimatedWizard />
-                </Flex>
-            )}
+                {showWizard && (
+                    <Flex justify="center" style={{ width: '100%', paddingBottom: '16px' }}>
+                            <AnimatedWizard size={200} />
+                    </Flex>
+                )}
+            </Flex>
         </Layout.Sider>
     );
 };
