@@ -307,6 +307,11 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 403
 
+    def test_remove_data_product_with_tag(self, client):
+        data_product = DataProductFactory(tags=[TagFactory()])
+        response = self.delete_data_product(client, data_product.id)
+        assert response.status_code == 403
+
     def test_remove_data_product(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()

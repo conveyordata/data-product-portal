@@ -15,7 +15,8 @@ from tests.factories import (
     UserFactory,
 )
 
-ENDPOINT = "/api/datasets"
+OLD_ENDPOINT = "/api/datasets"
+ENDPOINT = "/api/v2/data_products"
 
 
 def _assign_update_role(session, dataset):
@@ -23,7 +24,10 @@ def _assign_update_role(session, dataset):
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(
         scope=Scope.DATASET,
-        permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
+        permissions=[
+            AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
+            AuthorizationAction.OUTPUT_PORT__DELETE,
+        ],
     )
     DatasetRoleAssignmentFactory(
         user_id=user.id, role_id=role.id, dataset_id=dataset.id
@@ -52,13 +56,34 @@ class TestCuratedQueriesRouter:
         }
 
         put_response = client.put(
-            f"{ENDPOINT}/{dataset.id}/usage/curated_queries", json=payload
+            f"{OLD_ENDPOINT}/{dataset.id}/usage/curated_queries", json=payload
         )
         assert put_response.status_code == 200
         body = put_response.json()
         assert len(body["dataset_curated_queries"]) == 2
         assert body["dataset_curated_queries"][0]["title"] == "Top enrolling sites"
         assert body["dataset_curated_queries"][1]["title"] == "New deviations"
+
+    def test_delete_output_port_curated_query(self, client, session):
+        dataset = DatasetFactory()
+        _assign_update_role(session, dataset)
+
+        service = DatasetCuratedQueryService(session)
+        service.replace_curated_queries(
+            dataset.id,
+            [
+                OutputPortCuratedQueryInput(
+                    title="Existing query",
+                    description="Stored during setup",
+                    query_text="SELECT 1",
+                )
+            ],
+        )
+        response = client.delete(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}"
+        )
+
+        assert response.status_code == 200
 
     def test_curated_queries_get(self, client, session):
         dataset = DatasetFactory()
@@ -76,7 +101,7 @@ class TestCuratedQueriesRouter:
             ],
         )
 
-        get_response = client.get(f"{ENDPOINT}/{dataset.id}/usage/curated_queries")
+        get_response = client.get(f"{OLD_ENDPOINT}/{dataset.id}/usage/curated_queries")
         assert get_response.status_code == 200
         data = get_response.json()
         assert len(data["dataset_curated_queries"]) == 1

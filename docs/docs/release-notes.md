@@ -17,6 +17,7 @@ sidebar_position: 200
 ### bugfixes
 
 - **[Output ports]**: In output port card, the remove button to unlink an asset from an output port was not grayed out when missing permissions.
+- **[Output ports]**: Deleting output ports with a quality summary caused errors.
 - **[Output ports]**: Linking and unlinking technical assets to output ports was denied.
 - **[Technical Asset Creation]**: Broken technical asset creation flow is fixed.
 - **[Add user to Data Product]**: Bad authorization resolves caused issues with this specific action.
