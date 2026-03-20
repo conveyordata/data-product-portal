@@ -9,6 +9,7 @@ import { AdminButton } from '@/components/buttons/admin-button.tsx';
 import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import { Notifications } from '@/components/notifications/notifications';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component';
+import ToggleWizard from '@/components/wizard/wizard-button.tsx';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useIsAdminQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -102,6 +103,7 @@ export function UserMenu() {
     const items = [
         userItem(),
         AdminButton({ onAdminAction: () => window.location.reload(), isAdmin: isAdmin?.is_admin }),
+        ToggleWizard(t),
         signOutItem,
     ];
 
