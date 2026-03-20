@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
+import { QuickActions } from '@/pages/home/components/quick-actions/quick-actions.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
-import { PendingRequestsInbox } from './components/pending-requests-inbox/pending-requests-inbox';
 import styles from './home.module.scss';
 
 const ROW_GUTTER = 96;
@@ -22,9 +22,9 @@ export function Home() {
 
     return (
         <div className={styles.container}>
-            <PendingRequestsInbox />
-
             <div className={styles.contentSecondary}>
+                <QuickActions style={{ marginBottom: 48 }} />
+
                 <Row gutter={ROW_GUTTER}>
                     <Col span={COL_SPAN}>
                         <DataProductsInbox userId={currentUser.id} />
