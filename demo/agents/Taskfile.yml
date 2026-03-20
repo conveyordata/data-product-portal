@@ -1,0 +1,26 @@
+version: "3"
+
+tasks:
+  reset:
+    desc: Full reset of the demo (kill, remove, rebuild, start)
+    cmds:
+      - docker compose down -v
+      - docker compose build
+      - docker compose up -d
+
+  create-products:
+    desc: Create the 3 demo data products via portal API (triggers provisioner)
+    cmds:
+      - uv run setup/create_products.py
+
+  show-configs:
+    desc: Print all agent config YAMLs from the provisioner container
+    cmds:
+      - |
+        docker compose exec provisioner sh -c '
+          for f in /agent_configs/*.yml; do
+            echo "=== $f ===";
+            cat "$f";
+            echo;
+          done
+        '

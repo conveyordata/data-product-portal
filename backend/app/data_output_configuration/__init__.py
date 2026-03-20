@@ -1,3 +1,4 @@
+from .agno.schema import AgnoPlugin
 from .conveyor.schema import ConveyorPlugin
 from .databricks.schema import DatabricksTechnicalAssetConfiguration
 from .glue.schema import GlueTechnicalAssetConfiguration
@@ -8,6 +9,7 @@ from .s3.schema import S3TechnicalAssetConfiguration
 from .snowflake.schema import SnowflakeTechnicalAssetConfiguration
 
 __all__ = [
+    "AgnoPlugin",
     "ConveyorPlugin",
     "DatabricksTechnicalAssetConfiguration",
     "GlueTechnicalAssetConfiguration",
