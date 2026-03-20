@@ -39,11 +39,10 @@ export default function AlertBanner() {
                 title: styles.alertText,
             }}
             title={
-                <Trans t={t} count={actionsCount}>
+                <Trans t={t} values={{ count: actionsCount }}>
                     You have{' '}
                     <Link strong style={{ color: 'inherit' }} onClick={navigateToRequests}>
-                        {/* @ts-expect-error TS2353 */}
-                        {{ actionsCount }} pending requests
+                        {'{{ count }}'} pending requests
                     </Link>{' '}
                     waiting for you in the Product Studio
                 </Trans>
