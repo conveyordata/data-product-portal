@@ -10,6 +10,7 @@ export default defineConfig({
         nsSeparator: false,
         functions: ['t', '*.t'],
         transComponents: ['Trans'],
+        indentation: 4,
     },
     types: {
         input: ['locales/{{language}}/{{namespace}}.json'],

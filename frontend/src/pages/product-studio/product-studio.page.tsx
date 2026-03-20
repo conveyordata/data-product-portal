@@ -1,5 +1,5 @@
 import { InboxOutlined, ProductOutlined } from '@ant-design/icons';
-import { Badge, Tabs, Typography } from 'antd';
+import { Badge, Space, Tabs, Typography, theme } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
@@ -13,6 +13,11 @@ import { TabKeys } from './product-studio-tabkeys';
 
 export function ProductStudio() {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState<string>(TabKeys.DataProducts);
+
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
         setBreadcrumbs([
@@ -26,9 +31,6 @@ export function ProductStudio() {
         ]);
     }, [setBreadcrumbs, t]);
 
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<string>(TabKeys.DataProducts);
     const { data: { pending_actions } = {} } = useGetUserPendingActionsQuery();
 
     useEffect(() => {
@@ -37,13 +39,13 @@ export function ProductStudio() {
             setActiveTab(hash);
         } else if (!hash) {
             // If no hash is present, set the default tab hash
-            navigate(`#${TabKeys.DataProducts}`, { replace: true });
+            navigate({ hash: TabKeys.DataProducts }, { replace: true });
         }
     }, [location.hash, navigate]);
 
     const onTabChange = (key: string) => {
         setActiveTab(key);
-        navigate(`#${key}`, { replace: true });
+        navigate({ hash: key }, { replace: true });
     };
 
     const pendingCount = pending_actions?.length ?? 0;
@@ -64,9 +66,10 @@ export function ProductStudio() {
         {
             key: TabKeys.Requests,
             label: (
-                <Badge count={pendingCount} offset={[10, 0]}>
+                <Space>
                     {t('Requests')}
-                </Badge>
+                    <Badge count={pendingCount} color={token.colorPrimary} />
+                </Space>
             ),
             icon: <InboxOutlined />,
             children: <PendingAccessRequestsView />,
