@@ -87,7 +87,7 @@ export const Sidebar = () => {
 
     return (
         <Layout.Sider className={styles.sidebarWrapper}>
-            <Flex vertical justify="space-between" style={{height: "100%"}}>
+            <Flex vertical justify="space-between" style={{ height: '100%' }}>
                 <div>
                     <Flex className={styles.logoContainer}>
                         <ProductLogo
@@ -107,7 +107,7 @@ export const Sidebar = () => {
 
                 {showWizard && (
                     <Flex justify="center" style={{ width: '100%', paddingBottom: '16px' }}>
-                            <AnimatedWizard size={200} />
+                        <AnimatedWizard size={200} />
                     </Flex>
                 )}
             </Flex>
