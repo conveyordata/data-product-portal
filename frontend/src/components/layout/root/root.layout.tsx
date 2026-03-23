@@ -39,8 +39,6 @@ export default function RootLayout() {
                     return PosthogEvents.PATHNAME_CHANGED_EXPLORER;
                 case ApplicationPaths.People:
                     return PosthogEvents.PATHNAME_CHANGED_PEOPLE;
-                case ApplicationPaths.AuditLogs:
-                    return PosthogEvents.PATHNAME_CHANGED_AUDIT_LOGS;
                 case ApplicationPaths.Settings:
                     return PosthogEvents.PATHNAME_CHANGED_SETTINGS;
                 default:

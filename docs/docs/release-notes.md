@@ -13,6 +13,7 @@ sidebar_position: 200
 
 - **[Postgresql]**: Postgresql plugin defining technical assets
 - **[Docs]**: Adding an architecture overview
+- **[UI]**: Remove audit logs page
 
 ### bugfixes
 
