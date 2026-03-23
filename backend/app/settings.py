@@ -83,6 +83,8 @@ class Settings(BaseSettings):
         "S3TechnicalAssetConfiguration",
     ]
 
+    AWS_SETTING_DURATION: int = 900
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"
