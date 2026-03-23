@@ -27,7 +27,10 @@ def _assign_update_role(session, dataset):
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(
         scope=Scope.DATASET,
-        permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_DATA_QUALITY],
+        permissions=[
+            AuthorizationAction.OUTPUT_PORT__UPDATE_DATA_QUALITY,
+            AuthorizationAction.OUTPUT_PORT__DELETE,
+        ],
     )
     DatasetRoleAssignmentFactory(
         user_id=user.id, role_id=role.id, dataset_id=dataset.id
@@ -113,6 +116,24 @@ class TestDataQualityRouter:
         assert get_response.status_code == 404
         data = get_response.json()
         assert "No data quality summary found for output port" in data["detail"]
+
+    def test_delete_output_port_data_quality_summary(self, client, session):
+        dataset = DatasetFactory()
+        _assign_update_role(session, dataset)
+
+        service = OutputPortDataQualityService(session)
+        service.save_data_quality_summary(
+            dataset.id,
+            OutputPortDataQualitySummary(
+                created_at=datetime.now(UTC) - timedelta(days=1),
+                overall_status=DataQualityStatus.FAILURE,
+                technical_assets=[],
+            ),
+        )
+        response = client.delete(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}"
+        )
+        assert response.status_code == 200
 
     def test_get_latest_data_quality_result(self, client, session):
         dataset = DatasetFactory()
