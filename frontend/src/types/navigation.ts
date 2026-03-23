@@ -18,7 +18,6 @@ export enum ApplicationPaths {
     OutputPortEdit = '/studio/:dataProductId/output-port/:datasetId/edit',
     DataOutput = '/studio/:dataProductId/:dataOutputId',
     DataOutputEdit = '/studio/:dataProductId/:dataOutputId/edit',
-    AuditLogs = '/audit-logs',
     Explorer = '/explorer',
     Logout = '/logout',
     Settings = '/settings',

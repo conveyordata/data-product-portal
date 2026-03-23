@@ -3,7 +3,6 @@ import { createBrowserRouter, Navigate, RouterProvider, useParams } from 'react-
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
 import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
-import { AuditLogs } from '@/pages/audit-logs/audit-logs.page.tsx';
 import { Logout } from '@/pages/auth/logout/logout-page.tsx';
 import Cart from '@/pages/cart/cart.page.tsx';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
@@ -123,10 +122,6 @@ const router = createBrowserRouter([
                     {
                         path: ApplicationPaths.People,
                         element: <PeoplePage />,
-                    },
-                    {
-                        path: ApplicationPaths.AuditLogs,
-                        element: <AuditLogs />,
                     },
                     {
                         path: ApplicationPaths.Explorer,

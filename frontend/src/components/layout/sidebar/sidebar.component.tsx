@@ -6,7 +6,6 @@ import {
     SettingOutlined,
     ShopOutlined,
     TeamOutlined,
-    UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
 import clsx from 'clsx';
@@ -51,11 +50,6 @@ export const Sidebar = () => {
             label: <Link to={ApplicationPaths.People}>{t('People')}</Link>,
             icon: <TeamOutlined />,
             key: ApplicationPaths.People,
-        },
-        {
-            label: <Link to={ApplicationPaths.AuditLogs}>{t('Audit Logs')}</Link>,
-            icon: <UnorderedListOutlined />,
-            key: ApplicationPaths.AuditLogs,
         },
         {
             label: (
