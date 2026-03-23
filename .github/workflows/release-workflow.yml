@@ -21,15 +21,18 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create release notes in github
+        env:
+          tag: ${{ github.ref_name }}
         id: create_release_notes
         run: |
-          echo "Release notes for version ${{ github.ref_name }}"
-          RELEASEVERSION="[${{ github.ref_name }}]"
+          VERSION="${tag#v}"
+          echo "Release notes for version $VERSION"
+          RELEASEVERSION="[$VERSION]"
           echo "Version: $RELEASEVERSION"
-          RELEASEBODY=$(awk -v ver="$RELEASEVERSION" '/^## / { if (p) { exit }; if ($2 == ver) { p=1; next } } p && NF' docs/docs/release-notes.md)
+          RELEASENOTES=$(awk -v ver="$RELEASEVERSION" '/^## / { if (p) { exit }; if ($2 == ver) { p=1; next } } p && NF' docs/docs/release-notes.md)
           {
-          echo 'RELEASEBODY<<EOF'
-          echo "${RELEASEBODY}"
+          echo 'RELEASENOTES<<EOF'
+          echo "${RELEASENOTES}"
           echo EOF
           } >> $GITHUB_OUTPUT
 
@@ -39,6 +42,6 @@ jobs:
           tag: ${{ github.ref_name }}
         run: |
           echo "Creating release for version $tag"
-          echo "${{ steps.create_release_notes.outputs.RELEASEBODY }}"
-          gh release create "$tag" --title "$tag" --notes "${{ steps.create_release_notes.outputs.RELEASEBODY }}"
+          echo "${{ steps.create_release_notes.outputs.RELEASENOTES }}"
+          gh release create "$tag" --title "$tag" --notes "${{ steps.create_release_notes.outputs.RELEASENOTES }}"
           echo "Release created successfully"
