@@ -4,7 +4,7 @@ sidebar_position: 200
 
 # Release Notes
 
-## Unreleased
+## 0.5.2
 
 ### breaking changes
 - **[API]**: The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.
