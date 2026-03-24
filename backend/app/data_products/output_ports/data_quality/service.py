@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy import UUID, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.data_quality.model import (
@@ -34,6 +34,7 @@ class OutputPortDataQualityService:
             self.db.query(DataQualitySummary)
             .filter(DataQualitySummary.output_port_id == output_port_id)
             .order_by(desc(DataQualitySummary.created_at))
+            .options(selectinload(DataQualitySummary.technical_assets))
             .first()
         )
 
@@ -68,6 +69,7 @@ class OutputPortDataQualityService:
 
         merged_summary = self.db.merge(db_summary)
         self.db.commit()
+        self.db.refresh(merged_summary, ["technical_assets"])
         return merged_summary
 
     def overwrite_data_quality_summary(
@@ -96,7 +98,7 @@ class OutputPortDataQualityService:
         existing_summary.technical_assets = technical_assets
 
         self.db.commit()
-        self.db.refresh(existing_summary)
+        self.db.refresh(existing_summary, ["technical_assets"])
         return existing_summary
 
     def get_summary(self, output_port_id: UUID, summary_id: UUID) -> DataQualitySummary:
@@ -106,6 +108,7 @@ class OutputPortDataQualityService:
                 DataQualitySummary.id == summary_id,
                 DataQualitySummary.output_port_id == output_port_id,
             )
+            .options(selectinload(DataQualitySummary.technical_assets))
             .first()
         )
 

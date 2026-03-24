@@ -71,7 +71,7 @@ class DataQualitySummary(Base):
 
     # Relationships
     technical_assets: Mapped[list["DataQualityTechnicalAsset"]] = relationship(
-        lazy="joined",
+        lazy="raise",
         cascade="all, delete-orphan",
         back_populates="data_quality_summary",  # We need all summary info when querying
     )
