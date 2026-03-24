@@ -1,2 +1,3 @@
-- [ ] Update the release notes document if needed in the [release notes](../docs/docs/release-notes.md)
-- [ ] When updating the UI please provide screenshots or videos to the reviewers
+- [ ] Update the release notes document if needed in the [release notes](../docs/docs/release-notes.md).
+- [ ] When updating the UI please provide screenshots or videos to the reviewers.
+- [ ] Updated sample data so the new feature can be easily tested
