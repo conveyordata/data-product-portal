@@ -268,7 +268,7 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                 {
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS,
-                    name: 'Request Output port access',
+                    name: t('Request Output Port access'),
                     description: t('Allows requesting access to an Output Port'),
                 },
                 {
