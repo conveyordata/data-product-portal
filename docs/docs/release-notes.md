@@ -11,6 +11,7 @@ sidebar_position: 200
 
 ### features
 
+- **[Explorer]**: Domain container nodes are now visible in the global graph explorer, grouping data products by domain with distinct colours
 - **[Postgresql]**: Postgresql plugin defining technical assets
 - **[Docs]**: Adding an architecture overview
 - **[UI]**: Remove audit logs page
@@ -27,6 +28,7 @@ sidebar_position: 200
 - **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view. Also fixed broken animations in the global explorer view.
 - **[Data Product]**: Fixed an issue where updating a setting would not invalidate the correct cache, resulting in a broken state
 - **[General]**: Improved the performance of several endpoints by ensuring we load less data.
+
 
 ## 0.5.1
 
