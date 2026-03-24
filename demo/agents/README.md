@@ -103,7 +103,7 @@ cp .env.secret.example .env.secret
 ### 2. Start the Demo
 
 ```bash
-docker compose up -d
+task reset
 ```
 
 Wait for all services to be healthy, then create the three data products:
