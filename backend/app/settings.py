@@ -83,7 +83,7 @@ class Settings(BaseSettings):
         "S3TechnicalAssetConfiguration",
     ]
 
-    AWS_SETTING_DURATION: int = 900
+    AWS_SESSION_DURATION: int = 900
 
 
 class LogLevel(str, Enum):

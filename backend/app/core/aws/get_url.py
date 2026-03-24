@@ -58,7 +58,7 @@ def get_aws_url(id: UUID, db: Session, actor: User, environment: str) -> str:
         aws_signin_url,
         params={
             "Action": "getSigninToken",
-            "SessionDuration": settings.AWS_SETTING_DURATION,
+            "SessionDuration": settings.AWS_SESSION_DURATION,
             "Session": json_dump,
         },
     )

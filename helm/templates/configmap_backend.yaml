@@ -43,4 +43,4 @@ data:
   POSTHOG_HOST: {{ .Values.posthog.host }}
   INFRASTRUCTURE_LAMBDA_ARN: {{ .Values.infrastructure_lambda_arn }}
   ENABLED_PLUGINS: {{ .Values.enabled_plugins | toJson | quote }}
-  AWS_SETTING_DURATION: {{ .Values.aws_setting_duration }}
+  AWS_SESSION_DURATION: {{ .Values.aws_session_duration }}

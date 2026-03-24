@@ -43,7 +43,7 @@ database:
   server: data-product-portal-postgresql
   username: postgres
 infrastructure_lambda_arn: ""
-aws_setting_duration: 900
+aws_session_duration: 900
 
 # Pick from datamindedthemeconfig, bluethemeconfig, greenthemeconfig
 theme_configuration: "datamindedthemeconfig"
