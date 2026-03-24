@@ -10,7 +10,9 @@ import {
     type TableColumnType,
     Typography,
 } from 'antd';
+import type { TFunction } from 'i18next';
 import { type ReactElement, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
 import { RoleDetailsMenu } from '@/pages/roles/components/role-details-menu.component';
 import {
@@ -84,6 +86,7 @@ export function RolesTable({ scope }: RolesTableProps) {
     const { data: { roles: rawRoles = [] } = {}, isFetching: isFetchingRoles } = useGetRolesQuery(scope);
     const isFetching = isFetchingGlobalRoles || isFetchingRoles;
     const [updateRole, { isLoading }] = useUpdateRoleMutation();
+    const { t } = useTranslation();
 
     const roles = useMemo(() => {
         const data = [
@@ -93,7 +96,7 @@ export function RolesTable({ scope }: RolesTableProps) {
         data.sort(prototypePrecedence);
         return [...data];
     }, [rawRoles, globalRoles]);
-    const permissions = useMemo(() => determinePermissionsForScope(scope, roles), [roles, scope]);
+    const permissions = useMemo(() => determinePermissionsForScope(scope, roles, t), [roles, scope, t]);
 
     const handleCheckboxChange = useCallback(
         (record: PermissionInstance, id: string, checked: boolean) => {
@@ -217,7 +220,7 @@ export function RolesTable({ scope }: RolesTableProps) {
     );
 }
 
-function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[] {
+function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction): Permission[] {
     let permissions: Permission[] = [];
 
     switch (scope) {
@@ -232,7 +235,7 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION,
                     name: 'Manage configuration',
-                    description: 'Allows modifying the configuration options of this installation',
+                    description: t('Allows modifying the configuration options of this installation'),
                 },
                 {
                     type: 'Group',
@@ -243,13 +246,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT,
                     name: 'Create Data Product',
-                    description: 'Allows the creation of a Data Product',
+                    description: t('Allows the creation of a Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,
-                    name: 'Create Dataset',
-                    description: 'Allows the creation of a Dataset',
+                    name: 'Create Output Port',
+                    description: t('Allows the creation of an Output Port'),
                 },
                 {
                     type: 'Group',
@@ -260,13 +263,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
                     name: 'Request Data Product access',
-                    description: 'Allows requesting access to a Data Product',
+                    description: t('Allows requesting access to a Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS,
-                    name: 'Request Dataset access',
-                    description: 'Allows requesting access to a Dataset',
+                    name: 'Request Output port access',
+                    description: t('Allows requesting access to an Output Port'),
                 },
                 {
                     type: 'Group',
@@ -277,13 +280,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__CREATE_USER,
                     name: 'Create User',
-                    description: 'Allows the creation of a new user',
+                    description: t('Allows the creation of a new user'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__DELETE_USER,
                     name: 'Delete User',
-                    description: 'Allows the deletion of a user',
+                    description: t('Allows the deletion of a user'),
                 },
             ];
             break;
@@ -298,25 +301,25 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
                     name: 'Manage general properties',
-                    description: 'Allows modifying properties such as labels and the description of a Data Product',
+                    description: t('Allows modifying properties such as labels and the description of a Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS,
                     name: 'Manage settings',
-                    description: 'Allows changing the settings of a Data Product',
+                    description: t('Allows changing the settings of a Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS,
                     name: 'Manage status',
-                    description: 'Allows changing the status of a Data Product',
+                    description: t('Allows changing the status of a Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__DELETE,
                     name: 'Delete Data Product',
-                    description: 'Allows the role to delete the Data Product',
+                    description: t('Allows the role to delete the Data Product'),
                 },
                 {
                     type: 'Group',
@@ -327,25 +330,25 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__CREATE_USER,
                     name: 'Add User',
-                    description: 'Allows adding a user as member to this Data Product and assigning a role',
+                    description: t('Allows adding a user as member to this Data Product and assigning a role'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__DELETE_USER,
                     name: 'Remove User',
-                    description: 'Allows removing a user as member from this Data Product',
+                    description: t('Allows removing a user as member from this Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
                     name: 'Modify User',
-                    description: 'Allows changing the role of a member of the Data Product',
+                    description: t('Allows changing the role of a member of the Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
                     name: 'Review access request',
-                    description: 'Allows accepting or rejecting an access request made for the Data Product',
+                    description: t('Allows accepting or rejecting an access request made for the Data Product'),
                 },
                 {
                     type: 'Group',
@@ -356,43 +359,46 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
                     name: 'Add Technical Asset',
-                    description: 'Allows adding a Technical Asset to this Data Product',
+                    description: t('Allows adding a Technical Asset to this Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
                     name: 'Remove and unlink Technical Asset',
-                    description:
+                    description: t(
                         'Allows removing a Technical Asset from this Data Product and unlinking it from a Dataset',
+                    ),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
                     name: 'Modify Technical Asset',
-                    description: 'Allows modifying the details of a Technical Asset of this Data Product',
+                    description: t('Allows modifying the details of a Technical Asset of this Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
                     name: 'Request Technical Asset Link',
-                    description: 'Allows to request that a Technical Asset of Data Product gets linked to a Dataset',
+                    description: t(
+                        'Allows to request that a Technical Asset of Data Product gets linked to an Output Port',
+                    ),
                 },
                 {
                     type: 'Group',
-                    id: 'Manage Input Datasets',
-                    name: 'Manage Input Datasets',
+                    id: 'Manage Input Ports',
+                    name: 'Manage Input Ports',
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
-                    name: 'Request Access to Dataset',
-                    description: 'Allows to request read access to a Dataset',
+                    name: 'Request Access to Output Port',
+                    description: t('Allows to request read access to a Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
-                    name: 'Remove Access to Dataset',
-                    description: 'Allows to remove read access to a Dataset',
+                    name: 'Remove Access to Output Port',
+                    description: t('Allows to remove read access to a Output Port'),
                 },
                 {
                     type: 'Group',
@@ -403,7 +409,7 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
                     name: 'Access Integrations',
-                    description: 'Allows the role to see and access Integrations of the Data Product',
+                    description: t('Allows the role to see and access Integrations of the Data Product'),
                 },
             ];
             break;
@@ -411,32 +417,32 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
             permissions = [
                 {
                     type: 'Group',
-                    id: 'Manage Dataset',
-                    name: 'Manage Dataset',
+                    id: 'Manage an Output Port',
+                    name: 'Manage an Output Port',
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
                     name: 'Manage general properties',
-                    description: 'Allows modifying properties such as labels and the description of a Dataset',
+                    description: t('Allows modifying properties such as labels and the description of an Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__UPDATE_SETTINGS,
                     name: 'Manage settings',
-                    description: 'Allows changing the settings of a Dataset',
+                    description: t('Allows changing the settings of a Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__UPDATE_STATUS,
                     name: 'Manage status',
-                    description: 'Allows changing the status of a Dataset',
+                    description: t('Allows changing the status of a Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__DELETE,
-                    name: 'Delete Dataset',
-                    description: 'Allows the role to delete the Dataset',
+                    name: 'Delete Output Port',
+                    description: t('Allows the role to delete the Output Port'),
                 },
                 {
                     type: 'Group',
@@ -447,25 +453,25 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__CREATE_USER,
                     name: 'Add User',
-                    description: 'Allows adding a user as member to this Dataset and assigning a role',
+                    description: t('Allows adding a user as member to this Output Port and assigning a role'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__DELETE_USER,
                     name: 'Remove User',
-                    description: 'Allows removing a user as member from this Dataset',
+                    description: t('Allows removing a user as member from this Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__UPDATE_USER,
                     name: 'Modify User',
-                    description: 'Allows changing the role of a member of the Dataset',
+                    description: t('Allows changing the role of a member of the Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__APPROVE_USER_REQUEST,
                     name: 'Review access request',
-                    description: 'Allows approving or rejecting an access request made for the Dataset',
+                    description: t('Allows approving or rejecting an access request made for the Output Port'),
                 },
                 {
                     type: 'Group',
@@ -476,13 +482,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
                     name: 'Accept Technical Asset link',
-                    description: 'Allows accepting a request to link a Technical Asset to the Dataset',
+                    description: t('Allows accepting a request to link a Technical Asset to the Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK,
                     name: 'Remove Technical Asset link',
-                    description: 'Allows unlinking Technical Assets from the Dataset',
+                    description: t('Allows unlinking Technical Assets from the Output Port'),
                 },
                 {
                     type: 'Group',
@@ -493,13 +499,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                     name: 'Approve Data Product Access',
-                    description: 'Allows the role to accept or reject a read access request from a Data Product',
+                    description: t('Allows the role to accept or reject a read access request from a Data Product'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
                     name: 'Revoke Data Product Access',
-                    description: 'Allows the role to revoke read access from a Data Product again',
+                    description: t('Allows the role to revoke read access from a Data Product again'),
                 },
                 {
                     type: 'Group',
@@ -510,13 +516,13 @@ function determinePermissionsForScope(scope: Scope, roles: Role[]): Permission[]
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__READ_INTEGRATIONS,
                     name: 'Access Integrations',
-                    description: 'Allows the role to see and access Integrations of the Dataset',
+                    description: t('Allows the role to see and access Integrations of the Output Port'),
                 },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.OUTPUT_PORT__UPDATE_DATA_QUALITY,
                     name: 'Insert data quality results',
-                    description: 'Allows inserting data quality results for an Output Port',
+                    description: t('Allows inserting data quality results for an Output Port'),
                 },
             ];
             break;
