@@ -92,7 +92,7 @@ class Dataset(Base, BaseORM):
         back_populates="dataset",
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.dataset_id",
-        lazy="joined",
+        lazy="raise",
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="datasets", lazy="joined"

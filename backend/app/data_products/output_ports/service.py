@@ -92,6 +92,7 @@ class OutputPortService:
             query.options(
                 selectinload(DatasetModel.data_product_links),
                 selectinload(DatasetModel.data_output_links),
+                selectinload(DatasetModel.data_product_settings),
             )
         )
 
