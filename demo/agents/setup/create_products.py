@@ -190,7 +190,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Inventory Data",
         "namespace": "inventory-data",
         "description": "Daily stock snapshots and historical inventory levels by SKU and warehouse.",
-        "access_type": "restricted",
+        "access_type": "public",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -287,7 +287,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Sales & Revenue Data",
         "namespace": "sales-revenue-data",
         "description": "Transactional orders, line items, and subscription revenue for revenue reporting and analytics.",
-        "access_type": "restricted",
+        "access_type": "public",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -398,7 +398,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Customer Records",
         "namespace": "customer-records",
         "description": "Master customer identities and anonymous web session logs for segmentation and acquisition analysis.",
-        "access_type": "restricted",
+        "access_type": "public",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -634,10 +634,6 @@ def main():
     print("  - Created OSI and PostgreSQL technical assets")
     print("  - Written agent config YAMLs")
     print("  - Updated each product to 'Ready' lifecycle")
-    print("Output ports:")
-    print("  - Inventory Data          [restricted] — requires access request")
-    print("  - Sales & Revenue Data    [restricted] — requires access request")
-    print("  - Customer Records        [restricted] — requires access request (PII)")
 
 
 if __name__ == "__main__":
