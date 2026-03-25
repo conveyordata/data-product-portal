@@ -7,9 +7,7 @@ import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
-const preloadedAuthState = {
-    auth: { user: mockUsers[0], isLoading: false },
-};
+const currentUser = mockUsers[0];
 
 function setupMocks(dataProducts = mockDataProducts) {
     allowAllAuth();
@@ -28,7 +26,7 @@ describe('DataProductsTab', () => {
         );
         const { container } = renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
-            preloadedState: preloadedAuthState,
+            currentUser,
         });
 
         expect(container.querySelector('.ant-spin')).toBeInTheDocument();
@@ -38,7 +36,7 @@ describe('DataProductsTab', () => {
         setupMocks(mockDataProducts);
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
-            preloadedState: preloadedAuthState,
+            currentUser,
         });
 
         await waitFor(() => {
@@ -51,7 +49,7 @@ describe('DataProductsTab', () => {
         setupMocks([]);
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
-            preloadedState: preloadedAuthState,
+            currentUser,
         });
 
         await waitFor(() => {
@@ -63,7 +61,7 @@ describe('DataProductsTab', () => {
         setupMocks(mockDataProducts);
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
-            preloadedState: preloadedAuthState,
+            currentUser,
         });
 
         await waitFor(() => {
@@ -83,7 +81,7 @@ describe('DataProductsTab', () => {
         setupMocks(mockDataProducts);
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
-            preloadedState: preloadedAuthState,
+            currentUser,
         });
 
         await waitFor(() => {
@@ -104,7 +102,7 @@ describe('DataProductsTab', () => {
             setupMocks(mockDataProducts); // Also gives access on all products
             renderWithProviders(<DataProductsTab />, {
                 routerProps: { initialEntries: ['/studio'] },
-                preloadedState: preloadedAuthState,
+                currentUser,
             });
 
             await waitFor(() => {
@@ -130,7 +128,7 @@ describe('DataProductsTab', () => {
             );
             renderWithProviders(<DataProductsTab />, {
                 routerProps: { initialEntries: ['/studio'] },
-                preloadedState: preloadedAuthState,
+                currentUser,
             });
 
             await waitFor(() => {
