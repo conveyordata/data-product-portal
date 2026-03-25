@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { type RenderOptions, render } from '@testing-library/react';
+import { NuqsTestingAdapter } from 'nuqs/adapters/testing';
 import type { ReactElement, ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
@@ -33,11 +34,13 @@ function createTestStore() {
 function AllProviders({ children }: { children: ReactNode }) {
     const store = createTestStore();
     return (
-        <Provider store={store}>
-            <I18nextProvider i18n={i18n}>
-                <BreadcrumbProvider>{children}</BreadcrumbProvider>
-            </I18nextProvider>
-        </Provider>
+        <NuqsTestingAdapter>
+            <Provider store={store}>
+                <I18nextProvider i18n={i18n}>
+                    <BreadcrumbProvider>{children}</BreadcrumbProvider>
+                </I18nextProvider>
+            </Provider>
+        </NuqsTestingAdapter>
     );
 }
 

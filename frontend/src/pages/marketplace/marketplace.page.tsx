@@ -1,12 +1,13 @@
 import { ShopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Alert, Empty, Flex, Pagination } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { Alert, Col, Empty, Flex, Input, Pagination, Row, Typography } from 'antd';
+import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import SearchPage from '@/components/search-page/search-page.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { SearchSuggestions } from '@/pages/marketplace/search-suggestions.tsx';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
 
@@ -47,8 +48,8 @@ export function Marketplace() {
     );
 
     const pageSize = 12;
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1));
+    const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
 
     const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
         query: searchTerm?.length >= 3 ? searchTerm : null,
@@ -64,11 +65,6 @@ export function Marketplace() {
         setCurrentPage(page);
     };
 
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value);
-        setCurrentPage(1); // Reset to first page on search
-    };
-
     useEffect(() => {
         if (searchTerm?.length < 3) return;
         posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
@@ -76,60 +72,76 @@ export function Marketplace() {
         });
     }, [posthog, searchTerm]);
     return (
-        <SearchPage
-            title={t('Marketplace')}
-            searchPlaceholder={t('Ask a business question to find the relevant data')}
-            onSearch={handleSearchChange}
-            loadingResults={isFetching}
-            searchSuggestions={searchSuggestions}
-        >
-            {searchTerm && searchTerm.length < 3 && (
-                <>
-                    <Alert
-                        title={t('Search only works when providing at least 3 characters as a search term')}
-                        type="warning"
-                    />
-                    <br />
-                </>
-            )}
-            {isFetching ? (
-                <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
-            ) : paginatedOutputPorts?.length > 0 ? (
-                <Flex wrap="wrap" gap={'small'}>
-                    {paginatedOutputPorts.map((outputPort) => (
-                        <DatasetMarketplaceCard key={outputPort.id} dataset={outputPort} />
-                    ))}
-                </Flex>
-            ) : (
-                <Flex justify={'center'}>
-                    <Empty description={t('No results match you search')} />
-                </Flex>
-            )}
-
-            {!isFetching && outputPorts.length > pageSize && (
-                <Flex
-                    key="pagination-container"
-                    justify={'flex-end'}
-                    style={{
-                        marginTop: 12,
+        <Row gutter={[16, 16]}>
+            <Col span={24}>
+                <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
+            </Col>
+            <Col span={10}>
+                <Input.Search
+                    placeholder={t('Ask a business question to find the relevant data')}
+                    allowClear
+                    onSearch={(e) => {
+                        setSearchTerm(e);
+                        setCurrentPage(1);
                     }}
-                >
-                    <Pagination
-                        current={currentPage}
-                        pageSize={pageSize}
-                        total={outputPorts.length}
-                        onChange={handlePageChange}
-                        showSizeChanger={false} // Disable page size changer
-                        showTotal={(total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{count}} Output Ports', {
-                                range0: range[0],
-                                range1: range[1],
-                                count: total,
-                            })
-                        }
-                    />
-                </Flex>
-            )}
-        </SearchPage>
+                    defaultValue={searchTerm}
+                    loading={isFetching}
+                />
+            </Col>
+            <Col span={14} />
+            <Col span={10}>
+                {searchSuggestions && !searchTerm && <SearchSuggestions suggestions={searchSuggestions} />}
+            </Col>
+            <Col span={14} />
+            <Col span={24}>
+                {searchTerm && searchTerm.length < 3 && (
+                    <>
+                        <Alert
+                            title={t('Search only works when providing at least 3 characters as a search term')}
+                            type="warning"
+                        />
+                        <br />
+                    </>
+                )}
+                {isFetching ? (
+                    <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
+                ) : paginatedOutputPorts?.length > 0 ? (
+                    <Flex wrap="wrap" gap={'small'}>
+                        {paginatedOutputPorts.map((outputPort) => (
+                            <DatasetMarketplaceCard key={outputPort.id} dataset={outputPort} />
+                        ))}
+                    </Flex>
+                ) : (
+                    <Flex justify={'center'}>
+                        <Empty description={t('No results match you search')} />
+                    </Flex>
+                )}
+
+                {!isFetching && outputPorts.length > pageSize && (
+                    <Flex
+                        key="pagination-container"
+                        justify={'flex-end'}
+                        style={{
+                            marginTop: 12,
+                        }}
+                    >
+                        <Pagination
+                            current={currentPage}
+                            pageSize={pageSize}
+                            total={outputPorts.length}
+                            onChange={handlePageChange}
+                            showSizeChanger={false} // Disable page size changer
+                            showTotal={(total, range) =>
+                                t('Showing {{range0}}-{{range1}} of {{count}} Output Ports', {
+                                    range0: range[0],
+                                    range1: range[1],
+                                    count: total,
+                                })
+                            }
+                        />
+                    </Flex>
+                )}
+            </Col>
+        </Row>
     );
 }
