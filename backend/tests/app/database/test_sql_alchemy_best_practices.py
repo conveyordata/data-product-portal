@@ -11,7 +11,7 @@ ignore_list = {
     "TechnicalAsset": ["tags"],
     "Platform": ["services"],
     "User": ["data_product_roles", "dataset_roles"],
-    "Dataset": ["tags", "data_product_settings"],
+    "Dataset": ["tags"],
     "DataProduct": ["tags"],
 }
 
