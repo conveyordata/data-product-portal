@@ -175,6 +175,7 @@ export function PeoplePage() {
                 rowHoverable
                 rowClassName={styles.row}
                 size={'small'}
+                data-testid={'people-table'}
             />
         </SearchPage>
     );

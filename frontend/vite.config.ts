@@ -7,6 +7,12 @@ import svgr from 'vite-plugin-svgr';
 // https://vitejs.dev/config/
 export default defineConfig(() => {
     return {
+        test: {
+            globals: true,
+            environment: 'jsdom',
+            setupFiles: ['./src/tests/setup.ts'],
+            testTimeout: 10000,
+        },
         resolve: {
             alias: {
                 '@': path.resolve(__dirname, './src/'),

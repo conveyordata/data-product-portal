@@ -1,0 +1,49 @@
+import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
+import { type RenderOptions, render } from '@testing-library/react';
+import type { ReactElement, ReactNode } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import { Provider } from 'react-redux';
+import { BreadcrumbProvider } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import authSlice from '@/store/api/services/auth-slice.ts';
+import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
+import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
+import cartSlice from '@/store/features/cart/cart-slice.ts';
+import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
+import wizardSlice from '@/store/features/wizard/wizard-slice.ts';
+import i18n from './i18n';
+
+function createTestStore() {
+    const store = configureStore({
+        reducer: {
+            auth: authSlice,
+            cart: cartSlice,
+            feedback: feedbackSlice,
+            wizard: wizardSlice,
+            [baseApiSlice.reducerPath]: baseApiSlice.reducer,
+            [generatedApiSlice.reducerPath]: generatedApiSlice.reducer,
+        },
+        middleware: (getDefaultMiddleware) =>
+            getDefaultMiddleware().concat(baseApiSlice.middleware).concat(generatedApiSlice.middleware),
+    });
+    setupListeners(store.dispatch);
+    return store;
+}
+
+function AllProviders({ children }: { children: ReactNode }) {
+    const store = createTestStore();
+    return (
+        <Provider store={store}>
+            <I18nextProvider i18n={i18n}>
+                <BreadcrumbProvider>{children}</BreadcrumbProvider>
+            </I18nextProvider>
+        </Provider>
+    );
+}
+
+export function renderWithProviders(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
+    return render(ui, { wrapper: AllProviders, ...options });
+}
+
+export { screen, waitFor, within } from '@testing-library/react';
+export { default as userEvent } from '@testing-library/user-event';
