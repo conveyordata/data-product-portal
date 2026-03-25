@@ -1,9 +1,9 @@
 import { TeamOutlined } from '@ant-design/icons';
-import { Table } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Col, Input, Row, Table, Typography } from 'antd';
+import { parseAsString, useQueryState } from 'nuqs';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
-import SearchPage from '@/components/search-page/search-page.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GlobalRoleAssignmentResponse,
@@ -56,7 +56,7 @@ export function PeoplePage() {
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
 
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
     const filteredUsers = useMemo(() => filterUsers(users, searchTerm), [users, searchTerm]);
     const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
     const [updateGlobalRoleAssignment] = useModifyGlobalRoleAssignmentMutation();
@@ -154,29 +154,38 @@ export function PeoplePage() {
     );
 
     return (
-        <SearchPage
-            title={t('People')}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            searchPlaceholder={t('Search people by name')}
-        >
-            <Table<UsersGet>
-                columns={columns}
-                dataSource={filteredUsers}
-                pagination={{
-                    showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{count}} people', {
-                            range0: range[0],
-                            range1: range[1],
-                            count: total,
-                        }),
-                }}
-                rowKey={(record) => record.id}
-                loading={isFetching}
-                rowHoverable
-                rowClassName={styles.row}
-                size={'small'}
-                data-testid={'people-table'}
-            />
-        </SearchPage>
+        <Row gutter={[16, 16]}>
+            <Col span={24}>
+                <Typography.Title level={3}>{t('People')}</Typography.Title>
+            </Col>
+            <Col span={10}>
+                <Input.Search
+                    placeholder={t('Search people by name')}
+                    allowClear
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </Col>
+            <Col span={14} />
+            <Col span={24}>
+                <Table<UsersGet>
+                    columns={columns}
+                    dataSource={filteredUsers}
+                    pagination={{
+                        showTotal: (total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{count}} people', {
+                                range0: range[0],
+                                range1: range[1],
+                                count: total,
+                            }),
+                    }}
+                    rowKey={(record) => record.id}
+                    loading={isFetching}
+                    rowHoverable
+                    rowClassName={styles.row}
+                    size={'small'}
+                    data-testid={'people-table'}
+                />
+            </Col>
+        </Row>
     );
 }
