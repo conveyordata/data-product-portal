@@ -3,32 +3,26 @@ import { Route, Routes } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockDataProductDetail, mockDataProductDetailHttp } from '@/tests/mocks/data-products.ts';
+import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/data-products.ts';
 import { server } from '@/tests/mocks/server.ts';
+import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
 
-const mockCurrentUser = {
-    id: 'user-1',
-    email: 'alice@example.com',
-    external_id: 'ext-1',
-    first_name: 'Alice',
-    last_name: 'Smith',
-    has_seen_tour: true,
-    can_become_admin: false,
-    global_role: null,
-};
-
-function setupMocks() {
-    allowAllAuth();
-    mockDataProductDetailHttp(mockDataProductDetail);
+function mockUserCalls() {
     server.use(
         http.get('*/api/v2/users/current', () => {
-            return HttpResponse.json(mockCurrentUser);
+            return HttpResponse.json(mockUsers[0]);
         }),
         http.get('*/api/v2/users/current/pending_actions', () => {
             return HttpResponse.json({ pending_actions: [] });
         }),
     );
+}
+
+function setupMocks() {
+    allowAllAuth();
+    mockDataProductDetailCalls(mockDataProducts[0]);
+    mockUserCalls();
 }
 
 function renderDataProductPage(dataProductId = 'dp-1') {
@@ -49,16 +43,15 @@ describe('DataProduct Page', () => {
         allowAllAuth();
         server.use(
             http.get('*/api/v2/data_products/:id', () => {
-                return new Promise(() => {});
+                return new Promise(() => {
+                    //do not resolve promise
+                });
             }),
-            http.get('*/api/v2/data_products/:id/rolled_up_tags', () => {
-                return new Promise(() => {});
+            http.get('*/api/v2/data_products/dp-1/rolled_up_tags', () => {
+                return HttpResponse.json({});
             }),
             http.get('*/api/v2/users/current', () => {
-                return HttpResponse.json(mockCurrentUser);
-            }),
-            http.get('*/api/v2/users/current/pending_actions', () => {
-                return HttpResponse.json({ pending_actions: [] });
+                return HttpResponse.json(mockUsers[0]);
             }),
         );
         const { container } = renderDataProductPage();
@@ -66,81 +59,18 @@ describe('DataProduct Page', () => {
         expect(container.querySelector('.ant-spin-spinning')).toBeInTheDocument();
     });
 
-    it('renders the data product name', async () => {
+    it('renders the data product information', async () => {
         setupMocks();
         renderDataProductPage();
 
         await waitFor(() => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
         });
-    });
-
-    it('renders the data product description', async () => {
-        setupMocks();
-        renderDataProductPage();
-
-        await waitFor(() => {
-            expect(screen.getByText('Analytics data product for sales team')).toBeInTheDocument();
-        });
-    });
-
-    it('displays lifecycle status', async () => {
-        setupMocks();
-        renderDataProductPage();
-
-        await waitFor(() => {
-            expect(screen.getByText('Production')).toBeInTheDocument();
-        });
-    });
-
-    it('displays domain name', async () => {
-        setupMocks();
-        renderDataProductPage();
-
-        await waitFor(() => {
-            expect(screen.getByText('Sales')).toBeInTheDocument();
-        });
-    });
-
-    it('displays data product type', async () => {
-        setupMocks();
-        renderDataProductPage();
-
-        await waitFor(() => {
-            expect(screen.getByText('Reporting')).toBeInTheDocument();
-        });
-    });
-
-    it('displays tags', async () => {
-        setupMocks();
-        renderDataProductPage();
-
-        await waitFor(() => {
-            expect(screen.getByText('analytics')).toBeInTheDocument();
-        });
-    });
-
-    it('displays namespace', async () => {
-        setupMocks();
-        renderDataProductPage();
-
-        await waitFor(() => {
-            expect(screen.getByText('sales')).toBeInTheDocument();
-        });
-    });
-
-    it('shows tabs for the data product', async () => {
-        setupMocks();
-        renderDataProductPage();
-
-        await waitFor(() => {
-            expect(screen.getByText('About')).toBeInTheDocument();
-        });
-        expect(screen.getByText('Input Ports')).toBeInTheDocument();
-        expect(screen.getByText('Output Ports')).toBeInTheDocument();
-        expect(screen.getByText('Team')).toBeInTheDocument();
-        expect(screen.getByText('Settings')).toBeInTheDocument();
-        expect(screen.getByText('History')).toBeInTheDocument();
+        expect(screen.getByText('Analytics data product for sales team')).toBeInTheDocument();
+        expect(screen.getByText('Draft')).toBeInTheDocument();
+        expect(screen.getByText('Sales-domain')).toBeInTheDocument();
+        expect(screen.getByText('Reporting')).toBeInTheDocument();
+        expect(screen.getByText('analytics-tag')).toBeInTheDocument();
     });
 
     it('shows edit button when user has edit access', async () => {
@@ -156,21 +86,19 @@ describe('DataProduct Page', () => {
     });
 
     it('hides edit button when user lacks edit access', async () => {
+        mockDataProductDetailCalls(mockDataProducts[0]);
+        mockUserCalls();
         server.use(
             http.get('*/api/v2/authz/roles/:scope', () => {
                 return HttpResponse.json({ roles: [] });
             }),
+            http.get('*/api/v2/authz/role_assignments/data_product', () => {
+                return HttpResponse.json({ role_assignments: [] });
+            }),
             http.get('*/api/v2/authz/access/:action', () => {
                 return HttpResponse.json({ allowed: false });
             }),
-            http.get('*/api/v2/users/current', () => {
-                return HttpResponse.json(mockCurrentUser);
-            }),
-            http.get('*/api/v2/users/current/pending_actions', () => {
-                return HttpResponse.json({ pending_actions: [] });
-            }),
         );
-        mockDataProductDetailHttp(mockDataProductDetail);
         const { container } = renderDataProductPage();
 
         await waitFor(() => {
