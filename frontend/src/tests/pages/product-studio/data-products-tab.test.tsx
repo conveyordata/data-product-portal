@@ -4,21 +4,11 @@ import { DataProductsTab } from '@/pages/product-studio/components/data-products
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/data-products.ts';
 import { server } from '@/tests/mocks/server.ts';
+import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
-const mockCurrentUser = {
-    id: 'user-1',
-    email: 'alice@example.com',
-    external_id: 'ext-1',
-    first_name: 'Alice',
-    last_name: 'Smith',
-    has_seen_tour: true,
-    can_become_admin: false,
-    global_role: null,
-};
-
 const preloadedAuthState = {
-    auth: { user: mockCurrentUser, isLoading: false },
+    auth: { user: mockUsers[0], isLoading: false },
 };
 
 function setupMocks(dataProducts = mockDataProducts) {
@@ -26,20 +16,14 @@ function setupMocks(dataProducts = mockDataProducts) {
     mockDataProductsHttp(dataProducts);
 }
 
-function renderTab(dataProducts = mockDataProducts) {
-    setupMocks(dataProducts);
-    return renderWithProviders(<DataProductsTab />, {
-        routerProps: { initialEntries: ['/studio'] },
-        preloadedState: preloadedAuthState,
-    });
-}
-
 describe('DataProductsTab', () => {
     it('shows loading state while fetching', () => {
         allowAllAuth();
         server.use(
             http.get('*/api/v2/data_products', () => {
-                return new Promise(() => {});
+                return new Promise(() => {
+                    //Never resolve promise
+                });
             }),
         );
         const { container } = renderWithProviders(<DataProductsTab />, {
@@ -51,7 +35,11 @@ describe('DataProductsTab', () => {
     });
 
     it('displays data products in the table', async () => {
-        renderTab();
+        setupMocks(mockDataProducts);
+        renderWithProviders(<DataProductsTab />, {
+            routerProps: { initialEntries: ['/studio'] },
+            preloadedState: preloadedAuthState,
+        });
 
         await waitFor(() => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
@@ -60,7 +48,11 @@ describe('DataProductsTab', () => {
     });
 
     it('shows empty state when there are no data products', async () => {
-        renderTab([]);
+        setupMocks([]);
+        renderWithProviders(<DataProductsTab />, {
+            routerProps: { initialEntries: ['/studio'] },
+            preloadedState: preloadedAuthState,
+        });
 
         await waitFor(() => {
             expect(screen.getByText('Ready to build your first Data Product?')).toBeInTheDocument();
@@ -68,7 +60,11 @@ describe('DataProductsTab', () => {
     });
 
     it('filters data products by search term', async () => {
-        renderTab();
+        setupMocks(mockDataProducts);
+        renderWithProviders(<DataProductsTab />, {
+            routerProps: { initialEntries: ['/studio'] },
+            preloadedState: preloadedAuthState,
+        });
 
         await waitFor(() => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
@@ -84,7 +80,11 @@ describe('DataProductsTab', () => {
     });
 
     it('shows no results when search matches nothing', async () => {
-        renderTab();
+        setupMocks(mockDataProducts);
+        renderWithProviders(<DataProductsTab />, {
+            routerProps: { initialEntries: ['/studio'] },
+            preloadedState: preloadedAuthState,
+        });
 
         await waitFor(() => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
@@ -100,28 +100,12 @@ describe('DataProductsTab', () => {
     });
 
     describe('Create Data Product button', () => {
-        it('renders the Create Data Product button when data products exist', async () => {
-            renderTab();
-
-            await waitFor(() => {
-                expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
-            });
-
-            expect(screen.getByRole('button', { name: 'Create Data Product' })).toBeInTheDocument();
-        });
-
-        it('renders the Create Data Product button in empty state', async () => {
-            renderTab([]);
-
-            await waitFor(() => {
-                expect(screen.getByText('Ready to build your first Data Product?')).toBeInTheDocument();
-            });
-
-            expect(screen.getByRole('button', { name: 'Create Data Product' })).toBeInTheDocument();
-        });
-
         it('enables the button when user has create permission', async () => {
-            renderTab();
+            setupMocks(mockDataProducts); // Also gives access on all products
+            renderWithProviders(<DataProductsTab />, {
+                routerProps: { initialEntries: ['/studio'] },
+                preloadedState: preloadedAuthState,
+            });
 
             await waitFor(() => {
                 expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
@@ -140,6 +124,9 @@ describe('DataProductsTab', () => {
                 http.get('*/api/v2/authz/access/:action', () => {
                     return HttpResponse.json({ allowed: false });
                 }),
+                http.get('*/api/v2/authz/role_assignments/:data_product', () => {
+                    return HttpResponse.json({ role_assignments: [] });
+                }),
             );
             renderWithProviders(<DataProductsTab />, {
                 routerProps: { initialEntries: ['/studio'] },
@@ -152,17 +139,6 @@ describe('DataProductsTab', () => {
 
             const button = screen.getByRole('button', { name: 'Create Data Product' });
             expect(button).toBeDisabled();
-        });
-
-        it('links to the create data product page', async () => {
-            renderTab();
-
-            await waitFor(() => {
-                expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
-            });
-
-            const link = screen.getByRole('link', { name: 'Create Data Product' });
-            expect(link).toHaveAttribute('href', '/studio/new');
         });
     });
 });

@@ -19,7 +19,12 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         tags: [{ id: 'tag-1', value: 'analytics' }],
         usage: null,
         domain: { id: 'domain-1', name: 'Sales', description: 'Sales domain' },
-        type: { id: 'type-1', name: 'Reporting', description: 'Reporting type', icon_key: DataProductIconKey.Reporting },
+        type: {
+            id: 'type-1',
+            name: 'Reporting',
+            description: 'Reporting type',
+            icon_key: DataProductIconKey.Reporting,
+        },
         lifecycle: { id: 'lc-1', name: 'Production', value: 3, color: 'green', is_default: false },
         user_count: 5,
         output_port_count: 2,

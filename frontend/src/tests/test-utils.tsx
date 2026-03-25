@@ -1,4 +1,4 @@
-import { type PreloadedState, configureStore } from '@reduxjs/toolkit';
+import { configureStore, type PreloadedState } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { type RenderOptions, render } from '@testing-library/react';
 import { NuqsTestingAdapter } from 'nuqs/adapters/testing';
@@ -7,6 +7,7 @@ import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router';
 import { BreadcrumbProvider } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import type { RootState } from '@/store';
 import authSlice from '@/store/api/services/auth-slice.ts';
 import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
@@ -24,7 +25,7 @@ const reducer = {
     [generatedApiSlice.reducerPath]: generatedApiSlice.reducer,
 };
 
-function createTestStore(preloadedState?: PreloadedState<any>) {
+function createTestStore(preloadedState?: PreloadedState<RootState>) {
     const store = configureStore({
         reducer,
         preloadedState,
@@ -37,30 +38,27 @@ function createTestStore(preloadedState?: PreloadedState<any>) {
 
 type RenderWithProvidersOptions = Omit<RenderOptions, 'wrapper'> & {
     routerProps?: MemoryRouterProps;
-    preloadedState?: PreloadedState<any>;
+    preloadedState?: PreloadedState<RootState>;
 };
 
 export function renderWithProviders(ui: ReactElement, options?: RenderWithProvidersOptions) {
     const { routerProps, preloadedState, ...renderOptions } = options ?? {};
 
-    const Wrapper = ({children}: { children: ReactNode }) => {
+    const Wrapper = ({ children }: { children: ReactNode }) => {
         const store = createTestStore(preloadedState);
         return (
             <Provider store={store}>
                 <I18nextProvider i18n={i18n}>
                     <BreadcrumbProvider>
                         <NuqsTestingAdapter>
-                            {routerProps?
-                                (<MemoryRouter {...routerProps}>{children}</MemoryRouter>):
-                                (<>{children}</>)
-                            }
+                            {routerProps ? <MemoryRouter {...routerProps}>{children}</MemoryRouter> : children}
                         </NuqsTestingAdapter>
                     </BreadcrumbProvider>
                 </I18nextProvider>
             </Provider>
         );
     };
-    return render(ui, {wrapper: Wrapper, ...renderOptions});
+    return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
 
 export { screen, waitFor, within } from '@testing-library/react';
