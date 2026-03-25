@@ -118,7 +118,7 @@ class TestTechnicalAssetsRouter:
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
-    def test_create_data_output_product_aligned_new(
+    def test_create_technical_asset_product_aligned_new(
         self, data_output_payload, client: TestClient
     ):
         role = RoleFactory(
@@ -133,7 +133,7 @@ class TestTechnicalAssetsRouter:
         payload = deepcopy(data_output_payload)
         payload["technical_mapping"] = "default"
 
-        created_data_output = self.create_data_output(client, payload)
+        created_data_output = self.create_technical_asset(client, payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
@@ -219,6 +219,30 @@ class TestTechnicalAssetsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
 
+    def test_update_technical_asset(self, client: TestClient):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        tag = TagFactory()
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        update_payload = {
+            "name": "update",
+            "description": "update",
+            "tag_ids": [str(tag.id)],
+        }
+        response = self.update_technical_asset(
+            client, update_payload, technical_asset.owner.id, technical_asset.id
+        )
+
+        assert response.status_code == 200, response.text
+        assert response.json()["id"] == str(technical_asset.id)
+
     def test_update_data_product_no_member(self, client: TestClient):
         data_output = TechnicalAssetFactory()
         response = self.update_data_output(
@@ -281,6 +305,25 @@ class TestTechnicalAssetsRouter:
             client, {"status": "pending"}, data_output.id
         )
         response = self.get_data_output_by_id(client, data_output.id)
+        assert response.json()["status"] == "pending"
+
+    def test_update_technical_asset_status(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        response = self.get_data_output_by_id(client, technical_asset.id)
+        assert response.json()["status"] == "active"
+        _ = self.update_technical_asset_status(
+            client, {"status": "pending"}, technical_asset.owner.id, technical_asset.id
+        )
+        response = self.get_data_output_by_id(client, technical_asset.id)
         assert response.json()["status"] == "pending"
 
     def test_get_graph_data(self, client: TestClient):
@@ -643,7 +686,9 @@ class TestTechnicalAssetsRouter:
         )
 
     @staticmethod
-    def create_data_output(client: TestClient, default_data_output_payload) -> Response:
+    def create_technical_asset(
+        client: TestClient, default_data_output_payload
+    ) -> Response:
         return client.post(
             f"/api/v2/data_products/{default_data_output_payload.get('owner_id')}/technical_assets",
             json=default_data_output_payload,
@@ -664,6 +709,14 @@ class TestTechnicalAssetsRouter:
         return client.put(f"{OLD_ENDPOINT}/{data_output_id}", json=payload)
 
     @staticmethod
+    def update_technical_asset(
+        client: TestClient, payload, data_product_id, technical_asset_id
+    ) -> Response:
+        return client.put(
+            f"{ENDPOINT.format(data_product_id)}/{technical_asset_id}", json=payload
+        )
+
+    @staticmethod
     def delete_data_output(client: TestClient, data_output_id) -> Response:
         return client.delete(f"{OLD_ENDPOINT}/{data_output_id}")
 
@@ -672,6 +725,15 @@ class TestTechnicalAssetsRouter:
         client: TestClient, status, data_output_id
     ) -> Response:
         return client.put(f"{OLD_ENDPOINT}/{data_output_id}/status", json=status)
+
+    @staticmethod
+    def update_technical_asset_status(
+        client: TestClient, status, data_product_id, technical_asset_id
+    ) -> Response:
+        return client.put(
+            f"{ENDPOINT.format(data_product_id)}/{technical_asset_id}/status",
+            json=status,
+        )
 
     @staticmethod
     def get_namespace_suggestion_old(client: TestClient, name) -> Response:
