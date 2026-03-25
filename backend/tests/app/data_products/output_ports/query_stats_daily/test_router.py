@@ -20,33 +20,51 @@ DATA_PRODUCT_ENDPOINT = "/api/v2/data_products"
 
 
 class TestDatasetQueryStatsDailyRouter:
-    def test_update_query_stats_daily_batch(self, client, session):
-        """Test batch updating query stats."""
-        dataset = DatasetFactory()
+    @staticmethod
+    def update_query_stats_payload():
         consumer1 = DataProductFactory()
         consumer2 = DataProductFactory()
         today = date.today()
+        return [
+            {
+                "date": today.isoformat(),
+                "consumer_data_product_id": str(consumer1.id),
+                "query_count": 150,
+            },
+            {
+                "date": (today - timedelta(days=1)).isoformat(),
+                "consumer_data_product_id": str(consumer2.id),
+                "query_count": 250,
+            },
+        ]
 
-        update_payload = {
-            "dataset_query_stats_daily_updates": [
-                {
-                    "date": today.isoformat(),
-                    "consumer_data_product_id": str(consumer1.id),
-                    "query_count": 150,
-                },
-                {
-                    "date": (today - timedelta(days=1)).isoformat(),
-                    "consumer_data_product_id": str(consumer2.id),
-                    "query_count": 250,
-                },
-            ]
-        }
+    def test_update_query_stats_daily_batch_old(self, client, session):
+        """Test batch updating query stats."""
+        dataset = DatasetFactory()
 
         response = client.patch(
-            f"{ENDPOINT}/{dataset.id}/query_stats", json=update_payload
+            f"{ENDPOINT}/{dataset.id}/query_stats",
+            json={
+                "dataset_query_stats_daily_updates": self.update_query_stats_payload()
+            },
         )
 
         assert response.status_code == 200
+
+        # Verify the records were created
+        stats = session.query(DatasetQueryStatsDaily).all()
+        assert len(stats) >= 2
+
+    def test_update_query_stats_daily_batch(self, client, session):
+        """Test batch updating query stats."""
+        dataset = DatasetFactory()
+
+        response = client.patch(
+            f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
+            json={"output_port_query_stats_updates": self.update_query_stats_payload()},
+        )
+
+        assert response.status_code == 200, response.text
 
         # Verify the records were created
         stats = session.query(DatasetQueryStatsDaily).all()
@@ -96,6 +114,31 @@ class TestDatasetQueryStatsDailyRouter:
             assert "query_count" in stat
             assert stat["query_count"] in [150, 250]
 
+    def test_delete_query_stat_old(self, client, session):
+        dataset = DatasetFactory()
+        consumer = DataProductFactory()
+        today = date.today()
+
+        DatasetQueryStatsFactory(
+            date=today,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=200,
+        )
+        session.commit()
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/{dataset.id}/query_stats",
+            json={
+                "date": today.isoformat(),
+                "consumer_data_product_id": str(consumer.id),
+            },
+        )
+
+        assert response.status_code == 200
+        stats = session.query(DatasetQueryStatsDaily).all()
+        assert stats == []
+
     def test_delete_query_stat(self, client, session):
         dataset = DatasetFactory()
         consumer = DataProductFactory()
@@ -109,13 +152,13 @@ class TestDatasetQueryStatsDailyRouter:
         )
         session.commit()
 
-        payload = {
-            "date": today.isoformat(),
-            "consumer_data_product_id": str(consumer.id),
-        }
-
         response = client.request(
-            "DELETE", f"{ENDPOINT}/{dataset.id}/query_stats", json=payload
+            "DELETE",
+            f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
+            json={
+                "date": today.isoformat(),
+                "consumer_data_product_id": str(consumer.id),
+            },
         )
 
         assert response.status_code == 200

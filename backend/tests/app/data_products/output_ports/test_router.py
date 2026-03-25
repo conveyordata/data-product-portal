@@ -67,6 +67,24 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
+    def test_create_output_port(self, session, dataset_payload, client):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        data_product_id = dataset_payload.pop("data_product_id")
+        created_dataset = self.create_output_port(
+            client, data_product_id, dataset_payload
+        )
+        assert created_dataset.status_code == 200
+        assert "id" in created_dataset.json()
+
     def test_create_dataset_no_owner_role(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -230,6 +248,30 @@ class TestDatasetsRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
+    def test_update_output_port(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
+        update_payload = {
+            "name": "new_name",
+            "namespace": "new_namespace",
+            "description": "new_description",
+            "tag_ids": [],
+            "access_type": "public",
+        }
+
+        updated_dataset = self.update_output_port(
+            client, ds.data_product.id, ds.id, update_payload
+        )
+
+        assert updated_dataset.status_code == 200
+        assert updated_dataset.json()["id"] == str(ds.id)
+
     def test_update_dataset_about_no_role(self, client):
         ds = DatasetFactory()
         response = self.update_dataset_about(client, ds.id)
@@ -246,6 +288,17 @@ class TestDatasetsRouter:
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 200
 
+    def test_update_output_port_about(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        response = self.update_output_port_about(client, ds.data_product.id, ds.id)
+        assert response.status_code == 200
+
     def test_remove_dataset_not_owner(self, client):
         ds = DatasetFactory()
         response = self.delete_default_dataset(client, ds.id)
@@ -259,6 +312,19 @@ class TestDatasetsRouter:
         ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.delete_default_dataset(client, ds.id)
+        assert response.status_code == 200
+
+        response = self.get_dataset_by_id(client, ds.id)
+        assert response.status_code == 404
+
+    def test_remove_output_port(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        response = self.delete_output_port(client, ds.data_product.id, ds.id)
         assert response.status_code == 200
 
         response = self.get_dataset_by_id(client, ds.id)
@@ -348,6 +414,25 @@ class TestDatasetsRouter:
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "pending"
 
+    def test_update_output_port_status(self, client):
+        ds_owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_STATUS],
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(
+            user_id=ds_owner.id, role_id=role.id, dataset_id=ds.id
+        )
+        response = self.get_output_port(client, ds.id, ds.data_product.id)
+        assert response.json()["status"] == "active"
+        response = self.update_output_port_status(
+            client, ds.data_product.id, ds.id, {"status": "pending"}
+        )
+        assert response.status_code == 200
+        response = self.get_output_port(client, ds.id, ds.data_product.id)
+        assert response.json()["status"] == "pending"
+
     def test_update_status_not_owner(self, client):
         dataset = DatasetFactory()
         response = self.update_dataset_usage(client, {"usage": "new usage"}, dataset.id)
@@ -434,6 +519,23 @@ class TestDatasetsRouter:
 
         response = client.post(
             f"{OLD_ENDPOINT}/{ds.id}/settings/{setting.id}?value=false"
+        )
+        assert response.status_code == 200
+        response = client.get(f"{OLD_ENDPOINT}/{ds.id}")
+        assert response.json()["data_product_settings"][0]["value"] == "false"
+
+    def test_output_port_set_custom_setting(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_SETTINGS],
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        setting = DataProductSettingFactory(scope="dataset")
+
+        response = client.post(
+            f"{ENDPOINT.format(ds.data_product.id)}/{ds.id}/settings/{setting.id}?value=false"
         )
         assert response.status_code == 200
         response = client.get(f"{OLD_ENDPOINT}/{ds.id}")
@@ -716,8 +818,18 @@ class TestDatasetsRouter:
         return client.post(OLD_ENDPOINT, json=default_dataset_payload)
 
     @staticmethod
+    def create_output_port(client, data_product_id, output_port_payload):
+        return client.post(ENDPOINT.format(data_product_id), json=output_port_payload)
+
+    @staticmethod
     def update_dataset_status(client, status, dataset_id):
         return client.put(f"{OLD_ENDPOINT}/{dataset_id}/status", json=status)
+
+    @staticmethod
+    def update_output_port_status(client, data_product_id, dataset_id, status):
+        return client.put(
+            f"{ENDPOINT.format(data_product_id)}/{dataset_id}/status", json=status
+        )
 
     @staticmethod
     def update_dataset_usage(client, usage, dataset_id):
@@ -728,13 +840,32 @@ class TestDatasetsRouter:
         return client.put(f"{OLD_ENDPOINT}/{dataset_id}", json=default_dataset_payload)
 
     @staticmethod
-    def update_dataset_about(client, dataset_id):
-        data = {"about": "Updated Dataset Description"}
-        return client.put(f"{OLD_ENDPOINT}/{dataset_id}/about", json=data)
+    def update_output_port(client, data_product_id, dataset_id, payload):
+        return client.put(
+            f"{ENDPOINT.format(data_product_id)}/{dataset_id}", json=payload
+        )
+
+    @staticmethod
+    def update_dataset_about(client, dataset_id, payload=None):
+        if payload is None:
+            payload = {"about": "Updated Dataset Description"}
+        return client.put(f"{OLD_ENDPOINT}/{dataset_id}/about", json=payload)
+
+    @staticmethod
+    def update_output_port_about(client, data_product_id, output_port_id, payload=None):
+        if payload is None:
+            payload = {"about": "Updated Dataset Description"}
+        return client.put(
+            f"{ENDPOINT.format(data_product_id)}/{output_port_id}/about", json=payload
+        )
 
     @staticmethod
     def delete_default_dataset(client, dataset_id):
         return client.delete(f"{OLD_ENDPOINT}/{dataset_id}")
+
+    @staticmethod
+    def delete_output_port(client, data_product_id, dataset_id):
+        return client.delete(f"{ENDPOINT.format(data_product_id)}/{dataset_id}")
 
     @staticmethod
     def get_dataset_by_id(client, dataset_id):
