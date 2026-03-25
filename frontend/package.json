@@ -76,7 +76,7 @@
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.27.3",
         "esbuild-runner": "^2.2.2",
-        "i18next-cli": "^1.50.3",
+        "i18next-cli": "^1.50.5",
         "jsdom": "^29.0.1",
         "knip": "^6.0.5",
         "msw": "^2.12.14",
