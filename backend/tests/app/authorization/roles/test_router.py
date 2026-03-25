@@ -5,7 +5,8 @@ from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Role, Scope
 from tests.factories import RoleFactory
 
-ENDPOINT = "/api/roles"
+OLD_ENDPOINT = "/api/roles"
+ENDPOINT = "/api/v2/authz/roles"
 
 
 class TestRolesRouter:
@@ -18,7 +19,7 @@ class TestRolesRouter:
 
     def test_get_roles(self, client: TestClient):
         role: Role = RoleFactory(scope="global")
-        response = client.get(f"{ENDPOINT}/global")
+        response = client.get(f"{OLD_ENDPOINT}/global")
 
         assert response.status_code == 200
         data = response.json()
@@ -28,7 +29,7 @@ class TestRolesRouter:
     @pytest.mark.usefixtures("admin")
     def test_create_role(self, client: TestClient):
         response = client.post(
-            ENDPOINT,
+            OLD_ENDPOINT,
             json={
                 "name": self.test_role["name"],
                 "scope": self.test_role["scope"],
@@ -45,17 +46,29 @@ class TestRolesRouter:
         assert data["permissions"] == self.test_role["permissions"]
 
     @pytest.mark.usefixtures("admin")
-    def test_update_role(self, client: TestClient):
+    def test_update_role_old(self, client: TestClient):
         role: Role = RoleFactory()
         response = client.patch(
-            ENDPOINT,
+            OLD_ENDPOINT,
             json={
                 "id": str(role.id),
                 "permissions": [101, 102],
                 "description": "updated_description",
             },
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_role(self, client: TestClient):
+        role: Role = RoleFactory()
+        response = client.put(
+            f"{ENDPOINT}/{role.id}",
+            json={
+                "permissions": [101, 102],
+                "description": "updated_description",
+            },
+        )
+        assert response.status_code == 200, response.text
 
         data = response.json()
         assert data["id"] == str(role.id)
@@ -67,7 +80,7 @@ class TestRolesRouter:
     @pytest.mark.usefixtures("admin")
     def test_update_admin_role(self, client: TestClient):
         illegal = client.patch(
-            ENDPOINT,
+            OLD_ENDPOINT,
             json={
                 "id": str(ADMIN_UUID),
                 "permissions": [101, 102],
@@ -80,7 +93,7 @@ class TestRolesRouter:
         )
 
         legal = client.patch(
-            ENDPOINT,
+            OLD_ENDPOINT,
             json={
                 "id": str(ADMIN_UUID),
                 "description": "admins can have a custom description",
@@ -96,13 +109,13 @@ class TestRolesRouter:
     @pytest.mark.usefixtures("admin")
     def test_delete_role(self, client: TestClient):
         role: Role = RoleFactory(scope=Scope.DATASET)
-        response = client.get(f"{ENDPOINT}/{role.scope}")
+        response = client.get(f"{OLD_ENDPOINT}/{role.scope}")
         assert response.status_code == 200
         assert len(response.json()) == 1
 
-        response = client.delete(f"{ENDPOINT}/{role.id}")
+        response = client.delete(f"{OLD_ENDPOINT}/{role.id}")
         assert response.status_code == 200
 
-        response = client.get(f"{ENDPOINT}/{role.scope}")
+        response = client.get(f"{OLD_ENDPOINT}/{role.scope}")
         assert response.status_code == 200
         assert len(response.json()) == 0

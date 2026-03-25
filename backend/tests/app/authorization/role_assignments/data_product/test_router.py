@@ -150,6 +150,32 @@ class TestDataProductRoleAssignmentsRouter:
         else:
             mock_data_product_auth_assignment.assert_not_called()
 
+    def test_request_assignment_new(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}/request",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+                "data_product_id": str(data_product.id),
+            },
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["data_product"]["id"] == str(data_product.id)
+        assert data["user"]["id"] == str(user.id)
+        assert data["role"]["id"] == str(role.id)
+
     def test_request_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -583,6 +609,34 @@ class TestDataProductRoleAssignmentsRouter:
         assert data[0].get("decision") != DecisionStatus.PENDING
         assert data[1].get("decision") != DecisionStatus.PENDING
 
+    def test_request_data_product_role_assignment_new(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role1: Role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role1.id,
+        )
+        user_requester: User = UserFactory()
+        role2: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}",
+            json={
+                "user_id": str(user_requester.id),
+                "role_id": str(role2.id),
+                "data_product_id": str(data_product.id),
+            },
+        )
+        assert response.status_code == 200
+
     def test_request_data_product_role_assignment_without_accept_permission(
         self, client: TestClient
     ):
@@ -620,13 +674,6 @@ class TestDataProductRoleAssignmentsRouter:
     @staticmethod
     def delete_data_product(client: TestClient, data_product_id: str):
         return client.delete(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}")
-
-    @staticmethod
-    def create_data_product_role_assignment(client: TestClient, json):
-        return client.post(
-            f"{OLD_ENDPOINT}",
-            json=json,
-        )
 
     @staticmethod
     def delete_data_product_role_assignment(client: TestClient, assignment_id):
