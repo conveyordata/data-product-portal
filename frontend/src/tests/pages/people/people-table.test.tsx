@@ -1,12 +1,14 @@
 import { http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { PeoplePage } from '@/pages/people/people-table.component';
+import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users';
 import { server } from '../../mocks/server';
 import { renderWithProviders, screen, userEvent, waitFor } from '../../test-utils';
 
 describe('PeoplePage', () => {
     it('shows loading state while fetching', () => {
+        allowAllAuth();
         server.use(
             http.get('*/api/v2/users', () => {
                 return new Promise(() => {
@@ -19,6 +21,7 @@ describe('PeoplePage', () => {
         expect(container.querySelector('.ant-spin-spinning')).toBeInTheDocument();
     });
     it('renders an empty table when there are no users', async () => {
+        allowAllAuth();
         mockUsersHttp([]);
         renderWithProviders(<PeoplePage />);
 
@@ -32,6 +35,7 @@ describe('PeoplePage', () => {
     });
 
     it('displays users returned by the API', async () => {
+        allowAllAuth();
         mockUsersHttp([mockUsers[0], mockUsers[1]]);
         renderWithProviders(<PeoplePage />);
         const user1 = 'alice@example.com';
@@ -45,6 +49,7 @@ describe('PeoplePage', () => {
     });
 
     it('filters users by search term', async () => {
+        allowAllAuth();
         mockUsersHttp([mockUsers[0], mockUsers[1]]);
         renderWithProviders(<PeoplePage />);
         const user1 = 'alice@example.com';
