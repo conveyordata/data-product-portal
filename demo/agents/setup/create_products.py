@@ -10,6 +10,7 @@ Run this after `docker compose up -d` and all services are healthy.
 import requests
 import sys
 import time
+import traceback
 from typing import Any
 
 PORTAL_URL = "http://localhost:8080"
@@ -622,8 +623,9 @@ def main():
     for product in PRODUCTS:
         try:
             provision_product(product)
-        except Exception as e:
-            print(f"Failed to provision {product['name']}: {e}")
+        except Exception:
+            print(f"Failed to provision {product['name']}:")
+            traceback.print_exc()
             sys.exit(1)
 
     print(
