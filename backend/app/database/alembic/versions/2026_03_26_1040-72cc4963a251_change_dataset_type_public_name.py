@@ -23,7 +23,7 @@ def upgrade() -> None:
         "datasets",
         "access_type",
         existing_type=sa.Enum(
-            "public", "restricted", "private", name="outputportaccesstype"
+            "PUBLIC", "RESTRICTED", "PRIVATE", name="outputportaccesstype"
         ),
         type_=sa.String(),
         existing_nullable=True,
@@ -32,7 +32,7 @@ def upgrade() -> None:
     op.execute(sa.text("DROP TYPE IF EXISTS outputportaccesstype"))
     op.execute(
         sa.text(
-            "UPDATE datasets SET access_type = 'unrestricted' WHERE access_type = 'public'"
+            "UPDATE datasets SET access_type = 'UNRESTRICTED' WHERE access_type = 'PUBLIC'"
         )
     )
 
@@ -40,11 +40,11 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.execute(
         sa.text(
-            "UPDATE datasets SET access_type = 'public' WHERE access_type = 'unrestricted'"
+            "UPDATE datasets SET access_type = 'PUBLIC' WHERE access_type = 'UNRESTRICTED'"
         )
     )
     outputportaccesstype = sa.Enum(
-        "public", "restricted", "private", name="outputportaccesstype"
+        "PUBLIC", "RESTRICTED", "PRIVATE", name="outputportaccesstype"
     )
     outputportaccesstype.create(op.get_bind())
     op.alter_column(
