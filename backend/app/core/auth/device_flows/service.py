@@ -18,7 +18,11 @@ from app.core.auth.device_flows.exceptions import (
     SlowDownException,
 )
 from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
-from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
+from app.core.auth.device_flows.schema import (
+    DeviceFlow,
+    DeviceFlowStatus,
+    OIDCTokenResponse,
+)
 from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
 from app.core.logging import logger
@@ -69,7 +73,7 @@ class DeviceFlowService:
 
     def fetch_jwt_tokens(
         self, request: Request, db: Session, device_code: str, client_id: str
-    ):
+    ) -> OIDCTokenResponse:
         self.logger.debug("requesting JWTs")
         device_flow = db.get(DeviceFlowModel, device_code)
 
@@ -139,7 +143,7 @@ class DeviceFlowService:
             self.logger.debug(data)
             device_flow.status = DeviceFlowStatus.EXPIRED
             db.commit()
-            return data
+            return OIDCTokenResponse.model_validate(data)
         else:
             raise ExpiredDeviceCodeError
 

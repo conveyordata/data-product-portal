@@ -50,7 +50,7 @@ export type GetPluginUrlApiResponse =
 export type GetPluginUrlApiArg = {
   pluginName: string;
   id: string;
-  environment?: string | null;
+  environment?: string;
 };
 export type RenderTechnicalAssetAccessPathApiResponse =
   /** status 200 Successful Response */ RenderTechnicalAssetAccessPathResponse;

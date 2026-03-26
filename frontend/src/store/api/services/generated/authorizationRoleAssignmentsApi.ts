@@ -205,8 +205,8 @@ export type CreateGlobalRoleAssignmentApiArg = CreateGlobalRoleAssignment;
 export type ListGlobalRoleAssignmentsApiResponse =
   /** status 200 Successful Response */ ListGlobalRoleAssignmentsResponse;
 export type ListGlobalRoleAssignmentsApiArg = {
-  userId?: string | null;
-  roleId?: string | null;
+  userId?: string;
+  roleId?: string;
 };
 export type DeleteGlobalRoleAssignmentApiResponse =
   /** status 200 Successful Response */ DeleteGlobalRoleAssignmentResponse;
@@ -235,10 +235,10 @@ export type ModifyDataProductRoleAssignmentApiArg = {
 export type ListDataProductRoleAssignmentsApiResponse =
   /** status 200 Successful Response */ ListDataProductRoleAssignmentsResponse;
 export type ListDataProductRoleAssignmentsApiArg = {
-  dataProductId?: string | null;
-  userId?: string | null;
-  roleId?: string | null;
-  decision?: DecisionStatus | null;
+  dataProductId?: string;
+  userId?: string;
+  roleId?: string;
+  decision?: DecisionStatus;
 };
 export type CreateDataProductRoleAssignmentApiResponse =
   /** status 200 Successful Response */ DataProductRoleAssignmentResponse;
@@ -266,10 +266,10 @@ export type ModifyOutputPortRoleAssignmentApiArg = {
 export type ListOutputPortRoleAssignmentsApiResponse =
   /** status 200 Successful Response */ ListOutputPortRoleAssignmentsResponse;
 export type ListOutputPortRoleAssignmentsApiArg = {
-  outputPortId?: string | null;
-  userId?: string | null;
-  roleId?: string | null;
-  decision?: DecisionStatus | null;
+  outputPortId?: string;
+  userId?: string;
+  roleId?: string;
+  decision?: DecisionStatus;
 };
 export type CreateOutputPortRoleAssignmentApiResponse =
   /** status 200 Successful Response */ OutputPortRoleAssignmentResponse;

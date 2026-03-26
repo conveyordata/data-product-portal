@@ -1,0 +1,12 @@
+# sets generator options.
+generator:
+  # sets generator features.
+  features:
+    enable:
+      # Enables paths client generation
+      - "paths/client"
+    disable_all: true
+  ignore_not_implemented: ["all"]
+  filters:
+    # Regular expression to filter paths. If empty, all paths are accepted. Default is empty string.
+    path_regex: "/api/v2/.*"

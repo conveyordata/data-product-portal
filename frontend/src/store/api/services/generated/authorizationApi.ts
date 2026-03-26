@@ -21,8 +21,8 @@ export type CheckAccessApiResponse =
   /** status 200 Access check result */ AccessResponse;
 export type CheckAccessApiArg = {
   action: AuthorizationAction;
-  resource?: string | null;
-  domain?: string | null;
+  resource?: string;
+  domain?: string;
 };
 export type IsAdminApiResponse =
   /** status 200 Successful Response */ IsAdminResponse;

@@ -160,7 +160,7 @@ export type CreateDataProductApiResponse =
 export type CreateDataProductApiArg = DataProductCreate;
 export type GetDataProductsApiResponse =
   /** status 200 Successful Response */ GetDataProductsResponse;
-export type GetDataProductsApiArg = (string | null) | undefined;
+export type GetDataProductsApiArg = string | undefined;
 export type RemoveDataProductApiResponse =
   /** status 200 Successful Response */ any;
 export type RemoveDataProductApiArg = string;

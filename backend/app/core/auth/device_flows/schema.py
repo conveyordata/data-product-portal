@@ -32,3 +32,13 @@ class DeviceFlow(ORMModel):
             f"{self.oidc_redirect_uri}api/auth/"
             f"device?code={self.user_code}&authorize=true"
         )
+
+
+class OIDCTokenResponse(ORMModel):
+    """OIDC token endpoint response."""
+
+    access_token: str
+    token_type: str
+    expires_in: int
+    id_token: str | None = None
+    refresh_token: str | None = None
