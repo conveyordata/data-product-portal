@@ -17,7 +17,7 @@ export function DatasetPopoverTitle({ name, accessType, titleProps, isApproved }
     return (
         <Space>
             <Typography.Text {...titleProps}>{name}</Typography.Text>
-            {accessType !== OutputPortAccessType.Public && <Typography.Text italic>({subtitle})</Typography.Text>}
+            {accessType !== OutputPortAccessType.Unrestricted && <Typography.Text italic>({subtitle})</Typography.Text>}
         </Space>
     );
 }

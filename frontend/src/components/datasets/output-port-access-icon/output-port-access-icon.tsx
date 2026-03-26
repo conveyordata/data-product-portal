@@ -21,6 +21,8 @@ export const OutputPortAccessIcon = ({ accessType, hasPopover = false }: Props) 
         switch (accessType) {
             case OutputPortAccessType.Public:
                 return null;
+            case OutputPortAccessType.Unrestricted:
+                return null;
             case OutputPortAccessType.Restricted:
                 return <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />;
             case OutputPortAccessType.Private:
