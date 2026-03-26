@@ -72,7 +72,7 @@ class TestDataProductsDatasetsRouter:
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history) == 1
 
-    def test_request_data_product_multiple_link(self, client):
+    def test_request_data_product_multiple_link_old(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -91,6 +91,28 @@ class TestDataProductsDatasetsRouter:
             client, data_product.id, [ds1.id, ds2.id]
         )
         assert response.status_code == 200
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 2
+
+    def test_request_data_product_multiple_link(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds1 = DatasetFactory()
+        ds2 = DatasetFactory()
+
+        response = self.request_link_input_ports(
+            client, data_product.id, [ds1.id, ds2.id]
+        )
+        assert response.status_code == 200, response.text
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history) == 2
 
@@ -536,6 +558,23 @@ class TestDataProductsDatasetsRouter:
             f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
             json={
                 "dataset_ids": [str(dataset_id) for dataset_id in dataset_ids],
+                "justification": justification,
+            },
+        )
+
+    @staticmethod
+    def request_link_input_ports(
+        client: TestClient,
+        data_product_id: UUID,
+        output_port_ids: list[UUID],
+        justification: str = "This is my birth right!",
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_input_ports",
+            json={
+                "input_ports": [
+                    str(output_port_id) for output_port_id in output_port_ids
+                ],
                 "justification": justification,
             },
         )
