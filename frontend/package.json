@@ -83,7 +83,7 @@
         "rollup-plugin-visualizer": "^7.0.1",
         "sass": "^1.98.0",
         "typescript": "^6.0.2",
-        "vite": "^8.0.2",
+        "vite": "^8.0.3",
         "vite-plugin-svgr": "^4.5.0",
         "vitest": "^4.1.1"
     },
