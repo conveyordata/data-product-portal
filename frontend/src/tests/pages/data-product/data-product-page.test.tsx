@@ -13,6 +13,9 @@ function mockUserCalls() {
         http.get('*/api/v2/users/current', () => {
             return HttpResponse.json(mockUsers[0]);
         }),
+        http.get('*/api/v2/users', () => {
+            return HttpResponse.json({ users: mockUsers });
+        }),
         http.get('*/api/v2/users/current/pending_actions', () => {
             return HttpResponse.json({ pending_actions: [] });
         }),
@@ -23,6 +26,11 @@ function setupDefaultMocks() {
     allowAllAuth();
     mockDataProductDetailCalls(mockDataProducts[0]);
     mockUserCalls();
+    server.use(
+        http.get('*/api/v2/configuration/environments', () => {
+            return HttpResponse.json({ environment_configs: [] });
+        }),
+    );
 }
 
 function renderDataProductPage(dataProductId = 'dp-1') {
@@ -128,6 +136,9 @@ describe('DataProduct Page', () => {
             }),
             http.get('*/api/v2/authz/access/:action', () => {
                 return HttpResponse.json({ allowed: false });
+            }),
+            http.get('*/api/v2/configuration/environments', () => {
+                return HttpResponse.json({ environment_configs: [] });
             }),
         );
         const { container } = renderDataProductPage();
