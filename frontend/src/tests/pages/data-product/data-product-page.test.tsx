@@ -6,7 +6,7 @@ import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/data-products.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
-import { renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, waitFor, within } from '@/tests/test-utils.tsx';
 
 function mockUserCalls() {
     server.use(
@@ -19,7 +19,7 @@ function mockUserCalls() {
     );
 }
 
-function setupMocks() {
+function setupDefaultMocks() {
     allowAllAuth();
     mockDataProductDetailCalls(mockDataProducts[0]);
     mockUserCalls();
@@ -34,24 +34,19 @@ function renderDataProductPage(dataProductId = 'dp-1') {
             routerProps: {
                 initialEntries: [`/studio/${dataProductId}`],
             },
+            currentUser: mockUsers[0],
         },
     );
 }
 
 describe('DataProduct Page', () => {
     it('shows loading spinner while fetching', () => {
-        allowAllAuth();
+        setupDefaultMocks();
         server.use(
             http.get('*/api/v2/data_products/:id', () => {
                 return new Promise(() => {
                     //do not resolve promise
                 });
-            }),
-            http.get('*/api/v2/data_products/dp-1/rolled_up_tags', () => {
-                return HttpResponse.json({});
-            }),
-            http.get('*/api/v2/users/current', () => {
-                return HttpResponse.json(mockUsers[0]);
             }),
         );
         const { container } = renderDataProductPage();
@@ -60,7 +55,7 @@ describe('DataProduct Page', () => {
     });
 
     it('renders the data product information', async () => {
-        setupMocks();
+        setupDefaultMocks();
         renderDataProductPage();
 
         await waitFor(() => {
@@ -74,15 +69,51 @@ describe('DataProduct Page', () => {
     });
 
     it('shows edit button when user has edit access', async () => {
-        setupMocks();
+        setupDefaultMocks();
         const { container } = renderDataProductPage();
 
         await waitFor(() => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
         });
 
-        // The edit button renders an EditOutlined icon inside a circle button
         expect(container.querySelector('[aria-label="edit"]')).toBeInTheDocument();
+    });
+
+    it('does not show join team button when user already has access to product', async () => {
+        setupDefaultMocks();
+        server.use(
+            http.get('*/api/v2/authz/role_assignments/data_product', () => {
+                return HttpResponse.json({
+                    role_assignments: [{ user: { id: '1' }, decision: 'approved' }],
+                });
+            }),
+        );
+        const { container } = renderDataProductPage();
+
+        await waitFor(() => {
+            expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
+        });
+
+        const sidebar = within(container).queryByTestId('product-studio-sidebar');
+        expect(sidebar).toBeInTheDocument();
+        // biome-ignore lint/style/noNonNullAssertion: false positive
+        expect(within(sidebar!).queryByText('Join Team')).not.toBeInTheDocument();
+    });
+
+    it('shows join team button when user does not have access to product', async () => {
+        setupDefaultMocks();
+        const { container } = renderDataProductPage();
+
+        await waitFor(() => {
+            expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
+        });
+
+        const sidebar = within(container).queryByTestId('product-studio-sidebar');
+        expect(sidebar).toBeInTheDocument();
+        await waitFor(() => {
+            // biome-ignore lint/style/noNonNullAssertion: false positive
+            expect(within(sidebar!).getByText('Join Team')).toBeInTheDocument();
+        });
     });
 
     it('hides edit button when user lacks edit access', async () => {
