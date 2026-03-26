@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
@@ -14,7 +15,8 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.global_.schema import GlobalRoleAssignment
     from app.users.schema import User
 
-ENDPOINT = "/api/role_assignments/global"
+OLD_ENDPOINT = "/api/role_assignments/global"
+ENDPOINT = "/api/v2/authz/role_assignments/global"
 
 
 class TestGlobalRoleAssignmentsRouter:
@@ -24,7 +26,7 @@ class TestGlobalRoleAssignmentsRouter:
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id, role_id=role.id
         )
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -41,7 +43,7 @@ class TestGlobalRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
         response = client.post(
-            f"{ENDPOINT}",
+            f"{OLD_ENDPOINT}",
             json={
                 "user_id": str(user.id),
                 "role_id": str(role.id),
@@ -61,7 +63,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert delete.status_code == status.HTTP_403_FORBIDDEN
 
         response = client.post(
-            f"{ENDPOINT}/become_admin",
+            f"{OLD_ENDPOINT}/become_admin",
             json={"expiry": "2024-12-31T23:59:59Z"},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -74,7 +76,7 @@ class TestGlobalRoleAssignmentsRouter:
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=False)
 
         response = client.post(
-            f"{ENDPOINT}/become_admin",
+            f"{OLD_ENDPOINT}/become_admin",
             json={"expiry": "2024-12-31T23:59:59Z"},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -83,17 +85,17 @@ class TestGlobalRoleAssignmentsRouter:
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
 
         response = client.post(
-            f"{ENDPOINT}/revoke_admin",
+            f"{OLD_ENDPOINT}/revoke_admin",
         )
         assert response.status_code == status.HTTP_200_OK
         response = client.post(
-            f"{ENDPOINT}/become_admin",
+            f"{OLD_ENDPOINT}/become_admin",
             json={"expiry": "2024-12-31T23:59:59Z"},
         )
         assert response.status_code == status.HTTP_200_OK
 
         response = client.post(
-            f"{ENDPOINT}/revoke_admin",
+            f"{OLD_ENDPOINT}/revoke_admin",
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -107,7 +109,7 @@ class TestGlobalRoleAssignmentsRouter:
         user: User = UserFactory()
 
         response = client.post(
-            f"{ENDPOINT}",
+            f"{OLD_ENDPOINT}",
             json={
                 "user_id": str(user.id),
                 "role_id": "admin",
@@ -130,18 +132,19 @@ class TestGlobalRoleAssignmentsRouter:
             role_id=role.id,
         )
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 2
 
-        response = client.delete(f"{ENDPOINT}/{assignment.id}")
+        response = client.delete(f"{OLD_ENDPOINT}/{assignment.id}")
         assert response.status_code == status.HTTP_200_OK
 
-        response = client.get(f"{ENDPOINT}")
+        response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 1
 
-    def test_decide_assignment(self, client: TestClient):
+    @pytest.mark.parametrize("endpoint", [ENDPOINT, OLD_ENDPOINT])
+    def test_decide_assignment(self, endpoint: str, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -156,8 +159,9 @@ class TestGlobalRoleAssignmentsRouter:
             decision=DecisionStatus.PENDING,
         )
 
-        response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/decide",
+        method = "patch" if endpoint == OLD_ENDPOINT else "post"
+        response = getattr(client, method)(
+            f"{endpoint}/{assignment.id}/decide",
             json={"decision": DecisionStatus.APPROVED},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -182,7 +186,7 @@ class TestGlobalRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/decide",
+            f"{OLD_ENDPOINT}/{assignment.id}/decide",
             json={"decision": DecisionStatus.APPROVED},
         )
 
@@ -205,12 +209,13 @@ class TestGlobalRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/decide",
+            f"{OLD_ENDPOINT}/{assignment.id}/decide",
             json={"decision": DecisionStatus.DENIED},
         )
         assert response.status_code == status.HTTP_200_OK
 
-    def test_modify_assigned_role(self, client: TestClient):
+    @pytest.mark.parametrize("endpoint", [ENDPOINT, OLD_ENDPOINT])
+    def test_modify_assigned_role(self, endpoint: str, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -227,10 +232,11 @@ class TestGlobalRoleAssignmentsRouter:
             decision=DecisionStatus.APPROVED,
         )
 
-        response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(new_role.id)}
+        method = "patch" if endpoint == OLD_ENDPOINT else "put"
+        response = getattr(client, method)(
+            f"{endpoint}/{assignment.id}/role", json={"role_id": str(new_role.id)}
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK, method
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
 
@@ -252,7 +258,7 @@ class TestGlobalRoleAssignmentsRouter:
         GlobalRoleAssignmentFactory(user_id=user2.id, role_id=admin.id)
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(role.id)}
+            f"{OLD_ENDPOINT}/{assignment.id}/role", json={"role_id": str(role.id)}
         )
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -275,7 +281,7 @@ class TestGlobalRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/role", json={"role_id": "admin"}
+            f"{OLD_ENDPOINT}/{assignment.id}/role", json={"role_id": "admin"}
         )
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -302,8 +308,8 @@ class TestGlobalRoleAssignmentsRouter:
             role_id=admin.id,
         )
 
-        response = client.delete(f"{ENDPOINT}/{assignment_1.id}")
+        response = client.delete(f"{OLD_ENDPOINT}/{assignment_1.id}")
         assert response.status_code == status.HTTP_200_OK
 
-        response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
+        response = client.delete(f"{OLD_ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_200_OK  # No longer an issue
