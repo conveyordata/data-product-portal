@@ -75,14 +75,6 @@ const getAccessTypeOptions = (t: TFunction) => {
     return [
         {
             label: (
-                <Tooltip title={t('Public Output Ports are visible to everyone and are free to use by anyone')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Public)}
-                </Tooltip>
-            ),
-            value: DatasetAccess.Public,
-        },
-        {
-            label: (
                 <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
                     {getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted)}
                 </Tooltip>
@@ -91,11 +83,11 @@ const getAccessTypeOptions = (t: TFunction) => {
         },
         {
             label: (
-                <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Private)}
+                <Tooltip title={t('Unrestricted Output Ports are visible to everyone and are free to use by anyone')}>
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted)}
                 </Tooltip>
             ),
-            value: DatasetAccess.Private,
+            value: DatasetAccess.Unrestricted,
         },
     ];
 };

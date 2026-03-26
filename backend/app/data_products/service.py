@@ -368,7 +368,7 @@ class DataProductService:
 
         approval_status = (
             DecisionStatus.PENDING
-            if dataset.access_type != OutputPortAccessType.PUBLIC
+            if dataset.access_type != OutputPortAccessType.UNRESTRICTED
             else DecisionStatus.APPROVED
         )
 

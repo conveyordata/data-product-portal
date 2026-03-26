@@ -14,6 +14,7 @@ export enum DatasetAccess {
     Public = 'public',
     Restricted = 'restricted',
     Private = 'private',
+    Unrestricted = 'unrestricted',
 }
 
 export interface DatasetContract {
