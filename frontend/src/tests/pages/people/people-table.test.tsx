@@ -20,6 +20,7 @@ describe('PeoplePage', () => {
 
         expect(container.querySelector('.ant-spin-spinning')).toBeInTheDocument();
     });
+
     it('renders an empty table when there are no users', async () => {
         allowAllAuth();
         mockUsersHttp([]);
