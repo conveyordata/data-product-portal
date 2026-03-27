@@ -11,7 +11,12 @@ type QueriesPerConsumerChartProps = {
     colorScaleConfig: ColorScaleConfig;
 };
 
-export function QueriesPerConsumerChart({ data, isLoading, hasData, colorScaleConfig }: QueriesPerConsumerChartProps) {
+export default function QueriesPerConsumerChart({
+    data,
+    isLoading,
+    hasData,
+    colorScaleConfig,
+}: QueriesPerConsumerChartProps) {
     const { t } = useTranslation();
 
     // for options see: https://ant-design-charts.antgroup.com/options/plots/axis
