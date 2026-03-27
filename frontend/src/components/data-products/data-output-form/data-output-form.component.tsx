@@ -2,19 +2,16 @@ import { Form, type FormInstance, type FormProps, Input, Radio, Select, Space } 
 import TextArea from 'antd/es/input/TextArea';
 import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
-import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateTechnicalAssetRequest,
-    TechnicalAssetStatus,
     useCreateTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
@@ -30,7 +27,6 @@ import {
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
@@ -55,7 +51,6 @@ const DEBOUNCE = 500;
 
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
 
     // Data
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
@@ -142,14 +137,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const onSubmit: FormProps<CreateTechnicalAssetRequest>['onFinish'] = async (values) => {
         try {
-            if (!platformsLoading) {
-                await createTechnicalAsset({ dataProductId, createTechnicalAssetRequest: values }).unwrap();
-                dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
-                modalCallbackOnSubmit();
-                navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
-
-                form.resetFields();
-            }
+            await createTechnicalAsset({ dataProductId, createTechnicalAssetRequest: values }).unwrap();
+            dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
+            modalCallbackOnSubmit();
+            form.resetFields();
         } catch (_e) {
             const errorMessage = 'Failed to create Technical Asset';
             dispatchMessage({ content: errorMessage, type: 'error' });
@@ -309,12 +300,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 />
             </Form.Item>
             <Form.Item<TechnicalAssetsCreateForm>
-                name={'status'}
-                required
-                hidden
-                initialValue={TechnicalAssetStatus.Active}
-            />
-            <Form.Item<TechnicalAssetsCreateForm>
                 name={'technical_mapping'}
                 label={t('Technical Mapping')}
                 required
@@ -333,7 +318,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
                                 isDisabled={isLoading}
-                                isLoading={isLoading}
                                 isSelected={dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
                                 value={
@@ -354,7 +338,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 dataPlatform={dataPlatform}
                                 isDisabled={isLoading}
                                 isSelected={dataPlatform === selectedConfiguration}
-                                isLoading={isLoading}
                                 onTileClick={onConfigurationClick}
                                 value={platformServiceConfigMap.get(dataPlatform.value)?.service_id}
                             />

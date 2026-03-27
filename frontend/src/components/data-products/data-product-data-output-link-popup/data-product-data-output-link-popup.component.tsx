@@ -37,7 +37,7 @@ export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef
                 </Space>
             )}
         >
-            <div className={styles.list}>{children}</div>
+            {children}
         </FormModal>
     );
 }

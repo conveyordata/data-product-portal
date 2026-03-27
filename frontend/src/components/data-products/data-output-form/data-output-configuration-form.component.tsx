@@ -1,4 +1,4 @@
-import { Checkbox, type CheckboxOptionType, Form, type FormInstance, Input, Radio, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Radio, Select } from 'antd';
 import type { Rule } from 'antd/es/form';
 import type { BaseOptionType } from 'antd/es/select';
 import { type ReactElement, useEffect } from 'react';
@@ -105,30 +105,6 @@ export function DataOutputConfigurationForm({
             });
         }
 
-        // Build select options based on technical_mapping for fields that use namespace
-        let selectOptions: BaseOptionType[] = [];
-        if (type === 'select') {
-            selectOptions =
-                select?.options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
-            if (use_namespace_when_not_source_aligned && technical_mapping === 'default') {
-                selectOptions = [namespace].map((val) => ({
-                    label: val,
-                    value: val,
-                }));
-            } else {
-                selectOptions =
-                    select?.options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
-            }
-        }
-        let radioOptions: CheckboxOptionType[] = [];
-        if (type === 'radio') {
-            radioOptions =
-                radio?.options?.map((option) => ({
-                    label: option.label,
-                    value: option.value.toString(),
-                })) ?? [];
-        }
-
         // Determine if field should be disabled
         const isDisabled = disabled || (use_namespace_when_not_source_aligned && technical_mapping === 'default');
 
@@ -139,20 +115,36 @@ export function DataOutputConfigurationForm({
                 inputComponent = <Checkbox>{label}</Checkbox>;
                 break;
 
-            case 'select':
+            case 'select': {
+                const selectOptions: BaseOptionType[] =
+                    use_namespace_when_not_source_aligned && technical_mapping === 'default'
+                        ? [namespace].map((val) => ({ label: val, value: val }))
+                        : (select?.options?.map((option) => ({
+                              label: option.label,
+                              value: option.value.toString(),
+                          })) ?? []);
+                const maxCountGreaterThanOne = select?.max_count ? select?.max_count > 1 : false;
                 inputComponent = (
                     <Select
                         allowClear
                         showSearch
-                        maxCount={select?.max_count || undefined}
+                        mode={maxCountGreaterThanOne ? 'multiple' : undefined}
+                        maxCount={maxCountGreaterThanOne ? (select?.max_count ?? 0) : undefined}
                         disabled={isDisabled ?? false}
                         options={selectOptions}
                     />
                 );
                 break;
-            case 'radio':
+            }
+            case 'radio': {
+                const radioOptions =
+                    radio?.options?.map((option) => ({
+                        label: option.label,
+                        value: option.value.toString(),
+                    })) ?? [];
                 inputComponent = <Radio.Group disabled={isDisabled ?? false} options={radioOptions} />;
                 break;
+            }
             default:
                 inputComponent = <Input />;
                 break;
