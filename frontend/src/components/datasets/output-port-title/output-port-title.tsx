@@ -18,11 +18,13 @@ export function OutputPortTitle({ name, accessType, hasIcon = true, hasPopover =
     const title = (
         <Flex className={styles.datasetTitle}>
             <Typography.Text strong>{name}</Typography.Text>
-            {accessType !== OutputPortAccessType.Public && hasIcon && <OutputPortAccessIcon accessType={accessType} />}
+            {accessType !== OutputPortAccessType.Unrestricted && hasIcon && (
+                <OutputPortAccessIcon accessType={accessType} />
+            )}
         </Flex>
     );
 
-    if (accessType === OutputPortAccessType.Public) {
+    if (accessType === OutputPortAccessType.Unrestricted) {
         return title;
     }
 

@@ -575,6 +575,7 @@ export enum OutputPortAccessType {
   Public = "public",
   Restricted = "restricted",
   Private = "private",
+  Unrestricted = "unrestricted",
 }
 export enum TechnicalAssetStatus {
   Pending = "pending",

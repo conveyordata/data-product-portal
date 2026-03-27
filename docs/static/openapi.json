@@ -19923,7 +19923,8 @@
         "enum": [
           "public",
           "restricted",
-          "private"
+          "private",
+          "unrestricted"
         ],
         "title": "OutputPortAccessType"
       },
