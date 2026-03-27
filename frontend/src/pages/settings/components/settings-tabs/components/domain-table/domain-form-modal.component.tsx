@@ -2,11 +2,12 @@ import { Button, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
+    type DomainCreate,
+    type GetDomainsItem,
     useCreateDomainMutation,
     useUpdateDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { DomainContract, DomainCreateRequest } from '@/types/domain';
 
 interface DomainFormText {
     title: string;
@@ -19,7 +20,7 @@ type Props = {
     onClose: () => void;
     isOpen: boolean;
     mode: 'create' | 'edit';
-    initial?: DomainContract;
+    initial?: GetDomainsItem;
 };
 export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     const { t } = useTranslation();
@@ -43,7 +44,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (values: DomainCreateRequest) => {
+    const handleFinish = async (values: DomainCreate) => {
         try {
             if (mode === 'create') {
                 await createDomain(values);

@@ -2,7 +2,7 @@ import { type Node, useReactFlow } from '@xyflow/react';
 import { Flex, Segmented, Select, Switch } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DataProductContract } from '@/types/data-product';
+import type { GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
 import { CustomNodeTypes } from '../../charts/node-editor/node-types';
 import { NodeContext } from './node-context';
@@ -55,7 +55,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
         const node = getNode(nodeId);
         if (!node) return null;
 
-        const data = node.data as Record<string, DataProductContract>;
+        const data = node.data as Record<string, GetDataProductResponse>;
 
         return {
             name: String(data.name || ''),

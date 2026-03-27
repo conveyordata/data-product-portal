@@ -44,7 +44,6 @@ import {
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { DatasetAccess } from '@/types/dataset';
 import {
     ApplicationPaths,
     createDataOutputIdPath,
@@ -79,7 +78,7 @@ const getAccessTypeOptions = (t: TFunction) => {
                     {getDatasetAccessTypeLabel(t, OutputPortAccessType.Public)}
                 </Tooltip>
             ),
-            value: DatasetAccess.Public,
+            value: OutputPortAccessType.Public,
         },
         {
             label: (
@@ -87,7 +86,7 @@ const getAccessTypeOptions = (t: TFunction) => {
                     {getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted)}
                 </Tooltip>
             ),
-            value: DatasetAccess.Restricted,
+            value: OutputPortAccessType.Restricted,
         },
         {
             label: (
@@ -95,7 +94,7 @@ const getAccessTypeOptions = (t: TFunction) => {
                     {getDatasetAccessTypeLabel(t, OutputPortAccessType.Private)}
                 </Tooltip>
             ),
-            value: DatasetAccess.Private,
+            value: OutputPortAccessType.Private,
         },
     ];
 };
@@ -159,7 +158,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         isFetchingInitialValues ||
         isFetchingTags;
 
-    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
+    const accessTypeOptions: CheckboxOptionType<OutputPortAccessType>[] = useMemo(() => getAccessTypeOptions(t), [t]);
 
     const userSelectOptions = users.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
@@ -304,7 +303,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
-        access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
+        access_type: mode === 'create' ? OutputPortAccessType.Public : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle?.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,

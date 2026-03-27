@@ -7,9 +7,9 @@ import type {
     DataProductLifeCycle,
     DataProductStatus,
     DataProductType,
+    Domain,
     GetDataProductsResponseItem,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { DomainContract } from '@/types/domain';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
@@ -77,7 +77,7 @@ export const getDataProductTableColumns = ({
         {
             title: t('Domain'),
             dataIndex: 'domain',
-            render: (domain: DomainContract) => {
+            render: (domain: Domain) => {
                 return <TableCellItem text={domain.name} />;
             },
             ...new FilterSettings(data, (dp) => dp.domain.name),

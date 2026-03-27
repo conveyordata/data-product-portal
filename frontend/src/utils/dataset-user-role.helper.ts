@@ -1,8 +1,10 @@
-import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import {
+    type User,
+    useListOutputPortRoleAssignmentsQuery,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DecisionStatus, Prototype } from '@/types/roles';
-import type { UserContract } from '@/types/users/user.contract.ts';
 
-export function useGetDatasetOwners(datasetId: string | undefined): UserContract[] | undefined {
+export function useGetDatasetOwners(datasetId: string | undefined): User[] | undefined {
     const { data: roleAssignments } = useListOutputPortRoleAssignmentsQuery(
         {
             outputPortId: datasetId,

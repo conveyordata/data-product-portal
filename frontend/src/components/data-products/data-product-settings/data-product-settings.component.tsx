@@ -21,7 +21,6 @@ import {
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { DataProductSettingValueForm } from '@/types/data-product-setting';
 import styles from './data-product-settings.module.scss';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
@@ -30,6 +29,10 @@ type Props = {
     dataProductId?: string;
     scope: 'dataproduct' | 'dataset';
 };
+
+interface DataProductSettingValueForm {
+    [id: string]: string;
+}
 
 export function DataProductSettings({ id, scope, dataProductId }: Props) {
     const { t } = useTranslation();

@@ -2,14 +2,14 @@ import { Flex, Typography, theme } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 
 import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component';
-import type { UserContract } from '@/types/users/user.contract';
+import type { User } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 import styles from './user-access-overview.module.scss';
 
 const { useToken } = theme;
 
 type Props = {
-    users?: UserContract[];
+    users?: User[];
     title?: ReactNode;
 };
 
@@ -17,7 +17,7 @@ export function UserAccessOverview({ users = [], title }: Props) {
     const { token } = useToken();
 
     const sorted = useMemo(() => {
-        const sorter = new Sorter<UserContract>();
+        const sorter = new Sorter<User>();
         const compareFn = sorter.cascadedSorter(
             sorter.stringSorter((user) => user.last_name),
             sorter.stringSorter((user) => user.first_name),
