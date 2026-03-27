@@ -14,7 +14,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import { Explorer } from '@/components/explorer/explorer';
+import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
 import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
