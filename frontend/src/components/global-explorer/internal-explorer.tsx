@@ -1,8 +1,7 @@
 import '@xyflow/react/dist/base.css';
 
 import { G2 } from '@ant-design/plots';
-import type { Edge, Node } from '@xyflow/react';
-import { Position, useReactFlow } from '@xyflow/react';
+import { type Edge, type Node, Position, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useState } from 'react';
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
@@ -164,7 +163,7 @@ function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | nu
     return { highlightedNodes, highlightedEdges };
 }
 
-export default function InternalFullExplorer() {
+function InternalFullExplorerContent() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
     // Also includes a sidebar to select nodes
     const { token } = theme.useToken();
@@ -292,5 +291,13 @@ export default function InternalFullExplorer() {
                 }}
             />
         </Flex>
+    );
+}
+
+export default function InternalFullExplorer() {
+    return (
+        <ReactFlowProvider>
+            <InternalFullExplorerContent />
+        </ReactFlowProvider>
     );
 }
