@@ -1,6 +1,7 @@
 import { Alert, Col, Flex, Radio, type RadioChangeEvent, Row, Typography } from 'antd';
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     QueryStatsGranularity,
     useGetOutputPortCuratedQueriesQuery,
@@ -12,8 +13,9 @@ import {
     transformDataForChart,
 } from './components/chart-data.utils';
 import { CuratedQueriesList } from './components/curated-queries-list';
-import { QueriesOverTimeChart } from './components/queries-over-time-chart';
-import { QueriesPerConsumerChart } from './components/queries-per-consumer-chart';
+
+const QueriesOverTimeChart = lazy(() => import('./components/queries-over-time-chart'));
+const QueriesPerConsumerChart = lazy(() => import('./components/queries-per-consumer-chart'));
 
 type Props = {
     outputPortId: string;
@@ -109,20 +111,24 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
                 </Col>
             )}
             <Col span={12}>
-                <QueriesOverTimeChart
-                    data={chartData}
-                    isLoading={isLoadingState}
-                    hasData={hasUsageData}
-                    colorScaleConfig={colorScaleConfig}
-                />
+                <Suspense fallback={<LoadingSpinner />}>
+                    <QueriesOverTimeChart
+                        data={chartData}
+                        isLoading={isLoadingState}
+                        hasData={hasUsageData}
+                        colorScaleConfig={colorScaleConfig}
+                    />
+                </Suspense>
             </Col>
             <Col span={12}>
-                <QueriesPerConsumerChart
-                    data={consumerTotals}
-                    isLoading={isLoadingState}
-                    hasData={hasUsageData}
-                    colorScaleConfig={colorScaleConfig}
-                />
+                <Suspense fallback={<LoadingSpinner />}>
+                    <QueriesPerConsumerChart
+                        data={consumerTotals}
+                        isLoading={isLoadingState}
+                        hasData={hasUsageData}
+                        colorScaleConfig={colorScaleConfig}
+                    />
+                </Suspense>
             </Col>
             <Col span={24}>
                 <CuratedQueriesList queries={curatedQueries} isLoading={areCuratedQueriesLoading} />
