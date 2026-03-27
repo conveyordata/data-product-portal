@@ -21,6 +21,7 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
+import { searchMatchesUser } from '@/utils/search.ts';
 import styles from './people-table.module.scss';
 import { getPeopleTableColumns } from './people-table-columns';
 
@@ -28,11 +29,7 @@ function filterUsers(users: UsersGet[], searchTerm?: string) {
     if (!searchTerm) {
         return users;
     }
-    return users.filter(
-        (user) =>
-            user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.last_name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    return users.filter((user) => searchMatchesUser(searchTerm, user));
 }
 
 export function PeoplePage() {
