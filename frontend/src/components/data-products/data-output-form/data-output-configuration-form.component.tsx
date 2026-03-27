@@ -3,17 +3,17 @@ import type { Rule } from 'antd/es/form';
 import type { BaseOptionType } from 'antd/es/select';
 import { type ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TechnicalMapping } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import type { UiElementMetadata } from '@/store/api/services/generated/pluginsApi';
-import type { DataOutputCreateFormSchema } from '@/types/data-output';
-import type { TechnicalMappingContract } from '@/types/data-output/technical-mapping.contract';
+import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { configurationFieldName } from './components/configuration-field-name';
 import { ConfigurationFormItem } from './components/output-configuration-form-item';
 import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
 
 type Props = {
-    form: FormInstance<DataOutputCreateFormSchema>;
+    form: FormInstance<TechnicalAssetsCreateForm>;
     namespace: string;
-    technical_mapping: TechnicalMappingContract;
+    technical_mapping: TechnicalMapping;
     configurationType: string;
     uiMetadataGroups: UiElementMetadata[];
     resultLabel: string;

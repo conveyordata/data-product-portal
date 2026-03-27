@@ -14,6 +14,7 @@ import { useGetTagsQuery } from '@/store/api/services/generated/configurationTag
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateTechnicalAssetRequest,
+    TechnicalAssetStatus,
     useCreateTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
@@ -29,9 +30,9 @@ import {
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
+import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { getIcon } from '@/utils/icon-loader';
 import { DataOutputConfigurationForm } from './data-output-configuration-form.component';
@@ -257,7 +258,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             labelWrap
             disabled={isLoading}
         >
-            <Form.Item<DataOutputCreateFormSchema>
+            <Form.Item<TechnicalAssetsCreateForm>
                 name={'name'}
                 label={t('Name')}
                 tooltip={t('The name of your Technical Asset')}
@@ -279,7 +280,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 validationRequired
                 validateResourceName={validateNamespaceCallback}
             />
-            <Form.Item<DataOutputCreateFormSchema>
+            <Form.Item<TechnicalAssetsCreateForm>
                 name={'description'}
                 label={t('Description')}
                 tooltip={t('A description for the Technical Asset')}
@@ -298,7 +299,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')} initialValue={[]}>
+            <Form.Item<TechnicalAssetsCreateForm> name={'tag_ids'} label={t('Tags')} initialValue={[]}>
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select Technical Asset tags')}
@@ -307,13 +308,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
-            <Form.Item<DataOutputCreateFormSchema>
+            <Form.Item<TechnicalAssetsCreateForm>
                 name={'status'}
                 required
                 hidden
-                initialValue={DataOutputStatus.Active}
+                initialValue={TechnicalAssetStatus.Active}
             />
-            <Form.Item<DataOutputCreateFormSchema>
+            <Form.Item<TechnicalAssetsCreateForm>
                 name={'technical_mapping'}
                 label={t('Technical Mapping')}
                 required

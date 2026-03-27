@@ -18,6 +18,8 @@ import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/con
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
+    type DataProductCreate,
+    type DataProductUpdate,
     useCreateDataProductMutation,
     useGetDataProductQuery,
     useRemoveDataProductMutation,
@@ -32,7 +34,6 @@ import {
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
@@ -71,7 +72,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
 
-    const [form] = Form.useForm<DataProductCreateFormSchema>();
+    const [form] = Form.useForm<DataProductCreate>();
     const dataProductNameValue = Form.useWatch('name', form);
 
     const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
@@ -180,7 +181,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     return;
                 }
 
-                const request: DataProductUpdateRequest = {
+                const request: DataProductUpdate = {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
@@ -215,7 +216,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
-    const onFinishFailed: FormProps<DataProductCreateFormSchema>['onFinishFailed'] = () => {
+    const onFinishFailed: FormProps<DataProductCreate>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
@@ -287,7 +288,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 </Typography.Title>
             )}
             {mode === 'create' && <Typography.Title level={3}>{t('New Data Product')}</Typography.Title>}
-            <Form<DataProductCreateFormSchema>
+            <Form<DataProductCreate>
                 form={form}
                 labelWrap
                 labelCol={FORM_GRID_WRAPPER_COLS}
@@ -300,7 +301,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 disabled={isLoading || !canSubmit}
                 initialValues={initialValues}
             >
-                <Form.Item<DataProductCreateFormSchema>
+                <Form.Item<DataProductCreate>
                     name={'name'}
                     label={t('Name')}
                     tooltip={t('The name of your Data Product')}
@@ -323,7 +324,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     validationRequired={mode === 'create'}
                     validateResourceName={resourceNameValidationCallback}
                 />
-                <Form.Item<DataProductCreateFormSchema>
+                <Form.Item<DataProductCreate>
                     name={'owners'}
                     label={t('Owners')}
                     tooltip={t('The owners of the Data Product')}
@@ -343,7 +344,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                         tokenSeparators={[',']}
                     />
                 </Form.Item>
-                <Form.Item<DataProductCreateFormSchema>
+                <Form.Item<DataProductCreate>
                     name={'type_id'}
                     label={t('Type')}
                     rules={[
@@ -360,7 +361,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                         options={dataProductTypeSelectOptions}
                     />
                 </Form.Item>
-                <Form.Item<DataProductCreateFormSchema>
+                <Form.Item<DataProductCreate>
                     name={'lifecycle_id'}
                     label={t('Status')}
                     rules={[
@@ -380,7 +381,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                         allowClear
                     />
                 </Form.Item>
-                <Form.Item<DataProductCreateFormSchema>
+                <Form.Item<DataProductCreate>
                     name={'domain_id'}
                     label={t('Domain')}
                     rules={[
@@ -397,7 +398,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                         allowClear
                     />
                 </Form.Item>
-                <Form.Item<DataProductCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                <Form.Item<DataProductCreate> name={'tag_ids'} label={t('Tags')}>
                     <Select
                         tokenSeparators={[',']}
                         placeholder={t('Select Data Product tags')}
@@ -406,7 +407,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                         showSearch={{ filterOption: selectFilterOptionByLabel }}
                     />
                 </Form.Item>
-                <Form.Item<DataProductCreateFormSchema>
+                <Form.Item<DataProductCreate>
                     name={'description'}
                     label={t('Description')}
                     tooltip={t('A description for the Data Product')}
