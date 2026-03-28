@@ -1,0 +1,89 @@
+semantic_model:
+  - name: marketing_domain
+    description: Customer profiles and behavioral tracking
+    ai_context:
+      instructions: "acquired_by refers to internal admin IDs, not customer IDs. Do not attempt to join acquired_by to the customers table. Active customers are defined by their subscription or order status in the sales domain. ALWAYS challenge the user if their premise is numerically incorrect based on the data."
+
+    datasets:
+      - name: customers
+        source: customer_demographic_master.customers
+        primary_key: [id]
+        description: Master customer records
+        fields:
+          - name: customer_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: id
+          - name: full_name
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: full_name
+          - name: email
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: email
+          - name: acquisition_admin_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: acquired_by
+            description: Internal ID of the admin who acquired this customer
+          - name: signup_date
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: signup_date
+            dimension:
+              is_time: true
+
+      - name: web_sessions
+        source: customer_demographic_master.web_sessions
+        primary_key: [session_id]
+        description: Anonymous web traffic logs
+        ai_context:
+          instructions: "user_id in this table is an anonymous UUID and cannot be joined directly to customers.id without a mapping table (not present). Marketing channel attribution is currently impossible as 'web_sessions' lacks UTM parameters or referral source data."
+        fields:
+          - name: session_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: session_id
+          - name: anonymous_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: user_id
+          - name: page_path
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: page_path
+          - name: viewed_at
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: viewed_at
+            dimension:
+              is_time: true
+
+    relationships:
+      - name: customer_to_orders
+        from: sales_domain.orders
+        to: customers
+        from_columns: [customer_id]
+        to_columns: [id]
+        ai_context:
+          instructions: "Cross-domain relationship between sales orders and marketing customers."
+
+    metrics:
+      - name: active_customer_count
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "COUNT(DISTINCT customers.id)"
+        description: Total number of registered customers.
+        ai_context:
+          instructions: "Use with sales filters to find 'Active' users (e.g., status = 'ACTIVE' in recurring_revenue)."
