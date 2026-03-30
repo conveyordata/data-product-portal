@@ -6,6 +6,10 @@
   background-color: colors.$color-background-alert;
 
   margin: globals.$spacing-l globals.$spacing-xxl globals.$spacing-s;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 .alert-icon {

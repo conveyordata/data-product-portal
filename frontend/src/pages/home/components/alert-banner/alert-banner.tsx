@@ -8,7 +8,7 @@ import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/us
 import { ApplicationPaths } from '@/types/navigation.ts';
 import styles from './alert-banner.module.scss';
 
-const { Link } = Typography;
+const { Text } = Typography;
 
 export default function AlertBanner() {
     const { t } = useTranslation();
@@ -33,6 +33,7 @@ export default function AlertBanner() {
             type="warning"
             showIcon
             icon={<BellOutlined />}
+            onClick={navigateToRequests}
             classNames={{
                 root: styles.alertRoot,
                 icon: styles.alertIcon,
@@ -41,20 +42,14 @@ export default function AlertBanner() {
             title={
                 <Trans t={t} values={{ count: actionsCount }}>
                     You have{' '}
-                    <Link strong style={{ color: 'inherit' }} onClick={navigateToRequests}>
+                    <Text strong style={{ color: 'inherit' }}>
                         {'{{ count }}'} pending requests
-                    </Link>{' '}
+                    </Text>{' '}
                     waiting for you in the Product Studio
                 </Trans>
             }
             action={
-                <Button
-                    type="link"
-                    className={styles.alertText}
-                    icon={<ArrowRightOutlined />}
-                    iconPlacement="end"
-                    onClick={navigateToRequests}
-                >
+                <Button type="link" className={styles.alertText} icon={<ArrowRightOutlined />} iconPlacement="end">
                     {t('View requests')}
                 </Button>
             }
