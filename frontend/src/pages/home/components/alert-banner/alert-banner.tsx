@@ -10,7 +10,7 @@ import styles from './alert-banner.module.scss';
 
 const { Text } = Typography;
 
-export default function AlertBanner() {
+export function AlertBanner() {
     const { t } = useTranslation();
     const { token } = theme.useToken();
     const navigate = useNavigate();
@@ -51,7 +51,7 @@ export default function AlertBanner() {
                     </Trans>
                 }
                 action={
-                    <Button type="link" className={styles.alertText} icon={<ArrowRightOutlined />} iconPlacement="end">
+                    <Button type="link" icon={<ArrowRightOutlined />} iconPlacement="end">
                         {t('View requests')}
                     </Button>
                 }

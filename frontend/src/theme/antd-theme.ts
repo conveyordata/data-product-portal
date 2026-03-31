@@ -261,6 +261,7 @@ const greenThemeConfig: ThemeConfig = {
         // -------- Brand Colors ---------
         colorPrimary: '#3c9673',
         colorInfo: '#3c9673',
+        colorInfoBg: '#ebf4f1',
         colorError: '#c73f1e',
         colorWarning: '#ffa62b',
         colorTextBase: '#463f3f',
