@@ -9,9 +9,6 @@ import { QuickActions } from '@/pages/home/components/quick-actions/quick-action
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import styles from './home.module.scss';
 
-const ROW_GUTTER = 96;
-const COL_SPAN = 12;
-
 export function Home() {
     const currentUser = useSelector(selectCurrentUser);
     const { setBreadcrumbs } = useBreadcrumbs();
@@ -23,19 +20,19 @@ export function Home() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.contentSecondary}>
-                <AlertBanner />
-                <QuickActions style={{ marginBottom: 48 }} />
+            <AlertBanner />
 
-                <Row gutter={ROW_GUTTER}>
-                    <Col span={COL_SPAN}>
-                        <DataProductsInbox userId={currentUser.id} />
-                    </Col>
-                    <Col span={COL_SPAN}>
-                        <DatasetsInbox />
-                    </Col>
-                </Row>
-            </div>
+            <Row gutter={[48, 48]}>
+                <Col span={24}>
+                    <QuickActions />
+                </Col>
+                <Col span={12}>
+                    <DataProductsInbox userId={currentUser.id} />
+                </Col>
+                <Col span={12}>
+                    <DatasetsInbox />
+                </Col>
+            </Row>
         </div>
     );
 }

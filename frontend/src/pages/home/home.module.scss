@@ -1,14 +1,6 @@
 @use '@/styles/globals';
 
 .container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-}
-
-.content-secondary {
-    flex: 0.6;
     padding: globals.$container-padding-large;
     padding-bottom: 0;
     padding-top: globals.$spacing-regular;
