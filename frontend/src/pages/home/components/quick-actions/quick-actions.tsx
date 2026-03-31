@@ -48,7 +48,7 @@ export function QuickActions() {
     ];
 
     return (
-        <section>
+        <>
             <div style={{ marginBottom: 24 }}>
                 <Title level={3} style={{ margin: 0, marginBottom: 4 }}>
                     {t('What would you like to do today?')}
@@ -86,6 +86,6 @@ export function QuickActions() {
                     </Col>
                 ))}
             </Row>
-        </section>
+        </>
     );
 }
