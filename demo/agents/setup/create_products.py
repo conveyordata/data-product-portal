@@ -11,6 +11,7 @@ import requests
 import sys
 import time
 import traceback
+from pathlib import Path
 from typing import Any
 
 PORTAL_URL = "http://localhost:8080"
@@ -586,6 +587,13 @@ PRODUCTS = [
 # ---------------------------------------------------------------------------
 
 
+def add_osi_model_to_about(namespace: str, about: str) -> str:
+    with open(
+        Path(__file__).resolve().parent.parent / "products" / namespace / "osi.yml", "r"
+    ) as file:
+        return f"{about}<p></p><pre><code>{file.read()}</code></pre>"
+
+
 def provision_product(product: dict):
     namespace = product["namespace"]
     print(f"\n[{product['name']}]")
@@ -603,7 +611,7 @@ def provision_product(product: dict):
         name=op_cfg["name"],
         namespace=op_cfg["namespace"],
         description=op_cfg["description"],
-        about=op_cfg["about"],
+        about=add_osi_model_to_about(namespace, op_cfg["about"]),
         access_type=op_cfg["access_type"],
     )
 
