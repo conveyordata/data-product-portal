@@ -1028,14 +1028,14 @@ tqdm = ">=4.66,<5.0"
 
 [[package]]
 name = "fastmcp"
-version = "3.1.1"
+version = "3.2.0"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp-3.1.1-py3-none-any.whl", hash = "sha256:8132ba069d89f14566b3266919d6d72e2ec23dd45d8944622dca407e9beda7eb"},
-    {file = "fastmcp-3.1.1.tar.gz", hash = "sha256:db184b5391a31199323766a3abf3a8bfbb8010479f77eca84c0e554f18655c48"},
+    {file = "fastmcp-3.2.0-py3-none-any.whl", hash = "sha256:e71aba3df16f86f546a4a9e513261d3233bcc92bef0dfa647bac3fa33623f681"},
+    {file = "fastmcp-3.2.0.tar.gz", hash = "sha256:d4830b8ffc3592d3d9c76dc0f398904cf41f04910e41a0de38cc1004e0903bef"},
 ]
 
 [package.dependencies]
@@ -1062,10 +1062,10 @@ watchfiles = ">=1.0.0"
 websockets = ">=15.0.1"
 
 [package.extras]
-anthropic = ["anthropic (>=0.40.0)"]
-apps = ["prefab-ui (>=0.6.0)"]
-azure = ["azure-identity (>=1.16.0)"]
-code-mode = ["pydantic-monty (>=0.0.7,<0.0.8)"]
+anthropic = ["anthropic (>=0.48.0)"]
+apps = ["prefab-ui (>=0.18.0)"]
+azure = ["azure-identity (>=1.16.0)", "pyjwt (>=2.12.0)"]
+code-mode = ["pydantic-monty (==0.0.9)"]
 gemini = ["google-genai (>=1.18.0)"]
 openai = ["openai (>=1.102.0)"]
 tasks = ["pydocket (>=0.18.0)"]
@@ -4460,4 +4460,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "8e6d1a49b3c612dd0bd4f202e9c1dbe4682a738907e5e4951a12fa8f00252fd0"
+content-hash = "362cf8e8446f2ed8ab4e9cf29791e955fecf867119ddf9e9e8edc979680aa3d8"
