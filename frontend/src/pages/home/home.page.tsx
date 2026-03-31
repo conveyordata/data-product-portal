@@ -23,9 +23,8 @@ export function Home() {
 
     return (
         <div className={styles.container}>
-            <AlertBanner />
-
             <div className={styles.contentSecondary}>
+                <AlertBanner />
                 <QuickActions style={{ marginBottom: 48 }} />
 
                 <Row gutter={ROW_GUTTER}>

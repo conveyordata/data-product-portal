@@ -2,20 +2,9 @@
 @use "@/styles/globals";
 
 .alert-root {
-  border-color: colors.$color-border-alert;
-  background-color: colors.$color-background-alert;
-
-  margin: globals.$spacing-l globals.$spacing-xxl globals.$spacing-s;
+  margin-bottom: globals.$spacing-ml;
 
   &:hover {
     cursor: pointer;
   }
-}
-
-.alert-icon {
-  color: colors.$color-text-alert !important;
-}
-
-.alert-text {
-  color: colors.$color-text-alert !important;
 }

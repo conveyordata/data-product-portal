@@ -1,5 +1,5 @@
 import { ArrowRightOutlined, BellOutlined } from '@ant-design/icons';
-import { Alert, Button, Typography } from 'antd';
+import { Alert, Button, ConfigProvider, Typography, theme } from 'antd';
 import { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -12,6 +12,7 @@ const { Text } = Typography;
 
 export default function AlertBanner() {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const navigate = useNavigate();
 
     const { data: { pending_actions: pendingActions = [] } = {}, isFetching } = useGetUserPendingActionsQuery();
@@ -29,30 +30,32 @@ export default function AlertBanner() {
     }
 
     return (
-        <Alert
-            type="warning"
-            showIcon
-            icon={<BellOutlined />}
-            onClick={navigateToRequests}
-            classNames={{
-                root: styles.alertRoot,
-                icon: styles.alertIcon,
-                title: styles.alertText,
+        <ConfigProvider
+            theme={{
+                token: { colorText: token.colorInfoText },
             }}
-            title={
-                <Trans t={t} values={{ count: actionsCount }}>
-                    You have{' '}
-                    <Text strong style={{ color: 'inherit' }}>
-                        {'{{ count }}'} pending requests
-                    </Text>{' '}
-                    waiting for you in the Product Studio
-                </Trans>
-            }
-            action={
-                <Button type="link" className={styles.alertText} icon={<ArrowRightOutlined />} iconPlacement="end">
-                    {t('View requests')}
-                </Button>
-            }
-        />
+        >
+            <Alert
+                type="info"
+                showIcon
+                icon={<BellOutlined />}
+                onClick={navigateToRequests}
+                classNames={{ root: styles.alertRoot }}
+                title={
+                    <Trans t={t} values={{ count: actionsCount }}>
+                        You have{' '}
+                        <Text strong style={{ color: 'inherit' }}>
+                            {'{{ count }}'} pending requests
+                        </Text>{' '}
+                        waiting for you in the Product Studio
+                    </Trans>
+                }
+                action={
+                    <Button type="link" className={styles.alertText} icon={<ArrowRightOutlined />} iconPlacement="end">
+                        {t('View requests')}
+                    </Button>
+                }
+            />
+        </ConfigProvider>
     );
 }
