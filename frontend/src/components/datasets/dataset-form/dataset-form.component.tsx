@@ -82,7 +82,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         },
         {
             label: (
-                <Tooltip title={t('Unrestricted Output Ports are visible to everyone and are free to use by anyone')}>
+                <Tooltip title={t('Unrestricted Output Ports are visible and accessible to use by anyone')}>
                     {getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted)}
                 </Tooltip>
             ),
