@@ -19,6 +19,7 @@ import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';
+import { searchMatchesUser } from '@/utils/search.ts';
 import styles from './team-tab.module.scss';
 
 function filterUsers(
@@ -27,15 +28,7 @@ function filterUsers(
 ): DataProductRoleAssignmentResponse[] {
     if (!searchTerm) return users;
 
-    const searchString = searchTerm.toLowerCase();
-    return users.filter((assignment) => {
-        const user = assignment?.user;
-        return (
-            user?.email?.toLowerCase()?.includes(searchString) ||
-            user?.first_name?.toLowerCase()?.includes(searchString) ||
-            user?.last_name?.toLowerCase()?.includes(searchString)
-        );
-    });
+    return users.filter((assignment) => searchMatchesUser(searchTerm, assignment?.user));
 }
 
 type Props = {
