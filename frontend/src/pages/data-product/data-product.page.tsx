@@ -140,7 +140,10 @@ export function DataProduct() {
             </Flex>
 
             {/* Sidebar */}
-            <div className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
+            <div
+                data-testid="product-studio-sidebar"
+                className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}
+            >
                 {!sidebarCollapsed ? (
                     <Flex vertical>
                         <DataProductActions dataProductId={dataProductId} />
