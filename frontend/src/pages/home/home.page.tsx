@@ -3,8 +3,6 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { AlertBanner } from '@/pages/home/components/alert-banner/alert-banner.tsx';
-import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
-import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
 import { QuickActions } from '@/pages/home/components/quick-actions/quick-actions.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import styles from './home.module.scss';
@@ -25,12 +23,6 @@ export function Home() {
             <Row gutter={[48, 48]}>
                 <Col span={24}>
                     <QuickActions />
-                </Col>
-                <Col span={12}>
-                    <DataProductsInbox userId={currentUser.id} />
-                </Col>
-                <Col span={12}>
-                    <DatasetsInbox />
                 </Col>
             </Row>
         </div>
