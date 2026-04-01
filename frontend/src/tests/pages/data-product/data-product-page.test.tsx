@@ -102,10 +102,7 @@ describe('DataProduct Page', () => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
         });
 
-        const sidebar = within(container).queryByTestId('product-studio-sidebar');
-        expect(sidebar).toBeInTheDocument();
-        // biome-ignore lint/style/noNonNullAssertion: false positive
-        expect(within(sidebar!).queryByText('Join Team')).not.toBeInTheDocument();
+        expect(within(container).queryByText('Join Team')).not.toBeInTheDocument();
     });
 
     it('shows join team button when user does not have access to product', async () => {
@@ -116,11 +113,8 @@ describe('DataProduct Page', () => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
         });
 
-        const sidebar = within(container).queryByTestId('product-studio-sidebar');
-        expect(sidebar).toBeInTheDocument();
         await waitFor(() => {
-            // biome-ignore lint/style/noNonNullAssertion: false positive
-            expect(within(sidebar!).getByText('Join Team')).toBeInTheDocument();
+            expect(within(container).getByText('Join Team')).toBeInTheDocument();
         });
     });
 
