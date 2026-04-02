@@ -78,7 +78,7 @@
         "esbuild-runner": "^2.2.2",
         "i18next-cli": "^1.51.5",
         "jsdom": "^29.0.1",
-        "knip": "^6.1.1",
+        "knip": "^6.2.0",
         "msw": "^2.12.14",
         "rollup-plugin-visualizer": "^7.0.1",
         "sass": "^1.98.0",
