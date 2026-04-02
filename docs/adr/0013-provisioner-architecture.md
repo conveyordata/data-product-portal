@@ -1,67 +1,43 @@
-# Provisioner Architecture: Fluent Builder vs. Abstract Base Class SDK
+# Provisioner Architecture: Backend Event Adapter + Abstract Base Class SDK
 
-## Context and Problem Statement
+## How It Works Today
 
-The current provisioner (`demo/basic/provisioner/provisioner/main.py`) is a flat FastAPI application with no formal abstraction, no typed inputs, and no SDK. New provisioner authors must copy the demo, understand the internal `Router` class, and manually handle raw webhook payloads. There is no documented contract, no type safety, and no helper client for calling back into the Portal API.
+The Portal backend fires a generic webhook after every mutating API call. The payload is a raw forward of the HTTP exchange:
 
-This ADR proposes an SDK approach (`dpp-sdk`) that:
-
-- Provides a clear, typed interface for all provisioner lifecycle events
-- Wraps Portal API calls in a high-level client (`PortalClient`)
-- Exposes a standard FastAPI `app` object that authors serve themselves
-
-A key design principle, inspired by how [Agno](https://docs.agno.com) serves agents via `agent_os.get_app()`, is that the SDK returns a plain FastAPI application rather than owning the server lifecycle. Authors stay in control: they can pass the app to uvicorn, mount it inside an existing FastAPI app, add middleware, or combine it with other routes. The SDK handles routing and deserialisation; the author handles deployment.
-
-## Decision Drivers
-
-* **Developer experience**: new provisioner authors need a clear, discoverable starting point
-* **Type safety**: handler functions receive rich objects, not raw dicts
-* **Coverage**: all mutating Portal events should be addressable via named hooks
-* **Composability**: the SDK produces a standard FastAPI `app` — authors control how it is served
-* **Transport flexibility**: hook implementations must be transport-agnostic so they can be driven by webhooks today and a message queue tomorrow without code changes
-* **Consistency**: align with the base-class pattern established in ADR-0009
-
-## Considered Options
-
-* **Option 1: Fluent Builder API** — a `Provisioner` object configured by chaining `.on_*()` calls, exposing `.get_app()`
-* **Option 2: Abstract Base Class SDK** — a `BaseProvisioner` class that authors subclass, overriding only the hooks they need, exposing `.get_app()`
-
-## Decision Outcome
-
-**Chosen option:** *Option 2: Abstract Base Class SDK*. The base-class pattern provides a natural home for shared state (notably `self.client`), guarantees IDE autocomplete on all lifecycle methods, and is consistent with ADR-0009. Default no-op implementations mean authors implement only the hooks relevant to their platform. Both options expose `.get_app()` following the Agno pattern; the ABC wins on discoverability and shared-state ergonomics.
-
-### Confirmation
-
-- Delivered as installable Python package `dpp-provisioner-sdk`
-- Demo provisioner (`demo/basic/provisioner/`) rewritten to subclass `BaseProvisioner`
-- Package README shows a minimal from-scratch example
-
-## Pros and Cons of the Options
-
-### Option 1: Fluent Builder API
-
-```python
-from dpp_provisioner import Provisioner, PortalClient
-
-client = PortalClient(api_url="https://portal.example.com", api_token="secret")
-app = (
-    Provisioner(client=client)
-    .on_create_data_product(handle_create)
-    .on_approve_link(handle_approve)
-    .get_app()
-)
-
-# serve with: uvicorn main:app --port 6060
+```json
+{
+  "method": "POST",
+  "url": "/api/v2/data_products",
+  "query": {},
+  "response": "{\"id\": \"abc-123\", \"name\": \"My Product\"}",
+  "status_code": 200
+}
 ```
 
-* **Good, because** handlers are plain functions — easy to unit-test in isolation
-* **Good, because** no inheritance required; feels closer to a functional style
-* **Good, because** `.get_app()` returns a plain FastAPI app — authors control serving
-* **Bad, because** no natural home for shared state (`client`) — handlers need it via closure or explicit parameter
-* **Bad, because** hard to enforce that required hooks are implemented; gaps are silent
-* **Bad, because** discoverability depends on reading docs rather than IDE autocomplete on the object
+A provisioner is a separate HTTP service that receives all of these at a single `POST /` endpoint. To handle an event, it must:
 
-### Option 2: Abstract Base Class SDK
+1. Inspect `method` + `url` to figure out what happened
+2. Parse the raw `response` string to extract an entity ID
+3. Call back to the Portal to fetch the full object before doing any real work
+
+The demo provisioner (`demo/basic/provisioner/`) implements a custom `Router` class to handle this routing. There is no typed contract, no documented event format, and no helper for calling back into the Portal. Each new provisioner starts by copying the demo and reverse-engineering the internal `Router`.
+
+## What We're Building
+
+Two changes work together to fix this.
+
+**1. Backend event adapter** — Instead of forwarding the raw HTTP exchange, the backend maps each API call to a named domain event with the full object embedded:
+
+```json
+{
+  "event": "data_product.created",
+  "data_product": { ...full DataProduct object... }
+}
+```
+
+This lives in the backend so all provisioners benefit immediately, regardless of whether they use the SDK.
+
+**2. Provisioner SDK (`dpp-provisioner-sdk`)** — A Python package that consumes these enriched events and routes them to typed hook methods. Authors subclass `BaseProvisioner` and override only the hooks relevant to their platform:
 
 ```python
 from dpp_provisioner import BaseProvisioner, PortalClient
@@ -72,29 +48,64 @@ class MyProvisioner(BaseProvisioner):
         lifecycle = self.client.get_lifecycle("Ready")
         self.client.update_data_product_status(data_product.id, lifecycle.id)
 
-client = PortalClient(api_url="https://portal.example.com", api_token="secret")
+client = PortalClient(
+    api_url=os.environ["DPP_API_URL"],
+    api_token=os.environ["DPP_API_TOKEN"],
+)
 app = MyProvisioner(client=client).get_app()
 
 # serve with: uvicorn main:app --port 6060
 ```
 
-* **Good, because** `self.client` is available in all hooks without threading through parameters
-* **Good, because** all hook signatures appear in the base class — IDE autocomplete guides authors
-* **Good, because** consistent with ADR-0009 base-class plugin pattern
-* **Good, because** default no-op implementations mean unimplemented hooks are safe to omit
-* **Good, because** `.get_app()` returns a plain FastAPI app — authors control serving, middleware, and mounting
-* **Neutral, because** requires Python class inheritance, which may be unfamiliar to some authors
-* **Bad, because** harder to compose behaviour across multiple independent handler modules
+Authors no longer inspect raw payloads, regex-match URLs, or call back to get full objects — the event carries everything they need.
 
----
+## Decision Drivers
+
+* **Developer experience**: new provisioner authors need a clear, discoverable starting point
+* **Type safety**: handler functions receive rich objects, not raw dicts
+* **Coverage**: all mutating Portal events addressable via named hooks
+* **Composability**: SDK produces a standard FastAPI `app` — authors control how it is served
+* **Transport flexibility**: hooks must be transport-agnostic so they work with webhooks today and a message queue tomorrow
+* **Consistency**: align with the base-class pattern established in ADR-0009
+
+## Decision 1: Where to Put the Event Adapter
+
+**Chosen: in the backend.**
+
+The alternative is to put adaptation logic in the SDK or in each provisioner. But since events today carry only a raw API response, every provisioner would need to call back to the Portal to hydrate full objects — SDK or not. Putting the adapter in the backend solves this once, for all provisioners, regardless of language or framework.
+
+## Decision 2: SDK Shape — Abstract Base Class vs. Fluent Builder
+
+**Chosen: Abstract Base Class (`BaseProvisioner`)**
+
+Both options expose `.get_app()`, following the pattern used by [Agno](https://docs.agno.com): the SDK returns a plain FastAPI application rather than owning the server lifecycle. Authors pass the app to uvicorn, mount it inside an existing app, or add middleware — the SDK handles routing and deserialisation only.
+
+The ABC wins over the fluent builder because:
+
+- `self.client` is available in all hooks without threading it through parameters
+- All hook signatures appear in the base class — IDE autocomplete guides authors to what's available
+- Default no-op implementations mean unimplemented hooks are silently skipped
+- Consistent with the base-class plugin pattern in ADR-0009
+
+### Fluent Builder (not chosen)
+
+```python
+app = (
+    Provisioner(client=client)
+    .on_create_data_product(handle_create)
+    .on_approve_link(handle_approve)
+    .get_app()
+)
+```
+
+Good: handlers are plain functions, easier to unit-test in isolation. No class inheritance required.
+Bad: no natural home for shared state; gaps in hook coverage are silent; discoverability depends on docs rather than IDE autocomplete.
 
 ## Transport Extensibility
 
-Currently the SDK listens for events via **direct HTTP webhooks**: the Portal calls the provisioner's HTTP endpoint synchronously after each mutating API call. This is simple and requires no infrastructure beyond the provisioner process itself.
+Currently events arrive via **synchronous HTTP webhooks**: the Portal calls the provisioner directly after each mutation. This is simple but fragile — if the provisioner is temporarily unavailable, the event is lost.
 
-However, synchronous webhooks have a reliability gap: if the provisioner is temporarily unavailable, the event is lost. A future evolution is to route events through a **message queue** (e.g. AWS SQS, RabbitMQ, Kafka). In that model the Portal publishes events to the queue and provisioners consume them at their own pace — surviving restarts and handling retries automatically.
-
-The `BaseProvisioner` hook interface is designed to be **transport-agnostic**. Hook method signatures (`on_create_data_product`, `on_approve_link`, etc.) are pure business logic with no coupling to HTTP. The transport layer — whether webhook receiver or queue consumer — is responsible for deserialising the payload and dispatching to the appropriate hook.
+Hook method signatures (`on_create_data_product`, `on_approve_link`, etc.) contain no HTTP coupling, so a queue-based transport (SQS, Kafka) can be added in future without changing any hook implementations. Only the transport layer changes.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -113,7 +124,12 @@ The `BaseProvisioner` hook interface is designed to be **transport-agnostic**. H
   └────────────────┘           └─────────────────┘
 ```
 
-Authors write hooks once; swapping the transport does not require changes to hook implementations.
+## Confirmation
+
+- Backend enriches webhook payloads with full domain objects before dispatching to provisioners
+- Delivered as installable Python package `dpp-provisioner-sdk`
+- Demo provisioner (`demo/basic/provisioner/`) rewritten to subclass `BaseProvisioner`
+- Package README shows a minimal from-scratch example
 
 ---
 
@@ -165,9 +181,9 @@ All hooks receive typed objects rather than raw dicts. The `DataProduct` context
 
 ## Appendix B: SDK Pseudocode
 
-### `PortalClient` — configuration and Portal API helper
+### `PortalClient` — Portal API helper
 
-`PortalClient` is constructed explicitly with the Portal URL and an API token. Authors create it themselves and pass it to the provisioner constructor — there is no magic environment-variable bootstrapping hidden inside the class.
+`PortalClient` is constructed explicitly with the Portal URL and an API token. Authors create it themselves and pass it to the provisioner — there is no magic environment-variable bootstrapping hidden inside the class.
 
 ```python
 class PortalClient:
@@ -239,26 +255,4 @@ class BaseProvisioner(ABC):
     def on_approve_technical_asset_link(self, data_product: DataProduct, output_port: OutputPort, technical_asset: TechnicalAsset) -> None: pass
     def on_deny_technical_asset_link(self, data_product: DataProduct, output_port: OutputPort, technical_asset: TechnicalAsset) -> None: pass
     def on_unlink_technical_asset(self, data_product: DataProduct, output_port: OutputPort, technical_asset: TechnicalAsset) -> None: pass
-```
-
-### Minimal from-scratch example
-
-```python
-import os
-from dpp_provisioner import BaseProvisioner, PortalClient
-from dpp_provisioner.models import DataProduct
-
-class SimpleProvisioner(BaseProvisioner):
-    def on_create_data_product(self, data_product: DataProduct) -> None:
-        lifecycle = self.client.get_lifecycle("Ready")
-        self.client.update_data_product_status(data_product.id, lifecycle.id)
-        print(f"Provisioned: {data_product.name}")
-
-client = PortalClient(
-    api_url=os.environ["DPP_API_URL"],
-    api_token=os.environ["DPP_API_TOKEN"],
-)
-app = SimpleProvisioner(client=client).get_app()
-
-# Run with: uvicorn main:app --port 6060
 ```
