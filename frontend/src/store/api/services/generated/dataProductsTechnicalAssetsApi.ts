@@ -579,6 +579,7 @@ export enum OutputPortAccessType {
   Public = "public",
   Restricted = "restricted",
   Private = "private",
+  Unrestricted = "unrestricted",
 }
 export enum EventEntityType {
   DataProduct = "data_product",

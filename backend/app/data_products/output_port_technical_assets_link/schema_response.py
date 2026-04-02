@@ -13,17 +13,17 @@ from app.shared.schema import ORMModel
 from app.users.schema import User
 
 
-class TechnicalAsset(TechnicalAssetBaseSchema):
+class OwnedTechnicalAsset(TechnicalAssetBaseSchema):
     owner: DataProduct
 
 
-@deprecated("Use TechnicalAsset instead")
+@deprecated("Use OwnedTechnicalAsset instead")
 class DataOutput(TechnicalAssetBaseSchema):
     # Nested schemas
     owner: DataProduct
 
-    def convert(self) -> TechnicalAsset:
-        return TechnicalAsset(**self.model_dump())
+    def convert(self) -> OwnedTechnicalAsset:
+        return OwnedTechnicalAsset(**self.model_dump())
 
 
 class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
@@ -31,7 +31,7 @@ class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
     output_port_id: UUID
     output_port: OutputPort
     technical_asset_id: UUID
-    technical_asset: TechnicalAsset
+    technical_asset: OwnedTechnicalAsset
     status: DecisionStatus
     requested_on: datetime
     denied_on: Optional[datetime]

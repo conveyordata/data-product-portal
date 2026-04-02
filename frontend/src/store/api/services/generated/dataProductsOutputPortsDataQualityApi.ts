@@ -16,7 +16,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_quality_summary`,
         method: "POST",
-        body: queryArg.outputPortDataQualitySummaryInput,
+        body: queryArg.outputPortDataQualitySummary,
       }),
     }),
     overwriteOutputPortDataQualitySummary: build.mutation<
@@ -26,7 +26,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_quality_summary/${queryArg.summaryId}`,
         method: "PUT",
-        body: queryArg.outputPortDataQualitySummaryInput,
+        body: queryArg.outputPortDataQualitySummary,
       }),
     }),
   }),
@@ -34,7 +34,7 @@ const injectedRtkApi = api.injectEndpoints({
 });
 export { injectedRtkApi as api };
 export type GetLatestDataQualitySummaryForOutputPortApiResponse =
-  /** status 200 Successful Response */ OutputPortDataQualitySummary;
+  /** status 200 Successful Response */ OutputPortDataQualitySummaryResponse;
 export type GetLatestDataQualitySummaryForOutputPortApiArg = {
   dataProductId: string;
   id: string;
@@ -44,7 +44,7 @@ export type AddOutputPortDataQualityRunApiResponse =
 export type AddOutputPortDataQualityRunApiArg = {
   dataProductId: string;
   id: string;
-  outputPortDataQualitySummaryInput: OutputPortDataQualitySummary2;
+  outputPortDataQualitySummary: OutputPortDataQualitySummary;
 };
 export type OverwriteOutputPortDataQualitySummaryApiResponse =
   /** status 200 Successful Response */ OutputPortDataQualitySummaryResponse;
@@ -52,31 +52,11 @@ export type OverwriteOutputPortDataQualitySummaryApiArg = {
   dataProductId: string;
   id: string;
   summaryId: string;
-  outputPortDataQualitySummaryInput: OutputPortDataQualitySummary2;
+  outputPortDataQualitySummary: OutputPortDataQualitySummary;
 };
 export type DataQualityTechnicalAsset = {
   name: string;
   status: DataQualityStatus;
-};
-export type OutputPortDataQualitySummary = {
-  created_at: string;
-  overall_status: DataQualityStatus;
-  description?: string | null;
-  details_url?: string | null;
-  technical_assets: DataQualityTechnicalAsset[];
-  dimensions?: {
-    [key: string]: DataQualityStatus;
-  } | null;
-};
-export type ValidationError = {
-  loc: (string | number)[];
-  msg: string;
-  type: string;
-  input?: any;
-  ctx?: object;
-};
-export type HttpValidationError = {
-  detail?: ValidationError[];
 };
 export type OutputPortDataQualitySummaryResponse = {
   created_at: string;
@@ -90,7 +70,17 @@ export type OutputPortDataQualitySummaryResponse = {
   id: string;
   output_port_id: string;
 };
-export type OutputPortDataQualitySummary2 = {
+export type ValidationError = {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+  input?: any;
+  ctx?: object;
+};
+export type HttpValidationError = {
+  detail?: ValidationError[];
+};
+export type OutputPortDataQualitySummary = {
   created_at: string;
   overall_status: DataQualityStatus;
   description?: string | null;
