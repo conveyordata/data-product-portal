@@ -8,7 +8,7 @@ The Data Product Portal manages data products and their output ports. It consist
 ## Tech Stack
 *   **Backend**: Python ≥3.13, FastAPI, SQLAlchemy (async), Alembic, Casbin (RBAC), pgvector (embeddings), Pydantic v2, FastMCP.
 *   **Backend tooling**: Poetry (package management), Ruff (linting/formatting), mypy (type checking), pytest (testing).
-*   **Frontend**: React 19, TypeScript, Vite, Redux Toolkit + RTK Query, Ant Design, Biome (linting/formatting), i18next (localization), Vitest (testing).
+*   **Frontend**: React, TypeScript, Vite, Redux Toolkit + RTK Query, Ant Design, Biome (linting/formatting), i18next (localization), Vitest (testing).
 *   **CLI**: Go (`cli/golang/`), Python (`cli/python/`).
 *   **MCP**: FastMCP server exposing portal resources to AI agents.
 *   **Docs**: Docusaurus.
