@@ -74,7 +74,7 @@
         "@types/react-syntax-highlighter": "^15.5.13",
         "@vitejs/plugin-react": "^6.0.1",
         "axios-mock-adapter": "^2.1.0",
-        "esbuild": "^0.27.5",
+        "esbuild": "^0.28.0",
         "esbuild-runner": "^2.2.2",
         "i18next-cli": "^1.51.5",
         "jsdom": "^29.0.1",
@@ -84,7 +84,7 @@
         "sass": "^1.98.0",
         "typescript": "^6.0.2",
         "vite": "^8.0.3",
-        "vite-plugin-svgr": "^5.0.0",
+        "vite-plugin-svgr": "^5.2.0",
         "vitest": "^4.1.2"
     },
     "volta": {
