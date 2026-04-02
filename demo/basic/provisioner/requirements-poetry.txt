@@ -4,7 +4,7 @@ anyio==4.13.0
     # via httpx
 build==1.4.2
     # via poetry
-cachecontrol==0.14.4
+cachecontrol[filecache]==0.14.4
     # via poetry
 certifi==2026.2.25
     # via
@@ -12,9 +12,7 @@ certifi==2026.2.25
     #   httpx
     #   requests
 cffi==2.0.0
-    # via
-    #   cryptography
-    #   xattr
+    # via cryptography
 charset-normalizer==3.4.6
     # via requests
 cleo==2.1.0
@@ -25,7 +23,7 @@ cryptography==46.0.6
     # via secretstorage
 distlib==0.4.0
     # via virtualenv
-dulwich==0.24.10
+dulwich==1.1.0
     # via poetry
 fastjsonschema==2.21.2
     # via poetry
@@ -56,7 +54,9 @@ jaraco-context==6.1.2
 jaraco-functools==4.4.0
     # via keyring
 jeepney==0.9.0
-    # via secretstorage
+    # via
+    #   keyring
+    #   secretstorage
 keyring==25.7.0
     # via poetry
 more-itertools==10.8.0
@@ -70,7 +70,7 @@ packaging==26.0
     #   build
     #   findpython
     #   poetry
-pbs-installer==2025.12.17
+pbs-installer[download,install]==2025.12.17
     # via poetry
 pkginfo==1.12.1.2
     # via poetry
@@ -80,9 +80,9 @@ platformdirs==4.9.4
     #   poetry
     #   python-discovery
     #   virtualenv
-poetry==2.2.1
+poetry==2.3.3
     # via -r requirements-poetry.in
-poetry-core==2.2.1
+poetry-core==2.3.2
     # via poetry
 pycparser==3.0
     # via cffi
@@ -102,20 +102,22 @@ requests==2.33.0
 requests-toolbelt==1.0.0
     # via poetry
 secretstorage==3.5.0
-    # via -r requirements-poetry.in
+    # via
+    #   -r requirements-poetry.in
+    #   keyring
 shellingham==1.5.4
     # via poetry
 tomlkit==0.14.0
     # via poetry
 trove-classifiers==2026.1.14.14
     # via poetry
+typing-extensions==4.15.0
+    # via anyio
 urllib3==2.6.3
     # via
     #   dulwich
     #   requests
 virtualenv==21.2.0
-    # via poetry
-xattr==1.3.0
     # via poetry
 zstandard==0.25.0
     # via pbs-installer
