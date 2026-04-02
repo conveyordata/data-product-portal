@@ -362,7 +362,7 @@ def _send_dataset_link_emails(
     db: Session,
 ) -> None:
     for dataset_link in dataset_links:
-        if dataset_link.dataset.access_type != OutputPortAccessType.PUBLIC:
+        if dataset_link.dataset.access_type != OutputPortAccessType.UNRESTRICTED:
             approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
                 dataset_link.dataset_id,
                 Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,

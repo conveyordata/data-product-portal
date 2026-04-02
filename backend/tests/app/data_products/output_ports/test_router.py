@@ -6,6 +6,7 @@ from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.model import Dataset
 from app.events.enums import EventReferenceEntity
 from app.events.service import EventService
 from app.resource_names.service import ResourceNameValidityType
@@ -84,6 +85,29 @@ class TestDatasetsRouter:
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
+
+    def test_create_output_port_type_public(self, session, dataset_payload, client):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        data_product_id = dataset_payload.pop("data_product_id")
+        dataset_payload["access_type"] = OutputPortAccessType.PUBLIC.value
+        created_dataset = self.create_output_port(
+            client, data_product_id, dataset_payload
+        )
+        assert created_dataset.status_code == 200
+        assert "id" in created_dataset.json()
+        output_port: Dataset = (
+            session.query(Dataset).filter_by(id=created_dataset.json()["id"]).first()
+        )
+        assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_create_dataset_no_owner_role(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -219,12 +243,35 @@ class TestDatasetsRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
-            "access_type": "public",
+            "access_type": "restricted",
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
 
         assert updated_dataset.status_code == 403
+
+    def test_update_dataset_type_public_renamed(self, session, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        update_payload = {
+            "name": "new_name",
+            "namespace": "new_namespace",
+            "description": "new_description",
+            "tag_ids": [],
+            "access_type": "public",
+        }
+
+        updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
+
+        assert updated_dataset.status_code == 200
+        dataset_id = updated_dataset.json()["id"]
+        output_port: Dataset = session.query(Dataset).filter_by(id=dataset_id).first()
+        assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_update_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -240,7 +287,7 @@ class TestDatasetsRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "access_type": "public",
+            "access_type": "restricted",
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -262,7 +309,7 @@ class TestDatasetsRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "access_type": "public",
+            "access_type": "restricted",
         }
 
         updated_dataset = self.update_output_port(

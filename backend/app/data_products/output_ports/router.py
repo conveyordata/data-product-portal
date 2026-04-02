@@ -28,6 +28,7 @@ from app.data_products.output_ports.curated_queries.router import (
 from app.data_products.output_ports.data_quality.router import (
     router as data_quality_router,
 )
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.query_stats.router import (
@@ -275,6 +276,10 @@ def create_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateOutputPortResponse:
+    # Temporarily convert public to unrestricted.
+    if output_port.access_type == OutputPortAccessType.PUBLIC:
+        output_port.access_type = OutputPortAccessType.UNRESTRICTED
+
     new_dataset = OutputPortService(db).create_dataset(data_product_id, output_port)
     _assign_owner_role_assignments(
         new_dataset.id, output_port.owners, db=db, actor=authenticated_user
@@ -411,6 +416,10 @@ def update_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateOutputPortResponse:
+    # Temporarily convert public to unrestricted.
+    if dataset.access_type == OutputPortAccessType.PUBLIC:
+        dataset.access_type = OutputPortAccessType.UNRESTRICTED
+
     response = OutputPortService(db).update_dataset(id, data_product_id, dataset)
 
     EventService(db).create_event(

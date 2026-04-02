@@ -78,9 +78,10 @@ class TestDatasetsService:
         # Create a regular user without special permissions
         regular_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
 
-        # Create a public output port that should be visible
-        public_dataset = DatasetFactory(
-            name="Public Analytics Dataset", access_type=OutputPortAccessType.PUBLIC
+        # Create a unrestricted output port that should be visible
+        unrestricted_dataset = DatasetFactory(
+            name="Public Analytics Dataset",
+            access_type=OutputPortAccessType.UNRESTRICTED,
         )
 
         # Create a private output port that should NOT be visible
@@ -99,7 +100,7 @@ class TestDatasetsService:
         )
 
         # Recalculate search embeddings for all datasets
-        OutputPortService(test_session).recalculate_search(public_dataset.id)
+        OutputPortService(test_session).recalculate_search(unrestricted_dataset.id)
         OutputPortService(test_session).recalculate_search(private_dataset.id)
         OutputPortService(test_session).recalculate_search(owned_private_dataset.id)
 
@@ -111,9 +112,9 @@ class TestDatasetsService:
         # Extract dataset IDs from results
         result_ids = [ds.id for ds in search_results]
 
-        # Assert that public dataset is visible
-        assert public_dataset.id in result_ids, (
-            "Public dataset should be visible to all users"
+        # Assert that unrestricted dataset is visible
+        assert unrestricted_dataset.id in result_ids, (
+            "Unrestricted dataset should be visible to all users"
         )
 
         # Assert that private datasets are NOT visible
@@ -138,14 +139,14 @@ class TestDatasetsService:
             role_id=owner_role.id, dataset_id=private_dataset.id, user_id=owner.id
         )
 
-        # Create a public dataset for comparison
-        public_dataset = DatasetFactory(
-            name="Public Dataset", access_type=OutputPortAccessType.PUBLIC
+        # Create a unrestricted dataset for comparison
+        unrestricted_dataset = DatasetFactory(
+            name="Unrestricted Dataset", access_type=OutputPortAccessType.UNRESTRICTED
         )
 
         # Recalculate search embeddings
         OutputPortService(test_session).recalculate_search(private_dataset.id)
-        OutputPortService(test_session).recalculate_search(public_dataset.id)
+        OutputPortService(test_session).recalculate_search(unrestricted_dataset.id)
 
         # Search as the owner
         search_results = OutputPortService(test_session).search_datasets(
@@ -159,7 +160,9 @@ class TestDatasetsService:
         assert private_dataset.id in result_ids, (
             "Owner should see their own private dataset"
         )
-        assert public_dataset.id in result_ids, "Owner should also see public datasets"
+        assert unrestricted_dataset.id in result_ids, (
+            "Owner should also see public datasets"
+        )
 
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:

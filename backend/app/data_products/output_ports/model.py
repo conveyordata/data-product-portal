@@ -48,7 +48,7 @@ class Dataset(Base, BaseORM):
     description = Column(String)
     about = Column(String)
     access_type = Column(
-        Enum(OutputPortAccessType), default=OutputPortAccessType.PUBLIC
+        Enum(OutputPortAccessType), default=OutputPortAccessType.UNRESTRICTED
     )
     status: OutputPortStatus = Column(
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
