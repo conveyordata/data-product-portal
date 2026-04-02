@@ -1,0 +1,28 @@
+version: '3'
+
+tasks:
+  install:
+    desc: "Install SDK development dependencies"
+    cmds:
+      - poetry install --all-groups
+
+  filter:spec:
+    desc: "Filter the OpenAPI spec to v2 endpoints only"
+    deps: [install]
+    cmds:
+      - poetry run python scripts/filter_openapi_v2.py
+    generates:
+      - openapi-v2.json
+
+  generate:client:
+    desc: "Regenerate the portal API client from the OpenAPI spec"
+    deps: ["filter:spec"]
+    cmds:
+      - poetry run openapi-python-client generate
+          --path ./openapi-v2.json
+          --output-path ./sdk/api_client
+          --meta none
+          --overwrite
+      - rm openapi-v2.json
+    generates:
+      - sdk/api_client/**
