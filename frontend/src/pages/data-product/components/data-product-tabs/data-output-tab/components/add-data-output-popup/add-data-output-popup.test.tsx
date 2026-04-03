@@ -1,4 +1,3 @@
-import { describe, it } from 'vitest';
 import { AddDataOutputPopup } from '@/pages/data-product/components/data-product-tabs/data-output-tab/components/add-data-output-popup/add-data-output-popup.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockGetPlatformConfigs } from '@/tests/mocks/configuration.ts';
@@ -26,34 +25,34 @@ describe('TechnicalAssetPopup', async () => {
         mockResourceNamesValidate();
         mockRenderTechnicalAssetAccessPath();
         mockCreateTechnicalAsset(mock_data_products[0].id);
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
         const mockCloseFunction = vi.fn();
         renderWithProviders(
-            <AddDataOutputPopup onClose={mockCloseFunction} isOpen dataProductId={mock_data_products[0].id} />,
+            <AddDataOutputPopup
+                onClose={mockCloseFunction}
+                isOpen
+                dataProductId={mock_data_products[0].id}
+                debounce={0}
+            />,
         );
-        const nameInput = await waitFor(() => {
-            const input = screen.getByRole('textbox', { name: /name/i });
-            expect(input).not.toBeDisabled();
-            return input;
-        });
-        await userEvent.type(nameInput, 'My new technical asset');
 
-        const descriptionInput = screen.getByRole('textbox', { name: /description/i });
-        await userEvent.type(descriptionInput, 'My new technical asset is the best one ever');
+        const nameInput = screen.getByLabelText(/name/i);
+        await waitFor(() => expect(nameInput).not.toBeDisabled());
+        await user.type(nameInput, 'My new technical asset');
 
-        const awsRadio = screen.getByRole('radio', { name: /aws/i });
-        await userEvent.click(awsRadio, { pointerEventsCheck: 0 });
+        const descriptionInput = screen.getByLabelText(/description/i);
+        await user.type(descriptionInput, 'My new technical asset is the best one ever');
 
-        const s3Radio = screen.getByRole('radio', { name: /s3/i });
-        await userEvent.click(s3Radio, { pointerEventsCheck: 0 });
+        await user.click(screen.getByLabelText(/aws/i));
+        await user.click(screen.getByLabelText(/s3/i));
+        await user.click(screen.getByLabelText(/bucket/i));
 
-        const bucketInput = screen.getByRole('combobox', { name: /bucket/i });
-        await userEvent.click(bucketInput);
-        await userEvent.click(screen.getAllByText('datalake')[1]);
-
-        await userEvent.type(screen.getAllByRole('textbox', { name: /path/i })[0], 's3_path');
+        await user.click(screen.getAllByText('datalake')[1]);
+        await user.type(screen.getAllByRole('textbox', { name: /path/i })[0], 's3_path');
 
         const createButton = screen.getByRole('button', { name: /Create/i });
-        await userEvent.click(createButton);
+        await user.click(createButton);
 
         await waitFor(() => expect(mockCloseFunction).toHaveBeenCalled());
     }, 15000);

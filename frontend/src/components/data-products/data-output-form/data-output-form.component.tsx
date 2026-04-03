@@ -34,11 +34,14 @@ import { getIcon } from '@/utils/icon-loader';
 import { DataOutputConfigurationForm } from './data-output-configuration-form.component';
 import styles from './data-output-form.module.scss';
 
+const DEBOUNCE = 500;
+
 type Props = {
     mode: 'create';
     formRef: RefObject<FormInstance<CreateTechnicalAssetRequest> | null>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
+    debounce?: number;
 };
 
 type ServiceConfig = {
@@ -47,9 +50,7 @@ type ServiceConfig = {
     configuration: string[];
 };
 
-const DEBOUNCE = 500;
-
-export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
+export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit, debounce = DEBOUNCE }: Props) {
     const { t } = useTranslation();
 
     // Data
@@ -175,7 +176,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     };
 
     // Namespace validation
-    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), DEBOUNCE);
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), debounce);
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
@@ -225,7 +226,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             })
             .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
             .catch(() => form.setFieldValue('result', undefined));
-    }, DEBOUNCE);
+    }, debounce);
 
     const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (
         changed,

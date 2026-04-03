@@ -46,6 +46,7 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
         if (currentUser) {
             store.dispatch(setCredentials({ user: currentUser }));
         }
+
         return (
             <Provider store={store}>
                 <I18nextProvider i18n={i18n}>
