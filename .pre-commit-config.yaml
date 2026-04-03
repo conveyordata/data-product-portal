@@ -34,6 +34,8 @@ repos:
   hooks:
     - id: mypy
       language_version: python3.13
+      # Exclude auto-generated api_client code — it contains patterns mypy can't follow
+      exclude: ^sdk/sdk/api_client/
       additional_dependencies:
       - types-cachetools
       - types-requests
