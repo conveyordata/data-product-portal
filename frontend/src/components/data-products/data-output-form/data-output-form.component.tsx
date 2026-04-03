@@ -34,8 +34,6 @@ import { getIcon } from '@/utils/icon-loader';
 import { DataOutputConfigurationForm } from './data-output-configuration-form.component';
 import styles from './data-output-form.module.scss';
 
-const DEBOUNCE = 500;
-
 type Props = {
     mode: 'create';
     formRef: RefObject<FormInstance<CreateTechnicalAssetRequest> | null>;
@@ -49,6 +47,8 @@ type ServiceConfig = {
     service_id: string;
     configuration: string[];
 };
+
+const DEBOUNCE = 500;
 
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit, debounce = DEBOUNCE }: Props) {
     const { t } = useTranslation();
