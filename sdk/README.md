@@ -27,6 +27,42 @@ result = get_data_products_v2_data_products_get.sync(client=client)
 
 `sdk.api_client` mirrors the OpenAPI structure — models are in `sdk.api_client.models`, endpoints in `sdk.api_client.api.<resource>`.
 
+## Authentication
+
+`PortalAuth` handles token acquisition and caching. It supports two flows:
+
+- **Device authorization** (default): prompts a human to approve via browser
+- **Client credentials**: machine-to-machine, no human interaction
+
+### Environment variables
+
+| Variable | Description |
+|---|---|
+| `PORTAL_BASE_URL` | Base URL of your portal (e.g. `https://portal.example.com/api/`) |
+| `PORTAL_CLIENT_ID` | OAuth client ID |
+| `PORTAL_CLIENT_SECRET` | OAuth client secret |
+| `PORTAL_TOKEN_URL` | Cognito token endpoint (`https://<domain>.amazoncognito.com/oauth2/token`) |
+| `PORTAL_AUTH_MODE` | `""` for device flow (default) or `"client_credentials"` |
+| `PORTAL_SCOPE` | OAuth scope (default: `"openid"`) |
+| `PORTAL_DEV_MODE` | Set to `"true"` to skip auth entirely (returns empty token) |
+
+### Example
+
+```python
+from sdk import AuthenticatedClient, PortalAuth
+from sdk.api_client.api.data_products import get_data_product
+
+auth = PortalAuth()
+client = AuthenticatedClient(
+    base_url="https://portal.example.com",
+    token=auth.get_access_token(),
+)
+result = get_data_product.sync(id=some_uuid, client=client)
+```
+
+Tokens are cached in `~/.portal/token.json` and refreshed automatically before expiry.
+For client credentials mode, set `PORTAL_AUTH_MODE=client_credentials` — tokens are not persisted to disk.
+
 ## Regenerating the API client
 
 Run this after the OpenAPI spec changes (e.g. after `task update:open-api-spec` at the repo root):

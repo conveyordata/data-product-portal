@@ -2,6 +2,9 @@
 name = "dpp-sdk"
 version = "0.1.0"
 description = "SDK for Data Product Portal"
+authors = [
+    {name = "Dataminded"}
+]
 requires-python = ">=3.12,<4.0"
 dependencies = [
     # HTTP client used by the generated api_client to make requests

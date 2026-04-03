@@ -10,11 +10,15 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi (>=0.124.4,<0.125.0)",
     "uvicorn (>=0.38.0,<0.39.0)",
-    "cookiecutter (>=2.6.0,<3.0.0)"
+    "cookiecutter (>=2.6.0,<3.0.0)",
+    "dpp-sdk"
 ]
 
 [tool.poetry]
 packages = [{include = "provisioner", from = "."}]
+
+[tool.poetry.dependencies]
+dpp-sdk = {path = "../../../sdk", develop = true}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

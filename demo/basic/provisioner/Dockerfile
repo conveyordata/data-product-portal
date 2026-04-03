@@ -19,10 +19,13 @@ ENV POETRY_NO_INTERACTION=1 \
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
-COPY requirements-poetry.txt .
+COPY demo/basic/provisioner/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
-COPY poetry.lock pyproject.toml /
+# Copy pyproject.toml and lock file; SDK is expected at ../../../sdk relative to pyproject.toml,
+# which resolves to /sdk when pyproject.toml is at /.
+COPY demo/basic/provisioner/poetry.lock demo/basic/provisioner/pyproject.toml /
+COPY sdk/ /sdk/
 RUN poetry install --no-root
 
 FROM base-image
@@ -30,9 +33,9 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
 COPY --from=build-stage /usr/local /usr/local
 
-COPY ./provisioner ./provisioner
-COPY ./templates ./templates
-COPY ./VERSION ./VERSION
+COPY demo/basic/provisioner/provisioner ./provisioner
+COPY demo/basic/provisioner/templates ./templates
+COPY demo/basic/provisioner/VERSION ./VERSION
 
 EXPOSE 6060
 

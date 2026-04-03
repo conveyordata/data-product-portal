@@ -1,14 +1,10 @@
 import logging
-import os
 import time
 import json
-import requests
+import httpx
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urlencode
-
-from requests import Response
-from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
 TOKEN_PATH = Path.home() / ".portal" / "token.json"
@@ -16,14 +12,14 @@ TOKEN_PATH = Path.home() / ".portal" / "token.json"
 
 class PortalAuth:
     def __init__(self, timeout: int = 10):
+        import os
+
         self.timeout = timeout
         self.auth_mode = os.getenv("PORTAL_AUTH_MODE", "")
         self.base_url = os.getenv("PORTAL_BASE_URL", "").rstrip("/")
         self.client_id = os.getenv("PORTAL_CLIENT_ID", "")
         self.client_secret = os.getenv("PORTAL_CLIENT_SECRET", "")
-        self.token_url = os.getenv(
-            "PORTAL_TOKEN_URL", ""
-        )  # Cognito token endpoint to refresh tokens or get client credential tokens
+        self.token_url = os.getenv("PORTAL_TOKEN_URL", "")
         self.scope = os.getenv("PORTAL_SCOPE", "openid")
         self.dev_mode = os.getenv("PORTAL_DEV_MODE", "false").lower()
 
@@ -50,11 +46,6 @@ class PortalAuth:
             return False
         return time.time() < self._token["expires_at"] - 30
 
-    def _use_client_credentials_flow(self) -> bool:
-        if self.auth_mode == "client_credentials":
-            return True
-        return False
-
     def get_access_token(self) -> str:
         if self.dev_mode == "true":
             return ""
@@ -75,7 +66,7 @@ class PortalAuth:
                 "Client credentials requested but PORTAL_CLIENT_SECRET is missing"
             )
 
-        response = requests.post(
+        response = httpx.post(
             self.token_url,
             data={
                 "grant_type": "client_credentials",
@@ -87,7 +78,7 @@ class PortalAuth:
             timeout=self.timeout,
         )
 
-        if not response.ok:
+        if not response.is_success:
             raise RuntimeError(f"Client credentials auth failed: {response.text}")
         else:
             logger.info("Successfully authenticated")
@@ -101,7 +92,7 @@ class PortalAuth:
         }
         response = self._do_post(params, endpoint="auth/device/device_token")
 
-        if not response.ok:
+        if not response.is_success:
             raise RuntimeError(f"Device authorization failed: {response.text}")
 
         payload = response.json()
@@ -150,11 +141,11 @@ class PortalAuth:
 
         raise TimeoutError("Device authorization timed out")
 
-    def _do_post(self, params: dict[str, str], endpoint: str) -> Response:
+    def _do_post(self, params: dict[str, str], endpoint: str) -> httpx.Response:
         query_string = urlencode(params)
-        return requests.post(
+        return httpx.post(
             f"{self.base_url}/{endpoint}?{query_string}",
-            auth=HTTPBasicAuth(self.client_id, self.client_secret),
+            auth=httpx.BasicAuth(self.client_id, self.client_secret),
             timeout=self.timeout,
         )
 
@@ -164,17 +155,15 @@ class PortalAuth:
             "client_id": self.client_id,
             "refresh_token": self._token["refresh_token"],  # type: ignore
         }
-        response = requests.post(
+        response = httpx.post(
             self.token_url,
-            auth=HTTPBasicAuth(self.client_id, self.client_secret),
+            auth=httpx.BasicAuth(self.client_id, self.client_secret),
             data=urlencode(params),
-            headers={
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
             timeout=self.timeout,
         )
 
-        if not response.ok:
+        if not response.is_success:
             return False
 
         payload = response.json()
