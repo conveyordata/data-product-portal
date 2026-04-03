@@ -49,7 +49,7 @@
   },
   "overrides": {
     "@docusaurus/theme-mermaid": {
-      "lodash-es": ">=4.17.23"
+      "lodash-es": ">=4.18.1"
     },
     "@docusaurus/bundler": {
       "serialize-javascript": "^7.0.3"
