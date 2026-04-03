@@ -48,9 +48,7 @@ type ServiceConfig = {
     configuration: string[];
 };
 
-const DEBOUNCE = 500;
-
-export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit, debounce = DEBOUNCE }: Props) {
+export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit, debounce = 500 }: Props) {
     const { t } = useTranslation();
 
     // Data
