@@ -38,7 +38,6 @@ updates:
           - "vite"
           - "vite-plugin-*"
           - "@vitejs/*"
-          - "esbuild"
       tiptap:
         patterns:
           - "@tiptap/*"
