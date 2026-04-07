@@ -3,17 +3,19 @@ name: Release workflow
 on:
   push:
     tags:
-      - '*'
+      - 'v*.*.*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
-  id-token: write
-  contents: write
+  contents: read
 
 jobs:
   prep-version:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -44,7 +46,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: [ "prep-version" ]
+    needs: ["prep-version"]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -144,7 +146,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ "backend", "frontend", "prep-version"]
     permissions:
-      id-token: write
       contents: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -166,17 +167,17 @@ jobs:
 
       - name: Create Release
         env:
+          TAG: ${{ github.ref_name }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
+          NOTES: ${{ steps.create_release_notes.outputs.RELEASENOTES }}
         run: |
-          echo "Creating release for version $tag"
-          echo "${{ steps.create_release_notes.outputs.RELEASENOTES }}"
-          gh release create "$tag" --title "$tag" --notes "${{ steps.create_release_notes.outputs.RELEASENOTES }}"
+          echo "Creating release for version $TAG"
+          echo "$NOTES"
+          gh release create "$TAG" --title "$TAG" --notes "$NOTES"
           echo "Release created successfully"
   cli:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: write
     needs: [ "create-gh-release-notes" ]
     steps:
@@ -205,6 +206,9 @@ jobs:
           path: cli/golang/dist/*
   release-docs:
     runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -238,7 +242,6 @@ jobs:
     name: Deploy to portal demo
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
     needs: ["backend","frontend"]
     steps:
@@ -246,6 +249,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: Dispatch to demo-portal-infrastructure dev
+        env:
+          BEARER: ${{ secrets.DEMO_INFRASTRUCTURE_PAT }}
         run: |
           repo_owner="datamindedbe"
           repo_name="demo-portal-infrastructure"
@@ -256,7 +261,7 @@ jobs:
           curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.DEMO_INFRASTRUCTURE_PAT }}" \
+            -H "Authorization: Bearer $BEARER" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${repo_owner}/${repo_name}/dispatches" \
             -d "{\"event_type\": \"${event_type}\", \"client_payload\": {\"tag\": \"${version}\", \"chart_version\": \"${chart}\", \"env\": \"demo_dev\", \"integration\": true}}"
@@ -266,6 +271,7 @@ jobs:
           repo_name="demo-portal-infrastructure"
           event_type="apply-portal-release"
           version="$(git rev-parse --short=7 HEAD)"
+          chart="$(git describe --tags --abbrev=0 | cut -c2-)"
 
           curl -L \
             -X POST \
