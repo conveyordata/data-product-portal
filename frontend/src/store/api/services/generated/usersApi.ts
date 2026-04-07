@@ -175,7 +175,11 @@ export type CanBecomeAdminUpdate = {
   can_become_admin: boolean;
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType = "public" | "restricted" | "private";
+export type OutputPortAccessType =
+  | "public"
+  | "restricted"
+  | "private"
+  | "unrestricted";
 export type Tag = {
   id: string;
   value: string;

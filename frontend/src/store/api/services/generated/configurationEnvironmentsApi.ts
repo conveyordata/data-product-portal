@@ -140,6 +140,12 @@ export type PostgreSqlConfig = {
   admin_user: string;
   admin_pwd: string;
 };
+export type AzureBlobConfig = {
+  identifier: string;
+  storage_account_name: string;
+  resource_group_name: string;
+  container_name: string;
+};
 export type Platform = {
   id: string;
   name: string;
@@ -159,6 +165,7 @@ export type EnvironmentConfigsGetItem = {
     | SnowflakeConfig
     | RedshiftConfig
     | PostgreSqlConfig
+    | AzureBlobConfig
   )[];
   id: string;
   platform: Platform;
@@ -178,10 +185,16 @@ export type DatabricksEnvironmentPlatformConfiguration = {
   metastore_id: string;
   credential_name: string;
 };
+export type AzureEnvironmentPlatformConfiguration = {
+  tenant_id: string;
+  subscription_id: string;
+  region: string;
+};
 export type EnvironmentPlatformConfigGet = {
   config:
     | AwsEnvironmentPlatformConfiguration
-    | DatabricksEnvironmentPlatformConfiguration;
+    | DatabricksEnvironmentPlatformConfiguration
+    | AzureEnvironmentPlatformConfiguration;
   id: string;
   environment: Environment;
   platform: Platform;

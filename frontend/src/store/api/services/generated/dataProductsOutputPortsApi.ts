@@ -667,6 +667,7 @@ export enum OutputPortAccessType {
   Public = "public",
   Restricted = "restricted",
   Private = "private",
+  Unrestricted = "unrestricted",
 }
 export enum DataProductSettingType {
   Checkbox = "checkbox",

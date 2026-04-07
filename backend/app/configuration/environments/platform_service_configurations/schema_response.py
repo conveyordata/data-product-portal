@@ -7,6 +7,7 @@ from pydantic import field_validator
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSGlueConfig,
     AWSS3Config,
+    AzureBlobConfig,
     DatabricksConfig,
 )
 from app.configuration.environments.platform_service_configurations.schemas.postgresql_schema import (
@@ -30,6 +31,7 @@ ConfigType = (
     | SnowflakeConfig
     | RedshiftConfig
     | PostgreSQLConfig
+    | AzureBlobConfig
 )
 
 

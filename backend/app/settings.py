@@ -81,6 +81,7 @@ class Settings(BaseSettings):
         "ConveyorPlugin",
         "GlueTechnicalAssetConfiguration",
         "S3TechnicalAssetConfiguration",
+        "AzureBlobTechnicalAssetConfiguration",
     ]
 
     AWS_SESSION_DURATION: int = 900
