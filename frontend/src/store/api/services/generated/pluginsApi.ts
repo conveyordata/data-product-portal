@@ -128,8 +128,6 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
-  input?: any;
-  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -139,6 +137,12 @@ export type UrlResponse = {
 };
 export type RenderTechnicalAssetAccessPathResponse = {
   technical_asset_access_path: string;
+};
+export type AzureBlobTechnicalAssetConfiguration = {
+  configuration_type: "AzureBlobTechnicalAssetConfiguration";
+  domain?: string;
+  path?: string;
+  container_name: string;
 };
 export type DatabricksTechnicalAssetConfiguration = {
   configuration_type: "DatabricksTechnicalAssetConfiguration";
@@ -202,6 +206,9 @@ export type RenderTechnicalAssetAccessPathRequest = {
   platform_id: string;
   service_id: string;
   configuration:
+    | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
     | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)

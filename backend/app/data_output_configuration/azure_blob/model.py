@@ -7,7 +7,9 @@ from app.data_output_configuration.base_model import BaseTechnicalAssetConfigura
 class AzureBlobTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     __tablename__ = "azure_blob_technical_asset_configurations"
 
-    storage_account: Mapped[str] = mapped_column(String, nullable=False)
+    domain: Mapped[str] = mapped_column(
+        String, nullable=False
+    )  # Required to support looking up the correct storage account
     path: Mapped[str] = mapped_column(String, nullable=True)
     container_name: Mapped[str] = mapped_column(String, nullable=False)
 

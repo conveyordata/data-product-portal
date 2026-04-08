@@ -46,7 +46,7 @@ class S3TechnicalAssetConfiguration(AssetProviderPlugin):
     class Meta:
         orm_model = S3TechnicalAssetConfigurationModel
 
-    def validate_configuration(self, data_product: DataProduct):
+    def validate_configuration(self, data_product: DataProduct, db: Session):
         pass
 
     def on_create(self):

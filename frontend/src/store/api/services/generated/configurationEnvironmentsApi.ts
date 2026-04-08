@@ -101,8 +101,6 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
-  input?: any;
-  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -142,9 +140,9 @@ export type PostgreSqlConfig = {
 };
 export type AzureBlobConfig = {
   identifier: string;
-  storage_account_name: string;
-  resource_group_name: string;
-  container_name: string;
+  storage_account_names: {
+    [key: string]: string;
+  };
 };
 export type Platform = {
   id: string;

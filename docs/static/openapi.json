@@ -13906,25 +13906,18 @@
             "type": "string",
             "title": "Identifier"
           },
-          "storage_account_name": {
-            "type": "string",
-            "title": "Storage Account Name"
-          },
-          "resource_group_name": {
-            "type": "string",
-            "title": "Resource Group Name"
-          },
-          "container_name": {
-            "type": "string",
-            "title": "Container Name"
+          "storage_account_names": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Storage Account Names"
           }
         },
         "type": "object",
         "required": [
           "identifier",
-          "storage_account_name",
-          "resource_group_name",
-          "container_name"
+          "storage_account_names"
         ],
         "title": "AzureBlobConfig"
       },
@@ -13935,18 +13928,15 @@
             "const": "AzureBlobTechnicalAssetConfiguration",
             "title": "Configuration Type"
           },
-          "storage_account": {
+          "domain": {
             "type": "string",
-            "title": "Storage Account"
+            "title": "Domain",
+            "default": ""
           },
           "path": {
             "type": "string",
             "title": "Path",
             "default": ""
-          },
-          "resource_group": {
-            "type": "string",
-            "title": "Resource Group"
           },
           "container_name": {
             "type": "string",
@@ -13956,8 +13946,6 @@
         "type": "object",
         "required": [
           "configuration_type",
-          "storage_account",
-          "resource_group",
           "container_name"
         ],
         "title": "AzureBlobTechnicalAssetConfiguration"
