@@ -1,14 +1,26 @@
-from typing import ClassVar, Literal, Optional
+import json
+from typing import ClassVar, Literal, Optional, Sequence
 from uuid import UUID
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.configuration.environments.platform_service_configurations.model import (
+    EnvironmentPlatformServiceConfiguration,
+)
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    EnvironmentConfigsGetItem,
+)
+from app.configuration.platforms.platform_services.model import (
+    PlatformService as PlatformServiceModel,
+)
 from app.data_output_configuration.azure_blob.model import (
     AzureBlobTechnicalAssetConfiguration as AzureBlobTechnicalAssetConfigurationModel,
 )
 from app.data_output_configuration.base_schema import (
     AssetProviderPlugin,
     PlatformMetadata,
+    SelectOption,
     UIElementMetadata,
     UIElementSelect,
     UIElementString,
@@ -25,7 +37,6 @@ class AzureBlobTechnicalAssetConfiguration(AssetProviderPlugin):
 
     storage_account: str
     path: str = ""
-    resource_group: str
     container_name: str
 
     configuration_type: Literal[DataOutputTypes.AzureBlobTechnicalAssetConfiguration]
@@ -56,35 +67,81 @@ class AzureBlobTechnicalAssetConfiguration(AssetProviderPlugin):
         return "https://portal.azure.com/"
 
     @classmethod
+    def extract_entries_from_config(
+        cls, configs: Sequence[EnvironmentConfigsGetItem], key: str
+    ):
+        if not configs:
+            raise NotImplementedError("No platform service configuration found")
+        options: set[str] = set()
+        for env_config in configs:
+            if not isinstance(env_config.config, str):
+                continue
+            service_configs = json.loads(env_config.config)
+            for config_item in service_configs:
+                value = config_item.get(key)
+                if value is None:
+                    continue
+
+                if isinstance(value, dict):
+                    options.update(value.keys())
+                else:
+                    options.add(str(value))
+
+        return options
+
+    @classmethod
+    def get_platform_service_options_for_property(
+        cls, db: Session, key: str
+    ) -> set[str]:
+        """Get a specific enviornment platform configuration from the database if needed"""
+        if not cls._platform_metadata:
+            raise NotImplementedError("Platform metadata not defined for this plugin")
+
+        service = db.scalar(
+            select(PlatformServiceModel).where(
+                func.lower(PlatformServiceModel.name)
+                == cls._platform_metadata.platform_key
+            )
+        )
+        if not service:
+            raise NotImplementedError("No platform service found")
+        configs: Sequence[EnvironmentConfigsGetItem] = db.scalars(
+            select(EnvironmentPlatformServiceConfiguration).where(
+                EnvironmentPlatformServiceConfiguration.service_id == service.id
+            )
+        ).all()
+        return cls.extract_entries_from_config(configs, key)
+
+    @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
         base_metadata = super().get_ui_metadata(db)
+        domains = cls.get_platform_service_options_for_property(
+            db, "storage_account_names"
+        )
         base_metadata += [
-            # TODO remove the non-user visible fields (resource_group) and see how to distinguish between them
             UIElementMetadata(
                 name="storage_account",
-                label="Storage Account",
+                label="Storage Account of domain",
                 type=UIElementType.Select,
                 required=True,
-                select=UIElementSelect(options=cls.get_platform_options(db)),
+                tooltip="The storage account of your domain.",
+                select=UIElementSelect(
+                    options=[
+                        SelectOption(value=domain, label=domain) for domain in domains
+                    ]
+                ),
             ),
             UIElementMetadata(
                 name="container_name",
                 label="Container",
                 required=True,
-                type=UIElementType.Select,
-                select=UIElementSelect(options=cls.get_platform_options(db)),
-            ),
-            UIElementMetadata(
-                name="resource_group",
-                label="Resource Group",
-                required=True,
-                type=UIElementType.Select,
-                select=UIElementSelect(options=cls.get_platform_options(db)),
+                type=UIElementType.String,
+                string=UIElementString(initial_value=""),
             ),
             UIElementMetadata(
                 name="path",
                 label="Path",
-                required=True,
+                required=False,
                 type=UIElementType.String,
                 tooltip="The name of the path to give write access to",
                 string=UIElementString(initial_value=""),

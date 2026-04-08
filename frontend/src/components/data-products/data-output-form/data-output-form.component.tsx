@@ -362,6 +362,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     <DataOutputConfigurationForm
                         form={form}
                         uiMetadataGroups={pluginMetadata.ui_metadata}
+                        domain={currentDataProduct.domain}
                         namespace={currentDataProduct.namespace}
                         technical_mapping={technical_mapping}
                         configurationType={pluginMetadata.plugin}

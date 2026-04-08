@@ -31,7 +31,6 @@ def upgrade() -> None:
             primary_key=True,
         ),
         sa.Column("storage_account", sa.String(), nullable=False),
-        sa.Column("resource_group", sa.String(), nullable=False),
         sa.Column("container_name", sa.String(), nullable=False),
         sa.Column("path", sa.String(), nullable=True),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
