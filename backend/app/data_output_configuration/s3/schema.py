@@ -103,6 +103,7 @@ class S3TechnicalAssetConfiguration(AssetProviderPlugin):
                 type=UIElementType.String,
                 string=UIElementString(initial_value=""),
                 hidden=True,
+                use_namespace_when_not_source_aligned=True,
             ),
             UIElementMetadata(
                 name="path",
