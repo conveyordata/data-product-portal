@@ -28,7 +28,6 @@ from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as data_outputs
 from app.graph.router import router as graph
-from app.pending_actions.router import router as pending_action
 from app.resource_names.router import router as resource_name
 from app.search_output_ports.router import router as search_output_ports
 from app.users.notifications.router import router as notification
@@ -60,6 +59,5 @@ router.include_router(role_assignment)
 router.include_router(theme_settings)
 router.include_router(graph)
 router.include_router(notification)
-router.include_router(pending_action)
 router.include_router(resource_name)
 router.include_router(plugin)
