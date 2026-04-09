@@ -12,7 +12,6 @@ import { useGetTagsQuery } from '@/store/api/services/generated/configurationTag
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateTechnicalAssetRequest,
-    TechnicalAssetStatus,
     useCreateTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
@@ -299,12 +298,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
-            <Form.Item<TechnicalAssetsCreateForm>
-                name={'status'}
-                required
-                hidden
-                initialValue={TechnicalAssetStatus.Active}
-            />
             <Form.Item<TechnicalAssetsCreateForm>
                 name={'technical_mapping'}
                 label={t('Technical Mapping')}
