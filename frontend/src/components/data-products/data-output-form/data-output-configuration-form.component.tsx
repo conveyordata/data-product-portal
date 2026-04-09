@@ -18,12 +18,10 @@ type Props = {
     uiMetadataGroups: UiElementMetadata[];
     resultLabel: string;
     resultTooltip: string;
-    domain: string;
 };
 
 export function DataOutputConfigurationForm({
     form,
-    domain,
     namespace,
     technical_mapping,
     uiMetadataGroups,

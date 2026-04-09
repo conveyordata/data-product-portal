@@ -11,7 +11,8 @@ import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/service
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
-    type CreateTechnicalAssetRequest, TechnicalAssetStatus,
+    type CreateTechnicalAssetRequest,
+    TechnicalAssetStatus,
     useCreateTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
@@ -326,8 +327,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 isSelected={dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
                                 value={
-                                    platformConfig?.find((config) => config.platform.name === dataPlatform.label)
-                                        ?.platform.id
+                                    platformConfig?.find(
+                                        (config) =>
+                                            config.platform.name.toLowerCase() === dataPlatform.label.toLowerCase(),
+                                    )?.platform.id
                                 }
                             />
                         ))}
@@ -368,7 +371,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     <DataOutputConfigurationForm
                         form={form}
                         uiMetadataGroups={pluginMetadata.ui_metadata}
-                        domain={currentDataProduct.domain}
                         namespace={currentDataProduct.namespace}
                         technical_mapping={technical_mapping}
                         configurationType={pluginMetadata.plugin}

@@ -108,16 +108,11 @@ begin
     INSERT INTO public.tags (id, value, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Public', '2025-10-28 16:32:27.884892', NULL, NULL) returning id into tag_public_id;
 
 
-    -- PLATFORMS
-    INSERT INTO public.platforms (id, "name") SELECT gen_random_uuid(), 'AWS' WHERE NOT EXISTS (SELECT 1 FROM public.platforms WHERE "name" = 'AWS') returning id into returned_platform_id;
+    -- PLATFORMS: the default configuration is added in migrations already.
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
-    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) SELECT gen_random_uuid(), 'S3', returned_platform_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}' WHERE NOT EXISTS (SELECT 1 FROM public.platform_services WHERE "name" = 'S3' AND "platform_id" = returned_platform_id);
     SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'S3' INTO s3_service_id;
-    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) SELECT gen_random_uuid(), 'Glue', returned_platform_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}' WHERE NOT EXISTS (SELECT 1 FROM public.platform_services WHERE "name" = 'Glue' AND "platform_id" = returned_platform_id);
     SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'Glue' INTO glue_service_id;
-    INSERT INTO public.platforms (id, "name") SELECT gen_random_uuid(), 'AZURE' WHERE NOT EXISTS (SELECT 1 FROM public.platforms WHERE "name" = 'AZURE') returning id into azure_platform_id;
-    SELECT id FROM public.platforms WHERE name = 'AZURE' INTO azure_platform_id;
-    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) SELECT gen_random_uuid(), 'azureblob', azure_platform_id, 'platform_provided_storage_account/{container_name}/{path}', 'https://{storage_account}.blob.core.windows.net/{container_name}/{path}' WHERE NOT EXISTS (SELECT 1 FROM public.platform_services WHERE "name" = 'azureblob' AND "platform_id" = azure_platform_id);
+    SELECT id FROM public.platforms WHERE name = 'Azure' INTO azure_platform_id;
     SELECT id FROM public.platform_services WHERE platform_id = azure_platform_id AND name = 'azureblob' INTO azure_blob_service_id;
 
     -- ...existing platform configuration code...
@@ -133,7 +128,7 @@ begin
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, s3_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('0b9a0e7f-8fee-4fd3-97e0-830e1612b77a', databricks_id, databricks_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('0b9a0e7f-8fee-4fd3-97e0-940e1612babc', azure_platform_id, azure_blob_service_id, '["datalake","ingress", "egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('0b9a0e7f-8fee-4fd3-97e0-940e1612babc', azure_platform_id, azure_blob_service_id, '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES ('90ab1128-329f-47dd-9420-c9681bfc68c4', 'Processing', 'Data products that transform, clean, or enrich data to make it usable for other systems or analysis.', 'PROCESSING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO processing_type_id;
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES ('1b4a64b3-96fb-404c-a73c-294802dc9852', 'Reporting', 'Data products that provide structured reports and dashboards for decision-making.', 'REPORTING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO reporting_type_id;

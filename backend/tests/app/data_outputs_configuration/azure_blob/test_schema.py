@@ -30,13 +30,21 @@ class TestRenderTemplate:
         )
         assert result == "financeartifacts/data/output"
 
-    def test_falls_back_to_single_storage_account(self):
+    def test_falls_back_to_single_storage_account_for_key_default(self):
         config = make_blob_config(domain="", container_name="data", path="output")
         result = config.render_template(
             "{storage_account}/{container_name}",
-            storage_account_names={"finance": "financeartifacts"},
+            storage_account_names={"default": "financeartifacts"},
         )
         assert result == "financeartifacts/data"
+
+    def test_does_not_fall_back_to_single_storage_account(self):
+        config = make_blob_config(domain="", container_name="data", path="output")
+        with pytest.raises(KeyError):
+            config.render_template(
+                "{storage_account}/{container_name}",
+                storage_account_names={"finance": "financeartifacts"},
+            )
 
     def test_does_not_fall_back_when_multiple_accounts_and_no_match(self):
         config = make_blob_config(domain="", container_name="data", path="output")
