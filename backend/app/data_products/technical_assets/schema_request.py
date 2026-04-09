@@ -15,7 +15,6 @@ class CreateTechnicalAssetRequest(ORMModel):
     namespace: str
     platform_id: UUID
     service_id: UUID
-    status: TechnicalAssetStatus
     configuration: DataOutputConfiguration
     sourceAligned: bool | None = Field(
         default=None,
