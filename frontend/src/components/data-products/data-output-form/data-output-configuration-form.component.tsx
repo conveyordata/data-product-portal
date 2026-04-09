@@ -44,11 +44,6 @@ export function DataOutputConfigurationForm({
     // Auto-populate fields based on technical_mapping and namespace
     useEffect(() => {
         uiMetadataGroups.forEach((field) => {
-            // Handle suffix field
-            if (field.name === 'suffix') {
-                form.setFieldValue(configurationFieldName('suffix'), technical_mapping === 'default' ? namespace : '');
-            }
-
             // Handle fields that should auto-populate from namespace when not source-aligned
             if (field.use_namespace_when_not_source_aligned) {
                 form.setFieldValue(
