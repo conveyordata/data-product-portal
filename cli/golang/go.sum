@@ -65,8 +65,8 @@ github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
 github.com/oapi-codegen/oapi-codegen/v2 v2.6.0 h1:4i+F2cvwBFZeplxCssNdLy3MhNzUD87mI3HnayHZkAU=
 github.com/oapi-codegen/oapi-codegen/v2 v2.6.0/go.mod h1:eWHeJSohQJIINJZzzQriVynfGsnlQVh0UkN2UYYcw4Q=
-github.com/oapi-codegen/runtime v1.3.1 h1:RgDY6J4OGQLbRXhG/Xpt3vSVqYpHQS7hN4m85+5xB9g=
-github.com/oapi-codegen/runtime v1.3.1/go.mod h1:kOdeacKy7t40Rclb1je37ZLFboFxh+YLy0zaPCMibPY=
+github.com/oapi-codegen/runtime v1.4.0 h1:KLOSFOp7UzkbS7Cs1ms6NBEKYr0WmH2wZG0KKbd2er4=
+github.com/oapi-codegen/runtime v1.4.0/go.mod h1:5sw5fxCDmnOzKNYmkVNF8d34kyUeejJEY8HNT2WaPec=
 github.com/oasdiff/yaml v0.0.9 h1:zQOvd2UKoozsSsAknnWoDJlSK4lC0mpmjfDsfqNwX48=
 github.com/oasdiff/yaml v0.0.9/go.mod h1:8lvhgJG4xiKPj3HN5lDow4jZHPlx1i7dIwzkdAo6oAM=
 github.com/oasdiff/yaml3 v0.0.9 h1:rWPrKccrdUm8J0F3sGuU+fuh9+1K/RdJlWF7O/9yw2g=
