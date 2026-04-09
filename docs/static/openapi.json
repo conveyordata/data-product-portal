@@ -14370,9 +14370,6 @@
             "format": "uuid",
             "title": "Service Id"
           },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
           "configuration": {
             "oneOf": [
               {
@@ -14450,7 +14447,6 @@
           "namespace",
           "platform_id",
           "service_id",
-          "status",
           "configuration",
           "tag_ids"
         ],
@@ -14593,9 +14589,6 @@
             "format": "uuid",
             "title": "Service Id"
           },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
           "configuration": {
             "oneOf": [
               {
@@ -14673,7 +14666,6 @@
           "namespace",
           "platform_id",
           "service_id",
-          "status",
           "configuration",
           "tag_ids"
         ],
@@ -22719,13 +22711,6 @@
           "type": {
             "type": "string",
             "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
           }
         },
         "type": "object",

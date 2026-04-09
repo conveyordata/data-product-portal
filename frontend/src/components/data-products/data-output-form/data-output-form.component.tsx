@@ -9,7 +9,7 @@ import { ResourceNameFormItem } from '@/components/resource-name/resource-name-f
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import { TechnicalAssetStatus, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateTechnicalAssetRequest,
     useCreateTechnicalAssetMutation,
@@ -298,12 +298,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
-            <Form.Item<TechnicalAssetsCreateForm>
-                name={'status'}
-                required
-                hidden
-                initialValue={TechnicalAssetStatus.Active}
-            />
             <Form.Item<TechnicalAssetsCreateForm>
                 name={'technical_mapping'}
                 label={t('Technical Mapping')}
