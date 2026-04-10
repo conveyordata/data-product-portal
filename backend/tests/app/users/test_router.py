@@ -4,7 +4,7 @@ from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
-    DATA_OUTPUTS_ENDPOINT,
+    DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
@@ -240,7 +240,8 @@ class TestUsersRouter:
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
         response = client.post(
-            f"{DATA_OUTPUTS_ENDPOINT}/{data_output.id}/dataset/{ds.id}"
+            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, ds.id)}/add",
+            json={"technical_asset_id": f"{data_output.id}"},
         )
         assert response.status_code == 200
         response = client.get("/api/v2/users/current/pending_actions")
