@@ -110,6 +110,7 @@ class DataProductService:
 
         return rolled_up_tags
 
+    @deprecated("Leftover from API v1")
     def get_data_product_old(self, id: UUID) -> DataProductGet:
         data_product = self.db.get(
             DataProductModel,
@@ -164,6 +165,10 @@ class DataProductService:
                 DataProductLifeCycleModel.is_default
             )
         )
+        if not data_product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
+            )
 
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle

@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 OLD_ENDPOINT = "/api/role_assignments/data_product"
 ENDPOINT = "/api/v2/authz/role_assignments/data_product"
-ENDPOINT_DATA_PRODUCT = "/api/data_products"
 ENDPOINT_PENDING_ACTIONS = "/api/pending_actions"
 
 
@@ -673,7 +672,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     @staticmethod
     def delete_data_product(client: TestClient, data_product_id: str):
-        return client.delete(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}")
+        return client.delete(f"/api/v2/data_products/{data_product_id}")
 
     @staticmethod
     def delete_data_product_role_assignment(client: TestClient, assignment_id):
@@ -699,4 +698,4 @@ class TestDataProductRoleAssignmentsRouter:
 
     @staticmethod
     def get_data_product_history(client: TestClient, data_product_id):
-        return client.get(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}/history")
+        return client.get(f"/api/v2/data_products/{data_product_id}/history")

@@ -17,11 +17,6 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.namespace.validation import (
-    NamespaceLengthLimits,
-    NamespaceSuggestion,
-    NamespaceValidation,
-)
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
@@ -29,7 +24,6 @@ from app.data_products.output_ports.data_quality.router import (
     router as data_quality_router,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.query_stats.router import (
     router as query_stats_router,
@@ -37,15 +31,12 @@ from app.data_products.output_ports.query_stats.router import (
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
     DatasetAboutUpdate,
-    DatasetCreate,
     DatasetStatusUpdate,
     DatasetUpdate,
-    DatasetUsageUpdate,
 )
 from app.data_products.output_ports.schema_response import (
     CreateOutputPortResponse,
     DatasetGet,
-    DatasetsGet,
     GetDataProductOutputPortsResponse,
     GetOutputPortResponse,
     UpdateOutputPortResponse,
@@ -60,7 +51,6 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.resource_names.service import ResourceNameService
 from app.users.model import User
 from app.users.notifications.service import NotificationService
 
@@ -104,66 +94,10 @@ def _assign_owner_role_assignments(
 
 
 router = APIRouter(tags=["Data Products - Output ports"])
-old_route = "/datasets"
 route = "/v2/data_products/{data_product_id}/output_ports"
 router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
-
-
-@router.get(f"{old_route}/namespace_suggestion", deprecated=True)
-def get_dataset_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return NamespaceSuggestion(
-        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
-    )
-
-
-@router.get(f"{old_route}/validate_namespace", deprecated=True)
-def validate_dataset_namespace(
-    namespace: str, db: Session = Depends(get_db_session)
-) -> NamespaceValidation:
-    return NamespaceValidation(
-        validity=ResourceNameService(model=OutputPortModel)
-        .validate_resource_name(namespace, db)
-        .validity
-    )
-
-
-@router.get(f"{old_route}/namespace_length_limits", deprecated=True)
-def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
-    return NamespaceLengthLimits(
-        max_length=ResourceNameService.resource_name_length_limits().max_length
-    )
-
-
-@router.get(f"{old_route}/user/{{user_id}}", deprecated=True)
-def get_user_datasets_old(
-    user_id: UUID,  # This is deprecated
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> Sequence[DatasetsGet]:
-    return OutputPortService(db).get_datasets(
-        authenticated_user, check_user_assigned=True
-    )
-
-
-## Also deprecated, let's see if we can remove that inbox or do something useful with it
-@router.get(f"{old_route}/user", deprecated=True)
-def get_user_datasets(
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> Sequence[DatasetsGet]:
-    return OutputPortService(db).get_datasets(
-        authenticated_user, check_user_assigned=True
-    )
-
-
-@router.get(old_route, deprecated=True)
-def get_datasets(
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> Sequence[DatasetsGet]:
-    return OutputPortService(db).get_datasets(user)
 
 
 @router.get(route)
@@ -173,15 +107,6 @@ def get_data_product_output_ports(
     return GetDataProductOutputPortsResponse(
         output_ports=OutputPortService(db).get_output_ports(data_product_id)
     )
-
-
-@router.get(f"{old_route}/{{id}}", deprecated=True)
-def get_dataset(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> DatasetGet:
-    return OutputPortService(db).get_dataset(id, user)
 
 
 @router.get(f"{route}/{{id}}")
@@ -196,59 +121,16 @@ def get_output_port(
     ).convert()
 
 
-@router.get(f"{old_route}/{{id}}/history", deprecated=True)
-def get_event_history_old(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[GetEventHistoryResponseItemOld]:
-    ds = ensure_output_port_exists(id, db)
-    return EventService(db).get_history(ds.id, EventReferenceEntity.DATASET)
-
-
 @router.get(f"{route}/{{id}}/history")
 def get_output_ports_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
-    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
+    # ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
             GetEventHistoryResponseItemOld.model_validate(ds).convert()
-            for ds in EventService(db).get_history(ds.id, EventReferenceEntity.DATASET)
+            for ds in EventService(db).get_history(id, EventReferenceEntity.DATASET)
         ]
-    )
-
-
-@router.post(
-    old_route,
-    responses={
-        200: {
-            "description": "Dataset successfully created",
-            "content": {
-                "application/json": {"example": {"id": "random id of the new dataset"}}
-            },
-        },
-        404: {
-            "description": "Owner not found",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "User email for owner not found"}
-                }
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
-        ),
-    ],
-    deprecated=True,
-)
-def create_dataset_old(
-    dataset: DatasetCreate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> CreateOutputPortResponse:
-    return create_output_port(
-        dataset.data_product_id, dataset.convert(), db, authenticated_user
     )
 
 
@@ -301,30 +183,6 @@ def create_output_port(
 
 
 @router.delete(
-    f"{old_route}/{{id}}",
-    responses={
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
-    ],
-    deprecated=True,
-)
-def remove_dataset_old(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    ds = ensure_output_port_exists(id, db)
-    return remove_output_port(ds.data_product_id, id, db, authenticated_user)
-
-
-@router.delete(
     f"{route}/{{id}}",
     responses={
         404: {
@@ -360,35 +218,6 @@ def remove_output_port(
         dataset_id=dataset.id, event_id=event_id
     )
     RefreshInfrastructureLambda().trigger()
-
-
-@router.put(
-    f"{old_route}/{{id}}",
-    responses={
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def update_dataset(
-    id: UUID,
-    dataset: DatasetUpdate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> UpdateOutputPortResponse:
-    ds = ensure_output_port_exists(id, db)
-    return update_output_port(ds.data_product_id, id, dataset, db, authenticated_user)
 
 
 @router.put(
@@ -435,37 +264,6 @@ def update_output_port(
 
 
 @router.put(
-    f"{old_route}/{{id}}/about",
-    responses={
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def update_dataset_about(
-    id: UUID,
-    dataset: DatasetAboutUpdate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    ds = ensure_output_port_exists(id, db)
-    return update_output_port_about(
-        ds.data_product_id, id, dataset, db, authenticated_user
-    )
-
-
-@router.put(
     f"{route}/{{id}}/about",
     responses={
         404: {
@@ -499,35 +297,6 @@ def update_output_port_about(
             subject_type=EventReferenceEntity.DATASET,
             actor_id=authenticated_user.id,
         )
-    )
-
-
-@router.put(
-    f"{old_route}/{{id}}/status",
-    responses={
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
-        ),
-    ],
-    deprecated=True,
-)
-def update_dataset_status(
-    id: UUID,
-    dataset: DatasetStatusUpdate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    ds = ensure_output_port_exists(id, db)
-    return update_output_port_status(
-        ds.data_product_id, id, dataset, db, authenticated_user
     )
 
 
@@ -566,42 +335,6 @@ def update_output_port_status(
     )
 
 
-@router.put(
-    f"{old_route}/{{id}}/usage",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def update_dataset_usage(
-    id: UUID,
-    usage: DatasetUsageUpdate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    OutputPortService(db).update_dataset_usage(id, usage)
-    EventService(db).create_event(
-        CreateEvent(
-            name=EventType.DATASET_UPDATED,
-            subject_id=id,
-            subject_type=EventReferenceEntity.DATASET,
-            actor_id=authenticated_user.id,
-        )
-    )
-
-
-@router.get(f"{old_route}/{{id}}/graph", deprecated=True)
-def get_graph_data_old(
-    id: UUID, db: Session = Depends(get_db_session), level: int = 3
-) -> Graph:
-    ds = ensure_output_port_exists(id, db)
-    return get_output_port_graph_data(ds.data_product_id, id, db, level)
-
-
 @router.get(f"{route}/{{id}}/graph")
 def get_output_port_graph_data(
     data_product_id: UUID,
@@ -610,28 +343,6 @@ def get_output_port_graph_data(
     level: int = 3,
 ) -> Graph:
     return OutputPortService(db).get_graph_data(id, data_product_id, level)
-
-
-@router.post(
-    f"{old_route}/{{id}}/settings/{{setting_id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
-        ),
-    ],
-    deprecated=True,
-)
-def set_value_for_dataset(
-    id: UUID,
-    setting_id: UUID,
-    value: str,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    ds = ensure_output_port_exists(id, db)
-    return set_value_for_output_port(
-        ds.data_product_id, id, setting_id, value, db, authenticated_user
-    )
 
 
 @router.post(
