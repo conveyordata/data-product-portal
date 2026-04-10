@@ -59,7 +59,9 @@ class TestGlobalRoleAssignmentsRouter:
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
         ds = DatasetFactory()
 
-        delete = client.delete(f"/api/datasets/{ds.id}")
+        delete = client.delete(
+            f"/api/v2/data_products/{ds.data_product_id}/output_ports/{ds.id}"
+        )
         assert delete.status_code == status.HTTP_403_FORBIDDEN
 
         response = client.post(
@@ -69,7 +71,9 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
 
         # User became admin, can delete datasets now
-        delete = client.delete(f"/api/datasets/{ds.id}")
+        delete = client.delete(
+            f"/api/v2/data_products/{ds.data_product_id}/output_ports/{ds.id}"
+        )
         assert delete.status_code == status.HTTP_200_OK
 
     def test_become_admin_not_allowed(self, client: TestClient):
