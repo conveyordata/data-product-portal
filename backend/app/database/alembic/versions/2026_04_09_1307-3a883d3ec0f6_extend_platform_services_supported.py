@@ -56,6 +56,36 @@ def upgrade() -> None:
         },
     )
 
+    op.drop_constraint(
+        "platform_service_configs_service_id_fkey",
+        "platform_service_configs",
+        type_="foreignkey",
+    )
+
+    op.create_foreign_key(
+        "platform_service_configs_service_id_fkey",
+        "platform_service_configs",
+        "platform_services",
+        ["service_id"],
+        ["id"],
+        ondelete="CASCADE",
+    )
+
+    op.drop_constraint(
+        "platform_service_configs_platform_id_fkey",
+        "platform_service_configs",
+        type_="foreignkey",
+    )
+
+    op.create_foreign_key(
+        "platform_service_configs_platform_id_fkey",
+        "platform_service_configs",
+        "platforms",
+        ["platform_id"],
+        ["id"],
+        ondelete="CASCADE",
+    )
+
     session.commit()
 
 
@@ -77,4 +107,32 @@ def downgrade() -> None:
             WHERE name = 'Azure'
             """
         )
+    )
+
+    op.drop_constraint(
+        "platform_service_configs_platform_id_fkey",
+        "platform_service_configs",
+        type_="foreignkey",
+    )
+
+    op.create_foreign_key(
+        "platform_service_configs_platform_id_fkey",
+        "platform_service_configs",
+        "platforms",
+        ["platform_id"],
+        ["id"],
+    )
+
+    op.drop_constraint(
+        "platform_service_configs_service_id_fkey",
+        "platform_service_configs",
+        type_="foreignkey",
+    )
+
+    op.create_foreign_key(
+        "platform_service_configs_service_id_fkey",
+        "platform_service_configs",
+        "platform_services",
+        ["service_id"],
+        ["id"],
     )

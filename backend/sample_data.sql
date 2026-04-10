@@ -109,10 +109,15 @@ begin
 
 
     -- PLATFORMS: the default configuration is added in migrations already.
+    INSERT INTO public.platforms (id, "name") SELECT gen_random_uuid(), 'AWS' WHERE NOT EXISTS (SELECT 1 FROM public.platforms WHERE "name" = 'AWS') returning id into returned_platform_id;
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) SELECT gen_random_uuid(), 'S3', returned_platform_id, '{suffix}/{path}', '{bucket_arn}/{suffix}/{path}/*' WHERE NOT EXISTS (SELECT 1 FROM public.platform_services WHERE "name" = 'S3' AND "platform_id" = returned_platform_id);
     SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'S3' INTO s3_service_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) SELECT gen_random_uuid(), 'Glue', returned_platform_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}' WHERE NOT EXISTS (SELECT 1 FROM public.platform_services WHERE "name" = 'Glue' AND "platform_id" = returned_platform_id);
     SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'Glue' INTO glue_service_id;
+    INSERT INTO public.platforms (id, "name") SELECT gen_random_uuid(), 'Azure' WHERE NOT EXISTS (SELECT 1 FROM public.platforms WHERE "name" = 'Azure') returning id into azure_platform_id;
     SELECT id FROM public.platforms WHERE name = 'Azure' INTO azure_platform_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) SELECT gen_random_uuid(), 'azureblob', azure_platform_id, 'platform_provided_storage_account/{container_name}/{path}', 'https://{storage_account}.blob.core.windows.net/{container_name}/{path}' WHERE NOT EXISTS (SELECT 1 FROM public.platform_services WHERE "name" = 'azureblob' AND "platform_id" = azure_platform_id);
     SELECT id FROM public.platform_services WHERE platform_id = azure_platform_id AND name = 'azureblob' INTO azure_blob_service_id;
 
     -- ...existing platform configuration code...
