@@ -5,7 +5,7 @@ description = "SDK for Data Product Portal"
 authors = [
     {name = "Dataminded"}
 ]
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.13"
 dependencies = [
     # HTTP client used by the generated api_client to make requests
     "httpx>=0.23.0,<0.29.0",
@@ -18,11 +18,16 @@ dependencies = [
 [tool.poetry]
 packages = [{include = "sdk", from = "."}]
 
+[tool.poetry.dependencies]
+python = "^3.13"
+
 [tool.poetry.group.dev.dependencies]
 # Used to regenerate sdk/sdk/api_client/ from the OpenAPI spec
 openapi-python-client = ">=0.21"
+mypy = ">=1.0"
 
 [tool.mypy]
+ignore_missing_imports = true
 # Required so mypy understands @define-generated __init__ signatures from attrs
 plugins = ["attr.mypy_plugin"]
 

@@ -6,7 +6,7 @@ authors = [
     {name = "Pascal Knapen",email = "pascal.knapen@dataminded.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "fastapi (>=0.124.4,<0.125.0)",
     "uvicorn (>=0.38.0,<0.39.0)",
@@ -14,11 +14,25 @@ dependencies = [
     "dpp-sdk"
 ]
 
+[tool.mypy]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# demo/basic/provisioner imports from dpp-sdk's auto-generated api_client.
+# It uses a T TypeVar variable-reuse pattern that mypy cannot follow but is
+# correct at runtime. Suppress errors rather than patching generated files.
+module = "sdk.api_client.*"
+ignore_errors = true
+
 [tool.poetry]
 packages = [{include = "provisioner", from = "."}]
 
 [tool.poetry.dependencies]
+python = "^3.13"
 dpp-sdk = {path = "../../../sdk", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+mypy = ">=1.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

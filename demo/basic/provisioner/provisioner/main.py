@@ -38,7 +38,7 @@ logging.basicConfig(
 )
 
 # get the namespace of the data product
-portal_url = os.environ.get("PROV_DPP_API_URL", "http://localhost:8080")
+portal_url = os.environ.get("PROV_DPP_API_URL", "http://localhost:80801")
 
 # SDK client (no auth needed — demo runs with OIDC_ENABLED=false)
 client = Client(base_url=portal_url)
@@ -393,7 +393,9 @@ logging.info("Route registration complete.")
 @app.get("/")
 def get_root(request: Request):
     """Basic root endpoint for health checks."""
-    logging.debug(f"GET request from {request.client.host}")
+    logging.debug(
+        f"GET request from {request.client.host if request.client else 'unknown'}"
+    )
     return {"status": "ok"}
 
 
@@ -402,7 +404,9 @@ async def post_root(request: Request):
     """
     Main webhook entrypoint. It delegates request handling to the router.
     """
-    logging.info(f"Received POST request from {request.client.host}")
+    logging.info(
+        f"Received POST request from {request.client.host if request.client else 'unknown'}"
+    )
     return await router.do_route(request)
 
 
@@ -412,7 +416,9 @@ async def post_root(request: Request):
 
 @app.put("/")
 def put_root(request: Request):
-    logging.debug(f"PUT request from {request.client.host}")
+    logging.debug(
+        f"PUT request from {request.client.host if request.client else 'unknown'}"
+    )
     return {
         "status": "ok",
         "message": "This endpoint is not actively used for webhook routing.",
@@ -421,7 +427,9 @@ def put_root(request: Request):
 
 @app.delete("/")
 def delete_root(request: Request):
-    logging.debug(f"DELETE request from {request.client.host}")
+    logging.debug(
+        f"DELETE request from {request.client.host if request.client else 'unknown'}"
+    )
     return {
         "status": "ok",
         "message": "This endpoint is not actively used for webhook routing.",
