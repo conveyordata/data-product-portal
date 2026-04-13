@@ -29,7 +29,7 @@ packages = [{include = "provisioner", from = "."}]
 
 [tool.poetry.dependencies]
 python = "^3.13"
-dpp-sdk = {path = "../../../sdk", develop = true}
+dpp-sdk = {path = "../../../sdk", develop = false}
 
 [tool.poetry.group.dev.dependencies]
 mypy = ">=1.0"

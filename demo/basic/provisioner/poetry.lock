@@ -295,7 +295,7 @@ optional = false
 python-versions = "^3.13"
 groups = ["main"]
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 attrs = ">=22.2.0"
@@ -1204,4 +1204,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "81dd2a639f29303f836c64a1b0196814efe749064232d427928d104abc6fddd1"
+content-hash = "02fcf0708dd3aa43d8b89e594dddf56a58f6f3b81426b07e40d91b827db545d2"

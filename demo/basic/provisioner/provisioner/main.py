@@ -252,7 +252,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
     )
 
     # Set technical asset status to active
-    status_result = update_technical_asset_status.sync(
+    status_response = update_technical_asset_status.sync_detailed(
         data_product_id=UUID(data_product_id),
         id=technical_asset_id,
         body=DataOutputStatusUpdate.from_dict(
@@ -261,7 +261,7 @@ def handle_create_data_product(payload: Dict[str, Any]):
         client=client,
     )
 
-    if status_result is None:
+    if status_response.status_code != 200:
         logging.error(
             f"Failed to set technical asset {technical_asset_id} status to active"
         )
@@ -278,10 +278,19 @@ def handle_create_data_product(payload: Dict[str, Any]):
     }
 
 
-def handle_approve_link(link_id: str, payload: Dict[str, Any]):
+def handle_approve_link(
+    data_product_id: str, output_port_id: str, payload: Dict[str, Any]
+):
     """Handler for approving a data product link."""
-    logging.info(f"Approving link {link_id} with payload: {payload}")
-    return {"status": "success", "action": "approve_link", "link_id": link_id}
+    logging.info(
+        f"Approving link for data_product={data_product_id} output_port={output_port_id} with payload: {payload}"
+    )
+    return {
+        "status": "success",
+        "action": "approve_link",
+        "data_product_id": data_product_id,
+        "output_port_id": output_port_id,
+    }
 
 
 def handle_update_data_product(product_id: str, payload: Dict[str, Any]):
@@ -362,7 +371,9 @@ class Router:
                 match = route_pattern.match(url)
                 if match:
                     args = match.groups()
-                    logging.info(f"Matched route: {handler.__name__} with args: {args}")
+                    logging.info(
+                        f"Matched route: {handler.__name__} with args: {args} and payload: {webhook_payload}"
+                    )
                     response = handler(*args, payload=webhook_payload)
                     return response
 
