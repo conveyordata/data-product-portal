@@ -1,3 +1,4 @@
+from .azure_blob.schema import AzureBlobTechnicalAssetConfiguration
 from .conveyor.schema import ConveyorPlugin
 from .databricks.schema import DatabricksTechnicalAssetConfiguration
 from .glue.schema import GlueTechnicalAssetConfiguration
@@ -16,4 +17,5 @@ __all__ = [
     "RedshiftTechnicalAssetConfiguration",
     "SnowflakeTechnicalAssetConfiguration",
     "S3TechnicalAssetConfiguration",
+    "AzureBlobTechnicalAssetConfiguration",
 ]

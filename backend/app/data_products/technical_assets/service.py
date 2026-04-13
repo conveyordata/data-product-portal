@@ -111,7 +111,7 @@ class DataOutputService:
 
         if data_output.technical_mapping == TechnicalMapping.Default:
             data_product = self.db.get(DataProductModel, id)
-            data_output.configuration.validate_configuration(data_product)
+            data_output.configuration.validate_configuration(data_product, self.db)
 
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))

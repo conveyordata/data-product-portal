@@ -320,8 +320,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 isSelected={dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
                                 value={
-                                    platformConfig?.find((config) => config.platform.name === dataPlatform.label)
-                                        ?.platform.id
+                                    platformConfig?.find(
+                                        (config) =>
+                                            config.platform.name.toLowerCase() === dataPlatform.label.toLowerCase(),
+                                    )?.platform.id
                                 }
                             />
                         ))}

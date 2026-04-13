@@ -110,8 +110,6 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
-  input?: any;
-  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -148,6 +146,7 @@ export enum OutputPortAccessType {
   Public = "public",
   Restricted = "restricted",
   Private = "private",
+  Unrestricted = "unrestricted",
 }
 export const {
   useGetInputPortsForOutputPortQuery,

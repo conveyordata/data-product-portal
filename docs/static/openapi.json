@@ -13900,6 +13900,79 @@
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
       },
+      "AzureBlobConfig": {
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "title": "Identifier"
+          },
+          "storage_account_names": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Storage Account Names"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identifier",
+          "storage_account_names"
+        ],
+        "title": "AzureBlobConfig"
+      },
+      "AzureBlobTechnicalAssetConfiguration": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "const": "AzureBlobTechnicalAssetConfiguration",
+            "title": "Configuration Type"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "default": ""
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": ""
+          },
+          "container_name": {
+            "type": "string",
+            "title": "Container Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type",
+          "container_name"
+        ],
+        "title": "AzureBlobTechnicalAssetConfiguration"
+      },
+      "AzureEnvironmentPlatformConfiguration": {
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id"
+          },
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "subscription_id",
+          "region"
+        ],
+        "title": "AzureEnvironmentPlatformConfiguration"
+      },
       "BaseDataOutputDatasetAssociationGet": {
         "properties": {
           "id": {
@@ -14392,12 +14465,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -14528,12 +14605,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -14611,12 +14692,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -14837,12 +14922,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -15009,12 +15098,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -15110,12 +15203,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -15236,12 +15333,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -17144,12 +17245,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -17996,6 +18101,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/PostgreSQLConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/AzureBlobConfig"
                 }
               ]
             },
@@ -18070,6 +18178,9 @@
               },
               {
                 "$ref": "#/components/schemas/DatabricksEnvironmentPlatformConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureEnvironmentPlatformConfiguration"
               }
             ],
             "title": "Config"
@@ -19056,12 +19167,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -20895,12 +21010,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -22790,12 +22909,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -22888,12 +23011,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
