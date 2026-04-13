@@ -45,6 +45,7 @@
         "date-fns": "^4.1.0",
         "dayjs": "^1.11.20",
         "elkjs": "^0.11.1",
+        "esbuild-runner": "^2.2.2",
         "framer-motion": "^12.38.0",
         "i18next": "^26.0.4",
         "i18next-http-backend": "^3.0.4",
