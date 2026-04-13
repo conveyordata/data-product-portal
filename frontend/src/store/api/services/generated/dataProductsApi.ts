@@ -235,8 +235,6 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
-  input?: any;
-  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -389,6 +387,12 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
+export type AzureBlobTechnicalAssetConfiguration = {
+  configuration_type: "AzureBlobTechnicalAssetConfiguration";
+  domain?: string;
+  path?: string;
+  container_name: string;
+};
 export type DatabricksTechnicalAssetConfiguration = {
   configuration_type: "DatabricksTechnicalAssetConfiguration";
   catalog: string;
@@ -458,6 +462,9 @@ export type TechnicalAsset = {
   platform_id: string;
   service_id: string;
   configuration:
+    | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
     | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)

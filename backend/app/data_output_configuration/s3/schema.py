@@ -46,7 +46,7 @@ class S3TechnicalAssetConfiguration(AssetProviderPlugin):
     class Meta:
         orm_model = S3TechnicalAssetConfigurationModel
 
-    def validate_configuration(self, data_product: DataProduct):
+    def validate_configuration(self, data_product: DataProduct, db: Session):
         pass
 
     def on_create(self):
@@ -64,6 +64,11 @@ class S3TechnicalAssetConfiguration(AssetProviderPlugin):
         return get_aws_url(id, db, actor, environment)
 
     def render_template(self, template, **context):
+        """
+        Example template: {bucket_arn}/{suffix}/{path}/*
+        The bucket_arn is extracted based on the bucket names configured in the env platform services config.
+        The bucket name much match with the bucket name persisted for this technical asset configuration.
+        """
         return "/".join(
             [
                 part
@@ -73,6 +78,9 @@ class S3TechnicalAssetConfiguration(AssetProviderPlugin):
         )
 
     def get_configuration(self, configs: list[AWSS3Config]) -> Optional[AWSS3Config]:
+        """
+        Filter the configuration based on the bucket
+        """
         return next(
             (config for config in configs if config.identifier == self.bucket), None
         )

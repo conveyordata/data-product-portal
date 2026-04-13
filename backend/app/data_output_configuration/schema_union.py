@@ -2,6 +2,9 @@ from typing import Annotated, Union
 
 from pydantic import Field
 
+from app.data_output_configuration.azure_blob.schema import (
+    AzureBlobTechnicalAssetConfiguration,
+)
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.databricks.schema import (
     DatabricksTechnicalAssetConfiguration,
@@ -29,6 +32,7 @@ DataOutputs = Union[
     RedshiftTechnicalAssetConfiguration,
     PostgreSQLTechnicalAssetConfiguration,
     OSISemanticModelTechnicalAssetConfiguration,
+    AzureBlobTechnicalAssetConfiguration,
 ]
 
 DataOutputMap = {
@@ -39,6 +43,7 @@ DataOutputMap = {
     DataOutputTypes.RedshiftTechnicalAssetConfiguration: RedshiftTechnicalAssetConfiguration,
     DataOutputTypes.PostgreSQLTechnicalAssetConfiguration: PostgreSQLTechnicalAssetConfiguration,
     DataOutputTypes.OSISemanticModelTechnicalAssetConfiguration: OSISemanticModelTechnicalAssetConfiguration,
+    DataOutputTypes.AzureBlobTechnicalAssetConfiguration: AzureBlobTechnicalAssetConfiguration,
 }
 
 DataOutputConfiguration = Annotated[

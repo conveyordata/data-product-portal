@@ -8,6 +8,9 @@ from app.configuration.environments.platform_configurations.schemas import (
     AWSEnvironmentPlatformConfiguration,
     DatabricksEnvironmentPlatformConfiguration,
 )
+from app.configuration.environments.platform_configurations.schemas.azure_schema import (
+    AzureEnvironmentPlatformConfiguration,
+)
 from app.configuration.environments.schema_response import Environment
 from app.configuration.platforms.schema_response import Platform
 from app.shared.schema import ORMModel
@@ -15,7 +18,9 @@ from app.shared.schema import ORMModel
 
 class EnvironmentPlatformConfigGet(ORMModel):
     config: Union[
-        AWSEnvironmentPlatformConfiguration, DatabricksEnvironmentPlatformConfiguration
+        AWSEnvironmentPlatformConfiguration,
+        DatabricksEnvironmentPlatformConfiguration,
+        AzureEnvironmentPlatformConfiguration,
     ]
 
     @field_validator("config", mode="before")
