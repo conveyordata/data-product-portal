@@ -167,7 +167,7 @@ export type GlueTechnicalAssetConfiguration = {
 export type OsiSemanticModelTechnicalAssetConfiguration = {
   configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
   model_name?: string;
-  file_path?: string;
+  location?: string;
 };
 export type PostgreSqlTechnicalAssetConfiguration = {
   configuration_type: "PostgreSQLTechnicalAssetConfiguration";

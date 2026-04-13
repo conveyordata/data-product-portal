@@ -44,10 +44,7 @@ The following components require regular updates to remain compatible with the c
 
 #### Toil & Maintenance
 
-- **Provisioner Service**: Must be maintained when the Portal's API or webhook payload structures change, particularly the approve-link handler.
-- **OSI Semantic Models**: The `products/*/osi.yml` files must be updated when source schemas or business logic change.
-- **Agent Config Volume**: The `agent_configs` Docker volume is ephemeral. After `docker compose down -v`, re-run `python setup/create_products.py` to regenerate.
-- **SQL Seed Synchronization**: `portal_seed.sql` must stay in sync with the Portal's database schema.
+See [agents/README.md — Toil & Maintenance](agents/README.md#toil--maintenance).
 
 
 # Events documentation

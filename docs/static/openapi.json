@@ -19522,9 +19522,9 @@
             "title": "Model Name",
             "default": ""
           },
-          "file_path": {
+          "location": {
             "type": "string",
-            "title": "File Path",
+            "title": "Location",
             "default": ""
           }
         },

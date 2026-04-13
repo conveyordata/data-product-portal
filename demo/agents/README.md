@@ -177,5 +177,5 @@ The Agno plugin generates a link to `https://os.agno.com/chat?type=agent&id={nam
 
 - **Provisioner Service**: Must be maintained to handle changes in the Portal's API or webhook payload structure. The approve-link handler extracts `consumer_data_product_id` from the webhook response — validate this if the Portal API changes.
 - **OSI Semantic Models**: The `products/*/osi.yml` files are static. Update them when the underlying schema changes or when business logic evolves.
-- **Agent Config Volume**: The `agent_configs` Docker volume is ephemeral by default. After a `docker compose down -v`, re-run `python setup/create_products.py` to regenerate.
+- **Agent Config Volume**: The `agent_configs` Docker volume is ephemeral by default. After a `task reset`, re-run `task create-products` to regenerate.
 - **SQL Seed Synchronization**: `portal_seed.sql` must stay in sync with the Portal's database schema. If new required fields are added to core models, update the seed accordingly.

@@ -9,13 +9,10 @@ from agno.os import AgentOS
 from agno.team import Team
 from agno.team.mode import TeamMode
 from agno.tools.postgres import PostgresTools
-from agno.skills import Skills, LocalSkills
 from agno.tools.file import FileTools
 
 yaml_dir = os.environ.get("AGENT_CONFIGS_PATH", "/agent_configs")
-skill_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "skills", "postgres-semantic")
-)
+model_id = os.environ.get("AGENT_MODEL_ID", "claude-sonnet-4-5")
 
 
 def build_instructions(config: dict) -> str:
@@ -66,7 +63,7 @@ def make_admin_agent() -> Agent:
             "You are a database assistant with full admin access to the PostgreSQL database. "
             "Use postgres tools to answer questions about any table or schema."
         ),
-        model=Claude(id="claude-sonnet-4-5", cache_system_prompt=True),
+        model=Claude(id=model_id, cache_system_prompt=True),
         tools=[
             PostgresTools(
                 host=os.environ.get("PROV_DEMO_DB_HOST", "postgresql-demo"),
@@ -93,7 +90,7 @@ def make_fallback_agent() -> Agent:
             "Data product agents are provisioned automatically when data products are created in the portal. "
             "If no data product agents are available yet, let the user know they should run `task create-products` first."
         ),
-        model=Claude(id="claude-sonnet-4-5", cache_system_prompt=True),
+        model=Claude(id=model_id, cache_system_prompt=True),
         markdown=True,
     )
 
@@ -119,8 +116,7 @@ def load_dynamic_agents():
             name=config["name"],
             description=config.get("description", ""),
             instructions=build_instructions(config),
-            model=Claude(id="claude-sonnet-4-5", cache_system_prompt=True),
-            skills=Skills(loaders=[LocalSkills(os.path.abspath(skill_path))]),
+            model=Claude(id=model_id, cache_system_prompt=True),
             tools=[
                 PostgresTools(
                     host=postgres_cfg.get("host", "localhost"),
@@ -151,7 +147,7 @@ def make_data_team(agents: list[Agent]) -> Team:
             "Routes questions to the right specialist and synthesises cross-domain answers."
         ),
         mode=TeamMode.route,
-        model=Claude(id="claude-sonnet-4-5"),
+        model=Claude(id=model_id),
         members=agents,
         instructions=(
             "You are the SwiftGear Data Team coordinator. "
