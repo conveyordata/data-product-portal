@@ -27,7 +27,6 @@ if TYPE_CHECKING:
 OLD_ENDPOINT = "/api/role_assignments/data_product"
 ENDPOINT = "/api/v2/authz/role_assignments/data_product"
 ENDPOINT_DATA_PRODUCT = "/api/data_products"
-ENDPOINT_PENDING_ACTIONS = "/api/pending_actions"
 
 
 class TestDataProductRoleAssignmentsRouter:
@@ -558,18 +557,6 @@ class TestDataProductRoleAssignmentsRouter:
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history) == 1
 
-    def test_get_pending_actions_no_action(self, client: TestClient):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        data_product: DataProduct = DataProductFactory()
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        DataProductRoleAssignmentFactory(
-            data_product_id=data_product.id,
-            user_id=user.id,
-            role_id=role.id,
-        )
-        response = client.get(f"{ENDPOINT_PENDING_ACTIONS}")
-        assert response.json() == []
-
     def test_request_data_product_role_assignment_with_accept_permission(
         self, client: TestClient
     ):
@@ -599,9 +586,9 @@ class TestDataProductRoleAssignmentsRouter:
         )
         assert response.status_code == 200
 
-        response = client.get(f"{ENDPOINT_PENDING_ACTIONS}")
+        response = client.get("/api/v2/users/current/pending_actions")
         assert response.status_code == 200
-        assert len(response.json()) == 0
+        assert len(response.json()["pending_actions"]) == 0
         response = client.get(f"{OLD_ENDPOINT}")
         assert response.status_code == 200
         data = response.json()
