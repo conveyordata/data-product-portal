@@ -10,6 +10,8 @@ import { removeDatasetFromCart } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 
+const { Title, Paragraph } = Typography;
+
 type CartOverviewItemProps = {
     outputPort: SearchOutputPortsResponseItem;
     overlapping?: boolean;
@@ -121,39 +123,51 @@ export const CartOverview = ({
     };
 
     return (
-        <Card title={<Typography.Title level={3}>{t('Checkout summary')}</Typography.Title>}>
+        <Card
+            title={<Title level={3}>{t('Checkout summary')}</Title>}
+            styles={{
+                title: { paddingTop: 16 },
+                body: { paddingTop: 0 },
+                header: {
+                    borderBottom: 'none',
+                },
+            }}
+        >
+            <Paragraph>{t('Confirm your selected Output Ports.')}</Paragraph>
             <List
                 footer={
-                    <Flex justify={'flex-end'}>
+                    <Flex justify="flex-end">
                         {t('{{count}} Output Ports', {
                             count: cartOutputPorts?.length || 0,
                         })}
                     </Flex>
                 }
-                style={{ width: '100%' }}
+                grid={{ column: 1 }}
                 loading={loading}
                 dataSource={cartOutputPorts}
                 locale={{ emptyText: t('No Output Ports in cart, go to the Marketplace to add new Output Ports') }}
                 rowKey={(ds) => ds.id}
                 renderItem={(dataset) => (
                     <List.Item>
-                        <Flex justify="space-between" align="start">
-                            <CartOverviewItem
-                                outputPort={dataset}
-                                overlapping={overlappingDatasetIds?.includes(dataset.id)}
-                                selectedDataProductId={selectedDataProductId}
-                            />
-                            <Button
-                                type={'text'}
-                                icon={<DeleteOutlined />}
-                                danger
-                                style={{ marginLeft: 'auto' }}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    removeFromCart(dataset.id);
-                                }}
-                            />
-                        </Flex>
+                        <Card>
+                            <Flex justify="space-between" align="start">
+                                <CartOverviewItem
+                                    outputPort={dataset}
+                                    overlapping={overlappingDatasetIds?.includes(dataset.id)}
+                                    selectedDataProductId={selectedDataProductId}
+                                />
+                                <Button
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    danger
+                                    style={{ marginLeft: 'auto' }}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        removeFromCart(dataset.id);
+                                    }}
+                                />
+                            </Flex>
+                        </Card>
                     </List.Item>
                 )}
             />

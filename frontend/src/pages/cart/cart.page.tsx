@@ -16,13 +16,14 @@ import {
     Flex,
     Form,
     type FormProps,
+    Input,
     Row,
     Select,
     Skeleton,
+    Steps,
     Typography,
     theme,
 } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,6 +47,11 @@ import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slic
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 
+type CartFormData = {
+    dataProductId?: string;
+    justification?: string;
+};
+
 const cartFormDataStorageKey = 'cart-form-data';
 
 function Cart() {
@@ -61,7 +67,6 @@ function Cart() {
             {
                 title: (
                     <>
-                        {' '}
                         <ShopOutlined /> {t('Marketplace')}
                     </>
                 ),
@@ -94,12 +99,10 @@ function Cart() {
         useGetDataProductsQuery(currentUser?.id, {
             skip: currentUser === null || !currentUser?.id,
         });
-    const [form] = Form.useForm<CartFormData>();
 
-    type CartFormData = {
-        dataProductId?: string;
-        justification?: string;
-    };
+    const [form] = Form.useForm<CartFormData>();
+    const selectedDataProductId = Form.useWatch('dataProductId', form);
+
     const initialValues: CartFormData | undefined = useMemo(() => {
         let data: CartFormData = {};
         if (isFetchingUserDataProducts) {
@@ -148,12 +151,20 @@ function Cart() {
                 label: dataProduct?.name,
             };
         }) ?? [];
-    const selectedDataProductId = Form.useWatch('dataProductId', form);
+
     const createNewDataProduct = () => {
         posthog.capture(PosthogEvents.CART_CREATE_DATA_PRODUCT);
         navigate({
             pathname: ApplicationPaths.DataProductNew,
             search: new URLSearchParams({ fromMarketplace: 'true' }).toString(),
+        });
+    };
+
+    const createNewConsumerExploration = () => {
+        posthog.capture(PosthogEvents.CART_CREATE_CONSUMER_EXPLORATION);
+        navigate({
+            pathname: ApplicationPaths.DataProductNew,
+            search: new URLSearchParams({ fromMarketplace: 'true', exploration: 'true' }).toString(),
         });
     };
 
@@ -232,8 +243,11 @@ function Cart() {
         return submitFormIssues;
     }, [overlappingOutputPortIds, selectedProductOutputPortsInCart, t]);
     return (
-        <Row gutter={16}>
-            <Col span={10}>
+        <Row gutter={[0, 48]}>
+            <Col span={20} offset={2}>
+                <Steps current={0} items={[{ title: 'Step 1' }, { title: 'Step 2' }, { title: 'Step 3' }]} />
+            </Col>
+            <Col span={20} offset={2}>
                 <CartOverview
                     loading={fetchingOutputPorts}
                     cartOutputPorts={cartOutputPorts}
@@ -241,14 +255,14 @@ function Cart() {
                     selectedDataProductId={selectedDataProductId}
                 />
             </Col>
-            <Col span={14}>
+            <Col span={20} offset={2}>
                 <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>
                     {initialValues === undefined ? (
                         <Skeleton />
                     ) : (
                         <Form<CartFormData>
                             key={initialValues.dataProductId}
-                            layout={'vertical'}
+                            layout="vertical"
                             onFinish={onFinish}
                             form={form}
                             onValuesChange={onValuesChange}
@@ -269,14 +283,22 @@ function Cart() {
                                     }}
                                     popupRender={(menu) => (
                                         <>
-                                            <Button
-                                                type="text"
-                                                icon={<PlusOutlined />}
-                                                style={{ width: '100%' }}
-                                                onClick={createNewDataProduct}
-                                            >
-                                                {t('Create new Data Product')}
-                                            </Button>
+                                            <Flex gap={8} style={{ margin: '4px 8px' }}>
+                                                <Button
+                                                    icon={<PlusOutlined />}
+                                                    style={{ width: '100%' }}
+                                                    onClick={createNewDataProduct}
+                                                >
+                                                    {t('Create new Data Product')}
+                                                </Button>
+                                                <Button
+                                                    icon={<PlusOutlined />}
+                                                    style={{ width: '100%' }}
+                                                    onClick={createNewConsumerExploration}
+                                                >
+                                                    {t('Create new Consumer Exploration')}
+                                                </Button>
+                                            </Flex>
                                             <Divider style={{ margin: '8px 0' }} />
                                             {menu}
                                         </>
@@ -308,7 +330,7 @@ function Cart() {
                                     },
                                 ]}
                             >
-                                <TextArea
+                                <Input.TextArea
                                     rows={4}
                                     placeholder={t('Explain why you need access to these Output Ports')}
                                 />

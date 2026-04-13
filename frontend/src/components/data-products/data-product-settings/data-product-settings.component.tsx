@@ -1,5 +1,4 @@
-import { Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { Flex, Form, type FormProps, Input, Select, Switch, Typography } from 'antd';
 import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -204,7 +203,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                             label={setting.name}
                             tooltip={setting.tooltip}
                         >
-                            <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                            <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
                         </Form.Item>
                     );
                 default:

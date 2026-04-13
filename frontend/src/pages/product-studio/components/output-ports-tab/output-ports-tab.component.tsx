@@ -1,7 +1,6 @@
 import { DeploymentUnitOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
+import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table, Typography } from 'antd';
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +19,8 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createOutputPortPath } from '@/types/navigation.ts';
 import styles from './output-ports-tab.module.scss';
 import { getOutputPortTableColumns } from './output-ports-table-columns';
+
+const { Paragraph } = Typography;
 
 function filterOutputPorts(outputPorts: SearchOutputPortsResponseItem[], searchTerm?: string) {
     if (!searchTerm) {

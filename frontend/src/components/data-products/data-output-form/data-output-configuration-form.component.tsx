@@ -41,7 +41,7 @@ export function DataOutputConfigurationForm({
         watchedFields[field.name] = (allFormValues.configuration as any)?.[field.name];
     }
 
-    // Auto-populate fields based on technical_mapping and namespace
+    // Autopopulate fields based on technical_mapping and namespace
     useEffect(() => {
         uiMetadataGroups.forEach((field) => {
             // Handle fields that should auto-populate from namespace when not source-aligned

@@ -1,7 +1,6 @@
 import { ToolOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
+import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table, Typography } from 'antd';
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +18,8 @@ import {
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import styles from './data-products-tab.module.scss';
+
+const { Paragraph } = Typography;
 
 function filterDataProducts(dataProducts: GetDataProductsResponseItem[], searchTerm?: string) {
     if (!searchTerm) {

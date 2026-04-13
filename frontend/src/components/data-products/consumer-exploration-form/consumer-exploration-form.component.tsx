@@ -2,19 +2,15 @@ import { ProductOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space, Typography } from 'antd';
 import { parseAsBoolean, useQueryState } from 'nuqs';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { useDebouncedCallback } from 'use-debounce';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
-import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
-import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
-import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
@@ -25,21 +21,13 @@ import {
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import {
-    ResourceNameModel,
-    useLazySanitizeResourceNameQuery,
-    useLazyValidateResourceNameQuery,
-    useResourceNameConstraintsQuery,
-} from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-import styles from './data-product-form.module.scss';
-
-const { TextArea } = Input;
+import styles from './consumer-exploration-form.module.scss';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -47,7 +35,7 @@ type Props = {
     debounce?: number;
 };
 
-export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) {
+export function ConsumerExplorationForm({ mode, dataProductId }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
     const navigate = useNavigate();
@@ -59,22 +47,13 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
         dataProductId || '',
         { skip: mode === 'create' || !dataProductId || isDeleted || isDeleting },
     );
-    const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
-    const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
-        useGetDataProductsTypesQuery();
     const { data: { users: dataProductOwners = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
-    const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
-    const [validateResourceName] = useLazyValidateResourceNameQuery();
-    const { data: constraints } = useResourceNameConstraintsQuery();
 
     const [form] = Form.useForm<DataProductCreate>();
-    const dataProductNameValue = Form.useWatch('name', form);
-
-    const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
 
     const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const { data: update_access } = useCheckAccessQuery(
@@ -97,19 +76,8 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
     const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
     const canSubmit = canCreate || canEdit;
 
-    const isLoading =
-        isCreating ||
-        isUpdating ||
-        isCreating ||
-        isUpdating ||
-        isFetchingInitialValues ||
-        isFetchingTags ||
-        isFetchingLifecycles;
+    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
-    const dataProductTypeSelectOptions = dataProductTypes?.data_product_types.map((type) => ({
-        label: type.name,
-        value: type.id,
-    }));
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
@@ -144,7 +112,7 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                     ),
                     path: ApplicationPaths.Studio,
                 },
-                { title: t('New Data Product') },
+                { title: t('New Consumer Exploration') },
             ]);
         }
     }, [setBreadcrumbs, t, dataProductId, mode, currentDataProduct?.name]);
@@ -163,7 +131,7 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                     domain_id: values.domain_id,
                 };
                 const response = await createDataProduct(request).unwrap();
-                dispatchMessage({ content: t('Data Product created successfully'), type: 'success' });
+                dispatchMessage({ content: t('Consumer Exploration created successfully'), type: 'success' });
                 posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED);
 
                 if (fromMarketplace) {
@@ -176,7 +144,10 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                 }
             } else if (mode === 'edit' && dataProductId) {
                 if (!canEdit) {
-                    dispatchMessage({ content: t('You are not allowed to edit this Data Product'), type: 'error' });
+                    dispatchMessage({
+                        content: t('You are not allowed to edit this Consumer Exploration'),
+                        type: 'error',
+                    });
                     return;
                 }
 
@@ -194,14 +165,16 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                     id: dataProductId,
                 }).unwrap();
 
-                dispatchMessage({ content: t('Data Product updated successfully'), type: 'success' });
+                dispatchMessage({ content: t('Consumer Exploration updated successfully'), type: 'success' });
                 navigate(createDataProductIdPath(response.id));
             }
 
             form.resetFields();
         } catch (_e) {
             const errorMessage =
-                mode === 'edit' ? t('Failed to update Data Product') : t('Failed to create Data Product');
+                mode === 'edit'
+                    ? t('Failed to update Consumer Exploration')
+                    : t('Failed to create Consumer Exploration');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -223,44 +196,16 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
         if (canDelete && currentDataProduct) {
             try {
                 await deleteDataProduct(currentDataProduct?.id).unwrap();
-                dispatchMessage({ content: t('Data Product deleted successfully'), type: 'success' });
+                dispatchMessage({ content: t('Consumer Exploration deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Studio);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to delete Data Product, please try again later'),
+                    content: t('Failed to delete Consumer Exploration, please try again later'),
                     type: 'error',
                 });
             }
         }
     };
-
-    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), debounce);
-
-    useEffect(() => {
-        if (mode === 'create' && !canEditResourceName) {
-            form.setFields([
-                {
-                    name: 'namespace',
-                    validating: true,
-                    errors: [],
-                },
-            ]);
-            fetchResourceNameDebounced(dataProductNameValue ?? '');
-        }
-    }, [form, mode, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
-
-    useEffect(() => {
-        if (mode === 'create' && !canEditResourceName) {
-            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
-            form.validateFields(['namespace']);
-        }
-    }, [form, mode, canEditResourceName, sanitizedResourceName]);
-
-    const resourceNameValidationCallback = useCallback(
-        (resourceName: string) =>
-            validateResourceName({ resourceName: resourceName, model: ResourceNameModel.DataProduct }).unwrap(),
-        [validateResourceName],
-    );
 
     const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
 
@@ -270,8 +215,6 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
 
     const initialValues = {
         name: currentDataProduct?.name,
-        namespace: currentDataProduct?.namespace,
-        description: currentDataProduct?.description,
         type_id: currentDataProduct?.type.id,
         lifecycle_id: currentDataProduct?.lifecycle?.id,
         domain_id: currentDataProduct?.domain.id,
@@ -286,7 +229,7 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                     {currentDataProduct?.name}
                 </Typography.Title>
             )}
-            {mode === 'create' && <Typography.Title level={3}>{t('New Data Product')}</Typography.Title>}
+            {mode === 'create' && <Typography.Title level={3}>{t('New Consumer Exploration')}</Typography.Title>}
             <Form<DataProductCreate>
                 form={form}
                 labelWrap
@@ -303,81 +246,34 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                 <Form.Item<DataProductCreate>
                     name={'name'}
                     label={t('Name')}
-                    tooltip={t('The name of your Data Product')}
+                    tooltip={t('The name of your Consumer Exploration')}
                     rules={[
                         {
                             required: true,
-                            message: t('Please provide the name of the Data Product'),
+                            message: t('Please provide the name of the Consumer Exploration'),
                         },
                     ]}
                 >
                     <Input />
                 </Form.Item>
-                <ResourceNameFormItem
-                    form={form}
-                    tooltip={t('The namespace of the Data Product')}
-                    max_length={constraints?.max_length}
-                    editToggleDisabled={mode === 'edit'}
-                    canEditResourceName={canEditResourceName}
-                    toggleCanEditResourceName={() => setCanEditResourceName((prev) => !prev)}
-                    validationRequired={mode === 'create'}
-                    validateResourceName={resourceNameValidationCallback}
-                />
                 <Form.Item<DataProductCreate>
                     name={'owners'}
                     label={t('Owners')}
-                    tooltip={t('The owners of the Data Product')}
+                    tooltip={t('The owners of the Consumer Exploration')}
                     rules={[
                         {
                             required: true,
-                            message: t('Please select at least one owner for the Data Product'),
+                            message: t('Please select at least one owner for the Consumer Exploration'),
                         },
                     ]}
                 >
                     <Select
                         loading={isFetchingUsers}
-                        mode={'multiple'}
+                        mode="multiple"
                         options={userSelectOptions}
                         showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                         disabled={mode !== 'create'}
                         tokenSeparators={[',']}
-                    />
-                </Form.Item>
-                <Form.Item<DataProductCreate>
-                    name={'type_id'}
-                    label={t('Type')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please select the type of the Data Product'),
-                        },
-                    ]}
-                >
-                    <Select
-                        loading={isFetchingDataProductTypes}
-                        allowClear
-                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                        options={dataProductTypeSelectOptions}
-                    />
-                </Form.Item>
-                <Form.Item<DataProductCreate>
-                    name={'lifecycle_id'}
-                    label={t('Status')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please select the status of the Data Product'),
-                        },
-                    ]}
-                >
-                    <Select
-                        loading={isFetchingLifecycles}
-                        options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
-                            value: lifecycle.id,
-                            label: lifecycle.name,
-                        }))}
-                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                        allowClear
                     />
                 </Form.Item>
                 <Form.Item<DataProductCreate>
@@ -386,7 +282,7 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                     rules={[
                         {
                             required: true,
-                            message: t('Please select the domain of the Data Product'),
+                            message: t('Please select the domain of the Consumer Exploration'),
                         },
                     ]}
                 >
@@ -400,37 +296,18 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                 <Form.Item<DataProductCreate> name={'tag_ids'} label={t('Tags')}>
                     <Select
                         tokenSeparators={[',']}
-                        placeholder={t('Select Data Product tags')}
+                        placeholder={t('Select Consumer Exploration tags')}
                         mode={'multiple'}
                         options={tagSelectOptions}
                         showSearch={{ filterOption: selectFilterOptionByLabel }}
                     />
-                </Form.Item>
-                <Form.Item<DataProductCreate>
-                    name={'description'}
-                    label={t('Description')}
-                    tooltip={t('A description for the Data Product')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please provide a description for the Data Product'),
-                        },
-                        {
-                            max: MAX_DESCRIPTION_INPUT_LENGTH,
-                            message: t('Description must be less than {{length}} characters', {
-                                length: MAX_DESCRIPTION_INPUT_LENGTH,
-                            }),
-                        },
-                    ]}
-                >
-                    <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
                 </Form.Item>
                 <Form.Item>
                     <Row>
                         {mode !== 'create' && (
                             <Col>
                                 <Popconfirm
-                                    title={t('Are you sure you want to delete this Data Product?')}
+                                    title={t('Are you sure you want to delete this Consumer Exploration?')}
                                     onConfirm={handleDeleteDataProduct}
                                     okText={t('Yes')}
                                     cancelText={t('No')}

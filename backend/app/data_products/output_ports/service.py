@@ -1,4 +1,5 @@
 import copy
+import os
 from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
@@ -78,7 +79,10 @@ class OutputPortService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
-        self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
+        if os.getenv("FASTEMBED_CACHE_PATH"):
+            self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
+        else:
+            self.embedding_model = None
 
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
@@ -136,10 +140,14 @@ class OutputPortService:
         """
         ordered_by = DatasetModel.name.asc()
         if query:
-            query_embedding = self.embedding_model.embed(query)
-            semantic_score = (
-                1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
-            ).label("semantic_score")
+            if self.embedding_model is not None:
+                query_embedding = self.embedding_model.embed(query)
+                semantic_score = (
+                    1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
+                ).label("semantic_score")
+            else:
+                semantic_score = 0
+
             ts_query = func.websearch_to_tsquery("english", query)
             keyword_score = func.coalesce(
                 func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32), 0
@@ -209,6 +217,9 @@ class OutputPortService:
     def _recalculate_embeddings_and_search_vector(
         self, datasets: Sequence[DatasetModel]
     ) -> None:
+        if self.embedding_model is None:
+            return
+
         embeddings = self.embedding_model.embed(
             DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
         )

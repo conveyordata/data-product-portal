@@ -1,5 +1,4 @@
 import { Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
 import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
@@ -287,7 +286,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     },
                 ]}
             >
-                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item<TechnicalAssetsCreateForm> name={'tag_ids'} label={t('Tags')} initialValue={[]}>
                 <Select
