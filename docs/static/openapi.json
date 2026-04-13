@@ -4032,48 +4032,6 @@
         }
       }
     },
-    "/api/data_output_dataset_links/approve/{id}": {
-      "post": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Approve Data Output Link",
-        "operationId": "approve_data_output_link_api_data_output_dataset_links_approve__id__post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/approve_link_request": {
       "post": {
         "tags": [
@@ -4113,48 +4071,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_output_dataset_links/deny/{id}": {
-      "post": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Deny Data Output Link",
-        "operationId": "deny_data_output_link_api_data_output_dataset_links_deny__id__post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -4236,76 +4152,6 @@
             }
           }
         }
-      }
-    },
-    "/api/data_output_dataset_links/remove/{id}": {
-      "post": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Remove Data Output Link",
-        "description": "**DEPRECATED:** Please use unlink_output_port_from_technical_asset instead",
-        "operationId": "remove_data_output_link_api_data_output_dataset_links_remove__id__post",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_output_dataset_links/actions": {
-      "get": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Get User Pending Actions",
-        "description": "**DEPRECATED:** Please use get user actions globally instead",
-        "operationId": "get_user_pending_actions_api_data_output_dataset_links_actions_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/DataOutputDatasetPendingAction"
-                  },
-                  "type": "array",
-                  "title": "Response Get User Pending Actions Api Data Output Dataset Links Actions Get"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
       }
     },
     "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/add": {
