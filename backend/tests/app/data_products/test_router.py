@@ -162,7 +162,7 @@ class TestDataProductsRouter:
     def test_get_data_products(self, client):
         data_product = DataProductFactory()
         response = client.get(ENDPOINT)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert len(data) == 1
         assert data["data_products"][0]["id"] == str(data_product.id)

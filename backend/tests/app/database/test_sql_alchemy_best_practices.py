@@ -12,7 +12,6 @@ ignore_list = {
     "Platform": ["services"],
     "User": ["data_product_roles", "dataset_roles"],
     "Dataset": ["tags"],
-    "DataProduct": ["tags"],
 }
 
 
