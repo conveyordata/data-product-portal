@@ -162,11 +162,6 @@ def root():
     return {"message": "Hello World"}
 
 
-@app.get("/api/version", deprecated=True, tags=["Version"])
-def get_version_old():
-    return {"version": app.version}
-
-
 class VersionResponse(ORMModel):
     version: str
 

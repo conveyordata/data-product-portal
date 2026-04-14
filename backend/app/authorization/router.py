@@ -8,7 +8,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(tags=["Authorization"], prefix="/v2/authz")
 
 
 @router.get(
@@ -57,9 +57,3 @@ def is_admin(
         is_admin=authorizer.has_admin_role(user_id=user.id),
         time=user.admin_expiry.isoformat() if user.admin_expiry else None,
     )
-
-
-_router = router
-router = APIRouter(tags=["Authorization"])
-router.include_router(_router, prefix="/authz", deprecated=True)
-router.include_router(_router, prefix="/v2/authz")

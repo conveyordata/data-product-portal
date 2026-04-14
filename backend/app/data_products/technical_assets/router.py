@@ -145,7 +145,6 @@ def remove_technical_asset(
             )
         ),
     ],
-    deprecated=True,
 )
 def update_technical_asset(
     data_product_id: UUID,

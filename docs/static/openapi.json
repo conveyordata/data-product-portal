@@ -10,111 +10,6 @@
     "version": "0.5.1"
   },
   "paths": {
-    "/api/authz/access/{action}": {
-      "get": {
-        "tags": [
-          "Authorization"
-        ],
-        "summary": "Check Access",
-        "description": "Allows the requesting user to check whether an access check will fail or succeed.\nUseful to conditionally disable parts of the UI that are known to be inaccessible.",
-        "operationId": "check_access_api_authz_access__action__get",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "action",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/AuthorizationAction"
-            }
-          },
-          {
-            "name": "resource",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Resource"
-            }
-          },
-          {
-            "name": "domain",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Domain"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Access check result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccessResponse",
-                  "type": "object",
-                  "properties": {
-                    "access": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/authz/admin": {
-      "get": {
-        "tags": [
-          "Authorization"
-        ],
-        "summary": "Is Admin",
-        "operationId": "is_admin_api_authz_admin_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IsAdminResponse"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/api/v2/authz/access/{action}": {
       "get": {
         "tags": [
@@ -3590,7 +3485,6 @@
         ],
         "summary": "Update Technical Asset",
         "operationId": "update_technical_asset",
-        "deprecated": true,
         "parameters": [
           {
             "name": "data_product_id",
@@ -7468,68 +7362,6 @@
         }
       }
     },
-    "/api/notifications/all": {
-      "delete": {
-        "tags": [
-          "Users - Notifications"
-        ],
-        "summary": "Remove All User Notifications",
-        "operationId": "remove_all_user_notifications_api_notifications_all_delete",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/notifications/{id}": {
-      "delete": {
-        "tags": [
-          "Users - Notifications"
-        ],
-        "summary": "Remove User Notification",
-        "operationId": "remove_user_notification_api_notifications__id__delete",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/users/current/notifications/all": {
       "delete": {
         "tags": [
@@ -7588,32 +7420,6 @@
             }
           }
         }
-      }
-    },
-    "/api/notifications": {
-      "get": {
-        "tags": [
-          "Users - Notifications"
-        ],
-        "summary": "Get User Notifications Old",
-        "operationId": "get_user_notifications_old_api_notifications_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationGet"
-                  },
-                  "type": "array",
-                  "title": "Response Get User Notifications Old Api Notifications Get"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
       }
     },
     "/api/v2/users/current/notifications": {
@@ -8130,26 +7936,6 @@
             }
           }
         }
-      }
-    },
-    "/api/version": {
-      "get": {
-        "tags": [
-          "Version"
-        ],
-        "summary": "Get Version Old",
-        "operationId": "get_version_old_api_version_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "deprecated": true
       }
     },
     "/api/v2/version": {
@@ -10741,16 +10527,6 @@
         ],
         "title": "EventEntityType"
       },
-      "EventReferenceEntity": {
-        "type": "string",
-        "enum": [
-          "data_product",
-          "dataset",
-          "data_output",
-          "user"
-        ],
-        "title": "EventReferenceEntity"
-      },
       "FieldDependency": {
         "properties": {
           "field_name": {
@@ -11274,136 +11050,6 @@
           "actor"
         ],
         "title": "GetEventHistoryResponseItem"
-      },
-      "GetEventHistoryResponseItemOld": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "subject_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Subject Id"
-          },
-          "target_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Id"
-          },
-          "subject_type": {
-            "$ref": "#/components/schemas/EventReferenceEntity"
-          },
-          "target_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EventReferenceEntity"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "actor_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Actor Id"
-          },
-          "created_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created On"
-          },
-          "deleted_subject_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Subject Identifier"
-          },
-          "deleted_target_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Target Identifier"
-          },
-          "actor": {
-            "$ref": "#/components/schemas/User"
-          },
-          "data_product": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProduct"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "user": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "dataset": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Dataset"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "data_output": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/app__data_products__technical_assets__schema__TechnicalAsset"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "subject_id",
-          "subject_type",
-          "actor_id",
-          "created_on",
-          "actor"
-        ],
-        "title": "GetEventHistoryResponseItemOld",
-        "deprecated": true
       },
       "GetInputPortsForOutputPortResponse": {
         "properties": {
@@ -12315,40 +11961,6 @@
           "domainNode"
         ],
         "title": "NodeType"
-      },
-      "NotificationGet": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Event Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "event": {
-            "$ref": "#/components/schemas/GetEventHistoryResponseItemOld"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "event_id",
-          "user_id",
-          "event",
-          "user"
-        ],
-        "title": "NotificationGet"
       },
       "OSISemanticModelTechnicalAssetConfiguration": {
         "properties": {
