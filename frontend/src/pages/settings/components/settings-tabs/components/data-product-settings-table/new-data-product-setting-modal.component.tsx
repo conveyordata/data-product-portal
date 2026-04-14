@@ -12,14 +12,14 @@ import {
     DataProductSettingType,
     type DataProductSettingUpdate,
     useCreateDataProductSettingMutation,
-    useGetDataProductSettingsNamespaceLengthLimitsQuery,
-    useLazyGetDataProductSettingsNamespaceSuggestionQuery,
     useUpdateDataProductSettingMutation,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import {
     ResourceNameModel,
     type ResourceNameValidation,
+    useLazySanitizeResourceNameQuery,
     useLazyValidateResourceNameQuery,
+    useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import styles from './data-product-settings-table.module.scss';
@@ -136,9 +136,9 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
     const typeValue = Form.useWatch<DataProductSettingType>('type', form);
     const nameValue = Form.useWatch<string>('name', form);
 
-    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductSettingsNamespaceSuggestionQuery();
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazySanitizeResourceNameQuery();
     const [validateNamespace] = useLazyValidateResourceNameQuery();
-    const { data: namespaceLengthLimits } = useGetDataProductSettingsNamespaceLengthLimitsQuery();
+    const { data: namespaceLengthLimits } = useResourceNameConstraintsQuery();
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const initialValues = useMemo(() => {
@@ -208,7 +208,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
-            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.setFieldValue('namespace', namespaceSuggestion?.resource_name);
             form.validateFields(['namespace']);
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
