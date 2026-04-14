@@ -102,10 +102,12 @@ router.include_router(data_quality_router)
 
 @router.get(route)
 def get_data_product_output_ports(
-    data_product_id: UUID, db: Session = Depends(get_db_session)
+    data_product_id: UUID,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
 ) -> GetDataProductOutputPortsResponse:
     return GetDataProductOutputPortsResponse(
-        output_ports=OutputPortService(db).get_output_ports(data_product_id)
+        output_ports=OutputPortService(db).get_output_ports(data_product_id, user)
     )
 
 
@@ -205,7 +207,7 @@ def remove_output_port(
     dataset = OutputPortService(db).remove_dataset(id, data_product_id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
-    EventService(db).create_event(
+    event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_REMOVED,
             actor_id=authenticated_user.id,
@@ -214,15 +216,6 @@ def remove_output_port(
             deleted_subject_identifier=dataset.name,
             target_id=dataset.data_product_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
-        ),
-    )
-    event_id = EventService(db).create_event(
-        CreateEvent(
-            name=EventType.DATASET_REMOVED,
-            actor_id=authenticated_user.id,
-            subject_id=dataset.id,
-            subject_type=EventReferenceEntity.DATASET,
-            deleted_subject_identifier=dataset.name,
         ),
     )
     NotificationService(db).create_dataset_notifications(

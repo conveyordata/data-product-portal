@@ -527,12 +527,22 @@ class OutputPortService:
 
         return bool(consuming_data_products & user_data_products)
 
-    def get_output_ports(self, data_product_id: Optional[UUID]) -> Sequence[OutputPort]:
+    def get_output_ports(
+        self, data_product_id: Optional[UUID], user: User
+    ) -> Sequence[OutputPort]:
         query = select(DatasetModel)
         if data_product_id is not None:
             ensure_data_product_exists(data_product_id, self.db)
             query = query.filter(DatasetModel.data_product_id == data_product_id)
-        return self.db.scalars(query).unique().all()
+
+        results = self.db.scalars(query).unique().all()
+        visible_candidates: list[DatasetModel] = []
+        for dataset in results:
+            if self.is_visible_to_user(dataset, user):
+                dataset.domain = dataset.data_product.domain
+                visible_candidates.append(dataset)
+
+        return visible_candidates
 
     def get_consuming_data_products(
         self, output_port_id: UUID, data_product_id: UUID

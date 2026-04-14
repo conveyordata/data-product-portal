@@ -592,8 +592,7 @@ class TestDatasetsRouter:
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         response = client.get(ENDPOINT.format(ds.data_product.id))
         assert response.status_code == 200
-        # TODO This logic needs to be checked!
-        assert len(response.json()["output_ports"]) == 1
+        assert len(response.json()["output_ports"]) == 0
 
     def test_get_private_datasets_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -621,10 +620,9 @@ class TestDatasetsRouter:
         )
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
 
-        response = client.get(ENDPOINT.format(dp.id))
+        response = client.get(ENDPOINT.format(ds.data_product_id))
         assert response.status_code == 200
-        # TODO This logic needs to be checked
-        assert len(response.json()["output_ports"]) == 0
+        assert len(response.json()["output_ports"]) == 1
 
     def test_validate_namespace(self, client):
         namespace = "test"
