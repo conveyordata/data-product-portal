@@ -67,6 +67,7 @@ repos:
       language: script
       types: [text]
       files: ^backend\/.*\.py$
+      pass_filenames: false
     - id: local-fe-check
       name: fe check
       entry: bash -c "cd frontend && npm run check:fix"
