@@ -9,11 +9,16 @@ echo "Checking if generated API is up to date..."
 # Run generate-api
 npm run generate-api
 
-# Check if there are any changes in the generated files
-if ! git diff --exit-code src/store/api/services/generated/; then
-    echo "❌ ERROR: Generated API files are out of date!"
-    echo "Please run 'npm run generate-api' in the frontend directory and commit the changes."
+if [[ -n "${CI}" ]]; then
+  if [[ -z "$(git status --porcelain src/store/api/services/generated)" ]];
+  then
+    exit 0
+  else
+    echo "Git is dirty"
+    git status --porcelain src/store/api/services/generated
+    git --no-pager diff
     exit 1
+  fi
 fi
 
 echo "✅ Generated API files are up to date."
