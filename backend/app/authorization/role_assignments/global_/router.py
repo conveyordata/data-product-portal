@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Sequence, Union, cast
+from typing import Literal, Optional, Union, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -26,7 +26,7 @@ from app.database.database import get_db_session
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(prefix="/v2/authz/role_assignments/global")
 
 
 @router.post(
@@ -105,27 +105,7 @@ def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
     return cast("UUID", role_id)
 
 
-_router = router
-router = APIRouter()
-
-old_route = "/role_assignments/global"
-route = "/v2/authz/role_assignments/global"
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
-
-
-@router.get(old_route, deprecated=True)
-def list_assignments_old(
-    user_id: Optional[UUID] = None,
-    role_id: Optional[UUID] = None,
-    db: Session = Depends(get_db_session),
-) -> Sequence[GlobalRoleAssignmentResponse]:
-    return list_global_role_assignments(
-        user_id=user_id, role_id=role_id, db=db
-    ).role_assignments
-
-
-@router.get(route)
+@router.get("")
 def list_global_role_assignments(
     user_id: Optional[UUID] = None,
     role_id: Optional[UUID] = None,
@@ -138,26 +118,8 @@ def list_global_role_assignments(
     )
 
 
-@router.patch(
-    f"{old_route}/{{id}}/decide",
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
-        )
-    ],
-    deprecated=True,
-)
-def decide_assignment_old(
-    id: UUID,
-    request: DecideGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> GlobalRoleAssignmentResponse:
-    return decide_global_role_assignment(id, request, db, user)
-
-
 @router.post(
-    f"{route}/{{id}}/decide",
+    "/{id}/decide",
     dependencies=[
         Depends(
             Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
@@ -189,26 +151,8 @@ def decide_global_role_assignment(
     return assignment
 
 
-@router.patch(
-    f"{old_route}/{{id}}/role",
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
-        )
-    ],
-    deprecated=True,
-)
-def modify_assigned_role_old(
-    id: UUID,
-    request: ModifyGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> GlobalRoleAssignmentResponse:
-    return modify_global_role_assignment(id, request, db, user)
-
-
 @router.put(
-    f"{route}/{{id}}/role",
+    "/{id}/role",
     dependencies=[
         Depends(
             Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)

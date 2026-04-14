@@ -8,14 +8,12 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.role_assignments.output_port.schema import (
     CreateOutputPortRoleAssignment,
-    CreateOutputPortRoleAssignmentOld,
     DecideOutputPortRoleAssignment,
     DeleteOutputPortRoleAssignmentResponse,
     ListOutputPortRoleAssignmentsResponse,
     ModifyOutputPortRoleAssignment,
     OutputPortRoleAssignmentResponse,
     RequestOutputPortRoleAssignment,
-    RoleAssignmentOld,
     RoleAssignmentResponseOld,
     UpdateOutputPortRoleAssignment,
 )
@@ -34,7 +32,7 @@ from app.events.service import EventService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(prefix="/v2/authz/role_assignments/output_port")
 
 
 @router.delete(
@@ -80,28 +78,6 @@ def delete_output_port_role_assignment(
     )
 
 
-_router = router
-router = APIRouter()
-
-old_route = "/role_assignments/dataset"
-route = "/v2/authz/role_assignments/output_port"
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
-
-
-@router.get(old_route, deprecated=True)
-def list_assignments_old(
-    dataset_id: Optional[UUID] = None,
-    user_id: Optional[UUID] = None,
-    role_id: Optional[UUID] = None,
-    decision: Optional[DecisionStatus] = None,
-    db: Session = Depends(get_db_session),
-) -> Sequence[RoleAssignmentResponseOld]:
-    return RoleAssignmentService(db).list_assignments(
-        dataset_id=dataset_id, user_id=user_id, role_id=role_id, decision=decision
-    )
-
-
 def convert_to_role_assignment(
     assignment: RoleAssignmentResponseOld,
 ) -> OutputPortRoleAssignmentResponse:
@@ -118,7 +94,7 @@ def convert_to_role_assignment(
     )
 
 
-@router.get(route)
+@router.get("")
 def list_output_port_role_assignments(
     output_port_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
@@ -140,7 +116,7 @@ def list_output_port_role_assignments(
 
 
 @router.post(
-    f"{old_route}/request/{{id}}",
+    "/request",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -148,16 +124,14 @@ def list_output_port_role_assignments(
             )
         )
     ],
-    deprecated=True,
 )
-def request_assignment_old(
-    id: UUID,
-    request: CreateOutputPortRoleAssignmentOld,
+def request_output_port_role_assignment(
+    request: RequestOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentOld:
+) -> OutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).create_assignment(
-        dataset_id=id,
+        dataset_id=request.output_port_id,
         role_id=request.role_id,
         user_id=request.user_id,
         actor=authenticated_user,
@@ -173,57 +147,29 @@ def request_assignment_old(
             actor_id=authenticated_user.id,
         )
     )
-
-    return assignment
+    return convert_to_role_assignment(assignment)
 
 
 @router.post(
-    f"{route}/request",
+    "",
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS, resolver=EmptyResolver
+                Action.OUTPUT_PORT__CREATE_USER,
+                resolver=DatasetResolver,
+                object_id="output_port_id",
             )
         )
     ],
 )
-def request_output_port_role_assignment(
-    request: RequestOutputPortRoleAssignment,
+def create_output_port_role_assignment(
+    request: CreateOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
-    return convert_to_role_assignment(
-        request_assignment_old(
-            request.output_port_id,
-            CreateOutputPortRoleAssignmentOld(
-                user_id=request.user_id, role_id=request.role_id
-            ),
-            db,
-            authenticated_user,
-        )
-    )
-
-
-@router.post(
-    f"{old_route}/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__CREATE_USER, resolver=DatasetResolver
-            )
-        )
-    ],
-    deprecated=True,
-)
-def create_assignment_old(
-    id: UUID,
-    request: CreateOutputPortRoleAssignmentOld,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponseOld:
     service = RoleAssignmentService(db)
     role_assignment = service.create_assignment(
-        dataset_id=id,
+        dataset_id=request.output_port_id,
         user_id=request.user_id,
         role_id=request.role_id,
         actor=authenticated_user,
@@ -260,40 +206,11 @@ def create_assignment_old(
         )
         DatasetAuthAssignment(assignment).add()
 
-    return role_assignment
+    return convert_to_role_assignment(role_assignment)
 
 
 @router.post(
-    f"{route}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__CREATE_USER,
-                resolver=DatasetResolver,
-                object_id="output_port_id",
-            )
-        )
-    ],
-)
-def create_output_port_role_assignment(
-    request: CreateOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> OutputPortRoleAssignmentResponse:
-    return convert_to_role_assignment(
-        create_assignment_old(
-            request.output_port_id,
-            CreateOutputPortRoleAssignmentOld(
-                user_id=request.user_id, role_id=request.role_id
-            ),
-            db,
-            authenticated_user,
-        )
-    )
-
-
-@router.patch(
-    f"{old_route}/{{id}}/decide",
+    "/{id}/decide",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -302,14 +219,13 @@ def create_output_port_role_assignment(
             )
         )
     ],
-    deprecated=True,
 )
-def decide_assignment_old(
+def decide_output_port_role_assignment(
     id: UUID,
     request: DecideOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponseOld:
+) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     original = service.get_assignment(id)
 
@@ -354,31 +270,11 @@ def decide_assignment_old(
         ),
     )
 
-    return assignment
+    return convert_to_role_assignment(assignment)
 
 
-@router.post(
-    f"{route}/{{id}}/decide",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
-                resolver=DatasetRoleAssignmentResolver,
-            )
-        )
-    ],
-)
-def decide_output_port_role_assignment(
-    id: UUID,
-    request: DecideOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> OutputPortRoleAssignmentResponse:
-    return convert_to_role_assignment(decide_assignment_old(id, request, db, user))
-
-
-@router.patch(
-    f"{old_route}/{{id}}",
+@router.put(
+    "/{id}",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -387,14 +283,13 @@ def decide_output_port_role_assignment(
             )
         )
     ],
-    deprecated=True,
 )
-def modify_assigned_role_old(
+def modify_output_port_role_assignment(
     id: UUID,
     request: ModifyOutputPortRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponseOld:
+) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     original_role = service.get_assignment(id).role_id
 
@@ -422,24 +317,4 @@ def modify_assigned_role_old(
         ),
     )
 
-    return assignment
-
-
-@router.put(
-    f"{route}/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_USER,
-                resolver=DatasetRoleAssignmentResolver,
-            )
-        )
-    ],
-)
-def modify_output_port_role_assignment(
-    id: UUID,
-    request: ModifyOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> OutputPortRoleAssignmentResponse:
-    return convert_to_role_assignment(modify_assigned_role_old(id, request, db, user))
+    return convert_to_role_assignment(assignment)
