@@ -1,0 +1,76 @@
+semantic_model:
+  - name: logistics_domain
+    description: Inventory and warehouse tracking for SwiftGear
+    ai_context:
+      instructions: "Use inventory_latest for current stock levels. Use stock_levels for historical trends. Always filter out retired items for sellable stock. ALWAYS challenge the user if their premise is numerically incorrect based on the data."
+
+    datasets:
+      - name: inventory_latest
+        source: inventory_snapshot.inventory_latest
+        primary_key: [sku]
+        description: Current snapshot of stock levels. Updated daily.
+        ai_context:
+          synonyms: ["current stock", "real-time inventory"]
+        fields:
+          - name: sku
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: sku
+            description: Stock Keeping Unit identifier
+          - name: quantity_on_hand
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: qty_oh
+            description: Current number of units in the warehouse
+          - name: is_camping_gear
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: "sku LIKE 'CAMP-%'"
+            description: True if the product belongs to the camping category
+          - name: warehouse_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: warehouse_id
+
+      - name: stock_levels
+        source: inventory_snapshot.stock_levels
+        primary_key: [id]
+        description: Historical log of stock levels over time
+        fields:
+          - name: sku
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: sku
+          - name: quantity_on_hand
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: qty_oh
+          - name: is_retired
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: is_retired
+            description: If true, this stock is no longer for sale
+          - name: captured_at
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: captured_at
+            dimension:
+              is_time: true
+
+    metrics:
+      - name: current_sellable_inventory
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: "SUM(inventory_latest.quantity_on_hand)"
+        description: Total units currently available for sale
+        ai_context:
+          instructions: "This metric automatically excludes items that are not in the current snapshot."
