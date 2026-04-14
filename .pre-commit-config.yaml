@@ -39,6 +39,8 @@ repos:
   rev: v8.27.2
   hooks:
     - id: gitleaks
+# Splitting up the mypy checks as monorepos are not well supported:
+# https://github.com/python/mypy/issues/4008
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.16.1
   hooks:
@@ -65,12 +67,6 @@ repos:
         - attrs
 - repo: local
   hooks:
-    - id: mypy
-      name: mypy (demo packages)
-      entry: ./scripts/run_mypy.sh
-      language: script
-      pass_filenames: false
-      files: ^demo/
     - id: add-helm-version
       name: add-helm-version
       entry: ./scripts/add_helm_version.sh
