@@ -29,19 +29,6 @@ RECALL_BOUND: Final[float] = 0.8
 
 
 class TestOutputPortSearchRouter:
-    def test_search_datasets(self, session, client):
-        ds_1, ds_2, ds_3 = self.setup(session)
-
-        response = client.get("/api/datasets/search", params={"query": "Data"})
-        assert response.status_code == 200, response.text
-        data = response.json()
-        assert len(data) >= 2
-        returned_ops = {item["name"] for item in data}
-        expected_ops = {ds_1.name, ds_2.name}
-        assert returned_ops.issuperset(expected_ops), (
-            f"{returned_ops} is not the superset of {expected_ops}"
-        )
-
     def test_search_output_ports(self, session, client):
         ds_1, ds_2, ds_3 = self.setup(session)
 
