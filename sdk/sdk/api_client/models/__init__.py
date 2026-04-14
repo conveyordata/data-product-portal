@@ -13,6 +13,14 @@ from .aws_credentials import AWSCredentials
 from .aws_environment_platform_configuration import AWSEnvironmentPlatformConfiguration
 from .aws_glue_config import AWSGlueConfig
 from .awss3_config import AWSS3Config
+from .azure_blob_config import AzureBlobConfig
+from .azure_blob_config_storage_account_names import AzureBlobConfigStorageAccountNames
+from .azure_blob_technical_asset_configuration import (
+    AzureBlobTechnicalAssetConfiguration,
+)
+from .azure_environment_platform_configuration import (
+    AzureEnvironmentPlatformConfiguration,
+)
 from .become_admin import BecomeAdmin
 from .can_become_admin_update import CanBecomeAdminUpdate
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
@@ -280,6 +288,10 @@ __all__ = (
     "AWSEnvironmentPlatformConfiguration",
     "AWSGlueConfig",
     "AWSS3Config",
+    "AzureBlobConfig",
+    "AzureBlobConfigStorageAccountNames",
+    "AzureBlobTechnicalAssetConfiguration",
+    "AzureEnvironmentPlatformConfiguration",
     "BecomeAdmin",
     "CanBecomeAdminUpdate",
     "CreateDataProductLifeCycleResponse",

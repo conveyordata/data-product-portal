@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from ..models.aws_environment_platform_configuration import (
         AWSEnvironmentPlatformConfiguration,
     )
+    from ..models.azure_environment_platform_configuration import (
+        AzureEnvironmentPlatformConfiguration,
+    )
     from ..models.databricks_environment_platform_configuration import (
         DatabricksEnvironmentPlatformConfiguration,
     )
@@ -25,14 +28,17 @@ T = TypeVar("T", bound="EnvironmentPlatformConfigGet")
 class EnvironmentPlatformConfigGet:
     """
     Attributes:
-        config (AWSEnvironmentPlatformConfiguration | DatabricksEnvironmentPlatformConfiguration):
+        config (AWSEnvironmentPlatformConfiguration | AzureEnvironmentPlatformConfiguration |
+            DatabricksEnvironmentPlatformConfiguration):
         id (UUID):
         environment (Environment):
         platform (Platform):
     """
 
     config: (
-        AWSEnvironmentPlatformConfiguration | DatabricksEnvironmentPlatformConfiguration
+        AWSEnvironmentPlatformConfiguration
+        | AzureEnvironmentPlatformConfiguration
+        | DatabricksEnvironmentPlatformConfiguration
     )
     id: UUID
     environment: Environment
@@ -43,9 +49,14 @@ class EnvironmentPlatformConfigGet:
         from ..models.aws_environment_platform_configuration import (
             AWSEnvironmentPlatformConfiguration,
         )
+        from ..models.databricks_environment_platform_configuration import (
+            DatabricksEnvironmentPlatformConfiguration,
+        )
 
         config: dict[str, Any]
         if isinstance(self.config, AWSEnvironmentPlatformConfiguration):
+            config = self.config.to_dict()
+        elif isinstance(self.config, DatabricksEnvironmentPlatformConfiguration):
             config = self.config.to_dict()
         else:
             config = self.config.to_dict()
@@ -74,6 +85,9 @@ class EnvironmentPlatformConfigGet:
         from ..models.aws_environment_platform_configuration import (
             AWSEnvironmentPlatformConfiguration,
         )
+        from ..models.azure_environment_platform_configuration import (
+            AzureEnvironmentPlatformConfiguration,
+        )
         from ..models.databricks_environment_platform_configuration import (
             DatabricksEnvironmentPlatformConfiguration,
         )
@@ -86,6 +100,7 @@ class EnvironmentPlatformConfigGet:
             data: object,
         ) -> (
             AWSEnvironmentPlatformConfiguration
+            | AzureEnvironmentPlatformConfiguration
             | DatabricksEnvironmentPlatformConfiguration
         ):
             try:
@@ -96,11 +111,21 @@ class EnvironmentPlatformConfigGet:
                 return config_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                config_type_1 = DatabricksEnvironmentPlatformConfiguration.from_dict(
+                    data
+                )
+
+                return config_type_1
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
             if not isinstance(data, dict):
                 raise TypeError()
-            config_type_1 = DatabricksEnvironmentPlatformConfiguration.from_dict(data)
+            config_type_2 = AzureEnvironmentPlatformConfiguration.from_dict(data)
 
-            return config_type_1
+            return config_type_2
 
         config = _parse_config(d.pop("config"))
 

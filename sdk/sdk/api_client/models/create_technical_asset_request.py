@@ -7,11 +7,13 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.technical_asset_status import TechnicalAssetStatus
 from ..models.technical_mapping import TechnicalMapping
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.azure_blob_technical_asset_configuration import (
+        AzureBlobTechnicalAssetConfiguration,
+    )
     from ..models.databricks_technical_asset_configuration import (
         DatabricksTechnicalAssetConfiguration,
     )
@@ -45,10 +47,10 @@ class CreateTechnicalAssetRequest:
         namespace (str):
         platform_id (UUID):
         service_id (UUID):
-        status (TechnicalAssetStatus):
-        configuration (DatabricksTechnicalAssetConfiguration | GlueTechnicalAssetConfiguration |
-            OSISemanticModelTechnicalAssetConfiguration | PostgreSQLTechnicalAssetConfiguration |
-            RedshiftTechnicalAssetConfiguration | S3TechnicalAssetConfiguration | SnowflakeTechnicalAssetConfiguration):
+        configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
+            GlueTechnicalAssetConfiguration | OSISemanticModelTechnicalAssetConfiguration |
+            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | S3TechnicalAssetConfiguration |
+            SnowflakeTechnicalAssetConfiguration):
         tag_ids (list[UUID]):
         source_aligned (bool | None | Unset): DEPRECATED: Use 'technical_mapping' instead. This field will be removed in
             a future version.
@@ -60,9 +62,9 @@ class CreateTechnicalAssetRequest:
     namespace: str
     platform_id: UUID
     service_id: UUID
-    status: TechnicalAssetStatus
     configuration: (
-        DatabricksTechnicalAssetConfiguration
+        AzureBlobTechnicalAssetConfiguration
+        | DatabricksTechnicalAssetConfiguration
         | GlueTechnicalAssetConfiguration
         | OSISemanticModelTechnicalAssetConfiguration
         | PostgreSQLTechnicalAssetConfiguration
@@ -81,6 +83,9 @@ class CreateTechnicalAssetRequest:
         )
         from ..models.glue_technical_asset_configuration import (
             GlueTechnicalAssetConfiguration,
+        )
+        from ..models.osi_semantic_model_technical_asset_configuration import (
+            OSISemanticModelTechnicalAssetConfiguration,
         )
         from ..models.postgre_sql_technical_asset_configuration import (
             PostgreSQLTechnicalAssetConfiguration,
@@ -105,8 +110,6 @@ class CreateTechnicalAssetRequest:
 
         service_id = str(self.service_id)
 
-        status = self.status.value
-
         configuration: dict[str, Any]
         if isinstance(self.configuration, S3TechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
@@ -119,6 +122,10 @@ class CreateTechnicalAssetRequest:
         elif isinstance(self.configuration, RedshiftTechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
         elif isinstance(self.configuration, PostgreSQLTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(
+            self.configuration, OSISemanticModelTechnicalAssetConfiguration
+        ):
             configuration = self.configuration.to_dict()
         else:
             configuration = self.configuration.to_dict()
@@ -151,7 +158,6 @@ class CreateTechnicalAssetRequest:
                 "namespace": namespace,
                 "platform_id": platform_id,
                 "service_id": service_id,
-                "status": status,
                 "configuration": configuration,
                 "tag_ids": tag_ids,
             }
@@ -165,6 +171,9 @@ class CreateTechnicalAssetRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.azure_blob_technical_asset_configuration import (
+            AzureBlobTechnicalAssetConfiguration,
+        )
         from ..models.databricks_technical_asset_configuration import (
             DatabricksTechnicalAssetConfiguration,
         )
@@ -198,12 +207,11 @@ class CreateTechnicalAssetRequest:
 
         service_id = UUID(d.pop("service_id"))
 
-        status = TechnicalAssetStatus(d.pop("status"))
-
         def _parse_configuration(
             data: object,
         ) -> (
-            DatabricksTechnicalAssetConfiguration
+            AzureBlobTechnicalAssetConfiguration
+            | DatabricksTechnicalAssetConfiguration
             | GlueTechnicalAssetConfiguration
             | OSISemanticModelTechnicalAssetConfiguration
             | PostgreSQLTechnicalAssetConfiguration
@@ -267,13 +275,21 @@ class CreateTechnicalAssetRequest:
                 return configuration_type_5
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_6 = (
+                    OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_6
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
             if not isinstance(data, dict):
                 raise TypeError()
-            configuration_type_6 = (
-                OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
-            )
+            configuration_type_7 = AzureBlobTechnicalAssetConfiguration.from_dict(data)
 
-            return configuration_type_6
+            return configuration_type_7
 
         configuration = _parse_configuration(d.pop("configuration"))
 
@@ -316,7 +332,6 @@ class CreateTechnicalAssetRequest:
             namespace=namespace,
             platform_id=platform_id,
             service_id=service_id,
-            status=status,
             configuration=configuration,
             tag_ids=tag_ids,
             source_aligned=source_aligned,

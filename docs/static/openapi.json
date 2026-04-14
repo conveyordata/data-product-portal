@@ -20172,12 +20172,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -21415,12 +21419,16 @@
               },
               {
                 "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
               }
             ],
             "title": "Configuration",
             "discriminator": {
               "propertyName": "configuration_type",
               "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
                 "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
                 "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
@@ -22431,14 +22439,6 @@
           "type"
         ],
         "title": "ValidationError"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
       }
     },
     "securitySchemes": {

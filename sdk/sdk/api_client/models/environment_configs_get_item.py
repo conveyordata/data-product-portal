@@ -10,6 +10,7 @@ from attrs import field as _attrs_field
 if TYPE_CHECKING:
     from ..models.aws_glue_config import AWSGlueConfig
     from ..models.awss3_config import AWSS3Config
+    from ..models.azure_blob_config import AzureBlobConfig
     from ..models.databricks_config import DatabricksConfig
     from ..models.environment import Environment
     from ..models.platform import Platform
@@ -26,8 +27,8 @@ T = TypeVar("T", bound="EnvironmentConfigsGetItem")
 class EnvironmentConfigsGetItem:
     """
     Attributes:
-        config (list[AWSGlueConfig | AWSS3Config | DatabricksConfig | PostgreSQLConfig | RedshiftConfig |
-            SnowflakeConfig]):
+        config (list[AWSGlueConfig | AWSS3Config | AzureBlobConfig | DatabricksConfig | PostgreSQLConfig |
+            RedshiftConfig | SnowflakeConfig]):
         id (UUID):
         platform (Platform):
         environment (Environment):
@@ -37,6 +38,7 @@ class EnvironmentConfigsGetItem:
     config: list[
         AWSGlueConfig
         | AWSS3Config
+        | AzureBlobConfig
         | DatabricksConfig
         | PostgreSQLConfig
         | RedshiftConfig
@@ -52,6 +54,7 @@ class EnvironmentConfigsGetItem:
         from ..models.aws_glue_config import AWSGlueConfig
         from ..models.awss3_config import AWSS3Config
         from ..models.databricks_config import DatabricksConfig
+        from ..models.postgre_sql_config import PostgreSQLConfig
         from ..models.redshift_config import RedshiftConfig
         from ..models.snowflake_config import SnowflakeConfig
 
@@ -67,6 +70,8 @@ class EnvironmentConfigsGetItem:
             elif isinstance(config_item_data, SnowflakeConfig):
                 config_item = config_item_data.to_dict()
             elif isinstance(config_item_data, RedshiftConfig):
+                config_item = config_item_data.to_dict()
+            elif isinstance(config_item_data, PostgreSQLConfig):
                 config_item = config_item_data.to_dict()
             else:
                 config_item = config_item_data.to_dict()
@@ -99,6 +104,7 @@ class EnvironmentConfigsGetItem:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.aws_glue_config import AWSGlueConfig
         from ..models.awss3_config import AWSS3Config
+        from ..models.azure_blob_config import AzureBlobConfig
         from ..models.databricks_config import DatabricksConfig
         from ..models.environment import Environment
         from ..models.platform import Platform
@@ -117,6 +123,7 @@ class EnvironmentConfigsGetItem:
             ) -> (
                 AWSGlueConfig
                 | AWSS3Config
+                | AzureBlobConfig
                 | DatabricksConfig
                 | PostgreSQLConfig
                 | RedshiftConfig
@@ -162,11 +169,19 @@ class EnvironmentConfigsGetItem:
                     return config_item_type_4
                 except (TypeError, ValueError, AttributeError, KeyError):
                     pass
+                try:
+                    if not isinstance(data, dict):
+                        raise TypeError()
+                    config_item_type_5 = PostgreSQLConfig.from_dict(data)
+
+                    return config_item_type_5
+                except (TypeError, ValueError, AttributeError, KeyError):
+                    pass
                 if not isinstance(data, dict):
                     raise TypeError()
-                config_item_type_5 = PostgreSQLConfig.from_dict(data)
+                config_item_type_6 = AzureBlobConfig.from_dict(data)
 
-                return config_item_type_5
+                return config_item_type_6
 
             config_item = _parse_config_item(config_item_data)
 

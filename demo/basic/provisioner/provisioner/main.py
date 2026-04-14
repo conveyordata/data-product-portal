@@ -219,7 +219,6 @@ def handle_create_data_product(payload: Dict[str, Any]):
         namespace=data_product_details.namespace,
         description=data_product_details.description,
         tag_ids=[],
-        status=TechnicalAssetStatus.ACTIVE,
         technical_mapping=TechnicalMapping.CUSTOM,
         platform_id=postgres_config.platform.id,
         service_id=postgres_config.service.id,

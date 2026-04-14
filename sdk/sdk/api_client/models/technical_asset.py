@@ -11,6 +11,9 @@ from ..models.technical_asset_status import TechnicalAssetStatus
 from ..models.technical_mapping import TechnicalMapping
 
 if TYPE_CHECKING:
+    from ..models.azure_blob_technical_asset_configuration import (
+        AzureBlobTechnicalAssetConfiguration,
+    )
     from ..models.databricks_technical_asset_configuration import (
         DatabricksTechnicalAssetConfiguration,
     )
@@ -48,9 +51,10 @@ class TechnicalAsset:
         owner_id (UUID):
         platform_id (UUID):
         service_id (UUID):
-        configuration (DatabricksTechnicalAssetConfiguration | GlueTechnicalAssetConfiguration |
-            OSISemanticModelTechnicalAssetConfiguration | PostgreSQLTechnicalAssetConfiguration |
-            RedshiftTechnicalAssetConfiguration | S3TechnicalAssetConfiguration | SnowflakeTechnicalAssetConfiguration):
+        configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
+            GlueTechnicalAssetConfiguration | OSISemanticModelTechnicalAssetConfiguration |
+            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | S3TechnicalAssetConfiguration |
+            SnowflakeTechnicalAssetConfiguration):
     """
 
     id: UUID
@@ -63,7 +67,8 @@ class TechnicalAsset:
     platform_id: UUID
     service_id: UUID
     configuration: (
-        DatabricksTechnicalAssetConfiguration
+        AzureBlobTechnicalAssetConfiguration
+        | DatabricksTechnicalAssetConfiguration
         | GlueTechnicalAssetConfiguration
         | OSISemanticModelTechnicalAssetConfiguration
         | PostgreSQLTechnicalAssetConfiguration
@@ -79,6 +84,9 @@ class TechnicalAsset:
         )
         from ..models.glue_technical_asset_configuration import (
             GlueTechnicalAssetConfiguration,
+        )
+        from ..models.osi_semantic_model_technical_asset_configuration import (
+            OSISemanticModelTechnicalAssetConfiguration,
         )
         from ..models.postgre_sql_technical_asset_configuration import (
             PostgreSQLTechnicalAssetConfiguration,
@@ -124,6 +132,10 @@ class TechnicalAsset:
             configuration = self.configuration.to_dict()
         elif isinstance(self.configuration, PostgreSQLTechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
+        elif isinstance(
+            self.configuration, OSISemanticModelTechnicalAssetConfiguration
+        ):
+            configuration = self.configuration.to_dict()
         else:
             configuration = self.configuration.to_dict()
 
@@ -148,6 +160,9 @@ class TechnicalAsset:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.azure_blob_technical_asset_configuration import (
+            AzureBlobTechnicalAssetConfiguration,
+        )
         from ..models.databricks_technical_asset_configuration import (
             DatabricksTechnicalAssetConfiguration,
         )
@@ -192,7 +207,8 @@ class TechnicalAsset:
         def _parse_configuration(
             data: object,
         ) -> (
-            DatabricksTechnicalAssetConfiguration
+            AzureBlobTechnicalAssetConfiguration
+            | DatabricksTechnicalAssetConfiguration
             | GlueTechnicalAssetConfiguration
             | OSISemanticModelTechnicalAssetConfiguration
             | PostgreSQLTechnicalAssetConfiguration
@@ -256,13 +272,21 @@ class TechnicalAsset:
                 return configuration_type_5
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_6 = (
+                    OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_6
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
             if not isinstance(data, dict):
                 raise TypeError()
-            configuration_type_6 = (
-                OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
-            )
+            configuration_type_7 = AzureBlobTechnicalAssetConfiguration.from_dict(data)
 
-            return configuration_type_6
+            return configuration_type_7
 
         configuration = _parse_configuration(d.pop("configuration"))
 
