@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -11,14 +10,13 @@ from app.authorization.roles.schema import (
     Role,
     Scope,
     UpdateRole,
-    UpdateRoleOld,
 )
 from app.authorization.roles.service import RoleService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
-router = APIRouter()
+router = APIRouter(tags=["Authorization - Roles"], prefix="/v2/authz/roles")
 
 
 @router.post(
@@ -65,40 +63,8 @@ def remove_role(id: UUID, db: Session = Depends(get_db_session)) -> None:
     AuthRole(role).remove()
 
 
-_router = router
-router = APIRouter(tags=["Authorization - Roles"])
-old_route = "/roles"
-route = "/v2/authz/roles"
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
-
-
-@router.patch(
-    old_route,
-    responses={
-        200: {
-            "description": "Role successfully updated",
-            "content": {
-                "application/json": {"example": {"id": "id of the updated role"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
-        ),
-    ],
-    deprecated=True,
-)
-def update_role_old(
-    request: UpdateRoleOld,
-    db: Session = Depends(get_db_session),
-) -> Role:
-    return update_role(request.id, request, db)
-
-
 @router.put(
-    f"{route}/{{id}}",
+    "/{id}",
     responses={
         200: {
             "description": "Role successfully updated",
@@ -123,13 +89,6 @@ def update_role(
     return role
 
 
-@router.get("/roles/{scope}", deprecated=True)
-def get_roles_old(
-    scope: Scope, db: Session = Depends(get_db_session)
-) -> Sequence[Role]:
-    return get_roles(scope, db).roles
-
-
-@router.get("/v2/authz/roles/{scope}")
+@router.get("/{scope}")
 def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> GetRolesResponse:
     return GetRolesResponse(roles=RoleService(db).get_roles(scope))
