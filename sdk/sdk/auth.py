@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 import json
 import httpx
@@ -12,8 +13,6 @@ TOKEN_PATH = Path.home() / ".portal" / "token.json"
 
 class PortalAuth:
     def __init__(self, timeout: int = 10):
-        import os
-
         self.timeout = timeout
         self.auth_mode = os.getenv("PORTAL_AUTH_MODE", "")
         self.base_url = os.getenv("PORTAL_BASE_URL", "").rstrip("/")
