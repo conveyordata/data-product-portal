@@ -125,11 +125,11 @@ def get_output_port(
 def get_output_ports_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
-    # ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
+    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
             GetEventHistoryResponseItemOld.model_validate(ds).convert()
-            for ds in EventService(db).get_history(id, EventReferenceEntity.DATASET)
+            for ds in EventService(db).get_history(ds.id, EventReferenceEntity.DATASET)
         ]
     )
 
@@ -205,6 +205,17 @@ def remove_output_port(
     dataset = OutputPortService(db).remove_dataset(id, data_product_id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_REMOVED,
+            actor_id=authenticated_user.id,
+            subject_id=dataset.id,
+            subject_type=EventReferenceEntity.DATASET,
+            deleted_subject_identifier=dataset.name,
+            target_id=dataset.data_product_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
+        ),
+    )
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_REMOVED,

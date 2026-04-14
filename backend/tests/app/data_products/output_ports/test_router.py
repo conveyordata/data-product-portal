@@ -799,8 +799,11 @@ class TestDatasetsRouter:
         response = self.delete_output_port(client, ds.data_product_id, ds.id)
         assert response.status_code == 200
 
+        history = self.get_output_port_history(client, ds.id, ds.data_product.id)
+        assert history.status_code == 404
+
         events = EventService(db=test_session).get_history(
-            ds.id, EventReferenceEntity.DATASET
+            ds.data_product_id, EventReferenceEntity.DATA_PRODUCT
         )
         assert len(events) == 1
         assert events[0].deleted_subject_identifier == ds.name

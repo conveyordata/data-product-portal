@@ -559,10 +559,15 @@ class TestTechnicalAssetsRouter:
         )
         assert response.status_code == 200
 
-        history = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
-        ).json()
+        # get_data_product_history should return 1
+        history = self.get_data_product_history(client, data_output.owner.id).json()
         assert len(history["events"]) == 1
+
+        # get_data_output_history should fail
+        response = self.get_technical_asset_history(
+            client, data_output.owner.id, data_output.id
+        )
+        assert response.status_code == 404
 
     def test_retain_deleted_data_output_name_in_history(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -582,9 +587,7 @@ class TestTechnicalAssetsRouter:
         )
         assert response.status_code == 200
 
-        response = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
-        )
+        response = self.get_data_product_history(client, data_output.owner.id)
         assert len(response.json()["events"]) == 1
         assert (
             response.json()["events"][0]["deleted_subject_identifier"]
@@ -720,3 +723,7 @@ class TestTechnicalAssetsRouter:
         return client.get(
             f"{ENDPOINT.format(data_product_id)}/{data_output_id}/history"
         )
+
+    @staticmethod
+    def get_data_product_history(client, data_product_id):
+        return client.get(f"/api/v2/data_products/{data_product_id}/history")

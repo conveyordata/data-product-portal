@@ -11,6 +11,7 @@ from app.core.authz import (
     DataProductResolver,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
     DataOutputStatusUpdate,
@@ -67,6 +68,7 @@ def get_technical_asset(
 def get_technical_asset_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
+    ensure_technical_asset_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
             GetEventHistoryResponseItemOld.model_validate(event).convert()
