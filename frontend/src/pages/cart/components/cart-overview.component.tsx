@@ -1,9 +1,10 @@
 import { DeleteOutlined, WarningOutlined } from '@ant-design/icons';
-import { Button, Card, Descriptions, Flex, List, Space, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Descriptions, Empty, Flex, Space, Tag, Tooltip, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { useAppDispatch } from '@/store';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { removeDatasetFromCart } from '@/store/features/cart/cart-slice.ts';
@@ -123,54 +124,40 @@ export const CartOverview = ({
     };
 
     return (
-        <Card
-            title={<Title level={3}>{t('Checkout summary')}</Title>}
-            styles={{
-                title: { paddingTop: 16 },
-                body: { paddingTop: 0 },
-                header: {
-                    borderBottom: 'none',
-                },
-            }}
-        >
+        <Flex vertical>
+            <Title level={3}>{t('Checkout summary')}</Title>
             <Paragraph>{t('Confirm your selected Output Ports.')}</Paragraph>
-            <List
-                footer={
-                    <Flex justify="flex-end">
-                        {t('{{count}} Output Ports', {
-                            count: cartOutputPorts?.length || 0,
-                        })}
-                    </Flex>
-                }
-                grid={{ column: 1 }}
-                loading={loading}
-                dataSource={cartOutputPorts}
-                locale={{ emptyText: t('No Output Ports in cart, go to the Marketplace to add new Output Ports') }}
-                rowKey={(ds) => ds.id}
-                renderItem={(dataset) => (
-                    <List.Item>
-                        <Card>
-                            <Flex justify="space-between" align="start">
-                                <CartOverviewItem
-                                    outputPort={dataset}
-                                    overlapping={overlappingDatasetIds?.includes(dataset.id)}
-                                    selectedDataProductId={selectedDataProductId}
-                                />
-                                <Button
-                                    type="text"
-                                    icon={<DeleteOutlined />}
-                                    danger
-                                    style={{ marginLeft: 'auto' }}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        removeFromCart(dataset.id);
-                                    }}
-                                />
-                            </Flex>
-                        </Card>
-                    </List.Item>
-                )}
-            />
-        </Card>
+            {loading ? (
+                <LoadingSpinner />
+            ) : cartOutputPorts?.length == 0 ? (
+                <Empty>{t('No Output Ports in cart, go to the Marketplace to add new Output Ports')}</Empty>
+            ) : (
+                <Flex vertical gap={'small'}>
+                    {cartOutputPorts?.map((cartOutputPort) => {
+                        return (
+                            <Card>
+                                <Flex justify="space-between" align="start">
+                                    <CartOverviewItem
+                                        outputPort={cartOutputPort}
+                                        overlapping={overlappingDatasetIds?.includes(cartOutputPort.id)}
+                                        selectedDataProductId={selectedDataProductId}
+                                    />
+                                    <Button
+                                        type="text"
+                                        icon={<DeleteOutlined />}
+                                        danger
+                                        style={{ marginLeft: 'auto' }}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            removeFromCart(cartOutputPort.id);
+                                        }}
+                                    />
+                                </Flex>
+                            </Card>
+                        );
+                    })}
+                </Flex>
+            )}
+        </Flex>
     );
 };

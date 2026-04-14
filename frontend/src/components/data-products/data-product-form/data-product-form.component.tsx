@@ -286,12 +286,12 @@ export function DataProductForm({ mode, dataProductId, debounce = 500 }: Props) 
                     {currentDataProduct?.name}
                 </Typography.Title>
             )}
-            {mode === 'create' && <Typography.Title level={3}>{t('New Data Product')}</Typography.Title>}
+            {/*{mode === 'create' && <Typography.Title level={3}>{t('New Data Product')}</Typography.Title>}*/}
             <Form<DataProductCreate>
                 form={form}
                 labelWrap
-                labelCol={FORM_GRID_WRAPPER_COLS}
-                wrapperCol={FORM_GRID_WRAPPER_COLS}
+                // labelCol={FORM_GRID_WRAPPER_COLS}
+                // wrapperCol={FORM_GRID_WRAPPER_COLS}
                 layout="vertical"
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}

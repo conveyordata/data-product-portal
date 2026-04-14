@@ -24,14 +24,17 @@ import {
     Typography,
     theme,
 } from 'antd';
-import { parseAsString, useQueryState } from 'nuqs';
-import { useEffect, useMemo } from 'react';
+import { parseAsInteger, parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
+import { ConfirmationStep } from '@/pages/cart/components/confirmation.tsx';
+import { DataProductChoice, DataProductChoiceOptions } from '@/pages/cart/components/data-product-choice.tsx';
+import { DataProductsView } from '@/pages/cart/components/data-products-view.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -62,6 +65,13 @@ function Cart() {
     const dispatch = useAppDispatch();
     const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
     const { setBreadcrumbs } = useBreadcrumbs();
+    const [step, setStep] = useQueryState('step', parseAsInteger.withDefault(0));
+    const [selectedDataProductId] = useQueryState('selectedDataProductId', parseAsString);
+
+    const [dataProductChoice, setDataProductChoice] = useQueryState(
+        'dataProductChoice',
+        parseAsStringEnum<DataProductChoiceOptions>(Object.values(DataProductChoiceOptions)),
+    );
     useEffect(() => {
         setBreadcrumbs([
             {
@@ -101,7 +111,7 @@ function Cart() {
         });
 
     const [form] = Form.useForm<CartFormData>();
-    const selectedDataProductId = Form.useWatch('dataProductId', form);
+    // const selectedDataProductId = Form.useWatch('dataProductId', form);
 
     const initialValues: CartFormData | undefined = useMemo(() => {
         let data: CartFormData = {};
@@ -215,6 +225,12 @@ function Cart() {
         }
     }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
 
+    const maxSteps = 4;
+    const increaseStep = useCallback(() => {
+        setStep((value) => {
+            return Math.min(value + 1, maxSteps);
+        });
+    }, []);
     const submitFormIssues = useMemo(() => {
         const submitFormIssues = [];
         if (overlappingOutputPortIds.length > 0) {
@@ -242,141 +258,205 @@ function Cart() {
 
         return submitFormIssues;
     }, [overlappingOutputPortIds, selectedProductOutputPortsInCart, t]);
+
+    const onDataProductChoiceSelect = (option: DataProductChoiceOptions) => {
+        setDataProductChoice(option);
+        setStep(2);
+    };
+    const StepDisplayed = () => {
+        switch (step) {
+            default:
+            case 0:
+                return (
+                    <CartOverview
+                        loading={fetchingOutputPorts}
+                        cartOutputPorts={cartOutputPorts}
+                        overlappingDatasetIds={overlappingOutputPortIds}
+                        selectedDataProductId={selectedDataProductId ?? undefined}
+                    />
+                );
+            case 1:
+                return <DataProductChoice selectOption={onDataProductChoiceSelect} />;
+            case 2:
+                return (
+                    <DataProductsView
+                        goToNextStep={() => {
+                            setStep(3);
+                        }}
+                    />
+                );
+            case 3:
+                return <ConfirmationStep />;
+        }
+    };
+
     return (
         <Row gutter={[0, 48]}>
             <Col span={20} offset={2}>
-                <Steps current={0} items={[{ title: 'Step 1' }, { title: 'Step 2' }, { title: 'Step 3' }]} />
-            </Col>
-            <Col span={20} offset={2}>
-                <CartOverview
-                    loading={fetchingOutputPorts}
-                    cartOutputPorts={cartOutputPorts}
-                    overlappingDatasetIds={overlappingOutputPortIds}
-                    selectedDataProductId={selectedDataProductId}
+                <Steps
+                    current={step}
+                    type="navigation"
+                    size="small"
+                    onChange={setStep}
+                    items={[
+                        {
+                            title: t('Step: {{step}}', { step: 1 }),
+                        },
+                        {
+                            title: t('Step: {{step}}', { step: 2 }),
+                            status: dataProductChoice ? 'finish' : 'wait',
+                        },
+                        {
+                            title: t('Step: {{step}}', { step: 3 }),
+                            disabled: !dataProductChoice,
+                        },
+                        {
+                            title: t('Step: {{step}}', { step: 4 }),
+                            disabled: !dataProductChoice,
+                        },
+                    ]}
                 />
             </Col>
             <Col span={20} offset={2}>
-                <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>
-                    {initialValues === undefined ? (
-                        <Skeleton />
-                    ) : (
-                        <Form<CartFormData>
-                            key={initialValues.dataProductId}
-                            layout="vertical"
-                            onFinish={onFinish}
-                            form={form}
-                            onValuesChange={onValuesChange}
-                            initialValues={initialValues}
-                        >
-                            <Form.Item<CartFormData>
-                                name="dataProductId"
-                                label={t('Data Product')}
-                                rules={[{ required: true, message: t('Please select a Data Product') }]}
-                            >
-                                <Select
-                                    placeholder={t('Select a Data Product')}
-                                    options={dataProductOptions}
-                                    loading={isFetchingUserDataProducts}
-                                    showSearch={{
-                                        filterOption: (input, option) =>
-                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
-                                    }}
-                                    popupRender={(menu) => (
-                                        <>
-                                            <Flex gap={8} style={{ margin: '4px 8px' }}>
-                                                <Button
-                                                    icon={<PlusOutlined />}
-                                                    style={{ width: '100%' }}
-                                                    onClick={createNewDataProduct}
-                                                >
-                                                    {t('Create new Data Product')}
-                                                </Button>
-                                                <Button
-                                                    icon={<PlusOutlined />}
-                                                    style={{ width: '100%' }}
-                                                    onClick={createNewConsumerExploration}
-                                                >
-                                                    {t('Create new Consumer Exploration')}
-                                                </Button>
-                                            </Flex>
-                                            <Divider style={{ margin: '8px 0' }} />
-                                            {menu}
-                                        </>
-                                    )}
-                                />
-                            </Form.Item>
-                            {submitFormIssues.length > 0 && (
-                                <Alert
-                                    title={t('Cannot submit request')}
-                                    description={
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {submitFormIssues.map((reason) => (
-                                                <li key={reason.key}>{reason.value}</li>
-                                            ))}
-                                        </ul>
-                                    }
-                                    type="warning"
-                                    showIcon
-                                    style={{ marginBottom: 16 }}
-                                />
-                            )}
-                            <Form.Item<CartFormData>
-                                name="justification"
-                                label={'Business justification'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t('Please explain why you need access to these Output Ports'),
-                                    },
-                                ]}
-                            >
-                                <Input.TextArea
-                                    rows={4}
-                                    placeholder={t('Explain why you need access to these Output Ports')}
-                                />
-                            </Form.Item>
-                            <Form.Item label={null}>
-                                <Flex gap={'small'}>
-                                    <Link to={ApplicationPaths.Marketplace} style={{ width: '100%' }}>
-                                        <Button type="default" style={{ width: '100%' }}>
-                                            {t('Continue browsing')}
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        style={{ width: '100%' }}
-                                        loading={isRequestingAccess}
-                                        disabled={
-                                            fetchingOutputPorts ||
-                                            submitFormIssues.length > 0 ||
-                                            cartOutputPorts === undefined ||
-                                            cartOutputPorts?.length === 0
-                                        }
-                                    >
-                                        {t('Submit access requests')}
-                                    </Button>
-                                </Flex>
-                            </Form.Item>
-                        </Form>
-                    )}
-                    <Divider />
-                    <Flex vertical>
-                        <Typography.Text>
-                            <CheckCircleOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('Owners typically respond within 24-48 hours')}
-                        </Typography.Text>
-                        <Typography.Text>
-                            <BellOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('You will get notified when access is granted or denied')}
-                        </Typography.Text>
-                        <Typography.Text>
-                            <MessageOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('Message owners directly for questions')}
-                        </Typography.Text>
-                    </Flex>
-                </Card>
+                {StepDisplayed()}
             </Col>
+            {step == 0 && (
+                <Col span={20} offset={2}>
+                    <Flex justify="flex-end">
+                        <Button
+                            type={'primary'}
+                            onClick={() => {
+                                increaseStep();
+                            }}
+                        >
+                            {t('Confirm')}
+                        </Button>
+                    </Flex>
+                </Col>
+            )}
+
+            {/*<Col span={20} offset={2}>*/}
+            {/*    <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>*/}
+            {/*        {initialValues === undefined ? (*/}
+            {/*            <Skeleton />*/}
+            {/*        ) : (*/}
+            {/*            <Form<CartFormData>*/}
+            {/*                key={initialValues.dataProductId}*/}
+            {/*                layout="vertical"*/}
+            {/*                onFinish={onFinish}*/}
+            {/*                form={form}*/}
+            {/*                onValuesChange={onValuesChange}*/}
+            {/*                initialValues={initialValues}*/}
+            {/*            >*/}
+            {/*                <Form.Item<CartFormData>*/}
+            {/*                    name="dataProductId"*/}
+            {/*                    label={t('Data Product')}*/}
+            {/*                    rules={[{ required: true, message: t('Please select a Data Product') }]}*/}
+            {/*                >*/}
+            {/*                    <Select*/}
+            {/*                        placeholder={t('Select a Data Product')}*/}
+            {/*                        options={dataProductOptions}*/}
+            {/*                        loading={isFetchingUserDataProducts}*/}
+            {/*                        showSearch={{*/}
+            {/*                            filterOption: (input, option) =>*/}
+            {/*                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),*/}
+            {/*                        }}*/}
+            {/*                        popupRender={(menu) => (*/}
+            {/*                            <>*/}
+            {/*                                <Flex gap={8} style={{ margin: '4px 8px' }}>*/}
+            {/*                                    <Button*/}
+            {/*                                        icon={<PlusOutlined />}*/}
+            {/*                                        style={{ width: '100%' }}*/}
+            {/*                                        onClick={createNewDataProduct}*/}
+            {/*                                    >*/}
+            {/*                                        {t('Create new Data Product')}*/}
+            {/*                                    </Button>*/}
+            {/*                                    <Button*/}
+            {/*                                        icon={<PlusOutlined />}*/}
+            {/*                                        style={{ width: '100%' }}*/}
+            {/*                                        onClick={createNewConsumerExploration}*/}
+            {/*                                    >*/}
+            {/*                                        {t('Create new Consumer Exploration')}*/}
+            {/*                                    </Button>*/}
+            {/*                                </Flex>*/}
+            {/*                                <Divider style={{ margin: '8px 0' }} />*/}
+            {/*                                {menu}*/}
+            {/*                            </>*/}
+            {/*                        )}*/}
+            {/*                    />*/}
+            {/*                </Form.Item>*/}
+            {/*                {submitFormIssues.length > 0 && (*/}
+            {/*                    <Alert*/}
+            {/*                        title={t('Cannot submit request')}*/}
+            {/*                        description={*/}
+            {/*                            <ul style={{ margin: 0, paddingLeft: 20 }}>*/}
+            {/*                                {submitFormIssues.map((reason) => (*/}
+            {/*                                    <li key={reason.key}>{reason.value}</li>*/}
+            {/*                                ))}*/}
+            {/*                            </ul>*/}
+            {/*                        }*/}
+            {/*                        type="warning"*/}
+            {/*                        showIcon*/}
+            {/*                        style={{ marginBottom: 16 }}*/}
+            {/*                    />*/}
+            {/*                )}*/}
+            {/*                <Form.Item<CartFormData>*/}
+            {/*                    name="justification"*/}
+            {/*                    label={'Business justification'}*/}
+            {/*                    rules={[*/}
+            {/*                        {*/}
+            {/*                            required: true,*/}
+            {/*                            message: t('Please explain why you need access to these Output Ports'),*/}
+            {/*                        },*/}
+            {/*                    ]}*/}
+            {/*                >*/}
+            {/*                    <Input.TextArea*/}
+            {/*                        rows={4}*/}
+            {/*                        placeholder={t('Explain why you need access to these Output Ports')}*/}
+            {/*                    />*/}
+            {/*                </Form.Item>*/}
+            {/*                <Form.Item label={null}>*/}
+            {/*                    <Flex gap={'small'}>*/}
+            {/*                        <Link to={ApplicationPaths.Marketplace} style={{ width: '100%' }}>*/}
+            {/*                            <Button type="default" style={{ width: '100%' }}>*/}
+            {/*                                {t('Continue browsing')}*/}
+            {/*                            </Button>*/}
+            {/*                        </Link>*/}
+            {/*                        <Button*/}
+            {/*                            type="primary"*/}
+            {/*                            htmlType="submit"*/}
+            {/*                            style={{ width: '100%' }}*/}
+            {/*                            loading={isRequestingAccess}*/}
+            {/*                            disabled={*/}
+            {/*                                fetchingOutputPorts ||*/}
+            {/*                                submitFormIssues.length > 0 ||*/}
+            {/*                                cartOutputPorts === undefined ||*/}
+            {/*                                cartOutputPorts?.length === 0*/}
+            {/*                            }*/}
+            {/*                        >*/}
+            {/*                            {t('Submit access requests')}*/}
+            {/*                        </Button>*/}
+            {/*                    </Flex>*/}
+            {/*                </Form.Item>*/}
+            {/*            </Form>*/}
+            {/*        )}*/}
+            {/*        <Divider />*/}
+            {/*        <Flex vertical>*/}
+            {/*            <Typography.Text>*/}
+            {/*                <CheckCircleOutlined style={{ color: `${token.colorPrimary}` }} />{' '}*/}
+            {/*                {t('Owners typically respond within 24-48 hours')}*/}
+            {/*            </Typography.Text>*/}
+            {/*            <Typography.Text>*/}
+            {/*                <BellOutlined style={{ color: `${token.colorPrimary}` }} />{' '}*/}
+            {/*                {t('You will get notified when access is granted or denied')}*/}
+            {/*            </Typography.Text>*/}
+            {/*            <Typography.Text>*/}
+            {/*                <MessageOutlined style={{ color: `${token.colorPrimary}` }} />{' '}*/}
+            {/*                {t('Message owners directly for questions')}*/}
+            {/*            </Typography.Text>*/}
+            {/*        </Flex>*/}
+            {/*    </Card>*/}
+            {/*</Col>*/}
         </Row>
     );
 }
