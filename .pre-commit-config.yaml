@@ -47,7 +47,6 @@ repos:
     - id: mypy
       name: mypy (backend)
       language_version: python3.13
-      pass_filenames: false
       files: ^backend/
       args: [--config-file=backend/pyproject.toml]
       additional_dependencies:
