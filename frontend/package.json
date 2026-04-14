@@ -76,7 +76,7 @@
         "axios-mock-adapter": "^2.1.0",
         "i18next-cli": "^1.51.7",
         "jsdom": "^29.0.2",
-        "knip": "^6.3.1",
+        "knip": "^6.4.1",
         "msw": "^2.13.2",
         "rollup-plugin-visualizer": "^7.0.1",
         "sass": "^1.99.0",
