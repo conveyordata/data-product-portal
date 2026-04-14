@@ -3,6 +3,7 @@ from copy import deepcopy
 import pytest
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
+from app.resource_names.service import ResourceNameValidityType
 from tests.factories import DataProductSettingFactory
 
 ENDPOINT = "/api/v2/configuration/data_product_settings"
@@ -113,6 +114,39 @@ class TestDataProductSettingsRouter:
 
         response = self.create_data_product_setting(client, create_payload)
         assert response.status_code == 400
+
+    def test_validate_namespace(self, client):
+        namespace = "test"
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert response.json()["validity"] == ResourceNameValidityType.VALID
+
+    def test_validate_namespace_invalid_length(self, client):
+        namespace = "a" * 256
+        response = self.validate_namespace(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == ResourceNameValidityType.INVALID_LENGTH
+
+    def test_validate_namespace_duplicate(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
+        )
+        response = self.validate_namespace(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
+
+    def test_validate_namespace_duplicate_dataset(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATASET
+        )
+        response = self.validate_namespace_output_port(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
     @pytest.mark.usefixtures("admin")
     def test_update_data_product_setting_duplicate_namespace(self, client):
