@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -12,7 +11,6 @@ from app.configuration.data_product_types.schema_response import (
     CreateDataProductTypeResponse,
     DataProductTypeGet,
     DataProductTypesGet,
-    DataProductTypesGetItem,
     UpdateDataProductTypeResponse,
 )
 from app.configuration.data_product_types.service import DataProductTypeService
@@ -20,7 +18,10 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Configuration - Data Product types"],
+    prefix="/v2/configuration/data_product_types",
+)
 
 
 @router.get("/{id}")
@@ -104,20 +105,7 @@ def migrate_data_product_type(
     return DataProductTypeService(db).migrate_data_product_type(from_id, to_id)
 
 
-_router = router
-router = APIRouter(tags=["Configuration - Data Product types"])
-router.include_router(_router, prefix="/data_product_types", deprecated=True)
-router.include_router(_router, prefix="/v2/configuration/data_product_types")
-
-
-@router.get("/data_product_types", deprecated=True)
-def get_data_products_types_old(
-    db: Session = Depends(get_db_session),
-) -> Sequence[DataProductTypesGetItem]:
-    return get_data_products_types(db).data_product_types
-
-
-@router.get("/v2/configuration/data_product_types")
+@router.get("")
 def get_data_products_types(
     db: Session = Depends(get_db_session),
 ) -> DataProductTypesGet:

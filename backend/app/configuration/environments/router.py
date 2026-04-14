@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -19,7 +18,6 @@ from app.configuration.environments.platform_service_configurations.service impo
 )
 from app.configuration.environments.schema_response import (
     Environment,
-    EnvironmentGetItem,
     EnvironmentsGet,
 )
 from app.configuration.environments.service import EnvironmentService
@@ -27,7 +25,9 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Configuration - Environments"], prefix="/v2/configuration/environments"
+)
 
 
 @router.get("/{id}")
@@ -89,33 +89,12 @@ def get_environment_platform_config(
     )
 
 
-_router = router
-router = APIRouter(tags=["Configuration - Environments"])
-router.include_router(_router, prefix="/envs", deprecated=True)
-router.include_router(_router, prefix="/v2/configuration/environments")
-
-
-@router.get("/envs", deprecated=True)
-def get_environments_old(
-    db: Session = Depends(get_db_session),
-) -> Sequence[EnvironmentGetItem]:
-    return get_environments(db).environments
-
-
-@router.get("/v2/configuration/environments")
+@router.get("")
 def get_environments(db: Session = Depends(get_db_session)) -> EnvironmentsGet:
     return EnvironmentsGet(environments=EnvironmentService(db).get_environments())
 
 
-@router.get("/envs/{id}/configs", deprecated=True)
-def get_environment_configs_old(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-) -> Sequence[EnvironmentConfigsGetItem]:
-    return get_environment_configs(id, db).environment_configs
-
-
-@router.get("/v2/configuration/environments/{id}/configs")
+@router.get("/{id}/configs")
 def get_environment_configs(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -128,21 +107,7 @@ def get_environment_configs(
 
 
 @router.get(
-    "/envs/platforms/{platform_id}/services/{service_id}/config",
-    deprecated=True,
-)
-def get_environment_platform_service_config_for_all_envs_old(
-    platform_id: UUID,
-    service_id: UUID,
-    db: Session = Depends(get_db_session),
-) -> Sequence[EnvironmentConfigsGetItem]:
-    return get_environment_platform_service_config_for_all_envs(
-        platform_id, service_id, db
-    ).environment_configs
-
-
-@router.get(
-    "/v2/configuration/environments/platforms/{platform_id}/services/{service_id}/config",
+    "/platforms/{platform_id}/services/{service_id}/config",
 )
 def get_environment_platform_service_config_for_all_envs(
     platform_id: UUID,

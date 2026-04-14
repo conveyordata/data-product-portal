@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -11,7 +10,6 @@ from app.configuration.data_product_lifecycles.schema_request import (
 from app.configuration.data_product_lifecycles.schema_response import (
     CreateDataProductLifeCycleResponse,
     DataProductLifeCyclesGet,
-    DataProductLifeCyclesGetItem,
     UpdateDataProductLifeCycleResponse,
 )
 from app.configuration.data_product_lifecycles.service import (
@@ -21,7 +19,10 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Configuration - Data Product lifecycles"],
+    prefix="/v2/configuration/data_product_lifecycles",
+)
 
 
 @router.post(
@@ -110,20 +111,7 @@ def remove_data_product_lifecycle(
     return DataProductLifeCycleService(db).delete_data_product_lifecycle(id)
 
 
-_router = router
-router = APIRouter(tags=["Configuration - Data Product lifecycles"])
-router.include_router(_router, prefix="/data_product_lifecycles", deprecated=True)
-router.include_router(_router, prefix="/v2/configuration/data_product_lifecycles")
-
-
-@router.get("/data_product_lifecycles", deprecated=True)
-def get_data_products_lifecycles_old(
-    db: Session = Depends(get_db_session),
-) -> Sequence[DataProductLifeCyclesGetItem]:
-    return get_data_products_lifecycles(db).data_product_life_cycles
-
-
-@router.get("/v2/configuration/data_product_lifecycles")
+@router.get("")
 def get_data_products_lifecycles(
     db: Session = Depends(get_db_session),
 ) -> DataProductLifeCyclesGet:
