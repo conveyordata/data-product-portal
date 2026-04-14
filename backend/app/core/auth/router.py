@@ -10,7 +10,7 @@ from app.core.authz.resolvers import DataProductNameResolver
 from app.database.database import get_db_session
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(tags=["Authentication"], prefix="/v2/authn")
 router.include_router(device)
 
 
@@ -35,20 +35,3 @@ def get_aws_credentials(
     return AuthService().get_aws_credentials(
         data_product_name, environment, authorized_user, db
     )
-
-
-_router = router
-router = APIRouter(tags=["Authentication"])
-router.include_router(_router, prefix="/auth", deprecated=True)
-router.include_router(_router, prefix="/v2/authn")
-
-
-@router.get(
-    "/auth/user",
-    deprecated=True,
-    description="**DEPRECATED:** Please use current user endpoint instead",
-)
-def authorize(
-    authorized_user: User = Depends(authorize_user),
-) -> User:
-    return authorized_user
