@@ -199,6 +199,8 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
+  input?: any;
+  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -419,7 +421,6 @@ export type CreateTechnicalAssetRequest = {
   namespace: string;
   platform_id: string;
   service_id: string;
-  status: TechnicalAssetStatus;
   configuration:
     | ({
         configuration_type: "AzureBlobTechnicalAssetConfiguration";

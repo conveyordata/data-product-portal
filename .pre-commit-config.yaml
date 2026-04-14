@@ -61,6 +61,13 @@ repos:
       language: script
       types: [text]
       files: ^backend\/.*\.py$
+    - id: check-generated-api
+      name: Check generated API is up to date
+      entry: ./scripts/check_generated_api.sh
+      language: script
+      types: [text]
+      files: ^docs/static/openapi.json$
+      pass_filenames: false
     - id: local-fe-check
       name: fe check
       entry: bash -c "cd frontend && npm run check:fix"
