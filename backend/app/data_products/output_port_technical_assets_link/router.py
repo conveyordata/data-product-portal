@@ -1,5 +1,4 @@
 from copy import deepcopy
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
@@ -7,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.output_port.service import RoleAssignmentService
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz import Action, Authorization, DataOutputDatasetAssociationResolver
+from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     DataProductResolver,
     DatasetResolver,
@@ -31,47 +30,14 @@ from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
-from app.pending_actions.schema import DataOutputDatasetPendingAction
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 router = APIRouter(tags=["Data Products - Technical assets"])
 
-old_route = "/data_output_dataset_links"
 route = (
     "/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets"
 )
-
-
-@router.post(
-    f"{old_route}/approve/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
-                DataOutputDatasetAssociationResolver,
-            )
-        )
-    ],
-    deprecated=True,
-)
-def approve_data_output_link(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    link = DataOutputDatasetService(db).get_link_by_id(
-        id,
-    )
-    approve_output_port_technical_asset_link(
-        data_product_id=link.dataset.data_product_id,
-        output_port_id=link.dataset_id,
-        request=ApproveLinkBetweenTechnicalAssetAndOutputPortRequest(
-            technical_asset_id=link.data_output_id
-        ),
-        db=db,
-        authenticated_user=authenticated_user,
-    )
 
 
 @router.post(
@@ -119,35 +85,6 @@ def approve_output_port_technical_asset_link(
 
 
 @router.post(
-    f"{old_route}/deny/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
-                DataOutputDatasetAssociationResolver,
-            )
-        )
-    ],
-    deprecated=True,
-)
-def deny_data_output_link(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    link = DataOutputDatasetService(db).get_link_by_id(id)
-    deny_output_port_technical_asset_link(
-        data_product_id=link.dataset.data_product_id,
-        output_port_id=link.dataset_id,
-        request=DenyLinkBetweenTechnicalAssetAndOutputPortRequest(
-            technical_asset_id=link.data_output_id
-        ),
-        db=db,
-        authenticated_user=authenticated_user,
-    )
-
-
-@router.post(
     f"{route}/deny_link_request",
     dependencies=[
         Depends(
@@ -188,50 +125,6 @@ def deny_output_port_technical_asset_link(
         event_id=event_id,
         extra_receiver_ids=[output_link.requested_by_id],
     )
-
-
-@router.post(
-    f"{old_route}/remove/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK,
-                DataOutputDatasetAssociationResolver,
-            )
-        )
-    ],
-    deprecated=True,
-    description="**DEPRECATED:** Please use unlink_output_port_from_technical_asset instead",
-)
-def remove_data_output_link(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    output_link = DataOutputDatasetService(db).get_link_by_id(
-        id,
-    )
-    unlink_output_port_from_technical_asset(
-        output_link.dataset.data_product_id,
-        output_link.dataset_id,
-        UnLinkTechnicalAssetToOutputPortRequest(
-            technical_asset_id=output_link.data_output_id
-        ),
-        db,
-        authenticated_user,
-    )
-
-
-@router.get(
-    f"{old_route}/actions",
-    deprecated=True,
-    description="**DEPRECATED:** Please use get user actions globally instead",
-)
-def get_user_pending_actions(
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> Sequence[DataOutputDatasetPendingAction]:
-    return DataOutputDatasetService(db).get_user_pending_actions(authenticated_user)
 
 
 @router.post(

@@ -1,7 +1,6 @@
-from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -12,33 +11,15 @@ from app.core.authz import (
     DataProductResolver,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
-from app.data_output_configuration.schema_request import (
-    RenderTechnicalAssetAccessPathRequest,
-)
-from app.data_output_configuration.service import PluginService
-from app.data_products.output_port_technical_assets_link.router import (
-    link_output_port_to_technical_asset,
-    unlink_output_port_from_technical_asset,
-)
-from app.data_products.output_port_technical_assets_link.schema_request import (
-    LinkTechnicalAssetToOutputPortRequest,
-    UnLinkTechnicalAssetToOutputPortRequest,
-)
-from app.data_products.output_port_technical_assets_link.schema_response import (
-    LinkTechnicalAssetsToOutputPortResponse,
-)
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
-    DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
     CreateTechnicalAssetResponse,
     DataOutputGet,
-    DataOutputsGet,
     GetTechnicalAssetsResponse,
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
@@ -53,18 +34,11 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.resource_names.service import ResourceNameService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-old_route = "/data_outputs"
 route = "/v2/data_products/{data_product_id}/technical_assets"
 router = APIRouter(tags=["Data Products - Technical assets"])
-
-
-@router.get(old_route, deprecated=True)
-def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutputsGet]:
-    return DataOutputService(db).get_data_outputs()
 
 
 @router.get(route)
@@ -74,49 +48,11 @@ def get_data_product_technical_assets(
     return GetTechnicalAssetsResponse(
         technical_assets=[
             DataOutputGet.model_validate(do).convert()
-            for do in get_data_outputs_old(data_product_id, db)
+            for do in DataOutputService(db).get_data_outputs_for_data_product(
+                data_product_id
+            )
         ]
     )
-
-
-@router.get("/data_products/{data_product_id}/data_outputs", deprecated=True)
-def get_data_outputs_old(
-    data_product_id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[DataOutputGet]:
-    return DataOutputService(db).get_data_outputs_for_data_product(data_product_id)
-
-
-@router.get(f"{old_route}/namespace_suggestion", deprecated=True)
-def get_dataset_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return NamespaceSuggestion(
-        namespace=ResourceNameService.resource_name_suggestion(name).resource_name
-    )
-
-
-@router.get(f"{old_route}/namespace_length_limits", deprecated=True)
-def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
-    return NamespaceLengthLimits(
-        max_length=ResourceNameService.resource_name_length_limits().max_length
-    )
-
-
-@router.post(f"{old_route}/result_string", deprecated=True)
-def get_data_output_result_string(
-    request: DataOutputResultStringRequest, db: Session = Depends(get_db_session)
-) -> str:
-    return PluginService(db).render_technical_asset_access_path(
-        RenderTechnicalAssetAccessPathRequest(
-            platform_id=request.platform_id,
-            service_id=request.service_id,
-            configuration=request.configuration,
-        )
-    )
-
-
-@router.get(f"{old_route}/{{id}}", deprecated=True)
-def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutputGet:
-    do = ensure_technical_asset_exists(id, db)
-    return DataOutputService(db).get_data_output(do.owner_id, id)
 
 
 @router.get(f"{route}/{{id}}")
@@ -126,13 +62,6 @@ def get_technical_asset(
     return DataOutputGet.model_validate(
         DataOutputService(db).get_data_output(data_product_id, id)
     ).convert()
-
-
-@router.get(f"{old_route}/{{id}}/history", deprecated=True)
-def get_data_output_event_history(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[GetEventHistoryResponseItemOld]:
-    return EventService(db).get_history(id, EventReferenceEntity.DATA_OUTPUT)
 
 
 @router.get(f"{route}/{{id}}/history")
@@ -148,35 +77,6 @@ def get_technical_asset_event_history(
             )
         ]
     )
-
-
-@router.delete(
-    f"{old_route}/{{id}}",
-    responses={
-        404: {
-            "description": "Data Output not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Output id not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
-                DataOutputResolver,
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def remove_data_output(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    data_output = ensure_technical_asset_exists(id, db)
-    return remove_technical_asset(data_output.owner_id, id, db, authenticated_user)
 
 
 @router.delete(
@@ -226,36 +126,6 @@ def remove_technical_asset(
 
 
 @router.put(
-    f"{old_route}/{{id}}",
-    responses={
-        404: {
-            "description": "Data Output not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Output id not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                DataOutputResolver,
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def update_data_output(
-    id: UUID,
-    data_output: DataOutputUpdate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> UpdateTechnicalAssetResponse:
-    do = ensure_technical_asset_exists(id, db)
-    return update_technical_asset(do.owner_id, id, data_output, db, authenticated_user)
-
-
-@router.put(
     f"{route}/{{id}}",
     responses={
         404: {
@@ -298,38 +168,6 @@ def update_technical_asset(
 
 
 @router.put(
-    f"{old_route}/{{id}}/status",
-    responses={
-        404: {
-            "description": "Data Output not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Output id not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                DataOutputResolver,
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def update_data_output_status(
-    id: UUID,
-    data_output: DataOutputStatusUpdate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    do = ensure_technical_asset_exists(id, db)
-    return update_technical_asset_status(
-        do.owner_id, id, data_output, db, authenticated_user
-    )
-
-
-@router.put(
     f"{route}/{{id}}/status",
     responses={
         404: {
@@ -365,90 +203,6 @@ def update_technical_asset_status(
             subject_type=EventReferenceEntity.DATA_OUTPUT,
             actor_id=authenticated_user.id,
         )
-    )
-
-
-@router.post(
-    f"{old_route}/{{id}}/dataset/{{dataset_id}}",
-    responses={
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
-                DataOutputResolver,
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def link_dataset_to_data_output(
-    id: UUID,
-    dataset_id: UUID,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> LinkTechnicalAssetsToOutputPortResponse:
-    do = ensure_technical_asset_exists(id, db)
-    return link_output_port_to_technical_asset(
-        do.owner_id,
-        dataset_id,
-        LinkTechnicalAssetToOutputPortRequest(technical_asset_id=do.id),
-        background_tasks,
-        db,
-        authenticated_user,
-    )
-
-
-@router.delete(
-    f"{old_route}/{{id}}/dataset/{{dataset_id}}",
-    responses={
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
-                DataOutputResolver,
-            )
-        ),
-    ],
-    deprecated=True,
-)
-def unlink_dataset_from_data_output(
-    id: UUID,
-    dataset_id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> None:
-    do = ensure_technical_asset_exists(id, db)
-    return unlink_output_port_from_technical_asset(
-        data_product_id=do.owner_id,
-        output_port_id=dataset_id,
-        request=UnLinkTechnicalAssetToOutputPortRequest(technical_asset_id=id),
-        db=db,
-        authenticated_user=authenticated_user,
-    )
-
-
-@router.get(f"{old_route}/{{id}}/graph", deprecated=True)
-def get_graph_data_old(
-    id: UUID, db: Session = Depends(get_db_session), level: int = 3
-) -> Graph:
-    do = ensure_technical_asset_exists(id, db)
-    return get_technical_asset_graph_data(
-        data_product_id=do.owner_id, id=id, db=db, level=level
     )
 
 

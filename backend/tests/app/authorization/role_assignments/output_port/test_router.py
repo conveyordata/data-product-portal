@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 OLD_ENDPOINT = "/api/role_assignments/dataset"
 ENDPOINT = "/api/v2/authz/role_assignments/output_port"
-OLD_ENDPOINT_DATASET = "/api/datasets"
 
 
 class TestDatasetRoleAssignmentsRouter:
@@ -457,7 +456,7 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert len(data) == 1
 
-        response = self.delete_dataset(client, dataset.id)
+        response = self.delete_dataset(client, dataset.data_product_id, dataset.id)
         assert response.status_code == 200
 
         response = client.get(f"{OLD_ENDPOINT}")
@@ -515,8 +514,10 @@ class TestDatasetRoleAssignmentsRouter:
         )
         assert response.status_code == 200
 
-        history = self.get_dataset_history(client, dataset.id).json()
-        assert len(history) == 1
+        history = self.get_dataset_history(
+            client, dataset.data_product_id, dataset.id
+        ).json()
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_dataset_role_assignment_requested(
         self, client: TestClient
@@ -540,8 +541,10 @@ class TestDatasetRoleAssignmentsRouter:
         )
         assert response.status_code == 200
 
-        history = self.get_dataset_history(client, dataset.id).json()
-        assert len(history) == 1
+        history = self.get_dataset_history(
+            client, dataset.data_product_id, dataset.id
+        ).json()
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_dataset_role_assignment_approved(
         self, client: TestClient
@@ -570,9 +573,9 @@ class TestDatasetRoleAssignmentsRouter:
         )
         assert response.status_code == 200
 
-        response = self.get_dataset_history(client, dataset.id)
+        response = self.get_dataset_history(client, dataset.data_product_id, dataset.id)
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.json()["events"]) == 1
 
     def test_history_event_created_on_dataset_role_assignment_modified(
         self, client: TestClient
@@ -602,8 +605,10 @@ class TestDatasetRoleAssignmentsRouter:
         )
         assert response.status_code == 200
 
-        history = self.get_dataset_history(client, dataset.id).json()
-        assert len(history) == 1
+        history = self.get_dataset_history(
+            client, dataset.data_product_id, dataset.id
+        ).json()
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_dataset_role_assignment_removed(
         self, client: TestClient
@@ -633,13 +638,19 @@ class TestDatasetRoleAssignmentsRouter:
         response = client.delete(f"{OLD_ENDPOINT}/{assignment.id}")
         assert response.status_code == 200
 
-        history = self.get_dataset_history(client, dataset.id).json()
-        assert len(history) == 1
+        history = self.get_dataset_history(
+            client, dataset.data_product_id, dataset.id
+        ).json()
+        assert len(history["events"]) == 1
 
     @staticmethod
-    def delete_dataset(client: TestClient, dataset_id):
-        return client.delete(f"{OLD_ENDPOINT_DATASET}/{dataset_id}")
+    def delete_dataset(client: TestClient, data_product_id, dataset_id):
+        return client.delete(
+            f"/api/v2/data_products/{data_product_id}/output_ports/{dataset_id}"
+        )
 
     @staticmethod
-    def get_dataset_history(client: TestClient, dataset_id):
-        return client.get(f"{OLD_ENDPOINT_DATASET}/{dataset_id}/history")
+    def get_dataset_history(client: TestClient, data_product_id, dataset_id):
+        return client.get(
+            f"/api/v2/data_products/{data_product_id}/output_ports/{dataset_id}/history"
+        )

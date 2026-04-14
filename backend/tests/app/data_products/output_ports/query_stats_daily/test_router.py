@@ -15,7 +15,6 @@ from tests.factories import (
     UserFactory,
 )
 
-ENDPOINT = "/api/datasets"
 DATA_PRODUCT_ENDPOINT = "/api/v2/data_products"
 
 
@@ -37,23 +36,6 @@ class TestDatasetQueryStatsDailyRouter:
                 "query_count": 250,
             },
         ]
-
-    def test_update_query_stats_daily_batch_old(self, client, session):
-        """Test batch updating query stats."""
-        dataset = DatasetFactory()
-
-        response = client.patch(
-            f"{ENDPOINT}/{dataset.id}/query_stats",
-            json={
-                "dataset_query_stats_daily_updates": self.update_query_stats_payload()
-            },
-        )
-
-        assert response.status_code == 200
-
-        # Verify the records were created
-        stats = session.query(DatasetQueryStatsDaily).all()
-        assert len(stats) >= 2
 
     def test_update_query_stats_daily_batch(self, client, session):
         """Test batch updating query stats."""
@@ -94,15 +76,15 @@ class TestDatasetQueryStatsDailyRouter:
 
         # Use day granularity with small day_range to avoid excessive bucket filling
         response = client.get(
-            f"{ENDPOINT}/{dataset.id}/query_stats",
+            f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
             params={"granularity": "day", "day_range": 7},
         )
 
         assert response.status_code == 200
 
         data = response.json()
-        assert "dataset_query_stats_daily_responses" in data
-        stats = data["dataset_query_stats_daily_responses"]
+        assert "output_port_query_stats_responses" in data
+        stats = data["output_port_query_stats_responses"]
 
         # Find the actual data points (non-zero query counts)
         actual_stats = [stat for stat in stats if stat["query_count"] > 0]
@@ -113,31 +95,6 @@ class TestDatasetQueryStatsDailyRouter:
             assert "consumer_data_product_id" in stat
             assert "query_count" in stat
             assert stat["query_count"] in [150, 250]
-
-    def test_delete_query_stat_old(self, client, session):
-        dataset = DatasetFactory()
-        consumer = DataProductFactory()
-        today = date.today()
-
-        DatasetQueryStatsFactory(
-            date=today,
-            dataset_id=dataset.id,
-            consumer_data_product_id=consumer.id,
-            query_count=200,
-        )
-        session.commit()
-        response = client.request(
-            "DELETE",
-            f"{ENDPOINT}/{dataset.id}/query_stats",
-            json={
-                "date": today.isoformat(),
-                "consumer_data_product_id": str(consumer.id),
-            },
-        )
-
-        assert response.status_code == 200
-        stats = session.query(DatasetQueryStatsDaily).all()
-        assert stats == []
 
     def test_delete_query_stat(self, client, session):
         dataset = DatasetFactory()
@@ -194,13 +151,13 @@ class TestDatasetQueryStatsDailyRouter:
         session.commit()
 
         response = client.get(
-            f"{ENDPOINT}/{dataset.id}/query_stats",
+            f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
             params={"granularity": "week", "day_range": 90},
         )
 
         assert response.status_code == 200
         data = response.json()
-        stats = data["dataset_query_stats_daily_responses"]
+        stats = data["output_port_query_stats_responses"]
 
         # The service fills missing buckets, so we'll get all weeks in the 90-day range
         # Find the week with actual data (start_of_week and middle_of_week are in same week)

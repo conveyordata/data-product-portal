@@ -131,8 +131,10 @@ class TestOutputPortSearchRouter:
         ]
 
         # Validate test configuration
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         valid_output_ports = {
-            port.name for port in OutputPortService(session).get_output_ports(None)
+            port.name
+            for port in OutputPortService(session).get_output_ports(None, user)
         }
         for config in configuration:
             for value in config["expected"]:
