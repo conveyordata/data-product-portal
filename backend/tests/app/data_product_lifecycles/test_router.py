@@ -2,7 +2,7 @@ import pytest
 
 from tests.factories import DataProductFactory, LifecycleFactory
 
-ENDPOINT = "/api/data_product_lifecycles"
+ENDPOINT = "/api/v2/configuration/data_product_lifecycles"
 
 
 class TestDataProductLifecyclesRouter:

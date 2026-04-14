@@ -2,7 +2,7 @@ import pytest
 
 from tests.factories import ThemeSettingsFactory
 
-ENDPOINT = "/api/theme_settings"
+ENDPOINT = "/api/v2/configuration/theme_settings"
 
 
 @pytest.fixture

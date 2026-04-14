@@ -7,7 +7,7 @@ from tests.factories import (
     TechnicalAssetFactory,
 )
 
-ENDPOINT = "/api/tags"
+ENDPOINT = "/api/v2/configuration/tags"
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ class TestTagsRouter:
         TagFactory()
         tags = self.get_tags(client)
         assert tags.status_code == 200
-        assert len(tags.json()) == 1
+        assert len(tags.json()["tags"]) == 1
 
     @pytest.mark.usefixtures("admin")
     def test_update_tag(self, client):
@@ -43,7 +43,7 @@ class TestTagsRouter:
 
         tags = self.get_tags(client)
         assert tags.status_code == 200
-        assert len(tags.json()) == 0
+        assert len(tags.json()["tags"]) == 0
 
     @pytest.mark.usefixtures("admin")
     def test_remove_tag_coupled_with_dataset(self, client):

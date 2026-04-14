@@ -3,10 +3,9 @@ from copy import deepcopy
 import pytest
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
-from app.resource_names.service import ResourceNameValidityType
 from tests.factories import DataProductSettingFactory
 
-ENDPOINT = "/api/data_product_settings"
+ENDPOINT = "/api/v2/configuration/data_product_settings"
 
 
 @pytest.fixture
@@ -82,128 +81,6 @@ class TestDataProductSettingsRouter:
         data_product_setting = DataProductSettingFactory()
         response = self.remove_data_product_setting(client, data_product_setting.id)
         assert response.status_code == 403
-
-    def test_get_namespace_suggestion_substitution(self, client):
-        name = "test with spaces"
-        response = self.get_namespace_suggestion(client, name)
-        body = response.json()
-
-        assert response.status_code == 200
-        assert body["namespace"] == "test-with-spaces"
-
-    def test_get_namespace_length_limits(self, client):
-        response = self.get_namespace_length_limits(client)
-        assert response.status_code == 200
-        assert response.json()["max_length"] > 1
-
-    def test_validate_namespace_old(self, client):
-        namespace = "test"
-        response = self.validate_namespace_old(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.VALID
-
-    def test_validate_namespace_old_invalid_characters(self, client):
-        namespace = "!"
-        response = self.validate_namespace_old(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
-
-        assert response.status_code == 200
-        assert (
-            response.json()["validity"] == ResourceNameValidityType.INVALID_CHARACTERS
-        )
-
-    def test_validate_namespace_old_invalid_length(self, client):
-        namespace = "a" * 256
-        response = self.validate_namespace_old(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.INVALID_LENGTH
-
-    def test_validate_namespace_old_duplicate(self, client):
-        namespace = "test"
-        DataProductSettingFactory(
-            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
-        )
-        response = self.validate_namespace_old(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
-
-    def test_validate_namespace_old_duplicate_scoped_to_data_product(self, client):
-        namespace = "test"
-        DataProductSettingFactory(
-            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
-        )
-        response = self.validate_namespace_old(
-            client, namespace, DataProductSettingScope.DATASET
-        )
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.VALID
-
-    def test_validate_namespace(self, client):
-        namespace = "test"
-        response = self.validate_namespace(client, namespace)
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.VALID
-
-    def test_validate_namespace_invalid_characters(self, client):
-        namespace = "!"
-        response = self.validate_namespace_old(
-            client, namespace, DataProductSettingScope.DATAPRODUCT
-        )
-
-        assert response.status_code == 200
-        assert (
-            response.json()["validity"] == ResourceNameValidityType.INVALID_CHARACTERS
-        )
-
-    def test_validate_namespace_invalid_length(self, client):
-        namespace = "a" * 256
-        response = self.validate_namespace(client, namespace)
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.INVALID_LENGTH
-
-    def test_validate_namespace_duplicate(self, client):
-        namespace = "test"
-        DataProductSettingFactory(
-            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
-        )
-        response = self.validate_namespace(client, namespace)
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
-
-    def test_validate_namespace_duplicate_dataset(self, client):
-        namespace = "test"
-        DataProductSettingFactory(
-            namespace=namespace, scope=DataProductSettingScope.DATASET
-        )
-        response = self.validate_namespace_output_port(client, namespace)
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
-
-    def test_validate_namespace_duplicate_scoped_to_data_product(self, client):
-        namespace = "test"
-        DataProductSettingFactory(
-            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
-        )
-        response = self.validate_namespace_old(
-            client, namespace, DataProductSettingScope.DATASET
-        )
-
-        assert response.status_code == 200
-        assert response.json()["validity"] == ResourceNameValidityType.VALID
 
     @pytest.mark.usefixtures("admin")
     def test_create_data_product_setting_duplicate_namespace(

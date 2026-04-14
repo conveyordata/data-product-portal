@@ -8,7 +8,9 @@ from app.database.database import get_db_session
 from .schema_response import ThemeSettings
 from .service import ThemeSettingsService
 
-router = APIRouter(tags=["Configuration - Theme settings"])
+router = APIRouter(
+    tags=["Configuration - Theme settings"], prefix="/v2/configuration/theme_settings"
+)
 
 
 @router.get("")
@@ -28,9 +30,3 @@ def update_theme_settings(
     new_settings: ThemeSettings, db: Session = Depends(get_db_session)
 ):
     return ThemeSettingsService(db).update_theme_settings(new_settings)
-
-
-_router = router
-router = APIRouter()
-router.include_router(_router, prefix="/theme_settings", deprecated=True)
-router.include_router(_router, prefix="/v2/configuration/theme_settings")

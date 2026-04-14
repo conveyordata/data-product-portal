@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -7,10 +6,8 @@ from sqlalchemy.orm import Session
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
     CreateDomainResponse,
-    DomainGetOld,
     GetDomainResponse,
     GetDomainsItem,
-    GetDomainsItemOld,
     GetDomainsResponse,
     UpdateDomainResponse,
 )
@@ -19,7 +16,7 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
-router = APIRouter()
+router = APIRouter(tags=["Configuration - Domains"], prefix="/v2/configuration/domains")
 
 
 @router.post(
@@ -84,36 +81,16 @@ def migrate_domain(
     return DomainService(db).migrate_domain(from_id, to_id)
 
 
-_router = router
-router = APIRouter(tags=["Configuration - Domains"])
-old_route = "/domains"
-route = "/v2/configuration/domains"
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
-
-
-@router.get("/domains", deprecated=True)
-def get_domains_old(
-    db: Session = Depends(get_db_session),
-) -> Sequence[GetDomainsItemOld]:
-    return DomainService(db).get_domains()
-
-
-@router.get("/v2/configuration/domains")
+@router.get("")
 def get_domains(db: Session = Depends(get_db_session)) -> GetDomainsResponse:
     return GetDomainsResponse(
         domains=[
             GetDomainsItem.from_get_domains_item_old(domain)
-            for domain in get_domains_old(db)
+            for domain in DomainService(db).get_domains()
         ]
     )
 
 
-@router.get(f"{old_route}/{{id}}", deprecated=True)
-def get_domain_old(id: UUID, db: Session = Depends(get_db_session)) -> DomainGetOld:
-    return DomainService(db).get_domain(id)
-
-
-@router.get(f"{route}/{{id}}")
+@router.get("/{id}")
 def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> GetDomainResponse:
     return GetDomainResponse.from_domain_get_old(DomainService(db).get_domain(id))

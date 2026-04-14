@@ -9,7 +9,7 @@ from tests.factories import (
     PlatformServiceFactory,
 )
 
-ENDPOINT = "/api/envs"
+ENDPOINT = "/api/v2/configuration/environments"
 
 
 class TestEnvironmentsRouter:
@@ -20,8 +20,8 @@ class TestEnvironmentsRouter:
         response = client.get(ENDPOINT)
         assert response.status_code == 200
         environments = response.json()
-        assert len(environments) == 1
-        assert environments[0]["name"] == env_obj.name
+        assert len(environments["environments"]) == 1
+        assert environments["environments"][0]["name"] == env_obj.name
 
     def test_get_environment(self, client):
         env_obj = EnvironmentFactory()
@@ -48,8 +48,10 @@ class TestEnvironmentsRouter:
 
         assert response.status_code == 200
         actual_config = response.json()
-        assert len(actual_config) == 2
-        assert actual_config[0]["config"] == json.loads(config_obj.config)
+        assert len(actual_config["environment_configs"]) == 2
+        assert actual_config["environment_configs"][0]["config"] == json.loads(
+            config_obj.config
+        )
 
     @pytest.mark.usefixtures("admin")
     def test_get_config(self, client):
@@ -118,10 +120,10 @@ class TestEnvironmentsRouter:
 
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["service"]["name"] == service.name
-        assert "platform" in data[0]
-        assert "config" in data[0]
+        assert len(data["environment_configs"]) == 1
+        assert data["environment_configs"][0]["service"]["name"] == service.name
+        assert "platform" in data["environment_configs"][0]
+        assert "config" in data["environment_configs"][0]
 
     @staticmethod
     def get_environment_by_id(client, environment_id):
