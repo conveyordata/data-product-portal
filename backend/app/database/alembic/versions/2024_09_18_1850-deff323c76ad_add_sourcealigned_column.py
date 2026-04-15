@@ -23,4 +23,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column("data_outputs", sa.Column("sourceAligned", sa.Boolean))
+    op.drop_column("data_outputs", "sourceAligned")

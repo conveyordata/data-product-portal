@@ -49,5 +49,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_constraint("data_products_lifecycle_id_fkey","data_products", type_="foreignkey")
     op.drop_table("data_product_lifecycles")
     op.drop_column("data_products", "lifecycle_id")

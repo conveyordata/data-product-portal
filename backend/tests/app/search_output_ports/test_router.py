@@ -2,8 +2,12 @@ import os
 import time
 from typing import Final
 
-from sqlalchemy import text
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import select
 
+from app.db_tool import seed_cmd
+from app.users.model import User as UserModel
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
@@ -130,8 +134,7 @@ class TestOutputPortSearchRouter:
             },
         ]
 
-        # Validate test configuration
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        user = session.execute(select(UserModel).where(UserModel.external_id == settings.DEFAULT_USERNAME)).one()
         valid_output_ports = {
             port.name
             for port in OutputPortService(session).get_output_ports(None, user)
@@ -213,14 +216,11 @@ class TestOutputPortSearchRouter:
 
     @staticmethod
     def reseed(session) -> None:
-        from app.database.database import Base
-        from app.db_tool import seed_cmd
-
-        tables_list = ", ".join(
-            [str(name) for name in reversed(Base.metadata.sorted_tables)]
+        cfg = Config(
+            os.path.join(os.path.dirname(os.path.abspath("__file__")), "alembic.ini")
         )
-        session.execute(text(f"TRUNCATE TABLE {tables_list} RESTART IDENTITY CASCADE;"))
-        session.commit()
+        command.downgrade(cfg, "base")
+        command.upgrade(cfg, "heads")
 
         seed_cmd(path="./sample_data.sql")
         RoleService(db=session).initialize_prototype_roles()
