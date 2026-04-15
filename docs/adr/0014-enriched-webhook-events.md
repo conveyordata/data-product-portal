@@ -29,7 +29,6 @@ We want a v2 event system that delivers named events with full domain objects em
 * **Explicit and discoverable.** Reading a route handler should make it immediately obvious whether a v2 event fires, and for which named event. A grep should return a definitive list of all emitting endpoints.
 * **Testable.** Each emitting endpoint must be testable in isolation without making real outbound webhook calls.
 * **Full domain object in payload.** The event payload must include the complete hydrated Pydantic object, not just an ID.
-* **Consistent with existing patterns.** The codebase already expresses cross-cutting concerns as FastAPI `Depends()` callables returned from factory functions (see `Authorization.enforce()` in `backend/app/core/authz/authorization.py`). The v2 mechanism should follow the same idiom.
 
 ## Considered Options
 
