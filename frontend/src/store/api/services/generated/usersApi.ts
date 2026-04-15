@@ -298,7 +298,7 @@ export type SnowflakeTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
-export type TechnicalAsset = {
+export type OwnedTechnicalAsset = {
   id: string;
   name: string;
   namespace: string;
@@ -340,7 +340,7 @@ export type TechnicalAssetOutputPortPendingAction = {
   output_port_id: string;
   output_port: OutputPort;
   technical_asset_id: string;
-  technical_asset: TechnicalAsset;
+  technical_asset: OwnedTechnicalAsset;
   status: DecisionStatus;
   requested_on: string;
   denied_on: string | null;

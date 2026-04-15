@@ -1,11 +1,31 @@
 version: '3'
 
 tasks:
-  install:
-    desc: Install poetry dependencies
+  install:products:
+    desc: Install products poetry dependencies
     dir: products
     cmds:
       - poetry install
+
+  install:provisioner:
+    desc: Install provisioner poetry dependencies
+    dir: provisioner
+    cmds:
+      - poetry install --with dev
+
+  install:
+    desc: Install poetry dependencies
+    deps:
+      - install:products
+      - install:provisioner
+
+  mypy:
+    desc: Run mypy on provisioner
+    deps:
+      - install:provisioner
+    dir: provisioner
+    cmds:
+      - poetry run mypy . --config-file=pyproject.toml
 
   reset:
     desc: Restart the entire setup
