@@ -7,10 +7,12 @@ sidebar_position: 200
 ## Unreleased
 
 ### breaking changes
+- **[API]**: All v1 endpoints have been removed. Migrate to API v2 if not yet done so.
 - **[API]**: The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.
 
 ### features
 
+- **[SDK]**: We ship a full python client SDK which mirrors the openapi spec for easier integration.
 - **[Explorer]**: Domain container nodes are now visible in the global graph explorer, grouping data products by domain with distinct colours
 - **[Postgresql]**: Postgresql plugin defining technical assets
 - **[Docs]**: Adding an architecture overview
