@@ -78,7 +78,22 @@ def get_auth_provider() -> Optional[JWTVerifier]:
     return None
 
 
-mcp = FastMCP(name="DataProductPortalMCP", auth=get_auth_provider())
+mcp = FastMCP(
+    name="DataProductPortalMCP",
+    instructions="""
+    Portal for discovering and exploring data products and output ports.
+
+    Recommended discovery flow:
+    1. get_marketplace_overview: understand what's available and get domain IDs
+    2. search_output_ports: find specific output ports (preferred for most searches)
+       Use search_data_products only when the user explicitly asks to find a data product.
+    3. get_*_details: drill into a specific result by UUID
+
+    Output ports (datasets) are the primary way data is shared in the portal.
+    Data products are containers owned by teams that group related output ports and technical assets.
+    """,
+    auth=get_auth_provider(),
+)
 
 # ==============================================================================
 # CORE DISCOVERY & SEARCH TOOLS
@@ -100,8 +115,9 @@ def get_mcp_authenticated_user(token: str):
 
 @mcp.tool
 async def get_current_user(ctx: Context) -> dict[str, Any]:
-    """Get current user data from the MCP. You can use this to
-    get information about the authenticated user."""
+    """Get the profile of the currently authenticated user (id, name, email).
+    Use this to resolve 'me' or 'my' in user requests before querying roles or owned resources.
+    Requires authentication."""
     token = get_access_token()
     return get_mcp_authenticated_user(token=token.token)
 
@@ -111,13 +127,15 @@ def universal_search(
     query: str, entity_types: list[str] = [], limit: int = 10
 ) -> Dict[str, Any]:
     """
-    Universal search across data products, output ports, and technical assets.
-    The best search experience for retrieving output ports is to use the search_output_ports tool
+    Search across data products, output ports, technical assets, and domains in a single call.
+    Use this only when the user hasn't specified what type of entity they're looking for.
+    For output ports specifically, always prefer search_output_ports — it uses semantic search and returns richer metadata.
+    To get the data product details for output ports, you can use the get_data_product_details function with the data_product_id.
 
     Args:
         query: Search query string
-        entity_types: List of entity types to search
-        (data_products, output_ports, technical_assets, domains)
+        entity_types: Filter to specific types. Valid values: 'data_products', 'output_ports',
+                      'technical_assets', 'domains'. Leave empty to search all types.
         limit: Maximum number of results per entity type
     """
     try:
@@ -238,7 +256,19 @@ def search_data_products(
     status: Optional[str] = None,
     limit: int = 20,
 ) -> Dict[str, Any]:
-    """Search data products with filters using the existing service layer."""
+    """
+    Search and filter data products. Only use this when the user explicitly asks to find a data product.
+    For general data discovery, prefer search_output_ports instead.
+
+    A data product is a container owned by a team, grouping related output ports and technical assets.
+    To explore what a data product contains, follow up with get_data_product_details or get_data_product_analytics.
+
+    Args:
+        query: Keyword search on name and description. Leave empty to list all data products.
+        domain_id: UUID of the domain to filter by — use get_marketplace_overview to list available domains.
+        status: Lifecycle state. Common values: 'active', 'pending', 'archived'.
+        limit: Maximum number of results to return.
+    """
     try:
         db = next(get_db_session())
         try:
@@ -291,7 +321,17 @@ def search_output_ports(
     query: Optional[str] = None,
     limit: int = 20,
 ) -> Dict[str, Any]:
-    """Search output ports with filters using the existing service layer."""
+    """
+    Search output ports (datasets) using semantic search. This is the preferred tool for finding data in the portal.
+    Use this for any question about finding datasets, tables, or data sources — unless the user explicitly asks for a data product.
+
+    An output port is a published, consumable dataset exposed by a data product.
+    Returns the name, description, access type, owner, and parent data product for each result.
+
+    Args:
+        query: Natural language or keyword search. Leave empty to list all accessible output ports.
+        limit: Maximum number of results to return.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
@@ -299,7 +339,7 @@ def search_output_ports(
         try:
             # Get all datasets and filter manually
             all_datasets = OutputPortService(db).search_datasets(
-                query=query, user=user, limit=limit
+                query=query, user=user, limit=limit, current_user_assigned=False
             )
             return {
                 "output_ports": [
@@ -325,7 +365,14 @@ def search_output_ports(
 
 @mcp.tool
 def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific data product."""
+    """
+    Get full details of a single data product by its UUID, including its description,
+    domain, lifecycle status, owners, output ports, and technical assets.
+    Use after search_data_products or search_output_ports to drill into a related data product.
+
+    Args:
+        data_product_id: UUID obtained from search_data_products or universal_search.
+    """
     try:
         db = next(get_db_session())
         try:
@@ -347,7 +394,14 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
 
 @mcp.tool
 def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific output port."""
+    """
+    Get full details of a single output port by its UUID, including schema, access type,
+    the data product it belongs to, and owner contact information.
+    Use after search_output_ports to get complete information about a specific dataset.
+
+    Args:
+        output_port_id: UUID obtained from search_output_ports or universal_search.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
@@ -370,7 +424,13 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
 
 @mcp.tool
 def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific technical asset."""
+    """
+    Get full details of a specific technical asset (data output) by its UUID,
+    including its type, configuration, and the data product it belongs to.
+
+    Args:
+        technical_asset_id: UUID obtained from universal_search or get_data_product_analytics.
+    """
     try:
         db = next(get_db_session())
         do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
@@ -393,7 +453,13 @@ def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
 
 @mcp.tool
 def get_domain_details(domain_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific domain."""
+    """
+    Get details of a specific domain by its UUID, including its name and description.
+    Use get_marketplace_overview first to discover available domain IDs.
+
+    Args:
+        domain_id: UUID obtained from get_marketplace_overview or search results.
+    """
     try:
         db = next(get_db_session())
         try:
@@ -419,7 +485,12 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
 
 @mcp.tool
 def get_marketplace_overview() -> Dict[str, Any]:
-    """Get marketplace overview with statistics and featured content."""
+    """
+    Get a high-level overview of the portal: total counts of data products, output ports,
+    technical assets, a list of all domains with their IDs, and featured content.
+    Use this as a starting point to orient the user, discover available domain IDs,
+    or answer questions like 'what data is available?'.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
@@ -468,7 +539,13 @@ def get_marketplace_overview() -> Dict[str, Any]:
 
 @mcp.tool
 def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
-    """Get analytics and usage statistics for a data product."""
+    """
+    Get analytics for a data product: its output ports and technical assets with counts.
+    Use this to answer questions like 'what does this data product expose?' or 'how many datasets does it have?'.
+
+    Args:
+        data_product_id: UUID obtained from search_data_products or get_data_product_details.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
@@ -669,12 +746,16 @@ def get_user_roles(
     limit: int = 50,
 ) -> Dict[str, Any]:
     """
-    Get user roles and role assignments.
+    Get role assignments for a user across the portal.
+    Use get_current_user first to resolve 'me' or 'my' to a user ID.
+    Requires authentication.
 
     Args:
-        user_id: Specific user ID to get roles for (optional, defaults to current user)
-        scope_type: Filter by scope type ('global', 'data_product', 'output_port')
-        limit: Maximum number of role assignments to return
+        user_id: UUID of the user. Defaults to the currently authenticated user.
+        scope_type: Filter by scope. Valid values: 'global' (portal-wide roles),
+                    'data_product' (roles on specific data products),
+                    'dataset' (roles on specific output ports). Leave empty to return all scopes.
+        limit: Maximum number of role assignments to return.
     """
     try:
         db = next(get_db_session())
@@ -772,12 +853,12 @@ def get_resource_roles(
     limit: int = 50,
 ) -> Dict[str, Any]:
     """
-    Get all user roles for a specific resource (data product or output port).
+    List all users and their roles on a specific data product or output port.
 
     Args:
-        resource_type: Type of resource ('data_product' or 'output_port')
-        resource_id: ID of the resource
-        limit: Maximum number of role assignments to return
+        resource_type: Type of resource. Valid values: 'data_product' or 'dataset' (output ports use 'dataset').
+        resource_id: UUID of the resource.
+        limit: Maximum number of role assignments to return.
     """
     try:
         db = next(get_db_session())
