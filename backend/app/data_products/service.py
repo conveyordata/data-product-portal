@@ -158,7 +158,7 @@ class DataProductService:
         data_product = self.db.get(
             DataProductModel,
             id,
-            options=[selectinload(DataProductModel.data_product_settings)],
+            options=[selectinload(DataProductModel.tags)],
         )
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -184,10 +184,7 @@ class DataProductService:
             )
         )
         query = select(DataProductModel).options(
-            selectinload(DataProductModel.dataset_links).raiseload("*"),
-            selectinload(DataProductModel.assignments).raiseload("*"),
-            selectinload(DataProductModel.data_outputs).raiseload("*"),
-            selectinload(DataProductModel.data_product_settings).raiseload("*"),
+            selectinload(DataProductModel.tags).raiseload("*"),
         )
         if filter_to_user_with_assigment:
             query = query.filter(
@@ -265,7 +262,9 @@ class DataProductService:
         id: UUID,
         data_product: DataProductUpdate,
     ) -> UpdateDataProductResponse:
-        current_data_product = ensure_data_product_exists(id, self.db)
+        current_data_product = ensure_data_product_exists(
+            id, self.db, options=[selectinload(DataProductModel.tags)]
+        )
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         if (
