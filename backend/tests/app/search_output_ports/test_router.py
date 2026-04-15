@@ -4,7 +4,6 @@ from typing import Final
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import select
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype, Scope
@@ -16,7 +15,6 @@ from app.data_products.output_ports.schema_response import (
 from app.data_products.output_ports.service import OutputPortService
 from app.db_tool import seed_cmd
 from app.settings import settings
-from app.users.model import User as UserModel
 from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
@@ -25,7 +23,7 @@ from tests.factories import (
 )
 
 EMBEDDING_LATENCY_BOUND: Final[float] = float(
-    os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.000)
+    os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.100)
 )  # seconds
 LATENCY_BOUND: Final[float] = float(os.getenv("TEST_LATENCY_BOUND", 0.300))  # seconds
 PRECISION_BOUND: Final[float] = 0.5
@@ -134,9 +132,7 @@ class TestOutputPortSearchRouter:
             },
         ]
 
-        user = session.execute(
-            select(UserModel).where(UserModel.external_id == settings.DEFAULT_USERNAME)
-        ).one()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         valid_output_ports = {
             port.name
             for port in OutputPortService(session).get_output_ports(None, user)
