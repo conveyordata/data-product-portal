@@ -21,7 +21,7 @@ from app.database.database import get_db_session
 
 router = APIRouter(
     tags=["Configuration - Data Product lifecycles"],
-    prefix="/v2/configuration/data_product_lifecycles",
+    prefix="/v2/configuration/data_product_lifecycle",
 )
 
 
