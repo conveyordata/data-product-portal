@@ -10,7 +10,8 @@ from app.core.authz.resolvers import DataProductNameResolver
 from app.database.database import get_db_session
 from app.users.schema import User
 
-router = APIRouter(tags=["Authentication"], prefix="/v2/authn")
+prefix = "/v2/authn"
+router = APIRouter(tags=["Authentication"], prefix=prefix)
 router.include_router(device)
 
 
