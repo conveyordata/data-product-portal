@@ -2439,7 +2439,7 @@
         }
       }
     },
-    "/api/v2/configuration/data_product_lifecycle": {
+    "/api/v2/configuration/data_product_lifecycles": {
       "get": {
         "tags": [
           "Configuration - Data Product lifecycles"
@@ -2512,7 +2512,7 @@
         }
       }
     },
-    "/api/v2/configuration/data_product_lifecycle/{id}": {
+    "/api/v2/configuration/data_product_lifecycles/{id}": {
       "put": {
         "tags": [
           "Configuration - Data Product lifecycles"
