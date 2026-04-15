@@ -32,7 +32,9 @@ services:
       - ../../frontend/config.docker.js:/app/dist/config.js
 
   provisioner:
-    build: ./provisioner
+    build:
+      context: ../..
+      dockerfile: demo/basic/provisioner/Dockerfile
     env_file:
       - .env.portal
     volumes:
