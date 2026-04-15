@@ -259,4 +259,3 @@ def downgrade() -> None:
     op.execute("DROP TYPE DataProductMembershipStatus;")
     op.execute("DROP TYPE DataProductDatasetLinkStatus;")
     op.execute("DROP TYPE DeviceFlowStatus;")
-

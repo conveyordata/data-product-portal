@@ -6,8 +6,6 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import select
 
-from app.db_tool import seed_cmd
-from app.users.model import User as UserModel
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
@@ -16,7 +14,9 @@ from app.data_products.output_ports.schema_response import (
     GetDataProductOutputPortsResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
+from app.db_tool import seed_cmd
 from app.settings import settings
+from app.users.model import User as UserModel
 from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
@@ -134,7 +134,9 @@ class TestOutputPortSearchRouter:
             },
         ]
 
-        user = session.execute(select(UserModel).where(UserModel.external_id == settings.DEFAULT_USERNAME)).one()
+        user = session.execute(
+            select(UserModel).where(UserModel.external_id == settings.DEFAULT_USERNAME)
+        ).one()
         valid_output_ports = {
             port.name
             for port in OutputPortService(session).get_output_ports(None, user)
