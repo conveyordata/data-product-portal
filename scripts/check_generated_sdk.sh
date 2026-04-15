@@ -4,7 +4,10 @@ set -e
 # Check if the generated API is up to date
 cd sdk
 
-echo "Checking if generated API is up to date..."
+echo "Checking if generated SDK is up to date..."
+
+# Install dependencies (including openapi-python-client)
+poetry install --no-interaction --only dev
 
 # Run generate-api
 poetry run openapi-python-client generate \
