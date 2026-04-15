@@ -138,7 +138,7 @@ class DeviceFlowService:
                     "grant_type": "authorization_code",
                     "client_id": client_id,
                     "redirect_uri": f"{get_oidc().redirect_uri}"
-                    f"{request.url_for('device_flow_callback')}",
+                    f"{request.app.url_path_for('device_flow_callback')}",
                     "code": device_flow.authz_code,
                     "code_verifier": device_flow.authz_verif,
                 },
@@ -255,9 +255,7 @@ class DeviceFlowService:
         device.authz_verif = code_verifier
         db.commit()
 
-        callback_url = (
-            f"{get_oidc().redirect_uri}{request.url_for('device_flow_callback')}"
-        )
+        callback_url = f"{get_oidc().redirect_uri}{request.app.url_path_for('device_flow_callback')}"
 
         return RedirectResponse(
             status_code=302,
