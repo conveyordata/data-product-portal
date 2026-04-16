@@ -89,7 +89,7 @@ class PortalAuth:
             "client_id": self.client_id,
             "scope": self.scope,
         }
-        response = self._do_post(params, endpoint="auth/device/device_token")
+        response = self._do_post(params, endpoint="v2/authn/device/device_token")
 
         if not response.is_success:
             raise RuntimeError(f"Device authorization failed: {response.text}")
@@ -116,7 +116,7 @@ class PortalAuth:
                 "device_code": device_code,
             }
             token_response = self._do_post(
-                token_params, endpoint="auth/device/jwt_token"
+                token_params, endpoint="v2/authn/device/jwt_token"
             )
 
             if token_response.status_code == 200:
