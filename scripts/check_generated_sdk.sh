@@ -6,10 +6,9 @@ set -e
 echo "Checking if generated SDK is up to date..."
 pushd sdk
 
-
   # Install dependencies (including openapi-python-client)
   poetry install --no-interaction --only dev
-  
+
   # Run generate-api
   poetry run openapi-python-client generate \
     --path ./../docs/static/openapi.json \
