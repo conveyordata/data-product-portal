@@ -83,7 +83,6 @@ Like all FastAPI dependencies, the event-emitting dependencies run as part of th
 * **Good, because** the webhook call is co-located with the business operation.
 * **Bad, because** services are transport-agnostic by convention: they accept a `Session` and return domain objects; they do not import HTTP concerns such as `BackgroundTasks` or `Request`.
 * **Bad, because** `BackgroundTasks` is not available inside services; emitting with `asyncio.create_task()` directly would re-introduce the fire-on-failure risk of v1.
-* **Bad, because** each service that emits events becomes harder to unit test since the emitter must be mocked at the service layer.
 
 ---
 
