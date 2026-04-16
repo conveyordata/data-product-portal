@@ -121,7 +121,7 @@ export const CartOverview = ({
     };
 
     return (
-        <Card title={<Typography.Title level={3}>{t('Checkout summary')}</Typography.Title>}>
+        <Card title={<Typography.Title level={3}>{t('Output ports in cart')}</Typography.Title>}>
             <List
                 footer={
                     <Flex justify={'flex-end'}>

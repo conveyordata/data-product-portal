@@ -1,0 +1,5 @@
+@use '@/styles/globals';
+
+.selected {
+  border: solid 2px globals.$primary-color;
+}

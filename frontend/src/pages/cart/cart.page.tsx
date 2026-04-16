@@ -1,8 +1,11 @@
 import {
     BellOutlined,
     CheckCircleOutlined,
+    ExperimentOutlined,
+    GiftOutlined,
     MessageOutlined,
     PlusOutlined,
+    ProductOutlined,
     ShopOutlined,
     ShoppingCartOutlined,
 } from '@ant-design/icons';
@@ -16,6 +19,7 @@ import {
     Flex,
     Form,
     type FormProps,
+    Radio,
     Row,
     Select,
     Skeleton,
@@ -23,8 +27,8 @@ import {
     theme,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { parseAsString, useQueryState } from 'nuqs';
-import { useEffect, useMemo } from 'react';
+import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
@@ -32,6 +36,7 @@ import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrum
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
+import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
@@ -45,9 +50,18 @@ import { useSearchOutputPortsQuery } from '@/store/api/services/generated/output
 import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
+import styles from './cart.module.scss';
 
 const cartFormDataStorageKey = 'cart-form-data';
+export enum DataProductChoiceOptions {
+    exploration = 'EXPLORATION',
+    data_product = 'DATA_PRODUCT',
+}
 
+export enum ExistingOrNew {
+    existing = 'EXISTING',
+    new = 'new',
+}
 function Cart() {
     const { t } = useTranslation();
     const { token } = theme.useToken();
@@ -55,6 +69,14 @@ function Cart() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
+    const [selectedDataProductChoice, setSelectedDataProductChoice] = useQueryState(
+        'selectedDataProductChoice',
+        parseAsStringEnum<DataProductChoiceOptions>(''),
+    );
+    const [selectedExistingOrNew, setSelectedExistingOrNew] = useQueryState(
+        'selectedExistingOrNew',
+        parseAsStringEnum<ExistingOrNew>(''),
+    );
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
         setBreadcrumbs([
@@ -231,129 +253,103 @@ function Cart() {
 
         return submitFormIssues;
     }, [overlappingOutputPortIds, selectedProductOutputPortsInCart, t]);
+
+    const selectNewOrExistingDataProduct = useCallback(() => {
+        return (
+            <>
+                <Col span={12}>
+                    <Card
+                        hoverable
+                        className={selectedExistingOrNew === ExistingOrNew.new ? styles.selected : undefined}
+                        onClick={() => {
+                            setSelectedExistingOrNew(ExistingOrNew.new);
+                        }}
+                    >
+                        <Card.Meta
+                            avatar={<PlusOutlined style={{ fontSize: '40px' }} />}
+                            title={t('Create a new data product')}
+                        />
+                    </Card>
+                </Col>
+                <Col span={12}>
+                    <Card
+                        hoverable
+                        className={selectedExistingOrNew === ExistingOrNew.existing ? styles.selected : undefined}
+                        onClick={() => {
+                            setSelectedExistingOrNew(ExistingOrNew.existing);
+                        }}
+                    >
+                        <Card.Meta
+                            avatar={<ProductOutlined style={{ fontSize: '40px' }} />}
+                            title={t('Select an existing data product')}
+                        />
+                    </Card>
+                </Col>
+            </>
+        );
+    }, [selectedExistingOrNew]);
     return (
         <Row gutter={16}>
-            <Col span={10}>
+            <Col span={16}>
+                <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>
+                    <Typography.Text>{t('Choose the option that best describes your needs')}</Typography.Text>
+                    <Row gutter={[16, 32]}>
+                        <Col span={12}>
+                            <Card
+                                hoverable
+                                className={
+                                    selectedDataProductChoice === DataProductChoiceOptions.exploration
+                                        ? styles.selected
+                                        : undefined
+                                }
+                                onClick={() => {
+                                    setSelectedDataProductChoice(DataProductChoiceOptions.exploration);
+                                }}
+                            >
+                                <Card.Meta
+                                    avatar={<ExperimentOutlined style={{ fontSize: '40px' }} />}
+                                    title={t('I want to explore this data')}
+                                    description={t('I need a one-time answer or personal sandbox')}
+                                />
+                            </Card>
+                        </Col>
+                        <Col span={12}>
+                            <Card
+                                hoverable
+                                className={
+                                    selectedDataProductChoice === DataProductChoiceOptions.data_product
+                                        ? styles.selected
+                                        : undefined
+                                }
+                                onClick={() => {
+                                    setSelectedDataProductChoice(DataProductChoiceOptions.data_product);
+                                }}
+                            >
+                                <Card.Meta
+                                    avatar={<GiftOutlined style={{ fontSize: '40px' }} />}
+                                    title={t('I want to build data products')}
+                                    description={t('I want to transform, govern and share data with others')}
+                                />
+                            </Card>
+                        </Col>
+                        {selectedDataProductChoice === DataProductChoiceOptions.data_product &&
+                            selectNewOrExistingDataProduct()}
+                        {selectedDataProductChoice === DataProductChoiceOptions.data_product &&
+                            selectedExistingOrNew === ExistingOrNew.new && (
+                                <Col span={24}>
+                                    <DataProductCreate />
+                                </Col>
+                            )}
+                    </Row>
+                </Card>
+            </Col>
+            <Col span={8}>
                 <CartOverview
                     loading={fetchingOutputPorts}
                     cartOutputPorts={cartOutputPorts}
                     overlappingDatasetIds={overlappingOutputPortIds}
                     selectedDataProductId={selectedDataProductId}
                 />
-            </Col>
-            <Col span={14}>
-                <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>
-                    {initialValues === undefined ? (
-                        <Skeleton />
-                    ) : (
-                        <Form<CartFormData>
-                            key={initialValues.dataProductId}
-                            layout={'vertical'}
-                            onFinish={onFinish}
-                            form={form}
-                            onValuesChange={onValuesChange}
-                            initialValues={initialValues}
-                        >
-                            <Form.Item<CartFormData>
-                                name="dataProductId"
-                                label={t('Data Product')}
-                                rules={[{ required: true, message: t('Please select a Data Product') }]}
-                            >
-                                <Select
-                                    placeholder={t('Select a Data Product')}
-                                    options={dataProductOptions}
-                                    loading={isFetchingUserDataProducts}
-                                    showSearch={{
-                                        filterOption: (input, option) =>
-                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
-                                    }}
-                                    popupRender={(menu) => (
-                                        <>
-                                            <Button
-                                                type="text"
-                                                icon={<PlusOutlined />}
-                                                style={{ width: '100%' }}
-                                                onClick={createNewDataProduct}
-                                            >
-                                                {t('Create new Data Product')}
-                                            </Button>
-                                            <Divider style={{ margin: '8px 0' }} />
-                                            {menu}
-                                        </>
-                                    )}
-                                />
-                            </Form.Item>
-                            {submitFormIssues.length > 0 && (
-                                <Alert
-                                    title={t('Cannot submit request')}
-                                    description={
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {submitFormIssues.map((reason) => (
-                                                <li key={reason.key}>{reason.value}</li>
-                                            ))}
-                                        </ul>
-                                    }
-                                    type="warning"
-                                    showIcon
-                                    style={{ marginBottom: 16 }}
-                                />
-                            )}
-                            <Form.Item<CartFormData>
-                                name="justification"
-                                label={'Business justification'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t('Please explain why you need access to these Output Ports'),
-                                    },
-                                ]}
-                            >
-                                <TextArea
-                                    rows={4}
-                                    placeholder={t('Explain why you need access to these Output Ports')}
-                                />
-                            </Form.Item>
-                            <Form.Item label={null}>
-                                <Flex gap={'small'}>
-                                    <Link to={ApplicationPaths.Marketplace} style={{ width: '100%' }}>
-                                        <Button type="default" style={{ width: '100%' }}>
-                                            {t('Continue browsing')}
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        style={{ width: '100%' }}
-                                        loading={isRequestingAccess}
-                                        disabled={
-                                            fetchingOutputPorts ||
-                                            submitFormIssues.length > 0 ||
-                                            cartOutputPorts === undefined ||
-                                            cartOutputPorts?.length === 0
-                                        }
-                                    >
-                                        {t('Submit access requests')}
-                                    </Button>
-                                </Flex>
-                            </Form.Item>
-                        </Form>
-                    )}
-                    <Divider />
-                    <Flex vertical>
-                        <Typography.Text>
-                            <CheckCircleOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('Owners typically respond within 24-48 hours')}
-                        </Typography.Text>
-                        <Typography.Text>
-                            <BellOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('You will get notified when access is granted or denied')}
-                        </Typography.Text>
-                        <Typography.Text>
-                            <MessageOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('Message owners directly for questions')}
-                        </Typography.Text>
-                    </Flex>
-                </Card>
             </Col>
         </Row>
     );
