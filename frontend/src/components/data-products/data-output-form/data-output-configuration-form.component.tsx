@@ -1,19 +1,19 @@
-import { Checkbox, type CheckboxOptionType, Form, type FormInstance, Input, Radio, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Radio, Select } from 'antd';
 import type { Rule } from 'antd/es/form';
 import type { BaseOptionType } from 'antd/es/select';
 import { type ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TechnicalMapping } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import type { UiElementMetadata } from '@/store/api/services/generated/pluginsApi';
-import type { DataOutputCreateFormSchema } from '@/types/data-output';
-import type { TechnicalMappingContract } from '@/types/data-output/technical-mapping.contract';
+import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { configurationFieldName } from './components/configuration-field-name';
 import { ConfigurationFormItem } from './components/output-configuration-form-item';
 import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
 
 type Props = {
-    form: FormInstance<DataOutputCreateFormSchema>;
+    form: FormInstance<TechnicalAssetsCreateForm>;
     namespace: string;
-    technical_mapping: TechnicalMappingContract;
+    technical_mapping: TechnicalMapping;
     configurationType: string;
     uiMetadataGroups: UiElementMetadata[];
     resultLabel: string;
@@ -44,11 +44,6 @@ export function DataOutputConfigurationForm({
     // Auto-populate fields based on technical_mapping and namespace
     useEffect(() => {
         uiMetadataGroups.forEach((field) => {
-            // Handle suffix field
-            if (field.name === 'suffix') {
-                form.setFieldValue(configurationFieldName('suffix'), technical_mapping === 'default' ? namespace : '');
-            }
-
             // Handle fields that should auto-populate from namespace when not source-aligned
             if (field.use_namespace_when_not_source_aligned) {
                 form.setFieldValue(
@@ -105,30 +100,6 @@ export function DataOutputConfigurationForm({
             });
         }
 
-        // Build select options based on technical_mapping for fields that use namespace
-        let selectOptions: BaseOptionType[] = [];
-        if (type === 'select') {
-            selectOptions =
-                select?.options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
-            if (use_namespace_when_not_source_aligned && technical_mapping === 'default') {
-                selectOptions = [namespace].map((val) => ({
-                    label: val,
-                    value: val,
-                }));
-            } else {
-                selectOptions =
-                    select?.options?.map((option) => ({ label: option.label, value: option.value.toString() })) ?? [];
-            }
-        }
-        let radioOptions: CheckboxOptionType[] = [];
-        if (type === 'radio') {
-            radioOptions =
-                radio?.options?.map((option) => ({
-                    label: option.label,
-                    value: option.value.toString(),
-                })) ?? [];
-        }
-
         // Determine if field should be disabled
         const isDisabled = disabled || (use_namespace_when_not_source_aligned && technical_mapping === 'default');
 
@@ -139,20 +110,36 @@ export function DataOutputConfigurationForm({
                 inputComponent = <Checkbox>{label}</Checkbox>;
                 break;
 
-            case 'select':
+            case 'select': {
+                const selectOptions: BaseOptionType[] =
+                    use_namespace_when_not_source_aligned && technical_mapping === 'default'
+                        ? [namespace].map((val) => ({ label: val, value: val }))
+                        : (select?.options?.map((option) => ({
+                              label: option.label,
+                              value: option.value.toString(),
+                          })) ?? []);
+                const maxCountGreaterThanOne = select?.max_count ? select?.max_count > 1 : false;
                 inputComponent = (
                     <Select
                         allowClear
                         showSearch
-                        maxCount={select?.max_count || undefined}
+                        mode={maxCountGreaterThanOne ? 'multiple' : undefined}
+                        maxCount={maxCountGreaterThanOne ? (select?.max_count ?? 0) : undefined}
                         disabled={isDisabled ?? false}
                         options={selectOptions}
                     />
                 );
                 break;
-            case 'radio':
+            }
+            case 'radio': {
+                const radioOptions =
+                    radio?.options?.map((option) => ({
+                        label: option.label,
+                        value: option.value.toString(),
+                    })) ?? [];
                 inputComponent = <Radio.Group disabled={isDisabled ?? false} options={radioOptions} />;
                 break;
+            }
             default:
                 inputComponent = <Input />;
                 break;

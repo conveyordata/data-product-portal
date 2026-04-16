@@ -16,11 +16,9 @@ from tests.factories import (
     UserFactory,
 )
 
-OLD_DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
 DATA_OUTPUTS_DATASETS_ENDPOINT = (
     "api/v2/data_products/{}/output_ports/{}/technical_assets"
 )
-DATA_OUTPUTS_ENDPOINT = "/api/data_outputs"
 
 
 class TestOutputPortsTechnicalAssetsLinkRouter:
@@ -40,7 +38,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
 
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 200
 
     def test_request_data_output_new(self, client):
@@ -76,7 +76,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory()
 
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 404
 
     def test_request_already_exists(self, client):
@@ -93,9 +95,13 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
 
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 200
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 400
 
     def test_request_data_output_link_private_dataset_no_access(self, client):
@@ -103,7 +109,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
 
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 403
 
     def test_request_data_output_link_private_dataset(self, client):
@@ -120,7 +128,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 200
 
     def test_request_data_output_remove(self, client):
@@ -138,12 +148,14 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
 
         assert response.status_code == 200
 
-        response = self.request_data_output_dataset_unlink(
-            client, data_output.id, ds.id
+        response = self.request_data_output_dataset_unlink_new(
+            client, data_product.id, data_output.id, ds.id
         )
         assert response.status_code == 200
 
@@ -162,7 +174,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
 
         assert response.status_code == 200
 
@@ -178,7 +192,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
 
         ds = DatasetFactory(data_product=data_product)
 
-        link = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        link = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert link.status_code == 200
 
     def test_approve_data_output_link(self, client):
@@ -193,7 +209,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         link = DataOutputDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
-        response = self.approve_default_data_output_dataset_link(client, link.id)
+        response = self.approve_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
         assert response.status_code == 200, response.text
 
     def test_approve_link_between_technical_asset_and_output_port(self, client):
@@ -220,7 +238,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.approve_default_data_output_dataset_link(client, link.id)
+        response = self.approve_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
         assert response.status_code == 200
 
     def test_not_owner_cannot_approved_link(self, client):
@@ -229,7 +249,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.approve_default_data_output_dataset_link(client, link.id)
+        response = self.approve_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
         assert response.status_code == 403
         assert (
             response.json()["detail"]
@@ -247,7 +269,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         link = DataOutputDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
-        response = self.deny_default_data_output_dataset_link(client, link.id)
+        response = self.deny_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
         assert response.status_code == 200
 
     def test_deny_link_between_technical_asset_and_output_port(self, client):
@@ -274,7 +298,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.deny_default_data_output_dataset_link(client, link.id)
+        response = self.deny_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
         assert response.status_code == 200
 
     def test_not_owner_cannot_deny_link(self, client):
@@ -283,7 +309,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.deny_default_data_output_dataset_link(client, link.id)
+        response = self.deny_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, link.dataset.id
+        )
         assert response.status_code == 403
         assert (
             response.json()["detail"]
@@ -294,30 +322,36 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK],
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS],
         )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
+        )
         data_output = TechnicalAssetFactory(owner=ds.data_product)
-        link = DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
+        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
 
-        response = self.remove_data_output_dataset_link(client, link.id)
+        response = self.request_data_output_dataset_unlink_new(
+            client, ds.data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 200, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_remove_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
         data_output = TechnicalAssetFactory(owner=ds.data_product)
-        link = DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
+        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
 
-        response = self.remove_data_output_dataset_link(client, link.id)
+        response = self.request_data_output_dataset_unlink_new(
+            client, ds.data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 200
 
     def test_request_dataset_link_with_invalid_dataset_id(self, client):
         data_product = DataProductFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
-        response = self.request_data_output_dataset_link(
-            client, data_output.id, self.invalid_id
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, self.invalid_id
         )
         assert response.status_code == 403
 
@@ -329,41 +363,20 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(dataset=ds)
-        response = client.get(f"/api/data_outputs/{link.data_output_id}")
-        assert response.json()["dataset_links"][0]["dataset_id"] == str(ds.id)
-        response = client.delete(f"/api/datasets/{ds.id}")
+        response = client.get(
+            f"/api/v2/data_products/{link.data_output.owner.id}/technical_assets"
+        )
+        assert response.json()["technical_assets"][0]["output_port_links"][0][
+            "output_port_id"
+        ] == str(ds.id)
+        response = client.delete(
+            f"/api/v2/data_products/{ds.data_product.id}/output_ports/{ds.id}"
+        )
         assert response.status_code == 200
-        response = client.get(f"/api/data_outputs/{link.data_output_id}")
-        assert len(response.json()["dataset_links"]) == 0
-
-    def test_get_pending_actions_no_action(self, client):
-        response = client.get(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
-        assert response.json() == []
-
-    def test_get_pending_actions(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        data_product = DataProductFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
+        response = client.get(
+            f"/api/v2/data_products/{link.data_output.owner.id}/technical_assets"
         )
-        DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
-        )
-
-        ds = DatasetFactory(data_product=data_product)
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
-        )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
-        assert response.status_code == 200
-        response = client.get(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
-        assert response.json()[0]["data_output_id"] == str(data_output.id)
-        assert response.json()[0]["status"] == "pending"
+        assert len(response.json()["technical_assets"][0]["output_port_links"]) == 0
 
     def test_history_event_created_on_request_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -379,30 +392,40 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
 
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
         assert response.status_code == 200
 
-        history = self.get_data_output_history(client, data_output.id).json()
-        assert len(history) == 1
+        history = self.get_data_output_history(
+            client, data_product.id, data_output.id
+        ).json()
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_remove_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK],
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS],
         )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
+        )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         link = DataOutputDatasetAssociationFactory(
             dataset=ds, data_output=technical_asset
         )
+        owner_id = link.data_output.owner.id
+        output_id = link.data_output.id
 
-        response = self.remove_data_output_dataset_link(client, link.id)
+        response = self.request_data_output_dataset_unlink_new(
+            client, ds.data_product.id, technical_asset.id, ds.id
+        )
         assert response.status_code == 200
 
-        history = self.get_data_output_history(client, link.data_output_id).json()
-        assert len(history) == 1
+        history = self.get_data_output_history(client, owner_id, output_id).json()
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_approve_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -416,11 +439,15 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         link = DataOutputDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
-        response = self.approve_default_data_output_dataset_link(client, link.id)
+        response = self.approve_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, ds.id
+        )
         assert response.status_code == 200
 
-        history = self.get_data_output_history(client, link.data_output_id).json()
-        assert len(history) == 1
+        history = self.get_data_output_history(
+            client, link.data_output.owner.id, link.data_output.id
+        ).json()
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_deny_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -433,11 +460,15 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         link = DataOutputDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
-        response = self.deny_default_data_output_dataset_link(client, link.id)
+        response = self.deny_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.data_output.id, ds.id
+        )
         assert response.status_code == 200
 
-        history = self.get_data_output_history(client, link.data_output_id).json()
-        assert len(history) == 1
+        history = self.get_data_output_history(
+            client, link.data_output.owner.id, link.data_output.id
+        ).json()
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_unlink_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -454,23 +485,21 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, data_output.id, ds.id
+        )
 
         assert response.status_code == 200
 
-        response = self.request_data_output_dataset_unlink(
-            client, data_output.id, ds.id
+        response = self.request_data_output_dataset_unlink_new(
+            client, data_product.id, data_output.id, ds.id
         )
         assert response.status_code == 200
 
-        history = self.get_data_output_history(client, data_output.id).json()
-        assert len(history) == 2
-
-    @staticmethod
-    def request_data_output_dataset_link(client, data_output_id, dataset_id):
-        return client.post(
-            f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/dataset/{dataset_id}"
-        )
+        history = self.get_data_output_history(
+            client, data_product.id, data_output.id
+        ).json()
+        assert len(history["events"]) == 2
 
     @staticmethod
     def request_data_output_dataset_link_new(
@@ -480,10 +509,6 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/add",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
-
-    @staticmethod
-    def approve_default_data_output_dataset_link(client, link_id):
-        return client.post(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/approve/{link_id}")
 
     @staticmethod
     def approve_link_between_technical_asset_and_output_port(
@@ -504,20 +529,6 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
 
     @staticmethod
-    def deny_default_data_output_dataset_link(client, link_id):
-        return client.post(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/deny/{link_id}")
-
-    @staticmethod
-    def remove_data_output_dataset_link(client, link_id):
-        return client.post(f"{OLD_DATA_OUTPUTS_DATASETS_ENDPOINT}/remove/{link_id}")
-
-    @staticmethod
-    def request_data_output_dataset_unlink(client, data_output_id, dataset_id):
-        return client.delete(
-            f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/dataset/{dataset_id}"
-        )
-
-    @staticmethod
     def request_data_output_dataset_unlink_new(
         client, data_product_id, technical_asset_id, output_port_id
     ):
@@ -528,5 +539,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
 
     @staticmethod
-    def get_data_output_history(client, data_output_id):
-        return client.get(f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/history")
+    def get_data_output_history(client, data_product_id, data_output_id):
+        return client.get(
+            f"/api/v2/data_products/{data_product_id}/technical_assets/{data_output_id}/history"
+        )

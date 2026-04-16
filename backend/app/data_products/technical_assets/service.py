@@ -58,6 +58,12 @@ class DataOutputService:
             tags.append(tag)
         return tags
 
+    @staticmethod
+    def get_status_for(technical_mapping: TechnicalMapping):
+        if technical_mapping == TechnicalMapping.Default:
+            return TechnicalAssetStatus.ACTIVE
+        return TechnicalAssetStatus.PENDING
+
     def get_data_outputs(self) -> Sequence[DataOutputsGet]:
         return (
             self.db.scalars(
@@ -103,20 +109,20 @@ class DataOutputService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        if data_output.technical_mapping == TechnicalMapping.Custom:
-            data_output.status = TechnicalAssetStatus.PENDING
-        else:
+        if data_output.technical_mapping == TechnicalMapping.Default:
             data_product = self.db.get(DataProductModel, id)
-
-            data_output.configuration.validate_configuration(data_product)
+            data_output.configuration.validate_configuration(data_product, self.db)
 
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
         data_output_schema.pop("sourceAligned")  # Remove deprecated field
+
+        technical_asset_status = self.get_status_for(data_output.technical_mapping)  # type: ignore[arg-type]
         model = TechnicalAssetModel(
             **data_output_schema,
             tags=tags,
             owner_id=id,
+            status=technical_asset_status,
         )
         self.db.add(model)
         self.db.commit()

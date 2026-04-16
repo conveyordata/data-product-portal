@@ -170,7 +170,10 @@ async def send_response_to_webhook(request: Request, call_next):
     if (
         settings.WEBHOOK_URL
         and request.method in ["POST", "PUT", "DELETE"]
-        and not request.url.path.startswith("/api/auth/")
+        and not (
+            request.url.path.startswith("/api/auth/")
+            or request.url.path.startswith("/api/v2/authn/")
+        )
     ):
         body = ""
         if request.method == "POST":
@@ -193,11 +196,6 @@ async def send_response_to_webhook(request: Request, call_next):
 @app.get("/", include_in_schema=False)
 def root():
     return {"message": "Hello World"}
-
-
-@app.get("/api/version", deprecated=True, tags=["Version"])
-def get_version_old():
-    return {"version": app.version}
 
 
 class VersionResponse(ORMModel):

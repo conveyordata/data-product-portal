@@ -1,6 +1,6 @@
 import { ArrowRightOutlined, EnvironmentOutlined, FundViewOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Row, Typography } from 'antd';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { ApplicationPaths } from '@/types/navigation.ts';
@@ -19,11 +19,7 @@ interface ActionCardData {
     color: 'blue' | 'green' | 'orange';
 }
 
-type Props = {
-    style?: CSSProperties;
-};
-
-export function QuickActions({ style }: Props) {
+export function QuickActions() {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -52,7 +48,7 @@ export function QuickActions({ style }: Props) {
     ];
 
     return (
-        <section style={style}>
+        <>
             <div style={{ marginBottom: 24 }}>
                 <Title level={3} style={{ margin: 0, marginBottom: 4 }}>
                     {t('What would you like to do today?')}
@@ -90,6 +86,6 @@ export function QuickActions({ style }: Props) {
                     </Col>
                 ))}
             </Row>
-        </section>
+        </>
     );
 }

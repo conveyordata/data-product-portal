@@ -29,16 +29,6 @@ repos:
     - id: detect-private-key
 
 # Python
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.1
-  hooks:
-    - id: mypy
-      language_version: python3.13
-      additional_dependencies:
-      - types-cachetools
-      - types-requests
-      - types-pytz
-      - types-PyYAML
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.15.6
   hooks:
@@ -49,6 +39,32 @@ repos:
   rev: v8.27.2
   hooks:
     - id: gitleaks
+# Splitting up the mypy checks as monorepos are not well supported:
+# https://github.com/python/mypy/issues/4008
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.16.1
+  hooks:
+    - id: mypy
+      name: mypy (backend)
+      language_version: python3.13
+      files: ^backend/
+      args: [--config-file=backend/pyproject.toml]
+      additional_dependencies:
+        - types-cachetools
+        - types-requests
+        - types-pytz
+        - types-PyYAML
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.16.1
+  hooks:
+    - id: mypy
+      name: mypy (sdk)
+      language_version: python3.13
+      files: ^sdk/
+      exclude: ^sdk/sdk/api_client/
+      args: [--config-file=sdk/pyproject.toml]
+      additional_dependencies:
+        - attrs
 - repo: local
   hooks:
     - id: add-helm-version
@@ -61,6 +77,20 @@ repos:
       language: script
       types: [text]
       files: ^backend\/.*\.py$
+    - id: check-generated-api
+      name: Check generated API is up to date
+      entry: ./scripts/check_generated_api.sh
+      language: script
+      types: [text]
+      files: ^docs/static/openapi.json$
+      pass_filenames: false
+    - id: check-generated-sdk
+      name: Check generated SDK is up to date
+      entry: ./scripts/check_generated_sdk.sh
+      language: script
+      types: [text]
+      files: ^docs/static/openapi.json$
+      pass_filenames: false
     - id: local-fe-check
       name: fe check
       entry: bash -c "cd frontend && npm run check:fix"

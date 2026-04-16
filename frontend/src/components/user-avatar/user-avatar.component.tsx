@@ -1,10 +1,10 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
-import type { UserContract } from '@/types/users';
+import type { User } from '@/store/api/services/generated/usersApi.ts';
 import styles from './user-avatar.module.scss';
 
 type Props = {
-    user?: UserContract;
+    user?: User;
     color?: string;
     size?: 'small' | 'default' | 'large';
 };

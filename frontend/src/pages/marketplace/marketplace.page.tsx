@@ -52,7 +52,7 @@ export function Marketplace() {
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
 
     const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
-        query: searchTerm?.length >= 3 ? searchTerm : null,
+        query: searchTerm?.length >= 3 ? searchTerm : undefined,
     });
 
     const paginatedOutputPorts = useMemo(() => {

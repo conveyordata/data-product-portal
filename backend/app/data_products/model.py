@@ -1,29 +1,31 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, Enum, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.domains.model import Domain
 from app.configuration.tags.model import Tag, tag_data_product_table
+from app.data_products.output_ports.model import (
+    DataProductDatasetAssociation,
+)
 from app.data_products.status import DataProductStatus
+from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.data_product.model import (
-        DataProductRoleAssignment,
-    )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.output_ports.model import (
-        DataProductDatasetAssociation,
         Dataset,
     )
-    from app.data_products.technical_assets.model import TechnicalAsset
 
 
 class DataProduct(Base, BaseORM):
@@ -72,7 +74,7 @@ class DataProduct(Base, BaseORM):
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_product_table, back_populates="data_products", lazy="joined"
+        secondary=tag_data_product_table, back_populates="data_products", lazy="raise"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         back_populates="data_product",
@@ -86,27 +88,28 @@ class DataProduct(Base, BaseORM):
         lazy="raise",
     )
 
-    @property
-    def user_count(self) -> int:
-        approved_assignments = [
-            assignment
-            for assignment in self.assignments
-            if assignment.decision == DecisionStatus.APPROVED
-        ]
-        return len(approved_assignments)
+    user_count = column_property(
+        select(func.count(DataProductRoleAssignment.id))
+        .where(DataProductRoleAssignment.data_product_id == id)
+        .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
+        .correlate_except(DataProductRoleAssignment)
+        .scalar_subquery()
+    )
 
-    @property
-    def dataset_count(self) -> int:
-        accepted_dataset_links = [
-            link
-            for link in self.dataset_links
-            if link.status == DecisionStatus.APPROVED
-        ]
-        return len(accepted_dataset_links)
+    dataset_count = column_property(
+        select(func.count(DataProductDatasetAssociation.id))
+        .where(DataProductDatasetAssociation.data_product_id == id)
+        .where(DataProductDatasetAssociation.status == DecisionStatus.APPROVED)
+        .correlate_except(DataProductDatasetAssociation)
+        .scalar_subquery()
+    )
 
-    @property
-    def data_outputs_count(self) -> int:
-        return len(self.data_outputs)
+    data_outputs_count = column_property(
+        select(func.count(TechnicalAsset.id))
+        .where(TechnicalAsset.owner_id == id)
+        .correlate_except(TechnicalAsset)
+        .scalar_subquery()
+    )
 
 
 def ensure_data_product_exists(

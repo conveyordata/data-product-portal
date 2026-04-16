@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -5,53 +7,51 @@ import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
 // https://vitejs.dev/config/
-export default defineConfig(() => {
-    return {
-        test: {
-            globals: true,
-            environment: 'jsdom',
-            setupFiles: ['./src/tests/setup.ts'],
-            testTimeout: 10000,
+export default defineConfig({
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: ['./src/tests/setup.ts'],
+        testTimeout: 10000,
+    },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src/'),
+            '~@': path.resolve(__dirname, './src/'),
         },
-        resolve: {
-            alias: {
-                '@': path.resolve(__dirname, './src/'),
-                '~@': path.resolve(__dirname, './src/'),
+    },
+    plugins: [
+        react(),
+        svgr({
+            svgrOptions: {
+                ref: true,
+                svgo: false,
+                titleProp: true,
+                icon: true,
             },
+            include: '**/*.svg?react',
+        }),
+        visualizer({
+            template: 'treemap',
+            gzipSize: true,
+            brotliSize: true,
+            filename: 'dependencies.html',
+        }),
+    ],
+    ssr: {
+        noExternal: ['posthog-js', '@posthog/react'],
+    },
+    server: {
+        port: 3000,
+        open: true,
+    },
+    preview: {
+        port: 3000,
+        open: true,
+    },
+    css: {
+        modules: {
+            localsConvention: 'camelCase' as const,
         },
-        plugins: [
-            react(),
-            svgr({
-                svgrOptions: {
-                    ref: true,
-                    svgo: false,
-                    titleProp: true,
-                    icon: true,
-                },
-                include: '**/*.svg?react',
-            }),
-            visualizer({
-                template: 'treemap',
-                gzipSize: true,
-                brotliSize: true,
-                filename: 'dependencies.html',
-            }),
-        ],
-        ssr: {
-            noExternal: ['posthog-js', '@posthog/react'],
-        },
-        server: {
-            port: 3000,
-            open: true,
-        },
-        preview: {
-            port: 3000,
-            open: true,
-        },
-        css: {
-            modules: {
-                localsConvention: 'camelCase' as const,
-            },
-        },
-    };
+    },
 });

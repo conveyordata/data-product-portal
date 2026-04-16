@@ -2,12 +2,12 @@ import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
+    type GetDomainsItem,
     useGetDomainsQuery,
     useMigrateDomainMutation,
     useRemoveDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import type { DomainContract } from '@/types/domain';
 
 const { Option } = Select;
 
@@ -18,7 +18,7 @@ interface DomainMigrateFormValues {
 type Props = {
     onClose: () => void;
     isOpen: boolean;
-    migrateFrom: DomainContract;
+    migrateFrom: GetDomainsItem;
 };
 export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props) {
     const { t } = useTranslation();

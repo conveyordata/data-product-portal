@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.global_.schema import GlobalRoleAssignment
     from app.users.schema import User
 
-ENDPOINT = "/api/role_assignments/global"
+ENDPOINT = "/api/v2/authz/role_assignments/global"
 
 
 class TestGlobalRoleAssignmentsRouter:
@@ -28,8 +28,8 @@ class TestGlobalRoleAssignmentsRouter:
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["id"] == str(assignment.id)
+        assert len(data["role_assignments"]) == 1
+        assert data["role_assignments"][0]["id"] == str(assignment.id)
 
     def test_create_assignment(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -57,7 +57,9 @@ class TestGlobalRoleAssignmentsRouter:
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
         ds = DatasetFactory()
 
-        delete = client.delete(f"/api/datasets/{ds.id}")
+        delete = client.delete(
+            f"/api/v2/data_products/{ds.data_product_id}/output_ports/{ds.id}"
+        )
         assert delete.status_code == status.HTTP_403_FORBIDDEN
 
         response = client.post(
@@ -67,7 +69,9 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
 
         # User became admin, can delete datasets now
-        delete = client.delete(f"/api/datasets/{ds.id}")
+        delete = client.delete(
+            f"/api/v2/data_products/{ds.data_product_id}/output_ports/{ds.id}"
+        )
         assert delete.status_code == status.HTTP_200_OK
 
     def test_become_admin_not_allowed(self, client: TestClient):
@@ -132,14 +136,14 @@ class TestGlobalRoleAssignmentsRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 2
+        assert len(response.json()["role_assignments"]) == 2
 
         response = client.delete(f"{ENDPOINT}/{assignment.id}")
         assert response.status_code == status.HTTP_200_OK
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 1
+        assert len(response.json()["role_assignments"]) == 1
 
     def test_decide_assignment(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -156,7 +160,7 @@ class TestGlobalRoleAssignmentsRouter:
             decision=DecisionStatus.PENDING,
         )
 
-        response = client.patch(
+        response = client.post(
             f"{ENDPOINT}/{assignment.id}/decide",
             json={"decision": DecisionStatus.APPROVED},
         )
@@ -181,7 +185,7 @@ class TestGlobalRoleAssignmentsRouter:
             decision=DecisionStatus.DENIED,
         )
 
-        response = client.patch(
+        response = client.post(
             f"{ENDPOINT}/{assignment.id}/decide",
             json={"decision": DecisionStatus.APPROVED},
         )
@@ -204,7 +208,7 @@ class TestGlobalRoleAssignmentsRouter:
             decision=DecisionStatus.DENIED,
         )
 
-        response = client.patch(
+        response = client.post(
             f"{ENDPOINT}/{assignment.id}/decide",
             json={"decision": DecisionStatus.DENIED},
         )
@@ -227,7 +231,7 @@ class TestGlobalRoleAssignmentsRouter:
             decision=DecisionStatus.APPROVED,
         )
 
-        response = client.patch(
+        response = client.put(
             f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(new_role.id)}
         )
         assert response.status_code == status.HTTP_200_OK
@@ -251,7 +255,7 @@ class TestGlobalRoleAssignmentsRouter:
         )
         GlobalRoleAssignmentFactory(user_id=user2.id, role_id=admin.id)
 
-        response = client.patch(
+        response = client.put(
             f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(role.id)}
         )
         assert response.status_code == status.HTTP_200_OK
@@ -274,7 +278,7 @@ class TestGlobalRoleAssignmentsRouter:
             role_id=role.id,
         )
 
-        response = client.patch(
+        response = client.put(
             f"{ENDPOINT}/{assignment.id}/role", json={"role_id": "admin"}
         )
         assert response.status_code == status.HTTP_200_OK

@@ -12,7 +12,12 @@ type QueriesOverTimeChartProps = {
     colorScaleConfig: ColorScaleConfig;
 };
 
-export function QueriesOverTimeChart({ data, isLoading, hasData, colorScaleConfig }: QueriesOverTimeChartProps) {
+export default function QueriesOverTimeChart({
+    data,
+    isLoading,
+    hasData,
+    colorScaleConfig,
+}: QueriesOverTimeChartProps) {
     const { t } = useTranslation();
 
     const config = useMemo(() => {

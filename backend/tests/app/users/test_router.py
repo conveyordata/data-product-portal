@@ -4,7 +4,7 @@ from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
-    DATA_OUTPUTS_ENDPOINT,
+    DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
@@ -18,7 +18,7 @@ from tests.factories import (
     UserFactory,
 )
 
-ENDPOINT = "/api/users"
+ENDPOINT = "/api/v2/users"
 
 
 class TestUsersRouter:
@@ -46,7 +46,7 @@ class TestUsersRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert len(response.json()["users"]) == 2
 
     @pytest.mark.usefixtures("admin")
     def test_remove_user(self, client):
@@ -58,7 +58,7 @@ class TestUsersRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.json()["users"]) == 1
 
     def test_post_user_not_admin(self, client):
         response = client.post(f"{ENDPOINT}")
@@ -66,7 +66,7 @@ class TestUsersRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.json()["users"]) == 1
 
     @pytest.mark.usefixtures("admin")
     def test_post_user(self, client):
@@ -83,28 +83,28 @@ class TestUsersRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert len(response.json()["users"]) == 2
 
     def test_post_has_seen_tour(self, client):
         UserFactory(external_id=settings.DEFAULT_USERNAME)
         response = client.get(f"{ENDPOINT}")
-        assert len(response.json()) == 1
-        assert response.json()[0]["has_seen_tour"] is False
-        response = client.post(f"{ENDPOINT}/seen_tour")
+        assert len(response.json()["users"]) == 1
+        assert response.json()["users"][0]["has_seen_tour"] is False
+        response = client.post(f"{ENDPOINT}/current/seen_tour")
         response = client.get(f"{ENDPOINT}")
-        assert len(response.json()) == 1
-        assert response.json()[0]["has_seen_tour"] is True
+        assert len(response.json()["users"]) == 1
+        assert response.json()["users"][0]["has_seen_tour"] is True
         assert response.status_code == 200
 
     def test_post_has_seen_tour_v2(self, client):
         UserFactory(external_id=settings.DEFAULT_USERNAME)
         response = client.get(f"{ENDPOINT}")
-        assert len(response.json()) == 1
-        assert response.json()[0]["has_seen_tour"] is False
+        assert len(response.json()["users"]) == 1
+        assert response.json()["users"][0]["has_seen_tour"] is False
         response = client.post("/api/v2/users/current/seen_tour")
         response = client.get(f"{ENDPOINT}")
-        assert len(response.json()) == 1
-        assert response.json()[0]["has_seen_tour"] is True
+        assert len(response.json()["users"]) == 1
+        assert response.json()["users"][0]["has_seen_tour"] is True
         assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
@@ -122,7 +122,7 @@ class TestUsersRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert len(response.json()["users"]) == 2
 
     def test_can_become_admin_not_admin(self, client):
         user = UserFactory(
@@ -156,7 +156,7 @@ class TestUsersRouter:
         )
         assert response.status_code == 200
         response = client.get(f"{ENDPOINT}")
-        data = response.json()
+        data = response.json()["users"]
         for user_data in data:
             if user_data["id"] == str(user.id):
                 assert user_data["can_become_admin"] is False
@@ -179,7 +179,7 @@ class TestUsersRouter:
         )
         assert response.status_code == 400
         response = client.get(f"{ENDPOINT}")
-        data = response.json()
+        data = response.json()["users"]
         for user_data in data:
             if user_data["id"] == str(user.id):
                 assert user_data["can_become_admin"] is True
@@ -205,7 +205,7 @@ class TestUsersRouter:
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}")
-        data = response.json()
+        data = response.json()["users"]
         for user_data in data:
             if user_data["id"] == str(user.id):
                 assert user_data["can_become_admin"] is True
@@ -240,7 +240,8 @@ class TestUsersRouter:
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
         response = client.post(
-            f"{DATA_OUTPUTS_ENDPOINT}/{data_output.id}/dataset/{ds.id}"
+            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, ds.id)}/add",
+            json={"technical_asset_id": f"{data_output.id}"},
         )
         assert response.status_code == 200
         response = client.get("/api/v2/users/current/pending_actions")

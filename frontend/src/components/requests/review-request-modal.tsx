@@ -242,7 +242,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                             <FileTextOutlined />
                                             <Typography.Text strong>{t('Business Justification')}</Typography.Text>
                                         </Flex>
-                                        <Typography.Text code>{details.justification}</Typography.Text>
+                                        <Typography.Text>{details.justification}</Typography.Text>
                                     </Flex>
                                     <Divider style={{ margin: 0 }} />
                                 </>

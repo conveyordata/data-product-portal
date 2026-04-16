@@ -19,7 +19,7 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     description = factory.Faker("text", max_nb_chars=20)
     about = factory.Faker("text", max_nb_chars=20)
     status = OutputPortStatus.ACTIVE.value
-    access_type = OutputPortAccessType.PUBLIC.value
+    access_type = OutputPortAccessType.UNRESTRICTED.value
     usage = factory.Faker("word")
     data_product = factory.SubFactory(DataProductFactory)
 

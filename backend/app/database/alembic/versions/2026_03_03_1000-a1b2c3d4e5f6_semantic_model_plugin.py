@@ -31,7 +31,7 @@ def upgrade() -> None:
             primary_key=True,
         ),
         sa.Column("model_name", sa.String(), nullable=True),
-        sa.Column("file_path", sa.String(), nullable=True),
+        sa.Column("location", sa.String(), nullable=True),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime(timezone=False), nullable=True),

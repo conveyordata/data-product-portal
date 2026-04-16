@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  install:
+    desc: "Install SDK development dependencies"
+    cmds:
+      - poetry install --all-groups
+
+  generate:client:
+    desc: "Regenerate the portal API client from the OpenAPI spec"
+    cmds:
+      - poetry run openapi-python-client generate
+          --path ./../docs/static/openapi.json
+          --output-path ./sdk/api_client
+          --meta none
+          --overwrite
+    generates:
+      - sdk/api_client/**

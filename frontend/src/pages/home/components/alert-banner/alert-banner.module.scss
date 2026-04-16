@@ -1,0 +1,9 @@
+@use "@/styles/globals";
+
+.alert-root {
+  margin-bottom: globals.$spacing-ml;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

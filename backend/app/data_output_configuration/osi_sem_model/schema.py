@@ -22,7 +22,7 @@ class OSISemanticModelTechnicalAssetConfiguration(AssetProviderPlugin):
     version: ClassVar[str] = "1.0"
 
     model_name: str = ""
-    file_path: str = ""
+    location: str = ""
     configuration_type: Literal[
         DataOutputTypes.OSISemanticModelTechnicalAssetConfiguration
     ]
@@ -39,7 +39,7 @@ class OSISemanticModelTechnicalAssetConfiguration(AssetProviderPlugin):
     class Meta:
         orm_model = OSISemanticModelTechnicalAssetConfigurationModel
 
-    def validate_configuration(self, data_product: DataProduct):
+    def validate_configuration(self, data_product: DataProduct, db: Session):
         pass
 
     def on_create(self):
@@ -65,8 +65,8 @@ class OSISemanticModelTechnicalAssetConfiguration(AssetProviderPlugin):
                 required=True,
             ),
             UIElementMetadata(
-                name="file_path",
-                label="File Path",
+                name="location",
+                label="Location",
                 type=UIElementType.String,
                 required=True,
             ),

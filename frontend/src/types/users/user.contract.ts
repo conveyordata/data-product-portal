@@ -1,9 +1,0 @@
-export interface UserContract {
-    id: string;
-    email: string;
-    external_id: string;
-    first_name: string;
-    last_name: string;
-    has_seen_tour: boolean;
-    can_become_admin: boolean;
-}

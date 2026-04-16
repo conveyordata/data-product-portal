@@ -8,7 +8,7 @@ from tests.factories import (
     PlatformServiceFactory,
 )
 
-ENDPOINT = "/api/platforms"
+ENDPOINT = "/api/v2/configuration/platforms"
 
 
 class TestPlatformsRouter:
@@ -21,8 +21,8 @@ class TestPlatformsRouter:
 
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["name"] == platform.name
+        assert len(data["platforms"]) == 1
+        assert data["platforms"][0]["name"] == platform.name
 
     def test_get_platform_service_not_found(self, client):
         platform_service = PlatformServiceFactory()
@@ -40,8 +40,8 @@ class TestPlatformsRouter:
 
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["name"] == platform_service.name
+        assert len(data["platform_services"]) == 1
+        assert data["platform_services"][0]["name"] == platform_service.name
 
     def test_get_platform_configs(self, client):
         platform_service = PlatformServiceFactory()
@@ -53,10 +53,18 @@ class TestPlatformsRouter:
 
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["platform"]["name"] == platform_service.platform.name
-        assert data[0]["service"]["name"] == platform_service.name
-        assert data[0]["config"] == json.loads(config.config)
+        assert len(data["platform_service_configurations"]) == 1
+        assert (
+            data["platform_service_configurations"][0]["platform"]["name"]
+            == platform_service.platform.name
+        )
+        assert (
+            data["platform_service_configurations"][0]["service"]["name"]
+            == platform_service.name
+        )
+        assert data["platform_service_configurations"][0]["config"] == json.loads(
+            config.config
+        )
 
     def test_get_platform_service(self, client):
         platform_service = PlatformServiceFactory()

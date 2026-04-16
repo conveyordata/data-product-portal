@@ -220,6 +220,12 @@ export type LinkTechnicalAssetToOutputPortRequest = {
 export type UnLinkTechnicalAssetToOutputPortRequest = {
   technical_asset_id: string;
 };
+export type AzureBlobTechnicalAssetConfiguration = {
+  configuration_type: "AzureBlobTechnicalAssetConfiguration";
+  domain?: string;
+  path?: string;
+  container_name: string;
+};
 export type DatabricksTechnicalAssetConfiguration = {
   configuration_type: "DatabricksTechnicalAssetConfiguration";
   catalog: string;
@@ -243,7 +249,7 @@ export type GlueTechnicalAssetConfiguration = {
 export type OsiSemanticModelTechnicalAssetConfiguration = {
   configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
   model_name?: string;
-  file_path?: string;
+  location?: string;
 };
 export type PostgreSqlTechnicalAssetConfiguration = {
   configuration_type: "PostgreSQLTechnicalAssetConfiguration";
@@ -325,6 +331,9 @@ export type GetTechnicalAssetsResponseItem = {
   technical_mapping: TechnicalMapping;
   configuration:
     | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
+    | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)
     | ({
@@ -365,6 +374,9 @@ export type GetTechnicalAssetsResponseItemRead = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   configuration:
+    | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
     | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)
@@ -409,8 +421,10 @@ export type CreateTechnicalAssetRequest = {
   namespace: string;
   platform_id: string;
   service_id: string;
-  status: TechnicalAssetStatus;
   configuration:
+    | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
     | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)
@@ -466,6 +480,9 @@ export type TechnicalAsset = {
   platform_id: string;
   service_id: string;
   configuration:
+    | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
     | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)
@@ -579,6 +596,7 @@ export enum OutputPortAccessType {
   Public = "public",
   Restricted = "restricted",
   Private = "private",
+  Unrestricted = "unrestricted",
 }
 export enum EventEntityType {
   DataProduct = "data_product",

@@ -10,8 +10,7 @@ import { usePostHog } from '@posthog/react';
 import { Badge, Flex, Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { Explorer } from '@/components/explorer/explorer';
+import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';

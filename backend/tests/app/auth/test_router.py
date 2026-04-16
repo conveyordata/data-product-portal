@@ -9,12 +9,13 @@ from tests.factories import (
     UserFactory,
 )
 
-ENDPOINT = "/api/auth"
+ENDPOINT = "/api/v2/authn"
+CURRENT_USER_ENDPOINT = "/api/v2/users/current"
 
 
 class TestAuthRouter:
     def test_authorize_user(self, client):
-        response = client.get(f"{ENDPOINT}/user")
+        response = client.get(f"{CURRENT_USER_ENDPOINT}")
         assert response.status_code == 200
         assert response.json()["external_id"] == settings.DEFAULT_USERNAME
 

@@ -1,8 +1,10 @@
-import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import {
+    type User,
+    useListDataProductRoleAssignmentsQuery,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DecisionStatus, Prototype } from '@/types/roles';
-import type { UserContract } from '@/types/users/user.contract.ts';
 
-export function useGetDataProductOwners(dataProductId: string | undefined): UserContract[] | undefined {
+export function useGetDataProductOwners(dataProductId: string | undefined): User[] | undefined {
     const { data: roleAssignments } = useListDataProductRoleAssignmentsQuery(
         {
             dataProductId: dataProductId,

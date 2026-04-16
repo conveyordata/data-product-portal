@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -11,18 +10,18 @@ from app.configuration.platform_service_configurations.schema import (
 from app.configuration.platform_service_configurations.service import (
     PlatformServiceConfigurationService,
 )
-from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.platforms.platform_services.service import PlatformServiceService
 from app.configuration.platforms.schema_response import (
     GetAllPlatformsResponse,
-    Platform,
 )
 from app.database.database import get_db_session
 
 from .platform_services.schema_response import GetPlatformServicesResponse
 from .service import PlatformService as PlatformsService
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Configuration - Platforms"], prefix="/v2/configuration/platforms"
+)
 
 
 @router.get(
@@ -64,20 +63,7 @@ def get_single_platform_service_configuration(
     ).get_single_platform_service_configuration(config_id)
 
 
-_router = router
-router = APIRouter(tags=["Configuration - Platforms"])
-router.include_router(_router, prefix="/platforms", deprecated=True)
-router.include_router(_router, prefix="/v2/configuration/platforms")
-
-
-@router.get("/platforms/configs", deprecated=True)
-def get_all_platform_service_configurations_old(
-    db: Session = Depends(get_db_session),
-) -> Sequence[PlatformServiceConfiguration]:
-    return get_all_platform_service_configurations(db).platform_service_configurations
-
-
-@router.get("/v2/configuration/platforms/configs")
+@router.get("/configs")
 def get_all_platform_service_configurations(
     db: Session = Depends(get_db_session),
 ) -> GetAllPlatformServiceConfigurationsResponse:
@@ -88,28 +74,14 @@ def get_all_platform_service_configurations(
     )
 
 
-@router.get("/platforms", deprecated=True)
-def get_all_platforms_old(
-    db: Session = Depends(get_db_session),
-) -> Sequence[Platform]:
-    return get_all_platforms(db).platforms
-
-
-@router.get("/v2/configuration/platforms")
+@router.get("")
 def get_all_platforms(
     db: Session = Depends(get_db_session),
 ) -> GetAllPlatformsResponse:
     return GetAllPlatformsResponse(platforms=PlatformsService(db).get_all_platforms())
 
 
-@router.get("/platforms/{id}/services", deprecated=True)
-def get_platform_services_old(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[PlatformService]:
-    return get_platform_services(id, db).platform_services
-
-
-@router.get("/v2/configuration/platforms/{id}/services")
+@router.get("/{id}/services")
 def get_platform_services(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetPlatformServicesResponse:

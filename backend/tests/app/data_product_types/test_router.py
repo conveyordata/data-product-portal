@@ -3,7 +3,7 @@ import pytest
 from app.configuration.data_product_types.enums import DataProductIconKey
 from tests.factories import DataProductFactory, DataProductTypeFactory
 
-ENDPOINT = "/api/data_product_types"
+ENDPOINT = "/api/v2/configuration/data_product_types"
 
 
 @pytest.fixture

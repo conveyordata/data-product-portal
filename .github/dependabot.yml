@@ -31,14 +31,13 @@ updates:
       i18n:
         patterns:
           - "i18next"
-          - "i18next-http-backend"
+          - "i18next-*"
           - "react-i18next"
       vite:
         patterns:
           - "vite"
           - "vite-plugin-*"
           - "@vitejs/*"
-          - "esbuild"
       tiptap:
         patterns:
           - "@tiptap/*"

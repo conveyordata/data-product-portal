@@ -15,8 +15,8 @@ import {
 import { useResourceNameConstraintsQuery } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation';
+import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import styles from './data-output-form.module.scss';
 
@@ -39,7 +39,7 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateTechnicalAssetMutation();
     const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveTechnicalAssetMutation();
-    const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
+    const [form] = Form.useForm<TechnicalAssetsCreateForm>();
 
     const { data: update_access } = useCheckAccessQuery(
         {
@@ -81,7 +81,7 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
         }
     };
 
-    const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
+    const onSubmit: FormProps<TechnicalAssetsCreateForm>['onFinish'] = async (values) => {
         try {
             if (dataOutputId && currentDataOutput) {
                 if (!canEdit) {
@@ -112,7 +112,7 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
         }
     };
 
-    const onSubmitFailed: FormProps<DataOutputCreateFormSchema>['onFinishFailed'] = () => {
+    const onSubmitFailed: FormProps<TechnicalAssetsCreateForm>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
@@ -148,7 +148,7 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
             disabled={isLoading || !canEdit}
             initialValues={initialValues}
         >
-            <Form.Item<DataOutputCreateFormSchema>
+            <Form.Item<TechnicalAssetsCreateForm>
                 name={'name'}
                 label={t('Name')}
                 tooltip={t('The name of your Technical Asset')}
@@ -168,7 +168,7 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
                 editToggleDisabled
                 canEditResourceName={false}
             />
-            <Form.Item<DataOutputCreateFormSchema>
+            <Form.Item<TechnicalAssetsCreateForm>
                 name={'description'}
                 label={t('Description')}
                 tooltip={t('A description for the Technical Asset')}
@@ -187,7 +187,7 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
             >
                 <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+            <Form.Item<TechnicalAssetsCreateForm> name={'tag_ids'} label={t('Tags')}>
                 <Select
                     placeholder={t('Select Technical Asset tags')}
                     mode={'multiple'}

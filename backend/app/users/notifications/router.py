@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -13,7 +12,9 @@ from app.users.notifications.schema_response import (
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Users - Notifications"], prefix="/v2/users/current/notifications"
+)
 
 
 @router.delete("/all")
@@ -33,30 +34,13 @@ def remove_user_notification(
     return NotificationService(db).remove_notification(id, authenticated_user)
 
 
-_router = router
-router = APIRouter(tags=["Users - Notifications"])
-old_route = "/notifications"
-route = "/v2/users/current/notifications"
-
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
-
-
-@router.get(old_route, deprecated=True)
-def get_user_notifications_old(
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> Sequence[NotificationGet]:
-    return NotificationService(db).get_user_notifications(authenticated_user)
-
-
-@router.get(route)
+@router.get("")
 def get_user_notifications(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> GetUserNotificationsResponse:
     notifications = [
         NotificationGet.model_validate(event).convert()
-        for event in get_user_notifications_old(db, authenticated_user)
+        for event in NotificationService(db).get_user_notifications(authenticated_user)
     ]
     return GetUserNotificationsResponse(notifications=notifications)

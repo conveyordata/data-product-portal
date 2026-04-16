@@ -17,37 +17,6 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg,
       }),
     }),
-    getDataProductSettingsNamespaceSuggestion: build.query<
-      GetDataProductSettingsNamespaceSuggestionApiResponse,
-      GetDataProductSettingsNamespaceSuggestionApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/configuration/data_product_settings/namespace_suggestion`,
-        params: {
-          name: queryArg,
-        },
-      }),
-    }),
-    validateDataProductSettingsNamespace: build.query<
-      ValidateDataProductSettingsNamespaceApiResponse,
-      ValidateDataProductSettingsNamespaceApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/configuration/data_product_settings/validate_namespace`,
-        params: {
-          namespace: queryArg["namespace"],
-          scope: queryArg.scope,
-        },
-      }),
-    }),
-    getDataProductSettingsNamespaceLengthLimits: build.query<
-      GetDataProductSettingsNamespaceLengthLimitsApiResponse,
-      GetDataProductSettingsNamespaceLengthLimitsApiArg
-    >({
-      query: () => ({
-        url: `/api/v2/configuration/data_product_settings/namespace_length_limits`,
-      }),
-    }),
     updateDataProductSetting: build.mutation<
       UpdateDataProductSettingApiResponse,
       UpdateDataProductSettingApiArg
@@ -77,18 +46,6 @@ export type GetDataProductsSettingsApiArg = void;
 export type CreateDataProductSettingApiResponse =
   /** status 200 Successful Response */ CreateDataProductSettingResponse;
 export type CreateDataProductSettingApiArg = DataProductSettingCreate;
-export type GetDataProductSettingsNamespaceSuggestionApiResponse =
-  /** status 200 Successful Response */ NamespaceSuggestion;
-export type GetDataProductSettingsNamespaceSuggestionApiArg = string;
-export type ValidateDataProductSettingsNamespaceApiResponse =
-  /** status 200 Successful Response */ NamespaceValidation;
-export type ValidateDataProductSettingsNamespaceApiArg = {
-  namespace: string;
-  scope: DataProductSettingScope;
-};
-export type GetDataProductSettingsNamespaceLengthLimitsApiResponse =
-  /** status 200 Successful Response */ NamespaceLengthLimits;
-export type GetDataProductSettingsNamespaceLengthLimitsApiArg = void;
 export type UpdateDataProductSettingApiResponse =
   /** status 200 Successful Response */ UpdateDataProductSettingResponse;
 export type UpdateDataProductSettingApiArg = {
@@ -135,15 +92,6 @@ export type DataProductSettingCreate = {
   order?: number;
   scope: DataProductSettingScope;
 };
-export type NamespaceSuggestion = {
-  namespace: string;
-};
-export type NamespaceValidation = {
-  validity: ResourceNameValidityType;
-};
-export type NamespaceLengthLimits = {
-  max_length: number;
-};
 export type UpdateDataProductSettingResponse = {
   id: string;
 };
@@ -166,22 +114,10 @@ export enum DataProductSettingScope {
   Dataproduct = "dataproduct",
   Dataset = "dataset",
 }
-export enum ResourceNameValidityType {
-  Valid = "VALID",
-  InvalidLength = "INVALID_LENGTH",
-  InvalidCharacters = "INVALID_CHARACTERS",
-  Duplicate = "DUPLICATE",
-}
 export const {
   useGetDataProductsSettingsQuery,
   useLazyGetDataProductsSettingsQuery,
   useCreateDataProductSettingMutation,
-  useGetDataProductSettingsNamespaceSuggestionQuery,
-  useLazyGetDataProductSettingsNamespaceSuggestionQuery,
-  useValidateDataProductSettingsNamespaceQuery,
-  useLazyValidateDataProductSettingsNamespaceQuery,
-  useGetDataProductSettingsNamespaceLengthLimitsQuery,
-  useLazyGetDataProductSettingsNamespaceLengthLimitsQuery,
   useUpdateDataProductSettingMutation,
   useRemoveDataProductSettingMutation,
 } = injectedRtkApi;

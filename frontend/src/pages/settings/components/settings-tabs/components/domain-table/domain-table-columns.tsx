@@ -3,13 +3,12 @@ import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type { GetDomainsItem } from '@/store/api/services/generated/configurationDomainsApi.ts';
-import type { DomainsGetContract } from '@/types/domain';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    handleRemove: (domain: DomainsGetContract) => void;
-    handleEdit: (domain: DomainsGetContract) => () => void;
+    handleRemove: (domain: GetDomainsItem) => void;
+    handleEdit: (domain: GetDomainsItem) => () => void;
 };
 
 export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): TableColumnsType<GetDomainsItem> => {

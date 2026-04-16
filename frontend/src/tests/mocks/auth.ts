@@ -7,6 +7,10 @@ export const allowAllAuth = () => {
             return HttpResponse.json({ roles: [] });
         }),
 
+        http.get('*/api/v2/authz/role_assignments/:data_product', () => {
+            return HttpResponse.json({ role_assignments: [] });
+        }),
+
         http.get('*/api/v2/authz/access/:action', () => {
             return HttpResponse.json({ allowed: true });
         }),

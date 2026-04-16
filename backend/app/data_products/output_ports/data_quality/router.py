@@ -51,7 +51,7 @@ def get_latest_data_quality_summary_for_output_port(
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session),
-) -> OutputPortDataQualitySummary:
+) -> OutputPortDataQualitySummaryResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     summary = OutputPortDataQualityService(db).get_latest_data_quality_summary(ds.id)
     return convert(summary, id)

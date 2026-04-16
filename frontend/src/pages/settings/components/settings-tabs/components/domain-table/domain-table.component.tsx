@@ -9,7 +9,6 @@ import {
     useRemoveDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import type { DomainsGetContract } from '@/types/domain';
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
 import styles from './domain-table.module.scss';
@@ -26,8 +25,8 @@ export function DomainTable() {
     } = useModal();
     const [onRemoveDomain] = useRemoveDomainMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [initial, setInitial] = useState<DomainsGetContract | undefined>(undefined);
-    const [migrateFrom, setMigrateFrom] = useState<DomainsGetContract | undefined>(undefined);
+    const [initial, setInitial] = useState<GetDomainsItem | undefined>(undefined);
+    const [migrateFrom, setMigrateFrom] = useState<GetDomainsItem | undefined>(undefined);
 
     const handleAdd = () => {
         setMode('create');
@@ -35,13 +34,13 @@ export function DomainTable() {
         handleOpen();
     };
 
-    const handleEdit = (tag: DomainsGetContract) => () => {
+    const handleEdit = (tag: GetDomainsItem) => () => {
         setMode('edit');
         setInitial(tag);
         handleOpen();
     };
 
-    const handleRemove = async (domain: DomainsGetContract) => {
+    const handleRemove = async (domain: GetDomainsItem) => {
         try {
             if (domain.data_product_count > 0) {
                 setMigrateFrom(domain);

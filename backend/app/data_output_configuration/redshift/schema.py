@@ -61,7 +61,7 @@ class RedshiftTechnicalAssetConfiguration(AssetProviderPlugin):
             self.table = "*"
         return self
 
-    def validate_configuration(self, data_product: DataProduct):
+    def validate_configuration(self, data_product: DataProduct, db: Session):
         # If product aligned
         if not self.database.startswith(data_product.namespace):
             raise ValueError("Invalid database specified")

@@ -15,7 +15,6 @@ from tests.factories import (
     UserFactory,
 )
 
-OLD_ENDPOINT = "/api/datasets"
 ENDPOINT = "/api/v2/data_products"
 
 
@@ -36,11 +35,9 @@ def _assign_update_role(session, dataset):
 
 
 class TestCuratedQueriesRouter:
-    def test_curated_queries_put(self, client, session):
-        dataset = DatasetFactory()
-        _assign_update_role(session, dataset)
-
-        payload = {
+    @staticmethod
+    def curate_queries_payload():
+        return {
             "curated_queries": [
                 {
                     "title": "Top enrolling sites",
@@ -55,14 +52,19 @@ class TestCuratedQueriesRouter:
             ]
         }
 
+    def test_curated_queries_put(self, client, session):
+        dataset = DatasetFactory()
+        _assign_update_role(session, dataset)
+
         put_response = client.put(
-            f"{OLD_ENDPOINT}/{dataset.id}/usage/curated_queries", json=payload
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries",
+            json=self.curate_queries_payload(),
         )
         assert put_response.status_code == 200
         body = put_response.json()
-        assert len(body["dataset_curated_queries"]) == 2
-        assert body["dataset_curated_queries"][0]["title"] == "Top enrolling sites"
-        assert body["dataset_curated_queries"][1]["title"] == "New deviations"
+        assert len(body["output_port_curated_queries"]) == 2
+        assert body["output_port_curated_queries"][0]["title"] == "Top enrolling sites"
+        assert body["output_port_curated_queries"][1]["title"] == "New deviations"
 
     def test_delete_output_port_curated_query(self, client, session):
         dataset = DatasetFactory()
@@ -101,8 +103,10 @@ class TestCuratedQueriesRouter:
             ],
         )
 
-        get_response = client.get(f"{OLD_ENDPOINT}/{dataset.id}/usage/curated_queries")
+        get_response = client.get(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries"
+        )
         assert get_response.status_code == 200
         data = get_response.json()
-        assert len(data["dataset_curated_queries"]) == 1
-        assert data["dataset_curated_queries"][0]["title"] == "Existing query"
+        assert len(data["output_port_curated_queries"]) == 1
+        assert data["output_port_curated_queries"][0]["title"] == "Existing query"

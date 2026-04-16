@@ -11,7 +11,6 @@ from app.authorization.role_assignments.data_product.auth import (
 )
 from app.authorization.role_assignments.data_product.schema import (
     CreateDataProductRoleAssignment,
-    CreateDataProductRoleAssignmentOld,
     DataProductRoleAssignmentResponse,
     DecideDataProductRoleAssignment,
     DeleteDataProductRoleAssignmentResponse,
@@ -38,7 +37,7 @@ from app.events.service import EventService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(prefix="/v2/authz/role_assignments/data_product")
 
 
 @router.delete(
@@ -84,29 +83,7 @@ def delete_data_product_role_assignment(
     )
 
 
-_router = router
-router = APIRouter()
-
-old_route = "/role_assignments/data_product"
-route = "/v2/authz/role_assignments/data_product"
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
-
-
-@router.get(old_route, deprecated=True)
-def list_assignments_old(
-    data_product_id: Optional[UUID] = None,
-    user_id: Optional[UUID] = None,
-    role_id: Optional[UUID] = None,
-    decision: Optional[DecisionStatus] = None,
-    db: Session = Depends(get_db_session),
-) -> Sequence[DataProductRoleAssignmentResponse]:
-    return list_data_product_role_assignments(
-        data_product_id, user_id, role_id, decision, db=db
-    ).role_assignments
-
-
-@router.get(route)
+@router.get("")
 def list_data_product_role_assignments(
     data_product_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
@@ -125,35 +102,7 @@ def list_data_product_role_assignments(
 
 
 @router.post(
-    f"{old_route}/request/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS, resolver=EmptyResolver
-            )
-        )
-    ],
-    deprecated=True,
-)
-def request_assignment_old(
-    id: UUID,
-    request: CreateDataProductRoleAssignmentOld,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> DataProductRoleAssignmentResponse:
-    return request_data_product_role_assignment(
-        RequestDataProductRoleAssignment(
-            data_product_id=id, user_id=request.user_id, role_id=request.role_id
-        ),
-        background_tasks,
-        db,
-        user,
-    )
-
-
-@router.post(
-    f"{route}/request",
+    "/request",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -200,35 +149,7 @@ def request_data_product_role_assignment(
 
 
 @router.post(
-    f"{old_route}/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__CREATE_USER, resolver=DataProductResolver
-            )
-        )
-    ],
-    deprecated=True,
-)
-def create_assignment_old(
-    id: UUID,
-    request: CreateDataProductRoleAssignmentOld,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> DataProductRoleAssignmentResponse:
-    return create_data_product_role_assignment(
-        CreateDataProductRoleAssignment(
-            data_product_id=id, user_id=request.user_id, role_id=request.role_id
-        ),
-        background_tasks,
-        db,
-        user,
-    )
-
-
-@router.post(
-    route,
+    "",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -291,29 +212,8 @@ def create_data_product_role_assignment(
     return role_assignment
 
 
-@router.patch(
-    f"{old_route}/{{id}}/decide",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
-                resolver=DataProductRoleAssignmentResolver,
-            )
-        )
-    ],
-    deprecated=True,
-)
-def decide_assignment_old(
-    id: UUID,
-    request: DecideDataProductRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> DataProductRoleAssignmentResponse:
-    return decide_data_product_role_assignment(id, request, db, user)
-
-
 @router.post(
-    f"{route}/{{id}}/decide",
+    "/{id}/decide",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -374,29 +274,8 @@ def decide_data_product_role_assignment(
     return assignment
 
 
-@router.patch(
-    f"{old_route}/{{id}}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_USER,
-                resolver=DataProductRoleAssignmentResolver,
-            )
-        )
-    ],
-    deprecated=True,
-)
-def modify_assigned_role_old(
-    id: UUID,
-    request: ModifyDataProductRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> DataProductRoleAssignmentResponse:
-    return modify_data_product_role_assignment(id, request, db, user)
-
-
 @router.put(
-    f"{route}/{{id}}",
+    "/{id}",
     dependencies=[
         Depends(
             Authorization.enforce(

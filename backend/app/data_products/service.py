@@ -110,6 +110,7 @@ class DataProductService:
 
         return rolled_up_tags
 
+    @deprecated("Leftover from API v1")
     def get_data_product_old(self, id: UUID) -> DataProductGet:
         data_product = self.db.get(
             DataProductModel,
@@ -157,13 +158,17 @@ class DataProductService:
         data_product = self.db.get(
             DataProductModel,
             id,
-            options=[selectinload(DataProductModel.data_product_settings)],
+            options=[selectinload(DataProductModel.tags)],
         )
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
             )
         )
+        if not data_product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
+            )
 
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
@@ -179,10 +184,7 @@ class DataProductService:
             )
         )
         query = select(DataProductModel).options(
-            selectinload(DataProductModel.dataset_links).raiseload("*"),
-            selectinload(DataProductModel.assignments).raiseload("*"),
-            selectinload(DataProductModel.data_outputs).raiseload("*"),
-            selectinload(DataProductModel.data_product_settings).raiseload("*"),
+            selectinload(DataProductModel.tags).raiseload("*"),
         )
         if filter_to_user_with_assigment:
             query = query.filter(
@@ -260,7 +262,9 @@ class DataProductService:
         id: UUID,
         data_product: DataProductUpdate,
     ) -> UpdateDataProductResponse:
-        current_data_product = ensure_data_product_exists(id, self.db)
+        current_data_product = ensure_data_product_exists(
+            id, self.db, options=[selectinload(DataProductModel.tags)]
+        )
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         if (
@@ -368,7 +372,7 @@ class DataProductService:
 
         approval_status = (
             DecisionStatus.PENDING
-            if dataset.access_type != OutputPortAccessType.PUBLIC
+            if dataset.access_type != OutputPortAccessType.UNRESTRICTED
             else DecisionStatus.APPROVED
         )
 

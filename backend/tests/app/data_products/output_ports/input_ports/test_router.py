@@ -20,9 +20,7 @@ from tests.factories import (
     UserFactory,
 )
 
-OLD_DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/v2/data_products/{}/output_ports/{}/input_ports"
-OLD_DATA_PRODUCTS_ENDPOINT = "/api/data_products"
 DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 
 
@@ -51,28 +49,7 @@ class TestDataProductsDatasetsRouter:
         assert history_response.status_code == 200, history_response.text
         assert len(history_response.json()) == 1
 
-    def test_request_data_product_link_deprecated_method(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
-        )
-        data_product = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        ds = DatasetFactory()
-
-        response = client.post(
-            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product.id}/dataset/{str(ds.id)}",
-        )
-        assert response.status_code == 200
-        history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history) == 1
-
-    def test_request_data_product_multiple_link(self, client):
+    def test_request_data_product_multiple_link_old(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -92,7 +69,29 @@ class TestDataProductsDatasetsRouter:
         )
         assert response.status_code == 200
         history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history) == 2
+        assert len(history["events"]) == 2
+
+    def test_request_data_product_multiple_link(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds1 = DatasetFactory()
+        ds2 = DatasetFactory()
+
+        response = self.request_link_input_ports(
+            client, data_product.id, [ds1.id, ds2.id]
+        )
+        assert response.status_code == 200, response.text
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history["events"]) == 2
 
     def test_request_already_exists(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -163,7 +162,7 @@ class TestDataProductsDatasetsRouter:
             data_product_id=assoc.data_product.id,
         )
 
-        response = self.request_data_product_dataset_unlink_old(
+        response = self.request_data_product_input_port_unlink(
             client, assoc.data_product.id, assoc.dataset.id
         )
         assert response.status_code == 200
@@ -201,7 +200,9 @@ class TestDataProductsDatasetsRouter:
 
     def test_approve_data_product_link(self, client):
         link = self.create_link_with_status()
-        response = self.approve_default_data_product_dataset_link(client, link.id)
+        response = self.approve_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
     def test_approve_output_port_as_input_port(self, client):
@@ -218,7 +219,9 @@ class TestDataProductsDatasetsRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.approve_default_data_product_dataset_link(client, link.id)
+        response = self.approve_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
     def test_approved_link_no_role(self, client):
@@ -227,7 +230,9 @@ class TestDataProductsDatasetsRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.approve_default_data_product_dataset_link(client, link.id)
+        response = self.approve_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 403
         assert (
             response.json()["detail"]
@@ -253,7 +258,9 @@ class TestDataProductsDatasetsRouter:
 
     def test_deny_data_product_link(self, client):
         link = self.create_link_with_status()
-        response = self.deny_default_data_product_dataset_link(client, link.id)
+        response = self.deny_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
     def test_deny_output_port_as_input_port(self, client):
@@ -270,7 +277,9 @@ class TestDataProductsDatasetsRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.deny_default_data_product_dataset_link(client, link.id)
+        response = self.deny_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
     def test_deny_link_no_role(self, client):
@@ -279,17 +288,14 @@ class TestDataProductsDatasetsRouter:
             dataset=ds, status=DecisionStatus.PENDING
         )
 
-        response = self.deny_default_data_product_dataset_link(client, link.id)
+        response = self.deny_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 403
         assert (
             response.json()["detail"]
             == "You don't have permission to perform this action"
         )
-
-    def test_remove_data_product_link(self, client):
-        link = self.create_link_with_status()
-        response = self.remove_data_product_dataset_link(client, link.id)
-        assert response.status_code == 200, response.text
 
     def test_remove_output_port_as_input_port(self, client):
         link = self.create_link_with_status()
@@ -303,7 +309,9 @@ class TestDataProductsDatasetsRouter:
         ds = DatasetFactory()
         link = DataProductDatasetAssociationFactory(dataset=ds)
 
-        response = self.remove_data_product_dataset_link(client, link.id)
+        response = self.remove_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
     def test_request_dataset_link_with_invalid_dataset_id(self, client):
@@ -331,73 +339,18 @@ class TestDataProductsDatasetsRouter:
             user_id=str(user.id), role_id=str(role.id), dataset_id=str(ds.id)
         )
         link = DataProductDatasetAssociationFactory(dataset=ds)
-        response = client.get(f"/api/data_products/{link.data_product_id}")
-        assert response.json()["dataset_links"][0]["dataset_id"] == str(ds.id)
-        response = client.delete(f"/api/datasets/{ds.id}")
-        assert response.status_code == 200
-        response = client.get(f"/api/data_products/{link.data_product_id}")
-        assert len(response.json()["dataset_links"]) == 0
-
-    def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory()
-        DataProductDatasetAssociationFactory(dataset=ds)
-        response = client.get(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
-        assert response.json() == []
-
-    def test_get_pending_actions(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[
-                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
-                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
-            ],
+        response = client.get(
+            f"/api/v2/data_products/{link.data_product_id}/input_ports"
         )
-        data_product = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
-        )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-
-        response = self.request_data_product_dataset_link(
-            client, data_product_id=data_product.id, dataset_id=ds.id
+        assert len(response.json()["input_ports"]) == 1
+        response = client.delete(
+            f"/api/v2/data_products/{ds.data_product.id}/output_ports/{ds.id}"
         )
         assert response.status_code == 200
-        response = client.get(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
-        assert response.json()[0]["data_product_id"] == str(data_product.id)
-        assert response.json()[0]["status"] == "pending"
-        assert response.json()[0]["justification"] == "This is my birth right!"
-
-    def test_get_pending_actions_public(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[
-                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
-                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
-            ],
+        response = client.get(
+            f"/api/v2/data_products/{link.data_product_id}/input_ports"
         )
-        data_product = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        ds = DatasetFactory()
-
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
-        )
-        assert response.status_code == 200
-        response = client.get(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
-        assert response.json() == []
+        assert len(response.json()["input_ports"]) == 0
 
     def test_history_event_created_on_remove_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -409,7 +362,9 @@ class TestDataProductsDatasetsRouter:
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataProductDatasetAssociationFactory(dataset=ds)
 
-        response = self.remove_data_product_dataset_link(client, link.id)
+        response = self.remove_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
         history = self.get_data_product_history(client, link.data_product_id).json()
@@ -427,11 +382,13 @@ class TestDataProductsDatasetsRouter:
         link = DataProductDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
-        response = self.approve_default_data_product_dataset_link(client, link.id)
+        response = self.approve_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
         history = self.get_data_product_history(client, link.data_product_id).json()
-        assert len(history) == 1
+        assert len(history["events"]) == 1
 
     def test_history_event_created_on_denial(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -444,11 +401,13 @@ class TestDataProductsDatasetsRouter:
         link = DataProductDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
-        response = self.deny_default_data_product_dataset_link(client, link.id)
+        response = self.deny_output_port_as_input_port(
+            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+        )
         assert response.status_code == 200
 
         history = self.get_data_product_history(client, link.data_product_id).json()
-        assert len(history) == 1
+        assert len(history["events"]) == 1
 
     def test_get_input_ports_for_output_port(self, client):
         # Create a dataset (output port) with a data product
@@ -503,13 +462,13 @@ class TestDataProductsDatasetsRouter:
 
         assert response.status_code == 200
 
-        response = self.request_data_product_dataset_unlink_old(
+        response = self.request_data_product_input_port_unlink(
             client, data_product.id, ds.id
         )
         assert response.status_code == 200
 
         history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history) == 2
+        assert len(history["events"]) == 2
 
     @staticmethod
     def request_data_product_dataset_link(
@@ -532,19 +491,26 @@ class TestDataProductsDatasetsRouter:
         dataset_ids: list[UUID],
         justification: str = "This is my birth right!",
     ) -> Response:
-        return client.post(
-            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
-            json={
-                "dataset_ids": [str(dataset_id) for dataset_id in dataset_ids],
-                "justification": justification,
-            },
+        return TestDataProductsDatasetsRouter.request_link_input_ports(
+            client, data_product_id, dataset_ids, justification
         )
 
     @staticmethod
-    def approve_default_data_product_dataset_link(
-        client: TestClient, link_id
+    def request_link_input_ports(
+        client: TestClient,
+        data_product_id: UUID,
+        output_port_ids: list[UUID],
+        justification: str = "This is my birth right!",
     ) -> Response:
-        return client.post(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/approve/{link_id}")
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_input_ports",
+            json={
+                "input_ports": [
+                    str(output_port_id) for output_port_id in output_port_ids
+                ],
+                "justification": justification,
+            },
+        )
 
     @staticmethod
     def approve_output_port_as_input_port(
@@ -556,10 +522,6 @@ class TestDataProductsDatasetsRouter:
         )
 
     @staticmethod
-    def deny_default_data_product_dataset_link(client: TestClient, link_id) -> Response:
-        return client.post(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/deny/{link_id}")
-
-    @staticmethod
     def deny_output_port_as_input_port(
         client: TestClient, data_product_id, output_port_id, consuming_data_product_id
     ) -> Response:
@@ -569,24 +531,12 @@ class TestDataProductsDatasetsRouter:
         )
 
     @staticmethod
-    def remove_data_product_dataset_link(client: TestClient, link_id) -> Response:
-        return client.post(f"{OLD_DATA_PRODUCTS_DATASETS_ENDPOINT}/remove/{link_id}")
-
-    @staticmethod
     def remove_output_port_as_input_port(
         client: TestClient, data_product_id, output_port_id, consuming_data_product_id
     ) -> Response:
         return client.post(
             f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/remove",
             json={"consuming_data_product_id": f"{consuming_data_product_id}"},
-        )
-
-    @staticmethod
-    def request_data_product_dataset_unlink_old(
-        client: TestClient, data_product_id, dataset_id
-    ) -> Response:
-        return client.delete(
-            f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
         )
 
     @staticmethod
@@ -599,4 +549,4 @@ class TestDataProductsDatasetsRouter:
 
     @staticmethod
     def get_data_product_history(client, data_product_id):
-        return client.get(f"{OLD_DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")
+        return client.get(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")

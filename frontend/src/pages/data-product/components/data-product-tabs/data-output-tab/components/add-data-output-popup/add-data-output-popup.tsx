@@ -10,9 +10,10 @@ type Props = {
     onClose: () => void;
     isOpen: boolean;
     dataProductId: string;
+    debounce?: number;
 };
 
-export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
+export function AddDataOutputPopup({ onClose, isOpen, dataProductId, debounce }: Props) {
     const { t } = useTranslation();
     const ref = useRef<FormInstance<CreateTechnicalAssetRequest> | null>(null);
 
@@ -26,8 +27,9 @@ export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
             <DataOutputForm
                 formRef={ref}
                 modalCallbackOnSubmit={onClose}
-                mode={'create'}
+                mode="create"
                 dataProductId={dataProductId}
+                debounce={debounce}
             />
         </DataProductDataOutputLinkPopup>
     );

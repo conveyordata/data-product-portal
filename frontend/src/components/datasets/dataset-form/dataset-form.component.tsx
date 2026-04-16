@@ -44,7 +44,6 @@ import {
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { DatasetAccess } from '@/types/dataset';
 import {
     ApplicationPaths,
     createDataOutputIdPath,
@@ -75,19 +74,19 @@ const getAccessTypeOptions = (t: TFunction) => {
     return [
         {
             label: (
-                <Tooltip title={t('Public Output Ports are visible to everyone and are free to use by anyone')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Public)}
-                </Tooltip>
-            ),
-            value: DatasetAccess.Public,
-        },
-        {
-            label: (
                 <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
                     {getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted)}
                 </Tooltip>
             ),
-            value: DatasetAccess.Restricted,
+            value: OutputPortAccessType.Restricted,
+        },
+        {
+            label: (
+                <Tooltip title={t('Unrestricted Output Ports are visible and accessible to use by anyone')}>
+                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted)}
+                </Tooltip>
+            ),
+            value: OutputPortAccessType.Unrestricted,
         },
         {
             label: (
@@ -95,7 +94,7 @@ const getAccessTypeOptions = (t: TFunction) => {
                     {getDatasetAccessTypeLabel(t, OutputPortAccessType.Private)}
                 </Tooltip>
             ),
-            value: DatasetAccess.Private,
+            value: OutputPortAccessType.Private,
         },
     ];
 };
@@ -159,7 +158,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         isFetchingInitialValues ||
         isFetchingTags;
 
-    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
+    const accessTypeOptions: CheckboxOptionType<OutputPortAccessType>[] = useMemo(() => getAccessTypeOptions(t), [t]);
 
     const userSelectOptions = users.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
@@ -304,7 +303,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
-        access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
+        access_type: mode === 'create' ? OutputPortAccessType.Public : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle?.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,

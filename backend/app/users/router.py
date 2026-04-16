@@ -1,4 +1,3 @@
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -12,10 +11,10 @@ from app.pending_actions.schema_response import PendingActionResponse
 from app.pending_actions.service import PendingActionsService
 from app.users.schema import User
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
-from app.users.schema_response import GetUsersResponse, UserCreateResponse, UsersGet
+from app.users.schema_response import GetUsersResponse, UserCreateResponse
 from app.users.service import UserService
 
-router = APIRouter()
+router = APIRouter(tags=["Users"], prefix="/v2/users")
 
 
 @router.delete(
@@ -69,35 +68,12 @@ def set_can_become_admin(
     UserService(db).set_can_become_admin(request)
 
 
-_router = router
-router = APIRouter(tags=["Users"])
-old_route = "/users"
-route = "/v2/users"
-router.include_router(_router, prefix=old_route, deprecated=True)
-router.include_router(_router, prefix=route)
-
-
-@router.get(old_route, deprecated=True)
-def get_users_old(
-    db: Session = Depends(get_db_session),
-) -> Sequence[UsersGet]:
-    return UserService(db).get_users()
-
-
-@router.get(route)
+@router.get("")
 def get_users(db: Session = Depends(get_db_session)) -> GetUsersResponse:
-    return GetUsersResponse(users=get_users_old(db))
+    return GetUsersResponse(users=UserService(db).get_users())
 
 
-@router.post(f"{old_route}/seen_tour", deprecated=True)
-def mark_tour_as_seen_old(
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> None:
-    UserService(db).mark_tour_as_seen(user.id)
-
-
-@router.post(f"{route}/current/seen_tour")
+@router.post("/current/seen_tour")
 def mark_tour_as_seen(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
@@ -105,7 +81,7 @@ def mark_tour_as_seen(
     UserService(db).mark_tour_as_seen(user.id)
 
 
-@router.get("/v2/users/current/pending_actions")
+@router.get("/current/pending_actions")
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
@@ -113,6 +89,6 @@ def get_user_pending_actions(
     return PendingActionsService(db).get_user_pending_actions(authenticated_user)
 
 
-@router.get("/v2/users/current")
+@router.get("/current")
 def get_current_user(authorized_user: User = Depends(authorize_user)) -> User:
     return authorized_user

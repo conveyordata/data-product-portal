@@ -1,4 +1,4 @@
-from typing import Annotated, Sequence
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -26,19 +26,11 @@ def search_output_ports(
     return SearchOutputPortsResponse(
         output_ports=[
             SearchDatasets.model_validate(ds).convert()
-            for ds in search_data_sets(query, limit, current_user_assigned, db, user)
+            for ds in OutputPortService(db).search_datasets(
+                query=query,
+                limit=limit,
+                user=user,
+                current_user_assigned=current_user_assigned,
+            )
         ]
-    )
-
-
-@router.get("/datasets/search", deprecated=True)
-def search_data_sets(
-    query: Annotated[str | None, Query(min_length=3)] = None,
-    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
-    current_user_assigned: bool = False,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> Sequence[SearchDatasets]:
-    return OutputPortService(db).search_datasets(
-        query=query, limit=limit, user=user, current_user_assigned=current_user_assigned
     )

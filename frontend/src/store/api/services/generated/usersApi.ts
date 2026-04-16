@@ -175,7 +175,11 @@ export type CanBecomeAdminUpdate = {
   can_become_admin: boolean;
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType = "public" | "restricted" | "private";
+export type OutputPortAccessType =
+  | "public"
+  | "restricted"
+  | "private"
+  | "unrestricted";
 export type Tag = {
   id: string;
   value: string;
@@ -229,6 +233,12 @@ export type DataProductOutputPortPendingAction = {
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
+export type AzureBlobTechnicalAssetConfiguration = {
+  configuration_type: "AzureBlobTechnicalAssetConfiguration";
+  domain?: string;
+  path?: string;
+  container_name: string;
+};
 export type AccessGranularity = "schema" | "table";
 export type DatabricksTechnicalAssetConfiguration = {
   configuration_type: "DatabricksTechnicalAssetConfiguration";
@@ -253,7 +263,7 @@ export type GlueTechnicalAssetConfiguration = {
 export type OsiSemanticModelTechnicalAssetConfiguration = {
   configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
   model_name?: string;
-  file_path?: string;
+  location?: string;
 };
 export type PostgreSqlTechnicalAssetConfiguration = {
   configuration_type: "PostgreSQLTechnicalAssetConfiguration";
@@ -288,7 +298,7 @@ export type SnowflakeTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
-export type TechnicalAsset = {
+export type OwnedTechnicalAsset = {
   id: string;
   name: string;
   namespace: string;
@@ -299,6 +309,9 @@ export type TechnicalAsset = {
   platform_id: string;
   service_id: string;
   configuration:
+    | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
     | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)
@@ -327,7 +340,7 @@ export type TechnicalAssetOutputPortPendingAction = {
   output_port_id: string;
   output_port: OutputPort;
   technical_asset_id: string;
-  technical_asset: TechnicalAsset;
+  technical_asset: OwnedTechnicalAsset;
   status: DecisionStatus;
   requested_on: string;
   denied_on: string | null;

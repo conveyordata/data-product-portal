@@ -8,7 +8,6 @@ from tests.factories import (
     TechnicalAssetFactory,
 )
 
-OLD_ENDPOINT = "/api/graph"
 ENDPOINT = "/api/v2/graph"
 
 
@@ -16,7 +15,6 @@ class TestGraphRouter:
     @pytest.mark.parametrize(
         "route",
         [
-            OLD_ENDPOINT,
             ENDPOINT,
         ],
     )

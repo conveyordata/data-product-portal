@@ -7,14 +7,19 @@ sidebar_position: 200
 ## Unreleased
 
 ### breaking changes
+- **[API]**: All v1 endpoints have been removed. Migrate to API v2 if not yet done so.
 - **[API]**: The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.
+- **[Device Flow]**: Because of the removal of the v1 endpoints, the callback endpoint of the device flow has also changed.
+Please migrate your OIDC provider to allow for the endpoint `<HOST>/api/v2/authn/device/callback` instead of the previous `<HOST>/api/auth/device/callback/` **The trailing slash is removed, this is important depending on the provider you use**
 
 ### features
 
+- **[SDK]**: We ship a full python client SDK which mirrors the openapi spec for easier integration.
 - **[Explorer]**: Domain container nodes are now visible in the global graph explorer, grouping data products by domain with distinct colours
 - **[Postgresql]**: Postgresql plugin defining technical assets
 - **[Docs]**: Adding an architecture overview
 - **[UI]**: Remove audit logs page
+- **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
 
 ### bugfixes
 

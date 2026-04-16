@@ -2,8 +2,6 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from pydantic import computed_field
-
 from app.shared.schema import ORMModel
 
 
@@ -25,13 +23,7 @@ class DeviceFlow(ORMModel):
     authz_code: Optional[str]
     authz_state: Optional[str]
     authz_verif: Optional[str]
-
-    @computed_field
-    def verification_uri_complete(self) -> str:
-        return (
-            f"{self.oidc_redirect_uri}api/auth/"
-            f"device?code={self.user_code}&authorize=true"
-        )
+    verification_uri_complete: str
 
 
 class OIDCTokenResponse(ORMModel):

@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from freezegun import freeze_time
 
-ENDPOINT = "/api/auth/device"
+ENDPOINT = "/api/v2/authn/device"
 
 
 class TestAuthDeviceRouter:

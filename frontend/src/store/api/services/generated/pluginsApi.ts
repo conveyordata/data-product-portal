@@ -140,6 +140,12 @@ export type UrlResponse = {
 export type RenderTechnicalAssetAccessPathResponse = {
   technical_asset_access_path: string;
 };
+export type AzureBlobTechnicalAssetConfiguration = {
+  configuration_type: "AzureBlobTechnicalAssetConfiguration";
+  domain?: string;
+  path?: string;
+  container_name: string;
+};
 export type DatabricksTechnicalAssetConfiguration = {
   configuration_type: "DatabricksTechnicalAssetConfiguration";
   catalog: string;
@@ -163,7 +169,7 @@ export type GlueTechnicalAssetConfiguration = {
 export type OsiSemanticModelTechnicalAssetConfiguration = {
   configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
   model_name?: string;
-  file_path?: string;
+  location?: string;
 };
 export type PostgreSqlTechnicalAssetConfiguration = {
   configuration_type: "PostgreSQLTechnicalAssetConfiguration";
@@ -202,6 +208,9 @@ export type RenderTechnicalAssetAccessPathRequest = {
   platform_id: string;
   service_id: string;
   configuration:
+    | ({
+        configuration_type: "AzureBlobTechnicalAssetConfiguration";
+      } & AzureBlobTechnicalAssetConfiguration)
     | ({
         configuration_type: "DatabricksTechnicalAssetConfiguration";
       } & DatabricksTechnicalAssetConfiguration)

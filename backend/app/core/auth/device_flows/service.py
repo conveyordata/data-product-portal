@@ -57,7 +57,7 @@ class DeviceFlowService:
         self.logger = logger
 
     def generate_device_flow_codes(
-        self, db: Session, client_id: str, scope: str = "openid"
+        self, db: Session, client_id: str, request: Request, scope: str = "openid"
     ) -> DeviceFlow:
         device_flow = DeviceFlowModel(
             client_id=client_id,
@@ -69,7 +69,16 @@ class DeviceFlowService:
         )
         db.add(device_flow)
         db.commit()
-        return DeviceFlow.model_validate(device_flow)
+
+        base_url = request.url_for("device_flow_user_code")
+        verification_uri = f"{base_url}?code={device_flow.user_code}"
+
+        # Extract all ORM fields and add verification_uri_complete
+
+        return DeviceFlow(
+            **{k: v for k, v in device_flow.__dict__.items() if not k.startswith("_")},
+            verification_uri_complete=verification_uri,
+        )
 
     def fetch_jwt_tokens(
         self, request: Request, db: Session, device_code: str, client_id: str
@@ -133,7 +142,7 @@ class DeviceFlowService:
                     "grant_type": "authorization_code",
                     "client_id": client_id,
                     "redirect_uri": f"{get_oidc().redirect_uri}"
-                    "api/auth/device/callback/",
+                    f"{request.app.url_path_for('device_flow_callback')}",
                     "code": device_flow.authz_code,
                     "code_verifier": device_flow.authz_verif,
                 },
@@ -158,10 +167,15 @@ class DeviceFlowService:
             )
 
     def get_device_token(
-        self, auth_client_id: str, client_id: str, db: Session, scope: str = "openid"
+        self,
+        auth_client_id: str,
+        client_id: str,
+        db: Session,
+        request: Request,
+        scope: str = "openid",
     ) -> DeviceFlow:
         self._verify_auth_header(auth_client_id, client_id)
-        return self.generate_device_flow_codes(db, client_id, scope)
+        return self.generate_device_flow_codes(db, client_id, request, scope)
 
     def get_jwt_token(
         self,
@@ -203,13 +217,16 @@ class DeviceFlowService:
             db.commit()
             raise ExpiredUserCodeError
         self.logger.debug("User Code is valid and action is authorize")
+        # Generate URIs using url_for for base path, then add query params manually
+        confirm_base = request.url_for("device_flow_allow")
         confirm_uri = (
-            "/api/auth/device/allow?"
-            f"client_id={device_flow.client_id}&device_code={device_flow.device_code}"
+            f"{confirm_base}?client_id={device_flow.client_id}"
+            f"&device_code={device_flow.device_code}"
         )
+        deny_base = request.url_for("device_flow_deny")
         deny_uri = (
-            "/api/auth/device/deny?client_id"
-            f"={device_flow.client_id}&device_code={device_flow.device_code}"
+            f"{deny_base}?client_id={device_flow.client_id}"
+            f"&device_code={device_flow.device_code}"
         )
         return HTMLResponse(
             content=render_html_template(
@@ -228,7 +245,9 @@ class DeviceFlowService:
         db.commit()
         return RedirectResponse("/")
 
-    def allow_device_flow(self, client_id: str, device_code: str, db: Session):
+    def allow_device_flow(
+        self, client_id: str, device_code: str, db: Session, request: Request
+    ):
         code_verifier = uuid4().hex
         hash = sha256(code_verifier.encode("utf-8")).digest()
         code_challenge = urlsafe_b64encode(hash).decode("utf-8").replace("=", "")
@@ -240,13 +259,15 @@ class DeviceFlowService:
         device.authz_verif = code_verifier
         db.commit()
 
+        callback_url = f"{get_oidc().redirect_uri}{request.app.url_path_for('device_flow_callback')}"
+
         return RedirectResponse(
             status_code=302,
             url=(
                 f"{get_oidc().authorization_endpoint}?"
                 f"response_type=code&client_id={client_id}"
                 f"&scope={device.scope}&"
-                f"redirect_uri={get_oidc().redirect_uri}api/auth/device/callback/"
+                f"redirect_uri={callback_url}"
                 f"&state={state}&scope={device.scope}&code_challenge_method=S256"
                 f"&code_challenge={code_challenge}"
                 f"&identity_provider={get_oidc().provider.name}"

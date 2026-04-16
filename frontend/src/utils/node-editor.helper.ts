@@ -1,5 +1,5 @@
 import Dagre from '@dagrejs/dagre';
-import type { Edge, FitViewOptions, Node } from '@xyflow/react';
+import type { Edge, Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 
 export function getDagreDirection(direction: Position) {
@@ -52,9 +52,4 @@ export const generateDagreLayout = (
     }
 
     return { nodes, edges };
-};
-
-export const defaultFitViewOptions: FitViewOptions = {
-    padding: 0.1,
-    maxZoom: 1.25,
 };
