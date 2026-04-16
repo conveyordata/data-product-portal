@@ -13,6 +13,7 @@ import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
+import { LightweightDataProduct } from '@/pages/lwdp/page.tsx';
 import { Marketplace } from '@/pages/marketplace/marketplace.page.tsx';
 import { PeoplePage } from '@/pages/people/people-table.component.tsx';
 import { ProductStudio } from '@/pages/product-studio/product-studio.page.tsx';
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
                             {
                                 element: <ProductStudio />,
                                 index: true,
+                            },
+                            {
+                                path: ApplicationPaths.LightWeightDataProduct,
+                                element: <LightweightDataProduct />,
                             },
                             {
                                 path: ApplicationPaths.DataProduct,

@@ -7,6 +7,7 @@ export enum ApplicationPaths {
     Studio = '/studio',
     DataProducts = '/data-products',
     Documentation = '/documentation',
+    LightWeightDataProduct = '/studio/lwdp',
     DataProduct = '/studio/:dataProductId',
     DataProductNew = '/studio/new',
     DataProductEdit = '/studio/:dataProductId/edit',
