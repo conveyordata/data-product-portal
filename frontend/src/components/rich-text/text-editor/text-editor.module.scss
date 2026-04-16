@@ -14,9 +14,8 @@
 }
 
 .submitButton {
-    position: absolute;
-    bottom: globals.$spacing-regular;
-    right: globals.$spacing-regular;
+    align-self: flex-end;
+    margin-top: auto;
     border-radius: 50%;
 }
 
