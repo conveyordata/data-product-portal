@@ -1,5 +1,5 @@
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} python:3.13-slim AS base-image
+FROM --platform=${PLATFORM} python:3.13-slim@sha256:d168b8d9eb761f4d3fe305ebd04aeb7e7f2de0297cec5fb2f8f6403244621664 AS base-image
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -13,7 +13,7 @@ ENV POETRY_NO_INTERACTION=1 \
   POETRY_HOME='/usr/local'
 
 RUN apt-get update && apt-get upgrade -y && \
-    pip install poetry==2.2.1
+    pip install -r requirements-poetry.txt --require-hashes
 
 COPY pyproject.toml ./
 RUN poetry install --no-root
