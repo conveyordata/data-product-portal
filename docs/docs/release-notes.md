@@ -9,6 +9,8 @@ sidebar_position: 200
 ### breaking changes
 - **[API]**: All v1 endpoints have been removed. Migrate to API v2 if not yet done so.
 - **[API]**: The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.
+- **[Device Flow]**: Because of the removal of the v1 endpoints, the callback endpoint of the device flow has also changed.
+Please migrate your OIDC provider to allow for the endpoint `<HOST>/api/v2/authn/device/callback` instead of the previous `<HOST>/api/auth/device/callback/` **The trailing slash is removed, this is important depending on the provider you use**
 
 ### features
 

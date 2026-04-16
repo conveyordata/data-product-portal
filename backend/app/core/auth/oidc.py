@@ -30,6 +30,8 @@ class OIDCConfiguration:
             self.authority = authority or os.getenv("OIDC_AUTHORITY")
             self.audience = audience or os.getenv("OIDC_AUDIENCE")
             self.redirect_uri = redirect_uri or os.getenv("OIDC_REDIRECT_URI")
+            if self.redirect_uri:
+                self.redirect_uri = self.redirect_uri.removesuffix("/")
             self.oidc_enabled = oidc_enabled
             self.provider = provider
             self.configuration_url = (
