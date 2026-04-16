@@ -22,12 +22,12 @@ class OSISemanticModelTechnicalAssetConfiguration:
     Attributes:
         configuration_type (Literal['OSISemanticModelTechnicalAssetConfiguration']):
         model_name (str | Unset):  Default: ''.
-        file_path (str | Unset):  Default: ''.
+        location (str | Unset):  Default: ''.
     """
 
     configuration_type: Literal["OSISemanticModelTechnicalAssetConfiguration"]
     model_name: str | Unset = ""
-    file_path: str | Unset = ""
+    location: str | Unset = ""
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,7 +35,7 @@ class OSISemanticModelTechnicalAssetConfiguration:
 
         model_name = self.model_name
 
-        file_path = self.file_path
+        location = self.location
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -46,8 +46,8 @@ class OSISemanticModelTechnicalAssetConfiguration:
         )
         if model_name is not UNSET:
             field_dict["model_name"] = model_name
-        if file_path is not UNSET:
-            field_dict["file_path"] = file_path
+        if location is not UNSET:
+            field_dict["location"] = location
 
         return field_dict
 
@@ -65,12 +65,12 @@ class OSISemanticModelTechnicalAssetConfiguration:
 
         model_name = d.pop("model_name", UNSET)
 
-        file_path = d.pop("file_path", UNSET)
+        location = d.pop("location", UNSET)
 
         osi_semantic_model_technical_asset_configuration = cls(
             configuration_type=configuration_type,
             model_name=model_name,
-            file_path=file_path,
+            location=location,
         )
 
         osi_semantic_model_technical_asset_configuration.additional_properties = d

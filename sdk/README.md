@@ -71,4 +71,4 @@ Run this after the OpenAPI spec changes (e.g. after `task update:open-api-spec` 
 task generate:client
 ```
 
-This filters the spec to v2 endpoints, regenerates `sdk/api_client/`, and removes the intermediate spec file. Do not edit files inside `sdk/api_client/` by hand.
+This regenerates `sdk/api_client/` from the openapi spec in docs. Do not edit files inside `sdk/api_client/` by hand. The sdk client is also automatically regenerated if changes to the openapi spec are detected.
