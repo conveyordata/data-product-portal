@@ -23,3 +23,6 @@ vendor/
 go.work
 
 dist/
+
+# Preprocessed OpenAPI spec (intermediate file for go generate)
+pkg/openapi.processed.json

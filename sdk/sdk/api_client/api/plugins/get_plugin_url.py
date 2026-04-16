@@ -16,7 +16,7 @@ def _get_kwargs(
     plugin_name: str,
     *,
     id: UUID,
-    environment: None | str | Unset = UNSET,
+    environment: str | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -24,12 +24,7 @@ def _get_kwargs(
     json_id = str(id)
     params["id"] = json_id
 
-    json_environment: None | str | Unset
-    if isinstance(environment, Unset):
-        json_environment = UNSET
-    else:
-        json_environment = environment
-    params["environment"] = json_environment
+    params["environment"] = environment
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -79,7 +74,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     id: UUID,
-    environment: None | str | Unset = UNSET,
+    environment: str | Unset = UNSET,
 ) -> Response[HTTPValidationError | URLResponse]:
     """Get Plugin Url
 
@@ -88,7 +83,7 @@ def sync_detailed(
     Args:
         plugin_name (str):
         id (UUID):
-        environment (None | str | Unset):
+        environment (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -116,7 +111,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     id: UUID,
-    environment: None | str | Unset = UNSET,
+    environment: str | Unset = UNSET,
 ) -> HTTPValidationError | URLResponse | None:
     """Get Plugin Url
 
@@ -125,7 +120,7 @@ def sync(
     Args:
         plugin_name (str):
         id (UUID):
-        environment (None | str | Unset):
+        environment (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -148,7 +143,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     id: UUID,
-    environment: None | str | Unset = UNSET,
+    environment: str | Unset = UNSET,
 ) -> Response[HTTPValidationError | URLResponse]:
     """Get Plugin Url
 
@@ -157,7 +152,7 @@ async def asyncio_detailed(
     Args:
         plugin_name (str):
         id (UUID):
-        environment (None | str | Unset):
+        environment (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -183,7 +178,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     id: UUID,
-    environment: None | str | Unset = UNSET,
+    environment: str | Unset = UNSET,
 ) -> HTTPValidationError | URLResponse | None:
     """Get Plugin Url
 
@@ -192,7 +187,7 @@ async def asyncio(
     Args:
         plugin_name (str):
         id (UUID):
-        environment (None | str | Unset):
+        environment (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

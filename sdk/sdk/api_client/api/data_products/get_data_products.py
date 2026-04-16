@@ -13,18 +13,14 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    filter_to_user_with_assigment: None | Unset | UUID = UNSET,
+    filter_to_user_with_assigment: UUID | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    json_filter_to_user_with_assigment: None | str | Unset
-    if isinstance(filter_to_user_with_assigment, Unset):
-        json_filter_to_user_with_assigment = UNSET
-    elif isinstance(filter_to_user_with_assigment, UUID):
+    json_filter_to_user_with_assigment: str | Unset = UNSET
+    if not isinstance(filter_to_user_with_assigment, Unset):
         json_filter_to_user_with_assigment = str(filter_to_user_with_assigment)
-    else:
-        json_filter_to_user_with_assigment = filter_to_user_with_assigment
     params["filter_to_user_with_assigment"] = json_filter_to_user_with_assigment
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -71,12 +67,12 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    filter_to_user_with_assigment: None | Unset | UUID = UNSET,
+    filter_to_user_with_assigment: UUID | Unset = UNSET,
 ) -> Response[GetDataProductsResponse | HTTPValidationError]:
     """Get Data Products
 
     Args:
-        filter_to_user_with_assigment (None | Unset | UUID):
+        filter_to_user_with_assigment (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -100,12 +96,12 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    filter_to_user_with_assigment: None | Unset | UUID = UNSET,
+    filter_to_user_with_assigment: UUID | Unset = UNSET,
 ) -> GetDataProductsResponse | HTTPValidationError | None:
     """Get Data Products
 
     Args:
-        filter_to_user_with_assigment (None | Unset | UUID):
+        filter_to_user_with_assigment (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -124,12 +120,12 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    filter_to_user_with_assigment: None | Unset | UUID = UNSET,
+    filter_to_user_with_assigment: UUID | Unset = UNSET,
 ) -> Response[GetDataProductsResponse | HTTPValidationError]:
     """Get Data Products
 
     Args:
-        filter_to_user_with_assigment (None | Unset | UUID):
+        filter_to_user_with_assigment (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -151,12 +147,12 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    filter_to_user_with_assigment: None | Unset | UUID = UNSET,
+    filter_to_user_with_assigment: UUID | Unset = UNSET,
 ) -> GetDataProductsResponse | HTTPValidationError | None:
     """Get Data Products
 
     Args:
-        filter_to_user_with_assigment (None | Unset | UUID):
+        filter_to_user_with_assigment (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

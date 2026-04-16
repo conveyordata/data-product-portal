@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.core.auth.device_flows.schema import OIDCTokenResponse
 from app.core.auth.device_flows.service import DeviceFlowService, verify_auth_header
 from app.database.database import get_db_session
 
@@ -30,7 +31,7 @@ async def get_jwt_token(
     grant_type: str,
     auth_client_id: Annotated[str, Depends(verify_auth_header)],
     db: Session = Depends(get_db_session),
-):
+) -> OIDCTokenResponse:
     return DeviceFlowService().get_jwt_token(
         request, auth_client_id, client_id, device_code, grant_type, db
     )

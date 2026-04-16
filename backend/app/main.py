@@ -7,6 +7,7 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -90,7 +91,6 @@ app = FastAPI(
     title=TITLE,
     summary="Backend API implementation for Data product portal",
     version=API_VERSION,
-    contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
     lifespan=combined_lifespan,
@@ -100,6 +100,42 @@ app = FastAPI(
         "tagsSorter": "alpha",
     },
 )
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title=TITLE,
+        version=API_VERSION,
+        routes=app.routes,
+    )
+
+    # Walk through all paths and parameters
+    for path in openapi_schema.get("paths", {}).values():
+        for method in path.values():
+            parameters = method.get("parameters", [])
+            for param in parameters:
+                schema = param.get("schema", {})
+
+                # Check if 'anyOf' exists and contains a null type
+                if "anyOf" in schema:
+                    # Filter out the {'type': 'null'} entry
+                    new_any_of = [x for x in schema["anyOf"] if x.get("type") != "null"]
+
+                    if len(new_any_of) == 1:
+                        # If only one type remains, move it to the root schema
+                        schema.update(new_any_of[0])
+                        del schema["anyOf"]
+                    else:
+                        schema["anyOf"] = new_any_of
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
 
 mcp_app = mcp.http_app(path="/mcp")
 mcp.add_middleware(LoggingMiddleware())

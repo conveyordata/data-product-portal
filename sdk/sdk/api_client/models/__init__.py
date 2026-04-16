@@ -166,6 +166,7 @@ from .modify_output_port_role_assignment import ModifyOutputPortRoleAssignment
 from .node import Node
 from .node_data import NodeData
 from .node_type import NodeType
+from .oidc_token_response import OIDCTokenResponse
 from .osi_semantic_model_technical_asset_configuration import (
     OSISemanticModelTechnicalAssetConfiguration,
 )
@@ -410,6 +411,7 @@ __all__ = (
     "Node",
     "NodeData",
     "NodeType",
+    "OIDCTokenResponse",
     "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
     "OutputPortAccessType",

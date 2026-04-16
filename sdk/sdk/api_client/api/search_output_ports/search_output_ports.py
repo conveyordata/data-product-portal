@@ -12,19 +12,14 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    query: None | str | Unset = UNSET,
+    query: str | Unset = UNSET,
     limit: int | Unset = 100,
     current_user_assigned: bool | Unset = False,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    json_query: None | str | Unset
-    if isinstance(query, Unset):
-        json_query = UNSET
-    else:
-        json_query = query
-    params["query"] = json_query
+    params["query"] = query
 
     params["limit"] = limit
 
@@ -74,14 +69,14 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    query: None | str | Unset = UNSET,
+    query: str | Unset = UNSET,
     limit: int | Unset = 100,
     current_user_assigned: bool | Unset = False,
 ) -> Response[HTTPValidationError | SearchOutputPortsResponse]:
     """Search Output Ports
 
     Args:
-        query (None | str | Unset):
+        query (str | Unset):
         limit (int | Unset):  Default: 100.
         current_user_assigned (bool | Unset):  Default: False.
 
@@ -109,14 +104,14 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    query: None | str | Unset = UNSET,
+    query: str | Unset = UNSET,
     limit: int | Unset = 100,
     current_user_assigned: bool | Unset = False,
 ) -> HTTPValidationError | SearchOutputPortsResponse | None:
     """Search Output Ports
 
     Args:
-        query (None | str | Unset):
+        query (str | Unset):
         limit (int | Unset):  Default: 100.
         current_user_assigned (bool | Unset):  Default: False.
 
@@ -139,14 +134,14 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    query: None | str | Unset = UNSET,
+    query: str | Unset = UNSET,
     limit: int | Unset = 100,
     current_user_assigned: bool | Unset = False,
 ) -> Response[HTTPValidationError | SearchOutputPortsResponse]:
     """Search Output Ports
 
     Args:
-        query (None | str | Unset):
+        query (str | Unset):
         limit (int | Unset):  Default: 100.
         current_user_assigned (bool | Unset):  Default: False.
 
@@ -172,14 +167,14 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    query: None | str | Unset = UNSET,
+    query: str | Unset = UNSET,
     limit: int | Unset = 100,
     current_user_assigned: bool | Unset = False,
 ) -> HTTPValidationError | SearchOutputPortsResponse | None:
     """Search Output Ports
 
     Args:
-        query (None | str | Unset):
+        query (str | Unset):
         limit (int | Unset):  Default: 100.
         current_user_assigned (bool | Unset):  Default: False.
 

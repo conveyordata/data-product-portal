@@ -16,28 +16,20 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     action: AuthorizationAction,
     *,
-    resource: None | Unset | UUID = UNSET,
-    domain: None | Unset | UUID = UNSET,
+    resource: UUID | Unset = UNSET,
+    domain: UUID | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    json_resource: None | str | Unset
-    if isinstance(resource, Unset):
-        json_resource = UNSET
-    elif isinstance(resource, UUID):
+    json_resource: str | Unset = UNSET
+    if not isinstance(resource, Unset):
         json_resource = str(resource)
-    else:
-        json_resource = resource
     params["resource"] = json_resource
 
-    json_domain: None | str | Unset
-    if isinstance(domain, Unset):
-        json_domain = UNSET
-    elif isinstance(domain, UUID):
+    json_domain: str | Unset = UNSET
+    if not isinstance(domain, Unset):
         json_domain = str(domain)
-    else:
-        json_domain = domain
     params["domain"] = json_domain
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -87,8 +79,8 @@ def sync_detailed(
     action: AuthorizationAction,
     *,
     client: AuthenticatedClient | Client,
-    resource: None | Unset | UUID = UNSET,
-    domain: None | Unset | UUID = UNSET,
+    resource: UUID | Unset = UNSET,
+    domain: UUID | Unset = UNSET,
 ) -> Response[AccessResponse | HTTPValidationError]:
     """Check Access
 
@@ -101,8 +93,8 @@ def sync_detailed(
             This means you can change the name of the actions, but not their integer values.
             The values for the actions are spaced on purpose, to make it easier to extend.
             This has no technical benefit, but it makes it easier to read for developers.
-        resource (None | Unset | UUID):
-        domain (None | Unset | UUID):
+        resource (UUID | Unset):
+        domain (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -129,8 +121,8 @@ def sync(
     action: AuthorizationAction,
     *,
     client: AuthenticatedClient | Client,
-    resource: None | Unset | UUID = UNSET,
-    domain: None | Unset | UUID = UNSET,
+    resource: UUID | Unset = UNSET,
+    domain: UUID | Unset = UNSET,
 ) -> AccessResponse | HTTPValidationError | None:
     """Check Access
 
@@ -143,8 +135,8 @@ def sync(
             This means you can change the name of the actions, but not their integer values.
             The values for the actions are spaced on purpose, to make it easier to extend.
             This has no technical benefit, but it makes it easier to read for developers.
-        resource (None | Unset | UUID):
-        domain (None | Unset | UUID):
+        resource (UUID | Unset):
+        domain (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -166,8 +158,8 @@ async def asyncio_detailed(
     action: AuthorizationAction,
     *,
     client: AuthenticatedClient | Client,
-    resource: None | Unset | UUID = UNSET,
-    domain: None | Unset | UUID = UNSET,
+    resource: UUID | Unset = UNSET,
+    domain: UUID | Unset = UNSET,
 ) -> Response[AccessResponse | HTTPValidationError]:
     """Check Access
 
@@ -180,8 +172,8 @@ async def asyncio_detailed(
             This means you can change the name of the actions, but not their integer values.
             The values for the actions are spaced on purpose, to make it easier to extend.
             This has no technical benefit, but it makes it easier to read for developers.
-        resource (None | Unset | UUID):
-        domain (None | Unset | UUID):
+        resource (UUID | Unset):
+        domain (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -206,8 +198,8 @@ async def asyncio(
     action: AuthorizationAction,
     *,
     client: AuthenticatedClient | Client,
-    resource: None | Unset | UUID = UNSET,
-    domain: None | Unset | UUID = UNSET,
+    resource: UUID | Unset = UNSET,
+    domain: UUID | Unset = UNSET,
 ) -> AccessResponse | HTTPValidationError | None:
     """Check Access
 
@@ -220,8 +212,8 @@ async def asyncio(
             This means you can change the name of the actions, but not their integer values.
             The values for the actions are spaced on purpose, to make it easier to extend.
             This has no technical benefit, but it makes it easier to read for developers.
-        resource (None | Unset | UUID):
-        domain (None | Unset | UUID):
+        resource (UUID | Unset):
+        domain (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
