@@ -40,4 +40,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    pass
+    op.drop_table("azure_blob_technical_asset_configurations")

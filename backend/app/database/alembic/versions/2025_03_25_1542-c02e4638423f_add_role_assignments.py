@@ -72,3 +72,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("role_assignments_data_product")
     op.drop_table("role_assignments_dataset")
+    op.execute("DROP TYPE decisionstatus;")

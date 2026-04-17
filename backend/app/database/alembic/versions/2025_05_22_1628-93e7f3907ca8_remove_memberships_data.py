@@ -64,7 +64,6 @@ def downgrade():
             "status",
             PG_ENUM(name="decisionstatus", create_type=False),
             nullable=False,
-            server_default="PENDING",
         ),
         sa.Column("requested_by_id", UUID, sa.ForeignKey("users.id")),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),
