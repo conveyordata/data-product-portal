@@ -6,7 +6,7 @@ import { TableRow } from '@tiptap/extension-table-row';
 import { Typography } from '@tiptap/extension-typography';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
-import { Button, Popover } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -81,7 +81,7 @@ export const TextEditor = ({
                 <EditorContent editor={editor} content={content ?? undefined} className={styles.content} />
             </div>
             {isEditMode ? (
-                <Popover content={t('Save changes')}>
+                <Tooltip title={t('Save changes')}>
                     <Button
                         type="primary"
                         className={styles.submitButton}
@@ -90,10 +90,10 @@ export const TextEditor = ({
                         disabled={isDisabled || isLoading || isSubmitting}
                         loading={isSubmitting}
                     />
-                </Popover>
+                </Tooltip>
             ) : (
                 !isDisabled && (
-                    <Popover content={t('Edit content')}>
+                    <Tooltip title={t('Edit content')}>
                         <Button
                             type="primary"
                             className={styles.submitButton}
@@ -101,7 +101,7 @@ export const TextEditor = ({
                             disabled={isDisabled || isLoading || isSubmitting}
                             icon={<EditOutlined />}
                         />
-                    </Popover>
+                    </Tooltip>
                 )
             )}
         </div>

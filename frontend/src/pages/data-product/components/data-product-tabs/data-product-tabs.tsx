@@ -238,7 +238,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                     };
                 })}
                 size={'middle'}
-                rootClassName={styles.tabContainer}
+                className={styles.container}
             />
             <Tour
                 open={open}
