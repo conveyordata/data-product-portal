@@ -49,7 +49,6 @@ def emit_event(event_type: str, extract) -> Callable:
         background_tasks: BackgroundTasks,
         db: Session = Depends(get_db_session),
         authenticated_user: User = Depends(get_authenticated_user),
-        **kwargs,
     ) -> None:
         try:
             if not settings.WEBHOOK_V2_URL:
@@ -58,7 +57,7 @@ def emit_event(event_type: str, extract) -> Callable:
                 request=request,
                 db=db,
                 authenticated_user=authenticated_user,
-                **kwargs,
+                **request.path_params,
             )
             data = {k: v.model_dump(mode="json") for k, v in result.items()}
             background_tasks.add_task(call_v2_webhook, event_type, data)
@@ -81,7 +80,6 @@ def emit_event_after(event_type: str, extract) -> Callable:
         request: Request,
         db: Session = Depends(get_db_session),
         authenticated_user: User = Depends(get_authenticated_user),
-        **kwargs,
     ) -> AsyncGenerator[None, None]:
         try:
             yield
@@ -95,7 +93,7 @@ def emit_event_after(event_type: str, extract) -> Callable:
                     request=request,
                     db=db,
                     authenticated_user=authenticated_user,
-                    **kwargs,
+                    **request.path_params,
                 )
                 data = {k: v.model_dump(mode="json") for k, v in result.items()}
                 await call_v2_webhook(event_type, data)
