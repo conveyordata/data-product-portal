@@ -27,3 +27,67 @@ curl -X POST http://localhost:5050/mcp/mcp \                                    
   -H "mcp-session-id: $SESSION_ID" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
 ```
+
+## Alternative Oauth setup for MCP
+
+Niels had issues with the Oauth support in the MCP server.
+For now we kept the existing system as the assumption is that it works for most users.
+Documenting here an alternative setup that worked for Niels:
+
+### Use the dpp-sdk to get an access token
+
+First step is to rewrite the remote-proxy to use the dpp-sdk to get an access token.
+```python
+from __future__ import annotations
+
+import os
+
+from fastmcp import Client, FastMCP
+from fastmcp.client import BearerAuth
+from fastmcp.client.auth.oauth import OAuth
+from fastmcp.utilities.logging import get_logger
+from key_value.aio.stores.memory import MemoryStore
+from sdk.auth import PortalAuth
+logger = get_logger(__name__)
+
+endpoint = os.getenv("ENDPOINT", "http://localhost:5050")
+os.environ["PORTAL_BASE_URL"] = "http://localhost:5050/api"
+os.environ["PORTAL_CLIENT_ID"] = "<>"
+os.environ["PORTAL_CLIENT_SECRET"] = "<>"
+
+auth = PortalAuth()
+token = auth.get_access_token()
+client = Client(f"{endpoint}/mcp/mcp", auth=BearerAuth(token=token))
+
+server = FastMCP.as_proxy(client, name="AuthenticatedProxyDataProductPortal")
+
+if __name__ == "__main__":
+    server.run()
+```
+
+In order to get this to work we need to also install the dpp-sdk when configuring the MCP. MCP config:
+```
+{
+  "mcpServers": {
+    "dataProductPortal": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "--with",
+        "attrs",
+        "--with",
+        "<python wheel/pypi package for dpp-sdk>",
+        "fastmcp",
+        "run",
+        "<path>/remote_proxy.py"
+      ],
+      "env": {
+        "ENDPOINT": "http://localhost:5050"
+      }
+    }
+  }
+}
+```
+Note: if we want to give this to customers, we need to publish the dpp-sdk to pypi instead of using a local wheel.
