@@ -168,6 +168,178 @@ class TestTechnicalAssetV2Events:
         assert response.status_code == 404
         mock_webhook.assert_not_awaited()
 
+    def _link_endpoint(self, dp_id, op_id):
+        return f"{DP_ENDPOINT}/{dp_id}/output_ports/{op_id}/technical_assets"
+
+    # --- technical_asset.linked ---
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_linked_fires_event(self, mock_webhook, client, session):
+        from tests.factories import DatasetFactory
+
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(dp.id, op.id)}/add",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.linked"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_linked_does_not_fire_on_failure(self, mock_webhook, client, session):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(self.invalid_id, self.invalid_id)}/add",
+                json={"technical_asset_id": self.invalid_id},
+            )
+
+        assert response.status_code == 404
+        mock_webhook.assert_not_awaited()
+
+    # --- technical_asset.link_approved ---
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_approved_fires_event(self, mock_webhook, client, session):
+        from app.authorization.role_assignments.enums import DecisionStatus
+        from tests.factories import DataOutputDatasetAssociationFactory, DatasetFactory
+
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+        DataOutputDatasetAssociationFactory(
+            data_output=ta, dataset=op, status=DecisionStatus.PENDING
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(dp.id, op.id)}/approve_link_request",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.link_approved"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_approved_does_not_fire_on_failure(
+        self, mock_webhook, client, session
+    ):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(self.invalid_id, self.invalid_id)}/approve_link_request",
+                json={"technical_asset_id": self.invalid_id},
+            )
+
+        assert response.status_code == 404
+        mock_webhook.assert_not_awaited()
+
+    # --- technical_asset.link_denied ---
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_denied_fires_event(self, mock_webhook, client, session):
+        from app.authorization.role_assignments.enums import DecisionStatus
+        from tests.factories import DataOutputDatasetAssociationFactory, DatasetFactory
+
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+        DataOutputDatasetAssociationFactory(
+            data_output=ta, dataset=op, status=DecisionStatus.PENDING
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(dp.id, op.id)}/deny_link_request",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.link_denied"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_denied_does_not_fire_on_failure(self, mock_webhook, client, session):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(self.invalid_id, self.invalid_id)}/deny_link_request",
+                json={"technical_asset_id": self.invalid_id},
+            )
+
+        assert response.status_code == 404
+        mock_webhook.assert_not_awaited()
+
+    # --- technical_asset.unlinked ---
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_unlinked_fires_event(self, mock_webhook, client, session):
+        from tests.factories import DataOutputDatasetAssociationFactory, DatasetFactory
+
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+        DataOutputDatasetAssociationFactory(data_output=ta, dataset=op)
+
+        with webhook_v2_config():
+            response = client.request(
+                method="DELETE",
+                url=f"{self._link_endpoint(dp.id, op.id)}/remove",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.unlinked"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_unlinked_does_not_fire_on_failure(self, mock_webhook, client, session):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+
+        with webhook_v2_config():
+            response = client.request(
+                method="DELETE",
+                url=f"{self._link_endpoint(self.invalid_id, self.invalid_id)}/remove",
+                json={"technical_asset_id": self.invalid_id},
+            )
+
+        assert response.status_code == 404
+        mock_webhook.assert_not_awaited()
+
     # --- technical_asset.status_updated ---
 
     @patch("app.core.webhooks.v2.call_v2_webhook")
