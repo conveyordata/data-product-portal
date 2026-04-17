@@ -4,6 +4,12 @@
     padding-left: 24px;
 }
 
+.main-panel {
+    @extend .container;
+    padding-top: 5px;
+    padding-right: 5px;
+}
+
 .invisibleSplitter {
     // This targets the internal Ant Design splitter bar and removes it
     :global(.ant-splitter-bar) {

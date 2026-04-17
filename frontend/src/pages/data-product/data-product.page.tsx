@@ -96,7 +96,7 @@ export function DataProduct() {
     return (
         <Splitter className={styles.invisibleSplitter}>
             <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false} className={styles.container}>
-                <Flex vertical gap={'middle'} className={styles.container}>
+                <Flex vertical gap={'middle'} className={styles.mainPanel}>
                     <Flex justify={'space-between'}>
                         <Flex gap={'middle'} align={'center'} justify={'center'}>
                             <Icon
