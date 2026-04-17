@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -17,6 +17,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.v2 import emit_event, emit_event_after
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
@@ -42,6 +43,8 @@ from app.data_products.output_ports.schema_response import (
     UpdateOutputPortResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
+from app.data_products.schema_response import GetDataProductResponse
+from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -92,6 +95,75 @@ def _assign_owner_role_assignments(
             )
         )
 
+
+_emit_output_port_created = emit_event_after(
+    "output_port.created",
+    lambda request, data_product_id, db, authenticated_user, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        "output_port": DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(
+                request.state.output_port_id, authenticated_user, data_product_id
+            )
+        ).convert(),
+    },
+)
+_emit_output_port_updated = emit_event_after(
+    "output_port.updated",
+    lambda data_product_id, id, db, authenticated_user, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        "output_port": DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+        ).convert(),
+    },
+)
+_emit_output_port_deleted = emit_event(
+    "output_port.deleted",
+    lambda data_product_id, id, db, authenticated_user, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        "output_port": DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+        ).convert(),
+    },
+)
+_emit_output_port_about_updated = emit_event_after(
+    "output_port.about_updated",
+    lambda data_product_id, id, db, authenticated_user, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        "output_port": DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+        ).convert(),
+    },
+)
+_emit_output_port_status_updated = emit_event_after(
+    "output_port.status_updated",
+    lambda data_product_id, id, db, authenticated_user, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        "output_port": DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+        ).convert(),
+    },
+)
+_emit_output_port_setting_changed = emit_event_after(
+    "output_port.setting_changed",
+    lambda data_product_id, id, db, authenticated_user, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        "output_port": DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+        ).convert(),
+    },
+)
 
 router = APIRouter(tags=["Data Products - Output ports"])
 route = "/v2/data_products/{data_product_id}/output_ports"
@@ -152,9 +224,11 @@ def get_output_ports_event_history(
         Depends(
             Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
         ),
+        Depends(_emit_output_port_created),
     ],
 )
 def create_output_port(
+    request: Request,
     data_product_id: UUID,
     output_port: CreateOutputPortRequest,
     db: Session = Depends(get_db_session),
@@ -165,6 +239,7 @@ def create_output_port(
         output_port.access_type = OutputPortAccessType.UNRESTRICTED
 
     new_dataset = OutputPortService(db).create_dataset(data_product_id, output_port)
+    request.state.output_port_id = new_dataset.id
     _assign_owner_role_assignments(
         new_dataset.id, output_port.owners, db=db, actor=authenticated_user
     )
@@ -196,6 +271,7 @@ def create_output_port(
     },
     dependencies=[
         Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
+        Depends(_emit_output_port_deleted),
     ],
 )
 def remove_output_port(
@@ -240,6 +316,7 @@ def remove_output_port(
                 Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
             )
         ),
+        Depends(_emit_output_port_updated),
     ],
 )
 def update_output_port(
@@ -283,6 +360,7 @@ def update_output_port(
                 Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
             )
         ),
+        Depends(_emit_output_port_about_updated),
     ],
 )
 def update_output_port_about(
@@ -318,6 +396,7 @@ def update_output_port_about(
         Depends(
             Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
         ),
+        Depends(_emit_output_port_status_updated),
     ],
 )
 def update_output_port_status(
@@ -355,6 +434,7 @@ def get_output_port_graph_data(
         Depends(
             Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
         ),
+        Depends(_emit_output_port_setting_changed),
     ],
 )
 def set_value_for_output_port(
