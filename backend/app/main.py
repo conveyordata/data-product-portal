@@ -8,7 +8,10 @@ from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
+from sqlalchemy.exc import IntegrityError
+from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 
 from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
@@ -210,3 +213,19 @@ if settings.OPENTELEMETRY_TRACES_ENABLED:
     trace.set_tracer_provider(provider)
 
     FastAPIInstrumentor.instrument_app(app)
+
+
+@app.exception_handler(IntegrityError)
+async def integrity_exception_handler(request: Request, exc: IntegrityError):
+    # Check if the specific constraint name is in the error message
+    if "uq_data_product_name" in str(exc.orig):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "A data product with this name already exists."},
+        )
+
+    # Generic fallback for other integrity errors
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": "Data integrity error occurred."},
+    )
