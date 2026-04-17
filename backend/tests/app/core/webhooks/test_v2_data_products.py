@@ -266,16 +266,18 @@ class TestDataProductV2Events:
     def test_setting_changed_does_not_fire_on_failure(
         self, mock_webhook, client, session
     ):
+        # No admin setup — user has no permissions, auth returns 403
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
+        dp = DataProductFactory()
+        setting = DataProductSettingFactory()
 
         with webhook_v2_config():
             response = client.post(
-                f"{ENDPOINT}/{self.invalid_id}/settings/{self.invalid_id}",
+                f"{ENDPOINT}/{dp.id}/settings/{setting.id}",
                 params={"value": "test-value"},
             )
 
-        assert response.status_code == 404
+        assert response.status_code == 403
         mock_webhook.assert_not_awaited()
 
     # --- data_product.input_port_linked ---
@@ -325,9 +327,7 @@ class TestDataProductV2Events:
         self._setup_admin(session)
         dp = DataProductFactory()
         output_port = DatasetFactory()
-        DataProductDatasetAssociationFactory(
-            data_product_id=dp.id, dataset_id=output_port.id
-        )
+        DataProductDatasetAssociationFactory(data_product=dp, dataset=output_port)
 
         with webhook_v2_config():
             response = client.delete(f"{ENDPOINT}/{dp.id}/input_ports/{output_port.id}")
