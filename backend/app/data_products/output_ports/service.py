@@ -80,6 +80,48 @@ class OutputPortService:
         self.namespace_validator = NamespaceValidator(DatasetModel)
         self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
+    def get_dataset_unchecked(
+        self, id: UUID, data_product_id: Optional[UUID] = None
+    ) -> DatasetGet:
+        """Fetch a dataset with all required eager loads, bypassing visibility checks.
+
+        Used in webhook extract lambdas where the caller is already authorised
+        by the endpoint's own authorization dependency.
+        """
+        query = select(DatasetModel).where(DatasetModel.id == id)
+
+        if data_product_id is not None:
+            query = query.where(DatasetModel.data_product_id == data_product_id)
+
+        dataset = self.db.scalar(
+            query.options(
+                selectinload(DatasetModel.data_product_links),
+                selectinload(DatasetModel.data_output_links),
+                selectinload(DatasetModel.data_product_settings),
+            )
+        )
+
+        if not dataset:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
+            )
+
+        rolled_up_tags = set()
+        for output_link in dataset.data_output_links:
+            rolled_up_tags.update(output_link.data_output.tags)
+
+        dataset.rolled_up_tags = rolled_up_tags
+
+        if not dataset.lifecycle:
+            default_lifecycle = self.db.scalar(
+                select(DataProductLifeCycleModel).where(
+                    DataProductLifeCycleModel.is_default
+                )
+            )
+            dataset.lifecycle = default_lifecycle
+        dataset.domain = dataset.data_product.domain
+        return dataset
+
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
     ) -> DatasetGet:

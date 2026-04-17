@@ -34,14 +34,12 @@ from app.users.schema import User
 
 _emit_output_port_link_approved = emit_event_after(
     "output_port.link_approved",
-    lambda data_product_id, output_port_id, db, authenticated_user, **_: {
+    lambda data_product_id, output_port_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(
-                output_port_id, authenticated_user, data_product_id
-            )
+            OutputPortService(db).get_dataset_unchecked(output_port_id, data_product_id)
         ).convert(),
     },
 )

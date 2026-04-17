@@ -98,69 +98,69 @@ def _assign_owner_role_assignments(
 
 _emit_output_port_created = emit_event_after(
     "output_port.created",
-    lambda request, data_product_id, db, authenticated_user, **_: {
+    lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(
-                request.state.output_port_id, authenticated_user, data_product_id
+            OutputPortService(db).get_dataset_unchecked(
+                request.state.output_port_id, data_product_id
             )
         ).convert(),
     },
 )
 _emit_output_port_updated = emit_event_after(
     "output_port.updated",
-    lambda data_product_id, id, db, authenticated_user, **_: {
+    lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
         ).convert(),
     },
 )
 _emit_output_port_deleted = emit_event(
     "output_port.deleted",
-    lambda data_product_id, id, db, authenticated_user, **_: {
+    lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
         ).convert(),
     },
 )
 _emit_output_port_about_updated = emit_event_after(
     "output_port.about_updated",
-    lambda data_product_id, id, db, authenticated_user, **_: {
+    lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
         ).convert(),
     },
 )
 _emit_output_port_status_updated = emit_event_after(
     "output_port.status_updated",
-    lambda data_product_id, id, db, authenticated_user, **_: {
+    lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
         ).convert(),
     },
 )
 _emit_output_port_setting_changed = emit_event_after(
     "output_port.setting_changed",
-    lambda data_product_id, id, db, authenticated_user, **_: {
+    lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, authenticated_user, data_product_id)
+            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
         ).convert(),
     },
 )
