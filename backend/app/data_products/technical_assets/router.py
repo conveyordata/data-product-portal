@@ -46,11 +46,11 @@ _emit_technical_asset_created = emit_event_after(
     "technical_asset.created",
     lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(UUID(data_product_id))
+            DataProductService(db).get_data_product(data_product_id)
         ),
         "technical_asset": DataOutputGet.model_validate(
             DataOutputService(db).get_data_output(
-                UUID(data_product_id), request.state.technical_asset_id
+                data_product_id, request.state.technical_asset_id
             )
         ).convert(),
     },
@@ -59,10 +59,10 @@ _emit_technical_asset_updated = emit_event_after(
     "technical_asset.updated",
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(UUID(data_product_id))
+            DataProductService(db).get_data_product(data_product_id)
         ),
         "technical_asset": DataOutputGet.model_validate(
-            DataOutputService(db).get_data_output(UUID(data_product_id), UUID(id))
+            DataOutputService(db).get_data_output(data_product_id, id)
         ).convert(),
     },
 )
@@ -70,10 +70,10 @@ _emit_technical_asset_deleted = emit_event(
     "technical_asset.deleted",
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(UUID(data_product_id))
+            DataProductService(db).get_data_product(data_product_id)
         ),
         "technical_asset": DataOutputGet.model_validate(
-            DataOutputService(db).get_data_output(UUID(data_product_id), UUID(id))
+            DataOutputService(db).get_data_output(data_product_id, id)
         ).convert(),
     },
 )
@@ -81,10 +81,10 @@ _emit_technical_asset_status_updated = emit_event_after(
     "technical_asset.status_updated",
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(UUID(data_product_id))
+            DataProductService(db).get_data_product(data_product_id)
         ),
         "technical_asset": DataOutputGet.model_validate(
-            DataOutputService(db).get_data_output(UUID(data_product_id), UUID(id))
+            DataOutputService(db).get_data_output(data_product_id, id)
         ).convert(),
     },
 )
