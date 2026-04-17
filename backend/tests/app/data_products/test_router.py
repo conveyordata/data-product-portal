@@ -1,4 +1,5 @@
 import json
+import uuid
 from copy import deepcopy
 from uuid import UUID
 
@@ -43,9 +44,9 @@ def payload():
     user = UserFactory()
     tag = TagFactory()
     return {
-        "name": "Data Product Name",
+        "name": str(uuid.uuid4()),
         "description": "Updated Data Product Description",
-        "namespace": "namespace",
+        "namespace": str(uuid.uuid4()),
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "owners": [str(user.id)],
@@ -101,6 +102,23 @@ class TestDataProductsRouter:
         create_payload["owners"] = []
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
+
+    def test_create_data_product_duplicate_name(self, session, payload, client):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+
+        DataProductFactory(name=payload["name"])
+
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 400
 
     def test_create_data_product_duplicate_namespace(self, session, payload, client):
         RoleService(db=session).initialize_prototype_roles()
