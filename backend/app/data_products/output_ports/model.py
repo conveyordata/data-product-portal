@@ -85,7 +85,7 @@ class Dataset(Base, BaseORM):
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, back_populates="datasets", lazy="joined"
+        secondary=tag_dataset_table, back_populates="datasets", lazy="raise"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",

@@ -1,5 +1,7 @@
 import factory
+from sqlalchemy import insert
 
+from app.configuration.tags.model import Tag, tag_dataset_table
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.status import OutputPortStatus
@@ -26,14 +28,22 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
         if not create:
-            # If we are just doing DataOutputFactory.build(), don't save tags
+            # If we are just doing DatasetFactory.build(), don't save tags
             return
 
         if extracted:
-            # If called as: DataOutputFactory(tags=[tag1, tag2])
-            for tag in extracted:
-                self.tags.append(tag)
+            # If called as: DatasetFactory(tags=[tag1, tag2])
+            tags_to_add = extracted
         else:
             # If called without arguments, create a default tag
-            self.tags.append(TagFactory())
+            tags_to_add = [TagFactory()]
+
+        # Directly insert into the association table to avoid accessing lazy relationships
+        for tag in tags_to_add:
+            test_session.execute(
+                insert(tag_dataset_table).values(
+                    dataset_id=self.id,
+                    tag_id=tag.id,
+                )
+            )
         test_session.commit()

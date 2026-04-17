@@ -397,10 +397,11 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         assert response.status_code == 200
 
-        history = self.get_data_output_history(
+        response = self.get_data_output_history(
             client, data_product.id, data_output.id
-        ).json()
-        assert len(history["events"]) == 1
+        )
+        assert 200 == response.status_code, response.text
+        assert len(response.json()["events"]) == 1
 
     def test_history_event_created_on_remove_data_output_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
