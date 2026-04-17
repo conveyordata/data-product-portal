@@ -76,38 +76,66 @@ from app.users.schema import User
 _emit_data_product_created = emit_event_after(
     "data_product.created",
     lambda request, db, **_: {
-        "data_product": DataProductService(db).get_data_product(
-            request.state.data_product_id
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(request.state.data_product_id)
         )
     },
 )
 _emit_data_product_updated = emit_event_after(
     "data_product.updated",
-    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    },
 )
 _emit_data_product_deleted = emit_event(
     "data_product.deleted",
-    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    },
 )
 _emit_data_product_about_updated = emit_event_after(
     "data_product.about_updated",
-    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    },
 )
 _emit_data_product_status_updated = emit_event_after(
     "data_product.status_updated",
-    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    },
 )
 _emit_data_product_setting_changed = emit_event_after(
     "data_product.setting_changed",
-    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    },
 )
 _emit_data_product_input_port_linked = emit_event_after(
     "data_product.input_port_linked",
-    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    },
 )
 _emit_data_product_input_port_unlinked = emit_event_after(
     "data_product.input_port_unlinked",
-    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    },
 )
 
 router = APIRouter()
