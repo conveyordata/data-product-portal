@@ -31,13 +31,17 @@ from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
-from app.data_products.output_ports.schema_response import DatasetGet, DatasetsGet
+from app.data_products.output_ports.schema_response import (
+    DatasetGet,
+    DatasetsGet,
+    OutputPortsGet,
+)
 from app.data_products.output_ports.service import OutputPortService
 
 # Import enums - corrected paths
 from app.data_products.schema_response import (
-    DataProductGet,
     DataProductsGet,
+    GetDataProductResponse,
     GetDataProductsResponseItem,
 )
 from app.data_products.service import DataProductService
@@ -47,11 +51,13 @@ from app.data_products.technical_assets.model import ensure_technical_asset_exis
 from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
+    GetTechnicalAssetsResponseItem,
 )
 
 # Import existing services
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
+from app.search_output_ports.schema_response import SearchDatasets
 from app.settings import settings
 
 
@@ -72,7 +78,22 @@ def get_auth_provider() -> Optional[JWTVerifier]:
     return None
 
 
-mcp = FastMCP(name="DataProductPortalMCP", auth=get_auth_provider())
+mcp = FastMCP(
+    name="DataProductPortalMCP",
+    instructions="""
+    Portal for discovering and exploring data products and output ports.
+
+    Recommended discovery flow:
+    1. get_marketplace_overview: understand what's available and get domain IDs
+    2. search_output_ports: find specific output ports (preferred for most searches)
+       Use search_data_products only when the user explicitly asks to find a data product.
+    3. get_*_details: drill into a specific result by UUID
+
+    Output ports (datasets) are the primary way data is shared in the portal.
+    Data products are containers owned by teams that group related output ports and technical assets.
+    """,
+    auth=get_auth_provider(),
+)
 
 # ==============================================================================
 # CORE DISCOVERY & SEARCH TOOLS
@@ -94,8 +115,9 @@ def get_mcp_authenticated_user(token: str):
 
 @mcp.tool
 async def get_current_user(ctx: Context) -> dict[str, Any]:
-    """Get current user data from the MCP. You can use this to
-    get information about the authenticated user."""
+    """Get the profile of the currently authenticated user (id, name, email).
+    Use this to resolve 'me' or 'my' in user requests before querying roles or owned resources.
+    Requires authentication."""
     token = get_access_token()
     return get_mcp_authenticated_user(token=token.token)
 
@@ -105,12 +127,15 @@ def universal_search(
     query: str, entity_types: list[str] = [], limit: int = 10
 ) -> Dict[str, Any]:
     """
-    Universal search across data products, datasets, and data outputs.
+    Search across data products, output ports, technical assets, and domains in a single call.
+    Use this only when the user hasn't specified what type of entity they're looking for.
+    For output ports specifically, always prefer search_output_ports — it uses semantic search and returns richer metadata.
+    To get the data product details for output ports, you can use the get_data_product_details function with the data_product_id.
 
     Args:
         query: Search query string
-        entity_types: List of entity types to search
-        (data_products, datasets, data_outputs, domains)
+        entity_types: Filter to specific types. Valid values: 'data_products', 'output_ports',
+                      'technical_assets', 'domains'. Leave empty to search all types.
         limit: Maximum number of results per entity type
     """
     try:
@@ -127,8 +152,8 @@ def universal_search(
             total_count = 0
             search_types = entity_types or [
                 "data_products",
-                "datasets",
-                "data_outputs",
+                "output_ports",
+                "technical_assets",
                 "domains",
             ]
             query_results = {}
@@ -154,28 +179,28 @@ def universal_search(
                 query_results.update({"data_products": result_data_products})
                 total_count += len(filtered_data_products)
 
-            # Search Datasets - get all and filter manually
-            if "datasets" in search_types:
-                all_datasets = OutputPortService(db).get_datasets(user=user)
+            # Search output ports - get all and filter manually
+            if "output_ports" in search_types:
+                all_output_ports = OutputPortService(db).get_datasets(user=user)
                 # Filter by query manually
-                filtered_datasets = []
-                for ds in all_datasets:
+                filtered_output_ports = []
+                for ds in all_output_ports:
                     if query.lower() in ds.name.lower() or (
                         ds.description and query.lower() in ds.description.lower()
                     ):
-                        filtered_datasets.append(ds)
-                        if len(filtered_datasets) >= limit:
+                        filtered_output_ports.append(ds)
+                        if len(filtered_output_ports) >= limit:
                             break
 
                 result_datasets = [
                     DatasetsGet.model_validate(ds).model_dump()
-                    for ds in filtered_datasets
+                    for ds in filtered_output_ports
                 ]
                 query_results.update({"datasets": result_datasets})
-                total_count += len(filtered_datasets)
+                total_count += len(filtered_output_ports)
 
-            # Search Data Outputs - get all and filter manually
-            if "data_outputs" in search_types:
+            # Search technical assets - get all and filter manually
+            if "technical_assets" in search_types:
                 all_data_outputs = DataOutputService(db).get_data_outputs()
                 # Filter by query manually
                 filtered_data_outputs = []
@@ -191,7 +216,7 @@ def universal_search(
                     DataOutputsGet.model_validate(do).model_dump()
                     for do in filtered_data_outputs
                 ]
-                query_results.update({"data_outputs": result_data_outputs})
+                query_results.update({"technical_assets": result_data_outputs})
                 total_count += len(filtered_data_outputs)
 
             # Search Domains - get all and filter manually
@@ -231,7 +256,19 @@ def search_data_products(
     status: Optional[str] = None,
     limit: int = 20,
 ) -> Dict[str, Any]:
-    """Search data products with filters using the existing service layer."""
+    """
+    Search and filter data products. Only use this when the user explicitly asks to find a data product.
+    For general data discovery, prefer search_output_ports instead.
+
+    A data product is a container owned by a team, grouping related output ports and technical assets.
+    To explore what a data product contains, follow up with get_data_product_details or get_data_product_analytics.
+
+    Args:
+        query: Keyword search on name and description. Leave empty to list all data products.
+        domain_id: UUID of the domain to filter by — use get_marketplace_overview to list available domains.
+        status: Lifecycle state. Common values: 'active', 'pending', 'archived'.
+        limit: Maximum number of results to return.
+    """
     try:
         db = next(get_db_session())
         try:
@@ -280,56 +317,38 @@ def search_data_products(
 
 
 @mcp.tool
-def search_datasets(
+def search_output_ports(
     query: Optional[str] = None,
-    access_type: Optional[str] = None,
-    domain_id: Optional[str] = None,
     limit: int = 20,
 ) -> Dict[str, Any]:
-    """Search datasets with filters using the existing service layer."""
+    """
+    Search output ports (datasets) using semantic search. This is the preferred tool for finding data in the portal.
+    Use this for any question about finding datasets, tables, or data sources — unless the user explicitly asks for a data product.
+
+    An output port is a published, consumable dataset exposed by a data product.
+    Returns the name, description, access type, owner, and parent data product for each result.
+
+    Args:
+        query: Natural language or keyword search. Leave empty to list all accessible output ports.
+        limit: Maximum number of results to return.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
             # Get all datasets and filter manually
-            all_datasets = OutputPortService(db).get_datasets(user=user)
-            filtered_datasets = []
-
-            for ds in all_datasets:
-                # Apply filters manually
-                if (
-                    query
-                    and query.lower() not in ds.name.lower()
-                    and (
-                        not ds.description
-                        or query.lower() not in ds.description.lower()
-                    )
-                ):
-                    continue
-                if access_type and str(ds.access_type) != access_type:
-                    continue
-                if (
-                    domain_id
-                    and hasattr(ds, "domain_id")
-                    and str(ds.domain_id) != domain_id
-                ):
-                    continue
-
-                filtered_datasets.append(ds)
-                if len(filtered_datasets) >= limit:
-                    break
-
+            all_datasets = OutputPortService(db).search_datasets(
+                query=query, user=user, limit=limit, current_user_assigned=False
+            )
             return {
-                "datasets": [
-                    DatasetsGet.model_validate(ds).model_dump()
-                    for ds in filtered_datasets
+                "output_ports": [
+                    SearchDatasets.model_validate(ds).model_dump()
+                    for ds in all_datasets
                 ],
-                "count": len(filtered_datasets),
+                "count": len(all_datasets),
                 "filters_applied": {
                     "query": query,
-                    "access_type": access_type,
-                    "domain_id": domain_id,
                 },
             }
         finally:
@@ -346,11 +365,18 @@ def search_datasets(
 
 @mcp.tool
 def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific data product."""
+    """
+    Get full details of a single data product by its UUID, including its description,
+    domain, lifecycle status, owners, output ports, and technical assets.
+    Use after search_data_products or search_output_ports to drill into a related data product.
+
+    Args:
+        data_product_id: UUID obtained from search_data_products or universal_search.
+    """
     try:
         db = next(get_db_session())
         try:
-            data_product = DataProductService(db).get_data_product_old(
+            data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id),
             )
 
@@ -358,7 +384,7 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
                 return {"error": f"Data product {data_product_id} not found"}
 
             # Use Pydantic schema for serialization
-            return DataProductGet.model_validate(data_product).model_dump()
+            return GetDataProductResponse.model_validate(data_product).model_dump()
         finally:
             db.close()
 
@@ -367,17 +393,26 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool
-def get_dataset_details(dataset_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific dataset."""
+def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
+    """
+    Get full details of a single output port by its UUID, including schema, access type,
+    the data product it belongs to, and owner contact information.
+    Use after search_output_ports to get complete information about a specific dataset.
+
+    Args:
+        output_port_id: UUID obtained from search_output_ports or universal_search.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = OutputPortService(db).get_dataset(id=UUID(dataset_id), user=user)
+            dataset = OutputPortService(db).get_dataset(
+                id=UUID(output_port_id), user=user
+            )
 
             if not dataset:
-                return {"error": f"Dataset {dataset_id} not found"}
+                return {"error": f"Dataset {output_port_id} not found"}
 
             return DatasetGet.model_validate(dataset).model_dump()
         finally:
@@ -388,19 +423,25 @@ def get_dataset_details(dataset_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool
-def get_data_output_details(data_output_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific data output."""
+def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
+    """
+    Get full details of a specific technical asset (data output) by its UUID,
+    including its type, configuration, and the data product it belongs to.
+
+    Args:
+        technical_asset_id: UUID obtained from universal_search or get_data_product_analytics.
+    """
     try:
         db = next(get_db_session())
-        do = ensure_technical_asset_exists(UUID(data_output_id), db=db)
+        do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
         try:
             data_output = DataOutputService(db).get_data_output(
                 do.owner_id,
-                id=UUID(data_output_id),
+                id=UUID(technical_asset_id),
             )
 
             if not data_output:
-                return {"error": f"Data output {data_output_id} not found"}
+                return {"error": f"Data output {technical_asset_id} not found"}
 
             return DataOutputGet.model_validate(data_output).model_dump()
         finally:
@@ -412,7 +453,13 @@ def get_data_output_details(data_output_id: str) -> Dict[str, Any]:
 
 @mcp.tool
 def get_domain_details(domain_id: str) -> Dict[str, Any]:
-    """Get detailed information about a specific domain."""
+    """
+    Get details of a specific domain by its UUID, including its name and description.
+    Use get_marketplace_overview first to discover available domain IDs.
+
+    Args:
+        domain_id: UUID obtained from get_marketplace_overview or search results.
+    """
     try:
         db = next(get_db_session())
         try:
@@ -438,7 +485,12 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
 
 @mcp.tool
 def get_marketplace_overview() -> Dict[str, Any]:
-    """Get marketplace overview with statistics and featured content."""
+    """
+    Get a high-level overview of the portal: total counts of data products, output ports,
+    technical assets, a list of all domains with their IDs, and featured content.
+    Use this as a starting point to orient the user, discover available domain IDs,
+    or answer questions like 'what data is available?'.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
@@ -457,8 +509,8 @@ def get_marketplace_overview() -> Dict[str, Any]:
             return {
                 "statistics": {
                     "total_data_products": len(all_data_products),
-                    "total_datasets": len(all_datasets),
-                    "total_data_outputs": len(all_data_outputs),
+                    "total_output_ports": len(all_datasets),
+                    "total_technical_assets": len(all_data_outputs),
                     "total_domains": len(all_domains),
                 },
                 "featured_content": {
@@ -468,7 +520,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                         ).model_dump()
                         for dp in popular_data_products
                     ],
-                    "popular_datasets": [
+                    "popular_output_ports": [
                         DatasetsGet.model_validate(ds).model_dump()
                         for ds in popular_datasets
                     ],
@@ -487,14 +539,20 @@ def get_marketplace_overview() -> Dict[str, Any]:
 
 @mcp.tool
 def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
-    """Get analytics and usage statistics for a data product."""
+    """
+    Get analytics for a data product: its output ports and technical assets with counts.
+    Use this to answer questions like 'what does this data product expose?' or 'how many datasets does it have?'.
+
+    Args:
+        data_product_id: UUID obtained from search_data_products or get_data_product_details.
+    """
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
             # Get the data product using service
-            data_product = DataProductService(db).get_data_product_old(
+            data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id),
             )
 
@@ -502,37 +560,33 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
                 return {"error": f"Data product {data_product_id} not found"}
 
             # Get related datasets - filter manually from all datasets
-            all_datasets = OutputPortService(db).get_datasets(user=user)
-            related_datasets = [
-                ds
-                for ds in all_datasets
-                if hasattr(ds, "data_product_id")
-                and ds.data_product_id == UUID(data_product_id)
-            ]
+            output_ports = OutputPortService(db).get_output_ports(
+                user=user, data_product_id=UUID(data_product_id)
+            )
 
             # Get related data outputs - filter manually from all data outputs
-            all_data_outputs = DataOutputService(db).get_data_outputs()
-            related_data_outputs = [
+            technical_assets = DataOutputService(db).get_data_outputs()
+            related_technical_assets = [
                 do
-                for do in all_data_outputs
+                for do in technical_assets
                 if hasattr(do, "data_product_id")
                 and do.data_product_id == UUID(data_product_id)
             ]
 
             return {
-                "data_product": DataProductGet.model_validate(
+                "data_product": GetDataProductResponse.model_validate(
                     data_product
                 ).model_dump(),
                 "analytics": {
-                    "datasets_count": len(related_datasets),
-                    "data_outputs_count": len(related_data_outputs),
-                    "datasets": [
-                        DatasetsGet.model_validate(ds).model_dump()
-                        for ds in related_datasets
+                    "output_ports_count": len(output_ports),
+                    "technical_assets_count": len(related_technical_assets),
+                    "output_ports": [
+                        OutputPortsGet.model_validate(ds).model_dump()
+                        for ds in output_ports
                     ],
-                    "data_outputs": [
-                        DataOutputsGet.model_validate(do).model_dump()
-                        for do in related_data_outputs
+                    "technical_assets": [
+                        GetTechnicalAssetsResponseItem.model_validate(do).model_dump()
+                        for do in related_technical_assets
                     ],
                 },
             }
@@ -554,7 +608,7 @@ def get_data_product_resource(data_product_id: str) -> str:
     try:
         db = next(get_db_session())
         try:
-            data_product = DataProductService(db).get_data_product_old(
+            data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id),
             )
 
@@ -562,7 +616,7 @@ def get_data_product_resource(data_product_id: str) -> str:
                 return f"Error: Data product {data_product_id} not found"
 
             # Convert to Pydantic model and then to formatted string
-            dp_data = DataProductGet.model_validate(data_product)
+            dp_data = GetDataProductResponse.model_validate(data_product)
 
             return f"""
 # Data Product: {dp_data.name}
@@ -577,11 +631,6 @@ def get_data_product_resource(data_product_id: str) -> str:
 - **Updated:** {dp_data.updated_at}
 - **Owner:** {dp_data.owner_email or "N/A"}
 
-## Datasets
-{len(dp_data.datasets) if dp_data.datasets else 0} dataset(s) associated
-
-## Data Outputs
-{len(dp_data.data_outputs) if dp_data.data_outputs else 0} data output(s) associated
 """
         finally:
             db.close()
@@ -590,23 +639,25 @@ def get_data_product_resource(data_product_id: str) -> str:
         return f"Error retrieving data product resource: {str(e)}"
 
 
-@mcp.resource("dataset://{dataset_id}")
-def get_dataset_resource(dataset_id: str) -> str:
-    """Get dataset as a resource."""
+@mcp.resource("output-port://{output_port_id}")
+def get_output_port_resource(output_port_id: str) -> str:
+    """Get output port as a resource."""
     try:
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = OutputPortService(db).get_dataset(id=UUID(dataset_id), user=user)
+            dataset = OutputPortService(db).get_dataset(
+                id=UUID(output_port_id), user=user
+            )
 
             if not dataset:
-                return f"Error: Dataset {dataset_id} not found"
+                return f"Error: Output port {output_port_id} not found"
             # Convert to Pydantic model and then to formatted string
             ds_data = DatasetGet.model_validate(dataset)
 
             return f"""
-# Dataset: {ds_data.name}
+# Output port: {ds_data.name}
 
 **ID:** {ds_data.id}
 **Status:** {ds_data.status}
@@ -644,8 +695,8 @@ def get_marketplace_resource() -> str:
 
 ## Statistics
 - **Data Products:** {stats["total_data_products"]}
-- **Datasets:** {stats["total_datasets"]}
-- **Data Outputs:** {stats["total_data_outputs"]}
+- **Output Ports:** {stats["total_datasets"]}
+- **Technical Assets:** {stats["total_data_outputs"]}
 - **Domains:** {stats["total_domains"]}
 
 ## Popular Data Products
@@ -658,7 +709,7 @@ def get_marketplace_resource() -> str:
             )
         }
 
-## Popular Datasets
+## Popular Output Ports
 {
             chr(10).join(
                 [
@@ -695,12 +746,16 @@ def get_user_roles(
     limit: int = 50,
 ) -> Dict[str, Any]:
     """
-    Get user roles and role assignments.
+    Get role assignments for a user across the portal.
+    Use get_current_user first to resolve 'me' or 'my' to a user ID.
+    Requires authentication.
 
     Args:
-        user_id: Specific user ID to get roles for (optional, defaults to current user)
-        scope_type: Filter by scope type ('global', 'data_product', 'dataset')
-        limit: Maximum number of role assignments to return
+        user_id: UUID of the user. Defaults to the currently authenticated user.
+        scope_type: Filter by scope. Valid values: 'global' (portal-wide roles),
+                    'data_product' (roles on specific data products),
+                    'dataset' (roles on specific output ports). Leave empty to return all scopes.
+        limit: Maximum number of role assignments to return.
     """
     try:
         db = next(get_db_session())
@@ -772,7 +827,7 @@ def get_user_roles(
                 "roles": {
                     "global": global_roles,
                     "data_products": data_product_roles,
-                    "datasets": dataset_roles,
+                    "output_ports": dataset_roles,
                 },
                 "filters_applied": {
                     "scope_type": scope_type,
@@ -798,12 +853,12 @@ def get_resource_roles(
     limit: int = 50,
 ) -> Dict[str, Any]:
     """
-    Get all user roles for a specific resource (data product or dataset).
+    List all users and their roles on a specific data product or output port.
 
     Args:
-        resource_type: Type of resource ('data_product' or 'dataset')
-        resource_id: ID of the resource
-        limit: Maximum number of role assignments to return
+        resource_type: Type of resource. Valid values: 'data_product' or 'dataset' (output ports use 'dataset').
+        resource_id: UUID of the resource.
+        limit: Maximum number of role assignments to return.
     """
     try:
         db = next(get_db_session())
