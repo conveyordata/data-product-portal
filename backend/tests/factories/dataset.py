@@ -1,4 +1,5 @@
 import factory
+from faker import Faker
 
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
@@ -8,14 +9,16 @@ from tests import test_session
 from .data_product import DataProductFactory
 from .tags import TagFactory
 
+fake = Faker()
+
 
 class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Dataset
 
     id = factory.Faker("uuid4")
-    namespace = factory.Faker("word")
-    name = factory.Faker("word")
+    namespace = factory.LazyFunction(fake.unique.word)
+    name = factory.LazyFunction(fake.unique.word)
     description = factory.Faker("text", max_nb_chars=20)
     about = factory.Faker("text", max_nb_chars=20)
     status = OutputPortStatus.ACTIVE.value
