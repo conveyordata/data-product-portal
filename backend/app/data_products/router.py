@@ -1,7 +1,15 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.schema_response import InputPort
@@ -22,6 +30,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.v2 import emit_event, emit_event_after
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -57,6 +66,43 @@ from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
+_emit_data_product_created = emit_event_after(
+    "data_product.created",
+    lambda request, db, **_: {
+        "data_product": DataProductService(db).get_data_product(
+            request.state.data_product_id
+        )
+    },
+)
+_emit_data_product_updated = emit_event_after(
+    "data_product.updated",
+    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+)
+_emit_data_product_deleted = emit_event(
+    "data_product.deleted",
+    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+)
+_emit_data_product_about_updated = emit_event_after(
+    "data_product.about_updated",
+    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+)
+_emit_data_product_status_updated = emit_event_after(
+    "data_product.status_updated",
+    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+)
+_emit_data_product_setting_changed = emit_event_after(
+    "data_product.setting_changed",
+    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+)
+_emit_data_product_input_port_linked = emit_event_after(
+    "data_product.input_port_linked",
+    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+)
+_emit_data_product_input_port_unlinked = emit_event_after(
+    "data_product.input_port_unlinked",
+    lambda id, db, **_: {"data_product": DataProductService(db).get_data_product(id)},
+)
+
 router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
 
 
@@ -81,16 +127,21 @@ router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver))
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver)
+        ),
+        Depends(_emit_data_product_created),
     ],
 )
 def create_data_product(
+    request: Request,
     data_product: DataProductCreate,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateDataProductResponse:
     created_data_product = DataProductService(db).create_data_product(data_product)
+    request.state.data_product_id = created_data_product.id
     owners = data_product.owners
     _assign_owner_role_assignments(
         created_data_product.id,
@@ -170,6 +221,7 @@ def _assign_owner_role_assignments(
         Depends(
             Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
         ),
+        Depends(_emit_data_product_deleted),
     ],
 )
 def remove_data_product(
@@ -210,6 +262,7 @@ def remove_data_product(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
+        Depends(_emit_data_product_updated),
     ],
 )
 def update_data_product(
@@ -248,6 +301,7 @@ def update_data_product(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
+        Depends(_emit_data_product_about_updated),
     ],
 )
 def update_data_product_about(
@@ -283,6 +337,7 @@ def update_data_product_about(
                 Action.DATA_PRODUCT__UPDATE_STATUS, DataProductResolver
             )
         ),
+        Depends(_emit_data_product_status_updated),
     ],
 )
 def update_data_product_status(
@@ -344,6 +399,7 @@ def get_data_product_graph_data(
                 Action.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
             )
         ),
+        Depends(_emit_data_product_setting_changed),
     ],
 )
 def set_value_for_data_product(
@@ -392,7 +448,7 @@ _input_ports_dependencies = [
 @router.post(
     "/{id}/link_input_ports",
     responses=_input_ports_responses,
-    dependencies=_input_ports_dependencies,
+    dependencies=_input_ports_dependencies + [Depends(_emit_data_product_input_port_linked)],
     deprecated=True,
 )
 def link_input_ports_to_data_product(
@@ -549,6 +605,7 @@ def get_data_product_rolled_up_tags(
                 DataProductResolver,
             )
         ),
+        Depends(_emit_data_product_input_port_unlinked),
     ],
 )
 def unlink_input_port_from_data_product(
