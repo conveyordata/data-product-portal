@@ -9,6 +9,7 @@ from app.core.authz import Action
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DataProductTypeFactory,
     DatasetFactory,
@@ -348,6 +349,87 @@ class TestDataProductV2Events:
         with webhook_v2_config():
             response = client.delete(
                 f"{ENDPOINT}/{self.invalid_id}/input_ports/{self.invalid_id}"
+            )
+
+        assert response.status_code == 404
+        mock_webhook.assert_not_awaited()
+
+    # --- data_product.team_member_added ---
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_added_fires_event(self, mock_webhook, client, session):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+        dp = DataProductFactory()
+        member = UserFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+
+        with webhook_v2_config():
+            response = client.post(
+                "/api/v2/authz/role_assignments/data_product",
+                json={
+                    "data_product_id": str(dp.id),
+                    "user_id": str(member.id),
+                    "role_id": str(role.id),
+                },
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.team_member_added"
+        assert "data_product" in data
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_added_does_not_fire_on_failure(
+        self, mock_webhook, client, session
+    ):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+
+        with webhook_v2_config():
+            response = client.post(
+                "/api/v2/authz/role_assignments/data_product",
+                json={"invalid": "payload"},
+            )
+
+        assert response.status_code != 200
+        mock_webhook.assert_not_awaited()
+
+    # --- data_product.team_member_removed ---
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_removed_fires_event(self, mock_webhook, client, session):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+        dp = DataProductFactory()
+        member = UserFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        assignment = DataProductRoleAssignmentFactory(
+            data_product_id=dp.id, user_id=member.id, role_id=role.id
+        )
+
+        with webhook_v2_config():
+            response = client.delete(
+                f"/api/v2/authz/role_assignments/data_product/{assignment.id}"
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.team_member_removed"
+        assert "data_product" in data
+
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_removed_does_not_fire_on_failure(
+        self, mock_webhook, client, session
+    ):
+        mock_webhook.return_value = AsyncMock()
+        self._setup_admin(session)
+
+        with webhook_v2_config():
+            response = client.delete(
+                f"/api/v2/authz/role_assignments/data_product/{self.invalid_id}"
             )
 
         assert response.status_code == 404
