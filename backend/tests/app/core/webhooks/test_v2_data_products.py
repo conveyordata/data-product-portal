@@ -1,12 +1,9 @@
-from contextlib import contextmanager
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from app.authorization.roles.schema import Scope
-from app.authorization.roles.service import RoleService
-from app.core.authz import Action
-from app.settings import settings
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -14,7 +11,6 @@ from tests.factories import (
     DataProductTypeFactory,
     DatasetFactory,
     DomainFactory,
-    GlobalRoleAssignmentFactory,
     LifecycleFactory,
     RoleFactory,
     TagFactory,
@@ -22,16 +18,6 @@ from tests.factories import (
 )
 
 ENDPOINT = "/api/v2/data_products"
-
-
-@contextmanager
-def webhook_v2_config():
-    original = settings.WEBHOOK_V2_URL
-    settings.WEBHOOK_V2_URL = "http://test-v2.example.com/hook"
-    try:
-        yield
-    finally:
-        settings.WEBHOOK_V2_URL = original
 
 
 @pytest.fixture
@@ -74,22 +60,12 @@ def update_payload():
 class TestDataProductV2Events:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def _setup_admin(self, session):
-        """Create admin user matching DEFAULT_USERNAME with all permissions."""
-        RoleService(db=session).initialize_prototype_roles()
-        from app.settings import settings as s
-
-        user = UserFactory(external_id=s.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.GLOBAL, permissions=list(Action))
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
-        return user
-
     # --- data_product.created ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_created_fires_event(self, mock_webhook, client, session, create_payload):
+    def test_created_fires_event(self, mock_webhook, client, create_payload):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(ENDPOINT, json=create_payload)
@@ -102,9 +78,8 @@ class TestDataProductV2Events:
         assert data["data_product"]["name"] == create_payload["name"]
 
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_created_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_created_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(ENDPOINT, json={"invalid": "payload"})
@@ -114,10 +89,10 @@ class TestDataProductV2Events:
 
     # --- data_product.updated ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_updated_fires_event(self, mock_webhook, client, session, update_payload):
+    def test_updated_fires_event(self, mock_webhook, client, update_payload):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
 
         with webhook_v2_config():
@@ -129,12 +104,12 @@ class TestDataProductV2Events:
         assert event_type == "data_product.updated"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
     def test_updated_does_not_fire_on_failure(
-        self, mock_webhook, client, session, update_payload
+        self, mock_webhook, client, update_payload
     ):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.put(f"{ENDPOINT}/{self.invalid_id}", json=update_payload)
@@ -144,10 +119,10 @@ class TestDataProductV2Events:
 
     # --- data_product.deleted ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_deleted_fires_event(self, mock_webhook, client, session):
+    def test_deleted_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
 
         with webhook_v2_config():
@@ -159,10 +134,10 @@ class TestDataProductV2Events:
         assert event_type == "data_product.deleted"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_deleted_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_deleted_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.delete(f"{ENDPOINT}/{self.invalid_id}")
@@ -172,10 +147,10 @@ class TestDataProductV2Events:
 
     # --- data_product.about_updated ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_about_updated_fires_event(self, mock_webhook, client, session):
+    def test_about_updated_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
 
         with webhook_v2_config():
@@ -190,12 +165,10 @@ class TestDataProductV2Events:
         assert event_type == "data_product.about_updated"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_about_updated_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_about_updated_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.put(
@@ -208,10 +181,10 @@ class TestDataProductV2Events:
 
     # --- data_product.status_updated ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_status_updated_fires_event(self, mock_webhook, client, session):
+    def test_status_updated_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
 
         with webhook_v2_config():
@@ -226,12 +199,10 @@ class TestDataProductV2Events:
         assert event_type == "data_product.status_updated"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_status_updated_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_status_updated_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.put(
@@ -244,10 +215,10 @@ class TestDataProductV2Events:
 
     # --- data_product.setting_changed ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_setting_changed_fires_event(self, mock_webhook, client, session):
+    def test_setting_changed_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         setting = DataProductSettingFactory()
 
@@ -264,10 +235,8 @@ class TestDataProductV2Events:
         assert "data_product" in data
 
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_setting_changed_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
-        # No admin setup — user has no permissions, auth returns 403
+    def test_setting_changed_does_not_fire_on_failure(self, mock_webhook, client):
+        # No admin — user has no permissions, auth returns 403
         mock_webhook.return_value = AsyncMock()
         dp = DataProductFactory()
         setting = DataProductSettingFactory()
@@ -283,10 +252,10 @@ class TestDataProductV2Events:
 
     # --- data_product.input_port_linked ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_input_port_linked_fires_event(self, mock_webhook, client, session):
+    def test_input_port_linked_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         output_port = DatasetFactory()
 
@@ -302,12 +271,10 @@ class TestDataProductV2Events:
         assert event_type == "data_product.input_port_linked"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_input_port_linked_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_input_port_linked_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(
@@ -320,12 +287,12 @@ class TestDataProductV2Events:
 
     # --- data_product.input_port_unlinked ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_input_port_unlinked_fires_event(self, mock_webhook, client, session):
+    def test_input_port_unlinked_fires_event(self, mock_webhook, client):
         from tests.factories import DataProductDatasetAssociationFactory
 
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         output_port = DatasetFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=output_port)
@@ -339,12 +306,10 @@ class TestDataProductV2Events:
         assert event_type == "data_product.input_port_unlinked"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_input_port_unlinked_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_input_port_unlinked_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.delete(
@@ -356,10 +321,10 @@ class TestDataProductV2Events:
 
     # --- data_product.team_member_added ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_team_member_added_fires_event(self, mock_webhook, client, session):
+    def test_team_member_added_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         member = UserFactory()
         role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
@@ -380,12 +345,10 @@ class TestDataProductV2Events:
         assert event_type == "data_product.team_member_added"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_team_member_added_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_team_member_added_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(
@@ -398,10 +361,10 @@ class TestDataProductV2Events:
 
     # --- data_product.team_member_removed ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_team_member_removed_fires_event(self, mock_webhook, client, session):
+    def test_team_member_removed_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         member = UserFactory()
         role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
@@ -420,12 +383,10 @@ class TestDataProductV2Events:
         assert event_type == "data_product.team_member_removed"
         assert "data_product" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_team_member_removed_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_team_member_removed_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.delete(
