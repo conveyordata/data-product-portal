@@ -374,7 +374,9 @@ def get_dataset_details(dataset_id: str) -> Dict[str, Any]:
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = OutputPortService(db).get_dataset(id=UUID(dataset_id), user=user)
+            dataset = OutputPortService(db).get_visible_dataset(
+                id=UUID(dataset_id), user=user
+            )
 
             if not dataset:
                 return {"error": f"Dataset {dataset_id} not found"}
@@ -598,7 +600,9 @@ def get_dataset_resource(dataset_id: str) -> str:
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = OutputPortService(db).get_dataset(id=UUID(dataset_id), user=user)
+            dataset = OutputPortService(db).get_visible_dataset(
+                id=UUID(dataset_id), user=user
+            )
 
             if not dataset:
                 return f"Error: Dataset {dataset_id} not found"

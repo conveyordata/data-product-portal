@@ -39,7 +39,7 @@ _emit_output_port_link_approved = emit_event_after(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset_unchecked(output_port_id, data_product_id)
+            OutputPortService(db).get_dataset(output_port_id, data_product_id)
         ).convert(),
     },
 )

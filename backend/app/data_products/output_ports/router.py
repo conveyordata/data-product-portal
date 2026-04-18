@@ -103,7 +103,7 @@ _emit_output_port_created = emit_event_after(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset_unchecked(
+            OutputPortService(db).get_dataset(
                 request.state.output_port_id, data_product_id
             )
         ).convert(),
@@ -116,7 +116,7 @@ _emit_output_port_updated = emit_event_after(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
+            OutputPortService(db).get_dataset(id, data_product_id)
         ).convert(),
     },
 )
@@ -127,7 +127,7 @@ _emit_output_port_deleted = emit_event(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
+            OutputPortService(db).get_dataset(id, data_product_id)
         ).convert(),
     },
 )
@@ -138,7 +138,7 @@ _emit_output_port_about_updated = emit_event_after(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
+            OutputPortService(db).get_dataset(id, data_product_id)
         ).convert(),
     },
 )
@@ -149,7 +149,7 @@ _emit_output_port_status_updated = emit_event_after(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
+            OutputPortService(db).get_dataset(id, data_product_id)
         ).convert(),
     },
 )
@@ -160,7 +160,7 @@ _emit_output_port_setting_changed = emit_event_after(
             DataProductService(db).get_data_product(data_product_id)
         ),
         "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset_unchecked(id, data_product_id)
+            OutputPortService(db).get_dataset(id, data_product_id)
         ).convert(),
     },
 )
@@ -191,7 +191,7 @@ def get_output_port(
     user: User = Depends(get_authenticated_user),
 ) -> GetOutputPortResponse:
     return DatasetGet.model_validate(
-        OutputPortService(db).get_dataset(id, user, data_product_id)
+        OutputPortService(db).get_visible_dataset(id, user, data_product_id)
     ).convert()
 
 
