@@ -25,6 +25,7 @@ sidebar_position: 200
 - **[Docs]**: Adding an architecture overview
 - **[UI]**: Remove audit logs page
 - **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
+- **[Events]**: v2 implementation of the webhook events, making it easier to react to changes in Portal.
 
 ### bugfixes
 
