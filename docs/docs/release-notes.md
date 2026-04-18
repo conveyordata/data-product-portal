@@ -20,6 +20,7 @@ Please migrate your OIDC provider to allow for the endpoint `<HOST>/api/v2/authn
 - **[Docs]**: Adding an architecture overview
 - **[UI]**: Remove audit logs page
 - **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
+- **[Events]**: v2 implementation of the webhook events, making it easier to react to changes in Portal.
 
 ### bugfixes
 
