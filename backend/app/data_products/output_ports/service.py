@@ -80,13 +80,12 @@ class OutputPortService:
         self.namespace_validator = NamespaceValidator(DatasetModel)
         self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
-    def get_dataset_unchecked(
+    def _load_dataset(
         self, id: UUID, data_product_id: Optional[UUID] = None
     ) -> DatasetGet:
-        """Fetch a dataset with all required eager loads, bypassing visibility checks.
+        """DB fetch with all required eager loads, lifecycle defaulting, and tag roll-up.
 
-        Used in webhook extract lambdas where the caller is already authorised
-        by the endpoint's own authorization dependency.
+        Does not enforce any visibility policy — callers decide whether to gate on user.
         """
         query = select(DatasetModel).where(DatasetModel.id == id)
 
@@ -95,16 +94,13 @@ class OutputPortService:
 
         dataset = self.db.scalar(
             query.options(
-                selectinload(DatasetModel.data_product_links),
                 selectinload(DatasetModel.data_output_links),
                 selectinload(DatasetModel.data_product_settings),
             )
         )
 
         if not dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
-            )
+            raise self.not_found_exception(id)
 
         rolled_up_tags = set()
         for output_link in dataset.data_output_links:
@@ -123,43 +119,37 @@ class OutputPortService:
         return dataset
 
     def get_dataset(
-        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
+        self, id: UUID, data_product_id: Optional[UUID] = None
     ) -> DatasetModel:
-        query = select(DatasetModel).where(DatasetModel.id == id)
+        """Fetch a dataset without enforcing consumer-visibility.
 
-        if data_product_id is not None:
-            query = query.where(DatasetModel.data_product_id == data_product_id)
+        Use this for internal/system callers (e.g. webhook extract lambdas) where the
+        endpoint's Authorization.enforce() dependency has already authorised the request.
+        The visibility gate ("can this user consume this dataset?") is irrelevant once
+        endpoint-level permission is established.
 
-        dataset = self.db.scalar(
-            query.options(
-                selectinload(DatasetModel.data_output_links),
-                selectinload(DatasetModel.data_product_settings),
-            )
-        )
+        For user-facing endpoints and MCP tools, use get_visible_dataset() instead.
+        """
+        return self._load_dataset(id, data_product_id)
 
-        if not dataset:
-            raise self.not_found_exception(id)
+    def get_visible_dataset(
+        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
+    ) -> DatasetGet:
+        """Fetch a dataset, raising 403 if the user cannot see it as a consumer.
 
+        Use this for user-facing endpoints and MCP tools where a specific user identity
+        is available and dataset visibility must be enforced. Non-UNRESTRICTED datasets
+        are hidden from users who are not in the dataset's access list.
+
+        For system/internal callers already authorised at the endpoint level, use
+        get_dataset() instead.
+        """
+        dataset = self._load_dataset(id, data_product_id)
         if not self.is_visible_to_user(dataset, user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",
             )
-
-        rolled_up_tags = set()
-        for output_link in dataset.data_output_links:
-            rolled_up_tags.update(output_link.data_output.tags)
-
-        dataset.rolled_up_tags = rolled_up_tags
-
-        if not dataset.lifecycle:
-            default_lifecycle = self.db.scalar(
-                select(DataProductLifeCycleModel).where(
-                    DataProductLifeCycleModel.is_default
-                )
-            )
-            dataset.lifecycle = default_lifecycle
-        dataset.domain = dataset.data_product.domain
         return dataset
 
     def search_output_ports(

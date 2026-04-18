@@ -397,8 +397,8 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = OutputPortService(db).get_dataset(
-                id=UUID(output_port_id), user=user
+            dataset = OutputPortService(db).get_visible_dataset(
+                id=UUID(dataset_id), user=user
             )
 
             if not dataset:
@@ -641,8 +641,8 @@ def get_output_port_resource(output_port_id: str) -> str:
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
-            dataset = OutputPortService(db).get_dataset(
-                id=UUID(output_port_id), user=user
+            dataset = OutputPortService(db).get_visible_dataset(
+                id=UUID(dataset_id), user=user
             )
 
             if not dataset:
