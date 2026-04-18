@@ -1,78 +1,59 @@
-from contextlib import contextmanager
 from unittest.mock import AsyncMock, patch
 
-from app.authorization.roles.schema import Scope
-from app.authorization.roles.service import RoleService
-from app.core.authz import Action
-from app.settings import settings
+import pytest
+
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataProductFactory,
-    GlobalRoleAssignmentFactory,
     PlatformServiceFactory,
-    RoleFactory,
     TagFactory,
     TechnicalAssetFactory,
-    UserFactory,
 )
 
 DP_ENDPOINT = "/api/v2/data_products"
 
 
-@contextmanager
-def webhook_v2_config():
-    original = settings.WEBHOOK_V2_URL
-    settings.WEBHOOK_V2_URL = "http://test-v2.example.com/hook"
-    try:
-        yield
-    finally:
-        settings.WEBHOOK_V2_URL = original
+@pytest.fixture
+def ta_create_payload():
+    service = PlatformServiceFactory()
+    tag = TagFactory()
+    return {
+        "name": "Test Asset",
+        "description": "desc",
+        "namespace": "test-namespace",
+        "technical_mapping": "default",
+        "configuration": {
+            "bucket": "test",
+            "path": "test",
+            "configuration_type": "S3TechnicalAssetConfiguration",
+        },
+        "platform_id": str(service.platform.id),
+        "service_id": str(service.id),
+        "tag_ids": [str(tag.id)],
+    }
 
 
 class TestTechnicalAssetV2Events:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def _setup_admin(self, session):
-        RoleService(db=session).initialize_prototype_roles()
-        from app.settings import settings as s
-
-        user = UserFactory(external_id=s.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.GLOBAL, permissions=list(Action))
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
-        return user
-
     def _ta_endpoint(self, dp_id):
         return f"{DP_ENDPOINT}/{dp_id}/technical_assets"
 
-    def _create_payload(self):
-        service = PlatformServiceFactory()
-        tag = TagFactory()
-        return {
-            "name": "Test Asset",
-            "description": "desc",
-            "namespace": "test-namespace",
-            "technical_mapping": "default",
-            "configuration": {
-                "bucket": "test",
-                "path": "test",
-                "configuration_type": "S3TechnicalAssetConfiguration",
-            },
-            "platform_id": str(service.platform.id),
-            "service_id": str(service.id),
-            "tag_ids": [str(tag.id)],
-        }
+    def _link_endpoint(self, dp_id, op_id):
+        return f"{DP_ENDPOINT}/{dp_id}/output_ports/{op_id}/technical_assets"
 
     # --- technical_asset.created ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_created_fires_event(self, mock_webhook, client, session):
+    def test_created_fires_event(self, mock_webhook, client, ta_create_payload):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
 
         with webhook_v2_config():
             response = client.post(
                 self._ta_endpoint(dp.id),
-                json=self._create_payload(),
+                json=ta_create_payload,
             )
 
         assert response.status_code == 200
@@ -82,10 +63,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_created_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_created_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(
@@ -97,10 +78,10 @@ class TestTechnicalAssetV2Events:
 
     # --- technical_asset.updated ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_updated_fires_event(self, mock_webhook, client, session):
+    def test_updated_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         ta = TechnicalAssetFactory(owner=dp)
         tag = TagFactory()
@@ -122,10 +103,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_updated_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_updated_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.put(
@@ -138,10 +119,10 @@ class TestTechnicalAssetV2Events:
 
     # --- technical_asset.deleted ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_deleted_fires_event(self, mock_webhook, client, session):
+    def test_deleted_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         ta = TechnicalAssetFactory(owner=dp)
 
@@ -155,10 +136,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_deleted_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_deleted_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.delete(
@@ -168,17 +149,14 @@ class TestTechnicalAssetV2Events:
         assert response.status_code == 404
         mock_webhook.assert_not_awaited()
 
-    def _link_endpoint(self, dp_id, op_id):
-        return f"{DP_ENDPOINT}/{dp_id}/output_ports/{op_id}/technical_assets"
-
     # --- technical_asset.linked ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_linked_fires_event(self, mock_webhook, client, session):
+    def test_linked_fires_event(self, mock_webhook, client):
         from tests.factories import DatasetFactory
 
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         op = DatasetFactory(data_product=dp)
         ta = TechnicalAssetFactory(owner=dp)
@@ -196,10 +174,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_linked_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_linked_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(
@@ -212,13 +190,13 @@ class TestTechnicalAssetV2Events:
 
     # --- technical_asset.link_approved ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_link_approved_fires_event(self, mock_webhook, client, session):
+    def test_link_approved_fires_event(self, mock_webhook, client):
         from app.authorization.role_assignments.enums import DecisionStatus
         from tests.factories import DataOutputDatasetAssociationFactory, DatasetFactory
 
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         op = DatasetFactory(data_product=dp)
         ta = TechnicalAssetFactory(owner=dp)
@@ -239,12 +217,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_link_approved_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_link_approved_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(
@@ -257,13 +233,13 @@ class TestTechnicalAssetV2Events:
 
     # --- technical_asset.link_denied ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_link_denied_fires_event(self, mock_webhook, client, session):
+    def test_link_denied_fires_event(self, mock_webhook, client):
         from app.authorization.role_assignments.enums import DecisionStatus
         from tests.factories import DataOutputDatasetAssociationFactory, DatasetFactory
 
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         op = DatasetFactory(data_product=dp)
         ta = TechnicalAssetFactory(owner=dp)
@@ -284,10 +260,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_link_denied_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_link_denied_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.post(
@@ -300,12 +276,12 @@ class TestTechnicalAssetV2Events:
 
     # --- technical_asset.unlinked ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_unlinked_fires_event(self, mock_webhook, client, session):
+    def test_unlinked_fires_event(self, mock_webhook, client):
         from tests.factories import DataOutputDatasetAssociationFactory, DatasetFactory
 
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         op = DatasetFactory(data_product=dp)
         ta = TechnicalAssetFactory(owner=dp)
@@ -325,10 +301,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_unlinked_does_not_fire_on_failure(self, mock_webhook, client, session):
+    def test_unlinked_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.request(
@@ -342,10 +318,10 @@ class TestTechnicalAssetV2Events:
 
     # --- technical_asset.status_updated ---
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_status_updated_fires_event(self, mock_webhook, client, session):
+    def test_status_updated_fires_event(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
         dp = DataProductFactory()
         ta = TechnicalAssetFactory(owner=dp)
 
@@ -362,12 +338,10 @@ class TestTechnicalAssetV2Events:
         assert "data_product" in data
         assert "technical_asset" in data
 
+    @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_status_updated_does_not_fire_on_failure(
-        self, mock_webhook, client, session
-    ):
+    def test_status_updated_does_not_fire_on_failure(self, mock_webhook, client):
         mock_webhook.return_value = AsyncMock()
-        self._setup_admin(session)
 
         with webhook_v2_config():
             response = client.put(
