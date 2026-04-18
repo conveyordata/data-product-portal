@@ -37,6 +37,11 @@ tasks:
       - cd backend && poetry run python -m app.open_api_export
       - mv backend/openapi.json docs/static/openapi.json
 
+  docs:generate-webhook-events:
+    desc: "Generate webhook events reference page from router source"
+    cmds:
+      - cd backend && poetry run python ../scripts/generate_webhook_docs.py
+
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
