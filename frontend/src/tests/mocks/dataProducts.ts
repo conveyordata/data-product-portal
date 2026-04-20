@@ -1,10 +1,16 @@
 import { HttpResponse, http } from 'msw';
 import {
+    type DataProduct,
     DataProductIconKey,
     DataProductStatus,
+    DecisionStatus,
+    type GetDataProductInputPortsResponse,
     type GetDataProductRolledUpTagsResponse,
     type GetDataProductsResponse,
     type GetDataProductsResponseItem,
+    type InputPort,
+    OutputPortAccessType,
+    OutputPortStatus,
 } from '@/store/api/services/generated/dataProductsApi';
 import { server } from '@/tests/mocks/server.ts';
 
@@ -51,7 +57,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
     },
 ];
 
-export const mockDataProductsHttp = (dataProducts: GetDataProductsResponseItem[]) => {
+export const mockDataProductsHttp = (dataProducts: GetDataProductsResponseItem[] = mockDataProducts) => {
     server.use(
         http.get('*/api/v2/data_products', () => {
             return HttpResponse.json({ data_products: dataProducts } satisfies GetDataProductsResponse);
@@ -59,13 +65,52 @@ export const mockDataProductsHttp = (dataProducts: GetDataProductsResponseItem[]
     );
 };
 
-export const mockDataProductDetailCalls = (dataProduct: GetDataProductsResponseItem) => {
+export const mockDataProductHttp = (
+    data_product_id: string = mockDataProducts[0].id,
+    data_product: DataProduct = mockDataProducts[0],
+) => {
     server.use(
-        http.get(`*/api/v2/data_products/${dataProduct.id}`, () => {
-            return HttpResponse.json({
-                ...dataProduct,
-            });
+        http.get(`*/api/v2/data_products/${data_product_id}`, () => {
+            return HttpResponse.json(data_product);
         }),
+    );
+};
+
+const mockInputPorts: InputPort[] = [
+    {
+        id: 'id-1',
+        justification: 'I need access!',
+        data_product_id: mockDataProducts[0].id,
+        data_product: mockDataProducts[0],
+        output_port_id: 'op-1',
+        status: DecisionStatus.Approved,
+        input_port: {
+            id: 'op-1',
+            name: 'op-1',
+            namespace: 'op1',
+            description: 'My op1',
+            status: OutputPortStatus.Pending,
+            access_type: OutputPortAccessType.Public,
+            data_product_id: mockDataProducts[1].id,
+            tags: [],
+        },
+    },
+];
+
+export const mockDataProductInputPorts = (
+    dataProductId: string = mockDataProducts[0].id,
+    inputPorts: InputPort[] = mockInputPorts,
+) => {
+    server.use(
+        http.get(`*/api/v2/data_products/${dataProductId}/input_ports`, () => {
+            return HttpResponse.json({ input_ports: inputPorts } satisfies GetDataProductInputPortsResponse);
+        }),
+    );
+};
+
+export const mockDataProductDetailCalls = (dataProduct: GetDataProductsResponseItem) => {
+    mockDataProductHttp(dataProduct.id, dataProduct);
+    server.use(
         http.get(`*/api/v2/data_products/${dataProduct.id}/rolled_up_tags`, () => {
             return HttpResponse.json({ rolled_up_tags: [] } satisfies GetDataProductRolledUpTagsResponse);
         }),

@@ -1,0 +1,19 @@
+@use "@/styles/globals";
+
+.selectedCard {
+  border-color: globals.$primary-color;
+  border-width: 2px;
+
+  &:hover {
+    border-color: globals.$primary-color !important;
+  }
+}
+
+.selectableCardIcon,
+.selectedCardIcon {
+  font-size: 40px;
+}
+
+.selectedCardIcon {
+  color: globals.$primary-color;
+}

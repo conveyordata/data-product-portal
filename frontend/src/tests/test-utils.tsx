@@ -11,10 +11,14 @@ import authSlice, { setCredentials } from '@/store/api/services/auth-slice.ts';
 import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
 import type { User } from '@/store/api/services/generated/usersApi.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
-import cartSlice from '@/store/features/cart/cart-slice.ts';
+import cartSlice, { addDatasetToCart } from '@/store/features/cart/cart-slice.ts';
 import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
 import wizardSlice from '@/store/features/wizard/wizard-slice.ts';
 import i18n from './i18n';
+
+type TestStorePreloadedState = {
+    cart?: { DatasetIds: string[] };
+};
 
 function createTestStore() {
     const store = configureStore({
@@ -36,22 +40,28 @@ function createTestStore() {
 type RenderWithProvidersOptions = Omit<RenderOptions, 'wrapper'> & {
     routerProps?: MemoryRouterProps;
     currentUser?: User;
+    preloadedState?: TestStorePreloadedState;
 };
 
 export function renderWithProviders(ui: ReactElement, options?: RenderWithProvidersOptions) {
-    const { routerProps, currentUser, ...renderOptions } = options ?? {};
+    const { routerProps, currentUser, preloadedState, ...renderOptions } = options ?? {};
+
+    const store = createTestStore();
+    if (currentUser) {
+        store.dispatch(setCredentials({ user: currentUser }));
+    }
+    if (preloadedState?.cart?.DatasetIds) {
+        for (const datasetId of preloadedState.cart.DatasetIds) {
+            store.dispatch(addDatasetToCart({ datasetId }));
+        }
+    }
 
     const Wrapper = ({ children }: { children: ReactNode }) => {
-        const store = createTestStore();
-        if (currentUser) {
-            store.dispatch(setCredentials({ user: currentUser }));
-        }
-
         return (
             <Provider store={store}>
                 <I18nextProvider i18n={i18n}>
                     <BreadcrumbProvider>
-                        <NuqsTestingAdapter>
+                        <NuqsTestingAdapter hasMemory={true}>
                             {routerProps ? <MemoryRouter {...routerProps}>{children}</MemoryRouter> : children}
                         </NuqsTestingAdapter>
                     </BreadcrumbProvider>
@@ -63,5 +73,5 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
     return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
 
-export { screen, waitFor, within } from '@testing-library/react';
+export { fireEvent, screen, waitFor, within } from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';

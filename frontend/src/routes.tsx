@@ -5,6 +5,7 @@ import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
 import { Logout } from '@/pages/auth/logout/logout-page.tsx';
 import Cart from '@/pages/cart/cart.page.tsx';
+import ExplorationsCart from '@/pages/cart-explorations/cart.page.tsx';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
@@ -96,7 +97,8 @@ const router = createBrowserRouter([
                         path: ApplicationPaths.MarketplaceCart,
                         children: [
                             {
-                                element: <Cart />,
+                                element:
+                                    localStorage.getItem('explorations') === 'true' ? <ExplorationsCart /> : <Cart />,
                                 index: true,
                             },
                         ],

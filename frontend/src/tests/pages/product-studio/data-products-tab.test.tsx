@@ -2,10 +2,10 @@ import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { DataProductsTab } from '@/pages/product-studio/components/data-products-tab/data-products-tab.component.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/data-products.ts';
+import { mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/dataProducts.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
-import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
+import { fireEvent, renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
 
 const currentUser = mockUsers[0];
 
@@ -66,15 +66,16 @@ describe('DataProductsTab', () => {
 
         await waitFor(() => {
             expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
+            expect(screen.getByText('Customer Insights')).toBeInTheDocument();
         });
 
         const searchInput = screen.getByPlaceholderText('Search Data Products by name');
-        await userEvent.type(searchInput, 'Customer');
+        fireEvent.change(searchInput, { target: { value: 'Customer' } });
 
         await waitFor(() => {
             expect(screen.queryByText('Sales Analytics')).not.toBeInTheDocument();
+            expect(screen.getByText('Customer Insights')).toBeInTheDocument();
         });
-        expect(screen.getByText('Customer Insights')).toBeInTheDocument();
     });
 
     it('shows no results when search matches nothing', async () => {
@@ -89,7 +90,7 @@ describe('DataProductsTab', () => {
         });
 
         const searchInput = screen.getByPlaceholderText('Search Data Products by name');
-        await userEvent.type(searchInput, 'nonexistent');
+        fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
 
         await waitFor(() => {
             expect(screen.queryByText('Sales Analytics')).not.toBeInTheDocument();
