@@ -44,6 +44,17 @@ _emit_output_port_link_approved = emit_event_after(
         ).convert(),
     },
 )
+_emit_output_port_link_denied = emit_event_after(
+    "output_port.link_denied",
+    lambda data_product_id, output_port_id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        "output_port": DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(output_port_id, data_product_id)
+        ).convert(),
+    },
+)
 
 router = APIRouter(tags=["Data Products - Output ports - Input ports"])
 route = "/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports"
@@ -120,6 +131,7 @@ def approve_output_port_as_input_port(
                 object_id="output_port_id",
             )
         ),
+        Depends(_emit_output_port_link_denied),
     ],
 )
 def deny_output_port_as_input_port(

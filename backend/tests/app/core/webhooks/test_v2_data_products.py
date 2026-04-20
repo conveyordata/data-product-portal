@@ -395,3 +395,43 @@ class TestDataProductV2Events:
 
         assert response.status_code == 404
         mock_webhook.assert_not_awaited()
+
+    # --- data_product.team_member_updated ---
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        member = UserFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        new_role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        assignment = DataProductRoleAssignmentFactory(
+            data_product_id=dp.id, user_id=member.id, role_id=role.id
+        )
+
+        with webhook_v2_config():
+            response = client.put(
+                f"/api/v2/authz/role_assignments/data_product/{assignment.id}",
+                json={"role_id": str(new_role.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.team_member_updated"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_updated_does_not_fire_on_failure(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+
+        with webhook_v2_config():
+            response = client.put(
+                f"/api/v2/authz/role_assignments/data_product/{self.invalid_id}",
+                json={"role_id": str(self.invalid_id)},
+            )
+
+        assert response.status_code == 404
+        mock_webhook.assert_not_awaited()

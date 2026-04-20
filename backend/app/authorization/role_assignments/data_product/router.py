@@ -58,6 +58,16 @@ _emit_data_product_team_member_removed = emit_event(
         )
     },
 )
+_emit_data_product_team_member_updated = emit_event_after(
+    "data_product.team_member_updated",
+    lambda id, db, **_: {
+        "data_product": GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(
+                RoleAssignmentService(db=db).get_assignment(id).data_product_id
+            )
+        )
+    },
+)
 
 router = APIRouter(prefix="/v2/authz/role_assignments/data_product")
 
@@ -308,7 +318,8 @@ def decide_data_product_role_assignment(
                 Action.DATA_PRODUCT__UPDATE_USER,
                 resolver=DataProductRoleAssignmentResolver,
             )
-        )
+        ),
+        Depends(_emit_data_product_team_member_updated),
     ],
 )
 def modify_data_product_role_assignment(

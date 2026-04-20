@@ -45,6 +45,7 @@ Every event is wrapped in a CloudEvents envelope:
 | `data_product.status_updated` | `PUT /v2/data_products/{id}/status` | [`data_product`](/docs/api/#schema/GetDataProductResponse) |
 | `data_product.team_member_added` | `POST /v2/authz/role_assignments/data_product` | [`data_product`](/docs/api/#schema/GetDataProductResponse) |
 | `data_product.team_member_removed` | `DELETE /v2/authz/role_assignments/data_product/{id}` | [`data_product`](/docs/api/#schema/GetDataProductResponse) |
+| `data_product.team_member_updated` | `PUT /v2/authz/role_assignments/data_product/{id}` | [`data_product`](/docs/api/#schema/GetDataProductResponse) |
 | `data_product.updated` | `PUT /v2/data_products/{id}` | [`data_product`](/docs/api/#schema/GetDataProductResponse) |
 
 ### Output Port Events
@@ -55,6 +56,7 @@ Every event is wrapped in a CloudEvents envelope:
 | `output_port.created` | `POST /v2/data_products/{data_product_id}/output_ports` | [`data_product`](/docs/api/#schema/GetDataProductResponse), [`output_port`](/docs/api/#schema/DatasetGet) |
 | `output_port.deleted` | `DELETE /v2/data_products/{data_product_id}/output_ports/{id}` | [`data_product`](/docs/api/#schema/GetDataProductResponse), [`output_port`](/docs/api/#schema/DatasetGet) |
 | `output_port.link_approved` | `POST /v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/approve` | [`data_product`](/docs/api/#schema/GetDataProductResponse), [`output_port`](/docs/api/#schema/DatasetGet) |
+| `output_port.link_denied` | `POST /v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/deny` | [`data_product`](/docs/api/#schema/GetDataProductResponse), [`output_port`](/docs/api/#schema/DatasetGet) |
 | `output_port.setting_changed` | `POST /v2/data_products/{data_product_id}/output_ports/{id}/settings/{setting_id}` | [`data_product`](/docs/api/#schema/GetDataProductResponse), [`output_port`](/docs/api/#schema/DatasetGet) |
 | `output_port.status_updated` | `PUT /v2/data_products/{data_product_id}/output_ports/{id}/status` | [`data_product`](/docs/api/#schema/GetDataProductResponse), [`output_port`](/docs/api/#schema/DatasetGet) |
 | `output_port.updated` | `PUT /v2/data_products/{data_product_id}/output_ports/{id}` | [`data_product`](/docs/api/#schema/GetDataProductResponse), [`output_port`](/docs/api/#schema/DatasetGet) |

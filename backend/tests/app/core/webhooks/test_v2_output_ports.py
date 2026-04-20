@@ -2,8 +2,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
+    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductSettingFactory,
     DatasetFactory,
@@ -281,6 +283,46 @@ class TestOutputPortV2Events:
         with webhook_v2_config():
             response = client.post(
                 f"{self._op_endpoint(self.invalid_id)}/{self.invalid_id}/input_ports/approve",
+                json={"consuming_data_product_id": self.invalid_id},
+            )
+
+        assert response.status_code == 404
+        mock_webhook.assert_not_awaited()
+
+    # --- output_port.link_denied ---
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_denied_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        consumer_dp = DataProductFactory()
+        DataProductDatasetAssociationFactory(
+            data_product=consumer_dp, dataset=op, status=DecisionStatus.PENDING
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(dp.id)}/{op.id}/input_ports/deny",
+                json={"consuming_data_product_id": str(consumer_dp.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.link_denied"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_denied_does_not_fire_on_failure(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(self.invalid_id)}/{self.invalid_id}/input_ports/deny",
                 json={"consuming_data_product_id": self.invalid_id},
             )
 
