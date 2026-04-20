@@ -12,6 +12,7 @@ from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
 from .event import EventFactory
+from .exploration import ExplorationFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
 from .platform import PlatformFactory
@@ -55,6 +56,7 @@ factories = [
     TechnicalAssetFactory,
     ThemeSettingsFactory,
     NotificationFactory,
+    ExplorationFactory,
 ]
 
 for factory_model in factories:

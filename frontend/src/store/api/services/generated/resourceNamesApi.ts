@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/dataProductsOutputPortsDataQualityApi";
+import { api } from "@/store/api/services/generated/explorationsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     sanitizeResourceName: build.query<

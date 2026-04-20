@@ -5,7 +5,6 @@ from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.exc import IntegrityError
 
 from app.authorization.roles.schema import Scope
 from app.authorization.roles.service import RoleService
@@ -356,7 +355,7 @@ class TestDataProductsRouter:
         data_product = self.delete_data_product(client, self.invalid_id)
         assert data_product.status_code == 403
 
-    def test_data_product_set_custom_setting_wrong_scope(self, client):
+    def test_set_value_for_data_product_wrong_scope(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -369,12 +368,12 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         setting = DataProductSettingFactory(scope="dataset")
-        with pytest.raises(IntegrityError):
-            client.post(
-                f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
-            )
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
+        )
+        assert response.status_code == 400
 
-    def test_dataset_set_custom_setting_not_owner(self, client):
+    def test_set_value_for_data_product_not_owner(self, client):
         data_product = DataProductFactory()
         setting = DataProductSettingFactory()
         response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")

@@ -9,7 +9,7 @@ from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.data_products.model import DataProduct
+    from app.abstract_data_product.model import AbstractDataProduct
 
 
 class Domain(Base, BaseORM):
@@ -19,7 +19,7 @@ class Domain(Base, BaseORM):
     name = Column(String)
     description = Column(String)
 
-    data_products: Mapped[list["DataProduct"]] = relationship(lazy="raise")
+    data_products: Mapped[list["AbstractDataProduct"]] = relationship(lazy="raise")
 
     @property
     def data_product_count(self) -> int:
