@@ -32,14 +32,15 @@ class GraphService:
                         """
                 SELECT
                     data_products.id as id,
-                    data_products.name as name,
-                    data_products.description as description,
+                    adp.name as name,
+                    adp.description as description,
                     data_product_types.icon_key as icon_key,
                     domains.name as domain_name,
                     domains.id as domain_id
                 FROM data_products
+                LEFT JOIN abstract_data_products as adp on data_products.id = adp.id
                 LEFT JOIN data_product_types on data_products.type_id = data_product_types.id
-                LEFT JOIN domains on data_products.domain_id = domains.id
+                LEFT JOIN domains on adp.domain_id = domains.id
                 """
                     )
                 )
@@ -77,7 +78,8 @@ class GraphService:
                        domains.id                  as domain_id
                 FROM datasets
                 LEFT JOIN data_products on data_products.id = datasets.data_product_id
-                LEFT JOIN domains on data_products.domain_id = domains.id
+                LEFT JOIN abstract_data_products as adp on data_products.id = adp.id
+                LEFT JOIN domains on adp.domain_id = domains.id
                 """
                     )
                 )

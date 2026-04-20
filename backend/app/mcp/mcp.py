@@ -9,8 +9,6 @@ from sqlalchemy.orm import configure_mappers
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignmentResponse as DataProductRoleAssignmentResponse,
 )
-
-# Add role assignment imports
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
@@ -26,7 +24,7 @@ from app.authorization.role_assignments.output_port.schema import (
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
-from app.configuration.domains.schema_response import DomainGetOld
+from app.configuration.domains.schema_response import GetDomainResponse, GetDomainsItem
 from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
@@ -37,8 +35,6 @@ from app.data_products.output_ports.schema_response import (
     OutputPortsGet,
 )
 from app.data_products.output_ports.service import OutputPortService
-
-# Import enums - corrected paths
 from app.data_products.schema_response import (
     DataProductsGet,
     GetDataProductResponse,
@@ -46,15 +42,11 @@ from app.data_products.schema_response import (
 )
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
-
-# Import Pydantic schemas - corrected paths
 from app.data_products.technical_assets.schema_response import (
     DataOutputGet,
     DataOutputsGet,
     GetTechnicalAssetsResponseItem,
 )
-
-# Import existing services
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
 from app.search_output_ports.schema_response import SearchDatasets
@@ -234,7 +226,7 @@ def universal_search(
                             break
 
                 result_domains = [
-                    DomainGetOld.model_validate(domain).model_dump()
+                    GetDomainsItem.model_validate(domain).model_dump()
                     for domain in filtered_domains
                 ]
                 query_results.update({"domains": result_domains})
@@ -470,7 +462,7 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
             if not domain:
                 return {"error": f"Domain {domain_id} not found"}
 
-            return DomainGetOld.model_validate(domain).model_dump()
+            return GetDomainResponse.model_validate(domain).model_dump()
         finally:
             db.close()
 
@@ -526,7 +518,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                     ],
                 },
                 "domains": [
-                    DomainGetOld.model_validate(domain).model_dump()
+                    GetDomainsItem.model_validate(domain).model_dump()
                     for domain in all_domains
                 ],
             }

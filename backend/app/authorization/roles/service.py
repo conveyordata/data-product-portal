@@ -111,6 +111,7 @@ class RoleService:
                     description="This is the role that is used as fallback for users that don't have another role",  # noqa: E501
                     permissions=[
                         Action.GLOBAL__CREATE_DATAPRODUCT,
+                        Action.GLOBAL__CREATE_EXPLORATION,
                         Action.GLOBAL__CREATE_OUTPUT_PORT,
                         Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
                         Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS,

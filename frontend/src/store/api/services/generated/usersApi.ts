@@ -98,6 +98,7 @@ export type AuthorizationAction =
   | 105
   | 106
   | 107
+  | 108
   | 301
   | 302
   | 303
