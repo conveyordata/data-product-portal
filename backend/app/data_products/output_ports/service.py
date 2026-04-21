@@ -137,9 +137,7 @@ class OutputPortService:
     ) -> DatasetGet:
         """Fetch a dataset, raising 403 if the user cannot see it as a consumer.
 
-        Use this for user-facing endpoints and MCP tools where a specific user identity
-        is available and dataset visibility must be enforced. Non-UNRESTRICTED datasets
-        are hidden from users who are not in the dataset's access list.
+        Use this for endpoints where dataset visibility must be enforced.
 
         For system/internal callers already authorised at the endpoint level, use
         get_dataset() instead.
