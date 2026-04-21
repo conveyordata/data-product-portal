@@ -59,6 +59,7 @@ A minor version (adding a column) is backward-compatible by definition - the Con
 - Backward-compatible additions (new column, new file, new API field)
 - Update in place, bump version number on existing Output Port
 - Notify Consumers via changelog
+- deprecations, warn users of fields that will be removed in a new version, and give them an alternative in the changelog
 
 **Breaking changes** (1.x.x → 2.0.0):
 - Producer creates new Output Port version (v2) with new Technical Asset (or existing one in case of schemas)
@@ -74,7 +75,7 @@ A minor version (adding a column) is backward-compatible by definition - the Con
 
 ### Access inheritance for major versions
 
-When a Producer creates v2 of an Output Port, all Consumers with active Handshakes on v1 automatically receive access to v2. They don't need to go through the access request flow again - requiring re-requests would recreate the exact problem we're solving today.
+When a Producer creates v2 of an Output Port, all Consumers with an input port on v1 automatically receive access to v2. They don't need to go through the access request flow again - requiring re-requests would recreate the exact problem we're solving today.
 
 Consumers confirm when they've updated their code to use v2. Until they confirm, their input port on v1 remains active.
 
@@ -98,7 +99,7 @@ For setups where the Technical Asset is an individual table, a new major version
 - Patch/minor bumps update the `version` field on the existing Output Port record + add a changelog entry + trigger notification
 - Major bumps create a **new** Output Port record with `parent_version_id` pointing to the previous version
 - New major versions can reference the same or different Technical Assets (platform-dependent)
-- All active Handshakes are automatically copied from v(n) to v(n+1) on major version creation
+- All active input ports have access to all versions. They are not copied explicitly
 - Both versions coexist until the old version is explicitly deprecated
 - Changelog tracks all changes (major, minor, and patch)
 
@@ -168,71 +169,6 @@ Changes that would cause existing Consumer queries or code to fail:
 - Performance improvements
 - Data quality fixes
 - Documentation updates
-
-### Version creation flow
-
-**For patch/minor changes:**
-1. Producer makes the backward-compatible change to the Technical Asset
-2. Bumps version number in Portal (e.g., 1.0.0 → 1.1.0)
-3. Adds changelog entry with summary
-4. Consumers are notified; no migration action required
-
-**For major (breaking) changes:**
-1. Producer determines change is breaking
-2. Creates new Output Port (Portal UI or API)
-   - Specify new major version (2.0.0, 3.0.0, etc.)
-   - Provide migration guide
-   - Link to new or existing Technical Asset
-3. Access is automatically granted to the new version
-4. Both versions run in parallel
-5. Consumers update their code and confirm migration
-6. Old version is eventually deprecated and removed
-
-### Example: Breaking change (removing a column)
-
-**Initial state:**
-- Output Port "Customer Data" v1.2.0 → Table `customers` (id, name, email, phone)
-
-**Change needed:**
-- Remove `phone` column for privacy compliance
-
-**Steps:**
-1. Create new table: `customers_v2` (id, name, email)
-2. Create Output Port "Customer Data" v2.0.0 → points to `customers_v2`
-3. All v1 Consumers automatically get access on v2 (access inherited)
-4. Set up data sync from `customers` to `customers_v2` (minus phone column)
-5. Consumers update their queries and confirm migration
-6. After migration period, deprecate v1
-
-### Example: Breaking change with schema-level Technical Asset (dbt)
-
-**Initial state:**
-- Output Port "Marketing Gold" v1.2.0 → Technical Asset: Schema `gold.marketing`
-- Schema contains: `customers`, `orders`, `products`, and 7 other tables
-
-**Change needed:**
-- Restructure the `customers` table (rename columns)
-
-**Steps:**
-1. dbt creates `customers_v2` model in the same `gold.marketing` schema
-2. Create Output Port "Marketing Gold" v2.0.0 → **same** Technical Asset (schema `gold.marketing`)
-3. v2 contract documents: "use `customers_v2` instead of `customers`"
-4. All v1 Consumers automatically get Handshakes on v2
-5. Consumers update their queries (only the `customers` reference changes) and confirm
-6. The other 9 tables are unaffected — no new Technical Assets needed
-
-### Example: Non-breaking change (adding a column)
-
-**Initial state:**
-- Output Port "Customer Data" v1.2.0 → Table `customers` (id, name, email)
-
-**Change needed:**
-- Add `loyalty_tier` column
-
-**Steps:**
-1. Add column to existing table: `ALTER TABLE customers ADD COLUMN loyalty_tier VARCHAR(20)`
-2. Bump version to 1.3.0 in Portal, add changelog entry: "Added optional loyalty_tier column"
-3. Consumers are notified; no migration required - the new column is already available
 
 ---
 
