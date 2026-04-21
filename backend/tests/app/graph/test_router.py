@@ -1,10 +1,9 @@
-import pytest
-
 from tests.factories import (
     DataProductDatasetAssociationFactory,
     DataProductFactory,
     DatasetFactory,
     DomainFactory,
+    ExplorationFactory,
     TechnicalAssetFactory,
 )
 
@@ -12,24 +11,26 @@ ENDPOINT = "/api/v2/graph"
 
 
 class TestGraphRouter:
-    @pytest.mark.parametrize(
-        "route",
-        [
-            ENDPOINT,
-        ],
-    )
-    def test_get_graph_data(self, client, route):
+    def test_get_graph_data(self, client):
         domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
         DatasetFactory(data_product=data_product)
         TechnicalAssetFactory(owner=data_product)
-        response = client.get(route)
+        response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
         assert len(response.json()["edges"]) == 1
         assert len(response.json()["nodes"]) == 2
         for node in response.json()["nodes"]:
             assert node["data"]["domain_id"] == str(domain.id)
             assert node["data"]["domain"] == domain.name
+
+    def test_get_graph_data_do_not_include_explorations(self, client):
+        domain = DomainFactory()
+        DataProductFactory(domain=domain)
+        ExplorationFactory(domain=domain)
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200, response.text
+        assert len(response.json()["nodes"]) == 1
 
     def test_get_graph_data_1_link(self, client):
         data_product_1 = DataProductFactory()

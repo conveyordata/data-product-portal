@@ -27,6 +27,7 @@ from app.data_products.output_ports.input_ports.router import (
 from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as data_outputs
+from app.explorations.router import router as exploration
 from app.graph.router import router as graph
 from app.resource_names.router import router as resource_name
 from app.search_output_ports.router import router as search_output_ports
@@ -61,3 +62,4 @@ router.include_router(graph)
 router.include_router(notification)
 router.include_router(resource_name)
 router.include_router(plugin)
+router.include_router(exploration)

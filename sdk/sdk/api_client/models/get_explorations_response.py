@@ -1,43 +1,39 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="GetDomainResponse")
+if TYPE_CHECKING:
+    from ..models.exploration import Exploration
+
+
+T = TypeVar("T", bound="GetExplorationsResponse")
 
 
 @_attrs_define
-class GetDomainResponse:
+class GetExplorationsResponse:
     """
     Attributes:
-        id (UUID):
-        name (str):
-        description (str):
+        explorations (list[Exploration]):
     """
 
-    id: UUID
-    name: str
-    description: str
+    explorations: list[Exploration]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id = str(self.id)
-
-        name = self.name
-
-        description = self.description
+        explorations = []
+        for explorations_item_data in self.explorations:
+            explorations_item = explorations_item_data.to_dict()
+            explorations.append(explorations_item)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "id": id,
-                "name": name,
-                "description": description,
+                "explorations": explorations,
             }
         )
 
@@ -45,21 +41,22 @@ class GetDomainResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.exploration import Exploration
+
         d = dict(src_dict)
-        id = UUID(d.pop("id"))
+        explorations = []
+        _explorations = d.pop("explorations")
+        for explorations_item_data in _explorations:
+            explorations_item = Exploration.from_dict(explorations_item_data)
 
-        name = d.pop("name")
+            explorations.append(explorations_item)
 
-        description = d.pop("description")
-
-        get_domain_response = cls(
-            id=id,
-            name=name,
-            description=description,
+        get_explorations_response = cls(
+            explorations=explorations,
         )
 
-        get_domain_response.additional_properties = d
-        return get_domain_response
+        get_explorations_response.additional_properties = d
+        return get_explorations_response
 
     @property
     def additional_keys(self) -> list[str]:

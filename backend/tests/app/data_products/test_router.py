@@ -373,13 +373,13 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 400, response.text
 
-    def test_dataset_set_custom_setting_not_owner(self, client):
+    def test_set_value_for_data_product_not_owner(self, client):
         data_product = DataProductFactory()
         setting = DataProductSettingFactory()
         response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")
         assert response.status_code == 403
 
-    def test_dataproduct_set_custom_setting(self, client):
+    def test_dataset_set_custom_setting_not_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(

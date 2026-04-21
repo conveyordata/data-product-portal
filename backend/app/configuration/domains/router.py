@@ -7,7 +7,6 @@ from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
     CreateDomainResponse,
     GetDomainResponse,
-    GetDomainsItem,
     GetDomainsResponse,
     UpdateDomainResponse,
 )
@@ -84,13 +83,10 @@ def migrate_domain(
 @router.get("")
 def get_domains(db: Session = Depends(get_db_session)) -> GetDomainsResponse:
     return GetDomainsResponse(
-        domains=[
-            GetDomainsItem.from_get_domains_item_old(domain)
-            for domain in DomainService(db).get_domains()
-        ]
+        domains=DomainService(db).get_domains(),
     )
 
 
 @router.get("/{id}")
 def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> GetDomainResponse:
-    return GetDomainResponse.from_domain_get_old(DomainService(db).get_domain(id))
+    return DomainService(db).get_domain(id)

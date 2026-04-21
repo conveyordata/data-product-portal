@@ -1,24 +1,22 @@
-import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
 
+from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
-from app.configuration.domains.model import Domain
 from app.configuration.tags.model import Tag, tag_data_product_table
 from app.data_products.output_ports.model import (
     DataProductDatasetAssociation,
 )
 from app.data_products.status import DataProductStatus
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.database import Base, ensure_exists
-from app.shared.model import BaseORM
+from app.database.database import ensure_exists
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
@@ -28,13 +26,12 @@ if TYPE_CHECKING:
     )
 
 
-class DataProduct(Base, BaseORM):
+class DataProduct(AbstractDataProduct):
     __tablename__ = "data_products"
 
-    id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String)
-    namespace = Column(String)
-    description = Column(String)
+    id: Mapped[UUID] = mapped_column(
+        "id", ForeignKey("abstract_data_products.id"), primary_key=True
+    )
     about = Column(String)
     status: DataProductStatus = Column(
         Enum(DataProductStatus), default=DataProductStatus.ACTIVE
@@ -46,7 +43,6 @@ class DataProduct(Base, BaseORM):
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
-    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
 
     # Relationships
     type: Mapped[DataProductType] = relationship(
@@ -55,7 +51,6 @@ class DataProduct(Base, BaseORM):
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="data_products", lazy="joined"
     )
-    domain: Mapped[Domain] = relationship(back_populates="data_products", lazy="joined")
     assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
@@ -110,6 +105,10 @@ class DataProduct(Base, BaseORM):
         .correlate_except(TechnicalAsset)
         .scalar_subquery()
     )
+
+    __mapper_args__ = {
+        "polymorphic_identity": "data_products",
+    }
 
 
 def ensure_data_product_exists(

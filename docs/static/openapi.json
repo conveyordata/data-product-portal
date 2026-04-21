@@ -6537,6 +6537,66 @@
         }
       }
     },
+    "/api/v2/explorations": {
+      "get": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Get Explorations",
+        "operationId": "get_explorations",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExplorationsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Create Exploration",
+        "operationId": "create_exploration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExplorationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
@@ -6903,6 +6963,7 @@
           105,
           106,
           107,
+          108,
           301,
           302,
           303,
@@ -7135,6 +7196,68 @@
           "id"
         ],
         "title": "CreateDomainResponse"
+      },
+      "CreateExplorationRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Domain Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "namespace",
+          "description",
+          "domain_id"
+        ],
+        "title": "CreateExplorationRequest"
+      },
+      "CreateExplorationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain"
+        ],
+        "title": "CreateExplorationResponse"
       },
       "CreateGlobalRoleAssignment": {
         "properties": {
@@ -9201,6 +9324,39 @@
         ],
         "title": "EventEntityType"
       },
+      "Exploration": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain"
+        ],
+        "title": "Exploration"
+      },
       "FieldDependency": {
         "properties": {
           "field_name": {
@@ -9517,21 +9673,13 @@
           "description": {
             "type": "string",
             "title": "Description"
-          },
-          "data_products": {
-            "items": {
-              "$ref": "#/components/schemas/DataProduct"
-            },
-            "type": "array",
-            "title": "Data Products"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description",
-          "data_products"
+          "description"
         ],
         "title": "GetDomainResponse"
       },
@@ -9724,6 +9872,22 @@
           "actor"
         ],
         "title": "GetEventHistoryResponseItem"
+      },
+      "GetExplorationsResponse": {
+        "properties": {
+          "explorations": {
+            "items": {
+              "$ref": "#/components/schemas/Exploration"
+            },
+            "type": "array",
+            "title": "Explorations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "explorations"
+        ],
+        "title": "GetExplorationsResponse"
       },
       "GetInputPortsForOutputPortResponse": {
         "properties": {

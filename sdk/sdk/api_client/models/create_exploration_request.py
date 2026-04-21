@@ -7,37 +7,42 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="GetDomainResponse")
+T = TypeVar("T", bound="CreateExplorationRequest")
 
 
 @_attrs_define
-class GetDomainResponse:
+class CreateExplorationRequest:
     """
     Attributes:
-        id (UUID):
         name (str):
+        namespace (str):
         description (str):
+        domain_id (UUID):
     """
 
-    id: UUID
     name: str
+    namespace: str
     description: str
+    domain_id: UUID
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id = str(self.id)
-
         name = self.name
 
+        namespace = self.namespace
+
         description = self.description
+
+        domain_id = str(self.domain_id)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "id": id,
                 "name": name,
+                "namespace": namespace,
                 "description": description,
+                "domain_id": domain_id,
             }
         )
 
@@ -46,20 +51,23 @@ class GetDomainResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        id = UUID(d.pop("id"))
-
         name = d.pop("name")
+
+        namespace = d.pop("namespace")
 
         description = d.pop("description")
 
-        get_domain_response = cls(
-            id=id,
+        domain_id = UUID(d.pop("domain_id"))
+
+        create_exploration_request = cls(
             name=name,
+            namespace=namespace,
             description=description,
+            domain_id=domain_id,
         )
 
-        get_domain_response.additional_properties = d
-        return get_domain_response
+        create_exploration_request.additional_properties = d
+        return create_exploration_request
 
     @property
     def additional_keys(self) -> list[str]:
