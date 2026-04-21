@@ -123,12 +123,7 @@ class OutputPortService:
     ) -> DatasetModel:
         """Fetch a dataset without enforcing consumer-visibility.
 
-        Use this for internal/system callers (e.g. webhook extract lambdas) where the
-        endpoint's Authorization.enforce() dependency has already authorised the request.
-        The visibility gate ("can this user consume this dataset?") is irrelevant once
-        endpoint-level permission is established.
-
-        For user-facing endpoints and MCP tools, use get_visible_dataset() instead.
+        Use this for internal/system callers thave have already authorised the request.
         """
         return self._load_dataset(id, data_product_id)
 
