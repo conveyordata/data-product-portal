@@ -1,10 +1,10 @@
 import json
+import uuid
 from copy import deepcopy
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.exc import IntegrityError
 
 from app.authorization.roles.schema import Scope
 from app.authorization.roles.service import RoleService
@@ -43,9 +43,9 @@ def payload():
     user = UserFactory()
     tag = TagFactory()
     return {
-        "name": "Data Product Name",
+        "name": str(uuid.uuid4()),
         "description": "Updated Data Product Description",
-        "namespace": "namespace",
+        "namespace": str(uuid.uuid4()),
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "owners": [str(user.id)],
@@ -101,6 +101,23 @@ class TestDataProductsRouter:
         create_payload["owners"] = []
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
+
+    def test_create_data_product_duplicate_name(self, session, payload, client):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+
+        DataProductFactory(name=payload["name"])
+
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 400
 
     def test_create_data_product_duplicate_namespace(self, session, payload, client):
         RoleService(db=session).initialize_prototype_roles()
@@ -351,10 +368,10 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         setting = DataProductSettingFactory(scope="dataset")
-        with pytest.raises(IntegrityError):
-            client.post(
-                f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
-            )
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
+        )
+        assert response.status_code == 400, response.text
 
     def test_dataset_set_custom_setting_not_owner(self, client):
         data_product = DataProductFactory()
