@@ -7694,7 +7694,8 @@
               "format": "uuid"
             },
             "type": "array",
-            "title": "Tag Ids"
+            "title": "Tag Ids",
+            "default": []
           },
           "lifecycle_id": {
             "type": "string",
@@ -7718,7 +7719,6 @@
           "description",
           "type_id",
           "domain_id",
-          "tag_ids",
           "lifecycle_id",
           "owners"
         ],
@@ -8634,7 +8634,8 @@
               "format": "uuid"
             },
             "type": "array",
-            "title": "Tag Ids"
+            "title": "Tag Ids",
+            "default": []
           },
           "lifecycle_id": {
             "type": "string",
@@ -8649,7 +8650,6 @@
           "description",
           "type_id",
           "domain_id",
-          "tag_ids",
           "lifecycle_id"
         ],
         "title": "DataProductUpdate"

@@ -248,7 +248,7 @@ export type DataProductCreate = {
   type_id: string;
   about?: string | null;
   domain_id: string;
-  tag_ids: string[];
+  tag_ids?: string[];
   lifecycle_id: string;
   owners: string[];
 };
@@ -302,7 +302,7 @@ export type DataProductUpdate = {
   type_id: string;
   about?: string | null;
   domain_id: string;
-  tag_ids: string[];
+  tag_ids?: string[];
   lifecycle_id: string;
 };
 export type GetDataProductResponse = {
