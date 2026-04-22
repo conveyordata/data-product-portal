@@ -11,6 +11,12 @@ from app.core.authz import (
     DataProductResolver,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.events import (
+    TechnicalAssetCreatedEvent,
+    TechnicalAssetDeletedEvent,
+    TechnicalAssetStatusUpdatedEvent,
+    TechnicalAssetUpdatedEvent,
+)
 from app.core.webhooks.v2 import emit_event, emit_event_after
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
@@ -43,6 +49,7 @@ route = "/v2/data_products/{data_product_id}/technical_assets"
 
 _emit_technical_asset_created = emit_event_after(
     "technical_asset.created",
+    TechnicalAssetCreatedEvent,
     lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -56,6 +63,7 @@ _emit_technical_asset_created = emit_event_after(
 )
 _emit_technical_asset_updated = emit_event_after(
     "technical_asset.updated",
+    TechnicalAssetUpdatedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -67,6 +75,7 @@ _emit_technical_asset_updated = emit_event_after(
 )
 _emit_technical_asset_deleted = emit_event(
     "technical_asset.deleted",
+    TechnicalAssetDeletedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -78,6 +87,7 @@ _emit_technical_asset_deleted = emit_event(
 )
 _emit_technical_asset_status_updated = emit_event_after(
     "technical_asset.status_updated",
+    TechnicalAssetStatusUpdatedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)

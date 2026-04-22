@@ -17,6 +17,14 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.events import (
+    OutputPortAboutUpdatedEvent,
+    OutputPortCreatedEvent,
+    OutputPortDeletedEvent,
+    OutputPortSettingChangedEvent,
+    OutputPortStatusUpdatedEvent,
+    OutputPortUpdatedEvent,
+)
 from app.core.webhooks.v2 import emit_event, emit_event_after
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
@@ -92,6 +100,7 @@ def _assign_owner_role_assignments(
 
 _emit_output_port_created = emit_event_after(
     "output_port.created",
+    OutputPortCreatedEvent,
     lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -105,6 +114,7 @@ _emit_output_port_created = emit_event_after(
 )
 _emit_output_port_updated = emit_event_after(
     "output_port.updated",
+    OutputPortUpdatedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -116,6 +126,7 @@ _emit_output_port_updated = emit_event_after(
 )
 _emit_output_port_deleted = emit_event(
     "output_port.deleted",
+    OutputPortDeletedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -127,6 +138,7 @@ _emit_output_port_deleted = emit_event(
 )
 _emit_output_port_about_updated = emit_event_after(
     "output_port.about_updated",
+    OutputPortAboutUpdatedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -138,6 +150,7 @@ _emit_output_port_about_updated = emit_event_after(
 )
 _emit_output_port_status_updated = emit_event_after(
     "output_port.status_updated",
+    OutputPortStatusUpdatedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -149,6 +162,7 @@ _emit_output_port_status_updated = emit_event_after(
 )
 _emit_output_port_setting_changed = emit_event_after(
     "output_port.setting_changed",
+    OutputPortSettingChangedEvent,
     lambda data_product_id, id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)

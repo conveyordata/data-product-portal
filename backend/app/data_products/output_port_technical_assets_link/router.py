@@ -12,6 +12,12 @@ from app.core.authz.resolvers import (
     DatasetResolver,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.events import (
+    TechnicalAssetLinkApprovedEvent,
+    TechnicalAssetLinkDeniedEvent,
+    TechnicalAssetLinkedEvent,
+    TechnicalAssetUnlinkedEvent,
+)
 from app.core.webhooks.v2 import emit_event_after
 from app.data_products.output_port_technical_assets_link.schema_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
@@ -39,6 +45,7 @@ from app.users.schema import User
 
 _emit_technical_asset_linked = emit_event_after(
     "technical_asset.linked",
+    TechnicalAssetLinkedEvent,
     lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -52,6 +59,7 @@ _emit_technical_asset_linked = emit_event_after(
 )
 _emit_technical_asset_link_approved = emit_event_after(
     "technical_asset.link_approved",
+    TechnicalAssetLinkApprovedEvent,
     lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -65,6 +73,7 @@ _emit_technical_asset_link_approved = emit_event_after(
 )
 _emit_technical_asset_link_denied = emit_event_after(
     "technical_asset.link_denied",
+    TechnicalAssetLinkDeniedEvent,
     lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -78,6 +87,7 @@ _emit_technical_asset_link_denied = emit_event_after(
 )
 _emit_technical_asset_unlinked = emit_event_after(
     "technical_asset.unlinked",
+    TechnicalAssetUnlinkedEvent,
     lambda request, data_product_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)

@@ -11,6 +11,10 @@ from app.core.authz import (
     DatasetResolver,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.events import (
+    OutputPortLinkApprovedEvent,
+    OutputPortLinkDeniedEvent,
+)
 from app.core.webhooks.v2 import emit_event_after
 from app.data_products.output_ports.input_ports.schema_request import (
     ApproveOutputPortAsInputPortRequest,
@@ -35,6 +39,7 @@ from app.users.schema import User
 
 _emit_output_port_link_approved = emit_event_after(
     "output_port.link_approved",
+    OutputPortLinkApprovedEvent,
     lambda data_product_id, output_port_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
@@ -46,6 +51,7 @@ _emit_output_port_link_approved = emit_event_after(
 )
 _emit_output_port_link_denied = emit_event_after(
     "output_port.link_denied",
+    OutputPortLinkDeniedEvent,
     lambda data_product_id, output_port_id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)

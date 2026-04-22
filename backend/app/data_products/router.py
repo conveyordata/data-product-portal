@@ -30,6 +30,16 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.events import (
+    DataProductAboutUpdatedEvent,
+    DataProductCreatedEvent,
+    DataProductDeletedEvent,
+    DataProductInputPortLinkedEvent,
+    DataProductInputPortUnlinkedEvent,
+    DataProductSettingChangedEvent,
+    DataProductStatusUpdatedEvent,
+    DataProductUpdatedEvent,
+)
 from app.core.webhooks.v2 import emit_event, emit_event_after
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
@@ -68,6 +78,7 @@ from app.users.schema import User
 
 _emit_data_product_created = emit_event_after(
     "data_product.created",
+    DataProductCreatedEvent,
     lambda request, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(request.state.data_product_id)
@@ -76,6 +87,7 @@ _emit_data_product_created = emit_event_after(
 )
 _emit_data_product_updated = emit_event_after(
     "data_product.updated",
+    DataProductUpdatedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -84,6 +96,7 @@ _emit_data_product_updated = emit_event_after(
 )
 _emit_data_product_deleted = emit_event(
     "data_product.deleted",
+    DataProductDeletedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -92,6 +105,7 @@ _emit_data_product_deleted = emit_event(
 )
 _emit_data_product_about_updated = emit_event_after(
     "data_product.about_updated",
+    DataProductAboutUpdatedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -100,6 +114,7 @@ _emit_data_product_about_updated = emit_event_after(
 )
 _emit_data_product_status_updated = emit_event_after(
     "data_product.status_updated",
+    DataProductStatusUpdatedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -108,6 +123,7 @@ _emit_data_product_status_updated = emit_event_after(
 )
 _emit_data_product_setting_changed = emit_event_after(
     "data_product.setting_changed",
+    DataProductSettingChangedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -116,6 +132,7 @@ _emit_data_product_setting_changed = emit_event_after(
 )
 _emit_data_product_input_port_linked = emit_event_after(
     "data_product.input_port_linked",
+    DataProductInputPortLinkedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -124,6 +141,7 @@ _emit_data_product_input_port_linked = emit_event_after(
 )
 _emit_data_product_input_port_unlinked = emit_event_after(
     "data_product.input_port_unlinked",
+    DataProductInputPortUnlinkedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)

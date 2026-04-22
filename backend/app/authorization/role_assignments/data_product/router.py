@@ -30,6 +30,11 @@ from app.core.authz.resolvers import (
     DataProductRoleAssignmentResolver,
     EmptyResolver,
 )
+from app.core.webhooks.events import (
+    DataProductTeamMemberAddedEvent,
+    DataProductTeamMemberRemovedEvent,
+    DataProductTeamMemberUpdatedEvent,
+)
 from app.core.webhooks.v2 import emit_event, emit_event_after
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
@@ -42,6 +47,7 @@ from app.users.schema import User
 
 _emit_data_product_team_member_added = emit_event_after(
     "data_product.team_member_added",
+    DataProductTeamMemberAddedEvent,
     lambda request, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(request.state.data_product_id)
@@ -50,6 +56,7 @@ _emit_data_product_team_member_added = emit_event_after(
 )
 _emit_data_product_team_member_removed = emit_event(
     "data_product.team_member_removed",
+    DataProductTeamMemberRemovedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(
@@ -60,6 +67,7 @@ _emit_data_product_team_member_removed = emit_event(
 )
 _emit_data_product_team_member_updated = emit_event_after(
     "data_product.team_member_updated",
+    DataProductTeamMemberUpdatedEvent,
     lambda id, db, **_: {
         "data_product": GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(
