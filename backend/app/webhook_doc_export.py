@@ -1,28 +1,22 @@
-"""Generate docs/docs/developer-guide/webhook-events.md by introspecting the FastAPI app.
+"""Generate webhook-events.md by introspecting the FastAPI app.
 
 Usage:
-    python backend/app/webhook_doc_export.py
+    cd backend && poetry run python -m app.webhook_doc_export
 
 Run this after modifying v2 event emissions in any router, then commit the output.
 """
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-
-# Allow running as a standalone script from the repo root.
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from typing import TYPE_CHECKING
 
+import typer
 from fastapi.routing import APIRoute
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-REPO_ROOT = Path(__file__).parent.parent.parent
-DOCS_OUTPUT = REPO_ROOT / "docs/docs/developer-guide/webhook-events.md"
 API_DOCS_BASE = "/docs/api/#schema"
 
 GROUPS: dict[str, str] = {
@@ -143,17 +137,26 @@ def generate_markdown(events: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def main() -> None:
-    from app.main import app  # imported here to avoid side-effects at module level
+app = typer.Typer(help="Generate webhook events reference page.")
 
-    events = build_event_list(app)
+
+@app.command()
+def export_webhook_docs(
+    output: Path = typer.Argument(
+        default="webhook-events.md", help="Path where to export"
+    ),
+):
+    from app.main import (
+        app as f_app,  # imported here to avoid side-effects at module level
+    )
+
+    events = build_event_list(f_app)
     if not events:
-        sys.exit(1)
-
-    markdown = generate_markdown(events)
-    DOCS_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    DOCS_OUTPUT.write_text(markdown)
+        raise typer.Exit(1)
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(generate_markdown(events))
 
 
 if __name__ == "__main__":
-    main()
+    app()
