@@ -7,7 +7,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, scoped_session
 from starlette.routing import _DefaultLifespan
 
-from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz.authorization import Authorization
@@ -119,9 +118,8 @@ def clear_db(session: scoped_session[Session]) -> None:
 
 
 @pytest.fixture
-def admin(session) -> UserFactory:
+def admin() -> UserFactory:
     role = RoleFactory.admin()
-    RoleService(db=session).initialize_prototype_roles()
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
     return user
