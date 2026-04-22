@@ -21,7 +21,7 @@ const GLOSSARY_TERMS: GlossaryRule[] = [
     },
     {
         expected: 'Technical Asset',
-        pattern: /techincal asset/i,
+        pattern: /technical asset/i,
     },
     {
         expected: 'Exploration',
