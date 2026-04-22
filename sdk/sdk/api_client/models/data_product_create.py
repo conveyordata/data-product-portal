@@ -21,10 +21,10 @@ class DataProductCreate:
         description (str):
         type_id (UUID):
         domain_id (UUID):
-        tag_ids (list[UUID]):
         lifecycle_id (UUID):
         owners (list[UUID]):
         about (None | str | Unset):
+        tag_ids (list[UUID] | Unset):
     """
 
     name: str
@@ -32,10 +32,10 @@ class DataProductCreate:
     description: str
     type_id: UUID
     domain_id: UUID
-    tag_ids: list[UUID]
     lifecycle_id: UUID
     owners: list[UUID]
     about: None | str | Unset = UNSET
+    tag_ids: list[UUID] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -48,11 +48,6 @@ class DataProductCreate:
         type_id = str(self.type_id)
 
         domain_id = str(self.domain_id)
-
-        tag_ids = []
-        for tag_ids_item_data in self.tag_ids:
-            tag_ids_item = str(tag_ids_item_data)
-            tag_ids.append(tag_ids_item)
 
         lifecycle_id = str(self.lifecycle_id)
 
@@ -67,6 +62,13 @@ class DataProductCreate:
         else:
             about = self.about
 
+        tag_ids: list[str] | Unset = UNSET
+        if not isinstance(self.tag_ids, Unset):
+            tag_ids = []
+            for tag_ids_item_data in self.tag_ids:
+                tag_ids_item = str(tag_ids_item_data)
+                tag_ids.append(tag_ids_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -76,13 +78,14 @@ class DataProductCreate:
                 "description": description,
                 "type_id": type_id,
                 "domain_id": domain_id,
-                "tag_ids": tag_ids,
                 "lifecycle_id": lifecycle_id,
                 "owners": owners,
             }
         )
         if about is not UNSET:
             field_dict["about"] = about
+        if tag_ids is not UNSET:
+            field_dict["tag_ids"] = tag_ids
 
         return field_dict
 
@@ -98,13 +101,6 @@ class DataProductCreate:
         type_id = UUID(d.pop("type_id"))
 
         domain_id = UUID(d.pop("domain_id"))
-
-        tag_ids = []
-        _tag_ids = d.pop("tag_ids")
-        for tag_ids_item_data in _tag_ids:
-            tag_ids_item = UUID(tag_ids_item_data)
-
-            tag_ids.append(tag_ids_item)
 
         lifecycle_id = UUID(d.pop("lifecycle_id"))
 
@@ -124,16 +120,25 @@ class DataProductCreate:
 
         about = _parse_about(d.pop("about", UNSET))
 
+        _tag_ids = d.pop("tag_ids", UNSET)
+        tag_ids: list[UUID] | Unset = UNSET
+        if _tag_ids is not UNSET:
+            tag_ids = []
+            for tag_ids_item_data in _tag_ids:
+                tag_ids_item = UUID(tag_ids_item_data)
+
+                tag_ids.append(tag_ids_item)
+
         data_product_create = cls(
             name=name,
             namespace=namespace,
             description=description,
             type_id=type_id,
             domain_id=domain_id,
-            tag_ids=tag_ids,
             lifecycle_id=lifecycle_id,
             owners=owners,
             about=about,
+            tag_ids=tag_ids,
         )
 
         data_product_create.additional_properties = d

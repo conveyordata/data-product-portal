@@ -1,6 +1,6 @@
 import { AddDataOutputPopup } from '@/pages/data-product/components/data-product-tabs/data-output-tab/components/add-data-output-popup/add-data-output-popup.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockGetPlatformConfigs } from '@/tests/mocks/configuration.ts';
+import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import { mockGetPlatformTiles, mockGetPlugins, mockRenderTechnicalAssetAccessPath } from '@/tests/mocks/plugins.ts';
 import {

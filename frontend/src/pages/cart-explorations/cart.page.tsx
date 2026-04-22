@@ -15,6 +15,7 @@ import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrum
 import { CardSelection } from '@/pages/cart-explorations/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart-explorations/components/cart-overview.component.tsx';
 import { ExistingDataProductForm } from '@/pages/cart-explorations/components/existing-data-product-form.tsx';
+import { NewDataProductForm } from '@/pages/cart-explorations/components/new-data-product-form.tsx';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
@@ -122,12 +123,15 @@ function ExplorationsCart() {
                         />
                     )}
                     {dataProductTypeChoice === DataProductChoiceOptions.data_product &&
-                        existingOrNewChoice === ExistingOrNew.existing && (
+                        !!existingOrNewChoice &&
+                        (existingOrNewChoice === ExistingOrNew.existing ? (
                             <ExistingDataProductForm
                                 cartOutputPorts={cartOutputPorts}
                                 setSelectedDataProductId={setSelectedDataProductId}
                             />
-                        )}
+                        ) : (
+                            <NewDataProductForm cartOutputPorts={cartOutputPorts} />
+                        ))}
                 </Flex>
             </Col>
             <Col span={8}>

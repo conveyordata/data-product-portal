@@ -271,6 +271,7 @@
     "Failed to copy SQL": "Failed to copy SQL",
     "Failed to create Data Product": "Failed to create $t(Data Product)",
     "Failed to create Data Product setting": "Failed to create $t(Data Product) setting",
+    "Failed to create Data Product. Please try again.": "Failed to create Data Product. Please try again.",
     "Failed to create Domain": "Failed to create Domain",
     "Failed to create lifecycle": "Failed to create lifecycle",
     "Failed to create Output Port": "Failed to create $t(Output Port)",

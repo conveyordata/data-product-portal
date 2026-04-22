@@ -300,7 +300,7 @@ function Cart() {
                             )}
                             <Form.Item<CartFormData>
                                 name="justification"
-                                label={'Business justification'}
+                                label={t('Business justification')}
                                 rules={[
                                     {
                                         required: true,
