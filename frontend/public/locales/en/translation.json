@@ -333,6 +333,7 @@
     "If there are some concepts you are unsure about, please refer to our <2>documentation</2> or reach out to support.": "If there are some concepts you are unsure about, please refer to our <2>documentation</2> or reach out to support.",
     "INCLUDE": "INCLUDE",
     "Input": "Input",
+    "Input Port": "Input Port",
     "Input Ports": "Input Ports",
     "Is Default": "Is Default",
     "It looks like you don't have any Data Products yet. Create one to start managing your data assets.": "It looks like you don't have any $t(Data Products) yet. Create one to start managing your data assets.",
