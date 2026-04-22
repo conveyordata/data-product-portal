@@ -35,9 +35,7 @@ async def call_v2_webhook(event_type: str, data: dict) -> None:
         logger.warning("v2 webhook failed: %s", e)
 
 
-def emit_event(
-    event_type: str, event_model_or_extract: Any, extract: Any = None
-) -> Callable:
+def emit_event(event_type: str, event_model: type, extract: Any) -> Callable:
     """
     Dependency factory for DELETE routes.
 
@@ -45,17 +43,7 @@ def emit_event(
     `call_v2_webhook` as a background task. Starlette discards background
     tasks when the handler raises HTTPException, so the webhook never fires
     on failure.
-
-    Signature supports both:
-    - New: emit_event(event_type, event_model, extract)
-    - Legacy: emit_event(event_type, extract)
     """
-    # Handle overloading: if extract is None, event_model_or_extract is the extract function
-    if extract is None:
-        extract = event_model_or_extract
-        event_model = None
-    else:
-        event_model = event_model_or_extract
 
     async def _dependency(
         request: Request,
@@ -78,31 +66,18 @@ def emit_event(
             logger.warning("v2 webhook setup failed: %s", e)
 
     _dependency._webhook_event_type = event_type  # type: ignore[attr-defined]
-    if event_model is not None:
-        _dependency._webhook_payload_model = event_model  # type: ignore[attr-defined]
+    _dependency._webhook_payload_model = event_model  # type: ignore[attr-defined]
     return _dependency
 
 
-def emit_event_after(
-    event_type: str, event_model_or_extract: Any, extract: Any = None
-) -> Callable:
+def emit_event_after(event_type: str, event_model: type, extract: Any) -> Callable:
     """
     Yield-based dependency factory for CREATE and UPDATE routes.
 
     The `else` branch of try/except/else only runs when the handler returned
     normally — any exception raised by the handler re-raises in `except`,
     skipping the else block, so the webhook never fires on failure.
-
-    Signature supports both:
-    - New: emit_event_after(event_type, event_model, extract)
-    - Legacy: emit_event_after(event_type, extract)
     """
-    # Handle overloading: if extract is None, event_model_or_extract is the extract function
-    if extract is None:
-        extract = event_model_or_extract
-        event_model = None
-    else:
-        event_model = event_model_or_extract
 
     async def _dependency(
         request: Request,
@@ -129,6 +104,5 @@ def emit_event_after(
                 logger.warning("v2 webhook emit failed: %s", e)
 
     _dependency._webhook_event_type = event_type  # type: ignore[attr-defined]
-    if event_model is not None:
-        _dependency._webhook_payload_model = event_model  # type: ignore[attr-defined]
+    _dependency._webhook_payload_model = event_model  # type: ignore[attr-defined]
     return _dependency
