@@ -23,6 +23,10 @@ const GLOSSARY_TERMS: GlossaryRule[] = [
         expected: 'Technical Asset',
         pattern: /techincal asset/i,
     },
+    {
+        expected: 'Exploration',
+        pattern: /exploration/i,
+    },
 ];
 
 describe('Glossary Enforcement', () => {

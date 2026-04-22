@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-type CartState = {
+export type CartState = {
     DatasetIds: string[];
 };
 

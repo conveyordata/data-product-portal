@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/data-products.ts';
+import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, waitFor, within } from '@/tests/test-utils.tsx';
