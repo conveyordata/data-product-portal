@@ -88,7 +88,7 @@ def build_event_list(app: FastAPI) -> list[dict]:
                 continue
             seen.add(key)
             payload = {
-                name: field.annotation.__name__
+                name: getattr(field.annotation, "__name__", repr(field.annotation))
                 for name, field in event_model.model_fields.items()
             }
             events.append(
@@ -151,6 +151,7 @@ def main() -> None:
         sys.exit(1)
 
     markdown = generate_markdown(events)
+    DOCS_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     DOCS_OUTPUT.write_text(markdown)
 
 
