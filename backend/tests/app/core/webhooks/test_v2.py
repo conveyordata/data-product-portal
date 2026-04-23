@@ -1,6 +1,7 @@
+import asyncio  # noqa: F401
+
 import pytest
 from pydantic import BaseModel
-from starlette.datastructures import State
 
 from app.core.webhooks.events import V2Event
 from app.core.webhooks.v2 import emit_event, emit_event_after
@@ -18,6 +19,7 @@ def _make_request(**state_attrs):
     """Return a minimal mock request-like object with a State."""
     from unittest.mock import MagicMock
 
+    from starlette.datastructures import State
     from starlette.requests import Request as _R
 
     req = MagicMock(spec=_R)
