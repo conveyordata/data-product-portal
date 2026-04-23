@@ -120,7 +120,7 @@ jobs:
       - name: Publish Helm package
         env:
           VERSION: ${{ needs.prep-version.outputs.version }}
-        run:
+        run: |
           helm package helm --version 0.0.0-$VERSION
           helm push data-product-portal-0.0.0-$VERSION.tgz oci://public.ecr.aws/conveyordata
 
