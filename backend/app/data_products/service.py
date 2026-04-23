@@ -93,10 +93,10 @@ class DataProductService(AbstractDataProductService):
         return rolled_up_tags
 
     def get_data_product(self, id: UUID) -> GetDataProductResponse:
-        data_product = self.db.get(
-            DataProductModel,
-            id,
-            options=[selectinload(DataProductModel.tags)],
+        data_product = self.db.scalar(
+            select(DataProductModel)
+            .where(DataProductModel.id == id)
+            .options(selectinload(DataProductModel.tags))
         )
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
