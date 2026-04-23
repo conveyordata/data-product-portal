@@ -2,21 +2,22 @@ from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
+from pydantic import Field
+
+from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import (
-    DatasetSettingValue,
     OutputPortSettingValue,
 )
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema import (
-    DataOutputDatasetAssociation,
     TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.schema import (
-    DataProductDatasetAssociation,
+    InputPortBase,
 )
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
@@ -25,9 +26,9 @@ from app.data_products.technical_assets.schema import TechnicalAsset
 from app.shared.schema import ORMModel
 
 
-class DataProductLink(DataProductDatasetAssociation):
-    justification: str
-    data_product: DataProduct
+class InputPort(InputPortBase):
+    abstract_data_product_id: UUID
+    abstract_data_product: AbstractDataProductInfo
 
 
 @deprecated("Use TechnicalAsset instead")
@@ -40,20 +41,7 @@ class DatasetDataOutput(TechnicalAsset):
 
 
 class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
-    technical_asset: TechnicalAsset
-
-
-@deprecated("Use TechnicalAssetLink instead")
-class DataOutputLink(DataOutputDatasetAssociation):
-    data_output: DatasetDataOutput
-
-    def convert(self):
-        return TechnicalAssetLink(
-            **self.model_dump(exclude={"data_output", "data_output_id", "dataset_id"}),
-            technical_asset=self.data_output.convert(),
-            technical_asset_id=self.data_output_id,
-            output_port_id=self.dataset_id,
-        )
+    technical_asset: TechnicalAsset = Field(validation_alias="data_output")
 
 
 class BaseOutputPortGet(ORMModel):
@@ -94,39 +82,9 @@ class GetOutputPortResponse(BaseOutputPortGet):
 
     rolled_up_tags: set[Tag]
     data_product_settings: list[OutputPortSettingValue]
-    technical_asset_links: list[TechnicalAssetLink]
-
-
-@deprecated("Use GetOutputPortResponse instead")
-class DatasetGet(BaseDatasetGet):
-    about: Optional[str]
-
-    # Nested schemas
-    data_product_links: list[DataProductLink]
-    rolled_up_tags: set[Tag]
-
-    # There can only be one
-    data_product_settings: list[DatasetSettingValue]
-    data_output_links: list[DataOutputLink]
-
-    def convert(self):
-        return GetOutputPortResponse(
-            id=self.id,
-            namespace=self.namespace,
-            name=self.name,
-            description=self.description,
-            status=self.status,
-            usage=self.usage,
-            access_type=self.access_type,
-            data_product_id=self.data_product_id,
-            tags=self.tags,
-            domain=self.domain,
-            lifecycle=self.lifecycle,
-            about=self.about,
-            rolled_up_tags=self.rolled_up_tags,
-            technical_asset_links=[dol.convert() for dol in self.data_output_links],
-            data_product_settings=[s.convert() for s in self.data_product_settings],
-        )
+    technical_asset_links: list[TechnicalAssetLink] = Field(
+        validation_alias="data_output_links"
+    )
 
 
 class OutputPortsGet(BaseOutputPortGet):

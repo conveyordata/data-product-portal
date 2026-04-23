@@ -104,11 +104,11 @@ export const getDataProductTableColumns = ({
         },
         {
             title: t('Consumes'),
-            dataIndex: 'output_port_count',
+            dataIndex: 'input_port_count',
             render: (outputPortCount: number) => {
                 return <TableCellItem text={t('{{count}} Output Ports', { count: outputPortCount })} />;
             },
-            sorter: sorter.numberSorter((dp) => dp.output_port_count),
+            sorter: sorter.numberSorter((dp) => dp.input_port_count),
         },
         {
             title: t('Produces'),

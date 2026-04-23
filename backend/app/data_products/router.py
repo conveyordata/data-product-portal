@@ -27,9 +27,6 @@ from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation,
-)
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -41,13 +38,13 @@ from app.data_products.schema_request import (
 )
 from app.data_products.schema_response import (
     CreateDataProductResponse,
-    DataProductsGet,
-    DatasetLinks,
     GetDataProductInputPortsResponse,
     GetDataProductResponse,
     GetDataProductRolledUpTagsResponse,
     GetDataProductSettingsResponse,
     GetDataProductsResponse,
+    GetDataProductsResponseItem,
+    InputPort,
     LinkInputPortsToDataProductPost,
     UpdateDataProductResponse,
 )
@@ -336,7 +333,7 @@ def update_data_product_usage(
 
 
 def _send_dataset_link_emails(
-    dataset_links: list[DataProductDatasetAssociation],
+    dataset_links: list[InputPort],
     background_tasks: BackgroundTasks,
     actor: User,
     db: Session,
@@ -349,7 +346,7 @@ def _send_dataset_link_emails(
             )
             background_tasks.add_task(
                 email.send_dataset_link_email(
-                    dataset_link.data_product,
+                    dataset_link.consuming_abstract_data_product,
                     dataset_link.dataset,
                     requester=deepcopy(actor),
                     approvers=[deepcopy(approver) for approver in approvers],
@@ -432,7 +429,7 @@ def link_input_ports_to_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> LinkInputPortsToDataProductPost:
-    dataset_links = DataProductService(db).link_datasets_to_data_product(
+    input_ports = DataProductService(db).link_datasets_to_data_product(
         id,
         link_input_ports.input_ports,
         link_input_ports.justification,
@@ -447,25 +444,26 @@ def link_input_ports_to_data_product(
                     if dataset_link.status == DecisionStatus.PENDING
                     else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
-                subject_id=dataset_link.data_product_id,
+                subject_id=dataset_link.consuming_abstract_data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=dataset_link.dataset_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
             )
-            for dataset_link in dataset_links
+            for dataset_link in input_ports
         ]
     )
-    for dataset_link, event_id in zip(dataset_links, event_ids):
+    for dataset_link, event_id in zip(input_ports, event_ids):
         if dataset_link.status == DecisionStatus.APPROVED:
             NotificationService(db).create_data_product_notifications(
-                data_product_id=dataset_link.data_product_id, event_id=event_id
+                data_product_id=dataset_link.consuming_abstract_data_product_id,
+                event_id=event_id,
             )
 
-    _send_dataset_link_emails(dataset_links, background_tasks, authenticated_user, db)
+    _send_dataset_link_emails(input_ports, background_tasks, authenticated_user, db)
     RefreshInfrastructureLambda().trigger()
     return LinkInputPortsToDataProductPost(
-        input_port_links=[dataset_link.id for dataset_link in dataset_links]
+        input_port_links=[dataset_link.id for dataset_link in input_ports]
     )
 
 
@@ -476,8 +474,8 @@ def get_data_products(
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
-            DataProductsGet.model_validate(data_product_old).convert()
-            for data_product_old in DataProductService(db).get_data_products(
+            GetDataProductsResponseItem.model_validate(dp)
+            for dp in DataProductService(db).get_data_products(
                 filter_to_user_with_assigment
             )
         ]
@@ -512,7 +510,8 @@ def get_data_product_input_ports(
 ) -> GetDataProductInputPortsResponse:
     return GetDataProductInputPortsResponse(
         input_ports=[
-            DatasetLinks.model_validate(input_port).convert()
+            InputPort.model_validate(input_port)
+            # DatasetLinks.model_validate(input_port).convert()
             for input_port in DataProductService(db).get_input_ports(id)
         ]
     )

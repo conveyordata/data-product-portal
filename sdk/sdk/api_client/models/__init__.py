@@ -1,5 +1,7 @@
 """Contains all the data models used in inputs/outputs"""
 
+from .abstract_data_product_info import AbstractDataProductInfo
+from .abstract_data_product_type import AbstractDataProductType
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
 from .approve_link_between_technical_asset_and_output_port_request import (
@@ -45,7 +47,6 @@ from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
 from .data_product_icon_key import DataProductIconKey
-from .data_product_info import DataProductInfo
 from .data_product_life_cycle import DataProductLifeCycle
 from .data_product_life_cycle_create import DataProductLifeCycleCreate
 from .data_product_life_cycle_update import DataProductLifeCycleUpdate
@@ -121,7 +122,6 @@ from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
 from .get_all_platforms_response import GetAllPlatformsResponse
-from .get_data_product_input_ports_response import GetDataProductInputPortsResponse
 from .get_data_product_output_ports_response import GetDataProductOutputPortsResponse
 from .get_data_product_response import GetDataProductResponse
 from .get_data_product_rolled_up_tags_response import GetDataProductRolledUpTagsResponse
@@ -280,6 +280,8 @@ from .validation_error import ValidationError
 from .validation_error_context import ValidationErrorContext
 
 __all__ = (
+    "AbstractDataProductInfo",
+    "AbstractDataProductType",
     "AccessGranularity",
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
@@ -321,7 +323,6 @@ __all__ = (
     "DataProductAboutUpdate",
     "DataProductCreate",
     "DataProductIconKey",
-    "DataProductInfo",
     "DataProductLifeCycle",
     "DataProductLifeCycleCreate",
     "DataProductLifeCyclesGet",
@@ -377,7 +378,6 @@ __all__ = (
     "FieldDependency",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
-    "GetDataProductInputPortsResponse",
     "GetDataProductOutputPortsResponse",
     "GetDataProductResponse",
     "GetDataProductRolledUpTagsResponse",

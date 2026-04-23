@@ -19,3 +19,7 @@ class CreateExplorationResponse(Exploration):
 
 class GetExplorationsResponse(ORMModel):
     explorations: Sequence[Exploration]
+
+
+class LinkInputPortsToExplorationResponse(ORMModel):
+    input_port_links: list[UUID]

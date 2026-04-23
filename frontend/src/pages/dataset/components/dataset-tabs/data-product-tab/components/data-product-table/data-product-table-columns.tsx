@@ -1,5 +1,6 @@
 import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
+import chipIcon from '@/assets/icons/chip-icon.svg?react';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
@@ -10,7 +11,6 @@ import type {
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -46,19 +46,13 @@ export const getDatasetDataProductsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { data_product, data_product_id, status }) => {
+            render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id, status }) => {
                 return (
                     <TableCellAvatar
-                        popover={{ title: data_product.name }}
-                        linkTo={createDataProductIdPath(data_product_id)}
-                        icon={
-                            <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIcon(data_product?.type?.icon_key)}
-                                hasRoundBorder
-                                size={'default'}
-                            />
-                        }
-                        title={data_product.name}
+                        popover={{ title: consuming_abstract_data_product.name }}
+                        linkTo={createDataProductIdPath(consuming_abstract_data_product_id)}
+                        icon={<CustomSvgIconLoader iconComponent={chipIcon} hasRoundBorder size={'default'} />}
+                        title={consuming_abstract_data_product.name}
                         subtitle={
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
@@ -70,7 +64,7 @@ export const getDatasetDataProductsColumns = ({
             },
             width: '25%',
             ...new FilterSettings(dataProductLinks, (dpl) => getDecisionStatusLabel(t, dpl.status)),
-            sorter: sorter.stringSorter((dpl) => dpl.data_product.name),
+            sorter: sorter.stringSorter((dpl) => dpl.consuming_abstract_data_product.name),
             defaultSortOrder: 'ascend',
         },
         {
@@ -87,10 +81,10 @@ export const getDatasetDataProductsColumns = ({
             render: (
                 _,
                 {
-                    data_product: consuming_data_product,
-                    data_product_id: consuming_data_product_id,
+                    consuming_abstract_data_product: consuming_data_product,
+                    consuming_abstract_data_product_id: consuming_data_product_id,
                     status,
-                    input_port,
+                    output_port,
                 },
             ) => {
                 if (status === DecisionStatus.Pending) {
@@ -103,8 +97,8 @@ export const getDatasetDataProductsColumns = ({
                                 })}
                                 onConfirm={() =>
                                     onAcceptDataProductDatasetLink({
-                                        outputPortId: input_port.id,
-                                        dataProductId: input_port.data_product_id,
+                                        outputPortId: output_port.id,
+                                        dataProductId: output_port.data_product_id,
                                         approveOutputPortAsInputPortRequest: {
                                             consuming_data_product_id: consuming_data_product_id,
                                         },
@@ -127,8 +121,8 @@ export const getDatasetDataProductsColumns = ({
                                 })}
                                 onConfirm={() =>
                                     onRejectDataProductDatasetLink({
-                                        outputPortId: input_port.id,
-                                        dataProductId: input_port.data_product_id,
+                                        outputPortId: output_port.id,
+                                        dataProductId: output_port.data_product_id,
                                         denyOutputPortAsInputPortRequest: {
                                             consuming_data_product_id: consuming_data_product_id,
                                         },
@@ -156,8 +150,8 @@ export const getDatasetDataProductsColumns = ({
                             })}
                             onConfirm={() =>
                                 onRejectDataProductDatasetLink({
-                                    outputPortId: input_port.id,
-                                    dataProductId: input_port.data_product_id,
+                                    outputPortId: output_port.id,
+                                    dataProductId: output_port.data_product_id,
                                     denyOutputPortAsInputPortRequest: {
                                         consuming_data_product_id: consuming_data_product_id,
                                     },
@@ -182,7 +176,7 @@ export const getDatasetDataProductsColumns = ({
                             type={'link'}
                             onClick={() =>
                                 onRemoveDataProductDatasetLink(
-                                    input_port.data_product_id,
+                                    output_port.data_product_id,
                                     consuming_data_product.name,
                                     consuming_data_product_id,
                                 )

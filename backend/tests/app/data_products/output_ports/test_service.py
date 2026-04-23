@@ -9,12 +9,12 @@ from app.settings import settings
 from tests import test_session
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
+    InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     UserFactory,
@@ -54,7 +54,7 @@ class TestDatasetsService:
         DataProductRoleAssignmentFactory(
             role_id=role.id, data_product_id=dp.id, user_id=user.id
         )
-        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
         ds = self.get_dataset(ds)
         assert OutputPortService(test_session).is_visible_to_user(ds, user) is True
 

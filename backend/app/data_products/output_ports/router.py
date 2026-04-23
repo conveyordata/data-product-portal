@@ -36,7 +36,6 @@ from app.data_products.output_ports.schema_request import (
 )
 from app.data_products.output_ports.schema_response import (
     CreateOutputPortResponse,
-    DatasetGet,
     GetDataProductOutputPortsResponse,
     GetOutputPortResponse,
     UpdateOutputPortResponse,
@@ -111,16 +110,14 @@ def get_data_product_output_ports(
     )
 
 
-@router.get(f"{route}/{{id}}")
+@router.get(f"{route}/{{id}}", response_model=GetOutputPortResponse)
 def get_output_port(
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> GetOutputPortResponse:
-    return DatasetGet.model_validate(
-        OutputPortService(db).get_dataset(id, user, data_product_id)
-    ).convert()
+):
+    return OutputPortService(db).get_dataset(id, user, data_product_id)
 
 
 @router.get(f"{route}/{{id}}/history")

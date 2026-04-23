@@ -90,7 +90,7 @@ declare
     tag_sensitive_id uuid;
     tag_public_id uuid;
 begin
-    TRUNCATE TABLE public.data_products_datasets CASCADE;
+    TRUNCATE TABLE public.input_ports CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
     TRUNCATE TABLE public.data_products CASCADE;
     TRUNCATE TABLE public.abstract_data_products CASCADE;
@@ -283,13 +283,13 @@ begin
 
 
     -- Revenue dashboard - input ports
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to predict our revenue', revenue_dashboard, production_planning_insights_forecast, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to predict our revenue', revenue_dashboard, sales_performance_model_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to predict our revenue', revenue_dashboard, order_fulfillment_analysis_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to predict our revenue', revenue_dashboard, inventory_management_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
 
@@ -299,7 +299,7 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('d4e7792b-fb93-4541-beb9-b3c2b2474c77', 'expense_forecast', expense_forecasting, 'Expense Forecast', 'Predicted expenses by category', 'Provides insight into expected costs to support budgeting. Key objectives: - Forecast future expenses - Support planning - Reduce financial risk', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- Expense forecasting input ports
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES ('0658e52e-b69e-4787-b7b1-df215d75329c','Needed to predict our expenses, production planning is an important dataset', expense_forecasting, production_planning_insights_forecast, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- User feedback analysis
@@ -319,13 +319,13 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('e94890c6-0da8-4a1e-b696-e53e5312f743', 'privacy_compliance_report', data_privacy_compliance, 'Privacy Compliance Report', 'GDPR and privacy compliance metrics', 'Provides compliance tracking for regulatory adherence. Key objectives: - Identify gaps - Support audits - Ensure legal compliance', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- Data privacy compliance - input ports
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to check for GDPR compliance', data_privacy_compliance, user_feedback_insights_report, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to check for GDPR compliance', data_privacy_compliance, release_engagement_by_segment, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to check for GDPR compliance', data_privacy_compliance, release_impact_summary, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
         VALUES (gen_random_uuid(),'Needed to check for GDPR compliance', data_privacy_compliance, customer_segmentation_weekly_output_port_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
 
@@ -335,9 +335,9 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('dcb24163-bfec-44d8-b025-1d656d0fff36', 'cash_flow_overview', cash_flow_monitoring, 'Cash Flow Overview', 'Daily inflows and outflows', 'Provides real-time view of cash position. Key objectives: - Ensure liquidity - Identify gaps - Support financial planning', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- Cash flow monitoring - input ports
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for cash flow monitoring', cash_flow_monitoring, sales_performance_model_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for cash flow monitoring', cash_flow_monitoring, inventory_management_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- Fraud detection
@@ -346,9 +346,9 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'fraud_detection_alerts', fraud_detection, 'Fraud Detection Alerts', 'Transactions flagged for potential fraud', 'Provides actionable fraud detection results. Key objectives: - Prevent losses - Investigate suspicious activity - Improve security', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- Fraud detection - input ports
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for fraud detection', fraud_detection, sales_performance_model_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for fraud detection', fraud_detection, inventory_management_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- Profitability analysis
@@ -364,11 +364,11 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'financial_risk_dashboard', financial_risk_assessment, 'Financial Risk Dashboard', 'Metrics highlighting financial exposure', 'Provides risk analysis to prevent losses. Key objectives: - Track financial risks - Support mitigation strategies - Enable compliance', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
      -- Financial risk - input ports
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for detecting financial risks', financial_risk_assessment, sales_performance_model_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for detecting financial risks', financial_risk_assessment, inventory_management_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for detecting financial risks', financial_risk_assessment, margin_trends_by_product, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
 
@@ -378,7 +378,7 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('b8f56c2f-da55-4be5-9625-ba2a4e4a42c2', 'daily_feature_engagement', feature_usage_metrics, 'Daily Feature Engagement', 'Daily usage metrics per feature', 'Provides insights into feature adoption. Key objectives: - Monitor engagement - Guide product improvements - Track trends', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into feature_usage_metrics_daily;
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('f3a95935-5a3e-4427-be75-a01a40a53f55', 'weekly_feature_summary', feature_usage_metrics, 'Weekly Feature Summary', 'Aggregated weekly feature usage', 'Provides weekly trends for product teams. Key objectives: - Identify adoption patterns - Support roadmap planning - Enable executive reporting', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)returning id into feature_usage_metrics_weekly;
 
-    INSERT INTO public.data_products_datasets (id, justification, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(),'Needed for predicinting product featuree engagement', financial_risk_assessment, feature_usage_metrics_daily, 'PENDING', jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(),

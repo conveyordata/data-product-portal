@@ -10,9 +10,9 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.graph.service import GraphService
 from tests import test_session
 from tests.factories import (
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DatasetFactory,
+    InputPortFactory,
 )
 
 
@@ -30,8 +30,8 @@ class TestGraphServiceEnumMatching:
         consumer_approved = DataProductFactory()
 
         # Create links with different statuses
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_approved,
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_approved,
             dataset=dataset,
             status=DecisionStatus.APPROVED,
         )
@@ -59,8 +59,8 @@ class TestGraphServiceEnumMatching:
         consumer_pending = DataProductFactory()
 
         # Create links with different statuses
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_pending,
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_pending,
             dataset=dataset,
             status=DecisionStatus.PENDING,
         )
@@ -88,8 +88,8 @@ class TestGraphServiceEnumMatching:
         consumer_denied = DataProductFactory()
 
         # Create links with different statuses
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_denied,
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_denied,
             dataset=dataset,
             status=DecisionStatus.DENIED,
         )
