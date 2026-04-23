@@ -1,5 +1,7 @@
 """Typed Pydantic models for each v2 webhook event payload."""
 
+from typing import Any
+
 from pydantic import BaseModel
 
 from app.data_products.output_ports.schema_response import GetOutputPortResponse
@@ -8,52 +10,115 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
 
+
+class V2Event(BaseModel):
+    """Base class for all V2 webhook event payloads.
+
+    Every subclass must define an ``event_type()`` classmethod that returns
+    the CloudEvents ``type`` string.  Omitting it raises ``TypeError`` at
+    class-definition time so mistakes are caught on import.
+    """
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if "event_type" not in cls.__dict__:
+            raise TypeError(f"{cls.__name__} must define an event_type() classmethod")
+
+    @classmethod
+    def event_type(cls) -> str:
+        raise NotImplementedError
+
+
 # ---------------------------------------------------------------------------
 # Data Product events
 # ---------------------------------------------------------------------------
 
 
-class DataProductCreatedEvent(BaseModel):
+class DataProductCreatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.created"
+
     data_product: GetDataProductResponse
 
 
-class DataProductUpdatedEvent(BaseModel):
+class DataProductUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.updated"
+
     data_product: GetDataProductResponse
 
 
-class DataProductDeletedEvent(BaseModel):
+class DataProductDeletedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.deleted"
+
     data_product: GetDataProductResponse
 
 
-class DataProductAboutUpdatedEvent(BaseModel):
+class DataProductAboutUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.about_updated"
+
     data_product: GetDataProductResponse
 
 
-class DataProductStatusUpdatedEvent(BaseModel):
+class DataProductStatusUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.status_updated"
+
     data_product: GetDataProductResponse
 
 
-class DataProductSettingChangedEvent(BaseModel):
+class DataProductSettingChangedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.setting_changed"
+
     data_product: GetDataProductResponse
 
 
-class DataProductInputPortLinkedEvent(BaseModel):
+class DataProductInputPortLinkedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.input_port_linked"
+
     data_product: GetDataProductResponse
 
 
-class DataProductInputPortUnlinkedEvent(BaseModel):
+class DataProductInputPortUnlinkedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.input_port_unlinked"
+
     data_product: GetDataProductResponse
 
 
-class DataProductTeamMemberAddedEvent(BaseModel):
+class DataProductTeamMemberAddedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.team_member_added"
+
     data_product: GetDataProductResponse
 
 
-class DataProductTeamMemberRemovedEvent(BaseModel):
+class DataProductTeamMemberRemovedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.team_member_removed"
+
     data_product: GetDataProductResponse
 
 
-class DataProductTeamMemberUpdatedEvent(BaseModel):
+class DataProductTeamMemberUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.team_member_updated"
+
     data_product: GetDataProductResponse
 
 
@@ -62,42 +127,74 @@ class DataProductTeamMemberUpdatedEvent(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class OutputPortCreatedEvent(BaseModel):
+class OutputPortCreatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.created"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
 
-class OutputPortUpdatedEvent(BaseModel):
+class OutputPortUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.updated"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
 
-class OutputPortDeletedEvent(BaseModel):
+class OutputPortDeletedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.deleted"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
 
-class OutputPortAboutUpdatedEvent(BaseModel):
+class OutputPortAboutUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.about_updated"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
 
-class OutputPortStatusUpdatedEvent(BaseModel):
+class OutputPortStatusUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.status_updated"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
 
-class OutputPortSettingChangedEvent(BaseModel):
+class OutputPortSettingChangedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.setting_changed"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
 
-class OutputPortLinkApprovedEvent(BaseModel):
+class OutputPortLinkApprovedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.link_approved"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
 
-class OutputPortLinkDeniedEvent(BaseModel):
+class OutputPortLinkDeniedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.link_denied"
+
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
 
@@ -107,41 +204,73 @@ class OutputPortLinkDeniedEvent(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class TechnicalAssetCreatedEvent(BaseModel):
+class TechnicalAssetCreatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.created"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
 
 
-class TechnicalAssetUpdatedEvent(BaseModel):
+class TechnicalAssetUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.updated"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
 
 
-class TechnicalAssetDeletedEvent(BaseModel):
+class TechnicalAssetDeletedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.deleted"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
 
 
-class TechnicalAssetStatusUpdatedEvent(BaseModel):
+class TechnicalAssetStatusUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.status_updated"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
 
 
-class TechnicalAssetLinkedEvent(BaseModel):
+class TechnicalAssetLinkedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.linked"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
 
 
-class TechnicalAssetLinkApprovedEvent(BaseModel):
+class TechnicalAssetLinkApprovedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.link_approved"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
 
 
-class TechnicalAssetLinkDeniedEvent(BaseModel):
+class TechnicalAssetLinkDeniedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.link_denied"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
 
 
-class TechnicalAssetUnlinkedEvent(BaseModel):
+class TechnicalAssetUnlinkedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.unlinked"
+
     data_product: GetDataProductResponse
     technical_asset: GetTechnicalAssetsResponseItem
