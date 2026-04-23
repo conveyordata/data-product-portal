@@ -751,14 +751,12 @@ def ta_event_payload():
         "tag_ids": [str(tag.id)],
     }
 
-
-class TestTechnicalAssetV2Events:
-    invalid_id = "00000000-0000-0000-0000-000000000000"
-
-    def _ta_endpoint(self, dp_id):
+    @staticmethod
+    def _ta_endpoint(dp_id):
         return ENDPOINT.format(dp_id)
 
-    def _link_endpoint(self, dp_id, op_id):
+    @staticmethod
+    def _link_endpoint(dp_id, op_id):
         return f"/api/v2/data_products/{dp_id}/output_ports/{op_id}/technical_assets"
 
     @pytest.mark.usefixtures("admin")

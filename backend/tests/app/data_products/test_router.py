@@ -776,10 +776,6 @@ class TestDataProductsRouter:
     def get_data_product_settings(client: TestClient, data_product_id: UUID):
         return client.get(f"{ENDPOINT}/{data_product_id}/settings")
 
-
-class TestDataProductV2Events:
-    invalid_id = "00000000-0000-0000-0000-000000000000"
-
     @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
     def test_created_fires_event(self, mock_webhook, client, session, payload):

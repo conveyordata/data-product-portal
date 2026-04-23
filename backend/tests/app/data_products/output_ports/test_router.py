@@ -872,11 +872,8 @@ def output_port_event_payload():
         "access_type": "restricted",
     }
 
-
-class TestOutputPortV2Events:
-    invalid_id = "00000000-0000-0000-0000-000000000000"
-
-    def _op_endpoint(self, dp_id):
+    @staticmethod
+    def _op_endpoint(dp_id):
         return ENDPOINT.format(dp_id)
 
     @pytest.mark.usefixtures("admin")

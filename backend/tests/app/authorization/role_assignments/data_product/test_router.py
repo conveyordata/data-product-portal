@@ -584,10 +584,6 @@ class TestDataProductRoleAssignmentsRouter:
     def get_data_product_history(client: TestClient, data_product_id):
         return client.get(f"/api/v2/data_products/{data_product_id}/history")
 
-
-class TestDataProductTeamMemberV2Events:
-    invalid_id = "00000000-0000-0000-0000-000000000000"
-
     @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
     def test_team_member_added_fires_event(self, mock_webhook, client):
