@@ -1,4 +1,4 @@
-import asyncio  # noqa: F401
+import asyncio
 
 import pytest
 from pydantic import BaseModel
