@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 from uuid import UUID
 
+import boto3
 from fastmcp import Context, FastMCP
 from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
@@ -26,8 +27,11 @@ from app.authorization.role_assignments.output_port.service import (
 )
 from app.configuration.domains.schema_response import GetDomainResponse, GetDomainsItem
 from app.configuration.domains.service import DomainService
+from app.configuration.environments.service import EnvironmentService
 from app.core.auth.auth import get_authenticated_user
+from app.core.auth.credentials import AWSCredentials
 from app.core.auth.jwt import JWTToken, get_oidc
+from app.core.auth.service import AuthService
 from app.core.logging import logger
 from app.data_products.output_ports.schema_response import (
     DatasetGet,
@@ -83,6 +87,15 @@ mcp = FastMCP(
 
     Output ports (datasets) are the primary way data is shared in the portal.
     Data products are containers owned by teams that group related output ports and technical assets.
+
+    When you get a request to fetch, read or look up data use the following flow:
+    1. Discovery: search_output_ports: find specific output ports (preferred for most searches)
+       Use search_data_products only when the user explicitly asks to find a data product.
+    2. Identify: Identify the output port that is most likely to contain the requested data. Use a data product that has this output port as input port as your context.
+    3. Check access: Request credentials to see if you have access to the context data product. Use get_aws_credentials with the data product namespace and environment to check if you have access. If you don't have access, return an error message indicating that access is denied.
+    4. Get table: The database you want to access is always a Glue type technical asset. Inside there can be multiple tables. Fetch these by querying Athena.
+    5. Environments: Use get_environments to get the list of available environments and determine which one to use for the query.
+    6. Query: If you have access, use the returned credentials to query the data source (e.g., run an Athena query using query_athena). Query one of the tables of the input ports that is required to fetch the correct data.
     """,
     auth=get_auth_provider(),
 )
@@ -112,6 +125,234 @@ async def get_current_user(ctx: Context) -> dict[str, Any]:
     Requires authentication."""
     token = get_access_token()
     return get_mcp_authenticated_user(token=token.token)
+
+
+@mcp.tool
+def get_environments() -> list[str]:
+    """Get the list of available environments. This can be used to resolve 'environment' in user requests."""
+    db = next(get_db_session())
+    return [env.name for env in EnvironmentService(db).get_environments()]
+
+
+@mcp.tool
+def get_aws_credentials(data_product_namespace: str, env: str) -> AWSCredentials:
+    """Get temporary AWS credentials for a specific data product and environment.
+    This validates that the authenticated user has access to the data product.
+    If the user doesn't have access, the CLI command will fail.
+
+    Args:
+        data_product_namespace: The namespace of the data product (e.g., 'sales_data').
+        env: The environment to run on.
+
+    Returns:
+        AWS credentials including AccessKeyId, SecretAccessKey, and SessionToken.
+        Returns error dict if access is denied or credentials cannot be retrieved.
+    """
+    access_token: AccessToken = get_access_token()
+    user = get_authenticated_user(
+        token=JWTToken(sub="", token=f"Bearer {access_token.token}"),
+        db=next(get_db_session()),
+    )
+    return AuthService().get_aws_credentials(
+        data_product_name=data_product_namespace,
+        environment=env,
+        authorized_user=user,
+        db=next(get_db_session()),
+    )
+
+
+@mcp.tool
+def query_athena(
+    data_product_namespace: str,
+    env: str,
+    query: str,
+    prefix: Optional[str] = None,
+    bucket: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Run an Athena query using temporary credentials for a specific data product and environment.
+    The prefix and bucket are typically configured at the company level, but can be overridden if needed.
+    This tool will automatically check user access by retrieving credentials.
+
+    Args:
+        data_product_namespace: The namespace of the data product (e.g., 'sales_data').
+        env: The environment.
+        query: The SQL query to execute.
+        prefix: Optional override for the platform prefix. Uses AWS_ATHENA_PREFIX from settings if not provided.
+        bucket: Optional override for the S3 results bucket. Uses AWS_ATHENA_RESULTS_BUCKET from settings if not provided.
+
+    Returns:
+        Query execution details including QueryExecutionId, or error if query failed.
+    """
+
+    # TODO Figure out environment stuff for customers
+    # Use company-wide settings as defaults
+    athena_prefix = prefix or settings.AWS_ATHENA_PREFIX
+    results_bucket = bucket or settings.AWS_ATHENA_RESULTS_BUCKET
+
+    # Buckets are fetchable from the database I guess?
+    # TODO Get env id for the env parameter, get platform id for platform called AWS and get service id for service called S3
+    # db = next(get_db_session())
+    # EnvironmentPlatformServiceConfigurationService(db).get_environment_platform_service_config()
+
+    # Validate that prefix and bucket are available
+    if not athena_prefix:
+        return {
+            "error": "AWS Athena prefix not configured. Please set AWS_ATHENA_PREFIX in settings or provide as parameter."
+        }
+
+    if not results_bucket:
+        return {
+            "error": "AWS Athena results bucket not configured. Please set AWS_ATHENA_RESULTS_BUCKET in settings or provide as parameter."
+        }
+
+    # Get credentials (this also checks access)
+    creds = get_aws_credentials(data_product_namespace, env)
+
+    env = "publishing" if env == "production" else "experimentation"
+
+    # Check if credential retrieval failed
+    if "error" in creds:
+        return creds  # Return the error from get_aws_credentials
+
+    try:
+        # Create Athena client with temporary credentials
+        client = boto3.client(
+            "athena",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds.AccessKeyId,
+            aws_secret_access_key=creds.SecretAccessKey,
+            aws_session_token=creds.SessionToken,
+        )
+
+        # Execute the query
+        # TODO Fix all of the env stuff
+        response = client.start_query_execution(
+            QueryString=query,
+            WorkGroup=f"{athena_prefix}-{data_product_namespace}-experimentation",
+            ResultConfiguration={
+                "OutputLocation": f"s3://{results_bucket}/athena/{data_product_namespace}"
+            },
+        )
+
+        return {
+            "query_execution_id": response["QueryExecutionId"],
+            "data_product_namespace": data_product_namespace,
+            "environment": "experimentation",
+            "workgroup": f"{athena_prefix}-{data_product_namespace}-experimentation",
+            "output_location": f"s3://{results_bucket}/athena/{data_product_namespace}",
+            "query": query,
+            "status": "Query submitted successfully. Use get_athena_query_results to check status and get results.",
+        }
+
+    except client.exceptions.InvalidRequestException as e:
+        return {"error": f"Invalid Athena query request: {str(e)}", "query": query}
+    except Exception as e:
+        return {"error": f"Failed to execute Athena query: {str(e)}", "query": query}
+
+
+@mcp.tool
+def get_athena_query_results(
+    query_execution_id: str,
+    data_product_namespace: str,
+    env: str,
+    max_results: int = 100,
+) -> Dict[str, Any]:
+    """Get the status and results of an Athena query.
+    Use this after query_athena to check if the query completed and retrieve results.
+
+    Args:
+        query_execution_id: The query execution ID returned from query_athena.
+        data_product_namespace: The namespace of the data product.
+        env: The environment (e.g., 'prod', 'staging').
+        max_results: Maximum number of result rows to return (default 100).
+
+    Returns:
+        Query status and results if completed, or status information if still running.
+    """
+    # Get credentials
+    creds = get_aws_credentials(data_product_namespace, env)
+
+    if "error" in creds:
+        return creds
+
+    try:
+        client = boto3.client(
+            "athena",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds.AccessKeyId,
+            aws_secret_access_key=creds.SecretAccessKey,
+            aws_session_token=creds.SessionToken,
+        )
+
+        # Get query execution status
+        execution = client.get_query_execution(QueryExecutionId=query_execution_id)
+        status = execution["QueryExecution"]["Status"]["State"]
+
+        result = {
+            "query_execution_id": query_execution_id,
+            "status": status,
+            "data_scanned_bytes": execution["QueryExecution"]["Statistics"].get(
+                "DataScannedInBytes", 0
+            ),
+            "execution_time_ms": execution["QueryExecution"]["Statistics"].get(
+                "EngineExecutionTimeInMillis", 0
+            ),
+        }
+
+        # If query failed, include error details
+        if status == "FAILED":
+            result["error"] = execution["QueryExecution"]["Status"].get(
+                "StateChangeReason", "Query failed"
+            )
+            return result
+
+        # If query is still running
+        if status in ["QUEUED", "RUNNING"]:
+            result["message"] = (
+                f"Query is {status.lower()}. Please try again in a moment."
+            )
+            return result
+
+        # If query succeeded, get results
+        if status == "SUCCEEDED":
+            results_response = client.get_query_results(
+                QueryExecutionId=query_execution_id, MaxResults=max_results
+            )
+
+            # Parse results into a more readable format
+            rows = results_response["ResultSet"]["Rows"]
+            if not rows:
+                result["rows"] = []
+                result["row_count"] = 0
+                return result
+
+            # First row is headers
+            headers = [col.get("VarCharValue", "") for col in rows[0]["Data"]]
+
+            # Remaining rows are data
+            data_rows = []
+            for row in rows[1:]:
+                row_data = {}
+                for i, col in enumerate(row["Data"]):
+                    row_data[headers[i]] = col.get("VarCharValue", None)
+                data_rows.append(row_data)
+
+            result["columns"] = headers
+            result["rows"] = data_rows
+            result["row_count"] = len(data_rows)
+            result["truncated"] = len(data_rows) >= max_results
+
+            return result
+
+        # Unknown status
+        result["message"] = f"Unexpected query status: {status}"
+        return result
+
+    except Exception as e:
+        return {
+            "error": f"Failed to get query results: {str(e)}",
+            "query_execution_id": query_execution_id,
+        }
 
 
 @mcp.tool

@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     AWS_DEFAULT_PROFILE: Optional[str] = None
     PORTAL_API_KEY: Optional[str] = None
 
+    # AWS Athena Configuration (company-wide settings)
+    AWS_ATHENA_PREFIX: Optional[str] = None  # e.g., 'dpp' - platform name prefix
+    AWS_ATHENA_RESULTS_BUCKET: Optional[str] = (
+        None  # S3 bucket for Athena query results
+    )
+
     # OIDC Configuration
     OIDC_ENABLED: bool = False
     OIDC_CLIENT_ID: Optional[str] = None
