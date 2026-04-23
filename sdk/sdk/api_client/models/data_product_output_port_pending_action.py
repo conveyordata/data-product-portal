@@ -19,7 +19,7 @@ from ..models.decision_status import DecisionStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.data_product import DataProduct
+    from ..models.abstract_data_product_info import AbstractDataProductInfo
     from ..models.output_port import OutputPort
     from ..models.user import User
 
@@ -33,32 +33,30 @@ class DataProductOutputPortPendingAction:
     Attributes:
         id (UUID):
         justification (str):
-        data_product_id (UUID):
+        consuming_abstract_data_product_id (UUID):
         output_port_id (UUID):
         status (DecisionStatus):
         requested_on (datetime.datetime):
         output_port (OutputPort):
-        data_product (DataProduct):
+        consuming_abstract_data_product (AbstractDataProductInfo):
         requested_by (User):
         denied_by (None | User):
         approved_by (None | User):
-        pending_action_type (Literal['DataProductOutputPort'] | Unset):  Default: 'DataProductOutputPort'.
+        pending_action_type (Literal['InputPort'] | Unset):  Default: 'InputPort'.
     """
 
     id: UUID
     justification: str
-    data_product_id: UUID
+    consuming_abstract_data_product_id: UUID
     output_port_id: UUID
     status: DecisionStatus
     requested_on: datetime.datetime
     output_port: OutputPort
-    data_product: DataProduct
+    consuming_abstract_data_product: AbstractDataProductInfo
     requested_by: User
     denied_by: None | User
     approved_by: None | User
-    pending_action_type: Literal["DataProductOutputPort"] | Unset = (
-        "DataProductOutputPort"
-    )
+    pending_action_type: Literal["InputPort"] | Unset = "InputPort"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -68,7 +66,9 @@ class DataProductOutputPortPendingAction:
 
         justification = self.justification
 
-        data_product_id = str(self.data_product_id)
+        consuming_abstract_data_product_id = str(
+            self.consuming_abstract_data_product_id
+        )
 
         output_port_id = str(self.output_port_id)
 
@@ -78,7 +78,7 @@ class DataProductOutputPortPendingAction:
 
         output_port = self.output_port.to_dict()
 
-        data_product = self.data_product.to_dict()
+        consuming_abstract_data_product = self.consuming_abstract_data_product.to_dict()
 
         requested_by = self.requested_by.to_dict()
 
@@ -102,12 +102,12 @@ class DataProductOutputPortPendingAction:
             {
                 "id": id,
                 "justification": justification,
-                "data_product_id": data_product_id,
+                "consuming_abstract_data_product_id": consuming_abstract_data_product_id,
                 "output_port_id": output_port_id,
                 "status": status,
                 "requested_on": requested_on,
                 "output_port": output_port,
-                "data_product": data_product,
+                "consuming_abstract_data_product": consuming_abstract_data_product,
                 "requested_by": requested_by,
                 "denied_by": denied_by,
                 "approved_by": approved_by,
@@ -120,7 +120,7 @@ class DataProductOutputPortPendingAction:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product import DataProduct
+        from ..models.abstract_data_product_info import AbstractDataProductInfo
         from ..models.output_port import OutputPort
         from ..models.user import User
 
@@ -129,7 +129,9 @@ class DataProductOutputPortPendingAction:
 
         justification = d.pop("justification")
 
-        data_product_id = UUID(d.pop("data_product_id"))
+        consuming_abstract_data_product_id = UUID(
+            d.pop("consuming_abstract_data_product_id")
+        )
 
         output_port_id = UUID(d.pop("output_port_id"))
 
@@ -139,7 +141,9 @@ class DataProductOutputPortPendingAction:
 
         output_port = OutputPort.from_dict(d.pop("output_port"))
 
-        data_product = DataProduct.from_dict(d.pop("data_product"))
+        consuming_abstract_data_product = AbstractDataProductInfo.from_dict(
+            d.pop("consuming_abstract_data_product")
+        )
 
         requested_by = User.from_dict(d.pop("requested_by"))
 
@@ -174,25 +178,24 @@ class DataProductOutputPortPendingAction:
         approved_by = _parse_approved_by(d.pop("approved_by"))
 
         pending_action_type = cast(
-            Literal["DataProductOutputPort"] | Unset,
-            d.pop("pending_action_type", UNSET),
+            Literal["InputPort"] | Unset, d.pop("pending_action_type", UNSET)
         )
-        if pending_action_type != "DataProductOutputPort" and not isinstance(
+        if pending_action_type != "InputPort" and not isinstance(
             pending_action_type, Unset
         ):
             raise ValueError(
-                f"pending_action_type must match const 'DataProductOutputPort', got '{pending_action_type}'"
+                f"pending_action_type must match const 'InputPort', got '{pending_action_type}'"
             )
 
         data_product_output_port_pending_action = cls(
             id=id,
             justification=justification,
-            data_product_id=data_product_id,
+            consuming_abstract_data_product_id=consuming_abstract_data_product_id,
             output_port_id=output_port_id,
             status=status,
             requested_on=requested_on,
             output_port=output_port,
-            data_product=data_product,
+            consuming_abstract_data_product=consuming_abstract_data_product,
             requested_by=requested_by,
             denied_by=denied_by,
             approved_by=approved_by,

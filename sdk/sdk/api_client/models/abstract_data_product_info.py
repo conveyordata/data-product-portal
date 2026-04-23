@@ -1,39 +1,44 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-if TYPE_CHECKING:
-    from ..models.input_port import InputPort
+from ..models.abstract_data_product_type import AbstractDataProductType
 
-
-T = TypeVar("T", bound="GetDataProductInputPortsResponse")
+T = TypeVar("T", bound="AbstractDataProductInfo")
 
 
 @_attrs_define
-class GetDataProductInputPortsResponse:
+class AbstractDataProductInfo:
     """
     Attributes:
-        input_ports (list[InputPort]):
+        name (str):
+        namespace (str):
+        abstract_data_product_type (AbstractDataProductType):
     """
 
-    input_ports: list[InputPort]
+    name: str
+    namespace: str
+    abstract_data_product_type: AbstractDataProductType
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        input_ports = []
-        for input_ports_item_data in self.input_ports:
-            input_ports_item = input_ports_item_data.to_dict()
-            input_ports.append(input_ports_item)
+        name = self.name
+
+        namespace = self.namespace
+
+        abstract_data_product_type = self.abstract_data_product_type.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "input_ports": input_ports,
+                "name": name,
+                "namespace": namespace,
+                "abstract_data_product_type": abstract_data_product_type,
             }
         )
 
@@ -41,22 +46,23 @@ class GetDataProductInputPortsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.input_port import InputPort
-
         d = dict(src_dict)
-        input_ports = []
-        _input_ports = d.pop("input_ports")
-        for input_ports_item_data in _input_ports:
-            input_ports_item = InputPort.from_dict(input_ports_item_data)
+        name = d.pop("name")
 
-            input_ports.append(input_ports_item)
+        namespace = d.pop("namespace")
 
-        get_data_product_input_ports_response = cls(
-            input_ports=input_ports,
+        abstract_data_product_type = AbstractDataProductType(
+            d.pop("abstract_data_product_type")
         )
 
-        get_data_product_input_ports_response.additional_properties = d
-        return get_data_product_input_ports_response
+        abstract_data_product_info = cls(
+            name=name,
+            namespace=namespace,
+            abstract_data_product_type=abstract_data_product_type,
+        )
+
+        abstract_data_product_info.additional_properties = d
+        return abstract_data_product_info
 
     @property
     def additional_keys(self) -> list[str]:

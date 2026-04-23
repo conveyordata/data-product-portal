@@ -70,15 +70,10 @@ export type RemoveOutputPortAsInputPortApiArg = {
   outputPortId: string;
   removeOutputPortAsInputPortRequest: RemoveOutputPortAsInputPortRequest;
 };
-export type DataProductType = {
-  id: string;
+export type AbstractDataProductInfo = {
   name: string;
-  description: string;
-  icon_key: DataProductIconKey;
-};
-export type DataProductInfo = {
-  name: string;
-  type: DataProductType;
+  namespace: string;
+  abstract_data_product_type: AbstractDataProductType;
 };
 export type Tag = {
   id: string;
@@ -97,11 +92,11 @@ export type OutputPort = {
 export type InputPort = {
   id: string;
   justification: string;
-  data_product_id: string;
-  data_product: DataProductInfo;
-  output_port_id: string;
   status: DecisionStatus;
-  input_port: OutputPort;
+  consuming_abstract_data_product_id: string;
+  consuming_abstract_data_product: AbstractDataProductInfo;
+  output_port_id: string;
+  output_port: OutputPort;
 };
 export type GetInputPortsForOutputPortResponse = {
   input_ports: InputPort[];
@@ -125,19 +120,15 @@ export type DenyOutputPortAsInputPortRequest = {
 export type RemoveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
 };
-export enum DataProductIconKey {
-  Reporting = "reporting",
-  Processing = "processing",
-  Exploration = "exploration",
-  Ingestion = "ingestion",
-  MachineLearning = "machine_learning",
-  Analytics = "analytics",
-  Default = "default",
-}
 export enum DecisionStatus {
   Approved = "approved",
   Pending = "pending",
   Denied = "denied",
+}
+export enum AbstractDataProductType {
+  Unknown = "unknown",
+  DataProducts = "data_products",
+  Explorations = "explorations",
 }
 export enum OutputPortStatus {
   Pending = "pending",

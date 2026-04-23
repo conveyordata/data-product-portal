@@ -1,6 +1,7 @@
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { AbstractDataProductType } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 
 export enum ApplicationPaths {
     Home = '/',
@@ -8,6 +9,7 @@ export enum ApplicationPaths {
     DataProducts = '/data-products',
     Documentation = '/documentation',
     DataProduct = '/studio/:dataProductId',
+    Exploration = '/studio/exploration/:explorationId',
     DataProductNew = '/studio/new',
     DataProductEdit = '/studio/:dataProductId/edit',
     MarketPlaceOutputPort = '/marketplace/:dataProductId/datasets/:datasetId',
@@ -29,6 +31,20 @@ export function createDataProductIdPath(
     tabKey: DataProductTabKeys = DataProductTabKeys.About,
 ): string {
     return `${ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId))}?tab=${tabKey}`;
+}
+
+export function createExplorationIdPath(explorationId: string): string {
+    return `${ApplicationPaths.Exploration.replace(':explorationId', encodeURIComponent(explorationId))}}`;
+}
+
+export function createAbstractDataProductIdPath(id: string, type: AbstractDataProductType): string {
+    if (type === AbstractDataProductType.DataProducts) {
+        return createDataProductIdPath(id);
+    }
+    if (type === AbstractDataProductType.Explorations) {
+        return createExplorationIdPath(id);
+    }
+    throw new Error(`Unknown AbstractDataProductType: ${type}`);
 }
 
 export function createDataOutputIdPath(

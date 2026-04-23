@@ -16,7 +16,7 @@ type Props = {
 function filterDataProducts(dataProductLinks: InputPort[], searchTerm: string) {
     return (
         dataProductLinks.filter((item) =>
-            item?.data_product.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+            item?.consuming_abstract_data_product.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }

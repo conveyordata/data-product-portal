@@ -286,7 +286,7 @@ export type GetDataProductsResponseItem = {
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
   user_count: number;
-  output_port_count: number;
+  input_port_count: number;
   technical_asset_count: number;
 };
 export type GetDataProductsResponse = {
@@ -509,18 +509,12 @@ export type GetEventHistoryResponseItem = {
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
 };
-export type DataProductInfo = {
-  name: string;
-  type: DataProductType;
-};
 export type InputPort = {
   id: string;
   justification: string;
-  data_product_id: string;
-  data_product: DataProductInfo;
-  output_port_id: string;
   status: DecisionStatus;
-  input_port: OutputPort;
+  output_port_id: string;
+  output_port: OutputPort;
 };
 export type GetDataProductInputPortsResponse = {
   input_ports: InputPort[];

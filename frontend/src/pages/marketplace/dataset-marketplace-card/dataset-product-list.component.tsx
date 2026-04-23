@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { useGetInputPortsForOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
-import { createDataProductIdPath } from '@/types/navigation';
+import { createAbstractDataProductIdPath } from '@/types/navigation';
 import styles from './dataset-marketplace-card.module.scss';
 
 type Props = {
@@ -27,8 +27,14 @@ export function DatasetProductList({ outputPortId, dataProductId }: Props) {
             dataSource={filteredProductLinks}
             renderItem={(inputPort) => (
                 <List.Item style={{ margin: 0 }}>
-                    <Link to={createDataProductIdPath(inputPort.data_product_id)} className={styles.link}>
-                        {inputPort.data_product.name}
+                    <Link
+                        to={createAbstractDataProductIdPath(
+                            inputPort.consuming_abstract_data_product_id,
+                            inputPort.consuming_abstract_data_product.abstract_data_product_type,
+                        )}
+                        className={styles.link}
+                    >
+                        {inputPort.consuming_abstract_data_product.name}
                     </Link>
                 </List.Item>
             )}

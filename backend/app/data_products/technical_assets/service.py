@@ -36,8 +36,6 @@ from app.data_products.technical_assets.schema_request import (
     DataOutputUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
-    DataOutputGet,
-    DataOutputsGet,
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
@@ -64,7 +62,7 @@ class DataOutputService:
             return TechnicalAssetStatus.ACTIVE
         return TechnicalAssetStatus.PENDING
 
-    def get_data_outputs(self) -> Sequence[DataOutputsGet]:
+    def get_data_outputs(self) -> Sequence[TechnicalAssetModel]:
         return (
             self.db.scalars(
                 select(TechnicalAssetModel).options(
@@ -78,7 +76,7 @@ class DataOutputService:
             .all()
         )
 
-    def get_data_output(self, data_product_id: UUID, id: UUID) -> DataOutputGet:
+    def get_data_output(self, data_product_id: UUID, id: UUID) -> TechnicalAssetModel:
         data_output = self.db.scalar(
             (
                 select(TechnicalAssetModel)
@@ -276,7 +274,7 @@ class DataOutputService:
 
     def get_data_outputs_for_data_product(
         self, data_product_id: UUID
-    ) -> Sequence[DataOutputGet]:
+    ) -> Sequence[TechnicalAssetModel]:
         return (
             self.db.scalars(
                 select(TechnicalAssetModel)

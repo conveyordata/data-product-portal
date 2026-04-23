@@ -28,10 +28,10 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation,
+    InputPort,
 )
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
+    InputPort as DataProductDatasetAssociationModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_output_port_exists
@@ -44,7 +44,6 @@ from app.data_products.output_ports.schema_request import (
     DatasetUsageUpdate,
 )
 from app.data_products.output_ports.schema_response import (
-    DatasetGet,
     DatasetsGet,
 )
 from app.data_products.technical_assets.model import (
@@ -62,7 +61,9 @@ from app.users.schema import User
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
     return [
         selectinload(DatasetModel.data_product_links)
-        .selectinload(DataProductDatasetAssociationModel.data_product)
+        .selectinload(
+            DataProductDatasetAssociationModel.consuming_abstract_data_product
+        )
         .raiseload("*"),
         selectinload(DatasetModel.data_output_links)
         .selectinload(DataOutputDatasetAssociationModel.data_output)
@@ -82,7 +83,7 @@ class OutputPortService:
 
     def get_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
-    ) -> DatasetGet:
+    ) -> DatasetModel:
         query = select(DatasetModel).where(DatasetModel.id == id)
 
         if data_product_id is not None:
@@ -90,7 +91,6 @@ class OutputPortService:
 
         dataset = self.db.scalar(
             query.options(
-                selectinload(DatasetModel.data_product_links),
                 selectinload(DatasetModel.data_output_links),
                 selectinload(DatasetModel.data_product_settings),
             )
@@ -270,7 +270,7 @@ class OutputPortService:
         for dataset in datasets:
             if not dataset.lifecycle:
                 dataset.lifecycle = default_lifecycle
-            dataset.domain = dataset.data_product.domain
+            dataset.domain = dataset.consuming_abstract_data_product.domain
         return datasets
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
@@ -413,11 +413,11 @@ class OutputPortService:
         for downstream_products in dataset.data_product_links:
             nodes.append(
                 Node(
-                    id=downstream_products.data_product_id,
+                    id=downstream_products.consuming_abstract_data_product_id,
                     data=NodeData(
-                        id=downstream_products.data_product_id,
-                        name=downstream_products.data_product.name,
-                        icon_key=downstream_products.data_product.type.icon_key,
+                        id=downstream_products.consuming_abstract_data_product_id,
+                        name=downstream_products.consuming_abstract_data_product.name,
+                        icon_key=downstream_products.consuming_abstract_data_product.type.icon_key,
                     ),
                     type=NodeType.dataProductNode,
                 )
@@ -425,7 +425,7 @@ class OutputPortService:
             edges.append(
                 Edge(
                     id=f"{downstream_products.id}-{dataset.id}",
-                    target=downstream_products.data_product_id,
+                    target=downstream_products.consuming_abstract_data_product_id,
                     source=dataset.id,
                     animated=downstream_products.status == DecisionStatus.APPROVED,
                 )
@@ -498,7 +498,7 @@ class OutputPortService:
 
         return Graph(nodes=set(nodes), edges=set(edges))
 
-    def is_visible_to_user(self, dataset: DatasetModel, user: User) -> bool:
+    def is_visible_to_user(self, dataset: DatasetModel, user: UserModel) -> bool:
         if (
             dataset.access_type != OutputPortAccessType.PRIVATE
             or Authorization().has_admin_role(user_id=str(user.id))
@@ -514,7 +514,7 @@ class OutputPortService:
         )
 
         consuming_data_products = {
-            link.data_product
+            link.consuming_abstract_data_product
             for link in dataset.data_product_links
             if link.status == DecisionStatus.APPROVED
         }
@@ -546,14 +546,14 @@ class OutputPortService:
 
     def get_consuming_data_products(
         self, output_port_id: UUID, data_product_id: UUID
-    ) -> Sequence[DataProductDatasetAssociation]:
+    ) -> Sequence[InputPort]:
         dataset = self.db.scalar(
             select(DatasetModel)
             .where(DatasetModel.id == output_port_id)
             .where(DatasetModel.data_product_id == data_product_id)
             .options(
                 selectinload(DatasetModel.data_product_links).selectinload(
-                    DataProductDatasetAssociationModel.data_product
+                    DataProductDatasetAssociationModel.consuming_abstract_data_product
                 )
             )
         )

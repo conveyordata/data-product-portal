@@ -34,7 +34,7 @@ class GetDataProductsResponseItem:
         type_ (DataProductType):
         lifecycle (DataProductLifeCycle | None):
         user_count (int):
-        output_port_count (int):
+        input_port_count (int):
         technical_asset_count (int):
     """
 
@@ -49,7 +49,7 @@ class GetDataProductsResponseItem:
     type_: DataProductType
     lifecycle: DataProductLifeCycle | None
     user_count: int
-    output_port_count: int
+    input_port_count: int
     technical_asset_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -86,7 +86,7 @@ class GetDataProductsResponseItem:
 
         user_count = self.user_count
 
-        output_port_count = self.output_port_count
+        input_port_count = self.input_port_count
 
         technical_asset_count = self.technical_asset_count
 
@@ -105,7 +105,7 @@ class GetDataProductsResponseItem:
                 "type": type_,
                 "lifecycle": lifecycle,
                 "user_count": user_count,
-                "output_port_count": output_port_count,
+                "input_port_count": input_port_count,
                 "technical_asset_count": technical_asset_count,
             }
         )
@@ -165,7 +165,7 @@ class GetDataProductsResponseItem:
 
         user_count = d.pop("user_count")
 
-        output_port_count = d.pop("output_port_count")
+        input_port_count = d.pop("input_port_count")
 
         technical_asset_count = d.pop("technical_asset_count")
 
@@ -181,7 +181,7 @@ class GetDataProductsResponseItem:
             type_=type_,
             lifecycle=lifecycle,
             user_count=user_count,
-            output_port_count=output_port_count,
+            input_port_count=input_port_count,
             technical_asset_count=technical_asset_count,
         )
 

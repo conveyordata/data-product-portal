@@ -7,7 +7,7 @@ from tests import test_session
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
 from tests.factories.data_product import DataProductFactory
-from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
+from tests.factories.data_products_datasets import InputPortFactory
 from tests.factories.dataset import DatasetFactory
 
 
@@ -53,8 +53,8 @@ def add_random_data(
         for _ in range(random.randint(0, 3)):
             data_product = random.choice(data_products)
 
-            DataProductDatasetAssociationFactory(
-                data_product=data_product,
+            InputPortFactory(
+                consuming_abstract_data_product=data_product,
                 dataset=dataset,
             )
 

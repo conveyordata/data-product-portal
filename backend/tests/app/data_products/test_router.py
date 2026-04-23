@@ -12,7 +12,6 @@ from app.core.authz import Action
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
@@ -22,6 +21,7 @@ from tests.factories import (
     EnvironmentFactory,
     EnvPlatformConfigFactory,
     GlobalRoleAssignmentFactory,
+    InputPortFactory,
     LifecycleFactory,
     PlatformFactory,
     RoleFactory,
@@ -729,8 +729,8 @@ class TestDataProductsRouter:
         ]
 
     def test_get_data_product_input_ports(self, client: TestClient):
-        link = DataProductDatasetAssociationFactory()
-        response = self.get_input_ports(client, link.data_product.id)
+        link = InputPortFactory()
+        response = self.get_input_ports(client, link.consuming_abstract_data_product.id)
         assert response.status_code == 200, f"Response failed with: {response.text}"
         assert len(response.json()["input_ports"]) == 1
 

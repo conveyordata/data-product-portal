@@ -317,7 +317,7 @@ export type OutputPortLink = {
   output_port_id: string;
   technical_asset_id: string;
   status: DecisionStatus;
-  output: OutputPort;
+  output_port: OutputPort;
 };
 export type GetTechnicalAssetsResponseItem = {
   id: string;

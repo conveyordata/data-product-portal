@@ -10,6 +10,6 @@ class PendingActionTypesOld(str, Enum):
 
 
 class PendingActionTypes(str, Enum):
-    DataProductOutputPort = "DataProductOutputPort"
+    InputPort = "InputPort"
     TechnicalAssetOutputPort = "TechnicalAssetOutputPort"
     DataProductRoleAssignment = "DataProductRoleAssignment"
