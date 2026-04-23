@@ -115,7 +115,6 @@ def create_data_product(
 ) -> CreateDataProductResponse:
     created_data_product = DataProductService(db).create_data_product(data_product)
     created_id = created_data_product.id
-    db.expunge(created_data_product)
     request.state.event = DataProductCreatedEvent(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(created_id)
@@ -256,7 +255,6 @@ def update_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateDataProductResponse:
     result = DataProductService(db).update_data_product(id, data_product)
-    db.expire_all()
     request.state.event = DataProductUpdatedEvent(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -302,7 +300,6 @@ def update_data_product_about(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     DataProductService(db).update_data_product_about(id, data_product)
-    db.expire_all()
     request.state.event = DataProductAboutUpdatedEvent(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -345,7 +342,6 @@ def update_data_product_status(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     DataProductService(db).update_data_product_status(id, data_product)
-    db.expire_all()
     request.state.event = DataProductStatusUpdatedEvent(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
@@ -501,7 +497,6 @@ def request_input_ports_for_data_product(
         request.justification,
         actor=authenticated_user,
     )
-    db.expire_all()
     request.state.event = DataProductInputPortLinkedEvent(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
