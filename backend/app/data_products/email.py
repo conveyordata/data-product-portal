@@ -3,15 +3,15 @@ from typing import Callable, Sequence
 
 import emailgen
 
+from app.abstract_data_product.model import AbstractDataProduct
 from app.core.email.send_mail import send_mail
-from app.data_products.model import DataProduct
 from app.data_products.output_ports.model import Dataset
 from app.settings import settings
 from app.users.schema import User
 
 
 def send_dataset_link_email(
-    data_product: DataProduct,
+    data_product: AbstractDataProduct,
     dataset: Dataset,
     *,
     requester: User,

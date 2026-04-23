@@ -39,7 +39,12 @@ export function DataProductTab({ outputPortId, dataProductId }: Props) {
                 allowClear
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <DataProductTable datasetId={outputPortId} dataProducts={filteredDataProducts} isLoading={isLoading} />
+            <DataProductTable
+                outputPortId={outputPortId}
+                dataProductId={dataProductId}
+                dataProducts={filteredDataProducts}
+                isLoading={isLoading}
+            />
         </Flex>
     );
 }

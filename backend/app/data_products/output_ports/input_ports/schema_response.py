@@ -3,8 +3,6 @@ from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
-from pydantic import Field
-
 from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.input_ports.schema import InputPortBase
@@ -69,8 +67,6 @@ class DataProductOutputPortAssociationsGet(BaseDataProductOutputPortAssociationG
 class InputPort(InputPortBase):
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo
-    output_port_id: UUID = Field(validation_alias="dataset_id")
-    output_port: OutputPort = Field(validation_alias="dataset")
 
 
 class GetInputPortsForOutputPortResponse(ORMModel):

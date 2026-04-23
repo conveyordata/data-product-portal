@@ -75,28 +75,12 @@ export type AbstractDataProductInfo = {
   namespace: string;
   abstract_data_product_type: AbstractDataProductType;
 };
-export type Tag = {
-  id: string;
-  value: string;
-};
-export type OutputPort = {
-  id: string;
-  name: string;
-  namespace: string;
-  description: string;
-  status: OutputPortStatus;
-  access_type: OutputPortAccessType;
-  data_product_id: string;
-  tags: Tag[];
-};
 export type InputPort = {
   id: string;
   justification: string;
   status: DecisionStatus;
   consuming_abstract_data_product_id: string;
   consuming_abstract_data_product: AbstractDataProductInfo;
-  output_port_id: string;
-  output_port: OutputPort;
 };
 export type GetInputPortsForOutputPortResponse = {
   input_ports: InputPort[];
@@ -129,17 +113,6 @@ export enum AbstractDataProductType {
   Unknown = "unknown",
   DataProducts = "data_products",
   Explorations = "explorations",
-}
-export enum OutputPortStatus {
-  Pending = "pending",
-  Active = "active",
-  Archived = "archived",
-}
-export enum OutputPortAccessType {
-  Public = "public",
-  Restricted = "restricted",
-  Private = "private",
-  Unrestricted = "unrestricted",
 }
 export const {
   useGetInputPortsForOutputPortQuery,

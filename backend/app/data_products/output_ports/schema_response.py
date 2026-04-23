@@ -4,7 +4,6 @@ from warnings import deprecated
 
 from pydantic import Field
 
-from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import (
     OutputPortSettingValue,
@@ -16,28 +15,10 @@ from app.data_products.output_port_technical_assets_link.schema import (
 )
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.input_ports.schema import (
-    InputPortBase,
-)
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
-from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.shared.schema import ORMModel
-
-
-class InputPort(InputPortBase):
-    abstract_data_product_id: UUID
-    abstract_data_product: AbstractDataProductInfo
-
-
-@deprecated("Use TechnicalAsset instead")
-class DatasetDataOutput(TechnicalAsset):
-    # Nested schemas
-    owner: DataProduct
-
-    def convert(self):
-        return TechnicalAsset(**self.model_dump(exclude={"owner"}))
 
 
 class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
