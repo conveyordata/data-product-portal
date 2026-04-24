@@ -71,7 +71,7 @@ def approve_output_port_technical_asset_link(
     request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     output_link = DataOutputDatasetService(db).approve_data_output_link(
         data_product_id=data_product_id,
         technical_asset_id=link_request.technical_asset_id,

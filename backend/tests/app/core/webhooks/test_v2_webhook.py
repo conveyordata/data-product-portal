@@ -20,7 +20,7 @@ class TestCallV2Webhook:
             mock_cls.return_value.__aenter__ = AsyncMock(return_value=mock_http)
             mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
 
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 call_v2_webhook("data_product.created", {"data_product": {"id": "abc"}})
             )
 
@@ -40,7 +40,5 @@ class TestCallV2Webhook:
         from app.core.webhooks.v2 import call_v2_webhook
 
         with webhook_v2_config(url=None), patch("httpx.AsyncClient") as mock_cls:
-            asyncio.get_event_loop().run_until_complete(
-                call_v2_webhook("data_product.created", {})
-            )
+            asyncio.run(call_v2_webhook("data_product.created", {}))
             mock_cls.assert_not_called()
