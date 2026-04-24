@@ -80,7 +80,7 @@ class OutputPortService:
         self.namespace_validator = NamespaceValidator(DatasetModel)
         self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
-    def _load_dataset(
+    def get_dataset(
         self, id: UUID, data_product_id: Optional[UUID] = None
     ) -> DatasetGet:
         """DB fetch with all required eager loads, lifecycle defaulting, and tag roll-up.
@@ -118,18 +118,9 @@ class OutputPortService:
         dataset.domain = dataset.data_product.domain
         return dataset
 
-    def get_dataset(
-        self, id: UUID, data_product_id: Optional[UUID] = None
-    ) -> DatasetModel:
-        """Fetch a dataset without enforcing consumer-visibility.
-
-        Use this for internal/system callers thave have already authorised the request.
-        """
-        return self._load_dataset(id, data_product_id)
-
     def get_visible_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
-    ) -> DatasetGet:
+    ) -> DatasetModel:
         """Fetch a dataset, raising 403 if the user cannot see it as a consumer.
 
         Use this for endpoints where dataset visibility must be enforced.
@@ -137,7 +128,7 @@ class OutputPortService:
         For system/internal callers already authorised at the endpoint level, use
         get_dataset() instead.
         """
-        dataset = self._load_dataset(id, data_product_id)
+        dataset = self.get_dataset(id, data_product_id)
         if not self.is_visible_to_user(dataset, user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
