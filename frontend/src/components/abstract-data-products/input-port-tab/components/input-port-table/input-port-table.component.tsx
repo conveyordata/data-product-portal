@@ -4,17 +4,18 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { type InputPort, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
 import styles from './input-port-table.module.scss';
 import { getDataProductDatasetsColumns } from './input-port-table-columns.tsx';
 
 type Props = {
-    dataProductId: string;
+    canRemoveAccess: boolean;
+    handleRemove: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
+    loadingInputPorts: boolean;
 };
-export function InputPortTable({ dataProductId, inputPorts }: Props) {
+export function InputPortTable({ canRemoveAccess, handleRemove, inputPorts, loadingInputPorts }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
 
     const { pagination, handlePaginationChange } = useTablePagination(inputPorts, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
@@ -27,16 +28,15 @@ export function InputPortTable({ dataProductId, inputPorts }: Props) {
     const columns: TableColumnsType<InputPort> = useMemo(() => {
         return getDataProductDatasetsColumns({
             t,
-            dataProductId,
+            canRemoveAccess: canRemoveAccess,
+            handleRemove,
             inputPorts: inputPorts,
         });
-    }, [t, inputPorts, dataProductId]);
-
-    if (!dataProduct) return null;
+    }, [t, inputPorts, canRemoveAccess, handleRemove]);
 
     return (
         <Table<InputPort>
-            loading={isLoadingDataProduct}
+            loading={loadingInputPorts}
             className={styles.datasetListTable}
             columns={columns}
             dataSource={inputPorts}

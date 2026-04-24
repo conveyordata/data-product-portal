@@ -14,7 +14,7 @@ import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
-import styles from './data-products-table.module.scss';
+import styles from './data-products-table-columns.module.scss';
 
 const iconColumnWidth = 30;
 export const getDataProductTableColumns = ({

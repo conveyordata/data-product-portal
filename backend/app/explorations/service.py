@@ -9,8 +9,10 @@ from starlette import status
 from app.abstract_data_product.service import AbstractDataProductService
 from app.core.namespace.validation import NamespaceValidator
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
+from app.users.model import User
 
 from .model import Exploration as ExplorationModel
+from .model import ensure_exploration_exists
 from .schema_request import CreateExplorationRequest
 
 
@@ -22,6 +24,7 @@ class ExplorationService(AbstractDataProductService):
     def create_exploration(
         self,
         exploration: CreateExplorationRequest,
+        authenticated_user: User,
     ) -> ExplorationModel:
         if (
             validity := ResourceNameService(model=ExplorationModel)
@@ -32,14 +35,20 @@ class ExplorationService(AbstractDataProductService):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
-        model = ExplorationModel(**exploration.parse_pydantic_schema())
+        model = ExplorationModel(
+            **exploration.parse_pydantic_schema(), owner_id=authenticated_user.id
+        )
         self.db.add(model)
         self.db.flush()
         return model
 
-    def get_explorations(self) -> Sequence[ExplorationModel]:
-        query = select(ExplorationModel).order_by(asc(ExplorationModel.name))
+    def get_explorations(self, authenticated_user: User) -> Sequence[ExplorationModel]:
+        query = (
+            select(ExplorationModel)
+            .where(ExplorationModel.owner_id == authenticated_user.id)
+            .order_by(asc(ExplorationModel.name))
+        )
         return self.db.scalars(query).unique().all()
 
-    def get_exploration(self, id: UUID) -> type[ExplorationModel] | None:
-        return self.db.get(ExplorationModel, id)
+    def get_exploration(self, id: UUID, authenticated_user: User) -> ExplorationModel:
+        return ensure_exploration_exists(id, self.db, authenticated_user)

@@ -1,6 +1,7 @@
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
 import { AbstractDataProductType } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 
 export enum ApplicationPaths {
@@ -33,8 +34,11 @@ export function createDataProductIdPath(
     return `${ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId))}?tab=${tabKey}`;
 }
 
-export function createExplorationIdPath(explorationId: string): string {
-    return `${ApplicationPaths.Exploration.replace(':explorationId', encodeURIComponent(explorationId))}}`;
+export function createExplorationIdPath(
+    explorationId: string,
+    tabKey: ExplorationTabKeys = ExplorationTabKeys.InputPorts,
+): string {
+    return `${ApplicationPaths.Exploration.replace(':explorationId', encodeURIComponent(explorationId))}?tab=${tabKey}`;
 }
 
 export function createAbstractDataProductIdPath(id: string, type: AbstractDataProductType): string {

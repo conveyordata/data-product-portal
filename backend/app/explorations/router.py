@@ -9,6 +9,7 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.database.database import get_db_session
+from app.explorations.model import ensure_exploration_exists
 from app.explorations.schema_request import (
     CreateExplorationRequest,
     CreateExplorationRequestWithInputPorts,
@@ -29,8 +30,9 @@ router = APIRouter(tags=["Explorations"], prefix=route)
 @router.get("", response_model=GetExplorationsResponse)
 def get_explorations(
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return {"explorations": ExplorationService(db).get_explorations()}
+    return {"explorations": ExplorationService(db).get_explorations(authenticated_user)}
 
 
 @router.post(
@@ -48,6 +50,7 @@ def create_exploration(
 ):
     created_exploration = ExplorationService(db).create_exploration(
         CreateExplorationRequest(**request.model_dump(exclude={"input_ports"})),
+        authenticated_user,
     )
     if request.input_ports:
         input_ports = ExplorationService(db).request_input_ports(
@@ -69,15 +72,18 @@ def create_exploration(
 def get_exploration(
     id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return ExplorationService(db).get_exploration(id)
+    return ExplorationService(db).get_exploration(id, authenticated_user)
 
 
 @router.get("/{id}/input_ports", response_model=GetExplorationInputPortsResponse)
 def get_exploration_input_ports(
     id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
+    ensure_exploration_exists(id, db, authenticated_user)
     return GetExplorationInputPortsResponse(
         input_ports=[
             InputPort.model_validate(ip)

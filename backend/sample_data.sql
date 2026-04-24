@@ -22,6 +22,9 @@ declare
     jane_id uuid;
     john_id uuid;
 
+    -- EXPLORATIONS
+    ceo_question uuid;
+
     -- DATA PRODUCTS
     data_product_lifecycle_id uuid;
     customer_segmentation_id uuid;
@@ -380,6 +383,16 @@ begin
     INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(),
     feature_usage_metrics_daily, john_id, dataset_owner_id, 'APPROVED', john_id, '2025-10-28 16:32:57.902449', john_id, '2025-10-28 16:32:57.910346', '2025-10-28 16:32:57.89898', '2025-10-28 16:32:57.908607', NULL);
 
+
+
+    -- CEO question exploration
+    INSERT INTO public.abstract_data_products (id, "name", namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), 'CEO Question exploration', 'ceo_question_exploration', 'explorations', 'To answer a question from the CEO', hr_domain_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into ceo_question;
+    INSERT INTO public.explorations (id, owner_id) VALUES (ceo_question, john_id);
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(),'Needed for answering a question from the CEO', ceo_question, sales_performance_model_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.input_ports (id, justification, consuming_abstract_data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(),'Needed for answering a question from the CEO', ceo_question, inventory_management_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- extra products
 
