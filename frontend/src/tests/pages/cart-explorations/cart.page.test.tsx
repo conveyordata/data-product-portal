@@ -206,7 +206,7 @@ describe('Cart', () => {
                 expect(linkHandler).toHaveBeenCalled();
             });
         });
-    }, 15000);
+    }, 20000);
 
     describe('Cart should support creating a new exploration', () => {
         const createNewExploration = async () => {

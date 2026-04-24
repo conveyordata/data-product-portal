@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
-import { getDataProductTableColumns } from '@/pages/data-products/data-products-table-columns.tsx';
+import { getDataProductTableColumns } from '@/pages/product-studio/components/data-products-tab/data-products-table-columns.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
@@ -113,8 +113,8 @@ export function DataProductsTab() {
                         style={{ maxWidth: 400 }}
                     />
                     <Radio.Group value={showAllProducts} onChange={handleShowAllChange} optionType="button">
-                        <Radio.Button value={true}>{t('All Data Products')}</Radio.Button>
                         <Radio.Button value={false}>{t('My Data Products')}</Radio.Button>
+                        <Radio.Button value={true}>{t('All Data Products')}</Radio.Button>
                     </Radio.Group>
                     {!showAllProducts && (
                         <RoleFilter

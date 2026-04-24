@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
     from ..models.domain import Domain
+    from ..models.user import User
 
 
 T = TypeVar("T", bound="GetExplorationResponse")
@@ -23,6 +24,7 @@ class GetExplorationResponse:
         namespace (str):
         description (str):
         domain (Domain):
+        owner (User):
     """
 
     id: UUID
@@ -30,6 +32,7 @@ class GetExplorationResponse:
     namespace: str
     description: str
     domain: Domain
+    owner: User
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -43,6 +46,8 @@ class GetExplorationResponse:
 
         domain = self.domain.to_dict()
 
+        owner = self.owner.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -52,6 +57,7 @@ class GetExplorationResponse:
                 "namespace": namespace,
                 "description": description,
                 "domain": domain,
+                "owner": owner,
             }
         )
 
@@ -60,6 +66,7 @@ class GetExplorationResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.domain import Domain
+        from ..models.user import User
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -72,12 +79,15 @@ class GetExplorationResponse:
 
         domain = Domain.from_dict(d.pop("domain"))
 
+        owner = User.from_dict(d.pop("owner"))
+
         get_exploration_response = cls(
             id=id,
             name=name,
             namespace=namespace,
             description=description,
             domain=domain,
+            owner=owner,
         )
 
         get_exploration_response.additional_properties = d
