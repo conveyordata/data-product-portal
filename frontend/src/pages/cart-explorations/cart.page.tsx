@@ -16,6 +16,7 @@ import { CardSelection } from '@/pages/cart-explorations/components/card-selecti
 import { CartOverview } from '@/pages/cart-explorations/components/cart-overview.component.tsx';
 import { ExistingDataProductForm } from '@/pages/cart-explorations/components/existing-data-product-form.tsx';
 import { NewDataProductForm } from '@/pages/cart-explorations/components/new-data-product-form.tsx';
+import { NewExplorationForm } from '@/pages/cart-explorations/components/new-exploration-form.tsx';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
@@ -72,6 +73,30 @@ function ExplorationsCart() {
         }
         return outputPorts?.filter((dataset) => cartDatasetIds.includes(dataset.id));
     }, [outputPorts, cartDatasetIds]);
+    const form = useMemo(() => {
+        if (!dataProductTypeChoice || !existingOrNewChoice) {
+            return null;
+        }
+        if (dataProductTypeChoice === DataProductChoiceOptions.data_product) {
+            if (existingOrNewChoice === ExistingOrNew.existing) {
+                return (
+                    <ExistingDataProductForm
+                        cartOutputPorts={cartOutputPorts}
+                        setSelectedDataProductId={setSelectedDataProductId}
+                    />
+                );
+            }
+            if (existingOrNewChoice === ExistingOrNew.new) {
+                return <NewDataProductForm cartOutputPorts={cartOutputPorts} />;
+            }
+        }
+        if (dataProductTypeChoice === DataProductChoiceOptions.exploration) {
+            if (existingOrNewChoice === ExistingOrNew.new) {
+                return <NewExplorationForm cartOutputPorts={cartOutputPorts} />;
+            }
+        }
+        return null;
+    }, [dataProductTypeChoice, existingOrNewChoice, cartOutputPorts]);
     return (
         <Row gutter={16}>
             <Col span={16}>
@@ -122,16 +147,7 @@ function ExplorationsCart() {
                             ]}
                         />
                     )}
-                    {dataProductTypeChoice === DataProductChoiceOptions.data_product &&
-                        !!existingOrNewChoice &&
-                        (existingOrNewChoice === ExistingOrNew.existing ? (
-                            <ExistingDataProductForm
-                                cartOutputPorts={cartOutputPorts}
-                                setSelectedDataProductId={setSelectedDataProductId}
-                            />
-                        ) : (
-                            <NewDataProductForm cartOutputPorts={cartOutputPorts} />
-                        ))}
+                    {form}
                 </Flex>
             </Col>
             <Col span={8}>
