@@ -9,6 +9,7 @@ from sdk.api_client import AuthenticatedClient
 from sdk.api_client.api.authentication import (
     get_aws_credentials as sdk_get_aws_credentials,
 )
+from sqlalchemy import select
 from sqlalchemy.orm import configure_mappers
 
 from app.authorization.role_assignments.data_product.schema import (
@@ -31,8 +32,16 @@ from app.authorization.role_assignments.output_port.service import (
 )
 from app.configuration.domains.schema_response import GetDomainResponse, GetDomainsItem
 from app.configuration.domains.service import DomainService
+from app.configuration.environments.platform_service_configurations.model import (
+    EnvironmentPlatformServiceConfiguration as EnvPlatformServiceConfigurationModel,
+)
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    EnvironmentConfigsGetItem,
+)
 from app.configuration.environments.schema_response import EnvironmentGetItem
 from app.configuration.environments.service import EnvironmentService
+from app.configuration.platforms.model import Platform
+from app.configuration.platforms.platform_services.model import PlatformService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
@@ -399,19 +408,17 @@ def query_athena(
         env: The environment.
         query: The SQL query to execute (use quotes for database/table names with hyphens).
         prefix: Optional override for the platform prefix. Uses AWS_ATHENA_PREFIX from settings if not provided.
-        bucket: Optional override for the S3 results bucket. Uses AWS_ATHENA_RESULTS_BUCKET from settings if not provided.
+        bucket: use get_bucket tool to get the correct bucket for the data product and environment, or provide an override.
 
     Returns:
         Query execution details including QueryExecutionId, or error if query failed.
     """
 
-    # TODO Figure out environment stuff for customers
     # Use company-wide settings as defaults
     athena_prefix = prefix or settings.AWS_ATHENA_PREFIX
-    results_bucket = bucket or settings.AWS_ATHENA_RESULTS_BUCKET
+    results_bucket = bucket
 
     # Buckets are fetchable from the database I guess?
-    # TODO Get env id for the env parameter, get platform id for platform called AWS and get service id for service called S3
     # db = next(get_db_session())
     # EnvironmentPlatformServiceConfigurationService(db).get_environment_platform_service_config()
 
@@ -446,7 +453,6 @@ def query_athena(
         )
 
         # Execute the query
-        # TODO Fix all of the env stuff
         response = client.start_query_execution(
             QueryString=query,
             WorkGroup=f"{athena_prefix}-{data_product_namespace}-experimentation",
@@ -945,6 +951,88 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         return {"error": f"Failed to get domain details: {str(e)}"}
+
+
+@mcp.tool
+def get_bucket(environment_id: str) -> Dict[str, Any]:
+    """Get the S3 bucket name configured for Athena query results.
+    This is typically set at the company level in settings, but can be useful to confirm before running queries.
+
+    Args:
+        environment_id: The environment UUID for which to get the platform service config
+    Returns:
+        The S3 bucket name for Athena results, or an error if not configured.
+    """
+
+    db = next(get_db_session())
+    try:
+        logger.info(f"Getting bucket for environment_id: {environment_id}")
+
+        # Query for AWS S3 configuration by joining with Platform and PlatformService
+        stmt = (
+            select(EnvPlatformServiceConfigurationModel, Platform, PlatformService)
+            .join(
+                Platform,
+                EnvPlatformServiceConfigurationModel.platform_id == Platform.id,
+            )
+            .join(
+                PlatformService,
+                EnvPlatformServiceConfigurationModel.service_id == PlatformService.id,
+            )
+            .where(
+                EnvPlatformServiceConfigurationModel.environment_id
+                == UUID(environment_id)
+            )
+        )
+
+        results = db.execute(stmt).all()
+        logger.info(f"Found {len(results)} platform service configs for environment")
+
+        for config_model, platform, service in results:
+            logger.info(f"Platform: {platform.name}, Service: {service.name}")
+            if platform.name.lower() == "aws" and service.name.lower() == "s3":
+                logger.info("Found matching AWS S3 config")
+
+                # Parse the config using the schema
+                config_data = EnvironmentConfigsGetItem.model_validate(config_model)
+                logger.info(
+                    f"Config data parsed, has {len(config_data.config) if config_data.config else 0} configs"
+                )
+
+                # Find the default S3 config or use the first one
+                s3_config = None
+                if config_data.config:
+                    s3_config = next(
+                        (
+                            c
+                            for c in config_data.config
+                            if hasattr(c, "is_default") and c.is_default
+                        ),
+                        None,
+                    )
+                    if not s3_config:
+                        s3_config = config_data.config[0]
+                    logger.info(f"Selected S3 config: {s3_config}")
+
+                if not s3_config or not hasattr(s3_config, "bucket_name"):
+                    logger.error(
+                        f"No S3 bucket configured for environment '{environment_id}'."
+                    )
+                    return {
+                        "error": f"No S3 bucket configured for environment '{environment_id}'."
+                    }
+
+                logger.info(f"Returning bucket: {s3_config.bucket_name}")
+                return {"athena_results_bucket": s3_config.bucket_name}
+
+        return {
+            "error": f"AWS S3 configuration not found for environment '{environment_id}'."
+        }
+    except Exception as e:
+        logger.error(f"Error getting bucket: {str(e)}", exc_info=True)
+        return {"error": f"Failed to get bucket: {str(e)}"}
+    finally:
+        db.close()
 
 
 @mcp.tool
