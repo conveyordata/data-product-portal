@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -15,7 +15,7 @@ from app.core.webhooks.events import (
     OutputPortLinkApprovedEvent,
     OutputPortLinkDeniedEvent,
 )
-from app.core.webhooks.v2 import emit_event_after
+from app.core.webhooks.v2 import _emits_event
 from app.data_products.output_ports.input_ports.schema_request import (
     ApproveOutputPortAsInputPortRequest,
     DenyOutputPortAsInputPortRequest,
@@ -36,31 +36,6 @@ from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
-
-_emit_output_port_link_approved = emit_event_after(
-    "output_port.link_approved",
-    OutputPortLinkApprovedEvent,
-    lambda data_product_id, output_port_id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(output_port_id, data_product_id)
-        ).convert(),
-    },
-)
-_emit_output_port_link_denied = emit_event_after(
-    "output_port.link_denied",
-    OutputPortLinkDeniedEvent,
-    lambda data_product_id, output_port_id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(output_port_id, data_product_id)
-        ).convert(),
-    },
-)
 
 router = APIRouter(tags=["Data Products - Output ports - Input ports"])
 route = "/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports"
@@ -92,21 +67,30 @@ def get_input_ports_for_output_port(
                 object_id="output_port_id",
             )
         ),
-        Depends(_emit_output_port_link_approved),
+        Depends(_emits_event(OutputPortLinkApprovedEvent)),
     ],
 )
 def approve_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
-    request: ApproveOutputPortAsInputPortRequest,
+    http_request: Request,
+    body: ApproveOutputPortAsInputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_product_link = DataProductDatasetService(db).approve_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
-        consuming_data_product_id=request.consuming_data_product_id,
+        consuming_data_product_id=body.consuming_data_product_id,
         actor=authenticated_user,
+    )
+    http_request.state.event = OutputPortLinkApprovedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(output_port_id, data_product_id)
+        ).convert(),
     )
 
     event_id = EventService(db).create_event(
@@ -137,21 +121,30 @@ def approve_output_port_as_input_port(
                 object_id="output_port_id",
             )
         ),
-        Depends(_emit_output_port_link_denied),
+        Depends(_emits_event(OutputPortLinkDeniedEvent)),
     ],
 )
 def deny_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
-    request: DenyOutputPortAsInputPortRequest,
+    http_request: Request,
+    body: DenyOutputPortAsInputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_product_link = DataProductDatasetService(db).deny_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
-        consuming_data_product_id=request.consuming_data_product_id,
+        consuming_data_product_id=body.consuming_data_product_id,
         actor=authenticated_user,
+    )
+    http_request.state.event = OutputPortLinkDeniedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(output_port_id, data_product_id)
+        ).convert(),
     )
 
     event_id = EventService(db).create_event(
