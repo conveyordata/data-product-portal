@@ -184,7 +184,7 @@ mcp = FastMCP(
     ──────────────────────────────
     list_glue_tables(data_product_namespace, environment, database_name)
     → Use the SAME data_product_namespace that worked in Step 4!
-    → database_name may need environment prefix (e.g., 'mimir_experimentation_')
+    → database_name may need environment prefix (e.g., 'datalake_experimentation_')
     → Returns: list of table names in the database
     → Action: Identify which table(s) to query
 
@@ -197,9 +197,9 @@ mcp = FastMCP(
     )
     → Returns: query_execution_id
     → CRITICAL: Use fully qualified names with quotes for hyphens:
-      ✓ CORRECT: SELECT * FROM "mimir_experimentation_sales-data__sales"."users"
+      ✓ CORRECT: SELECT * FROM "datalake_experimentation_sales-data__sales"."users"
       ✗ WRONG:   SELECT * FROM users (missing database)
-      ✗ WRONG:   SELECT * FROM mimir_experimentation_sales-data__sales.users (no quotes)
+      ✗ WRONG:   SELECT * FROM datalake_experimentation_sales-data__sales.users (no quotes)
 
     Step 7: GET RESULTS
     ───────────────────
@@ -259,11 +259,11 @@ mcp = FastMCP(
        get_aws_credentials("mcp-test-sales-overview", "dev")
        → ✓ Success! Use this namespace for all queries
     5. list_glue_tables("mcp-test-sales-overview", "dev",
-                        "mimir_experimentation_mcp-athena-query-test__sales")
+                        "datalake_experimentation_mcp-athena-query-test__sales")
        → Note: Database has environment prefix!
        → Returns: ['users']
     6. query_athena("mcp-test-sales-overview", "dev",
-         'SELECT * FROM "mimir_experimentation_mcp-athena-query-test__sales"."users" LIMIT 100')
+         'SELECT * FROM "datalake_experimentation_mcp-athena-query-test__sales"."users" LIMIT 100')
        → Note: Quotes around database/table names with hyphens!
     7. get_athena_query_results(...) → Returns user data
 
@@ -278,7 +278,7 @@ mcp = FastMCP(
     • TRY CONSUMING DATA PRODUCTS FIRST - this is the most common access pattern
     • Use the SAME namespace for list_glue_tables and query_athena that worked in get_aws_credentials
     • Use fully qualified table names with quotes: "database"."table_name"
-    • Be aware of environment prefixes in database names (e.g., 'mimir_experimentation_')
+    • Be aware of environment prefixes in database names (e.g., 'datalake_experimentation_')
     • Wait and retry if query is still running
     • Default to 'dev' environment unless specified
 
@@ -399,9 +399,9 @@ def query_athena(
     SQL SYNTAX NOTES:
     - Always use fully qualified names: database.table
     - Use double quotes for names with hyphens or special chars:
-      ✓ SELECT * FROM "mimir_experimentation_sales-data__sales"."users"
-      ✗ SELECT * FROM mimir_experimentation_sales-data__sales.users (syntax error)
-    - Database names often have environment prefixes (mimir_experimentation_, mimir_publishing_)
+      ✓ SELECT * FROM "datalake_experimentation_sales-data__sales"."users"
+      ✗ SELECT * FROM datalake_experimentation_sales-data__sales.users (syntax error)
+    - Database names often have environment prefixes (datalake_experimentation_, datalake_publishing_)
 
     Args:
         data_product_namespace: The namespace that has access (from consuming data product).
@@ -1084,8 +1084,8 @@ def list_glue_tables(
     the output port's data_product_links[], NOT the owner namespace.
 
     NOTE: The database_name often has an environment prefix added by the platform.
-    If you get "Database not found", try prefixing with 'mimir_experimentation_' or 'mimir_publishing_'.
-    Example: 'sales-data__sales' becomes 'mimir_experimentation_sales-data__sales'
+    If you get "Database not found", try prefixing with 'datalake_experimentation_' or 'datalake_publishing_'.
+    Example: 'sales-data__sales' becomes 'datalake_experimentation_sales-data__sales'
 
     Args:
         data_product_namespace: The namespace that has access (from consuming data product).
