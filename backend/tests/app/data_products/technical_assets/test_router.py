@@ -751,6 +751,8 @@ def ta_event_payload():
         "tag_ids": [str(tag.id)],
     }
 
+
+class TestTechnicalAssetsRouterV2Events:
     @staticmethod
     def _ta_endpoint(dp_id):
         return ENDPOINT.format(dp_id)
