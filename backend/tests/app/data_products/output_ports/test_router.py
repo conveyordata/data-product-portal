@@ -2,8 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-from app.authorization.roles.schema import Prototype, Scope
-from app.authorization.roles.service import RoleService
+from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
@@ -52,8 +51,7 @@ def dataset_payload():
 class TestDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_dataset(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_create_dataset(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -66,11 +64,10 @@ class TestDatasetsRouter:
         created_dataset = self.create_output_port(
             client, dataset_payload["data_product_id"], dataset_payload
         )
-        assert created_dataset.status_code == 200
+        assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
 
     def test_create_output_port(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -88,7 +85,6 @@ class TestDatasetsRouter:
         assert "id" in created_dataset.json()
 
     def test_create_output_port_type_public(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -110,23 +106,7 @@ class TestDatasetsRouter:
         )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
-    def test_create_dataset_no_owner_role(self, dataset_payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
-        created_dataset = self.create_output_port(
-            client, dataset_payload["data_product_id"], dataset_payload
-        )
-        assert created_dataset.status_code == 400
-
     def test_create_dataset_no_owners(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -144,7 +124,6 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 422
 
     def test_create_dataset_duplicate_namespace(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -164,7 +143,6 @@ class TestDatasetsRouter:
     def test_create_dataset_invalid_characters_namespace(
         self, session, dataset_payload, client
     ):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -185,7 +163,6 @@ class TestDatasetsRouter:
     def test_create_dataset_invalid_length_namespace(
         self, session, dataset_payload, client
     ):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -563,7 +540,7 @@ class TestDatasetsRouter:
 
     def test_get_private_dataset_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        role = RoleFactory.dataset_owner()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.get_output_port(client, ds.id, ds.data_product.id)
@@ -596,7 +573,7 @@ class TestDatasetsRouter:
 
     def test_get_private_datasets_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
+        role = RoleFactory.data_product_owner()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = client.get(ENDPOINT.format(ds.data_product.id))
@@ -679,10 +656,7 @@ class TestDatasetsRouter:
 
         assert response.status_code == 400
 
-    def test_history_event_created_on_create_dataset(
-        self, session, dataset_payload, client
-    ):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_history_event_created_on_create_dataset(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -705,8 +679,7 @@ class TestDatasetsRouter:
         )
         assert len(history.json()["events"]) == 2
 
-    def test_get_output_port_history(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_get_output_port_history(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,

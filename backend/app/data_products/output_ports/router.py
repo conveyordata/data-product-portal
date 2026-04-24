@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -58,11 +58,6 @@ def _assign_owner_role_assignments(
     dataset_id: UUID, owners: Sequence[UUID], db: Session, actor: User
 ) -> None:
     owner_role = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
-    if owner_role is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Owner role not found",
-        )
 
     assignment_service = RoleAssignmentService(db)
     event_service = EventService(db)

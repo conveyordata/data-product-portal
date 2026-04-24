@@ -1,5 +1,4 @@
 from app.authorization.roles.schema import Scope
-from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.curated_queries.schema_request import (
     OutputPortCuratedQueryInput,
@@ -19,7 +18,6 @@ ENDPOINT = "/api/v2/data_products"
 
 
 def _assign_update_role(session, dataset):
-    RoleService(db=session).initialize_prototype_roles()
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(
         scope=Scope.DATASET,

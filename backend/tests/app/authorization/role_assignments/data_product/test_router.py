@@ -6,7 +6,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.roles.schema import Prototype, Role, Scope
+from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
 from tests.factories import (
@@ -177,9 +177,8 @@ class TestDataProductRoleAssignmentsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
         )
-
+        role = RoleFactory.data_product_owner()
         user_1, user_2 = UserFactory.create_batch(2)
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
         assignment_1 = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user_1.id,
@@ -323,13 +322,12 @@ class TestDataProductRoleAssignmentsRouter:
     def test_modify_last_owner(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
-        owner: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.CUSTOM)
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
-            role_id=owner.id,
+            role_id=RoleFactory.data_product_owner().id,
             decision=DecisionStatus.APPROVED,
         )
 
