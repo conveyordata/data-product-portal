@@ -917,6 +917,25 @@ files = [
 ]
 
 [[package]]
+name = "dpp-sdk"
+version = "0.1.0"
+description = "SDK for Data Product Portal"
+optional = false
+python-versions = "^3.13"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+attrs = ">=22.2.0"
+httpx = ">=0.23.0,<0.29.0"
+python-dateutil = ">=2.8.0"
+
+[package.source]
+type = "directory"
+url = "../sdk"
+
+[[package]]
 name = "email-validator"
 version = "2.3.0"
 description = "A robust email address syntax and deliverability validation library."
@@ -4748,4 +4767,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "bb68f6cece3861b61c66488014e2b04510f267d44c2531e6c8f68ebbfb3bdde2"
+content-hash = "e96939d224d30d8bccf12c7a3684475b30bcc23d26a748f6fd6b0b2d238773a0"
