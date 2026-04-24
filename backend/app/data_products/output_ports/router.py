@@ -25,7 +25,7 @@ from app.core.webhooks.events import (
     OutputPortStatusUpdatedEvent,
     OutputPortUpdatedEvent,
 )
-from app.core.webhooks.v2 import emit_event, emit_event_after
+from app.core.webhooks.v2 import _emits_event
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
@@ -98,81 +98,6 @@ def _assign_owner_role_assignments(
         )
 
 
-_emit_output_port_created = emit_event_after(
-    "output_port.created",
-    OutputPortCreatedEvent,
-    lambda request, data_product_id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(
-                request.state.output_port_id, data_product_id
-            )
-        ).convert(),
-    },
-)
-_emit_output_port_updated = emit_event_after(
-    "output_port.updated",
-    OutputPortUpdatedEvent,
-    lambda data_product_id, id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
-    },
-)
-_emit_output_port_deleted = emit_event(
-    "output_port.deleted",
-    OutputPortDeletedEvent,
-    lambda data_product_id, id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
-    },
-)
-_emit_output_port_about_updated = emit_event_after(
-    "output_port.about_updated",
-    OutputPortAboutUpdatedEvent,
-    lambda data_product_id, id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
-    },
-)
-_emit_output_port_status_updated = emit_event_after(
-    "output_port.status_updated",
-    OutputPortStatusUpdatedEvent,
-    lambda data_product_id, id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
-    },
-)
-_emit_output_port_setting_changed = emit_event_after(
-    "output_port.setting_changed",
-    OutputPortSettingChangedEvent,
-    lambda data_product_id, id, db, **_: {
-        "data_product": GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
-        ),
-        "output_port": DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
-    },
-)
-
 router = APIRouter(tags=["Data Products - Output ports"])
 route = "/v2/data_products/{data_product_id}/output_ports"
 router.include_router(query_stats_router)
@@ -230,7 +155,7 @@ def get_output_ports_event_history(
         Depends(
             Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
         ),
-        Depends(_emit_output_port_created),
+        Depends(_emits_event(OutputPortCreatedEvent)),
     ],
 )
 def create_output_port(
@@ -245,7 +170,14 @@ def create_output_port(
         output_port.access_type = OutputPortAccessType.UNRESTRICTED
 
     new_dataset = OutputPortService(db).create_dataset(data_product_id, output_port)
-    request.state.output_port_id = new_dataset.id
+    request.state.event = OutputPortCreatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(new_dataset.id, data_product_id)
+        ).convert(),
+    )
     _assign_owner_role_assignments(
         new_dataset.id, output_port.owners, db=db, actor=authenticated_user
     )
@@ -277,15 +209,23 @@ def create_output_port(
     },
     dependencies=[
         Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
-        Depends(_emit_output_port_deleted),
+        Depends(_emits_event(OutputPortDeletedEvent)),
     ],
 )
 def remove_output_port(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
+    output_port_for_event = OutputPortService(db).get_dataset(id, data_product_id)
+    request.state.event = OutputPortDeletedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(output_port_for_event).convert(),
+    )
     dataset = OutputPortService(db).remove_dataset(id, data_product_id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
@@ -322,10 +262,11 @@ def remove_output_port(
                 Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
             )
         ),
-        Depends(_emit_output_port_updated),
+        Depends(_emits_event(OutputPortUpdatedEvent)),
     ],
 )
 def update_output_port(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     dataset: DatasetUpdate,
@@ -337,6 +278,14 @@ def update_output_port(
         dataset.access_type = OutputPortAccessType.UNRESTRICTED
 
     response = OutputPortService(db).update_dataset(id, data_product_id, dataset)
+    request.state.event = OutputPortUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, data_product_id)
+        ).convert(),
+    )
 
     EventService(db).create_event(
         CreateEvent(
@@ -366,10 +315,11 @@ def update_output_port(
                 Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
             )
         ),
-        Depends(_emit_output_port_about_updated),
+        Depends(_emits_event(OutputPortAboutUpdatedEvent)),
     ],
 )
 def update_output_port_about(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     dataset: DatasetAboutUpdate,
@@ -377,6 +327,14 @@ def update_output_port_about(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     OutputPortService(db).update_dataset_about(id, data_product_id, dataset)
+    request.state.event = OutputPortAboutUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, data_product_id)
+        ).convert(),
+    )
 
     EventService(db).create_event(
         CreateEvent(
@@ -402,10 +360,11 @@ def update_output_port_about(
         Depends(
             Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
         ),
-        Depends(_emit_output_port_status_updated),
+        Depends(_emits_event(OutputPortStatusUpdatedEvent)),
     ],
 )
 def update_output_port_status(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     dataset: DatasetStatusUpdate,
@@ -413,6 +372,14 @@ def update_output_port_status(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     OutputPortService(db).update_dataset_status(id, data_product_id, dataset)
+    request.state.event = OutputPortStatusUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, data_product_id)
+        ).convert(),
+    )
 
     EventService(db).create_event(
         CreateEvent(
@@ -440,10 +407,11 @@ def get_output_port_graph_data(
         Depends(
             Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
         ),
-        Depends(_emit_output_port_setting_changed),
+        Depends(_emits_event(OutputPortSettingChangedEvent)),
     ],
 )
 def set_value_for_output_port(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     setting_id: UUID,
@@ -453,6 +421,14 @@ def set_value_for_output_port(
 ) -> None:
     ensure_output_port_exists(id, db, data_product_id=data_product_id)
     DataProductSettingService(db).set_value_for_product(setting_id, id, value)
+    request.state.event = OutputPortSettingChangedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        output_port=DatasetGet.model_validate(
+            OutputPortService(db).get_dataset(id, data_product_id)
+        ).convert(),
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_SETTING_UPDATED,
