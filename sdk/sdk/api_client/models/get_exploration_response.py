@@ -2,38 +2,56 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.input_port import InputPort
+    from ..models.domain import Domain
 
 
-T = TypeVar("T", bound="GetInputPortsForOutputPortResponse")
+T = TypeVar("T", bound="GetExplorationResponse")
 
 
 @_attrs_define
-class GetInputPortsForOutputPortResponse:
+class GetExplorationResponse:
     """
     Attributes:
-        input_ports (list[InputPort]):
+        id (UUID):
+        name (str):
+        namespace (str):
+        description (str):
+        domain (Domain):
     """
 
-    input_ports: list[InputPort]
+    id: UUID
+    name: str
+    namespace: str
+    description: str
+    domain: Domain
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        input_ports = []
-        for input_ports_item_data in self.input_ports:
-            input_ports_item = input_ports_item_data.to_dict()
-            input_ports.append(input_ports_item)
+        id = str(self.id)
+
+        name = self.name
+
+        namespace = self.namespace
+
+        description = self.description
+
+        domain = self.domain.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "input_ports": input_ports,
+                "id": id,
+                "name": name,
+                "namespace": namespace,
+                "description": description,
+                "domain": domain,
             }
         )
 
@@ -41,22 +59,29 @@ class GetInputPortsForOutputPortResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.input_port import InputPort
+        from ..models.domain import Domain
 
         d = dict(src_dict)
-        input_ports = []
-        _input_ports = d.pop("input_ports")
-        for input_ports_item_data in _input_ports:
-            input_ports_item = InputPort.from_dict(input_ports_item_data)
+        id = UUID(d.pop("id"))
 
-            input_ports.append(input_ports_item)
+        name = d.pop("name")
 
-        get_input_ports_for_output_port_response = cls(
-            input_ports=input_ports,
+        namespace = d.pop("namespace")
+
+        description = d.pop("description")
+
+        domain = Domain.from_dict(d.pop("domain"))
+
+        get_exploration_response = cls(
+            id=id,
+            name=name,
+            namespace=namespace,
+            description=description,
+            domain=domain,
         )
 
-        get_input_ports_for_output_port_response.additional_properties = d
-        return get_input_ports_for_output_port_response
+        get_exploration_response.additional_properties = d
+        return get_exploration_response
 
     @property
     def additional_keys(self) -> list[str]:

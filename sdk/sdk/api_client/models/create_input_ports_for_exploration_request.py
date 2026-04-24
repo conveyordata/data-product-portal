@@ -1,59 +1,41 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.decision_status import DecisionStatus
-
-if TYPE_CHECKING:
-    from ..models.output_port import OutputPort
-
-
-T = TypeVar("T", bound="InputPort")
+T = TypeVar("T", bound="CreateInputPortsForExplorationRequest")
 
 
 @_attrs_define
-class InputPort:
+class CreateInputPortsForExplorationRequest:
     """
     Attributes:
-        id (UUID):
+        output_ports (list[UUID]):
         justification (str):
-        status (DecisionStatus):
-        output_port_id (UUID):
-        output_port (OutputPort):
     """
 
-    id: UUID
+    output_ports: list[UUID]
     justification: str
-    status: DecisionStatus
-    output_port_id: UUID
-    output_port: OutputPort
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id = str(self.id)
+        output_ports = []
+        for output_ports_item_data in self.output_ports:
+            output_ports_item = str(output_ports_item_data)
+            output_ports.append(output_ports_item)
 
         justification = self.justification
-
-        status = self.status.value
-
-        output_port_id = str(self.output_port_id)
-
-        output_port = self.output_port.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "id": id,
+                "output_ports": output_ports,
                 "justification": justification,
-                "status": status,
-                "output_port_id": output_port_id,
-                "output_port": output_port,
             }
         )
 
@@ -61,29 +43,23 @@ class InputPort:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.output_port import OutputPort
-
         d = dict(src_dict)
-        id = UUID(d.pop("id"))
+        output_ports = []
+        _output_ports = d.pop("output_ports")
+        for output_ports_item_data in _output_ports:
+            output_ports_item = UUID(output_ports_item_data)
+
+            output_ports.append(output_ports_item)
 
         justification = d.pop("justification")
 
-        status = DecisionStatus(d.pop("status"))
-
-        output_port_id = UUID(d.pop("output_port_id"))
-
-        output_port = OutputPort.from_dict(d.pop("output_port"))
-
-        input_port = cls(
-            id=id,
+        create_input_ports_for_exploration_request = cls(
+            output_ports=output_ports,
             justification=justification,
-            status=status,
-            output_port_id=output_port_id,
-            output_port=output_port,
         )
 
-        input_port.additional_properties = d
-        return input_port
+        create_input_ports_for_exploration_request.additional_properties = d
+        return create_input_ports_for_exploration_request
 
     @property
     def additional_keys(self) -> list[str]:

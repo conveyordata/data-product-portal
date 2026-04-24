@@ -31,9 +31,14 @@ from .create_data_product_role_assignment import CreateDataProductRoleAssignment
 from .create_data_product_setting_response import CreateDataProductSettingResponse
 from .create_data_product_type_response import CreateDataProductTypeResponse
 from .create_domain_response import CreateDomainResponse
-from .create_exploration_request import CreateExplorationRequest
+from .create_exploration_request_with_input_ports import (
+    CreateExplorationRequestWithInputPorts,
+)
 from .create_exploration_response import CreateExplorationResponse
 from .create_global_role_assignment import CreateGlobalRoleAssignment
+from .create_input_ports_for_exploration_request import (
+    CreateInputPortsForExplorationRequest,
+)
 from .create_output_port_request import CreateOutputPortRequest
 from .create_output_port_response import CreateOutputPortResponse
 from .create_output_port_role_assignment import CreateOutputPortRoleAssignment
@@ -122,6 +127,7 @@ from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
 from .get_all_platforms_response import GetAllPlatformsResponse
+from .get_data_product_input_ports_response import GetDataProductInputPortsResponse
 from .get_data_product_output_ports_response import GetDataProductOutputPortsResponse
 from .get_data_product_response import GetDataProductResponse
 from .get_data_product_rolled_up_tags_response import GetDataProductRolledUpTagsResponse
@@ -133,8 +139,9 @@ from .get_domains_item import GetDomainsItem
 from .get_domains_response import GetDomainsResponse
 from .get_event_history_response import GetEventHistoryResponse
 from .get_event_history_response_item import GetEventHistoryResponseItem
+from .get_exploration_input_ports_response import GetExplorationInputPortsResponse
+from .get_exploration_response import GetExplorationResponse
 from .get_explorations_response import GetExplorationsResponse
-from .get_input_ports_for_output_port_response import GetInputPortsForOutputPortResponse
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
@@ -303,9 +310,10 @@ __all__ = (
     "CreateDataProductSettingResponse",
     "CreateDataProductTypeResponse",
     "CreateDomainResponse",
-    "CreateExplorationRequest",
+    "CreateExplorationRequestWithInputPorts",
     "CreateExplorationResponse",
     "CreateGlobalRoleAssignment",
+    "CreateInputPortsForExplorationRequest",
     "CreateOutputPortRequest",
     "CreateOutputPortResponse",
     "CreateOutputPortRoleAssignment",
@@ -378,6 +386,7 @@ __all__ = (
     "FieldDependency",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
+    "GetDataProductInputPortsResponse",
     "GetDataProductOutputPortsResponse",
     "GetDataProductResponse",
     "GetDataProductRolledUpTagsResponse",
@@ -389,8 +398,9 @@ __all__ = (
     "GetDomainsResponse",
     "GetEventHistoryResponse",
     "GetEventHistoryResponseItem",
+    "GetExplorationInputPortsResponse",
+    "GetExplorationResponse",
     "GetExplorationsResponse",
-    "GetInputPortsForOutputPortResponse",
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",

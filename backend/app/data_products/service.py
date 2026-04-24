@@ -1,15 +1,13 @@
 import copy
-from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
-import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
-from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.configuration.data_product_lifecycles.model import (
@@ -29,13 +27,10 @@ from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.data_products.output_ports.model import ensure_output_port_exists
-from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -58,27 +53,11 @@ from app.users.model import User as UserModel
 from app.users.schema import User
 
 
-class DataProductService:
+class DataProductService(AbstractDataProductService):
     def __init__(self, db: Session):
-        self.db = db
+        super().__init__(db)
         self.namespace_validator = NamespaceValidator(DataProductModel)
         self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
-
-    def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
-        ensure_data_product_exists(data_product_id, self.db)
-        return (
-            self.db.scalars(
-                select(InputPortModel)
-                .options(
-                    selectinload(InputPortModel.dataset),
-                )
-                .filter(
-                    InputPortModel.consuming_abstract_data_product_id == data_product_id
-                ),
-            )
-            .unique()
-            .all()
-        )
 
     def get_data_product_settings(
         self, data_product_id: UUID
@@ -277,115 +256,6 @@ class DataProductService:
         current_data_product.usage = usage.usage
         self.db.commit()
         return current_data_product
-
-    def link_dataset_to_data_product(
-        self,
-        id: UUID,
-        dataset_id: UUID,
-        justification: str,
-        *,
-        actor: User,
-    ) -> InputPortModel:
-        """
-        Links an output port to a data product to be used as input port.
-        """
-
-        dataset = ensure_output_port_exists(
-            dataset_id,
-            self.db,
-            options=[
-                selectinload(DatasetModel.data_product_links)
-                .selectinload(InputPortModel.consuming_abstract_data_product)
-                .selectinload(AbstractDataProduct.input_ports)
-            ],
-        )
-        data_product = self.db.get(
-            DataProductModel,
-            id,
-            options=[selectinload(DataProductModel.input_ports)],
-            populate_existing=True,
-        )
-
-        if dataset.id in [
-            link.dataset_id
-            for link in data_product.input_ports
-            if link.status != DecisionStatus.DENIED
-        ]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Dataset {dataset_id} already exists in data product {id}",
-            )
-        if dataset.data_product_id == data_product.id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot link own dataset to data product",
-            )
-
-        if not OutputPortService(self.db).is_visible_to_user(dataset, actor):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private dataset",
-            )
-
-        approval_status = (
-            DecisionStatus.PENDING
-            if dataset.access_type != OutputPortAccessType.UNRESTRICTED
-            else DecisionStatus.APPROVED
-        )
-
-        dataset_link = InputPortModel(
-            dataset_id=dataset_id,
-            status=approval_status,
-            justification=justification,
-            requested_by=actor,
-            requested_on=datetime.now(tz=pytz.utc),
-        )
-        data_product.input_ports.append(dataset_link)
-        return dataset_link
-
-    def link_datasets_to_data_product(
-        self,
-        id: UUID,
-        dataset_ids: list[UUID],
-        justification: str,
-        *,
-        actor: User,
-    ) -> list[InputPortModel]:
-        dataset_links = [
-            self.link_dataset_to_data_product(
-                id, dataset_id, justification, actor=actor
-            )
-            for dataset_id in dataset_ids
-        ]
-        self.db.commit()
-        return dataset_links
-
-    def unlink_dataset_from_data_product(
-        self,
-        id: UUID,
-        dataset_id: UUID,
-    ) -> InputPortModel:
-        ensure_output_port_exists(dataset_id, self.db)
-        data_product = ensure_data_product_exists(
-            id, self.db, options=[selectinload(DataProductModel.input_ports)]
-        )
-        data_product_dataset = next(
-            (
-                dataset
-                for dataset in data_product.input_ports
-                if dataset.dataset_id == dataset_id
-            ),
-            None,
-        )
-        if not data_product_dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data product dataset for data product {id} not found",
-            )
-
-        data_product.input_ports.remove(data_product_dataset)
-        self.db.commit()
-        return data_product_dataset
 
     @deprecated("Should use generate_signin_url instead")
     def get_data_product_role_arn(self, id: UUID, environment: str) -> str:

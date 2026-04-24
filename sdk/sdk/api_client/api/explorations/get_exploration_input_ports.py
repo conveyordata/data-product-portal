@@ -7,8 +7,8 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_data_product_input_ports_response import (
-    GetDataProductInputPortsResponse,
+from ...models.get_exploration_input_ports_response import (
+    GetExplorationInputPortsResponse,
 )
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
@@ -20,7 +20,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/api/v2/data_products/{id}/input_ports".format(
+        "url": "/api/v2/explorations/{id}/input_ports".format(
             id=quote(str(id), safe=""),
         ),
     }
@@ -30,9 +30,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> GetDataProductInputPortsResponse | HTTPValidationError | None:
+) -> GetExplorationInputPortsResponse | HTTPValidationError | None:
     if response.status_code == 200:
-        response_200 = GetDataProductInputPortsResponse.from_dict(response.json())
+        response_200 = GetExplorationInputPortsResponse.from_dict(response.json())
 
         return response_200
 
@@ -49,7 +49,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetDataProductInputPortsResponse | HTTPValidationError]:
+) -> Response[GetExplorationInputPortsResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -62,8 +62,8 @@ def sync_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetDataProductInputPortsResponse | HTTPValidationError]:
-    """Get Data Product Input Ports
+) -> Response[GetExplorationInputPortsResponse | HTTPValidationError]:
+    """Get Exploration Input Ports
 
     Args:
         id (UUID):
@@ -73,7 +73,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetDataProductInputPortsResponse | HTTPValidationError]
+        Response[GetExplorationInputPortsResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -91,8 +91,8 @@ def sync(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> GetDataProductInputPortsResponse | HTTPValidationError | None:
-    """Get Data Product Input Ports
+) -> GetExplorationInputPortsResponse | HTTPValidationError | None:
+    """Get Exploration Input Ports
 
     Args:
         id (UUID):
@@ -102,7 +102,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetDataProductInputPortsResponse | HTTPValidationError
+        GetExplorationInputPortsResponse | HTTPValidationError
     """
 
     return sync_detailed(
@@ -115,8 +115,8 @@ async def asyncio_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetDataProductInputPortsResponse | HTTPValidationError]:
-    """Get Data Product Input Ports
+) -> Response[GetExplorationInputPortsResponse | HTTPValidationError]:
+    """Get Exploration Input Ports
 
     Args:
         id (UUID):
@@ -126,7 +126,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetDataProductInputPortsResponse | HTTPValidationError]
+        Response[GetExplorationInputPortsResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -142,8 +142,8 @@ async def asyncio(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> GetDataProductInputPortsResponse | HTTPValidationError | None:
-    """Get Data Product Input Ports
+) -> GetExplorationInputPortsResponse | HTTPValidationError | None:
+    """Get Exploration Input Ports
 
     Args:
         id (UUID):
@@ -153,7 +153,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetDataProductInputPortsResponse | HTTPValidationError
+        GetExplorationInputPortsResponse | HTTPValidationError
     """
 
     return (

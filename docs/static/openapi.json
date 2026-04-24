@@ -6567,7 +6567,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateExplorationRequest"
+                "$ref": "#/components/schemas/CreateExplorationRequestWithInputPorts"
               }
             }
           },
@@ -6580,6 +6580,92 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}": {
+      "get": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Get Exploration",
+        "operationId": "get_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/input_ports": {
+      "get": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Get Exploration Input Ports",
+        "operationId": "get_exploration_input_ports",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExplorationInputPortsResponse"
                 }
               }
             }
@@ -7228,7 +7314,7 @@
         ],
         "title": "CreateDomainResponse"
       },
-      "CreateExplorationRequest": {
+      "CreateExplorationRequestWithInputPorts": {
         "properties": {
           "name": {
             "type": "string",
@@ -7246,6 +7332,16 @@
             "type": "string",
             "format": "uuid",
             "title": "Domain Id"
+          },
+          "input_ports": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CreateInputPortsForExplorationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -7255,7 +7351,7 @@
           "description",
           "domain_id"
         ],
-        "title": "CreateExplorationRequest"
+        "title": "CreateExplorationRequestWithInputPorts"
       },
       "CreateExplorationResponse": {
         "properties": {
@@ -7317,6 +7413,28 @@
           "role_id"
         ],
         "title": "CreateGlobalRoleAssignment"
+      },
+      "CreateInputPortsForExplorationRequest": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports",
+          "justification"
+        ],
+        "title": "CreateInputPortsForExplorationRequest"
       },
       "CreateOutputPortRequest": {
         "properties": {
@@ -9425,7 +9543,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/app__data_products__schema_response__InputPort"
+              "$ref": "#/components/schemas/app__abstract_data_product__schema_response__InputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -9886,6 +10004,55 @@
           "actor"
         ],
         "title": "GetEventHistoryResponseItem"
+      },
+      "GetExplorationInputPortsResponse": {
+        "properties": {
+          "input_ports": {
+            "items": {
+              "$ref": "#/components/schemas/app__abstract_data_product__schema_response__InputPort"
+            },
+            "type": "array",
+            "title": "Input Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_ports"
+        ],
+        "title": "GetExplorationInputPortsResponse"
+      },
+      "GetExplorationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain"
+        ],
+        "title": "GetExplorationResponse"
       },
       "GetExplorationsResponse": {
         "properties": {
@@ -13427,6 +13594,39 @@
         ],
         "title": "ValidationError"
       },
+      "app__abstract_data_product__schema_response__InputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "status",
+          "output_port_id",
+          "output_port"
+        ],
+        "title": "InputPort"
+      },
       "app__data_products__output_ports__input_ports__schema_response__InputPort": {
         "properties": {
           "id": {
@@ -13448,14 +13648,6 @@
           },
           "consuming_abstract_data_product": {
             "$ref": "#/components/schemas/AbstractDataProductInfo"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
           }
         },
         "type": "object",
@@ -13464,42 +13656,7 @@
           "justification",
           "status",
           "consuming_abstract_data_product_id",
-          "consuming_abstract_data_product",
-          "output_port_id",
-          "output_port"
-        ],
-        "title": "InputPort"
-      },
-      "app__data_products__schema_response__InputPort": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "justification",
-          "status",
-          "output_port_id",
-          "output_port"
+          "consuming_abstract_data_product"
         ],
         "title": "InputPort"
       }

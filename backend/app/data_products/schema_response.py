@@ -4,6 +4,7 @@ from warnings import deprecated
 
 from pydantic import Field
 
+from app.abstract_data_product.schema_response import InputPort
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import DataProductSettingValue
 from app.configuration.data_product_types.schema import DataProductType
@@ -12,8 +13,6 @@ from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema_response import (
     BaseTechnicalAssetOutputPortAssociationGet,
 )
-from app.data_products.output_ports.input_ports.schema import InputPortBase
-from app.data_products.output_ports.schema import OutputPort
 from app.data_products.status import DataProductStatus
 from app.data_products.technical_assets.schema_response import (
     BaseTechnicalAssetGet,
@@ -39,11 +38,6 @@ class BaseDataProductGet(ORMModel):
 class TechnicalAssetLinks(BaseTechnicalAssetGet):
     # Nested schemas
     output_port_links: list[BaseTechnicalAssetOutputPortAssociationGet]
-
-
-class InputPort(InputPortBase):
-    output_port_id: UUID = Field(validation_alias="dataset_id")
-    output_port: OutputPort = Field(validation_alias="dataset")
 
 
 class GetDataProductResponse(BaseDataProductGet):

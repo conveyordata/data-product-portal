@@ -4,14 +4,14 @@ from enum import Enum
 from sqlalchemy import Column, ForeignKey, String, func, select
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, deferred, mapped_column, relationship
+from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.domains.model import Domain
 from app.data_products.output_ports.model import (
     InputPort,
 )
-from app.database.database import Base
+from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 
@@ -61,3 +61,9 @@ class AbstractDataProduct(Base, BaseORM):
         .scalar_subquery(),
         raiseload=True,
     )
+
+
+def ensure_abstract_data_product_exists(
+    id: UUID, db: Session, **kwargs
+) -> AbstractDataProduct:
+    return ensure_exists(id, db, AbstractDataProduct, **kwargs)

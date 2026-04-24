@@ -1,6 +1,12 @@
+from typing import Optional
 from uuid import UUID
 
 from app.shared.schema import ORMModel
+
+
+class CreateInputPortsForExplorationRequest(ORMModel):
+    output_ports: list[UUID]
+    justification: str
 
 
 class CreateExplorationRequest(ORMModel):
@@ -8,3 +14,7 @@ class CreateExplorationRequest(ORMModel):
     namespace: str
     description: str
     domain_id: UUID
+
+
+class CreateExplorationRequestWithInputPorts(CreateExplorationRequest):
+    input_ports: Optional[CreateInputPortsForExplorationRequest] = None

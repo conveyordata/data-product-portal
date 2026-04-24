@@ -7,9 +7,6 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_input_ports_for_output_port_response import (
-    GetInputPortsForOutputPortResponse,
-)
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -32,12 +29,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> GetInputPortsForOutputPortResponse | HTTPValidationError | None:
-    if response.status_code == 200:
-        response_200 = GetInputPortsForOutputPortResponse.from_dict(response.json())
-
-        return response_200
-
+) -> HTTPValidationError | None:
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -51,7 +43,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetInputPortsForOutputPortResponse | HTTPValidationError]:
+) -> Response[HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -65,7 +57,7 @@ def sync_detailed(
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetInputPortsForOutputPortResponse | HTTPValidationError]:
+) -> Response[HTTPValidationError]:
     """Get Input Ports For Output Port
 
     Args:
@@ -77,7 +69,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetInputPortsForOutputPortResponse | HTTPValidationError]
+        Response[HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -97,7 +89,7 @@ def sync(
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> GetInputPortsForOutputPortResponse | HTTPValidationError | None:
+) -> HTTPValidationError | None:
     """Get Input Ports For Output Port
 
     Args:
@@ -109,7 +101,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetInputPortsForOutputPortResponse | HTTPValidationError
+        HTTPValidationError
     """
 
     return sync_detailed(
@@ -124,7 +116,7 @@ async def asyncio_detailed(
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetInputPortsForOutputPortResponse | HTTPValidationError]:
+) -> Response[HTTPValidationError]:
     """Get Input Ports For Output Port
 
     Args:
@@ -136,7 +128,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetInputPortsForOutputPortResponse | HTTPValidationError]
+        Response[HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -154,7 +146,7 @@ async def asyncio(
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> GetInputPortsForOutputPortResponse | HTTPValidationError | None:
+) -> HTTPValidationError | None:
     """Get Input Ports For Output Port
 
     Args:
@@ -166,7 +158,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetInputPortsForOutputPortResponse | HTTPValidationError
+        HTTPValidationError
     """
 
     return (

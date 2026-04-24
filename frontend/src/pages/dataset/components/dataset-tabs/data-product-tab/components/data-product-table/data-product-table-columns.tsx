@@ -17,6 +17,8 @@ import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
+    dataProductId: string;
+    outputPortId: string;
     dataProductLinks: InputPort[];
     onAcceptDataProductDatasetLink: (request: ApproveOutputPortAsInputPortApiArg) => void;
     onRejectDataProductDatasetLink: (request: DenyOutputPortAsInputPortApiArg) => void;
@@ -28,6 +30,8 @@ type Props = {
 
 export const getDatasetDataProductsColumns = ({
     t,
+    dataProductId,
+    outputPortId,
     dataProductLinks,
     onRemoveDataProductDatasetLink,
     onRejectDataProductDatasetLink,
@@ -84,7 +88,6 @@ export const getDatasetDataProductsColumns = ({
                     consuming_abstract_data_product: consuming_data_product,
                     consuming_abstract_data_product_id: consuming_data_product_id,
                     status,
-                    output_port,
                 },
             ) => {
                 if (status === DecisionStatus.Pending) {
@@ -97,8 +100,8 @@ export const getDatasetDataProductsColumns = ({
                                 })}
                                 onConfirm={() =>
                                     onAcceptDataProductDatasetLink({
-                                        outputPortId: output_port.id,
-                                        dataProductId: output_port.data_product_id,
+                                        outputPortId,
+                                        dataProductId,
                                         approveOutputPortAsInputPortRequest: {
                                             consuming_data_product_id: consuming_data_product_id,
                                         },
@@ -121,8 +124,8 @@ export const getDatasetDataProductsColumns = ({
                                 })}
                                 onConfirm={() =>
                                     onRejectDataProductDatasetLink({
-                                        outputPortId: output_port.id,
-                                        dataProductId: output_port.data_product_id,
+                                        outputPortId,
+                                        dataProductId,
                                         denyOutputPortAsInputPortRequest: {
                                             consuming_data_product_id: consuming_data_product_id,
                                         },
@@ -150,8 +153,8 @@ export const getDatasetDataProductsColumns = ({
                             })}
                             onConfirm={() =>
                                 onRejectDataProductDatasetLink({
-                                    outputPortId: output_port.id,
-                                    dataProductId: output_port.data_product_id,
+                                    outputPortId,
+                                    dataProductId,
                                     denyOutputPortAsInputPortRequest: {
                                         consuming_data_product_id: consuming_data_product_id,
                                     },
@@ -176,7 +179,7 @@ export const getDatasetDataProductsColumns = ({
                             type={'link'}
                             onClick={() =>
                                 onRemoveDataProductDatasetLink(
-                                    output_port.data_product_id,
+                                    dataProductId,
                                     consuming_data_product.name,
                                     consuming_data_product_id,
                                 )
