@@ -1,6 +1,7 @@
 import Icon, {
     BarChartOutlined,
     CompassOutlined,
+    EuroOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
     SettingOutlined,
@@ -20,6 +21,7 @@ import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
+import { CostsTab } from '@/pages/data-product/components/data-product-tabs/costs-tab/costs-tab.tsx';
 import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { InputPortTab } from '@/pages/data-product/components/data-product-tabs/input-port-tab/input-port-tab.tsx';
@@ -101,6 +103,12 @@ export function DataProductTabs({ dataProductId }: Props) {
                 key: TabKeys.Usage,
                 icon: <BarChartOutlined />,
                 children: <UsageTab dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Costs'),
+                key: TabKeys.Costs,
+                icon: <EuroOutlined />,
+                children: <CostsTab dataProductId={dataProductId} />,
             },
             {
                 label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
