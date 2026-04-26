@@ -18,18 +18,18 @@ type BreakdownRow = {
     share: number;
 };
 
-const DAY_RANGE_OPTIONS = [
-    { label: '30d', value: 30 },
-    { label: '90d', value: 90 },
-    { label: '180d', value: 180 },
-];
-
 function formatEur(value: number): string {
     return `€${value.toFixed(2)}`;
 }
 
 export function CostsTab({ dataProductId }: Props) {
     const { t } = useTranslation();
+
+    const DAY_RANGE_OPTIONS = [
+        { label: t('Last 30 days'), value: 30 },
+        { label: t('Last 90 days'), value: 90 },
+        { label: t('Last 180 days'), value: 180 },
+    ];
     const [dayRange, setDayRange] = useState<number>(30);
 
     const { data, isLoading } = useGetDataProductCostSummaryQuery(
