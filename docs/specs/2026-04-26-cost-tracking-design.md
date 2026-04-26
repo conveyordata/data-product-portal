@@ -107,7 +107,9 @@ Response `201`:
 
 **`GET /cost`** — Fetch cost history
 Auth: no special auth (same as other GET endpoints on output ports)
-Query params: `limit` (default 90)
+Query params: `day_range` (int, default 90, same pattern as `query_stats`)
+
+Returns all records pushed within the last `day_range` days, ordered by `recorded_at` descending.
 
 Response:
 ```json
@@ -132,12 +134,17 @@ Implemented in `backend/app/data_products/router.py` (added directly, not a sub-
 
 Route: `GET /v2/data_products/{id}/cost`
 
-Aggregates the latest cost record from each output port belonging to this data product. Output ports with no cost data are excluded.
+Query params: `day_range` (int, default 30)
+
+Sums all cost records within the last `day_range` days per output port, then aggregates across output ports into a total. Output ports with no cost data in the window are excluded.
+
+Using a sum (not latest-only) means the period total reflects all pushes in the window — if billing pushes monthly, a 30-day window yields one record per output port; a 90-day window yields three months summed.
 
 Response:
 ```json
 {
   "data_product_id": "...",
+  "day_range": 30,
   "total_cost": 240.00,
   "breakdown": [
     {
@@ -175,11 +182,14 @@ New components:
 
 ### Costs tab layout
 
+A `day_range` selector (e.g. Ant Design `Segmented` or `Select`: 30 / 90 / 180 days, default 30) sits above the content and drives the API call. Changing the selection re-fetches the cost summary.
+
 ```
+[ Last 30 days ▼ ]   ← day_range selector
+
 ┌─────────────────────────────────────────┐
-│  Total Monthly Cost                     │
+│  Total Cost (last 30 days)              │
 │  €240.00                                │
-│  Based on latest cost record per port   │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
