@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func
@@ -47,7 +48,7 @@ class OutputPortCostService:
 
     def get_data_product_cost_summary(
         self, data_product_id: UUID, day_range: int = 30
-    ) -> list:
+    ) -> list[Any]:
         start_date = date.today() - timedelta(days=day_range)
         return (
             self.db.query(
