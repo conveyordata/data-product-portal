@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -22,6 +23,8 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.data_products.model import ensure_data_product_exists
+from app.data_products.output_ports.cost.service import OutputPortCostService
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -33,6 +36,7 @@ from app.data_products.schema_request import (
 )
 from app.data_products.schema_response import (
     CreateDataProductResponse,
+    DataProductCostSummaryResponse,
     GetDataProductInputPortsResponse,
     GetDataProductResponse,
     GetDataProductRolledUpTagsResponse,
@@ -40,6 +44,7 @@ from app.data_products.schema_response import (
     GetDataProductsResponse,
     GetDataProductsResponseItem,
     LinkInputPortsToDataProductPost,
+    OutputPortCostBreakdown,
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
@@ -559,4 +564,32 @@ def get_data_product_settings(
 ) -> GetDataProductSettingsResponse:
     return GetDataProductSettingsResponse(
         data_product_settings=DataProductService(db).get_data_product_settings(id)
+    )
+
+
+@router.get(f"{route}/{{id}}/cost")
+def get_data_product_cost_summary(
+    id: UUID,
+    day_range: int = Query(default=30, ge=1),
+    db: Session = Depends(get_db_session),
+) -> DataProductCostSummaryResponse:
+    ensure_data_product_exists(id, db)
+    results = OutputPortCostService(db).get_data_product_cost_summary(id, day_range)
+    breakdown = [
+        OutputPortCostBreakdown(
+            output_port_id=row.output_port_id,
+            output_port_name=row.output_port_name,
+            compute_cost=row.compute_cost,
+            storage_cost=row.storage_cost,
+            platform_overhead_cost=row.platform_overhead_cost,
+            total_cost=row.compute_cost + row.storage_cost + row.platform_overhead_cost,
+        )
+        for row in results
+    ]
+    total_cost = sum((b.total_cost for b in breakdown), Decimal(0))
+    return DataProductCostSummaryResponse(
+        data_product_id=id,
+        day_range=day_range,
+        total_cost=total_cost,
+        breakdown=breakdown,
     )

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
@@ -101,3 +102,19 @@ class GetDatabricksWorkspaceUrlResponse(ORMModel):
 
 class GetSnowflakeUrlResponse(ORMModel):
     snowflake_url: str
+
+
+class OutputPortCostBreakdown(ORMModel):
+    output_port_id: UUID
+    output_port_name: str
+    compute_cost: Decimal
+    storage_cost: Decimal
+    platform_overhead_cost: Decimal
+    total_cost: Decimal
+
+
+class DataProductCostSummaryResponse(ORMModel):
+    data_product_id: UUID
+    day_range: int
+    total_cost: Decimal
+    breakdown: list[OutputPortCostBreakdown]

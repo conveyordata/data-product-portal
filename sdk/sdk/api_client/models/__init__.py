@@ -53,6 +53,7 @@ from .data_output_status_update import DataOutputStatusUpdate
 from .data_output_update import DataOutputUpdate
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
+from .data_product_cost_summary_response import DataProductCostSummaryResponse
 from .data_product_create import DataProductCreate
 from .data_product_icon_key import DataProductIconKey
 from .data_product_life_cycle import DataProductLifeCycle
@@ -185,6 +186,7 @@ from .osi_semantic_model_technical_asset_configuration import (
 )
 from .output_port import OutputPort
 from .output_port_access_type import OutputPortAccessType
+from .output_port_cost_breakdown import OutputPortCostBreakdown
 from .output_port_curated_queries import OutputPortCuratedQueries
 from .output_port_curated_queries_update import OutputPortCuratedQueriesUpdate
 from .output_port_curated_query import OutputPortCuratedQuery
@@ -335,6 +337,7 @@ __all__ = (
     "DataOutputUpdate",
     "DataProduct",
     "DataProductAboutUpdate",
+    "DataProductCostSummaryResponse",
     "DataProductCreate",
     "DataProductIconKey",
     "DataProductLifeCycle",
@@ -437,6 +440,7 @@ __all__ = (
     "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
     "OutputPortAccessType",
+    "OutputPortCostBreakdown",
     "OutputPortCuratedQueries",
     "OutputPortCuratedQueriesUpdate",
     "OutputPortCuratedQuery",

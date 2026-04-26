@@ -2319,6 +2319,60 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/cost": {
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Get Data Product Cost Summary",
+        "operationId": "get_data_product_cost_summary",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "day_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 30,
+              "title": "Day Range"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductCostSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/configuration/data_product_types/{id}": {
       "get": {
         "tags": [
@@ -8075,6 +8129,39 @@
         ],
         "title": "DataProductAboutUpdate"
       },
+      "DataProductCostSummaryResponse": {
+        "properties": {
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "day_range": {
+            "type": "integer",
+            "title": "Day Range"
+          },
+          "total_cost": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Total Cost"
+          },
+          "breakdown": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortCostBreakdown"
+            },
+            "type": "array",
+            "title": "Breakdown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product_id",
+          "day_range",
+          "total_cost",
+          "breakdown"
+        ],
+        "title": "DataProductCostSummaryResponse"
+      },
       "DataProductCreate": {
         "properties": {
           "name": {
@@ -11295,6 +11382,49 @@
           "unrestricted"
         ],
         "title": "OutputPortAccessType"
+      },
+      "OutputPortCostBreakdown": {
+        "properties": {
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port_name": {
+            "type": "string",
+            "title": "Output Port Name"
+          },
+          "compute_cost": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Compute Cost"
+          },
+          "storage_cost": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Storage Cost"
+          },
+          "platform_overhead_cost": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Platform Overhead Cost"
+          },
+          "total_cost": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Total Cost"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_id",
+          "output_port_name",
+          "compute_cost",
+          "storage_cost",
+          "platform_overhead_cost",
+          "total_cost"
+        ],
+        "title": "OutputPortCostBreakdown"
       },
       "OutputPortCuratedQueries": {
         "properties": {

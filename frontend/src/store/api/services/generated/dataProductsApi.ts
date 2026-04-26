@@ -151,6 +151,17 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/data_products/${queryArg}/settings`,
       }),
     }),
+    getDataProductCostSummary: build.query<
+      GetDataProductCostSummaryApiResponse,
+      GetDataProductCostSummaryApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/cost`,
+        params: {
+          day_range: queryArg.dayRange,
+        },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -228,6 +239,12 @@ export type UnlinkInputPortFromDataProductApiArg = {
 export type GetDataProductSettingsApiResponse =
   /** status 200 Successful Response */ GetDataProductSettingsResponse;
 export type GetDataProductSettingsApiArg = string;
+export type GetDataProductCostSummaryApiResponse =
+  /** status 200 Successful Response */ DataProductCostSummaryResponse;
+export type GetDataProductCostSummaryApiArg = {
+  id: string;
+  dayRange?: number;
+};
 export type CreateDataProductResponse = {
   id: string;
 };
@@ -543,6 +560,20 @@ export type DataProductSettingValue = {
 export type GetDataProductSettingsResponse = {
   data_product_settings: DataProductSettingValue[];
 };
+export type OutputPortCostBreakdown = {
+  output_port_id: string;
+  output_port_name: string;
+  compute_cost: string;
+  storage_cost: string;
+  platform_overhead_cost: string;
+  total_cost: string;
+};
+export type DataProductCostSummaryResponse = {
+  data_product_id: string;
+  day_range: number;
+  total_cost: string;
+  breakdown: OutputPortCostBreakdown[];
+};
 export enum DataProductStatus {
   Pending = "pending",
   Active = "active",
@@ -631,4 +662,6 @@ export const {
   useUnlinkInputPortFromDataProductMutation,
   useGetDataProductSettingsQuery,
   useLazyGetDataProductSettingsQuery,
+  useGetDataProductCostSummaryQuery,
+  useLazyGetDataProductCostSummaryQuery,
 } = injectedRtkApi;
