@@ -53,7 +53,7 @@ declare
     ready uuid;
 
 begin
-    TRUNCATE TABLE public.data_products_datasets CASCADE;
+    TRUNCATE TABLE public.input_ports CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
     TRUNCATE TABLE public.data_products CASCADE;
     TRUNCATE TABLE public.data_product_types CASCADE;
