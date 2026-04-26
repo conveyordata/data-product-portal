@@ -761,6 +761,16 @@
               }
             }
           },
+          "404": {
+            "description": "Output Port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output Port ID not found"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {

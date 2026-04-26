@@ -1,0 +1,109 @@
+<h2>Design: Frontend</h2>
+<p class="subtitle">Where cost information surfaces in the UI</p>
+
+<div class="section">
+  <h3>1. Output Port page — sidebar additions</h3>
+  <div class="mockup">
+    <div class="mockup-header">dataset.page.tsx — right sidebar (below DatasetQuality)</div>
+    <div class="mockup-body">
+      <div style="display: flex; gap: 24px;">
+        <!-- Existing sidebar -->
+        <div style="flex:1; border: 1px solid #e0e0e0; border-radius:6px; padding:12px; background:#fafafa;">
+          <p class="label">Existing sidebar</p>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee;">
+            <strong style="font-size:12px;">Actions</strong>
+          </div>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee;">
+            <strong style="font-size:12px;">Quality Status</strong>
+          </div>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee;">
+            <strong style="font-size:12px;">Output Port Owners</strong>
+          </div>
+        </div>
+        <!-- Updated sidebar -->
+        <div style="flex:1; border: 1px solid #4a90d9; border-radius:6px; padding:12px; background:#f0f6ff;">
+          <p class="label" style="color:#4a90d9;">Updated sidebar</p>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee;">
+            <strong style="font-size:12px;">Actions</strong>
+          </div>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee;">
+            <strong style="font-size:12px;">Quality Status</strong>
+          </div>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee; border-left: 3px solid #4a90d9;">
+            <strong style="font-size:12px; color:#4a90d9;">💰 Direct Cost</strong>
+            <div style="font-size:11px; margin-top:4px;">
+              <div style="display:flex; justify-content:space-between;"><span>Compute</span><span>€45.00</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>Storage</span><span>€30.00</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>Platform</span><span>€15.00</span></div>
+              <div style="display:flex; justify-content:space-between; font-weight:bold; border-top:1px solid #eee; margin-top:4px; padding-top:4px;"><span>Total</span><span>€90.00</span></div>
+              <div style="color:#666; font-size:10px; margin-top:4px;">Last updated 2h ago · 4 consumers</div>
+            </div>
+          </div>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee; border-left: 3px solid #f0a500;">
+            <strong style="font-size:12px; color:#f0a500;">⬆ Upstream Exposure</strong>
+            <div style="font-size:11px; margin-top:4px;">
+              <div style="display:flex; justify-content:space-between;"><span>CRM Platform / customer_events</span><span>€42.50</span></div>
+              <div style="display:flex; justify-content:space-between; font-weight:bold; border-top:1px solid #eee; margin-top:4px; padding-top:4px;"><span>Total</span><span>€42.50</span></div>
+              <div style="color:#666; font-size:10px; margin-top:4px;">Proportional share of upstream costs</div>
+            </div>
+          </div>
+          <div style="padding: 8px; border-radius:4px; background:#fff; margin-bottom:8px; border:1px solid #eee;">
+            <strong style="font-size:12px;">Output Port Owners</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. Data Product page — output ports tab</h3>
+  <div class="mockup">
+    <div class="mockup-header">data-output-tab.tsx — cost summary above output port cards</div>
+    <div class="mockup-body">
+      <!-- Cost summary card -->
+      <div style="border: 1px solid #4a90d9; border-radius:6px; padding:12px; margin-bottom:16px; background:#f0f6ff;">
+        <strong style="font-size:13px;">Total Output Port Cost</strong>
+        <div style="font-size:22px; font-weight:bold; margin: 6px 0;">€240.00 <span style="font-size:13px; font-weight:normal; color:#666;">/ month</span></div>
+        <!-- Breakdown bars -->
+        <div style="margin-top:8px; font-size:11px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <div style="width:80px; color:#666;">sales_orders</div>
+            <div style="flex:1; background:#e0e0e0; border-radius:2px; height:10px;">
+              <div style="width:62%; background:#4a90d9; border-radius:2px; height:10px;"></div>
+            </div>
+            <div style="width:50px; text-align:right;">€150.00</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:80px; color:#666;">customer_profiles</div>
+            <div style="flex:1; background:#e0e0e0; border-radius:2px; height:10px;">
+              <div style="width:38%; background:#7cb9e8; border-radius:2px; height:10px;"></div>
+            </div>
+            <div style="width:50px; text-align:right;">€90.00</div>
+          </div>
+        </div>
+      </div>
+      <!-- Output port cards (existing) -->
+      <div style="border: 1px solid #e0e0e0; border-radius:6px; padding:10px; margin-bottom:8px; background:#fff; font-size:12px;">
+        <strong>sales_orders</strong> — existing DatasetCard component (unchanged)
+      </div>
+      <div style="border: 1px solid #e0e0e0; border-radius:6px; padding:10px; background:#fff; font-size:12px;">
+        <strong>customer_profiles</strong> — existing DatasetCard component (unchanged)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>New components</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-size:13px;">
+      <ul>
+        <li><code>OutputPortCost</code> — sidebar widget for direct cost (mirrors DatasetQuality structure)</li>
+        <li><code>OutputPortUpstreamCost</code> — sidebar widget for upstream exposure</li>
+        <li><code>DataProductCostSummary</code> — total cost card + bar breakdown on data product page</li>
+      </ul>
+      <p style="color:#666;">RTK Query hooks auto-generated from OpenAPI spec after backend is implemented. No manual API client code.</p>
+    </div>
+  </div>
+</div>

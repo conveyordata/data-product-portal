@@ -20,6 +20,14 @@ route = "/v2/data_products/{data_product_id}/output_ports/{id}/cost"
 @router.post(
     route,
     status_code=201,
+    responses={
+        404: {
+            "description": "Output Port not found",
+            "content": {
+                "application/json": {"example": {"detail": "Output Port ID not found"}}
+            },
+        }
+    },
     dependencies=[
         Depends(Authorization.enforce(Action.OUTPUT_PORT__UPDATE_COST, DatasetResolver))
     ],

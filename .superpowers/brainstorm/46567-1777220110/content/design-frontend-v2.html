@@ -1,0 +1,98 @@
+<h2>Design: Frontend (v1 scope)</h2>
+<p class="subtitle">A new Costs tab on the data product page — no changes to output port page</p>
+
+<div class="section">
+  <h3>Data Product page — new "Costs" tab</h3>
+  <div class="mockup">
+    <div class="mockup-header">Tab bar — Costs tab added next to Usage</div>
+    <div class="mockup-body">
+      <div style="display:flex; gap:0; border-bottom: 2px solid #e0e0e0; margin-bottom:16px; font-size:13px;">
+        <div style="padding:8px 16px; color:#666; border-bottom: 2px solid transparent; margin-bottom:-2px;">About</div>
+        <div style="padding:8px 16px; color:#666; border-bottom: 2px solid transparent; margin-bottom:-2px;">Usage</div>
+        <div style="padding:8px 16px; color:#4a90d9; font-weight:bold; border-bottom: 2px solid #4a90d9; margin-bottom:-2px;">Costs</div>
+        <div style="padding:8px 16px; color:#666; border-bottom: 2px solid transparent; margin-bottom:-2px;">Input Ports</div>
+        <div style="padding:8px 16px; color:#666; border-bottom: 2px solid transparent; margin-bottom:-2px;">Output Ports</div>
+        <div style="padding:8px 16px; color:#666; border-bottom: 2px solid transparent; margin-bottom:-2px;">Team</div>
+        <div style="padding:8px 16px; color:#666; border-bottom: 2px solid transparent; margin-bottom:-2px;">Settings</div>
+      </div>
+
+      <!-- Total cost card -->
+      <div style="border: 1px solid #e0e0e0; border-radius:6px; padding:16px; margin-bottom:20px; background:#fafafa;">
+        <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total Monthly Cost</div>
+        <div style="font-size:28px; font-weight:bold;">€240.00</div>
+        <div style="font-size:12px; color:#666; margin-top:4px;">Based on latest cost record per output port</div>
+      </div>
+
+      <!-- Breakdown table -->
+      <div style="border: 1px solid #e0e0e0; border-radius:6px; overflow:hidden;">
+        <div style="padding:12px 16px; background:#f5f5f5; font-weight:bold; font-size:13px; border-bottom:1px solid #e0e0e0;">
+          Cost by Output Port
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="border-bottom:1px solid #e0e0e0; background:#fafafa;">
+              <th style="text-align:left; padding:8px 16px; color:#666; font-weight:500;">Output Port</th>
+              <th style="text-align:right; padding:8px 12px; color:#666; font-weight:500;">Compute</th>
+              <th style="text-align:right; padding:8px 12px; color:#666; font-weight:500;">Storage</th>
+              <th style="text-align:right; padding:8px 12px; color:#666; font-weight:500;">Platform</th>
+              <th style="text-align:right; padding:8px 16px; color:#666; font-weight:500;">Total</th>
+              <th style="text-align:left; padding:8px 12px; color:#666; font-weight:500;">Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:10px 16px;"><a href="#" style="color:#4a90d9;">sales_orders</a></td>
+              <td style="text-align:right; padding:10px 12px;">€80.00</td>
+              <td style="text-align:right; padding:10px 12px;">€40.00</td>
+              <td style="text-align:right; padding:10px 12px;">€30.00</td>
+              <td style="text-align:right; padding:10px 16px; font-weight:bold;">€150.00</td>
+              <td style="padding:10px 12px;">
+                <div style="background:#e0e0e0; border-radius:2px; height:8px; width:100px;">
+                  <div style="width:63%; background:#4a90d9; border-radius:2px; height:8px;"></div>
+                </div>
+              </td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:10px 16px;"><a href="#" style="color:#4a90d9;">customer_profiles</a></td>
+              <td style="text-align:right; padding:10px 12px;">€50.00</td>
+              <td style="text-align:right; padding:10px 12px;">€20.00</td>
+              <td style="text-align:right; padding:10px 12px;">€20.00</td>
+              <td style="text-align:right; padding:10px 16px; font-weight:bold;">€90.00</td>
+              <td style="padding:10px 12px;">
+                <div style="background:#e0e0e0; border-radius:2px; height:8px; width:100px;">
+                  <div style="width:37%; background:#7cb9e8; border-radius:2px; height:8px;"></div>
+                </div>
+              </td>
+            </tr>
+            <tr style="background:#fafafa; font-weight:bold; border-top:2px solid #e0e0e0;">
+              <td style="padding:10px 16px;">Total</td>
+              <td style="text-align:right; padding:10px 12px;">€130.00</td>
+              <td style="text-align:right; padding:10px 12px;">€60.00</td>
+              <td style="text-align:right; padding:10px 12px;">€50.00</td>
+              <td style="text-align:right; padding:10px 16px;">€240.00</td>
+              <td style="padding:10px 12px;"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:12px; font-size:12px; color:#999;">
+        Output ports with no cost data are excluded from the total.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>New components</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-size:13px;">
+      <ul>
+        <li><code>CostsTab</code> — new tab component in <code>data-product-tabs/costs-tab/</code></li>
+        <li><code>DataProductCostSummary</code> — total cost card</li>
+        <li><code>OutputPortCostTable</code> — breakdown table with per-category columns + share bars</li>
+      </ul>
+      <p style="color:#888; margin-top:8px;">RTK Query hooks auto-generated from OpenAPI after backend ships. Tab key <code>"costs"</code> added to <code>TabKeys</code> enum.</p>
+    </div>
+  </div>
+</div>
