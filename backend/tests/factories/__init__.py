@@ -15,6 +15,7 @@ from .event import EventFactory
 from .exploration import ExplorationFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
+from .output_port_cost_record import OutputPortCostRecordFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
@@ -56,6 +57,7 @@ factories = [
     TechnicalAssetFactory,
     ThemeSettingsFactory,
     NotificationFactory,
+    OutputPortCostRecordFactory,
     ExplorationFactory,
 ]
 
