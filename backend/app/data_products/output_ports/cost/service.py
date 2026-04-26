@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.data_products.output_ports.cost.model import OutputPortCostRecord
 from app.data_products.output_ports.cost.schema_request import CreateCostRecord
+from app.data_products.output_ports.model import ensure_output_port_exists
 
 
 class OutputPortCostService:
@@ -14,6 +15,7 @@ class OutputPortCostService:
     def push_cost_record(
         self, output_port_id: UUID, record: CreateCostRecord
     ) -> OutputPortCostRecord:
+        ensure_output_port_exists(output_port_id, self.db)
         recorded_at = record.recorded_at or date.today()
         db_record = OutputPortCostRecord(
             output_port_id=output_port_id,
@@ -30,6 +32,7 @@ class OutputPortCostService:
     def get_cost_history(
         self, output_port_id: UUID, day_range: int = 90
     ) -> list[OutputPortCostRecord]:
+        ensure_output_port_exists(output_port_id, self.db)
         start_date = date.today() - timedelta(days=day_range)
         return (
             self.db.query(OutputPortCostRecord)
