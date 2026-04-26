@@ -6,14 +6,16 @@ Create Date: 2026-04-26 12:00:00.000000
 
 """
 
+from typing import Sequence, Union
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision = "1b4af17b29f7"
-down_revision = "63243c53dd67"
-branch_labels = None
-depends_on = None
+revision: str = "1b4af17b29f7"
+down_revision: Union[str, None] = "63243c53dd67"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
