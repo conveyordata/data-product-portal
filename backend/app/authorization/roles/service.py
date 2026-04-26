@@ -142,6 +142,7 @@ class RoleService:
                         Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
                         Action.OUTPUT_PORT__READ_INTEGRATIONS,
                         Action.OUTPUT_PORT__UPDATE_DATA_QUALITY,
+                        Action.OUTPUT_PORT__UPDATE_COST,
                     ],
                 ),
                 prototype=Prototype.OWNER,
