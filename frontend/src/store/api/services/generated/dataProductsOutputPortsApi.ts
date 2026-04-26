@@ -79,6 +79,27 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.outputPortDataQualitySummary,
       }),
     }),
+    pushCostRecord: build.mutation<
+      PushCostRecordApiResponse,
+      PushCostRecordApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/cost`,
+        method: "POST",
+        body: queryArg.createCostRecord,
+      }),
+    }),
+    getCostHistory: build.query<
+      GetCostHistoryApiResponse,
+      GetCostHistoryApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/cost`,
+        params: {
+          day_range: queryArg.dayRange,
+        },
+      }),
+    }),
     getDataProductOutputPorts: build.query<
       GetDataProductOutputPortsApiResponse,
       GetDataProductOutputPortsApiArg
@@ -232,6 +253,20 @@ export type OverwriteOutputPortDataQualitySummaryApiArg = {
   summaryId: string;
   outputPortDataQualitySummary: OutputPortDataQualitySummary;
 };
+export type PushCostRecordApiResponse =
+  /** status 201 Successful Response */ CostRecordResponseRead;
+export type PushCostRecordApiArg = {
+  dataProductId: string;
+  id: string;
+  createCostRecord: CreateCostRecord;
+};
+export type GetCostHistoryApiResponse =
+  /** status 200 Successful Response */ CostHistoryResponseRead;
+export type GetCostHistoryApiArg = {
+  dataProductId: string;
+  id: string;
+  dayRange?: number;
+};
 export type GetDataProductOutputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductOutputPortsResponse;
 export type GetDataProductOutputPortsApiArg = string;
@@ -371,6 +406,37 @@ export type OutputPortDataQualitySummary = {
   dimensions?: {
     [key: string]: DataQualityStatus;
   } | null;
+};
+export type CostRecordResponse = {
+  id: string;
+  output_port_id: string;
+  recorded_at: string;
+  compute_cost: string;
+  storage_cost: string;
+  platform_overhead_cost: string;
+};
+export type CostRecordResponseRead = {
+  id: string;
+  output_port_id: string;
+  recorded_at: string;
+  compute_cost: string;
+  storage_cost: string;
+  platform_overhead_cost: string;
+  total_cost: string;
+};
+export type CreateCostRecord = {
+  recorded_at?: string | null;
+  compute_cost: number | string;
+  storage_cost: number | string;
+  platform_overhead_cost: number | string;
+};
+export type CostHistoryResponse = {
+  output_port_id: string;
+  records: CostRecordResponse[];
+};
+export type CostHistoryResponseRead = {
+  output_port_id: string;
+  records: CostRecordResponseRead[];
 };
 export type Tag = {
   id: string;
@@ -733,6 +799,9 @@ export const {
   useLazyGetLatestDataQualitySummaryForOutputPortQuery,
   useAddOutputPortDataQualityRunMutation,
   useOverwriteOutputPortDataQualitySummaryMutation,
+  usePushCostRecordMutation,
+  useGetCostHistoryQuery,
+  useLazyGetCostHistoryQuery,
   useGetDataProductOutputPortsQuery,
   useLazyGetDataProductOutputPortsQuery,
   useCreateOutputPortMutation,

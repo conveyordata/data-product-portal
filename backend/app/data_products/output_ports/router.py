@@ -17,6 +17,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.data_products.output_ports.cost.router import router as cost_router
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
@@ -97,6 +98,7 @@ route = "/v2/data_products/{data_product_id}/output_ports"
 router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
+router.include_router(cost_router)
 
 
 @router.get(route)

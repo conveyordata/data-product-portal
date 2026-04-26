@@ -25,6 +25,9 @@ from .azure_environment_platform_configuration import (
 )
 from .become_admin import BecomeAdmin
 from .can_become_admin_update import CanBecomeAdminUpdate
+from .cost_history_response import CostHistoryResponse
+from .cost_record_response import CostRecordResponse
+from .create_cost_record import CreateCostRecord
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -304,6 +307,9 @@ __all__ = (
     "AzureEnvironmentPlatformConfiguration",
     "BecomeAdmin",
     "CanBecomeAdminUpdate",
+    "CostHistoryResponse",
+    "CostRecordResponse",
+    "CreateCostRecord",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
