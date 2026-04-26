@@ -34,7 +34,7 @@ Cost tracking allows teams to attribute infrastructure costs to their output por
 |---|---|---|
 | `id` | UUID | Primary key |
 | `output_port_id` | UUID | FK → `datasets.id`, CASCADE delete |
-| `recorded_at` | DateTime | `server_default=utcnow()`, indexed |
+| `recorded_at` | Date | Caller-supplied (defaults to today if omitted), indexed |
 | `compute_cost` | Numeric(12,4) | EUR, required |
 | `storage_cost` | Numeric(12,4) | EUR, required |
 | `platform_overhead_cost` | Numeric(12,4) | EUR, required |
@@ -54,7 +54,7 @@ cost_records: Mapped[list["OutputPortCostRecord"]] = relationship(
 )
 ```
 
-The latest record is fetched in the service layer, not as a joined relationship, to avoid loading full history on every output port load.
+Records are fetched in the service layer by filtering on `recorded_at`, not as a joined relationship, to avoid loading full history on every output port load.
 
 ---
 
@@ -83,9 +83,12 @@ Base route: `/v2/data_products/{data_product_id}/output_ports/{id}/cost`
 **`POST /cost`** — Push a cost record
 Auth: new `OUTPUT_PORT__UPDATE_COST` Casbin action (parallel to `OUTPUT_PORT__UPDATE_DATA_QUALITY`)
 
+`recorded_at` is an explicit date field in the request body (following the `query_stats` pattern where `date` is always caller-supplied). This allows billing systems to push cost data for a past period even if the data arrives days later. If omitted, defaults to today.
+
 Request body:
 ```json
 {
+  "recorded_at": "2026-04-01",
   "compute_cost": 45.00,
   "storage_cost": 30.00,
   "platform_overhead_cost": 15.00
@@ -97,7 +100,7 @@ Response `201`:
 {
   "id": "...",
   "output_port_id": "...",
-  "recorded_at": "2026-04-01T00:00:00Z",
+  "recorded_at": "2026-04-01",
   "compute_cost": 45.00,
   "storage_cost": 30.00,
   "platform_overhead_cost": 15.00,
