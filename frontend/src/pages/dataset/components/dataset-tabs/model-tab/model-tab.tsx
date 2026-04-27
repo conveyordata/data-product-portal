@@ -5,6 +5,7 @@ import {
     useGetOutputPortSemanticModelsQuery,
     useGetOutputPortTableSchemasQuery,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { TableSchemaList } from './components/table-schema-list';
 
 type Props = {
     datasetId: string;
@@ -34,9 +35,7 @@ export function ModelTab({ datasetId, dataProductId }: Props) {
                 {tableSchemas.length === 0 ? (
                     <Empty description={t('No table schemas imported yet')} />
                 ) : (
-                    <div>
-                        {tableSchemas.length} {t('table(s) — components coming in Task 13')}
-                    </div>
+                    <TableSchemaList schemas={tableSchemas} />
                 )}
             </div>
             <Divider />
