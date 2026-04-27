@@ -104,7 +104,7 @@ class TestDatasetsService:
         OutputPortService(test_session).recalculate_search(owned_private_dataset.id)
 
         # Search as the regular user
-        search_results = OutputPortService(test_session).search_datasets(
+        search_results = OutputPortService(test_session).search_output_ports(
             query=None, limit=100, user=regular_user, current_user_assigned=False
         )
 
@@ -148,7 +148,7 @@ class TestDatasetsService:
         OutputPortService(test_session).recalculate_search(unrestricted_dataset.id)
 
         # Search as the owner
-        search_results = OutputPortService(test_session).search_datasets(
+        search_results = OutputPortService(test_session).search_output_ports(
             query=None, limit=100, user=owner, current_user_assigned=False
         )
 

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from fastembed import TextEmbedding
-from sqlalchemy import asc, func, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 from sqlalchemy.sql.base import ExecutableOption
 
@@ -43,9 +43,6 @@ from app.data_products.output_ports.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.data_products.output_ports.schema_response import (
-    DatasetsGet,
-)
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
@@ -53,7 +50,6 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.resource_names.service import ResourceNameValidityType
-from app.search_output_ports.schema_response import SearchDatasets
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -123,13 +119,13 @@ class OutputPortService:
         dataset.domain = dataset.data_product.domain
         return dataset
 
-    def search_datasets(
+    def search_output_ports(
         self,
         query: Optional[str],
         limit: int,
         user: UserModel,
         current_user_assigned: bool,
-    ) -> Sequence[SearchDatasets]:
+    ) -> Sequence[DatasetModel]:
         """An attempt was made to use the elbow method to determine a cut-off for returned results.
         The results of this method were quite poor, hence the search currently works as a sorting operation only,
         no filtering is applied other than the limit.
@@ -246,32 +242,6 @@ class OutputPortService:
                 self._recalculate_embeddings_and_search_vector(batch_datasets)
                 self.db.flush()
         self.db.commit()
-
-    def get_datasets(
-        self, user: UserModel, check_user_assigned: bool = False
-    ) -> Sequence[DatasetsGet]:
-        load_options = get_dataset_load_options()
-        default_lifecycle = self.db.scalar(
-            select(DataProductLifeCycleModel).filter(
-                DataProductLifeCycleModel.is_default
-            )
-        )
-        query = (
-            select(DatasetModel).options(*load_options).order_by(asc(DatasetModel.name))
-        )
-        if check_user_assigned:
-            query = query.filter(DatasetModel.assignments.any(user_id=user.id))
-        datasets = [
-            dataset
-            for dataset in self.db.scalars(query).unique().all()
-            if self.is_visible_to_user(dataset, user)
-        ]
-
-        for dataset in datasets:
-            if not dataset.lifecycle:
-                dataset.lifecycle = default_lifecycle
-            dataset.domain = dataset.consuming_abstract_data_product.domain
-        return datasets
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
