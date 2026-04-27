@@ -1,4 +1,4 @@
-import { Flex, Progress, Segmented, Statistic, Table } from 'antd';
+import { Flex, Progress, Radio, type RadioChangeEvent, Statistic, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ export function CostsTab({ dataProductId }: Props) {
     const DAY_RANGE_OPTIONS = [
         { label: t('Last 30 days'), value: 30 },
         { label: t('Last 90 days'), value: 90 },
-        { label: t('Last 180 days'), value: 180 },
+        { label: t('Last year'), value: 365 },
     ];
     const [dayRange, setDayRange] = useState<number>(30);
 
@@ -56,28 +56,28 @@ export function CostsTab({ dataProductId }: Props) {
             key: 'output_port_name',
         },
         {
-            title: t('Compute'),
+            title: <div style={{ textAlign: 'right' }}>{t('Compute')}</div>,
             dataIndex: 'compute_cost',
             key: 'compute_cost',
             align: 'right',
             render: (v: number) => formatEur(v),
         },
         {
-            title: t('Storage'),
+            title: <div style={{ textAlign: 'right' }}>{t('Storage')}</div>,
             dataIndex: 'storage_cost',
             key: 'storage_cost',
             align: 'right',
             render: (v: number) => formatEur(v),
         },
         {
-            title: t('Platform Overhead'),
+            title: <div style={{ textAlign: 'right' }}>{t('Platform Overhead')}</div>,
             dataIndex: 'platform_overhead_cost',
             key: 'platform_overhead_cost',
             align: 'right',
             render: (v: number) => formatEur(v),
         },
         {
-            title: t('Total'),
+            title: <div style={{ textAlign: 'right' }}>{t('Total')}</div>,
             dataIndex: 'total_cost',
             key: 'total_cost',
             align: 'right',
@@ -88,7 +88,19 @@ export function CostsTab({ dataProductId }: Props) {
             dataIndex: 'share',
             key: 'share',
             render: (share: number) => (
-                <Progress percent={Math.round(share)} showInfo={false} size="small" style={{ width: 100 }} />
+                <Flex align="center" gap="small">
+                    <Progress percent={Math.round(share)} showInfo={false} size="small" style={{ width: 80 }} />
+                    <span
+                        style={{
+                            minWidth: 36,
+                            textAlign: 'right',
+                            fontSize: '0.85em',
+                            color: 'var(--ant-color-text-secondary)',
+                        }}
+                    >
+                        {Math.round(share)}%
+                    </span>
+                </Flex>
             ),
         },
     ];
@@ -116,9 +128,16 @@ export function CostsTab({ dataProductId }: Props) {
 
     return (
         <Flex vertical gap="large">
-            <Segmented options={DAY_RANGE_OPTIONS} value={dayRange} onChange={(v) => setDayRange(v as number)} />
-
-            <Statistic title={t('Total Cost')} value={isLoading ? '—' : formatEur(totalCost)} />
+            <Flex justify="space-between" align="center">
+                <Radio.Group
+                    optionType="button"
+                    buttonStyle="solid"
+                    value={dayRange}
+                    onChange={(e: RadioChangeEvent) => setDayRange(e.target.value)}
+                    options={DAY_RANGE_OPTIONS}
+                />
+                <Statistic title={t('Total Cost')} value={isLoading ? '—' : formatEur(totalCost)} />
+            </Flex>
 
             <Table<BreakdownRow>
                 dataSource={tableData}

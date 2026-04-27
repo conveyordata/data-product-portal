@@ -33,20 +33,26 @@ declare
     sales_crm_customers_dp_id uuid;
     sales_erp_orders_dp_id uuid;
     logistics_wms_shipments_dp_id uuid;
+    marketing_customer_360_dp_id uuid;
+    campaign_activation_dp_id uuid;
+    churn_model_dp_id uuid;
 
     -- DATASETS
     sales_crm_customers_ds_id uuid;
     sales_erp_orders_ds_id uuid;
     logistics_wms_shipments_ds_id uuid;
+    marketing_customer_360_ds_id uuid;
 
     -- DATA OUTPUTS
     sales_crm_customers_do_id uuid;
     sales_erp_orders_do_id uuid;
     logistics_wms_shipments_do_id uuid;
+    marketing_customer_360_do_id uuid;
 
     sales_crm_customers_do_config_id uuid;
     sales_erp_orders_do_config_id uuid;
     logistics_wms_shipments_do_config_id uuid;
+    marketing_customer_360_do_config_id uuid;
 
     -- LIFECYLE
     draft uuid;
@@ -71,6 +77,7 @@ begin
     TRUNCATE TABLE public.tags_data_products CASCADE;
     TRUNCATE TABLE public.tags_datasets CASCADE;
     TRUNCATE TABLE public.dataset_query_stats_daily CASCADE;
+    TRUNCATE TABLE public.output_port_cost_records CASCADE;
     TRUNCATE TABLE public.data_product_lifecycles CASCADE;
 
     -- DATA PRODUCT LIFECYLCE
@@ -186,9 +193,66 @@ begin
 <p><strong>Usage:</strong> Approved for logistics optimization, carrier management, and customer service inquiry resolution.</p>
 <p><strong>Limitations:</strong> Data accuracy is dependent on third-party carrier scan events. Not suitable as sole evidence in legal delivery disputes without secondary carrier documentation.</p>', 'ACTIVE', source_aligned_type_id, ready);
 
+    INSERT INTO public.abstract_data_products (id, "name", namespace, description, domain_id, abstract_data_product_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Marketing Customer 360', 'marketing-customer-360', 'A consolidated view of customer activity, combining customer profiles, order history, and shipment status for marketing analysis.', marketing_id, 'data_products', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_customer_360_dp_id;
+    INSERT INTO public.data_products (id, about, status, type_id, lifecycle_id) VALUES (marketing_customer_360_dp_id, '<h3>Value Proposition</h3>
+<p>This data product consolidates fragmented customer signals into a single, authoritative view. By unifying CRM profiles with transactional order history and real-time shipment status, it empowers marketing, data science, and support teams to execute with precision and build lasting customer relationships.<br></p>
+
+<h3>User Consumption Mode</h3>
+<p><strong>Analytical & Operational:</strong> Optimized for both high-performance operational lookups and comprehensive historical trend analysis.<br></p>
+
+<h3>Recommended Use Cases</h3>
+<p><ul>
+  <li><strong>Marketing:</strong> Segmentation for email campaigns and loyalty programs.</li>
+  <li><strong>Support:</strong> Providing agents with a 360-degree view of customer history.</li>
+  <li><strong>Data Science:</strong> Building churn prediction and lifetime value models.</li>
+</ul></p>
+
+<h3>Terms of Use</h3>
+<p><strong>Usage:</strong> Approved for all internal analytics, marketing automation, and customer support workflows.</p>
+<p><strong>Limitations:</strong> Not authorized for external regulatory reporting. Handling of PII must strictly adhere to the corporate GDPR compliance framework.</p>', 'ACTIVE', aggregated_type_id, ready);
+
+    INSERT INTO public.abstract_data_products (id, "name", namespace, description, domain_id, abstract_data_product_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Campaign Activation', 'campaign-activation', 'Transforms enriched customer segments into channel-ready audience lists for targeted campaign execution across email, paid media, and loyalty channels.', marketing_id, 'data_products', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO campaign_activation_dp_id;
+    INSERT INTO public.data_products (id, about, status, type_id, lifecycle_id) VALUES (campaign_activation_dp_id, '<h3>Value Proposition</h3>
+<p>Transforms enriched customer segments from the Marketing Customer 360 into actionable, channel-ready audience lists. Enables marketing teams to execute highly targeted campaigns with measurable precision, reducing wasted spend and increasing conversion rates.<br></p>
+
+<h3>User Consumption Mode</h3>
+<p><strong>Operational:</strong> Designed for direct integration with marketing automation platforms and ad tech systems to activate audience segments in near real time.<br></p>
+
+<h3>Recommended Use Cases</h3>
+<p><ul>
+  <li><strong>Email Marketing:</strong> Automated lifecycle campaigns triggered by customer behavior signals.</li>
+  <li><strong>Paid Media:</strong> Lookalike audience creation and retargeting suppression lists.</li>
+  <li><strong>Loyalty Programs:</strong> Personalized reward offers based on RFM tier and purchase history.</li>
+</ul></p>
+
+<h3>Terms of Use</h3>
+<p><strong>Usage:</strong> Approved for internal marketing automation and paid media activation workflows.</p>
+<p><strong>Limitations:</strong> Customer PII must not be transmitted to third-party ad platforms in raw form. All audience exports must be hashed or anonymized in compliance with GDPR and CCPA requirements.</p>', 'ACTIVE', consumer_aligned_type_id, draft);
+
+    INSERT INTO public.abstract_data_products (id, "name", namespace, description, domain_id, abstract_data_product_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Churn Model', 'churn-model', 'Predicts the likelihood of customer churn using the unified customer view, enabling proactive retention interventions.', marketing_id, 'data_products', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO churn_model_dp_id;
+    INSERT INTO public.data_products (id, about, status, type_id, lifecycle_id) VALUES (churn_model_dp_id, '<h3>Value Proposition</h3>
+<p>Leverages the unified customer view from the Marketing Customer 360 to predict the likelihood of customer churn. Enables proactive retention interventions before customers disengage, directly improving Customer Lifetime Value and reducing acquisition costs.<br></p>
+
+<h3>User Consumption Mode</h3>
+<p><strong>Analytical & Operational:</strong> Scored daily and consumed by both the data science team for model iteration and marketing automation systems for real-time retention triggers.<br></p>
+
+<h3>Recommended Use Cases</h3>
+<p><ul>
+  <li><strong>Retention Marketing:</strong> Triggering win-back campaigns for high-risk customer segments.</li>
+  <li><strong>Customer Success:</strong> Prioritizing proactive outreach by customer health score.</li>
+  <li><strong>Product:</strong> Identifying product usage patterns correlated with churn risk.</li>
+</ul></p>
+
+<h3>Terms of Use</h3>
+<p><strong>Usage:</strong> Approved for internal retention analysis, marketing automation, and product analytics.</p>
+<p><strong>Limitations:</strong> Model outputs are probabilistic scores and must not be used as the sole basis for customer-facing decisions. Scores should be reviewed alongside supporting data before triggering any customer communication.</p>', 'ACTIVE', consumer_aligned_type_id, draft);
+
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), marketing_customer_360_dp_id, alice_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), campaign_activation_dp_id, alice_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), churn_model_dp_id, bob_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', bob_id, timezone('utc'::text, CURRENT_TIMESTAMP), bob_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- DATA OUTPUT CONFIGURATIONS
     SELECT gen_random_uuid() INTO sales_crm_customers_do_config_id;
@@ -203,24 +267,42 @@ begin
     INSERT INTO public.data_output_configurations (id, configuration_type) VALUES (logistics_wms_shipments_do_config_id, 'PostgreSQLTechnicalAssetConfiguration');
     INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (logistics_wms_shipments_do_config_id, 'dpp_demo', 'logistics_wms_shipments', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
+    SELECT gen_random_uuid() INTO marketing_customer_360_do_config_id;
+    INSERT INTO public.data_output_configurations (id, configuration_type) VALUES (marketing_customer_360_do_config_id, 'PostgreSQLTechnicalAssetConfiguration');
+    INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (marketing_customer_360_do_config_id, 'dpp_demo', 'marketing_customer_360', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
     -- DATA OUTPUTS
     INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'sales-crm-customers', 'Sales CRM Customers', 'Customer account information', 'ACTIVE', postgresql_id, postgresql_service_id, sales_crm_customers_dp_id, NULL, sales_crm_customers_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO sales_crm_customers_do_id;
     INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'sales-erp-orders', 'Sales ERP Orders', 'Order data', 'ACTIVE', postgresql_id, postgresql_service_id, sales_erp_orders_dp_id, NULL, sales_erp_orders_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO sales_erp_orders_do_id;
     INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'logistics-wms-shipments', 'Logistics WMS Shipments', 'Shipment and delivery status', 'ACTIVE', postgresql_id, postgresql_service_id, logistics_wms_shipments_dp_id, NULL, logistics_wms_shipments_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO logistics_wms_shipments_do_id;
+    INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'marketing-customer-360', 'Customer 360', 'This SQL model generates a Customer 360 view by unifying data from CRM, ERP, and Logistics. It maps customer profiles to their full order history and real-time shipment statuses to provide a holistic view of the customer journey.', 'ACTIVE', postgresql_id, postgresql_service_id, marketing_customer_360_dp_id, NULL, marketing_customer_360_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO marketing_customer_360_do_id;
 
     -- DATASETS
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset contains curated customer information from the Sales CRM, providing a single source of truth for customer identity and contact details.</p><br><h3>How to Use</h3><p>Use this dataset to enrich sales data with customer demographic information or for marketing campaign targeting. Join with the <code>Orders</code> dataset on <code>customer_id</code>.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>Integer</td><td>Unique identifier for the customer.</td></tr><tr><td>first_name</td><td>String</td><td>Customer''s first name.</td></tr><tr><td>last_name</td><td>String</td><td>Customer''s last name.</td></tr><tr><td>email</td><td>String</td><td>Primary contact email address.</td></tr><tr><td>signup_date</td><td>Timestamp</td><td>Timestamp when the customer registered.</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_ds_id;
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', '<p><strong>Version:</strong> 1.1.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Real-time (near real-time via ERP hooks)</p><p>Provides detailed transaction history for all sales orders processed through the ERP system.</p><br><h3>How to Use</h3><p>This dataset is the primary source for revenue analysis and order volume tracking. It can be joined with <code>Customers</code> for customer-level insights or <code>Shipments</code> for fulfillment tracking.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>order_id</td><td>Integer</td><td>Unique identifier for the order.</td></tr><tr><td>customer_id</td><td>Integer</td><td>Reference to the customer who placed the order.</td></tr><tr><td>order_date</td><td>Timestamp</td><td>Timestamp of order placement.</td></tr><tr><td>total_amount</td><td>Decimal</td><td>Total monetary value of the order.</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_erp_orders_ds_id;
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'shipments', logistics_wms_shipments_dp_id, 'Shipments', 'Shipment and delivery status from the WMS', '<p><strong>Version:</strong> 1.0.2 &nbsp;|&nbsp; <strong>Freshness:</strong> Hourly updates</p><p>Tracks the fulfillment lifecycle of orders, from warehouse dispatch to final delivery status.</p><br><h3>How to Use</h3><p>Utilize this data to monitor delivery times, identify shipping bottlenecks, and calculate order fulfillment rates. Join with <code>Orders</code> on <code>order_ref</code>.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>shipment_id</td><td>Integer</td><td>Unique identifier for the shipment record.</td></tr><tr><td>order_ref</td><td>Integer</td><td>Reference to the corresponding ERP order.</td></tr><tr><td>shipped_date</td><td>Timestamp</td><td>Timestamp when the package left the warehouse.</td></tr><tr><td>delivery_status</td><td>String</td><td>Current status of the delivery (e.g., Shipped, In Transit, Delivered).</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO logistics_wms_shipments_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'customer-360', marketing_customer_360_dp_id, 'Customer 360', 'This SQL model generates a Customer 360 view by unifying data from CRM, ERP, and Logistics.', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset unifies customer profiles, order history, and shipment status into a comprehensive Customer 360 view optimized for marketing analysis and activation.</p><br><h3>How to Use</h3><p>Use this dataset for customer segmentation, RFM modeling, churn prediction, and campaign activation. Join on <code>customer_id</code> for customer-level insights. It serves as the primary input for all downstream marketing data products.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>customer_id</td><td>Integer</td><td>Unique identifier for the customer.</td></tr><tr><td>first_name</td><td>String</td><td>Customer''s first name.</td></tr><tr><td>last_name</td><td>String</td><td>Customer''s last name.</td></tr><tr><td>email</td><td>String</td><td>Primary contact email address.</td></tr><tr><td>signup_date</td><td>Timestamp</td><td>Timestamp when the customer registered.</td></tr><tr><td>total_orders</td><td>Integer</td><td>Total number of orders placed by the customer.</td></tr><tr><td>total_revenue</td><td>Decimal</td><td>Total monetary value of all orders.</td></tr><tr><td>last_order_date</td><td>Timestamp</td><td>Date of the most recent order.</td></tr><tr><td>last_shipment_status</td><td>String</td><td>Status of the most recent shipment (e.g., Delivered, In Transit).</td></tr><tr><td>rfm_segment</td><td>String</td><td>RFM-based segmentation tier (e.g., Champions, At Risk, Churned).</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO marketing_customer_360_ds_id;
 
     INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_ds_id, john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_ds_id, john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_ds_id, john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), marketing_customer_360_ds_id, alice_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- DATA OUTPUTS - DATASETS
     INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_do_id, sales_crm_customers_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_do_id, sales_erp_orders_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_do_id, logistics_wms_shipments_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), marketing_customer_360_do_id, marketing_customer_360_ds_id, 'APPROVED', alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), alice_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    -- INPUT PORTS
+    -- Marketing Customer 360 consumes: Customers, Orders, Shipments
+    INSERT INTO public.input_ports (id, justification, status, requested_on, approved_on, denied_on, consuming_abstract_data_product_id, dataset_id, requested_by_id, approved_by_id, denied_by_id) VALUES (gen_random_uuid(), 'Access is required to integrate Customer, Order, and Shipment data into the Marketing Customer 360. This enables RFM modeling to increase Customer Lifetime Value (LTV), improves ROAS by suppressing ads for recent purchasers, and allows for proactive retention triggers based on delivery status.', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, marketing_customer_360_dp_id, sales_crm_customers_ds_id, alice_id, alice_id, NULL);
+    INSERT INTO public.input_ports (id, justification, status, requested_on, approved_on, denied_on, consuming_abstract_data_product_id, dataset_id, requested_by_id, approved_by_id, denied_by_id) VALUES (gen_random_uuid(), 'Access is required to integrate Customer, Order, and Shipment data into the Marketing Customer 360. This enables RFM modeling to increase Customer Lifetime Value (LTV), improves ROAS by suppressing ads for recent purchasers, and allows for proactive retention triggers based on delivery status.', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, marketing_customer_360_dp_id, sales_erp_orders_ds_id, alice_id, alice_id, NULL);
+    INSERT INTO public.input_ports (id, justification, status, requested_on, approved_on, denied_on, consuming_abstract_data_product_id, dataset_id, requested_by_id, approved_by_id, denied_by_id) VALUES (gen_random_uuid(), 'Access is required to integrate Customer, Order, and Shipment data into the Marketing Customer 360. This enables RFM modeling to increase Customer Lifetime Value (LTV), improves ROAS by suppressing ads for recent purchasers, and allows for proactive retention triggers based on delivery status.', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, marketing_customer_360_dp_id, logistics_wms_shipments_ds_id, alice_id, alice_id, NULL);
+    -- Campaign Activation consumes: Customer 360
+    INSERT INTO public.input_ports (id, justification, status, requested_on, approved_on, denied_on, consuming_abstract_data_product_id, dataset_id, requested_by_id, approved_by_id, denied_by_id) VALUES (gen_random_uuid(), 'Access to the Customer 360 is required to build enriched audience segments for targeted campaign activation across email, paid media, and loyalty channels.', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, campaign_activation_dp_id, marketing_customer_360_ds_id, alice_id, alice_id, NULL);
+    -- Churn Model consumes: Customer 360
+    INSERT INTO public.input_ports (id, justification, status, requested_on, approved_on, denied_on, consuming_abstract_data_product_id, dataset_id, requested_by_id, approved_by_id, denied_by_id) VALUES (gen_random_uuid(), 'Access to the Customer 360 is required to train and score the churn prediction model using unified customer behavior, purchase history, and delivery data.', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, churn_model_dp_id, marketing_customer_360_ds_id, bob_id, alice_id, NULL);
 
     -- ------------------------------------------------------------------------------------------------
     -- START of Insert dynamic dataset query stats
@@ -243,8 +325,71 @@ begin
     FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
     WHERE EXTRACT(ISODOW FROM gs) = 1;
 
+    -- Customer 360 usage
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, marketing_customer_360_ds_id, campaign_activation_dp_id, 22
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) BETWEEN 1 AND 5;
+
+    INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
+    SELECT gs::date, marketing_customer_360_ds_id, churn_model_dp_id, 5
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs
+    WHERE EXTRACT(ISODOW FROM gs) BETWEEN 1 AND 5;
+
     -- ------------------------------------------------------------------------------------------------
     -- END of Insert dynamic dataset query stats
+    -- ------------------------------------------------------------------------------------------------
+
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert output port cost records
+    -- ------------------------------------------------------------------------------------------------
+
+    -- Sales CRM Customers: ~36 compute / ~12 storage / ~57 platform overhead per month
+    INSERT INTO public.output_port_cost_records (id, output_port_id, recorded_at, compute_cost, storage_cost, platform_overhead_cost)
+    SELECT
+        gen_random_uuid(),
+        sales_crm_customers_ds_id,
+        gs::date,
+        1.1800 + (EXTRACT(DOW FROM gs) * 0.0300),
+        0.3900 + (EXTRACT(DOW FROM gs) * 0.0050),
+        1.8500 + (EXTRACT(DOW FROM gs) * 0.0200)
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs;
+
+    -- Sales ERP Orders: ~55 compute / ~16 storage / ~57 platform overhead per month
+    INSERT INTO public.output_port_cost_records (id, output_port_id, recorded_at, compute_cost, storage_cost, platform_overhead_cost)
+    SELECT
+        gen_random_uuid(),
+        sales_erp_orders_ds_id,
+        gs::date,
+        1.7500 + (EXTRACT(DOW FROM gs) * 0.0400),
+        0.5100 + (EXTRACT(DOW FROM gs) * 0.0060),
+        1.8500 + (EXTRACT(DOW FROM gs) * 0.0200)
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs;
+
+    -- Logistics WMS Shipments: ~23 compute / ~9 storage / ~57 platform overhead per month
+    INSERT INTO public.output_port_cost_records (id, output_port_id, recorded_at, compute_cost, storage_cost, platform_overhead_cost)
+    SELECT
+        gen_random_uuid(),
+        logistics_wms_shipments_ds_id,
+        gs::date,
+        0.7300 + (EXTRACT(DOW FROM gs) * 0.0200),
+        0.2700 + (EXTRACT(DOW FROM gs) * 0.0040),
+        1.8500 + (EXTRACT(DOW FROM gs) * 0.0200)
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs;
+
+    -- Marketing Customer 360: ~48 compute / ~15 storage / ~57 platform overhead per month
+    INSERT INTO public.output_port_cost_records (id, output_port_id, recorded_at, compute_cost, storage_cost, platform_overhead_cost)
+    SELECT
+        gen_random_uuid(),
+        marketing_customer_360_ds_id,
+        gs::date,
+        1.5200 + (EXTRACT(DOW FROM gs) * 0.0350),
+        0.4700 + (EXTRACT(DOW FROM gs) * 0.0055),
+        1.8500 + (EXTRACT(DOW FROM gs) * 0.0200)
+    FROM generate_series((CURRENT_DATE - INTERVAL '3 months')::date, CURRENT_DATE - 1, INTERVAL '1 day') AS gs;
+
+    -- ------------------------------------------------------------------------------------------------
+    -- END of Insert output port cost records
     -- ------------------------------------------------------------------------------------------------
 
     -- DATASET CURATED QUERIES
@@ -257,6 +402,19 @@ begin
          FROM customers
          WHERE status = ''ACTIVE''
          ORDER BY name ASC;',
+        0
+    );
+
+    INSERT INTO public.dataset_curated_queries (output_port_id, title, description, query_text, sort_order)
+    VALUES (
+        marketing_customer_360_ds_id,
+        'High-Value Customer Segments',
+        'Retrieve top customers by total revenue for loyalty and campaign targeting.',
+        'SELECT customer_id, first_name, last_name, email, total_orders, total_revenue, rfm_segment
+         FROM customer_360
+         WHERE rfm_segment IN (''Champions'', ''Loyal Customers'')
+         ORDER BY total_revenue DESC
+         LIMIT 100;',
         0
     );
 
