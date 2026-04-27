@@ -1,6 +1,5 @@
 from typing import Optional, Sequence
 from uuid import UUID
-from warnings import deprecated
 
 from pydantic import Field
 
@@ -41,23 +40,6 @@ class BaseOutputPortGet(ORMModel):
     lifecycle: Optional[DataProductLifeCycle]
 
 
-@deprecated("Use BaseOutputPortGet instead")
-class BaseDatasetGet(ORMModel):
-    id: UUID
-    namespace: str
-    name: str
-    description: str
-    status: OutputPortStatus
-    usage: Optional[str]
-    access_type: OutputPortAccessType
-    data_product_id: UUID
-
-    # Nested schemas
-    tags: list[Tag]
-    domain: Domain
-    lifecycle: Optional[DataProductLifeCycle]
-
-
 class GetOutputPortResponse(BaseOutputPortGet):
     about: Optional[str]
 
@@ -69,14 +51,6 @@ class GetOutputPortResponse(BaseOutputPortGet):
 
 
 class OutputPortsGet(BaseOutputPortGet):
-    data_product_count: int
-    technical_assets_count: int
-    data_product_name: str
-    quality_status: Optional[DataQualityStatus]
-
-
-@deprecated("Use OutputPortsGet instead")
-class DatasetsGet(BaseDatasetGet):
     data_product_count: int
     technical_assets_count: int
     data_product_name: str

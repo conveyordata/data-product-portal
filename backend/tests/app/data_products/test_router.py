@@ -7,7 +7,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.authorization.roles.schema import Scope
-from app.authorization.roles.service import RoleService
 from app.core.authz import Action
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
@@ -58,8 +57,7 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_product(self, payload, client, session):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_create_data_product(self, payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -73,21 +71,7 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
-    def test_create_data_product_no_owner_role(self, payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
-        created_data_product = self.create_data_product(client, payload)
-        assert created_data_product.status_code == 400
-
-    def test_create_data_product_no_owners(self, session, payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_create_data_product_no_owners(self, payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -103,8 +87,7 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
 
-    def test_create_data_product_duplicate_name(self, session, payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_create_data_product_duplicate_name(self, payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -120,8 +103,7 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
 
-    def test_create_data_product_duplicate_namespace(self, session, payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_create_data_product_duplicate_namespace(self, payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -140,7 +122,6 @@ class TestDataProductsRouter:
     def test_create_data_product_invalid_characters_namespace(
         self, session, payload, client
     ):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -160,7 +141,6 @@ class TestDataProductsRouter:
     def test_create_data_product_invalid_length_namespace(
         self, session, payload, client
     ):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -573,8 +553,7 @@ class TestDataProductsRouter:
 
         assert response.status_code == 400
 
-    def test_get_data_product_event_history(self, payload, client: TestClient, session):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_get_data_product_event_history(self, payload, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -595,9 +574,8 @@ class TestDataProductsRouter:
         assert len(history_response.json()["events"]) == 2
 
     def test_history_event_created_on_data_product_creation(
-        self, payload, client: TestClient, session
+        self, payload, client: TestClient
     ):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,

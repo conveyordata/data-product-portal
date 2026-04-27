@@ -46,7 +46,6 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
 from app.data_products.output_ports.schema_response import (
-    DatasetsGet,
     GetOutputPortResponse,
     OutputPortsGet,
 )
@@ -62,7 +61,7 @@ from app.data_products.technical_assets.schema_response import (
 )
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
-from app.search_output_ports.schema_response import SearchDatasets
+from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.settings import settings
 
 
@@ -676,7 +675,9 @@ def universal_search(
 
             # Search output ports - get all and filter manually
             if "output_ports" in search_types:
-                all_output_ports = OutputPortService(db).get_datasets(user=user)
+                all_output_ports = OutputPortService(db).search_output_ports(
+                    query=None, limit=1000, user=user, current_user_assigned=False
+                )
                 # Filter by query manually
                 filtered_output_ports = []
                 for ds in all_output_ports:
@@ -688,10 +689,10 @@ def universal_search(
                             break
 
                 result_datasets = [
-                    GetDataProductsResponseItem.model_validate(ds).model_dump()
-                    for ds in filtered_output_ports
+                    SearchOutputPortsResponseItem.model_validate(op).model_dump()
+                    for op in filtered_output_ports
                 ]
-                query_results.update({"datasets": result_datasets})
+                query_results.update({"output_ports": result_datasets})
                 total_count += len(filtered_output_ports)
 
             # Search technical assets - get all and filter manually
@@ -877,15 +878,15 @@ def search_output_ports(
         user = get_mcp_authenticated_user(token=access_token.token)
         try:
             # Get all datasets and filter manually
-            all_datasets = OutputPortService(db).search_datasets(
+            all_output_ports = OutputPortService(db).search_output_ports(
                 query=query, user=user, limit=limit, current_user_assigned=False
             )
             return {
                 "output_ports": [
-                    SearchDatasets.model_validate(ds).model_dump()
-                    for ds in all_datasets
+                    SearchOutputPortsResponseItem.model_validate(ds).model_dump()
+                    for ds in all_output_ports
                 ],
-                "count": len(all_datasets),
+                "count": len(all_output_ports),
                 "filters_applied": {
                     "query": query,
                 },
@@ -1261,19 +1262,21 @@ def get_marketplace_overview() -> Dict[str, Any]:
         try:
             # Get counts by querying all and taking length
             all_data_products = DataProductService(db).get_data_products()
-            all_datasets = OutputPortService(db).get_datasets(user=user)
-            all_data_outputs = DataOutputService(db).get_data_outputs()
+            all_output_ports = OutputPortService(db).search_output_ports(
+                query=None, limit=1000, user=user, current_user_assigned=False
+            )
+            all_technical_assets = DataOutputService(db).get_data_outputs()
             all_domains = DomainService(db).get_domains()
 
             # Get first 5 items as "popular" (since we can't sort)
             popular_data_products = all_data_products[:5]
-            popular_datasets = all_datasets[:5]
+            popular_datasets = all_output_ports[:5]
 
             return {
                 "statistics": {
                     "total_data_products": len(all_data_products),
-                    "total_output_ports": len(all_datasets),
-                    "total_technical_assets": len(all_data_outputs),
+                    "total_output_ports": len(all_output_ports),
+                    "total_technical_assets": len(all_technical_assets),
                     "total_domains": len(all_domains),
                 },
                 "featured_content": {
@@ -1284,7 +1287,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                         for dp in popular_data_products
                     ],
                     "popular_output_ports": [
-                        DatasetsGet.model_validate(ds).model_dump()
+                        SearchOutputPortsResponseItem.model_validate(ds).model_dump()
                         for ds in popular_datasets
                     ],
                 },

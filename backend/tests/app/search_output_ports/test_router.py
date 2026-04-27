@@ -6,8 +6,6 @@ from alembic import command
 from alembic.config import Config
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.roles.schema import Prototype, Scope
-from app.authorization.roles.service import RoleService
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.schema_response import (
     GetDataProductOutputPortsResponse,
@@ -48,7 +46,7 @@ class TestOutputPortSearchRouter:
         ds_1, _, _ = self.setup(session)
 
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        role = RoleFactory.dataset_owner()
         DatasetRoleAssignmentFactory(
             dataset=ds_1,
             user_id=user.id,
@@ -205,7 +203,6 @@ class TestOutputPortSearchRouter:
 
     @staticmethod
     def setup(session) -> tuple[Dataset, Dataset, Dataset]:
-        RoleService(db=session).initialize_prototype_roles()
         ds_1 = DatasetFactory(name="Customer Data")
         ds_2 = DatasetFactory(name="Sales Data")
         ds_3 = DatasetFactory(name="Internal Metrics")
@@ -221,7 +218,6 @@ class TestOutputPortSearchRouter:
         command.upgrade(cfg, "heads")
 
         seed_cmd(path="./sample_data.sql")
-        RoleService(db=session).initialize_prototype_roles()
 
         start_time = time.perf_counter()
         OutputPortService(db=session).recalculate_search_for_all_output_ports()

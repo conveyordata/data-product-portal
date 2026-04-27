@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
-from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Authorization
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
@@ -29,7 +28,7 @@ class TestAuth:
 
     def test_add_admin(self, authorizer: Authorization):
         user: User = UserFactory()
-        admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
+        admin = RoleFactory.admin()
         assert not authorizer.has_admin_role(user_id=str(user.id))
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -58,7 +57,7 @@ class TestAuth:
 
     def test_remove_admin(self, authorizer: Authorization):
         user: User = UserFactory()
-        admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
+        admin = RoleFactory.admin()
         assert not authorizer.has_admin_role(user_id=str(user.id))
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -73,7 +72,6 @@ class TestAuth:
     def test_swap(self, authorizer: Authorization):
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
 
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -85,7 +83,7 @@ class TestAuth:
         assert authorizer.has_global_role(user_id=str(user.id), role_id=str(role.id))
         assert not authorizer.has_admin_role(user_id=str(user.id))
 
-        assignment.role_id = admin.id
+        assignment.role_id = RoleFactory.admin().id
         GlobalAuthAssignment(assignment, previous_role_id=role.id).swap()
 
         assert not authorizer.has_global_role(

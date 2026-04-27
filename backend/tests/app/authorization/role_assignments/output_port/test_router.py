@@ -6,7 +6,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.roles.schema import Prototype, Role, Scope
+from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
 from tests.factories import (
@@ -342,7 +342,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
 
         user_1, user_2 = UserFactory.create_batch(2)
-        role: Role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        role = RoleFactory.dataset_owner()
         assignment_1 = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user_1.id,
