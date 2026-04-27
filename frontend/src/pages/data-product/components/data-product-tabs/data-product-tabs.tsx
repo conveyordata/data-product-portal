@@ -114,7 +114,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                 label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
                 key: TabKeys.InputPorts,
                 icon: <Icon component={datasetOutlineIcon} />,
-                children: <InputPortTab dataProductId={dataProductId} />,
+                children: <InputPortTab dataProductId={dataProductId} staleCount={0} />,
             },
             {
                 label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,

@@ -7,10 +7,10 @@ import { useCheckAccessQuery } from '@/store/api/services/generated/authorizatio
 import { type InputPort, useGetDataProductInputPortsQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { DecisionStatus } from '@/types/roles';
 
 type Props = {
     dataProductId: string;
+    staleCount: number;
 };
 
 function filterDatasets(input_ports: InputPort[], searchTerm: string) {
@@ -23,16 +23,12 @@ function filterDatasets(input_ports: InputPort[], searchTerm: string) {
     );
 }
 
-export function InputPortTab({ dataProductId }: Props) {
+export function InputPortTab({ dataProductId, staleCount }: Props) {
     const { t } = useTranslation();
     const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(dataProductId);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [bannerDismissed, setBannerDismissed] = useState(false);
-    const hasStaleInputPort = useMemo(
-        () =>
-            inputPorts.some((p) => p.status === DecisionStatus.Approved && p.output_port?.freshness_status === 'stale'),
-        [inputPorts],
-    );
+    const hasStaleInputPort = staleCount > 0;
     const filteredDatasets = useMemo(() => {
         return filterDatasets(inputPorts, searchTerm);
     }, [inputPorts, searchTerm]);
