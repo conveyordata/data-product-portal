@@ -13,6 +13,7 @@ import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrum
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.component';
 import { OutputPortDescription } from '@/pages/dataset/components/dataset-description/output-port-description.tsx';
+import { DatasetFreshness } from '@/pages/dataset/components/dataset-freshness/dataset-freshness.component.tsx';
 import { DatasetQuality } from '@/pages/dataset/components/dataset-quality/dataset-quality.component.tsx';
 import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -142,6 +143,7 @@ export function Dataset() {
             <Flex vertical className={styles.sidebar}>
                 <DatasetActions datasetId={datasetId} />
                 <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
+                <DatasetFreshness dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
                 <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
             </Flex>
         </Flex>
