@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: marketing_customer_360
+    schema: marketing_customer_360
+    tables:
+      - name: customer_360

@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: audience_segments
+    description: Channel-ready audience segments for targeted campaign activation.
+    columns:
+      - name: segment_id
+        description: Surrogate key for the audience segment record.
+        data_type: text
+      - name: customer_id
+        description: Reference to the customer.
+        data_type: integer
+      - name: segment_name
+        description: Human-readable name for the audience segment.
+        data_type: text
+      - name: channel
+        description: Activation channel (email, paid_media, loyalty).
+        data_type: text
+      - name: rfm_tier
+        description: RFM segment of the customer at time of activation.
+        data_type: text
+      - name: activation_date
+        description: Date the segment was generated for activation.
+        data_type: date
+      - name: campaign_id
+        description: Identifier of the campaign this audience belongs to.
+        data_type: text

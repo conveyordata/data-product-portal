@@ -1,0 +1,33 @@
+semantic_models:
+  - name: audience_segments
+    defaults:
+      agg_time_dimension: activation_date
+    model: ref('audience_segments')
+    entities:
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: activation_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: channel
+        type: categorical
+      - name: rfm_tier
+        type: categorical
+      - name: segment_name
+        type: categorical
+    measures:
+      - name: audience_size
+        agg: count_distinct
+        expr: customer_id
+
+metrics:
+  - name: audience_size
+    label: Audience Size
+    description: Number of unique customers in activated audience segments.
+    type: simple
+    type_params:
+      measure:
+        name: audience_size

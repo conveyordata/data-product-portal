@@ -1,0 +1,19 @@
+name: 'campaign_activation'
+version: '1.0.0'
+
+profile: 'campaign_activation'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  campaign_activation:
+    +materialized: table
