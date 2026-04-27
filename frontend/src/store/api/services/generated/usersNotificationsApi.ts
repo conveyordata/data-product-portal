@@ -85,6 +85,8 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  freshness_status?: FreshnessStatus | null;
+  freshness_deadline_time?: string | null;
 };
 export type AzureBlobTechnicalAssetConfiguration = {
   configuration_type: "AzureBlobTechnicalAssetConfiguration";
@@ -243,6 +245,11 @@ export enum OutputPortAccessType {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
+}
+export enum FreshnessStatus {
+  Fresh = "fresh",
+  Stale = "stale",
+  Unknown = "unknown",
 }
 export enum TechnicalAssetStatus {
   Pending = "pending",

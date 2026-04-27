@@ -110,6 +110,8 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  freshness_status?: FreshnessStatus | null;
+  freshness_deadline_time?: string | null;
 };
 export type InputPort = {
   id: string;
@@ -136,6 +138,11 @@ export enum OutputPortAccessType {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
+}
+export enum FreshnessStatus {
+  Fresh = "fresh",
+  Stale = "stale",
+  Unknown = "unknown",
 }
 export const {
   useGetExplorationsQuery,

@@ -1,3 +1,5 @@
+from datetime import time
+from typing import Optional
 from uuid import UUID
 from warnings import deprecated
 
@@ -5,6 +7,7 @@ from pydantic import Field, field_validator
 
 from app.configuration.tags.schema import Tag
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.freshness.enums import FreshnessStatus
 from app.data_products.output_ports.status import OutputPortStatus
 from app.shared.schema import ORMModel
 
@@ -18,6 +21,8 @@ class OutputPort(ORMModel):
     access_type: OutputPortAccessType
     data_product_id: UUID
     tags: list[Tag]
+    freshness_status: Optional[FreshnessStatus] = None
+    freshness_deadline_time: Optional[time] = None
 
 
 @deprecated("use OutputPort instead")

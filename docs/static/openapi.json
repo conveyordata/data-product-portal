@@ -9868,6 +9868,15 @@
         "title": "FieldDependency",
         "description": "Represents a field dependency for conditional visibility.\ne.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y\nIn practice this is often used with checkbox fields having value=True"
       },
+      "FreshnessStatus": {
+        "type": "string",
+        "enum": [
+          "fresh",
+          "stale",
+          "unknown"
+        ],
+        "title": "FreshnessStatus"
+      },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
           "platform_service_configurations": {
@@ -11359,6 +11368,28 @@
             },
             "type": "array",
             "title": "Tags"
+          },
+          "freshness_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FreshnessStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "freshness_deadline_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freshness Deadline Time"
           }
         },
         "type": "object",

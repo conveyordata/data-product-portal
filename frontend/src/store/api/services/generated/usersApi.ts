@@ -187,6 +187,7 @@ export type Tag = {
   id: string;
   value: string;
 };
+export type FreshnessStatus = "fresh" | "stale" | "unknown";
 export type OutputPort = {
   id: string;
   name: string;
@@ -196,6 +197,8 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  freshness_status?: FreshnessStatus | null;
+  freshness_deadline_time?: string | null;
 };
 export type AbstractDataProductType =
   | "unknown"
