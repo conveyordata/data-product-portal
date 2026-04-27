@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization, DatasetResolver
-from app.data_products.output_ports.freshness.enums import FreshnessStatus
 from app.data_products.output_ports.freshness.model import (
     FreshnessObservation,
     FreshnessSlo,
@@ -29,17 +28,13 @@ def _to_slo_response(
     slo: FreshnessSlo,
     dataset,
     latest_obs: FreshnessObservation | None,
+    service: FreshnessService,
 ) -> FreshnessSloResponse:
-    status = (
-        FreshnessStatus(dataset.freshness_status)
-        if dataset.freshness_status
-        else FreshnessStatus.UNKNOWN
-    )
     return FreshnessSloResponse(
         id=slo.id,
         output_port_id=slo.output_port_id,
         deadline_time=slo.deadline_time,
-        status=status,
+        status=service.compute_status(dataset),
         last_refreshed_at=latest_obs.last_refreshed_at if latest_obs else None,
         last_observed_at=latest_obs.created_at if latest_obs else None,
     )
@@ -55,7 +50,7 @@ def get_freshness_slo(
     service = FreshnessService(db)
     slo = service.get_slo(id)
     latest_obs = service.get_latest_observation(id)
-    return _to_slo_response(slo, dataset, latest_obs)
+    return _to_slo_response(slo, dataset, latest_obs, service)
 
 
 @router.put(
@@ -79,7 +74,7 @@ def upsert_freshness_slo(
     slo = service.upsert_slo(id, request)
     db.refresh(dataset)
     latest_obs = service.get_latest_observation(id)
-    return _to_slo_response(slo, dataset, latest_obs)
+    return _to_slo_response(slo, dataset, latest_obs, service)
 
 
 @router.delete(
@@ -120,15 +115,10 @@ def add_freshness_observation(
     service = FreshnessService(db)
     obs = service.add_observation(id, request)
     db.refresh(dataset)
-    status = (
-        FreshnessStatus(dataset.freshness_status)
-        if dataset.freshness_status
-        else FreshnessStatus.UNKNOWN
-    )
     return FreshnessObservationResponse(
         id=obs.id,
         output_port_id=obs.output_port_id,
         last_refreshed_at=obs.last_refreshed_at,
         created_at=obs.created_at,
-        status=status,
+        status=service.compute_status(dataset),
     )
