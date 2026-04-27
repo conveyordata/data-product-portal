@@ -638,4 +638,32 @@ begin
     UNION ALL
     SELECT dataset_name || '_view', 'warning', summary_id FROM summary_mapping;
 
+    -- Freshness SLOs: production_planning_insights_forecast gets a broken SLO
+    -- (shows up as stale on revenue_dashboard), others are fresh
+    INSERT INTO public.output_port_freshness_slos
+        (id, output_port_id, deadline_time, created_at, updated_at)
+    VALUES
+        (gen_random_uuid(), production_planning_insights_forecast, '06:00:00'::time, NOW(), NOW()),
+        (gen_random_uuid(), sales_performance_model_output_port,   '07:00:00'::time, NOW(), NOW()),
+        (gen_random_uuid(), order_fulfillment_analysis_output_port,'05:00:00'::time, NOW(), NOW());
+
+    -- Freshness observations
+    -- production_planning_forecast: last refreshed 2 days ago → stale
+    INSERT INTO public.output_port_freshness_observations
+        (id, output_port_id, last_refreshed_at, created_at)
+    VALUES
+        (gen_random_uuid(), production_planning_insights_forecast, NOW() - INTERVAL '2 days', NOW());
+
+    -- sales_performance: refreshed 2 hours ago → fresh
+    INSERT INTO public.output_port_freshness_observations
+        (id, output_port_id, last_refreshed_at, created_at)
+    VALUES
+        (gen_random_uuid(), sales_performance_model_output_port, NOW() - INTERVAL '2 hours', NOW());
+
+    -- order_fulfillment: refreshed 1 hour ago → fresh
+    INSERT INTO public.output_port_freshness_observations
+        (id, output_port_id, last_refreshed_at, created_at)
+    VALUES
+        (gen_random_uuid(), order_fulfillment_analysis_output_port, NOW() - INTERVAL '1 hour', NOW());
+
 end $$;
