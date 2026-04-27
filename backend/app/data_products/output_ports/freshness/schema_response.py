@@ -1,5 +1,4 @@
 from datetime import datetime, time
-from typing import Optional
 from uuid import UUID
 
 from app.data_products.output_ports.freshness.enums import FreshnessStatus
@@ -11,8 +10,8 @@ class FreshnessSloResponse(ORMModel):
     output_port_id: UUID
     deadline_time: time
     status: FreshnessStatus
-    last_refreshed_at: Optional[datetime] = None
-    last_observed_at: Optional[datetime] = None
+    last_refreshed_at: datetime | None = None
+    last_observed_at: datetime | None = None
 
 
 class FreshnessObservationResponse(ORMModel):
