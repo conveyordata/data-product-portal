@@ -19,6 +19,7 @@ from sdk.api_client.api.data_products_output_ports import (
 )
 from sdk.api_client.client import Client
 from sdk.api_client.models.column_request import ColumnRequest
+from sdk.api_client.models.http_validation_error import HTTPValidationError
 from sdk.api_client.models.semantic_model_format import SemanticModelFormat
 from sdk.api_client.models.semantic_model_request import SemanticModelRequest
 from sdk.api_client.models.semantic_model_request_content import (
@@ -67,7 +68,10 @@ def upsert_table_schema(
         client=client,
     )
     body = TableSchemaRequest(name=project_name, columns=columns)
-    if not existing:
+    if isinstance(existing, HTTPValidationError) or not existing:
+        if isinstance(existing, HTTPValidationError):
+            print(f"[table-schema] ERROR fetching schemas: {existing}", file=sys.stderr)
+            sys.exit(1)
         print("[table-schema] None found — creating new schema")
         result = create_output_port_table_schema.sync(
             data_product_id=data_product_id,
@@ -85,8 +89,8 @@ def upsert_table_schema(
             client=client,
             body=body,
         )
-    if result is None:
-        print("[table-schema] ERROR: no response from API", file=sys.stderr)
+    if result is None or isinstance(result, HTTPValidationError):
+        print(f"[table-schema] ERROR: {result}", file=sys.stderr)
         sys.exit(1)
     print(f"[table-schema] Done: {result.id}")
 
@@ -109,7 +113,12 @@ def upsert_semantic_model(
         format_=SemanticModelFormat.METRICSFLOW,
         content=content,
     )
-    if not existing:
+    if isinstance(existing, HTTPValidationError) or not existing:
+        if isinstance(existing, HTTPValidationError):
+            print(
+                f"[semantic-model] ERROR fetching models: {existing}", file=sys.stderr
+            )
+            sys.exit(1)
         print("[semantic-model] None found — creating new semantic model")
         result = create_output_port_semantic_model.sync(
             data_product_id=data_product_id,
@@ -127,8 +136,8 @@ def upsert_semantic_model(
             client=client,
             body=body,
         )
-    if result is None:
-        print("[semantic-model] ERROR: no response from API", file=sys.stderr)
+    if result is None or isinstance(result, HTTPValidationError):
+        print(f"[semantic-model] ERROR: {result}", file=sys.stderr)
         sys.exit(1)
     print(f"[semantic-model] Done: {result.id}")
 
