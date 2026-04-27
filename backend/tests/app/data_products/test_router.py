@@ -12,6 +12,7 @@ from app.core.authz import Action
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
+    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
@@ -416,7 +417,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200, response.text
         assert response.json()["data_product_settings"][0]["value"] == dps.value
 
-    def test_get_graph_data(self, client):
+    def test_get_data_product_graph_data(self, client):
         data_product = DataProductFactory()
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert response.json()["edges"] == []
@@ -435,6 +436,20 @@ class TestDataProductsRouter:
                 "isMain": True,
                 "type": "dataProductNode",
             }
+
+    def test_get_data_product_graph_data_level3(self, client):
+        data_product = DataProductFactory()
+        dataset = DatasetFactory(data_product=data_product)
+        ta = TechnicalAssetFactory(owner=data_product)
+        DataOutputDatasetAssociationFactory(data_output=ta, dataset=dataset)
+        downstream_dataset = DatasetFactory()
+        InputPortFactory(
+            dataset=dataset,
+            consuming_abstract_data_product=downstream_dataset.data_product,
+        )
+        response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
+        assert len(response.json()["edges"]) == 3
+        assert len(response.json()["nodes"]) == 4
 
     def test_get_signin_url_not_implemented(self, client):
         EnvironmentFactory(name="production")
