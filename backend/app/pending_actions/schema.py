@@ -23,8 +23,8 @@ class DataProductDatasetPendingAction(DataProductDatasetAssociationsGet):
 
 
 class DataProductOutputPortPendingAction(DataProductOutputPortAssociationsGet):
-    pending_action_type: Literal[PendingActionTypes.DataProductOutputPort] = (
-        PendingActionTypes.DataProductOutputPort
+    pending_action_type: Literal[PendingActionTypes.InputPort] = (
+        PendingActionTypes.InputPort
     )
 
 
@@ -53,12 +53,6 @@ class DataProductRoleAssignmentPendingAction(DataProductRoleAssignmentResponse):
         PendingActionTypes.DataProductRoleAssignment
     )
 
-
-PendingActionOld = Union[
-    DataProductDatasetPendingAction,
-    DataOutputDatasetPendingAction,
-    DataProductRoleAssignmentPendingActionOld,
-]
 
 PendingAction = Union[
     DataProductOutputPortPendingAction,

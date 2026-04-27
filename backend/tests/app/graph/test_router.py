@@ -1,9 +1,9 @@
 from tests.factories import (
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DatasetFactory,
     DomainFactory,
     ExplorationFactory,
+    InputPortFactory,
     TechnicalAssetFactory,
 )
 
@@ -36,8 +36,8 @@ class TestGraphRouter:
         data_product_1 = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
-        DataProductDatasetAssociationFactory(
-            data_product=data_product_2, dataset=dataset
+        InputPortFactory(
+            consuming_abstract_data_product=data_product_2, dataset=dataset
         )
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
@@ -48,8 +48,8 @@ class TestGraphRouter:
         data_product_1 = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
-        DataProductDatasetAssociationFactory(
-            data_product=data_product_2, dataset=dataset
+        InputPortFactory(
+            consuming_abstract_data_product=data_product_2, dataset=dataset
         )
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
         assert response.status_code == 200, response.text
@@ -61,7 +61,7 @@ class TestGraphRouter:
         producer = DataProductFactory()
         dataset = DatasetFactory(data_product=producer)
         consumer = DataProductFactory()
-        DataProductDatasetAssociationFactory(data_product=consumer, dataset=dataset)
+        InputPortFactory(consuming_abstract_data_product=consumer, dataset=dataset)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
         assert response.status_code == 200, response.text
         edge = response.json()["edges"][0]

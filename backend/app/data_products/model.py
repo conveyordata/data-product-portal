@@ -4,16 +4,13 @@ from sqlalchemy import Column, Enum, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
 
-from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.tags.model import Tag, tag_data_product_table
-from app.data_products.output_ports.model import (
-    DataProductDatasetAssociation,
-)
 from app.data_products.status import DataProductStatus
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import ensure_exists
@@ -57,12 +54,6 @@ class DataProduct(AbstractDataProduct):
         order_by="DataProductRoleAssignment.decision, DataProductRoleAssignment.requested_on",
         lazy="raise",
     )
-    dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        back_populates="data_product",
-        cascade="all, delete-orphan",
-        order_by="DataProductDatasetAssociation.status.desc()",
-        lazy="raise",
-    )
     datasets: Mapped[list["Dataset"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
@@ -91,14 +82,6 @@ class DataProduct(AbstractDataProduct):
         .scalar_subquery()
     )
 
-    dataset_count = column_property(
-        select(func.count(DataProductDatasetAssociation.id))
-        .where(DataProductDatasetAssociation.data_product_id == id)
-        .where(DataProductDatasetAssociation.status == DecisionStatus.APPROVED)
-        .correlate_except(DataProductDatasetAssociation)
-        .scalar_subquery()
-    )
-
     data_outputs_count = column_property(
         select(func.count(TechnicalAsset.id))
         .where(TechnicalAsset.owner_id == id)
@@ -107,7 +90,7 @@ class DataProduct(AbstractDataProduct):
     )
 
     __mapper_args__ = {
-        "polymorphic_identity": "data_products",
+        "polymorphic_identity": AbstractDataProductType.DATA_PRODUCT,
     }
 
 

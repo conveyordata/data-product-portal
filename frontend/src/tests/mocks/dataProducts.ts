@@ -32,7 +32,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         },
         lifecycle: { id: 'lc-1', name: 'Draft', value: 3, color: 'green', is_default: false },
         user_count: 5,
-        output_port_count: 2,
+        input_port_count: 2,
         technical_asset_count: 3,
     },
     {
@@ -52,7 +52,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         },
         lifecycle: { id: 'lc-2', name: 'Production', value: 1, color: 'blue', is_default: true },
         user_count: 3,
-        output_port_count: 1,
+        input_port_count: 1,
         technical_asset_count: 2,
     },
 ];
@@ -80,11 +80,9 @@ const mockInputPorts: InputPort[] = [
     {
         id: 'id-1',
         justification: 'I need access!',
-        data_product_id: mockDataProducts[0].id,
-        data_product: mockDataProducts[0],
         output_port_id: 'op-1',
         status: DecisionStatus.Approved,
-        input_port: {
+        output_port: {
             id: 'op-1',
             name: 'op-1',
             namespace: 'op1',

@@ -27,9 +27,10 @@ export function InputPortTable({ dataProductId, inputPorts }: Props) {
     const columns: TableColumnsType<InputPort> = useMemo(() => {
         return getDataProductDatasetsColumns({
             t,
+            dataProductId,
             inputPorts: inputPorts,
         });
-    }, [t, inputPorts]);
+    }, [t, inputPorts, dataProductId]);
 
     if (!dataProduct) return null;
 

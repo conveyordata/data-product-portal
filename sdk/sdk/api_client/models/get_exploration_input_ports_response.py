@@ -7,35 +7,33 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.data_product_type import DataProductType
+    from ..models.input_port import InputPort
 
 
-T = TypeVar("T", bound="DataProductInfo")
+T = TypeVar("T", bound="GetExplorationInputPortsResponse")
 
 
 @_attrs_define
-class DataProductInfo:
+class GetExplorationInputPortsResponse:
     """
     Attributes:
-        name (str):
-        type_ (DataProductType):
+        input_ports (list[InputPort]):
     """
 
-    name: str
-    type_: DataProductType
+    input_ports: list[InputPort]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        name = self.name
-
-        type_ = self.type_.to_dict()
+        input_ports = []
+        for input_ports_item_data in self.input_ports:
+            input_ports_item = input_ports_item_data.to_dict()
+            input_ports.append(input_ports_item)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "name": name,
-                "type": type_,
+                "input_ports": input_ports,
             }
         )
 
@@ -43,20 +41,22 @@ class DataProductInfo:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_type import DataProductType
+        from ..models.input_port import InputPort
 
         d = dict(src_dict)
-        name = d.pop("name")
+        input_ports = []
+        _input_ports = d.pop("input_ports")
+        for input_ports_item_data in _input_ports:
+            input_ports_item = InputPort.from_dict(input_ports_item_data)
 
-        type_ = DataProductType.from_dict(d.pop("type"))
+            input_ports.append(input_ports_item)
 
-        data_product_info = cls(
-            name=name,
-            type_=type_,
+        get_exploration_input_ports_response = cls(
+            input_ports=input_ports,
         )
 
-        data_product_info.additional_properties = d
-        return data_product_info
+        get_exploration_input_ports_response.additional_properties = d
+        return get_exploration_input_ports_response
 
     @property
     def additional_keys(self) -> list[str]:

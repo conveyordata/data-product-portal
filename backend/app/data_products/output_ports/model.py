@@ -24,7 +24,7 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation,
+    InputPort,
 )
 from app.data_products.output_ports.status import OutputPortStatus
 from app.database.database import Base, ensure_exists
@@ -70,10 +70,10 @@ class Dataset(Base, BaseORM):
         order_by="DatasetRoleAssignment.decision, DatasetRoleAssignment.requested_on",
         lazy="raise",
     )
-    data_product_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        "DataProductDatasetAssociation",
+    data_product_links: Mapped[list["InputPort"]] = relationship(
+        "InputPort",
         back_populates="dataset",
-        order_by="DataProductDatasetAssociation.status.desc()",
+        order_by="InputPort.status.desc()",
         cascade="all, delete-orphan",
         lazy="raise",
     )
@@ -117,10 +117,10 @@ class Dataset(Base, BaseORM):
         return self.data_product.name
 
     data_product_count = column_property(
-        select(func.count(DataProductDatasetAssociation.id))
-        .where(DataProductDatasetAssociation.dataset_id == id)
-        .where(DataProductDatasetAssociation.status == DecisionStatus.APPROVED)
-        .correlate_except(DataProductDatasetAssociation)
+        select(func.count(InputPort.id))
+        .where(InputPort.dataset_id == id)
+        .where(InputPort.status == DecisionStatus.APPROVED)
+        .correlate_except(InputPort)
         .scalar_subquery()
     )
     technical_assets_count = column_property(

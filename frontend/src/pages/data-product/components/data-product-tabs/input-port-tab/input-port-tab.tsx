@@ -12,12 +12,12 @@ type Props = {
     dataProductId: string;
 };
 
-function filterDatasets(datasetLinks: InputPort[], searchTerm: string) {
+function filterDatasets(input_ports: InputPort[], searchTerm: string) {
     return (
-        datasetLinks.filter(
-            (datasetLink) =>
-                datasetLink?.input_port?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                datasetLink?.input_port?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+        input_ports.filter(
+            (input_port) =>
+                input_port?.output_port?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                input_port?.output_port?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }

@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, RouterProvider, useParams } from 'react-
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
 import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
+import { AppConfig } from '@/config/app-config.ts';
 import { Logout } from '@/pages/auth/logout/logout-page.tsx';
 import Cart from '@/pages/cart/cart.page.tsx';
 import ExplorationsCart from '@/pages/cart-explorations/cart.page.tsx';
@@ -97,8 +98,7 @@ const router = createBrowserRouter([
                         path: ApplicationPaths.MarketplaceCart,
                         children: [
                             {
-                                element:
-                                    localStorage.getItem('explorations') === 'true' ? <ExplorationsCart /> : <Cart />,
+                                element: AppConfig.ExplorationsEnabled() ? <ExplorationsCart /> : <Cart />,
                                 index: true,
                             },
                         ],

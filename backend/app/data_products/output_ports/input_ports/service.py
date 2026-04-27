@@ -14,7 +14,7 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.core.authz import Action, Authorization
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
+    InputPort as DataProductDatasetAssociationModel,
 )
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.model import Dataset as DatasetModel
@@ -44,7 +44,7 @@ class DataProductDatasetService:
         current_link = self.db.scalar(
             select(DataProductDatasetAssociationModel)
             .where(
-                DataProductDatasetAssociationModel.data_product_id
+                DataProductDatasetAssociationModel.consuming_abstract_data_product_id
                 == consuming_data_product_id,
                 DataProductDatasetAssociationModel.dataset_id == output_port_id,
             )

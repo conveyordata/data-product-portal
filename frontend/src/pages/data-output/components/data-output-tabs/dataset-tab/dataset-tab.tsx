@@ -12,8 +12,8 @@ function filterDatasets(outputPortLinks: OutputPortLink[], searchTerm: string) {
     return (
         outputPortLinks.filter(
             (outputPortLink) =>
-                outputPortLink?.output?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                outputPortLink?.output?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                outputPortLink?.output_port?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                outputPortLink?.output_port?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }

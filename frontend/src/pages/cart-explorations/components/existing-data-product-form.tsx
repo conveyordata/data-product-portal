@@ -97,7 +97,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
         ) {
             return;
         }
-        posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED, {
+        posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED_EXISTING_DATA_PRODUCT, {
             cartSize: cartOutputPorts?.length,
         });
         clearStorage();
@@ -160,7 +160,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
             )}
             <Form.Item<CartFormData>
                 name="justification"
-                label={'Business justification'}
+                label={t('Business justification')}
                 rules={[
                     {
                         required: true,

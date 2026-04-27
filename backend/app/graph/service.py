@@ -121,10 +121,11 @@ class GraphService:
                 self.db.execute(
                     text(
                         """
-                SELECT data_products_datasets.data_product_id as consumer_id,
-                       data_products_datasets.dataset_id as dataset_id,
-                       data_products_datasets.status          as status
-                FROM data_products_datasets
+                SELECT input_ports.consuming_abstract_data_product_id as consumer_id,
+                       input_ports.dataset_id as dataset_id,
+                       input_ports.status          as status
+                FROM input_ports
+                JOIN data_products on data_products.id = input_ports.consuming_abstract_data_product_id
                 """
                     )
                 )
@@ -149,11 +150,11 @@ class GraphService:
                         """
                 SELECT
                     data_products.id as producer_id,
-                    data_products_datasets.data_product_id as consumer_id,
-                    data_products_datasets.status as status
+                    input_ports.consuming_abstract_data_product_id as consumer_id,
+                    input_ports.status as status
                 FROM data_products
                 JOIN datasets on data_products.id = datasets.data_product_id
-                JOIN data_products_datasets on datasets.id = data_products_datasets.dataset_id
+                JOIN input_ports on datasets.id = input_ports.dataset_id
                 """
                     )
                 )
@@ -179,10 +180,10 @@ class GraphService:
                         """
                 SELECT
                     datasets.id as consumer_id,
-                    data_products_datasets.dataset_id as producer_id,
-                    data_products_datasets.status as status
-                FROM data_products_datasets
-                JOIN datasets on datasets.data_product_id = data_products_datasets.data_product_id
+                    input_ports.dataset_id as producer_id,
+                    input_ports.status as status
+                FROM input_ports
+                JOIN datasets on datasets.data_product_id = input_ports.data_product_id
                 """
                     )
                 )

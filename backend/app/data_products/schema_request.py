@@ -15,7 +15,7 @@ class DataProductUpdate(ORMModel):
     type_id: UUID
     about: Optional[str] = None
     domain_id: UUID
-    tag_ids: list[UUID]
+    tag_ids: list[UUID] = []
     lifecycle_id: UUID
 
 

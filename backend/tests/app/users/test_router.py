@@ -1,5 +1,6 @@
 import pytest
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
@@ -13,6 +14,7 @@ from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
+    InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     UserFactory,
@@ -215,6 +217,23 @@ class TestUsersRouter:
         DataOutputDatasetAssociationFactory(dataset=ds)
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json() == {"pending_actions": []}
+
+    def test_get_pending_actions_input_port(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        input_port = InputPortFactory(status=DecisionStatus.PENDING)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST
+            ],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, dataset_id=input_port.dataset.id
+        )
+
+        response = client.get("/api/v2/users/current/pending_actions")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["pending_actions"]) == 1
 
     def test_get_pending_actions(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

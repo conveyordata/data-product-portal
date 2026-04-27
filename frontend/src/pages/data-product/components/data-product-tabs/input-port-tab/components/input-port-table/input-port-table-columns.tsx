@@ -17,9 +17,10 @@ import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
+    dataProductId: string;
     inputPorts: InputPort[];
 };
-export const getDataProductDatasetsColumns = ({ t, inputPorts }: Props): TableColumnsType<InputPort> => {
+export const getDataProductDatasetsColumns = ({ t, dataProductId, inputPorts }: Props): TableColumnsType<InputPort> => {
     const sorter = new Sorter<InputPort>();
     return [
         {
@@ -30,21 +31,21 @@ export const getDataProductDatasetsColumns = ({ t, inputPorts }: Props): TableCo
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { input_port, status }) => {
+            render: (_, { output_port, status }) => {
                 const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
-                        name={input_port.name}
-                        accessType={input_port.access_type}
+                        name={output_port.name}
+                        accessType={output_port.access_type}
                         isApproved={isDatasetRequestApproved}
                     />
                 );
                 return (
                     <TableCellAvatar
-                        popover={{ title: popoverTitle, content: input_port.description }}
-                        linkTo={createMarketplaceOutputPortPath(input_port.id, input_port.data_product_id)}
+                        popover={{ title: popoverTitle, content: output_port.description }}
+                        linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                        title={<OutputPortTitle name={input_port.name} accessType={input_port.access_type} />}
+                        title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
                         subtitle={
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
@@ -56,7 +57,7 @@ export const getDataProductDatasetsColumns = ({ t, inputPorts }: Props): TableCo
             },
             width: '25%',
             ...new FilterSettings(inputPorts, (input_port) => getDecisionStatusLabel(t, input_port.status)),
-            sorter: sorter.stringSorter((input_port) => input_port.input_port.name),
+            sorter: sorter.stringSorter((input_port) => input_port.output_port.name),
             defaultSortOrder: 'ascend',
         },
         {
@@ -67,9 +68,9 @@ export const getDataProductDatasetsColumns = ({ t, inputPorts }: Props): TableCo
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { input_port, data_product_id, status }) => {
+            render: (_, { output_port, status }) => {
                 return (
-                    <InputPortActionButton output_port={input_port} dataProductId={data_product_id} status={status} />
+                    <InputPortActionButton output_port={output_port} dataProductId={dataProductId} status={status} />
                 );
             },
             fixed: 'right',

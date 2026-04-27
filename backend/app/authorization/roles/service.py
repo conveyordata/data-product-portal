@@ -106,7 +106,7 @@ class RoleService:
             modified = True
             self.create_role(
                 CreateRole(
-                    name="everyone",
+                    name="Everyone",
                     scope=Scope.GLOBAL,
                     description="This is the role that is used as fallback for users that don't have another role",  # noqa: E501
                     permissions=[
@@ -124,7 +124,7 @@ class RoleService:
             modified = True
             self.create_role(
                 CreateRole(
-                    name="owner",
+                    name="Owner",
                     scope=Scope.DATASET,
                     description="The owner of a Dataset",
                     permissions=[
@@ -151,7 +151,7 @@ class RoleService:
             modified = True
             self.create_role(
                 CreateRole(
-                    name="owner",
+                    name="Owner",
                     scope=Scope.DATA_PRODUCT,
                     description="The owner of a Data Product",
                     permissions=[

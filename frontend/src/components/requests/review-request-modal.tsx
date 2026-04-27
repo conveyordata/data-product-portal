@@ -10,8 +10,8 @@ import { Avatar, Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography
 import { useTranslation } from 'react-i18next';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
-    PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
@@ -52,13 +52,13 @@ function getRequestDetails(
     action: PendingAction,
     t: (key: string, params?: Record<string, string>) => string,
 ): RequestDetails | undefined {
-    if (action.pending_action_type === PendingRequestType_DataProductOutputPort) {
+    if (action.pending_action_type === PendingRequestType_InputPort) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
             requestType: t('Output Port Access'),
             source: {
-                name: action.data_product.name,
+                name: action.consuming_abstract_data_product.name,
                 email: action.requested_by.email,
                 type: t('Data Product'),
                 icon: <DataProductOutlined />,

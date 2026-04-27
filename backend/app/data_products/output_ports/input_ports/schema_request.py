@@ -2,7 +2,7 @@ from uuid import UUID
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation as DataProductDatasetModel,
+    InputPort as DataProductDatasetModel,
 )
 from app.shared.schema import ORMModel
 

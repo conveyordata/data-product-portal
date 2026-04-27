@@ -1,5 +1,7 @@
 """Contains all the data models used in inputs/outputs"""
 
+from .abstract_data_product_info import AbstractDataProductInfo
+from .abstract_data_product_type import AbstractDataProductType
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
 from .approve_link_between_technical_asset_and_output_port_request import (
@@ -29,9 +31,14 @@ from .create_data_product_role_assignment import CreateDataProductRoleAssignment
 from .create_data_product_setting_response import CreateDataProductSettingResponse
 from .create_data_product_type_response import CreateDataProductTypeResponse
 from .create_domain_response import CreateDomainResponse
-from .create_exploration_request import CreateExplorationRequest
+from .create_exploration_request_with_input_ports import (
+    CreateExplorationRequestWithInputPorts,
+)
 from .create_exploration_response import CreateExplorationResponse
 from .create_global_role_assignment import CreateGlobalRoleAssignment
+from .create_input_ports_for_exploration_request import (
+    CreateInputPortsForExplorationRequest,
+)
 from .create_output_port_request import CreateOutputPortRequest
 from .create_output_port_response import CreateOutputPortResponse
 from .create_output_port_role_assignment import CreateOutputPortRoleAssignment
@@ -45,7 +52,6 @@ from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
 from .data_product_icon_key import DataProductIconKey
-from .data_product_info import DataProductInfo
 from .data_product_life_cycle import DataProductLifeCycle
 from .data_product_life_cycle_create import DataProductLifeCycleCreate
 from .data_product_life_cycle_update import DataProductLifeCycleUpdate
@@ -133,8 +139,9 @@ from .get_domains_item import GetDomainsItem
 from .get_domains_response import GetDomainsResponse
 from .get_event_history_response import GetEventHistoryResponse
 from .get_event_history_response_item import GetEventHistoryResponseItem
+from .get_exploration_input_ports_response import GetExplorationInputPortsResponse
+from .get_exploration_response import GetExplorationResponse
 from .get_explorations_response import GetExplorationsResponse
-from .get_input_ports_for_output_port_response import GetInputPortsForOutputPortResponse
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
@@ -280,6 +287,8 @@ from .validation_error import ValidationError
 from .validation_error_context import ValidationErrorContext
 
 __all__ = (
+    "AbstractDataProductInfo",
+    "AbstractDataProductType",
     "AccessGranularity",
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
@@ -301,9 +310,10 @@ __all__ = (
     "CreateDataProductSettingResponse",
     "CreateDataProductTypeResponse",
     "CreateDomainResponse",
-    "CreateExplorationRequest",
+    "CreateExplorationRequestWithInputPorts",
     "CreateExplorationResponse",
     "CreateGlobalRoleAssignment",
+    "CreateInputPortsForExplorationRequest",
     "CreateOutputPortRequest",
     "CreateOutputPortResponse",
     "CreateOutputPortRoleAssignment",
@@ -321,7 +331,6 @@ __all__ = (
     "DataProductAboutUpdate",
     "DataProductCreate",
     "DataProductIconKey",
-    "DataProductInfo",
     "DataProductLifeCycle",
     "DataProductLifeCycleCreate",
     "DataProductLifeCyclesGet",
@@ -389,8 +398,9 @@ __all__ = (
     "GetDomainsResponse",
     "GetEventHistoryResponse",
     "GetEventHistoryResponseItem",
+    "GetExplorationInputPortsResponse",
+    "GetExplorationResponse",
     "GetExplorationsResponse",
-    "GetInputPortsForOutputPortResponse",
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",

@@ -6,8 +6,8 @@ import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
-    PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
@@ -23,12 +23,14 @@ function filterBySearch(requests: PendingAction[], searchTerm: string): PendingA
     return requests.filter((action) => {
         // Check data link requests
         if (
-            action.pending_action_type === PendingRequestType_DataProductOutputPort ||
+            action.pending_action_type === PendingRequestType_InputPort ||
             action.pending_action_type === PendingRequestType_TechnicalAssetOutputPort
         ) {
             return (
                 action.output_port.name.toLowerCase().includes(lowerSearch) ||
-                ('data_product' in action && action.data_product.name.toLowerCase().includes(lowerSearch)) ||
+                ('consuming_abstract_data_product' in action &&
+                    action.consuming_abstract_data_product.name.toLowerCase().includes(lowerSearch)) ||
+                ('technical_asset' in action && action.technical_asset.name.toLowerCase().includes(lowerSearch)) ||
                 action.requested_by.first_name.toLowerCase().includes(lowerSearch) ||
                 action.requested_by.last_name.toLowerCase().includes(lowerSearch) ||
                 action.requested_by.email.toLowerCase().includes(lowerSearch)

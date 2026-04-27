@@ -1,10 +1,10 @@
-from copy import deepcopy
 from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.schema_response import InputPort
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
@@ -15,9 +15,6 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
@@ -25,11 +22,6 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.data_products import email
-from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation,
-)
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -41,13 +33,12 @@ from app.data_products.schema_request import (
 )
 from app.data_products.schema_response import (
     CreateDataProductResponse,
-    DataProductsGet,
-    DatasetLinks,
     GetDataProductInputPortsResponse,
     GetDataProductResponse,
     GetDataProductRolledUpTagsResponse,
     GetDataProductSettingsResponse,
     GetDataProductsResponse,
+    GetDataProductsResponseItem,
     LinkInputPortsToDataProductPost,
     UpdateDataProductResponse,
 )
@@ -335,28 +326,6 @@ def update_data_product_usage(
     )
 
 
-def _send_dataset_link_emails(
-    dataset_links: list[DataProductDatasetAssociation],
-    background_tasks: BackgroundTasks,
-    actor: User,
-    db: Session,
-) -> None:
-    for dataset_link in dataset_links:
-        if dataset_link.dataset.access_type != OutputPortAccessType.UNRESTRICTED:
-            approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
-                dataset_link.dataset_id,
-                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-            )
-            background_tasks.add_task(
-                email.send_dataset_link_email(
-                    dataset_link.data_product,
-                    dataset_link.dataset,
-                    requester=deepcopy(actor),
-                    approvers=[deepcopy(approver) for approver in approvers],
-                )
-            )
-
-
 @router.get("/{id}/graph")
 def get_data_product_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
@@ -432,7 +401,7 @@ def link_input_ports_to_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> LinkInputPortsToDataProductPost:
-    dataset_links = DataProductService(db).link_datasets_to_data_product(
+    input_ports = DataProductService(db).request_input_ports(
         id,
         link_input_ports.input_ports,
         link_input_ports.justification,
@@ -447,25 +416,28 @@ def link_input_ports_to_data_product(
                     if dataset_link.status == DecisionStatus.PENDING
                     else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
-                subject_id=dataset_link.data_product_id,
+                subject_id=dataset_link.consuming_abstract_data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=dataset_link.dataset_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
             )
-            for dataset_link in dataset_links
+            for dataset_link in input_ports
         ]
     )
-    for dataset_link, event_id in zip(dataset_links, event_ids):
+    for dataset_link, event_id in zip(input_ports, event_ids):
         if dataset_link.status == DecisionStatus.APPROVED:
             NotificationService(db).create_data_product_notifications(
-                data_product_id=dataset_link.data_product_id, event_id=event_id
+                data_product_id=dataset_link.consuming_abstract_data_product_id,
+                event_id=event_id,
             )
 
-    _send_dataset_link_emails(dataset_links, background_tasks, authenticated_user, db)
+    DataProductService(db).send_input_port_requested_emails_to_output_port_owners(
+        input_ports, background_tasks, authenticated_user
+    )
     RefreshInfrastructureLambda().trigger()
     return LinkInputPortsToDataProductPost(
-        input_port_links=[dataset_link.id for dataset_link in dataset_links]
+        input_port_links=[dataset_link.id for dataset_link in input_ports]
     )
 
 
@@ -476,8 +448,8 @@ def get_data_products(
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
-            DataProductsGet.model_validate(data_product_old).convert()
-            for data_product_old in DataProductService(db).get_data_products(
+            GetDataProductsResponseItem.model_validate(dp)
+            for dp in DataProductService(db).get_data_products(
                 filter_to_user_with_assigment
             )
         ]
@@ -512,7 +484,7 @@ def get_data_product_input_ports(
 ) -> GetDataProductInputPortsResponse:
     return GetDataProductInputPortsResponse(
         input_ports=[
-            DatasetLinks.model_validate(input_port).convert()
+            InputPort.model_validate(input_port)
             for input_port in DataProductService(db).get_input_ports(id)
         ]
     )
@@ -558,9 +530,7 @@ def unlink_input_port_from_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_dataset = DataProductService(db).unlink_dataset_from_data_product(
-        id, input_port_id
-    )
+    data_product_dataset = DataProductService(db).remove_input_port(id, input_port_id)
 
     event_id = EventService(db).create_event(
         CreateEvent(

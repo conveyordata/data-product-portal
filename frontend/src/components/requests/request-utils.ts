@@ -1,8 +1,8 @@
 import type { User } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
-    PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 
@@ -21,8 +21,8 @@ export interface TableRow {
  * - "User Name requests Admin role"
  */
 export function getRequestDescription(action: PendingAction): string {
-    if (action.pending_action_type === PendingRequestType_DataProductOutputPort) {
-        const productName = action.data_product.name;
+    if (action.pending_action_type === PendingRequestType_InputPort) {
+        const productName = action.consuming_abstract_data_product.name;
         const outputPortName = action.output_port.name;
         return `${productName} requests read access to ${outputPortName}`;
     }
@@ -49,7 +49,7 @@ export function transformToTableRow(action: PendingAction): TableRow {
         pendingAction: action,
     };
 
-    if (action.pending_action_type === PendingRequestType_DataProductOutputPort) {
+    if (action.pending_action_type === PendingRequestType_InputPort) {
         return {
             ...baseRow,
             requestedBy: action.requested_by,

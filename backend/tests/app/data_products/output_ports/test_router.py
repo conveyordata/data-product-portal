@@ -14,7 +14,6 @@ from app.settings import settings
 from tests import test_session
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
@@ -22,6 +21,7 @@ from tests.factories import (
     DatasetRoleAssignmentFactory,
     DomainFactory,
     GlobalRoleAssignmentFactory,
+    InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     UserFactory,
@@ -578,7 +578,7 @@ class TestDatasetsRouter:
     def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         dp = DataProductFactory()
-        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
         DataProductRoleAssignmentFactory(
@@ -586,7 +586,7 @@ class TestDatasetsRouter:
         )
 
         response = self.get_output_port(client, ds.id, ds.data_product.id)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
     def test_get_private_datasets_not_allowed(self, client):
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
@@ -618,7 +618,7 @@ class TestDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=dp.id
         )
-        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
 
         response = client.get(ENDPOINT.format(ds.data_product_id))
         assert response.status_code == 200

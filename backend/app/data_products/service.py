@@ -1,14 +1,13 @@
 import copy
-from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
-import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
+from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.configuration.data_product_lifecycles.model import (
@@ -28,13 +27,10 @@ from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation as DataProductDatasetModel,
+    InputPort as InputPortModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.data_products.output_ports.model import ensure_output_port_exists
-from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -43,9 +39,6 @@ from app.data_products.schema_request import (
     DataProductUsageUpdate,
 )
 from app.data_products.schema_response import (
-    DataProductGet,
-    DataProductsGet,
-    DatasetLinks,
     GetDataProductResponse,
     UpdateDataProductResponse,
 )
@@ -60,25 +53,11 @@ from app.users.model import User as UserModel
 from app.users.schema import User
 
 
-class DataProductService:
+class DataProductService(AbstractDataProductService):
     def __init__(self, db: Session):
-        self.db = db
+        super().__init__(db)
         self.namespace_validator = NamespaceValidator(DataProductModel)
         self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
-
-    def get_input_ports(self, data_product_id: UUID) -> Sequence[DatasetLinks]:
-        ensure_data_product_exists(data_product_id, self.db)
-        return (
-            self.db.scalars(
-                select(DataProductDatasetModel)
-                .options(
-                    selectinload(DataProductDatasetModel.dataset),
-                )
-                .filter(DataProductDatasetModel.data_product_id == data_product_id),
-            )
-            .unique()
-            .all()
-        )
 
     def get_data_product_settings(
         self, data_product_id: UUID
@@ -110,50 +89,6 @@ class DataProductService:
 
         return rolled_up_tags
 
-    @deprecated("Leftover from API v1")
-    def get_data_product_old(self, id: UUID) -> DataProductGet:
-        data_product = self.db.get(
-            DataProductModel,
-            id,
-            options=[
-                selectinload(DataProductModel.dataset_links)
-                .selectinload(DataProductDatasetModel.dataset)
-                .selectinload(DatasetModel.data_output_links),
-                selectinload(DataProductModel.datasets).selectinload(DatasetModel.tags),
-                selectinload(DataProductModel.datasets).raiseload("*"),
-                selectinload(DataProductModel.data_outputs).selectinload(
-                    TechnicalAssetModel.dataset_links
-                ),
-                selectinload(DataProductModel.data_outputs).selectinload(
-                    TechnicalAssetModel.environment_configurations
-                ),
-                selectinload(DataProductModel.data_product_settings),
-            ],
-        )
-        default_lifecycle = self.db.scalar(
-            select(DataProductLifeCycleModel).filter(
-                DataProductLifeCycleModel.is_default
-            )
-        )
-
-        rolled_up_tags = set()
-
-        if not data_product:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
-            )
-
-        for link in data_product.dataset_links:
-            rolled_up_tags.update(link.dataset.tags)
-            for output_link in link.dataset.data_output_links:
-                rolled_up_tags.update(output_link.data_output.tags)
-
-        data_product.rolled_up_tags = rolled_up_tags
-
-        if not data_product.lifecycle:
-            data_product.lifecycle = default_lifecycle
-        return data_product
-
     def get_data_product(self, id: UUID) -> GetDataProductResponse:
         data_product = self.db.get(
             DataProductModel,
@@ -177,7 +112,7 @@ class DataProductService:
     def get_data_products(
         self,
         filter_to_user_with_assigment: Optional[UUID] = None,
-    ) -> Sequence[DataProductsGet]:
+    ) -> Sequence[DataProductModel]:
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
@@ -185,6 +120,7 @@ class DataProductService:
         )
         query = select(DataProductModel).options(
             selectinload(DataProductModel.tags).raiseload("*"),
+            undefer(DataProductModel.input_port_count),
         )
         if filter_to_user_with_assigment:
             query = query.filter(
@@ -321,115 +257,6 @@ class DataProductService:
         self.db.commit()
         return current_data_product
 
-    def link_dataset_to_data_product(
-        self,
-        id: UUID,
-        dataset_id: UUID,
-        justification: str,
-        *,
-        actor: User,
-    ) -> DataProductDatasetModel:
-        """
-        Links an output port to a data product to be used as input port.
-        """
-
-        dataset = ensure_output_port_exists(
-            dataset_id,
-            self.db,
-            options=[
-                selectinload(DatasetModel.data_product_links)
-                .selectinload(DataProductDatasetModel.data_product)
-                .selectinload(DataProductModel.dataset_links)
-            ],
-        )
-        data_product = self.db.get(
-            DataProductModel,
-            id,
-            options=[selectinload(DataProductModel.dataset_links)],
-            populate_existing=True,
-        )
-
-        if dataset.id in [
-            link.dataset_id
-            for link in data_product.dataset_links
-            if link.status != DecisionStatus.DENIED
-        ]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Dataset {dataset_id} already exists in data product {id}",
-            )
-        if dataset.data_product_id == data_product.id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot link own dataset to data product",
-            )
-
-        if not OutputPortService(self.db).is_visible_to_user(dataset, actor):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private dataset",
-            )
-
-        approval_status = (
-            DecisionStatus.PENDING
-            if dataset.access_type != OutputPortAccessType.UNRESTRICTED
-            else DecisionStatus.APPROVED
-        )
-
-        dataset_link = DataProductDatasetModel(
-            dataset_id=dataset_id,
-            status=approval_status,
-            justification=justification,
-            requested_by=actor,
-            requested_on=datetime.now(tz=pytz.utc),
-        )
-        data_product.dataset_links.append(dataset_link)
-        return dataset_link
-
-    def link_datasets_to_data_product(
-        self,
-        id: UUID,
-        dataset_ids: list[UUID],
-        justification: str,
-        *,
-        actor: User,
-    ) -> list[DataProductDatasetModel]:
-        dataset_links = [
-            self.link_dataset_to_data_product(
-                id, dataset_id, justification, actor=actor
-            )
-            for dataset_id in dataset_ids
-        ]
-        self.db.commit()
-        return dataset_links
-
-    def unlink_dataset_from_data_product(
-        self,
-        id: UUID,
-        dataset_id: UUID,
-    ) -> DataProductDatasetModel:
-        ensure_output_port_exists(dataset_id, self.db)
-        data_product = ensure_data_product_exists(
-            id, self.db, options=[selectinload(DataProductModel.dataset_links)]
-        )
-        data_product_dataset = next(
-            (
-                dataset
-                for dataset in data_product.dataset_links
-                if dataset.dataset_id == dataset_id
-            ),
-            None,
-        )
-        if not data_product_dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data product dataset for data product {id} not found",
-            )
-
-        data_product.dataset_links.remove(data_product_dataset)
-        self.db.commit()
-        return data_product_dataset
-
     @deprecated("Should use generate_signin_url instead")
     def get_data_product_role_arn(self, id: UUID, environment: str) -> str:
         return _get_data_product_role_arn(id, environment, self.db)
@@ -451,9 +278,9 @@ class DataProductService:
         ]
         edges = []
 
-        dataset_links = (
+        input_ports = (
             self.db.scalars(
-                select(DataProductDatasetModel).filter_by(data_product_id=id)
+                select(InputPortModel).filter_by(consuming_abstract_data_product_id=id)
             )
             .unique()
             .all()
@@ -473,14 +300,14 @@ class DataProductService:
             .all()
         )
 
-        for upstream_datasets in dataset_links:
+        for upstream_datasets in input_ports:
             nodes.append(
                 Node(
                     id=upstream_datasets.id,
                     data=NodeData(
                         id=upstream_datasets.dataset_id,
                         name=upstream_datasets.dataset.name,
-                        link_to_id=upstream_datasets.dataset.data_product_id,
+                        link_to_id=upstream_datasets.dataset.consuming_abstract_data_product_id,
                     ),
                     type=NodeType.datasetNode,
                 )
@@ -523,7 +350,7 @@ class DataProductService:
                             data=NodeData(
                                 id=f"{downstream_datasets.dataset_id}",
                                 name=downstream_datasets.dataset.name,
-                                link_to_id=downstream_datasets.dataset.data_product_id,
+                                link_to_id=downstream_datasets.dataset.consuming_abstract_data_product_id,
                             ),
                             type=NodeType.datasetNode,
                         )
@@ -538,17 +365,15 @@ class DataProductService:
                         )
                     )
                     if level >= 3:
-                        for (
-                            downstream_dps
-                        ) in downstream_datasets.dataset.data_product_links:
-                            icon = downstream_dps.data_product.type.icon_key
+                        for downstream_dps in downstream_datasets.dataset.input_ports:
+                            icon = downstream_dps.consuming_abstract_data_product.type.icon_key
                             nodes.append(
                                 Node(
                                     id=f"{downstream_dps.id}_3",
                                     data=NodeData(
-                                        id=f"{downstream_dps.data_product_id}",
+                                        id=f"{downstream_dps.consuming_abstract_data_product_id}",
                                         icon_key=icon,
-                                        name=downstream_dps.data_product.name,
+                                        name=downstream_dps.consuming_abstract_data_product.name,
                                     ),
                                     type=NodeType.dataProductNode,
                                 )

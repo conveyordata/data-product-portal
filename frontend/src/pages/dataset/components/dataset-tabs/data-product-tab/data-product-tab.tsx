@@ -16,7 +16,7 @@ type Props = {
 function filterDataProducts(dataProductLinks: InputPort[], searchTerm: string) {
     return (
         dataProductLinks.filter((item) =>
-            item?.data_product.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+            item?.consuming_abstract_data_product.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }
@@ -39,7 +39,12 @@ export function DataProductTab({ outputPortId, dataProductId }: Props) {
                 allowClear
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <DataProductTable datasetId={outputPortId} dataProducts={filteredDataProducts} isLoading={isLoading} />
+            <DataProductTable
+                outputPortId={outputPortId}
+                dataProductId={dataProductId}
+                dataProducts={filteredDataProducts}
+                isLoading={isLoading}
+            />
         </Flex>
     );
 }

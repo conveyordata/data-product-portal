@@ -1,6 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
+from app.abstract_data_product.schema_response import InputPort
 from app.configuration.domains.schema import Domain
 from app.shared.schema import ORMModel
 
@@ -17,5 +18,13 @@ class CreateExplorationResponse(Exploration):
     pass
 
 
+class GetExplorationResponse(Exploration):
+    pass
+
+
 class GetExplorationsResponse(ORMModel):
     explorations: Sequence[Exploration]
+
+
+class GetExplorationInputPortsResponse(ORMModel):
+    input_ports: Sequence[InputPort]

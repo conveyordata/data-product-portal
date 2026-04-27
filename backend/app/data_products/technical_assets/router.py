@@ -19,7 +19,6 @@ from app.data_products.technical_assets.schema_request import (
 )
 from app.data_products.technical_assets.schema_response import (
     CreateTechnicalAssetResponse,
-    DataOutputGet,
     GetTechnicalAssetsResponse,
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
@@ -47,7 +46,7 @@ def get_data_product_technical_assets(
 ) -> GetTechnicalAssetsResponse:
     return GetTechnicalAssetsResponse(
         technical_assets=[
-            DataOutputGet.model_validate(do).convert()
+            GetTechnicalAssetsResponseItem.model_validate(do)
             for do in DataOutputService(db).get_data_outputs_for_data_product(
                 data_product_id
             )
@@ -59,9 +58,9 @@ def get_data_product_technical_assets(
 def get_technical_asset(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponseItem:
-    return DataOutputGet.model_validate(
+    return GetTechnicalAssetsResponseItem.model_validate(
         DataOutputService(db).get_data_output(data_product_id, id)
-    ).convert()
+    )
 
 
 @router.get(f"{route}/{{id}}/history")

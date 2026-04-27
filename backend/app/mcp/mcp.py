@@ -46,21 +46,18 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
 from app.data_products.output_ports.schema_response import (
-    DatasetGet,
     DatasetsGet,
+    GetOutputPortResponse,
     OutputPortsGet,
 )
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import (
-    DataProductsGet,
     GetDataProductResponse,
     GetDataProductsResponseItem,
 )
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import (
-    DataOutputGet,
-    DataOutputsGet,
     GetTechnicalAssetsResponseItem,
 )
 from app.data_products.technical_assets.service import DataOutputService
@@ -665,7 +662,7 @@ def universal_search(
                         dp.description and query.lower() in dp.description.lower()
                     ):
                         filtered_data_products.append(
-                            DataProductsGet.model_validate(dp).convert()
+                            GetDataProductsResponseItem.model_validate(dp)
                         )
                         if len(filtered_data_products) >= limit:
                             break
@@ -691,7 +688,7 @@ def universal_search(
                             break
 
                 result_datasets = [
-                    DatasetsGet.model_validate(ds).model_dump()
+                    GetDataProductsResponseItem.model_validate(ds).model_dump()
                     for ds in filtered_output_ports
                 ]
                 query_results.update({"datasets": result_datasets})
@@ -711,7 +708,7 @@ def universal_search(
                             break
 
                 result_data_outputs = [
-                    DataOutputsGet.model_validate(do).model_dump()
+                    GetTechnicalAssetsResponseItem.model_validate(do)
                     for do in filtered_data_outputs
                 ]
                 query_results.update({"technical_assets": result_data_outputs})
@@ -791,7 +788,7 @@ def search_data_products(
                     continue
 
                 filtered_data_products.append(
-                    DataProductsGet.model_validate(dp).convert()
+                    GetDataProductsResponseItem.model_validate(dp)
                 )
                 if len(filtered_data_products) >= limit:
                     break
@@ -968,7 +965,7 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
             if not dataset:
                 return {"error": f"Dataset {output_port_id} not found"}
 
-            return DatasetGet.model_validate(dataset).model_dump()
+            return GetOutputPortResponse.model_validate(dataset).model_dump()
         finally:
             db.close()
 
@@ -997,7 +994,9 @@ def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
             if not data_output:
                 return {"error": f"Data output {technical_asset_id} not found"}
 
-            return DataOutputGet.model_validate(data_output).model_dump()
+            return GetTechnicalAssetsResponseItem.model_validate(
+                data_output
+            ).model_dump()
         finally:
             db.close()
 
@@ -1280,7 +1279,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
                 "featured_content": {
                     "popular_data_products": [
                         GetDataProductsResponseItem.model_validate(
-                            DataProductsGet.model_validate(dp).convert()
+                            GetDataProductsResponseItem.model_validate(dp)
                         ).model_dump()
                         for dp in popular_data_products
                     ],
@@ -1418,7 +1417,7 @@ def get_output_port_resource(output_port_id: str) -> str:
             if not dataset:
                 return f"Error: Output port {output_port_id} not found"
             # Convert to Pydantic model and then to formatted string
-            ds_data = DatasetGet.model_validate(dataset)
+            ds_data = GetOutputPortResponse.model_validate(dataset)
 
             return f"""
 # Output port: {ds_data.name}

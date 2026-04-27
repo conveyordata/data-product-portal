@@ -2,28 +2,27 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any, TypeVar
-from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="CreateExplorationRequest")
+from ..models.abstract_data_product_type import AbstractDataProductType
+
+T = TypeVar("T", bound="AbstractDataProductInfo")
 
 
 @_attrs_define
-class CreateExplorationRequest:
+class AbstractDataProductInfo:
     """
     Attributes:
         name (str):
         namespace (str):
-        description (str):
-        domain_id (UUID):
+        abstract_data_product_type (AbstractDataProductType):
     """
 
     name: str
     namespace: str
-    description: str
-    domain_id: UUID
+    abstract_data_product_type: AbstractDataProductType
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -31,9 +30,7 @@ class CreateExplorationRequest:
 
         namespace = self.namespace
 
-        description = self.description
-
-        domain_id = str(self.domain_id)
+        abstract_data_product_type = self.abstract_data_product_type.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -41,8 +38,7 @@ class CreateExplorationRequest:
             {
                 "name": name,
                 "namespace": namespace,
-                "description": description,
-                "domain_id": domain_id,
+                "abstract_data_product_type": abstract_data_product_type,
             }
         )
 
@@ -55,19 +51,18 @@ class CreateExplorationRequest:
 
         namespace = d.pop("namespace")
 
-        description = d.pop("description")
-
-        domain_id = UUID(d.pop("domain_id"))
-
-        create_exploration_request = cls(
-            name=name,
-            namespace=namespace,
-            description=description,
-            domain_id=domain_id,
+        abstract_data_product_type = AbstractDataProductType(
+            d.pop("abstract_data_product_type")
         )
 
-        create_exploration_request.additional_properties = d
-        return create_exploration_request
+        abstract_data_product_info = cls(
+            name=name,
+            namespace=namespace,
+            abstract_data_product_type=abstract_data_product_type,
+        )
+
+        abstract_data_product_info.additional_properties = d
+        return abstract_data_product_info
 
     @property
     def additional_keys(self) -> list[str]:

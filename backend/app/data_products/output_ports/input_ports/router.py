@@ -18,10 +18,10 @@ from app.data_products.output_ports.input_ports.schema_request import (
 )
 from app.data_products.output_ports.input_ports.schema_response import (
     GetInputPortsForOutputPortResponse,
+    InputPort,
 )
 from app.data_products.output_ports.input_ports.service import DataProductDatasetService
 from app.data_products.output_ports.service import OutputPortService
-from app.data_products.schema_response import DatasetLinks
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -41,7 +41,7 @@ def get_input_ports_for_output_port(
 ) -> GetInputPortsForOutputPortResponse:
     return GetInputPortsForOutputPortResponse(
         input_ports=[
-            DatasetLinks.model_validate(x).convert()
+            InputPort.model_validate(x)
             for x in OutputPortService(db).get_consuming_data_products(
                 output_port_id, data_product_id
             )
@@ -80,7 +80,7 @@ def approve_output_port_as_input_port(
             name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
             subject_id=data_product_link.dataset_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=data_product_link.data_product_id,
+            target_id=data_product_link.consuming_abstract_data_product_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
@@ -124,7 +124,7 @@ def deny_output_port_as_input_port(
             name=EventType.DATA_PRODUCT_DATASET_LINK_DENIED,
             subject_id=data_product_link.dataset_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=data_product_link.data_product_id,
+            target_id=data_product_link.consuming_abstract_data_product_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
@@ -165,7 +165,7 @@ def remove_output_port_as_input_port(
             name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
             subject_id=data_product_link.dataset_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=data_product_link.data_product_id,
+            target_id=data_product_link.consuming_abstract_data_product_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),

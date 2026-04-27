@@ -16,12 +16,13 @@ import styles from './data-product-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
 
 type Props = {
-    datasetId: string;
+    dataProductId: string;
+    outputPortId: string;
     dataProducts: InputPort[];
     isLoading?: boolean;
 };
 
-export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) {
+export function DataProductTable({ outputPortId, dataProductId, dataProducts, isLoading }: Props) {
     const { t } = useTranslation();
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveOutputPortAsInputPortMutation();
@@ -36,17 +37,17 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
 
     const { data: approve_access } = useCheckAccessQuery(
         {
-            resource: datasetId,
+            resource: outputPortId,
             action: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
         },
-        { skip: !datasetId },
+        { skip: !outputPortId },
     );
     const { data: revoke_access } = useCheckAccessQuery(
         {
-            resource: datasetId,
+            resource: outputPortId,
             action: AuthorizationAction.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
         },
-        { skip: !datasetId },
+        { skip: !outputPortId },
     );
     const canApprove = approve_access?.allowed || false;
     const canRevoke = revoke_access?.allowed || false;
@@ -63,7 +64,7 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
         async (dataProductId: string, consumingDataProductName: string, consumingDataProductId: string) => {
             try {
                 await removeDatasetFromDataProduct({
-                    outputPortId: datasetId,
+                    outputPortId: outputPortId,
                     dataProductId,
                     removeOutputPortAsInputPortRequest: {
                         consuming_data_product_id: consumingDataProductId,
@@ -80,12 +81,14 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
                 });
             }
         },
-        [datasetId, removeDatasetFromDataProduct, t],
+        [outputPortId, removeDatasetFromDataProduct, t],
     );
 
     const columns: TableColumnsType<InputPort> = useMemo(() => {
         return getDatasetDataProductsColumns({
             t,
+            dataProductId,
+            outputPortId,
             dataProductLinks: dataProducts,
             onAcceptDataProductDatasetLink: handleAcceptDataProductDatasetLink,
             onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
@@ -96,6 +99,8 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
         });
     }, [
         t,
+        dataProductId,
+        outputPortId,
         dataProducts,
         handleAcceptDataProductDatasetLink,
         handleRejectDataProductDatasetLink,
