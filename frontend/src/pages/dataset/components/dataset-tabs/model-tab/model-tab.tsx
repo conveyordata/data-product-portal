@@ -5,6 +5,7 @@ import {
     useGetOutputPortSemanticModelsQuery,
     useGetOutputPortTableSchemasQuery,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { SemanticModelList } from './components/semantic-model-list';
 import { TableSchemaList } from './components/table-schema-list';
 
 type Props = {
@@ -44,9 +45,7 @@ export function ModelTab({ datasetId, dataProductId }: Props) {
                 {semanticModels.length === 0 ? (
                     <Empty description={t('No semantic models imported yet')} />
                 ) : (
-                    <div>
-                        {semanticModels.length} {t('model(s) — components coming in Task 14')}
-                    </div>
+                    <SemanticModelList models={semanticModels} />
                 )}
             </div>
         </Flex>
