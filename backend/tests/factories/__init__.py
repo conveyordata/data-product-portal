@@ -16,6 +16,8 @@ from .exploration import ExplorationFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
 from .output_port_cost_record import OutputPortCostRecordFactory
+from .output_port_freshness_observation import FreshnessObservationFactory
+from .output_port_freshness_slo import FreshnessSloFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
@@ -58,6 +60,8 @@ factories = [
     ThemeSettingsFactory,
     NotificationFactory,
     OutputPortCostRecordFactory,
+    FreshnessSloFactory,
+    FreshnessObservationFactory,
     ExplorationFactory,
 ]
 
