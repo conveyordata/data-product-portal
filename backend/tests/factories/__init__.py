@@ -15,9 +15,11 @@ from .event import EventFactory
 from .exploration import ExplorationFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
+from .output_port_column import OutputPortColumnFactory
 from .output_port_cost_record import OutputPortCostRecordFactory
 from .output_port_freshness_observation import FreshnessObservationFactory
 from .output_port_freshness_slo import FreshnessSloFactory
+from .output_port_table_schema import OutputPortTableSchemaFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
@@ -62,6 +64,8 @@ factories = [
     OutputPortCostRecordFactory,
     FreshnessSloFactory,
     FreshnessObservationFactory,
+    OutputPortTableSchemaFactory,
+    OutputPortColumnFactory,
     ExplorationFactory,
 ]
 
