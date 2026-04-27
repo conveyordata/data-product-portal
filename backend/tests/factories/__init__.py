@@ -19,6 +19,7 @@ from .output_port_column import OutputPortColumnFactory
 from .output_port_cost_record import OutputPortCostRecordFactory
 from .output_port_freshness_observation import FreshnessObservationFactory
 from .output_port_freshness_slo import FreshnessSloFactory
+from .output_port_semantic_model import OutputPortSemanticModelFactory
 from .output_port_table_schema import OutputPortTableSchemaFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
@@ -66,6 +67,7 @@ factories = [
     FreshnessObservationFactory,
     OutputPortTableSchemaFactory,
     OutputPortColumnFactory,
+    OutputPortSemanticModelFactory,
     ExplorationFactory,
 ]
 
