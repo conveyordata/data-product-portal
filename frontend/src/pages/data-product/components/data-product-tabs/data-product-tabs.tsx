@@ -131,7 +131,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                         <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>
                         {staleCount > 0 && (
                             <Tooltip
-                                title={t('{{count}} input port(s) have a broken freshness SLO', { count: staleCount })}
+                                title={t('{{count}} Input Port(s) have a broken freshness SLO', { count: staleCount })}
                             >
                                 <WarningOutlined style={{ color: '#faad14' }} />
                             </Tooltip>
