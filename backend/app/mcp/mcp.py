@@ -149,6 +149,9 @@ mcp = FastMCP(
       1. The owner data_product_id (for direct access attempt)
       2. ALL data_product_links[].data_product.namespace (for fallback access)
 
+    If you don't have the consuming products there is a specific tool for that as well:
+    get_consuming_products(output_port_id, data_product_id) where data_product_id is the owner data product of the output port. This will return a list of consuming products with their namespaces and descriptions.
+
     Step 3: DETERMINE ENVIRONMENT
     ──────────────────────────────
     If user didn't specify environment:
@@ -178,17 +181,23 @@ mcp = FastMCP(
         consuming data products: [list names from data_product_links]"
 
     ⚠️  REMEMBER: Once you find working credentials, use that SAME namespace
-        for list_glue_tables and query_athena in the following steps!
+        for query_athena in the following steps!
 
-    Step 5: LIST AVAILABLE TABLES
+    Step 5: FIND DATABASE
     ──────────────────────────────
+    Defer the database name from the technical asset or query athena to find it.
+    Use get_glue_database(environment, technical_asset_id) tool
+
+    Step 6: LIST AVAILABLE TABLES
+     ──────────────────────────────
     list_glue_tables(data_product_namespace, environment, database_name)
     → Use the SAME data_product_namespace that worked in Step 4!
     → database_name may need environment prefix (e.g., 'datalake_experimentation_')
+    → database may need suffixes found in technical asset links (e.g., __sales)
     → Returns: list of table names in the database
     → Action: Identify which table(s) to query
 
-    Step 6: CONSTRUCT & EXECUTE QUERY
+    Step 7: CONSTRUCT & EXECUTE QUERY
     ──────────────────────────────────
     query_athena(
         data_product_namespace,  # SAME namespace from Step 4!
@@ -201,7 +210,7 @@ mcp = FastMCP(
       ✗ WRONG:   SELECT * FROM users (missing database)
       ✗ WRONG:   SELECT * FROM datalake_experimentation_sales-data__sales.users (no quotes)
 
-    Step 7: GET RESULTS
+    Step 8: GET RESULTS
     ───────────────────
     get_athena_query_results(query_execution_id, data_product_namespace, environment)
     → If status = 'RUNNING': Wait 3-5 seconds, retry
@@ -236,8 +245,6 @@ mcp = FastMCP(
        → Use: 'prod' (default)
     4. get_aws_credentials("sales_data", "prod")
        → ✓ Success: got credentials
-    5. list_glue_tables("sales_data", "prod", "sales_db")
-       → ['customers', 'transactions', 'customer_revenue']
     6. query_athena("sales_data", "prod",
          "SELECT customer_name, revenue FROM sales_db.customer_revenue
           ORDER BY revenue DESC LIMIT 10")
@@ -258,10 +265,6 @@ mcp = FastMCP(
     4. Try consuming product FIRST:
        get_aws_credentials("mcp-test-sales-overview", "dev")
        → ✓ Success! Use this namespace for all queries
-    5. list_glue_tables("mcp-test-sales-overview", "dev",
-                        "datalake_experimentation_mcp-athena-query-test__sales")
-       → Note: Database has environment prefix!
-       → Returns: ['users']
     6. query_athena("mcp-test-sales-overview", "dev",
          'SELECT * FROM "datalake_experimentation_mcp-athena-query-test__sales"."users" LIMIT 100')
        → Note: Quotes around database/table names with hyphens!
@@ -276,7 +279,7 @@ mcp = FastMCP(
     • Route to Query mode for actual data questions (credentials required)
     • ALWAYS extract data_product_links from output port details
     • TRY CONSUMING DATA PRODUCTS FIRST - this is the most common access pattern
-    • Use the SAME namespace for list_glue_tables and query_athena that worked in get_aws_credentials
+    • Use the SAME namespace for query_athena that worked in get_aws_credentials
     • Use fully qualified table names with quotes: "database"."table_name"
     • Be aware of environment prefixes in database names (e.g., 'datalake_experimentation_')
     • Wait and retry if query is still running
@@ -286,7 +289,7 @@ mcp = FastMCP(
     • Don't try owner access first - consuming products are the primary access pattern
     • Don't request credentials for pure metadata questions
     • Don't skip extracting data_product_links from output port details
-    • Don't skip the list_glue_tables step - you need actual table names with prefixes
+    • Don't skip the get_prefix step - you need actual table names with prefixes
     • Don't use unqualified table names (missing database prefix)
     • Don't forget quotes around database/table names with hyphens or underscores
 
@@ -345,8 +348,10 @@ def get_aws_credentials(data_product_namespace: str, env: str) -> Dict[str, str]
     1. FIRST: Try each consuming data product namespace from data_product_links[]
     2. LAST: Try the owner data product namespace (fallback only)
 
+    ALWAYS use full names for environments. Never abbreviations
+
     The namespace that successfully returns credentials should be used for ALL
-    subsequent operations (list_glue_tables, query_athena, get_athena_query_results).
+    subsequent operations (query_athena, get_athena_query_results).
 
     Args:
         data_product_namespace: The namespace to try (consuming product or owner).
@@ -363,7 +368,11 @@ def get_aws_credentials(data_product_namespace: str, env: str) -> Dict[str, str]
             token=JWTToken(sub="", token=f"Bearer {access_token.token}"),
             db=db,
         )
-
+        envs = EnvironmentService(db).get_environments()
+        if env not in [e.name for e in envs]:
+            return {
+                "error": f"Environment '{env}' not found. Available environments: {[e.name for e in envs]}"
+            }
         client = AuthenticatedClient(base_url=settings.HOST, token=access_token.token)
         result = sdk_get_aws_credentials.sync(
             client=client, data_product_name=data_product_namespace, environment=env
@@ -382,12 +391,39 @@ def get_aws_credentials(data_product_namespace: str, env: str) -> Dict[str, str]
 
 
 @mcp.tool
+def get_database_prefix(environment: str) -> str:
+    prefix = settings.AWS_ATHENA_PREFIX
+    if environment == "production" or environment == "prd" or environment == "prod":
+        return f"{prefix}_publishing_"
+    else:
+        return f"{prefix}_experimentation_"
+
+
+@mcp.tool
+def get_glue_database(environment: str, technical_asset_id: str) -> str:
+    """Get the Glue database name associated with a technical asset.
+    This is used to find the database to query in Athena.
+    Args:
+        environment: The name of the environment to run the query in
+        technical_asset_id: The ID of the technical asset to query
+    Returns:
+        The name of the Glue database to query in Athena.
+    """
+
+    technical_asset = get_technical_asset_details(technical_asset_id)
+    prefix = get_database_prefix(environment)
+    db = technical_asset.get("configuration").get("database")
+    suffix = technical_asset.get("configuration").get("database_suffix")
+    return f"{prefix}_{db}__{suffix}"
+
+
+@mcp.tool
 def query_athena(
     data_product_namespace: str,
     env: str,
     query: str,
-    prefix: Optional[str] = None,
-    bucket: Optional[str] = None,
+    prefix: str,
+    bucket: str,
 ) -> Dict[str, Any]:
     """Run an Athena query using temporary credentials for a specific data product and environment.
     The prefix and bucket are typically configured at the company level, but can be overridden if needed.
@@ -401,13 +437,17 @@ def query_athena(
     - Use double quotes for names with hyphens or special chars:
       ✓ SELECT * FROM "datalake_experimentation_sales-data__sales"."users"
       ✗ SELECT * FROM datalake_experimentation_sales-data__sales.users (syntax error)
-    - Database names often have environment prefixes (datalake_experimentation_, datalake_publishing_)
-
+    - Database names often have environment prefixes (<PREFIX>, <PREFIX>)
+    e.g. datalake_prd. The prefixes can be found with get_prefix
+    - Database names are often suffixed. These suffixes can be found in the technical asset links of the output port details.
+    The suffix is always attached with a DOUBLE __ (underscore) e.g. datalake_experimentation_sales-data__sales
+    The workgroup must be filled in and is the same namespace as you requested access for.
+    Make sure the database exists and is correct before assuming access rights issues are the issue.
     Args:
         data_product_namespace: The namespace that has access (from consuming data product).
         env: The environment.
         query: The SQL query to execute (use quotes for database/table names with hyphens).
-        prefix: Optional override for the platform prefix. Uses AWS_ATHENA_PREFIX from settings if not provided.
+        prefix: use get_prefix tool to get database prefixes. Use these in your query.
         bucket: use get_bucket tool to get the correct bucket for the data product and environment, or provide an override.
 
     Returns:
@@ -415,7 +455,6 @@ def query_athena(
     """
 
     # Use company-wide settings as defaults
-    athena_prefix = prefix or settings.AWS_ATHENA_PREFIX
     results_bucket = bucket
 
     # Buckets are fetchable from the database I guess?
@@ -423,9 +462,14 @@ def query_athena(
     # EnvironmentPlatformServiceConfigurationService(db).get_environment_platform_service_config()
 
     # Validate that prefix and bucket are available
-    if not athena_prefix:
+    if not settings.AWS_ATHENA_PREFIX:
         return {
             "error": "AWS Athena prefix not configured. Please set AWS_ATHENA_PREFIX in settings or provide as parameter."
+        }
+
+    if not prefix:
+        return {
+            "error": "Database prefix not provided. Use get_prefix tool to retrieve the correct prefix for the environment and data product."
         }
 
     if not results_bucket:
@@ -455,17 +499,16 @@ def query_athena(
         # Execute the query
         response = client.start_query_execution(
             QueryString=query,
-            WorkGroup=f"{athena_prefix}-{data_product_namespace}-experimentation",
+            WorkGroup=f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-publishing",
             ResultConfiguration={
                 "OutputLocation": f"s3://{results_bucket}/athena/{data_product_namespace}"
             },
         )
-
         return {
             "query_execution_id": response["QueryExecutionId"],
             "data_product_namespace": data_product_namespace,
-            "environment": "experimentation",
-            "workgroup": f"{athena_prefix}-{data_product_namespace}-experimentation",
+            "environment": "publishing",
+            "workgroup": f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-publishing",
             "output_location": f"s3://{results_bucket}/athena/{data_product_namespace}",
             "query": query,
             "status": "Query submitted successfully. Use get_athena_query_results to check status and get results.",
@@ -776,6 +819,47 @@ def search_data_products(
         return {"error": f"Failed to search data products: {str(e)}"}
 
 
+# Tool
+# Get input port for output ports to figure out consumers
+@mcp.tool
+def get_consuming_products(output_port_id: str, data_product_id: str) -> Dict[str, Any]:
+    """
+    Get consuming data products for a specific output port. This is essential for understanding who has access to the data and how users typically access it.
+
+    Args:
+        output_port_id: UUID of the output port (dataset) to check.
+        data_product_id: UUID of the owning data product of the output port.
+    returns:
+        List of consuming data products that have access to this output port, including their namespaces and descriptions.
+    """
+    try:
+        db = next(get_db_session())
+        access_token: AccessToken = get_access_token()
+        get_mcp_authenticated_user(token=access_token.token)
+        try:
+            consuming_products = OutputPortService(db).get_consuming_data_products(
+                UUID(output_port_id), UUID(data_product_id)
+            )
+            consuming_products_data = [
+                {
+                    "id": str(dp.data_product.id),
+                    "name": dp.data_product.name,
+                    "namespace": dp.data_product.namespace,
+                    "description": dp.data_product.description,
+                }
+                for dp in consuming_products
+            ]
+            return {
+                "output_port_id": output_port_id,
+                "consuming_data_products": consuming_products_data,
+            }
+        finally:
+            db.close()
+
+    except Exception as e:
+        return {"error": f"Failed to get consuming products: {str(e)}"}
+
+
 @mcp.tool
 def search_output_ports(
     query: Optional[str] = None,
@@ -1084,8 +1168,7 @@ def list_glue_tables(
     the output port's data_product_links[], NOT the owner namespace.
 
     NOTE: The database_name often has an environment prefix added by the platform.
-    If you get "Database not found", try prefixing with 'datalake_experimentation_' or 'datalake_publishing_'.
-    Example: 'sales-data__sales' becomes 'datalake_experimentation_sales-data__sales'
+    If you get "Database not found", try prefixing or list the available databases.
 
     Args:
         data_product_namespace: The namespace that has access (from consuming data product).
@@ -1097,7 +1180,7 @@ def list_glue_tables(
     """
     # Get credentials first to validate access
     creds = get_aws_credentials(data_product_namespace, env)
-
+    env = "publishing"
     if "error" in creds:
         return creds
 
