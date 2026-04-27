@@ -107,13 +107,13 @@ mcp = FastMCP(
     - Check ownership/descriptions: "What does the revenue_monthly table contain?"
 
     Tools for Discovery (no credentials needed):
-    • search_output_ports(query) - find datasets
-    • search_data_products(query) - find data products
-    • get_output_port_details(id) - metadata about a dataset
-    • get_data_product_details(id) - details about a data product
-    • get_data_product_analytics(id) - what output ports a data product has
-    • get_marketplace_overview() - high-level statistics
-    • get_environments() - available environments
+    - search_output_ports(query) - find datasets
+    - search_data_products(query) - find data products
+    - get_output_port_details(id) - metadata about a dataset
+    - get_data_product_details(id) - details about a data product
+    - get_data_product_analytics(id) - what output ports a data product has
+    - get_marketplace_overview() - high-level statistics
+    - get_environments() - available environments
 
     MODE 2: DATA QUERIES (Actual Data - Requires AWS Credentials)
     ──────────────────────────────────────────────────────────────────────
