@@ -20,6 +20,7 @@ Please migrate your OIDC provider to allow for the endpoint `<HOST>/api/v2/authn
 - **[Docs]**: Adding an architecture overview
 - **[UI]**: Remove audit logs page
 - **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
+- **[MCP]**: Extended the MCP server with tools to fetch AWS credentials and use those credentials to query Glue and Athena. This allows the MCP server to fully execute "Talk to your data" requests if configured correctly.
 
 ### bugfixes
 
