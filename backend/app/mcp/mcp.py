@@ -824,12 +824,12 @@ def get_consuming_products(output_port_id: str, data_product_id: str) -> Dict[st
             )
             consuming_products_data = [
                 {
-                    "id": str(dp.data_product.id),
-                    "name": dp.data_product.name,
-                    "namespace": dp.data_product.namespace,
-                    "description": dp.data_product.description,
+                    "id": str(input_port.consuming_abstract_data_product.id),
+                    "name": input_port.consuming_abstract_data_product.name,
+                    "namespace": input_port.consuming_abstract_data_product.namespace,
+                    "description": input_port.consuming_abstract_data_product.description,
                 }
-                for dp in consuming_products
+                for input_port in consuming_products
             ]
             return {
                 "output_port_id": output_port_id,
