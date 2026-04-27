@@ -33,6 +33,9 @@ from app.data_products.output_ports.input_ports.model import (
     InputPort,
 )
 from app.data_products.output_ports.status import OutputPortStatus
+from app.data_products.output_ports.table_schemas.model import (  # noqa: F401
+    OutputPortTableSchema,
+)
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
