@@ -28,8 +28,10 @@ export function InputPortTab({ dataProductId }: Props) {
     const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(dataProductId);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [bannerDismissed, setBannerDismissed] = useState(false);
-    const hasStaleInputPort = inputPorts.some(
-        (p) => p.status === DecisionStatus.Approved && p.output_port?.freshness_status === 'stale',
+    const hasStaleInputPort = useMemo(
+        () =>
+            inputPorts.some((p) => p.status === DecisionStatus.Approved && p.output_port?.freshness_status === 'stale'),
+        [inputPorts],
     );
     const filteredDatasets = useMemo(() => {
         return filterDatasets(inputPorts, searchTerm);
