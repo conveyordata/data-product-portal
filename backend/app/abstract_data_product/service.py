@@ -117,17 +117,17 @@ class AbstractDataProductService:
     def request_input_ports(
         self,
         id: UUID,
-        dataset_ids: list[UUID],
+        output_port_ids: list[UUID],
         justification: str,
         *,
         actor: User,
     ) -> list[InputPortModel]:
-        dataset_links = [
+        input_ports = [
             self.request_input_port(id, dataset_id, justification, actor=actor)
-            for dataset_id in dataset_ids
+            for dataset_id in output_port_ids
         ]
         self.db.flush()
-        return dataset_links
+        return input_ports
 
     def remove_input_port(
         self,

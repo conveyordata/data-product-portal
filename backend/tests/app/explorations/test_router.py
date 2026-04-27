@@ -123,3 +123,16 @@ class TestExplorationRouter:
         response = client.get(f"{ROUTE}/{exploration.id}/input_ports")
         assert response.status_code == 200, response.text
         assert len(response.json()["input_ports"]) == 1
+
+    def test_request_input_port(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports",
+            json={
+                "output_ports": [str(DatasetFactory().id)],
+                "justification": "I am your king!",
+            },
+        )
+        assert response.status_code == 200, response.text
+        assert len(response.json()["input_port_ids"]) == 1

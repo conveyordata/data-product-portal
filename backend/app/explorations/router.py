@@ -12,13 +12,13 @@ from app.database.database import get_db_session
 from app.explorations.model import ensure_exploration_exists
 from app.explorations.schema_request import (
     CreateExplorationRequest,
-    CreateExplorationRequestWithInputPorts,
+    CreateExplorationRequestWithInputPorts, RequestInputPortsRequest,
 )
 from app.explorations.schema_response import (
     CreateExplorationResponse,
     GetExplorationInputPortsResponse,
     GetExplorationResponse,
-    GetExplorationsResponse,
+    GetExplorationsResponse, RequestInputPortsResponse,
 )
 from app.explorations.service import ExplorationService
 from app.users.model import User
@@ -90,3 +90,13 @@ def get_exploration_input_ports(
             for ip in ExplorationService(db).get_input_ports(id)
         ]
     )
+
+@router.post("/{id}/input_ports", response_model=RequestInputPortsResponse)
+def request_input_ports(
+    id: UUID,
+    request: RequestInputPortsRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+):
+    ensure_exploration_exists(id, db, authenticated_user)
+    return RequestInputPortsResponse(input_port_ids=[ip.id for ip in ExplorationService(db).request_input_ports(id, request.output_ports, request.justification, actor=authenticated_user)])

@@ -31,6 +31,16 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/explorations/${queryArg}/input_ports`,
       }),
     }),
+    requestInputPorts: build.mutation<
+      RequestInputPortsApiResponse,
+      RequestInputPortsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports`,
+        method: "POST",
+        body: queryArg.requestInputPortsRequest,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -47,6 +57,12 @@ export type GetExplorationApiArg = string;
 export type GetExplorationInputPortsApiResponse =
   /** status 200 Successful Response */ GetExplorationInputPortsResponse;
 export type GetExplorationInputPortsApiArg = string;
+export type RequestInputPortsApiResponse =
+  /** status 200 Successful Response */ RequestInputPortsResponse;
+export type RequestInputPortsApiArg = {
+  id: string;
+  requestInputPortsRequest: RequestInputPortsRequest;
+};
 export type Domain = {
   id: string;
   name: string;
@@ -79,7 +95,7 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
-export type CreateInputPortsForExplorationRequest = {
+export type RequestInputPortsRequest = {
   output_ports: string[];
   justification: string;
 };
@@ -88,7 +104,7 @@ export type CreateExplorationRequestWithInputPorts = {
   namespace: string;
   description: string;
   domain_id: string;
-  input_ports?: CreateInputPortsForExplorationRequest | null;
+  input_ports?: RequestInputPortsRequest | null;
 };
 export type GetExplorationResponse = {
   id: string;
@@ -121,6 +137,9 @@ export type InputPort = {
 export type GetExplorationInputPortsResponse = {
   input_ports: InputPort[];
 };
+export type RequestInputPortsResponse = {
+  input_port_ids: string[];
+};
 export enum DecisionStatus {
   Approved = "approved",
   Pending = "pending",
@@ -145,4 +164,5 @@ export const {
   useLazyGetExplorationQuery,
   useGetExplorationInputPortsQuery,
   useLazyGetExplorationInputPortsQuery,
+  useRequestInputPortsMutation,
 } = injectedRtkApi;
