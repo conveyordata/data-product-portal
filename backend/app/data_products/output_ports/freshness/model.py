@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, time
 
-from sqlalchemy import ForeignKey, Time, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Time, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -23,10 +23,13 @@ class FreshnessSlo(Base):
     )
     deadline_time: Mapped[time] = mapped_column(Time(timezone=False), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        server_default=utcnow(), nullable=False
+        DateTime(timezone=True), server_default=utcnow(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        server_default=utcnow(), onupdate=utcnow(), nullable=False
+        DateTime(timezone=True),
+        server_default=utcnow(),
+        onupdate=utcnow(),
+        nullable=False,
     )
 
 
@@ -40,9 +43,10 @@ class FreshnessObservation(Base):
         UUID(as_uuid=True),
         ForeignKey("datasets.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
-    last_refreshed_at: Mapped[datetime] = mapped_column(nullable=False, index=True)
+    last_refreshed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(
-        server_default=utcnow(), nullable=False
+        DateTime(timezone=True), server_default=utcnow(), nullable=False
     )

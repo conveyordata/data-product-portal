@@ -42,7 +42,9 @@ def upgrade() -> None:
             nullable=False,
             server_default=utcnow(),
         ),
-        sa.UniqueConstraint("output_port_id"),
+        sa.UniqueConstraint(
+            "output_port_id", name="uix_output_port_freshness_slos_output_port_id"
+        ),
     )
 
     op.create_table(
@@ -53,11 +55,8 @@ def upgrade() -> None:
             sa.UUID,
             sa.ForeignKey("datasets.id", ondelete="CASCADE"),
             nullable=False,
-            index=True,
         ),
-        sa.Column(
-            "last_refreshed_at", sa.DateTime(timezone=True), nullable=False, index=True
-        ),
+        sa.Column("last_refreshed_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -65,8 +64,28 @@ def upgrade() -> None:
             server_default=utcnow(),
         ),
     )
+    op.create_index(
+        op.f("ix_output_port_freshness_observations_output_port_id"),
+        "output_port_freshness_observations",
+        ["output_port_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_output_port_freshness_observations_last_refreshed_at"),
+        "output_port_freshness_observations",
+        ["last_refreshed_at"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:
+    op.drop_index(
+        op.f("ix_output_port_freshness_observations_last_refreshed_at"),
+        table_name="output_port_freshness_observations",
+    )
+    op.drop_index(
+        op.f("ix_output_port_freshness_observations_output_port_id"),
+        table_name="output_port_freshness_observations",
+    )
     op.drop_table("output_port_freshness_observations")
     op.drop_table("output_port_freshness_slos")
