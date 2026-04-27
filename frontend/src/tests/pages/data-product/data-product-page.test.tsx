@@ -2,8 +2,9 @@ import { HttpResponse, http } from 'msw';
 import { Route, Routes } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
+import type { GetDataProductInputPortsResponse } from '@/store/api/services/generated/dataProductsApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
+import { mockDataProductDetailCalls, mockDataProducts, mockInputPortsStale } from '@/tests/mocks/dataProducts.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, waitFor, within } from '@/tests/test-utils.tsx';
@@ -142,5 +143,26 @@ describe('DataProduct Page', () => {
         });
 
         expect(container.querySelector('[aria-label="edit"]')).not.toBeInTheDocument();
+    });
+
+    it('shows stale warning icon on Input Ports tab when a dependency is stale', async () => {
+        setupDefaultMocks();
+        server.use(
+            http.get('*/api/v2/data_products/dp-1/input_ports', () => {
+                return HttpResponse.json({
+                    input_ports: mockInputPortsStale,
+                } satisfies GetDataProductInputPortsResponse);
+            }),
+        );
+        renderDataProductPage();
+
+        await waitFor(() => {
+            expect(screen.getByText('Sales Analytics')).toBeInTheDocument();
+        });
+
+        // The warning icon is an Ant Design WarningOutlined — it renders as an SVG with aria-label="warning"
+        await waitFor(() => {
+            expect(screen.getByRole('img', { name: 'warning' })).toBeInTheDocument();
+        });
     });
 });

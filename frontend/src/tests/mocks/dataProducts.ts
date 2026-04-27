@@ -4,6 +4,7 @@ import {
     DataProductIconKey,
     DataProductStatus,
     DecisionStatus,
+    FreshnessStatus,
     type GetDataProductInputPortsResponse,
     type GetDataProductRolledUpTagsResponse,
     type GetDataProductsResponse,
@@ -95,6 +96,26 @@ const mockInputPorts: InputPort[] = [
     },
 ];
 
+export const mockInputPortsStale: InputPort[] = [
+    {
+        id: 'id-stale',
+        justification: 'I need access!',
+        output_port_id: 'op-stale',
+        status: DecisionStatus.Approved,
+        output_port: {
+            id: 'op-stale',
+            name: 'stale-output-port',
+            namespace: 'stale',
+            description: 'A stale output port',
+            status: OutputPortStatus.Active,
+            access_type: OutputPortAccessType.Public,
+            data_product_id: mockDataProducts[1].id,
+            tags: [],
+            freshness_status: FreshnessStatus.Stale,
+        },
+    },
+];
+
 export const mockDataProductInputPorts = (
     dataProductId: string = mockDataProducts[0].id,
     inputPorts: InputPort[] = mockInputPorts,
@@ -109,6 +130,9 @@ export const mockDataProductInputPorts = (
 export const mockDataProductDetailCalls = (dataProduct: GetDataProductsResponseItem) => {
     mockDataProductHttp(dataProduct.id, dataProduct);
     server.use(
+        http.get(`*/api/v2/data_products/${dataProduct.id}/input_ports`, () => {
+            return HttpResponse.json({ input_ports: [] } satisfies GetDataProductInputPortsResponse);
+        }),
         http.get(`*/api/v2/data_products/${dataProduct.id}/rolled_up_tags`, () => {
             return HttpResponse.json({ rolled_up_tags: [] } satisfies GetDataProductRolledUpTagsResponse);
         }),
