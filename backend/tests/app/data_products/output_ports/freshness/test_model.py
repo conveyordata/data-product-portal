@@ -7,8 +7,6 @@ from app.data_products.output_ports.freshness.model import (
 )
 from tests.factories import DatasetFactory
 
-ENDPOINT = "/api/v2/data_products"
-
 
 class TestFreshnessStatusComputation:
     def test_freshness_status_is_none_when_no_slo(self, session):
@@ -50,7 +48,7 @@ class TestFreshnessStatusComputation:
         dataset = DatasetFactory()
         slo = FreshnessSlo(
             output_port_id=dataset.id,
-            deadline_time=time(0, 0, 1),  # 00:00:01 UTC — always past
+            deadline_time=time(0, 0, 0),  # 00:00:00 UTC — midnight is always passed
         )
         session.add(slo)
         obs = FreshnessObservation(

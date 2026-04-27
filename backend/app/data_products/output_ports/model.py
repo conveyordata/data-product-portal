@@ -24,6 +24,7 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.freshness.enums import FreshnessStatus
 from app.data_products.output_ports.freshness.model import (
     FreshnessObservation,
     FreshnessSlo,
@@ -128,7 +129,6 @@ class Dataset(Base, BaseORM):
         """Returns the freshness status based on the SLO and latest observation."""
         if not self.freshness_slo:
             return None
-        from app.data_products.output_ports.freshness.enums import FreshnessStatus
 
         if self.latest_freshness_at is None:
             return FreshnessStatus.UNKNOWN.value
