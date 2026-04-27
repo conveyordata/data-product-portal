@@ -78,6 +78,8 @@ begin
     TRUNCATE TABLE public.tags_datasets CASCADE;
     TRUNCATE TABLE public.dataset_query_stats_daily CASCADE;
     TRUNCATE TABLE public.output_port_cost_records CASCADE;
+    TRUNCATE TABLE public.output_port_freshness_slos CASCADE;
+    TRUNCATE TABLE public.output_port_freshness_observations CASCADE;
     TRUNCATE TABLE public.data_product_lifecycles CASCADE;
 
     -- DATA PRODUCT LIFECYLCE
@@ -417,5 +419,23 @@ begin
          LIMIT 100;',
         0
     );
+
+    -- ------------------------------------------------------------------------------------------------
+    -- Freshness SLOs
+    -- ------------------------------------------------------------------------------------------------
+    -- sales_erp_orders: 06:00 UTC deadline, last refreshed 2 days ago → stale
+    -- sales_crm_customers: 07:00 UTC deadline, last refreshed 2 hours ago → fresh
+    -- logistics_wms_shipments: 05:00 UTC deadline, last refreshed 1 hour ago → fresh
+    INSERT INTO public.output_port_freshness_slos (id, output_port_id, deadline_time, created_at, updated_at)
+    VALUES
+        (gen_random_uuid(), sales_erp_orders_ds_id,         '06:00:00'::time, NOW(), NOW()),
+        (gen_random_uuid(), sales_crm_customers_ds_id,      '07:00:00'::time, NOW(), NOW()),
+        (gen_random_uuid(), logistics_wms_shipments_ds_id,  '05:00:00'::time, NOW(), NOW());
+
+    INSERT INTO public.output_port_freshness_observations (id, output_port_id, last_refreshed_at, created_at)
+    VALUES
+        (gen_random_uuid(), sales_erp_orders_ds_id,         NOW() - INTERVAL '2 days', NOW()),
+        (gen_random_uuid(), sales_crm_customers_ds_id,      NOW() - INTERVAL '2 hours', NOW()),
+        (gen_random_uuid(), logistics_wms_shipments_ds_id,  NOW() - INTERVAL '1 hour',  NOW());
 
 end $$;

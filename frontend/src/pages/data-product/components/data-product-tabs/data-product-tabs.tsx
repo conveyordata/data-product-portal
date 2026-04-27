@@ -127,7 +127,7 @@ export function DataProductTabs({ dataProductId }: Props) {
             },
             {
                 label: (
-                    <Flex align="center" gap={4}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                         <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>
                         {staleCount > 0 && (
                             <Tooltip
@@ -136,7 +136,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                                 <WarningOutlined style={{ color: '#faad14' }} />
                             </Tooltip>
                         )}
-                    </Flex>
+                    </span>
                 ),
                 key: TabKeys.InputPorts,
                 icon: <Icon component={datasetOutlineIcon} />,
