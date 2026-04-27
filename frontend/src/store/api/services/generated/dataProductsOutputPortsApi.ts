@@ -100,6 +100,43 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    getFreshnessSlo: build.query<
+      GetFreshnessSloApiResponse,
+      GetFreshnessSloApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/freshness_slo`,
+      }),
+    }),
+    upsertFreshnessSlo: build.mutation<
+      UpsertFreshnessSloApiResponse,
+      UpsertFreshnessSloApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/freshness_slo`,
+        method: "PUT",
+        body: queryArg.freshnessSloRequest,
+      }),
+    }),
+    deleteFreshnessSlo: build.mutation<
+      DeleteFreshnessSloApiResponse,
+      DeleteFreshnessSloApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/freshness_slo`,
+        method: "DELETE",
+      }),
+    }),
+    addFreshnessObservation: build.mutation<
+      AddFreshnessObservationApiResponse,
+      AddFreshnessObservationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/freshness_observations`,
+        method: "POST",
+        body: queryArg.freshnessObservationRequest,
+      }),
+    }),
     getDataProductOutputPorts: build.query<
       GetDataProductOutputPortsApiResponse,
       GetDataProductOutputPortsApiArg
@@ -266,6 +303,31 @@ export type GetCostHistoryApiArg = {
   dataProductId: string;
   id: string;
   dayRange?: number;
+};
+export type GetFreshnessSloApiResponse =
+  /** status 200 Successful Response */ FreshnessSloResponse;
+export type GetFreshnessSloApiArg = {
+  dataProductId: string;
+  id: string;
+};
+export type UpsertFreshnessSloApiResponse =
+  /** status 200 Successful Response */ FreshnessSloResponse;
+export type UpsertFreshnessSloApiArg = {
+  dataProductId: string;
+  id: string;
+  freshnessSloRequest: FreshnessSloRequest;
+};
+export type DeleteFreshnessSloApiResponse = unknown;
+export type DeleteFreshnessSloApiArg = {
+  dataProductId: string;
+  id: string;
+};
+export type AddFreshnessObservationApiResponse =
+  /** status 200 Successful Response */ FreshnessObservationResponse;
+export type AddFreshnessObservationApiArg = {
+  dataProductId: string;
+  id: string;
+  freshnessObservationRequest: FreshnessObservationRequest;
 };
 export type GetDataProductOutputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductOutputPortsResponse;
@@ -437,6 +499,27 @@ export type CostHistoryResponse = {
 export type CostHistoryResponseRead = {
   output_port_id: string;
   records: CostRecordResponseRead[];
+};
+export type FreshnessSloResponse = {
+  id: string;
+  output_port_id: string;
+  deadline_time: string;
+  status: FreshnessStatus;
+  last_refreshed_at?: string | null;
+  last_observed_at?: string | null;
+};
+export type FreshnessSloRequest = {
+  deadline_time: string;
+};
+export type FreshnessObservationResponse = {
+  id: string;
+  output_port_id: string;
+  last_refreshed_at: string;
+  created_at: string;
+  status: FreshnessStatus;
+};
+export type FreshnessObservationRequest = {
+  last_refreshed_at: string;
 };
 export type Tag = {
   id: string;
@@ -725,6 +808,11 @@ export enum DataQualityStatus {
   Error = "error",
   Unknown = "unknown",
 }
+export enum FreshnessStatus {
+  Fresh = "fresh",
+  Stale = "stale",
+  Unknown = "unknown",
+}
 export enum OutputPortStatus {
   Pending = "pending",
   Active = "active",
@@ -735,11 +823,6 @@ export enum OutputPortAccessType {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
-}
-export enum FreshnessStatus {
-  Fresh = "fresh",
-  Stale = "stale",
-  Unknown = "unknown",
 }
 export enum DataProductSettingType {
   Checkbox = "checkbox",
@@ -809,6 +892,11 @@ export const {
   usePushCostRecordMutation,
   useGetCostHistoryQuery,
   useLazyGetCostHistoryQuery,
+  useGetFreshnessSloQuery,
+  useLazyGetFreshnessSloQuery,
+  useUpsertFreshnessSloMutation,
+  useDeleteFreshnessSloMutation,
+  useAddFreshnessObservationMutation,
   useGetDataProductOutputPortsQuery,
   useLazyGetDataProductOutputPortsQuery,
   useCreateOutputPortMutation,

@@ -25,6 +25,9 @@ from app.data_products.output_ports.data_quality.router import (
     router as data_quality_router,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.freshness.router import (
+    router as freshness_router,
+)
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.query_stats.router import (
     router as query_stats_router,
@@ -99,6 +102,7 @@ router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
 router.include_router(cost_router)
+router.include_router(freshness_router)
 
 
 @router.get(route)

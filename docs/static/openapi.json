@@ -847,6 +847,231 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/freshness_slo": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Freshness"
+        ],
+        "summary": "Get Freshness Slo",
+        "operationId": "get_freshness_slo",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FreshnessSloResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Freshness"
+        ],
+        "summary": "Upsert Freshness Slo",
+        "operationId": "upsert_freshness_slo",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FreshnessSloRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FreshnessSloResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Freshness"
+        ],
+        "summary": "Delete Freshness Slo",
+        "operationId": "delete_freshness_slo",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/freshness_observations": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Freshness"
+        ],
+        "summary": "Add Freshness Observation",
+        "operationId": "add_freshness_observation",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FreshnessObservationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FreshnessObservationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/output_ports": {
       "get": {
         "tags": [
@@ -9867,6 +10092,124 @@
         ],
         "title": "FieldDependency",
         "description": "Represents a field dependency for conditional visibility.\ne.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y\nIn practice this is often used with checkbox fields having value=True"
+      },
+      "FreshnessObservationRequest": {
+        "properties": {
+          "last_refreshed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Refreshed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "last_refreshed_at"
+        ],
+        "title": "FreshnessObservationRequest"
+      },
+      "FreshnessObservationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "last_refreshed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Refreshed At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FreshnessStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "last_refreshed_at",
+          "created_at",
+          "status"
+        ],
+        "title": "FreshnessObservationResponse"
+      },
+      "FreshnessSloRequest": {
+        "properties": {
+          "deadline_time": {
+            "type": "string",
+            "format": "time",
+            "title": "Deadline Time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deadline_time"
+        ],
+        "title": "FreshnessSloRequest"
+      },
+      "FreshnessSloResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "deadline_time": {
+            "type": "string",
+            "format": "time",
+            "title": "Deadline Time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FreshnessStatus"
+          },
+          "last_refreshed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Refreshed At"
+          },
+          "last_observed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Observed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "deadline_time",
+          "status"
+        ],
+        "title": "FreshnessSloResponse"
       },
       "FreshnessStatus": {
         "type": "string",

@@ -127,6 +127,10 @@ from .environments_get import EnvironmentsGet
 from .event_entity_type import EventEntityType
 from .exploration import Exploration
 from .field_dependency import FieldDependency
+from .freshness_observation_request import FreshnessObservationRequest
+from .freshness_observation_response import FreshnessObservationResponse
+from .freshness_slo_request import FreshnessSloRequest
+from .freshness_slo_response import FreshnessSloResponse
 from .freshness_status import FreshnessStatus
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
@@ -394,6 +398,10 @@ __all__ = (
     "EventEntityType",
     "Exploration",
     "FieldDependency",
+    "FreshnessObservationRequest",
+    "FreshnessObservationResponse",
+    "FreshnessSloRequest",
+    "FreshnessSloResponse",
     "FreshnessStatus",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
