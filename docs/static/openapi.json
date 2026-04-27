@@ -12152,7 +12152,8 @@
           "technical_asset",
           "output_port",
           "data_product_setting",
-          "output_port_setting"
+          "output_port_setting",
+          "exploration"
         ],
         "title": "ResourceNameModel"
       },

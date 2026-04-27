@@ -23,6 +23,10 @@ describe('Cart', () => {
         const dataProductChoice = await screen.findByText('I want to build Data Products');
         await userEvent.click(dataProductChoice);
     };
+    const selectExplorations = async () => {
+        const explorationsChoice = await screen.findByText('I want to explore this data');
+        await userEvent.click(explorationsChoice);
+    };
     describe('Cart should support existing data products', () => {
         const selectExistingDataProducts = async () => {
             const existingChoice = await screen.findByText('Select an existing Data Product');
@@ -200,6 +204,62 @@ describe('Cart', () => {
             await waitFor(() => {
                 expect(createHandler).toHaveBeenCalled();
                 expect(linkHandler).toHaveBeenCalled();
+            });
+        });
+    }, 15000);
+
+    describe('Cart should support creating a new exploration', () => {
+        const createNewExploration = async () => {
+            const existingChoice = await screen.findByText('Create a new Exploration');
+            await userEvent.click(existingChoice);
+        };
+        it('Should succeed when filling in the form completely', async () => {
+            allowAllAuth();
+
+            // Mock the output ports search (cart items)
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize();
+            mockResourceNamesValidate();
+            mockGetDomains();
+
+            const createHandler = vi.fn(() => HttpResponse.json({ id: 'id-1' }));
+            server.use(http.post('*/api/v2/explorations', createHandler));
+
+            renderWithProviders(<ExplorationsCart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await createNewExploration();
+
+            const nameInput = await screen.findByRole('textbox', { name: /name/i });
+            await userEvent.type(nameInput, 'My New exploration');
+
+            const domainSelect = screen.getByRole('combobox', { name: /domain/i });
+            await userEvent.click(domainSelect);
+            const domainOption = await screen.findByText('Finance');
+            await userEvent.click(domainOption);
+
+            const descriptionTextArea = screen.getByRole('textbox', { name: /description/i });
+            await userEvent.type(descriptionTextArea, 'A detailed description of the exploration.');
+
+            const justificationTextArea = await screen.findByPlaceholderText(
+                'Explain why you need access to these Output Ports',
+            );
+            await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
+
+            const submitButton = await screen.findByText('Create');
+            await userEvent.click(submitButton);
+
+            // Assert the create and link APIs were called
+            await waitFor(() => {
+                expect(createHandler).toHaveBeenCalled();
             });
         });
     }, 15000);

@@ -75,6 +75,7 @@
     "Allows requesting access to an Output Port": "Allows requesting access to an Output Port",
     "Allows the creation of a Data Product": "Allows the creation of a Data Product",
     "Allows the creation of a new user": "Allows the creation of a new user",
+    "Allows the creation of an Exploration": "Allows the creation of an Exploration",
     "Allows the creation of an Output Port": "Allows the creation of an Output Port",
     "Allows the deletion of a user": "Allows the deletion of a user",
     "Allows the role to accept or reject a read access request from a Data Product": "Allows the role to accept or reject a read access request from a Data Product",
@@ -274,6 +275,7 @@
     "Failed to create Data Product setting": "Failed to create $t(Data Product) setting",
     "Failed to create Data Product. Please try again.": "Failed to create Data Product. Please try again.",
     "Failed to create Domain": "Failed to create Domain",
+    "Failed to create Exploration. Please try again.": "Failed to create Exploration. Please try again.",
     "Failed to create lifecycle": "Failed to create lifecycle",
     "Failed to create Output Port": "Failed to create $t(Output Port)",
     "Failed to create Output Port setting": "Failed to create $t(Output Port) setting",
@@ -700,6 +702,7 @@
     "You have finished the tour!": "You have finished the tour!",
     "You need to be authenticated to access the Data Product Portal": "You need to be authenticated to access the $t(Data Product Portal)",
     "You will get notified when access is granted or denied": "You will get notified when access is granted or denied",
+    "Your Exploration has been created.": "Your Exploration has been created.",
     "Your first Data Product!": "Your first $t(Data Product)!",
     "Your requests have successfully been created.": "Your requests have successfully been created."
 }

@@ -75,7 +75,6 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         label: type.name,
         value: type.id,
     }));
-    const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
         value: owner.id,
@@ -211,7 +210,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
             >
                 <Select
                     loading={isFetchingDomains}
-                    options={domainSelectOptions}
+                    options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
                 />
