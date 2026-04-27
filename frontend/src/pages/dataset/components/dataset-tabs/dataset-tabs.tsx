@@ -4,8 +4,10 @@ import {
     HistoryOutlined,
     InfoCircleOutlined,
     SettingOutlined,
+    TableOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
+
 import { usePostHog } from '@posthog/react';
 import { Badge, Flex, Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo } from 'react';
@@ -24,6 +26,7 @@ import { useGetOutputPortsEventHistoryQuery } from '@/store/api/services/generat
 import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
 import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';
+import { ModelTab } from './model-tab/model-tab.tsx';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 
@@ -65,6 +68,12 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Model'),
+                key: TabKeys.Model,
+                icon: <TableOutlined />,
+                children: <ModelTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: (
