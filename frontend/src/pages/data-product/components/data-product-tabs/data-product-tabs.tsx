@@ -6,10 +6,11 @@ import Icon, {
     InfoCircleOutlined,
     SettingOutlined,
     TeamOutlined,
+    WarningOutlined,
 } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { TourProps } from 'antd';
-import { Badge, Flex, Tabs, Tour, Typography } from 'antd';
+import { Badge, Flex, Tabs, Tooltip, Tour, Typography } from 'antd';
 import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -28,10 +29,15 @@ import { InputPortTab } from '@/pages/data-product/components/data-product-tabs/
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
-import { useGetDataProductEventHistoryQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    FreshnessStatus,
+    useGetDataProductEventHistoryQuery,
+    useGetDataProductInputPortsQuery,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import { useMarkTourAsSeenMutation } from '@/store/api/services/generated/usersApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import { DecisionStatus } from '@/types/roles';
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 
@@ -76,6 +82,15 @@ export function DataProductTabs({ dataProductId }: Props) {
     const [setSeenTour] = useMarkTourAsSeenMutation();
     const { data: { events: dataProductHistoryData = [] } = {}, isLoading: isFetchingDataProductHistory } =
         useGetDataProductEventHistoryQuery(dataProductId, { skip: !dataProductId });
+    const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(dataProductId);
+    const staleCount = useMemo(
+        () =>
+            inputPorts.filter(
+                (p) =>
+                    p.status === DecisionStatus.Approved && p.output_port?.freshness_status === FreshnessStatus.Stale,
+            ).length,
+        [inputPorts],
+    );
 
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
@@ -111,10 +126,21 @@ export function DataProductTabs({ dataProductId }: Props) {
                 children: <CostsTab dataProductId={dataProductId} />,
             },
             {
-                label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
+                label: (
+                    <Flex align="center" gap={4}>
+                        <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>
+                        {staleCount > 0 && (
+                            <Tooltip
+                                title={t('{{count}} input port(s) have a broken freshness SLO', { count: staleCount })}
+                            >
+                                <WarningOutlined style={{ color: '#faad14' }} />
+                            </Tooltip>
+                        )}
+                    </Flex>
+                ),
                 key: TabKeys.InputPorts,
                 icon: <Icon component={datasetOutlineIcon} />,
-                children: <InputPortTab dataProductId={dataProductId} staleCount={0} />,
+                children: <InputPortTab dataProductId={dataProductId} staleCount={staleCount} />,
             },
             {
                 label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
@@ -154,7 +180,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                 ),
             },
         ];
-    }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory]);
+    }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory, staleCount]);
 
     const steps: TourProps['steps'] = useMemo(() => {
         return [

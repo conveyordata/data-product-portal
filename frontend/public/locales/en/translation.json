@@ -5,6 +5,8 @@
     "{{count}} available Technical Assets_other": "{{count}} available $t(Technical Assets)",
     "{{count}} Data Products_one": "{{count}} $t(Data Product)",
     "{{count}} Data Products_other": "{{count}} $t(Data Products)",
+    "{{count}} input port(s) have a broken freshness SLO_one": "{{count}} input port(s) have a broken freshness SLO",
+    "{{count}} input port(s) have a broken freshness SLO_other": "{{count}} input port(s) have a broken freshness SLO",
     "{{count}} linked Output Ports_one": "{{count}} linked $t(Output Port)",
     "{{count}} linked Output Ports_other": "{{count}} linked $t(Output Ports)",
     "{{count}} linked Technical Assets_one": "{{count}} linked $t(Technical Asset)",
