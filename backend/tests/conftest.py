@@ -109,7 +109,10 @@ def default_dataset_payload() -> dict[str, Any]:
 def clear_db(session: scoped_session[Session]) -> None:
     """Clear database after each test."""
     for table in reversed(Base.metadata.sorted_tables):
-        session.execute(table.delete())
+        if table.name == "roles":
+            session.execute(table.delete().where(table.c.prototype == 0))
+        else:
+            session.execute(table.delete())
     session.commit()
     AuthorizationService._clear_casbin_table()
 

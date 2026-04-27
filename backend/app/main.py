@@ -10,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.authorization.roles.service import RoleService
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import oidc
@@ -65,10 +64,10 @@ async def log_middleware(request: Request, call_next):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    db = next(database.get_db_session())
-    resync = RoleService(db).initialize_prototype_roles()
-    if resync or settings.AUTHORIZER_STARTUP_SYNC:
-        AuthorizationService(db).reload_enforcer()
+    with database.SessionLocal() as db:
+        if settings.AUTHORIZER_STARTUP_SYNC:
+            AuthorizationService(db).reload_enforcer()
+        db.commit()
 
     backend_analytics(API_VERSION)
     admin_task = asyncio.create_task(check_expired_admins())
