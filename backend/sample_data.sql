@@ -643,7 +643,7 @@ begin
     INSERT INTO public.output_port_freshness_slos
         (id, output_port_id, deadline_time, created_at, updated_at)
     VALUES
-        (gen_random_uuid(), production_planning_insights_forecast, '06:00:00'::time, NOW(), NOW()),
+        (gen_random_uuid(), production_planning_insights_forecast, '00:00:00'::time, NOW(), NOW()),
         (gen_random_uuid(), sales_performance_model_output_port,   '07:00:00'::time, NOW(), NOW()),
         (gen_random_uuid(), order_fulfillment_analysis_output_port,'05:00:00'::time, NOW(), NOW());
 

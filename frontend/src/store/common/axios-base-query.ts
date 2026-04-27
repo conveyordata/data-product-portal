@@ -51,6 +51,9 @@ function shouldShowErrorToast(status: number, url: string) {
         if (url.includes('data_quality_summary')) {
             return false;
         }
+        if (url.includes('freshness_slo')) {
+            return false;
+        }
     }
     return true;
 }
