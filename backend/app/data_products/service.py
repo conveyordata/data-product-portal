@@ -307,7 +307,7 @@ class DataProductService(AbstractDataProductService):
                     data=NodeData(
                         id=upstream_datasets.dataset_id,
                         name=upstream_datasets.dataset.name,
-                        link_to_id=upstream_datasets.dataset.consuming_abstract_data_product_id,
+                        link_to_id=upstream_datasets.dataset.data_product_id,
                     ),
                     type=NodeType.datasetNode,
                 )
@@ -350,7 +350,7 @@ class DataProductService(AbstractDataProductService):
                             data=NodeData(
                                 id=f"{downstream_datasets.dataset_id}",
                                 name=downstream_datasets.dataset.name,
-                                link_to_id=downstream_datasets.dataset.consuming_abstract_data_product_id,
+                                link_to_id=downstream_datasets.dataset.data_product_id,
                             ),
                             type=NodeType.datasetNode,
                         )
@@ -365,7 +365,9 @@ class DataProductService(AbstractDataProductService):
                         )
                     )
                     if level >= 3:
-                        for downstream_dps in downstream_datasets.dataset.input_ports:
+                        for (
+                            downstream_dps
+                        ) in downstream_datasets.dataset.data_product_links:
                             icon = downstream_dps.consuming_abstract_data_product.type.icon_key
                             nodes.append(
                                 Node(

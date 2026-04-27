@@ -183,7 +183,7 @@ class GraphService:
                     input_ports.dataset_id as producer_id,
                     input_ports.status as status
                 FROM input_ports
-                JOIN datasets on datasets.data_product_id = input_ports.data_product_id
+                JOIN datasets on datasets.data_product_id = input_ports.consuming_abstract_data_product_id
                 """
                     )
                 )
