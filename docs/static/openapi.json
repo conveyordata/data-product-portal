@@ -6544,6 +6544,25 @@
         ],
         "summary": "Get Explorations",
         "operationId": "get_explorations",
+        "parameters": [
+          {
+            "name": "filter_to_user_with_assigment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter To User With Assigment"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6551,6 +6570,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetExplorationsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -6564,14 +6593,14 @@
         "summary": "Create Exploration",
         "operationId": "create_exploration",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateExplorationRequestWithInputPorts"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -10042,6 +10071,9 @@
           },
           "domain": {
             "$ref": "#/components/schemas/Domain"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/User"
           }
         },
         "type": "object",
@@ -10050,7 +10082,8 @@
           "name",
           "namespace",
           "description",
-          "domain"
+          "domain",
+          "owner"
         ],
         "title": "GetExplorationResponse"
       },

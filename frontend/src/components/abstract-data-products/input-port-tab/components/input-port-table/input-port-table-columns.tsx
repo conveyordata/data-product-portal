@@ -2,25 +2,31 @@ import { Badge, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
-import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
+import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title.tsx';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { InputPortActionButton } from '@/pages/data-product/components/data-product-tabs/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
 import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
-import { FilterSettings } from '@/utils/table-filter.helper';
-import { Sorter } from '@/utils/table-sorter.helper';
+import { FilterSettings } from '@/utils/table-filter.helper.ts';
+import { Sorter } from '@/utils/table-sorter.helper.ts';
 
 type Props = {
     t: TFunction;
-    dataProductId: string;
+    canRemoveAccess: boolean;
+    handleRemove: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
 };
-export const getDataProductDatasetsColumns = ({ t, dataProductId, inputPorts }: Props): TableColumnsType<InputPort> => {
+export const getDataProductDatasetsColumns = ({
+    t,
+    canRemoveAccess,
+    handleRemove,
+    inputPorts,
+}: Props): TableColumnsType<InputPort> => {
     const sorter = new Sorter<InputPort>();
     return [
         {
@@ -70,7 +76,12 @@ export const getDataProductDatasetsColumns = ({ t, dataProductId, inputPorts }: 
             key: 'action',
             render: (_, { output_port, status }) => {
                 return (
-                    <InputPortActionButton output_port={output_port} dataProductId={dataProductId} status={status} />
+                    <InputPortActionButton
+                        output_port={output_port}
+                        canRemoveAccess={canRemoveAccess}
+                        handleRemove={handleRemove}
+                        status={status}
+                    />
                 );
             },
             fixed: 'right',

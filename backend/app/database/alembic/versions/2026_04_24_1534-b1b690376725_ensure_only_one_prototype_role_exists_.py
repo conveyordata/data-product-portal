@@ -1,7 +1,7 @@
 """Ensure only one prototype role exists per scope
 
 Revision ID: b1b690376725
-Revises: 63243c53dd67
+Revises: 6449af439bdd
 Create Date: 2026-04-24 15:34:54.005335
 
 """

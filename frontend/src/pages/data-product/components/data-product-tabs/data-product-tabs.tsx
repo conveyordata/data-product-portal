@@ -22,7 +22,7 @@ import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
 import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
-import { InputPortTab } from '@/pages/data-product/components/data-product-tabs/input-port-tab/input-port-tab.tsx';
+import { DataProductInputPorts } from '@/pages/data-product/components/data-product-tabs/input-ports/input-port-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -106,7 +106,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                 label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
                 key: TabKeys.InputPorts,
                 icon: <Icon component={datasetOutlineIcon} />,
-                children: <InputPortTab dataProductId={dataProductId} />,
+                children: <DataProductInputPorts dataProductId={dataProductId} />,
             },
             {
                 label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,

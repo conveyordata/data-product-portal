@@ -3,6 +3,7 @@ import factory
 from app.explorations.model import Exploration
 
 from .domain import DomainFactory
+from .user import UserFactory
 
 
 class ExplorationFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -14,3 +15,4 @@ class ExplorationFactory(factory.alchemy.SQLAlchemyModelFactory):
     namespace = factory.Faker("word")
     description = factory.Faker("text", max_nb_chars=20)
     domain = factory.SubFactory(DomainFactory)
+    owner = factory.SubFactory(UserFactory)

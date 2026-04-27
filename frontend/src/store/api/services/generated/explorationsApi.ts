@@ -5,7 +5,12 @@ const injectedRtkApi = api.injectEndpoints({
       GetExplorationsApiResponse,
       GetExplorationsApiArg
     >({
-      query: () => ({ url: `/api/v2/explorations` }),
+      query: (queryArg) => ({
+        url: `/api/v2/explorations`,
+        params: {
+          filter_to_user_with_assigment: queryArg,
+        },
+      }),
     }),
     createExploration: build.mutation<
       CreateExplorationApiResponse,
@@ -37,7 +42,7 @@ const injectedRtkApi = api.injectEndpoints({
 export { injectedRtkApi as api };
 export type GetExplorationsApiResponse =
   /** status 200 Successful Response */ GetExplorationsResponse;
-export type GetExplorationsApiArg = void;
+export type GetExplorationsApiArg = (string | null) | undefined;
 export type CreateExplorationApiResponse =
   /** status 200 Successful Response */ CreateExplorationResponse;
 export type CreateExplorationApiArg = CreateExplorationRequestWithInputPorts;
@@ -62,13 +67,6 @@ export type Exploration = {
 export type GetExplorationsResponse = {
   explorations: Exploration[];
 };
-export type CreateExplorationResponse = {
-  id: string;
-  name: string;
-  namespace: string;
-  description: string;
-  domain: Domain;
-};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -78,6 +76,13 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type CreateExplorationResponse = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
 };
 export type CreateInputPortsForExplorationRequest = {
   output_ports: string[];
@@ -90,12 +95,23 @@ export type CreateExplorationRequestWithInputPorts = {
   domain_id: string;
   input_ports?: CreateInputPortsForExplorationRequest | null;
 };
+export type User = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+};
 export type GetExplorationResponse = {
   id: string;
   name: string;
   namespace: string;
   description: string;
   domain: Domain;
+  owner: User;
 };
 export type Tag = {
   id: string;
