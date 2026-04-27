@@ -42,29 +42,23 @@ declare
     sales_erp_orders_ds_id uuid;
     logistics_wms_shipments_ds_id uuid;
     marketing_customer_360_ds_id uuid;
-
-    -- New datasets (output ports)
     campaign_activation_ds_id uuid;
     churn_model_ds_id uuid;
-
-    -- New data output configs
-    campaign_activation_do_config_id uuid;
-    churn_model_do_config_id uuid;
-
-    -- New data outputs
-    campaign_activation_do_id uuid;
-    churn_model_do_id uuid;
 
     -- DATA OUTPUTS
     sales_crm_customers_do_id uuid;
     sales_erp_orders_do_id uuid;
     logistics_wms_shipments_do_id uuid;
     marketing_customer_360_do_id uuid;
+    campaign_activation_do_id uuid;
+    churn_model_do_id uuid;
 
     sales_crm_customers_do_config_id uuid;
     sales_erp_orders_do_config_id uuid;
     logistics_wms_shipments_do_config_id uuid;
     marketing_customer_360_do_config_id uuid;
+    campaign_activation_do_config_id uuid;
+    churn_model_do_config_id uuid;
 
     -- LIFECYLE
     draft uuid;
@@ -293,13 +287,11 @@ begin
     INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (marketing_customer_360_do_config_id, 'dpp_demo', 'marketing_customer_360', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- campaign_activation
-    campaign_activation_ds_id := '22222222-0000-0000-0000-000000000005'::uuid;
     SELECT gen_random_uuid() INTO campaign_activation_do_config_id;
     INSERT INTO public.data_output_configurations (id, configuration_type) VALUES (campaign_activation_do_config_id, 'PostgreSQLTechnicalAssetConfiguration');
     INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (campaign_activation_do_config_id, 'dpp_demo', 'campaign_activation', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- churn_model
-    churn_model_ds_id := '22222222-0000-0000-0000-000000000006'::uuid;
     SELECT gen_random_uuid() INTO churn_model_do_config_id;
     INSERT INTO public.data_output_configurations (id, configuration_type) VALUES (churn_model_do_config_id, 'PostgreSQLTechnicalAssetConfiguration');
     INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (churn_model_do_config_id, 'dpp_demo', 'churn_model', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
@@ -314,11 +306,13 @@ begin
 
     INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'churn-model', 'Churn Scores', 'Customer churn probability scores', 'ACTIVE', postgresql_id, postgresql_service_id, churn_model_dp_id, NULL, churn_model_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO churn_model_do_id;
 
-    -- DATASETS
+    -- Fixed dataset (output port) UUIDs
     sales_crm_customers_ds_id    := '22222222-0000-0000-0000-000000000001'::uuid;
     sales_erp_orders_ds_id       := '22222222-0000-0000-0000-000000000002'::uuid;
     logistics_wms_shipments_ds_id := '22222222-0000-0000-0000-000000000003'::uuid;
     marketing_customer_360_ds_id  := '22222222-0000-0000-0000-000000000004'::uuid;
+    campaign_activation_ds_id     := '22222222-0000-0000-0000-000000000005'::uuid;
+    churn_model_ds_id             := '22222222-0000-0000-0000-000000000006'::uuid;
 
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (sales_crm_customers_ds_id, 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset contains curated customer information from the Sales CRM, providing a single source of truth for customer identity and contact details.</p><br><h3>How to Use</h3><p>Use this dataset to enrich sales data with customer demographic information or for marketing campaign targeting. Join with the <code>Orders</code> dataset on <code>customer_id</code>.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>Integer</td><td>Unique identifier for the customer.</td></tr><tr><td>first_name</td><td>String</td><td>Customer''s first name.</td></tr><tr><td>last_name</td><td>String</td><td>Customer''s last name.</td></tr><tr><td>email</td><td>String</td><td>Primary contact email address.</td></tr><tr><td>signup_date</td><td>Timestamp</td><td>Timestamp when the customer registered.</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready);
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (sales_erp_orders_ds_id, 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', '<p><strong>Version:</strong> 1.1.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Real-time (near real-time via ERP hooks)</p><p>Provides detailed transaction history for all sales orders processed through the ERP system.</p><br><h3>How to Use</h3><p>This dataset is the primary source for revenue analysis and order volume tracking. It can be joined with <code>Customers</code> for customer-level insights or <code>Shipments</code> for fulfillment tracking.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>order_id</td><td>Integer</td><td>Unique identifier for the order.</td></tr><tr><td>customer_id</td><td>Integer</td><td>Reference to the customer who placed the order.</td></tr><tr><td>order_date</td><td>Timestamp</td><td>Timestamp of order placement.</td></tr><tr><td>total_amount</td><td>Decimal</td><td>Total monetary value of the order.</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready);
