@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: customers
+    description: Clean, trusted view of customer account information sourced from the CRM.
+    columns:
+      - name: id
+        description: Unique identifier for the customer.
+        data_type: integer
+      - name: first_name
+        description: Customer's first name.
+        data_type: text
+      - name: last_name
+        description: Customer's last name.
+        data_type: text
+      - name: email
+        description: Primary contact email address.
+        data_type: text
+      - name: signup_date
+        description: Timestamp when the customer registered.
+        data_type: timestamp

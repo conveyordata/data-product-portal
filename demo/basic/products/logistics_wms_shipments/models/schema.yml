@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: shipments
+    description: Order shipment and delivery status from the warehouse management system.
+    columns:
+      - name: shipment_id
+        description: Unique identifier for the shipment record.
+        data_type: integer
+      - name: order_ref
+        description: Reference to the corresponding ERP order.
+        data_type: integer
+      - name: shipped_date
+        description: Timestamp when the package left the warehouse.
+        data_type: timestamp
+      - name: delivery_status
+        description: Current status of the delivery (e.g., Shipped, In Transit, Delivered).
+        data_type: text

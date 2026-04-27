@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: orders
+    description: Real-time order data from the ERP system.
+    columns:
+      - name: order_id
+        description: Unique identifier for the order.
+        data_type: integer
+      - name: customer_id
+        description: Reference to the customer who placed the order.
+        data_type: integer
+      - name: order_date
+        description: Timestamp of order placement.
+        data_type: timestamp
+      - name: total_amount
+        description: Total monetary value of the order.
+        data_type: numeric
