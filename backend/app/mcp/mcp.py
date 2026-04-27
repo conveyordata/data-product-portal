@@ -393,10 +393,7 @@ def get_aws_credentials(data_product_namespace: str, env: str) -> Dict[str, str]
 @mcp.tool
 def get_database_prefix(environment: str) -> str:
     prefix = settings.AWS_ATHENA_PREFIX
-    if environment == "production" or environment == "prd" or environment == "prod":
-        return f"{prefix}_publishing_"
-    else:
-        return f"{prefix}_experimentation_"
+    return f"{prefix}_{environment}_"
 
 
 @mcp.tool
@@ -480,8 +477,6 @@ def query_athena(
     # Get credentials (this also checks access)
     creds = get_aws_credentials(data_product_namespace, env)
 
-    env = "publishing" if env == "production" else "experimentation"
-
     # Check if credential retrieval failed
     if "error" in creds:
         return creds  # Return the error from get_aws_credentials
@@ -499,7 +494,7 @@ def query_athena(
         # Execute the query
         response = client.start_query_execution(
             QueryString=query,
-            WorkGroup=f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-publishing",
+            WorkGroup=f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-{env}",
             ResultConfiguration={
                 "OutputLocation": f"s3://{results_bucket}/athena/{data_product_namespace}"
             },
@@ -507,8 +502,8 @@ def query_athena(
         return {
             "query_execution_id": response["QueryExecutionId"],
             "data_product_namespace": data_product_namespace,
-            "environment": "publishing",
-            "workgroup": f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-publishing",
+            "environment": env,
+            "workgroup": f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-{env}",
             "output_location": f"s3://{results_bucket}/athena/{data_product_namespace}",
             "query": query,
             "status": "Query submitted successfully. Use get_athena_query_results to check status and get results.",
@@ -1180,7 +1175,6 @@ def list_glue_tables(
     """
     # Get credentials first to validate access
     creds = get_aws_credentials(data_product_namespace, env)
-    env = "publishing"
     if "error" in creds:
         return creds
 
