@@ -271,34 +271,23 @@ mcp = FastMCP(
     ═══════════════════════════════════════════════════════════════════════
 
     ✓ DO:
-    • Route to Discovery mode for metadata questions (no credentials needed)
-    • Route to Query mode for actual data questions (credentials required)
-    • ALWAYS extract data_product_links from output port details
-    • TRY CONSUMING DATA PRODUCTS FIRST - this is the most common access pattern
-    • Use the SAME namespace for query_athena that worked in get_aws_credentials
-    • Use fully qualified table names with quotes: "database"."table_name"
-    • Be aware of environment prefixes in database names (e.g., 'datalake_experimentation_')
-    • Wait and retry if query is still running
-    • Default to 'dev' environment unless specified
+    - Route to Discovery mode for metadata questions (no credentials needed)
+    - Route to Query mode for actual data questions (credentials required)
+    - ALWAYS extract data_product_links from output port details
+    - TRY CONSUMING DATA PRODUCTS FIRST - this is the most common access pattern
+    - Use the SAME namespace for query_athena that worked in get_aws_credentials
+    - Use fully qualified table names with quotes: "database"."table_name"
+    - Be aware of environment prefixes in database names (e.g., 'datalake_experimentation_')
+    - Wait and retry if query is still running
+    - Default to 'dev' environment unless specified
 
     ✗ DON'T:
-    • Don't try owner access first - consuming products are the primary access pattern
-    • Don't request credentials for pure metadata questions
-    • Don't skip extracting data_product_links from output port details
-    • Don't skip the get_prefix step - you need actual table names with prefixes
-    • Don't use unqualified table names (missing database prefix)
-    • Don't forget quotes around database/table names with hyphens or underscores
-
-    ═══════════════════════════════════════════════════════════════════════
-    MCP COMPATIBILITY
-    ═══════════════════════════════════════════════════════════════════════
-
-    This flow is designed for MCP (Model Context Protocol) servers:
-    • Discovery queries are synchronous and fast (< 1 second)
-    • Data queries are asynchronous (Athena takes 3-30 seconds)
-    • MCP clients should handle the wait/retry pattern in Step 7
-    • All tools return structured data (JSON) for easy parsing
-    • Authentication is handled via JWT tokens at the MCP level
+    - Don't try owner access first - consuming products are the primary access pattern
+    - Don't request credentials for pure metadata questions
+    - Don't skip extracting data_product_links from output port details
+    - Don't skip the get_prefix step - you need actual table names with prefixes
+    - Don't use unqualified table names (missing database prefix)
+    - Don't forget quotes around database/table names with hyphens or underscores
     """,
     auth=get_auth_provider(),
 )
