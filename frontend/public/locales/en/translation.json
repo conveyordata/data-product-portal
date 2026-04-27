@@ -473,6 +473,7 @@
     "Please provide the name of the Technical Asset": "Please provide the name of the $t(Technical Asset)",
     "Please provide the value": "Please provide the value",
     "Please select a Data Product": "Please select a $t(Data Product)",
+    "Please select a deadline time": "Please select a deadline time",
     "Please select a type": "Please select a type",
     "Please select at least one owner for the Data Product": "Please select at least one owner for the $t(Data Product)",
     "Please select at least one owner for the Output Port": "Please select at least one owner for the $t(Output Port)",

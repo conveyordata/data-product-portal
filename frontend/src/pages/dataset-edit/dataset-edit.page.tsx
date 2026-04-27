@@ -28,6 +28,12 @@ function FreshnessSloSection({ datasetId, dataProductId }: { datasetId: string; 
     const [deleteSlo] = useDeleteFreshnessSloMutation();
     const [form] = Form.useForm();
 
+    useEffect(() => {
+        form.setFieldsValue({
+            deadline_time: slo?.deadline_time ? dayjs(slo.deadline_time, 'HH:mm:ss') : undefined,
+        });
+    }, [form, slo]);
+
     async function handleSave(values: { deadline_time: dayjs.Dayjs }) {
         try {
             await upsertSlo({
@@ -67,7 +73,11 @@ function FreshnessSloSection({ datasetId, dataProductId }: { datasetId: string; 
                 }}
                 onFinish={handleSave}
             >
-                <Form.Item name="deadline_time" label={t('Deadline (UTC)')}>
+                <Form.Item
+                    name="deadline_time"
+                    label={t('Deadline (UTC)')}
+                    rules={[{ required: true, message: t('Please select a deadline time') }]}
+                >
                     <TimePicker format="HH:mm" />
                 </Form.Item>
                 <Form.Item>
