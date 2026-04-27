@@ -118,11 +118,11 @@ mcp = FastMCP(
     MODE 2: DATA QUERIES (Actual Data - Requires AWS Credentials)
     ──────────────────────────────────────────────────────────────────────
     Use this when the user wants to:
-    ✓ See actual data: "Show me sales from last month"
-    ✓ Run analytics: "What are the top 10 customers by revenue?"
-    ✓ Query tables: "SELECT * FROM sales_db.transactions WHERE date > '2026-01-01'"
-    ✓ Get row-level data: "How many orders were placed yesterday?"
-    ✓ Find records in data: "Which users are in the sales data?"
+    - See actual data: "Show me sales from last month"
+    - Run analytics: "What are the top 10 customers by revenue?"
+    - Query tables: "SELECT * FROM sales_db.transactions WHERE date > '2026-01-01'"
+    - Get row-level data: "How many orders were placed yesterday?"
+    - Find records in data: "Which users are in the sales data?"
 
     ═══════════════════════════════════════════════════════════════════════
     DATA QUERY FLOW (Step-by-Step)
