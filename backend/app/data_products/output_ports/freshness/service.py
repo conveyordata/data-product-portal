@@ -31,6 +31,9 @@ class FreshnessService:
         )
         if existing:
             existing.deadline_time = request.deadline_time
+            # Explicitly set updated_at because SQLAlchemy's onupdate fires at the DB
+            # level but is unreliable with plain ORM attribute assignments in some
+            # configurations. Explicit assignment is the safer approach here.
             existing.updated_at = datetime.now(UTC)
             self.db.commit()
             self.db.refresh(existing)
@@ -97,4 +100,7 @@ class FreshnessService:
         raw = dataset.freshness_status
         if raw is None:
             return FreshnessStatus.UNKNOWN
-        return FreshnessStatus(raw)
+        try:
+            return FreshnessStatus(raw)
+        except ValueError:
+            return FreshnessStatus.UNKNOWN
