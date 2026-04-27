@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: churn_scores
+    description: Customer churn probability scores produced by the prediction model.
+    columns:
+      - name: customer_id
+        description: Unique identifier for the customer.
+        data_type: integer
+      - name: churn_score
+        description: Probability of churn between 0.0 (no risk) and 1.0 (certain churn).
+        data_type: numeric
+      - name: churn_risk_tier
+        description: Categorical risk tier (very_low, low, medium, high).
+        data_type: text
+      - name: scored_at
+        description: Timestamp when the score was computed.
+        data_type: timestamp
+      - name: model_version
+        description: Version of the churn model used to produce the score.
+        data_type: text

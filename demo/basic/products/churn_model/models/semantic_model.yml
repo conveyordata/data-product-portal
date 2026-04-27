@@ -1,0 +1,41 @@
+semantic_models:
+  - name: churn_scores
+    defaults:
+      agg_time_dimension: scored_at
+    model: ref('churn_scores')
+    entities:
+      - name: customer
+        type: primary
+        expr: customer_id
+    dimensions:
+      - name: scored_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: churn_risk_tier
+        type: categorical
+    measures:
+      - name: customer_count
+        agg: count
+        expr: customer_id
+      - name: avg_churn_score
+        agg: average
+        expr: churn_score
+
+metrics:
+  - name: avg_churn_score
+    label: Average Churn Score
+    description: Average churn probability across all scored customers.
+    type: simple
+    type_params:
+      measure:
+        name: avg_churn_score
+
+  - name: high_risk_customers
+    label: High Risk Customers
+    description: Count of customers in the high churn risk tier.
+    type: simple
+    type_params:
+      measure:
+        name: customer_count
+    filter: "{{ Dimension('customer__churn_risk_tier') }} = 'high'"

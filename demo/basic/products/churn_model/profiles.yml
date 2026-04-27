@@ -1,0 +1,12 @@
+churn_model:
+  outputs:
+    dev:
+      dbname: dpp_demo
+      host: localhost
+      pass: abc123
+      port: 5433
+      schema: churn_model
+      threads: 1
+      type: postgres
+      user: postgres
+  target: dev
