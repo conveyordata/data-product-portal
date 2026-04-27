@@ -60,14 +60,7 @@ OutputPortSemanticModel
 
 ### Changes to existing output port response
 
-`GetOutputPortResponse` gains two new nested lists:
-
-```python
-table_schemas: list[OutputPortTableSchemaResponse]
-semantic_models: list[OutputPortSemanticModelResponse]
-```
-
-These are eagerly loaded so the frontend can render the Model tab from the existing `getOutputPort` RTK Query call without additional requests.
+None. `GetOutputPortResponse` stays as-is. Table schemas and semantic models can be large (column lists, JSONB content) and are only needed when the user opens the Model tab, so they are loaded lazily via the dedicated GET endpoints.
 
 ## API Endpoints
 
@@ -102,7 +95,6 @@ Authorization follows the existing `Authorization.enforce()` Casbin pattern on a
 ```
 
 Tags are referenced by **string value** (matching the existing pattern used by `tags_datasets` and `tags_data_outputs`). Tag records are created on first use if they don't already exist.
-```
 
 ### Semantic Models
 
@@ -129,7 +121,7 @@ Tags are referenced by **string value** (matching the existing pattern used by `
 
 Added to the output port detail page (`dataset-tabs.tsx`) with a new `TabKeys.Model` key. Positioned after "About".
 
-The tab is read-only. It loads data from the existing `getOutputPort` RTK Query response (table_schemas + semantic_models nested in), requiring no additional API calls beyond the regenerated API client (`npm run generate-api`).
+The tab is read-only. It calls the dedicated `GET .../table-schemas` and `GET .../semantic-models` endpoints when the tab mounts (lazy loading — only triggered when the user opens the tab). The RTK Query hooks are generated from the OpenAPI spec via `npm run generate-api`.
 
 ### Table Schemas section
 
