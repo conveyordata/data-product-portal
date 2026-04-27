@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: customer_360
+    description: Consolidated view of customer activity combining CRM, ERP, and logistics data.
+    columns:
+      - name: customer_id
+        description: Unique identifier for the customer.
+        data_type: integer
+      - name: first_name
+        description: Customer's first name.
+        data_type: text
+      - name: last_name
+        description: Customer's last name.
+        data_type: text
+      - name: email
+        description: Primary contact email address.
+        data_type: text
+      - name: signup_date
+        description: Timestamp when the customer registered.
+        data_type: timestamp
+      - name: total_orders
+        description: Total number of orders placed by the customer.
+        data_type: integer
+      - name: total_revenue
+        description: Total monetary value of all orders.
+        data_type: numeric
+      - name: last_order_date
+        description: Date of the most recent order.
+        data_type: timestamp
+      - name: last_shipment_status
+        description: Status of the most recent shipment (e.g., Delivered, In Transit).
+        data_type: text
+      - name: rfm_segment
+        description: RFM-based segmentation tier (Champions, Loyal Customers, Recent, At Risk, Churned).
+        data_type: text

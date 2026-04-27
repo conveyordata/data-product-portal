@@ -1,0 +1,19 @@
+name: 'marketing_customer_360'
+version: '1.0.0'
+
+profile: 'marketing_customer_360'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  marketing_customer_360:
+    +materialized: table

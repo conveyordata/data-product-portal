@@ -1,0 +1,49 @@
+semantic_models:
+  - name: customer_360
+    defaults:
+      agg_time_dimension: signup_date
+    model: ref('customer_360')
+    entities:
+      - name: customer
+        type: primary
+        expr: customer_id
+    dimensions:
+      - name: signup_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: last_order_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: rfm_segment
+        type: categorical
+      - name: last_shipment_status
+        type: categorical
+    measures:
+      - name: customer_count
+        agg: count
+        expr: customer_id
+      - name: total_revenue
+        agg: sum
+        expr: total_revenue
+      - name: avg_order_count
+        agg: average
+        expr: total_orders
+
+metrics:
+  - name: customer_count
+    label: Customer Count
+    description: Total number of customers in the 360 view.
+    type: simple
+    type_params:
+      measure:
+        name: customer_count
+
+  - name: total_revenue
+    label: Total Revenue
+    description: Sum of all customer revenue.
+    type: simple
+    type_params:
+      measure:
+        name: total_revenue
