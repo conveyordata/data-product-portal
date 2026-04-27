@@ -123,6 +123,8 @@ class TestFreshnessSloRouter:
     def test_post_observation_records_and_returns_status(self, client, session):
         dataset = DatasetFactory()
         _assign_update_freshness_role(session, dataset)
+        # deadline_time=time(0,0,0): FRESH is returned when last_refreshed >= today_start,
+        # independent of the deadline — observation is "now", so always fresh.
         FreshnessSloFactory(output_port_id=dataset.id, deadline_time=time(0, 0, 0))
 
         payload = {"last_refreshed_at": datetime.now(UTC).isoformat()}
@@ -137,6 +139,8 @@ class TestFreshnessSloRouter:
 
     def test_get_slo_returns_status_with_latest_observation(self, client, session):
         dataset = DatasetFactory()
+        # deadline_time=time(0,0,0): midnight ensures now_utc >= deadline_today is
+        # always true (any time of day > midnight), so a stale observation returns STALE.
         FreshnessSloFactory(output_port_id=dataset.id, deadline_time=time(0, 0, 0))
         FreshnessObservationFactory(
             output_port_id=dataset.id,
