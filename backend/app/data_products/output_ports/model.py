@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime, time
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
@@ -23,6 +24,10 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.freshness.model import (
+    FreshnessObservation,
+    FreshnessSlo,
+)
 from app.data_products.output_ports.input_ports.model import (
     InputPort,
 )
@@ -106,6 +111,12 @@ class Dataset(Base, BaseORM):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    freshness_slo: Mapped[Optional[FreshnessSlo]] = relationship(
+        foreign_keys=[FreshnessSlo.output_port_id],
+        lazy="joined",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
 
     @property
     def quality_status(self) -> Optional[str]:
@@ -113,9 +124,47 @@ class Dataset(Base, BaseORM):
         return self.quality_summary.overall_status if self.quality_summary else None
 
     @property
+    def freshness_status(self) -> Optional[str]:
+        """Returns the freshness status based on the SLO and latest observation."""
+        if not self.freshness_slo:
+            return None
+        from app.data_products.output_ports.freshness.enums import FreshnessStatus
+
+        if self.latest_freshness_at is None:
+            return FreshnessStatus.UNKNOWN.value
+        now_utc = datetime.now(UTC)
+        today_start = now_utc.replace(hour=0, minute=0, second=0, microsecond=0)
+        deadline_today = today_start.replace(
+            hour=self.freshness_slo.deadline_time.hour,
+            minute=self.freshness_slo.deadline_time.minute,
+            second=self.freshness_slo.deadline_time.second,
+        )
+        last_refreshed = self.latest_freshness_at
+        if last_refreshed.tzinfo is None:
+            last_refreshed = last_refreshed.replace(tzinfo=UTC)
+        if last_refreshed >= today_start:
+            return FreshnessStatus.FRESH.value
+        if now_utc >= deadline_today:
+            return FreshnessStatus.STALE.value
+        return FreshnessStatus.UNKNOWN.value
+
+    @property
+    def freshness_deadline_time(self) -> Optional[time]:
+        """Returns the deadline time from the freshness SLO if it exists."""
+        if not self.freshness_slo:
+            return None
+        return self.freshness_slo.deadline_time
+
+    @property
     def data_product_name(self) -> str:
         return self.data_product.name
 
+    latest_freshness_at = column_property(
+        select(func.max(FreshnessObservation.last_refreshed_at))
+        .where(FreshnessObservation.output_port_id == id)
+        .correlate_except(FreshnessObservation)
+        .scalar_subquery()
+    )
     data_product_count = column_property(
         select(func.count(InputPort.id))
         .where(InputPort.dataset_id == id)
