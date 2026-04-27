@@ -137,6 +137,80 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.freshnessObservationRequest,
       }),
     }),
+    getOutputPortTableSchemas: build.query<
+      GetOutputPortTableSchemasApiResponse,
+      GetOutputPortTableSchemasApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/table-schemas`,
+      }),
+    }),
+    createOutputPortTableSchema: build.mutation<
+      CreateOutputPortTableSchemaApiResponse,
+      CreateOutputPortTableSchemaApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/table-schemas`,
+        method: "POST",
+        body: queryArg.tableSchemaRequest,
+      }),
+    }),
+    replaceOutputPortTableSchema: build.mutation<
+      ReplaceOutputPortTableSchemaApiResponse,
+      ReplaceOutputPortTableSchemaApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/table-schemas/${queryArg.schemaId}`,
+        method: "PUT",
+        body: queryArg.tableSchemaRequest,
+      }),
+    }),
+    deleteOutputPortTableSchema: build.mutation<
+      DeleteOutputPortTableSchemaApiResponse,
+      DeleteOutputPortTableSchemaApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/table-schemas/${queryArg.schemaId}`,
+        method: "DELETE",
+      }),
+    }),
+    getOutputPortSemanticModels: build.query<
+      GetOutputPortSemanticModelsApiResponse,
+      GetOutputPortSemanticModelsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/semantic-models`,
+      }),
+    }),
+    createOutputPortSemanticModel: build.mutation<
+      CreateOutputPortSemanticModelApiResponse,
+      CreateOutputPortSemanticModelApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/semantic-models`,
+        method: "POST",
+        body: queryArg.semanticModelRequest,
+      }),
+    }),
+    replaceOutputPortSemanticModel: build.mutation<
+      ReplaceOutputPortSemanticModelApiResponse,
+      ReplaceOutputPortSemanticModelApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/semantic-models/${queryArg.modelId}`,
+        method: "PUT",
+        body: queryArg.semanticModelRequest,
+      }),
+    }),
+    deleteOutputPortSemanticModel: build.mutation<
+      DeleteOutputPortSemanticModelApiResponse,
+      DeleteOutputPortSemanticModelApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/semantic-models/${queryArg.modelId}`,
+        method: "DELETE",
+      }),
+    }),
     getDataProductOutputPorts: build.query<
       GetDataProductOutputPortsApiResponse,
       GetDataProductOutputPortsApiArg
@@ -328,6 +402,60 @@ export type AddFreshnessObservationApiArg = {
   dataProductId: string;
   id: string;
   freshnessObservationRequest: FreshnessObservationRequest;
+};
+export type GetOutputPortTableSchemasApiResponse =
+  /** status 200 Successful Response */ TableSchemaResponse[];
+export type GetOutputPortTableSchemasApiArg = {
+  dataProductId: string;
+  id: string;
+};
+export type CreateOutputPortTableSchemaApiResponse =
+  /** status 200 Successful Response */ TableSchemaResponse;
+export type CreateOutputPortTableSchemaApiArg = {
+  dataProductId: string;
+  id: string;
+  tableSchemaRequest: TableSchemaRequest;
+};
+export type ReplaceOutputPortTableSchemaApiResponse =
+  /** status 200 Successful Response */ TableSchemaResponse;
+export type ReplaceOutputPortTableSchemaApiArg = {
+  dataProductId: string;
+  id: string;
+  schemaId: string;
+  tableSchemaRequest: TableSchemaRequest;
+};
+export type DeleteOutputPortTableSchemaApiResponse = unknown;
+export type DeleteOutputPortTableSchemaApiArg = {
+  dataProductId: string;
+  id: string;
+  schemaId: string;
+};
+export type GetOutputPortSemanticModelsApiResponse =
+  /** status 200 Successful Response */ SemanticModelResponse[];
+export type GetOutputPortSemanticModelsApiArg = {
+  dataProductId: string;
+  id: string;
+};
+export type CreateOutputPortSemanticModelApiResponse =
+  /** status 200 Successful Response */ SemanticModelResponse;
+export type CreateOutputPortSemanticModelApiArg = {
+  dataProductId: string;
+  id: string;
+  semanticModelRequest: SemanticModelRequest;
+};
+export type ReplaceOutputPortSemanticModelApiResponse =
+  /** status 200 Successful Response */ SemanticModelResponse;
+export type ReplaceOutputPortSemanticModelApiArg = {
+  dataProductId: string;
+  id: string;
+  modelId: string;
+  semanticModelRequest: SemanticModelRequest;
+};
+export type DeleteOutputPortSemanticModelApiResponse = unknown;
+export type DeleteOutputPortSemanticModelApiArg = {
+  dataProductId: string;
+  id: string;
+  modelId: string;
 };
 export type GetDataProductOutputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductOutputPortsResponse;
@@ -524,6 +652,49 @@ export type FreshnessObservationRequest = {
 export type Tag = {
   id: string;
   value: string;
+};
+export type ColumnResponse = {
+  id: string;
+  name: string;
+  description?: string | null;
+  data_type?: string | null;
+  tags: Tag[];
+};
+export type TableSchemaResponse = {
+  id: string;
+  output_port_id: string;
+  name: string;
+  description?: string | null;
+  tags: Tag[];
+  columns: ColumnResponse[];
+};
+export type ColumnRequest = {
+  name: string;
+  description?: string | null;
+  data_type?: string | null;
+  tag_ids?: string[];
+};
+export type TableSchemaRequest = {
+  name: string;
+  description?: string | null;
+  tag_ids?: string[];
+  columns?: ColumnRequest[];
+};
+export type SemanticModelResponse = {
+  id: string;
+  output_port_id: string;
+  name: string;
+  format: SemanticModelFormat;
+  content: {
+    [key: string]: any;
+  };
+};
+export type SemanticModelRequest = {
+  name: string;
+  format: SemanticModelFormat;
+  content: {
+    [key: string]: any;
+  };
 };
 export type OutputPort = {
   id: string;
@@ -813,6 +984,10 @@ export enum FreshnessStatus {
   Stale = "stale",
   Unknown = "unknown",
 }
+export enum SemanticModelFormat {
+  MetricsFlow = "MetricsFlow",
+  OpenSemanticInterchange = "OpenSemanticInterchange",
+}
 export enum OutputPortStatus {
   Pending = "pending",
   Active = "active",
@@ -897,6 +1072,16 @@ export const {
   useUpsertFreshnessSloMutation,
   useDeleteFreshnessSloMutation,
   useAddFreshnessObservationMutation,
+  useGetOutputPortTableSchemasQuery,
+  useLazyGetOutputPortTableSchemasQuery,
+  useCreateOutputPortTableSchemaMutation,
+  useReplaceOutputPortTableSchemaMutation,
+  useDeleteOutputPortTableSchemaMutation,
+  useGetOutputPortSemanticModelsQuery,
+  useLazyGetOutputPortSemanticModelsQuery,
+  useCreateOutputPortSemanticModelMutation,
+  useReplaceOutputPortSemanticModelMutation,
+  useDeleteOutputPortSemanticModelMutation,
   useGetDataProductOutputPortsQuery,
   useLazyGetDataProductOutputPortsQuery,
   useCreateOutputPortMutation,

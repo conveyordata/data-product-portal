@@ -44,7 +44,13 @@ from app.data_products.output_ports.schema_response import (
     GetOutputPortResponse,
     UpdateOutputPortResponse,
 )
+from app.data_products.output_ports.semantic_models.router import (
+    router as semantic_models_router,
+)
 from app.data_products.output_ports.service import OutputPortService
+from app.data_products.output_ports.table_schemas.router import (
+    router as table_schemas_router,
+)
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -103,6 +109,8 @@ router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
 router.include_router(cost_router)
 router.include_router(freshness_router)
+router.include_router(table_schemas_router)
+router.include_router(semantic_models_router)
 
 
 @router.get(route)

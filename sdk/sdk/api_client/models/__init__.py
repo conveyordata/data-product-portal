@@ -25,6 +25,8 @@ from .azure_environment_platform_configuration import (
 )
 from .become_admin import BecomeAdmin
 from .can_become_admin_update import CanBecomeAdminUpdate
+from .column_request import ColumnRequest
+from .column_response import ColumnResponse
 from .cost_history_response import CostHistoryResponse
 from .cost_record_response import CostRecordResponse
 from .create_cost_record import CreateCostRecord
@@ -250,10 +252,17 @@ from .scope import Scope
 from .search_output_ports_response import SearchOutputPortsResponse
 from .search_output_ports_response_item import SearchOutputPortsResponseItem
 from .select_option import SelectOption
+from .semantic_model_format import SemanticModelFormat
+from .semantic_model_request import SemanticModelRequest
+from .semantic_model_request_content import SemanticModelRequestContent
+from .semantic_model_response import SemanticModelResponse
+from .semantic_model_response_content import SemanticModelResponseContent
 from .snowflake_config import SnowflakeConfig
 from .snowflake_technical_asset_configuration import (
     SnowflakeTechnicalAssetConfiguration,
 )
+from .table_schema_request import TableSchemaRequest
+from .table_schema_response import TableSchemaResponse
 from .tag import Tag
 from .tag_create import TagCreate
 from .tag_update import TagUpdate
@@ -314,6 +323,8 @@ __all__ = (
     "AzureEnvironmentPlatformConfiguration",
     "BecomeAdmin",
     "CanBecomeAdminUpdate",
+    "ColumnRequest",
+    "ColumnResponse",
     "CostHistoryResponse",
     "CostRecordResponse",
     "CreateCostRecord",
@@ -497,8 +508,15 @@ __all__ = (
     "SearchOutputPortsResponse",
     "SearchOutputPortsResponseItem",
     "SelectOption",
+    "SemanticModelFormat",
+    "SemanticModelRequest",
+    "SemanticModelRequestContent",
+    "SemanticModelResponse",
+    "SemanticModelResponseContent",
     "SnowflakeConfig",
     "SnowflakeTechnicalAssetConfiguration",
+    "TableSchemaRequest",
+    "TableSchemaResponse",
     "Tag",
     "TagCreate",
     "TagsGet",
