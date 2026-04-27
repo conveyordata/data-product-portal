@@ -47,9 +47,68 @@ tasks:
         vars: { PROJECT: sales_erp_orders }
       - task: run-dbt
         vars: { PROJECT: logistics_wms_shipments }
+      - task: run-dbt
+        vars: { PROJECT: marketing_customer_360 }
+      - task: run-dbt
+        vars: { PROJECT: campaign_activation }
+      - task: run-dbt
+        vars: { PROJECT: churn_model }
+      - task: upload-metadata:all
 
   run-dbt:
     internal: true
     dir: products
     cmds:
       - poetry run dbt run --project-dir {{.PROJECT}} --profiles-dir {{.PROJECT}}
+
+  upload-metadata:
+    internal: true
+    dir: products
+    cmds:
+      - poetry run python upload_metadata.py --project {{.PROJECT}}
+
+  upload-metadata:sales-crm-customers:
+    desc: Upload metadata for sales_crm_customers
+    cmds:
+      - task: upload-metadata
+        vars: { PROJECT: sales_crm_customers }
+
+  upload-metadata:sales-erp-orders:
+    desc: Upload metadata for sales_erp_orders
+    cmds:
+      - task: upload-metadata
+        vars: { PROJECT: sales_erp_orders }
+
+  upload-metadata:logistics-wms-shipments:
+    desc: Upload metadata for logistics_wms_shipments
+    cmds:
+      - task: upload-metadata
+        vars: { PROJECT: logistics_wms_shipments }
+
+  upload-metadata:marketing-customer-360:
+    desc: Upload metadata for marketing_customer_360
+    cmds:
+      - task: upload-metadata
+        vars: { PROJECT: marketing_customer_360 }
+
+  upload-metadata:campaign-activation:
+    desc: Upload metadata for campaign_activation
+    cmds:
+      - task: upload-metadata
+        vars: { PROJECT: campaign_activation }
+
+  upload-metadata:churn-model:
+    desc: Upload metadata for churn_model
+    cmds:
+      - task: upload-metadata
+        vars: { PROJECT: churn_model }
+
+  upload-metadata:all:
+    desc: Upload metadata for all projects
+    cmds:
+      - task: upload-metadata:sales-crm-customers
+      - task: upload-metadata:sales-erp-orders
+      - task: upload-metadata:logistics-wms-shipments
+      - task: upload-metadata:marketing-customer-360
+      - task: upload-metadata:campaign-activation
+      - task: upload-metadata:churn-model
