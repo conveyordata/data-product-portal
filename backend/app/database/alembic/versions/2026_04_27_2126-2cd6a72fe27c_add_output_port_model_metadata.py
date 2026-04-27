@@ -54,6 +54,13 @@ def upgrade() -> None:
         sa.Column("data_type", sa.String(), nullable=True),
     )
 
+    op.create_index(
+        op.f("ix_output_port_columns_table_schema_id"),
+        "output_port_columns",
+        ["table_schema_id"],
+        unique=False,
+    )
+
     op.create_table(
         "tags_output_port_table_schemas",
         sa.Column(
@@ -115,6 +122,10 @@ def downgrade() -> None:
     op.drop_table("output_port_semantic_models")
     op.drop_table("tags_output_port_columns")
     op.drop_table("tags_output_port_table_schemas")
+    op.drop_index(
+        op.f("ix_output_port_columns_table_schema_id"),
+        table_name="output_port_columns",
+    )
     op.drop_table("output_port_columns")
     op.drop_index(
         op.f("ix_output_port_table_schemas_output_port_id"),
