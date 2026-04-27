@@ -10,8 +10,8 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.create_input_ports_for_exploration_request import (
-        CreateInputPortsForExplorationRequest,
+    from ..models.request_input_ports_for_exploration_request import (
+        RequestInputPortsForExplorationRequest,
     )
 
 
@@ -26,19 +26,19 @@ class CreateExplorationRequestWithInputPorts:
         namespace (str):
         description (str):
         domain_id (UUID):
-        input_ports (CreateInputPortsForExplorationRequest | None | Unset):
+        input_ports (None | RequestInputPortsForExplorationRequest | Unset):
     """
 
     name: str
     namespace: str
     description: str
     domain_id: UUID
-    input_ports: CreateInputPortsForExplorationRequest | None | Unset = UNSET
+    input_ports: None | RequestInputPortsForExplorationRequest | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.create_input_ports_for_exploration_request import (
-            CreateInputPortsForExplorationRequest,
+        from ..models.request_input_ports_for_exploration_request import (
+            RequestInputPortsForExplorationRequest,
         )
 
         name = self.name
@@ -52,7 +52,7 @@ class CreateExplorationRequestWithInputPorts:
         input_ports: dict[str, Any] | None | Unset
         if isinstance(self.input_ports, Unset):
             input_ports = UNSET
-        elif isinstance(self.input_ports, CreateInputPortsForExplorationRequest):
+        elif isinstance(self.input_ports, RequestInputPortsForExplorationRequest):
             input_ports = self.input_ports.to_dict()
         else:
             input_ports = self.input_ports
@@ -74,8 +74,8 @@ class CreateExplorationRequestWithInputPorts:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.create_input_ports_for_exploration_request import (
-            CreateInputPortsForExplorationRequest,
+        from ..models.request_input_ports_for_exploration_request import (
+            RequestInputPortsForExplorationRequest,
         )
 
         d = dict(src_dict)
@@ -89,7 +89,7 @@ class CreateExplorationRequestWithInputPorts:
 
         def _parse_input_ports(
             data: object,
-        ) -> CreateInputPortsForExplorationRequest | None | Unset:
+        ) -> None | RequestInputPortsForExplorationRequest | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -97,14 +97,14 @@ class CreateExplorationRequestWithInputPorts:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                input_ports_type_0 = CreateInputPortsForExplorationRequest.from_dict(
+                input_ports_type_0 = RequestInputPortsForExplorationRequest.from_dict(
                     data
                 )
 
                 return input_ports_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(CreateInputPortsForExplorationRequest | None | Unset, data)
+            return cast(None | RequestInputPortsForExplorationRequest | Unset, data)
 
         input_ports = _parse_input_ports(d.pop("input_ports", UNSET))
 

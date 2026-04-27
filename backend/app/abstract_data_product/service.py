@@ -65,13 +65,13 @@ class AbstractDataProductService:
                 .selectinload(AbstractDataProduct.input_ports)
             ],
         )
-        data_product = self.db.get(
+        adp = self.db.get(
             AbstractDataProduct,
             consuming_abstract_data_product_id,
             options=[selectinload(AbstractDataProduct.input_ports)],
             populate_existing=True,
         )
-        if not data_product:
+        if not adp:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Abstract data product {consuming_abstract_data_product_id} not found",
@@ -79,14 +79,14 @@ class AbstractDataProductService:
 
         if output_port.id in [
             link.dataset_id
-            for link in data_product.input_ports
+            for link in adp.input_ports
             if link.status != DecisionStatus.DENIED
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Input port connection to Output Port ({output_port_id}) already exists in {data_product.abstract_data_product_type} {consuming_abstract_data_product_id}",
+                detail=f"Input port connection to Output Port ({output_port_id}) already exists in {adp.abstract_data_product_type} {consuming_abstract_data_product_id}",
             )
-        if output_port.data_product_id == data_product.id:
+        if output_port.data_product_id == adp.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot link own dataset to data product",
@@ -111,23 +111,23 @@ class AbstractDataProductService:
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
-        data_product.input_ports.append(dataset_link)
+        adp.input_ports.append(dataset_link)
         return dataset_link
 
     def request_input_ports(
         self,
         id: UUID,
-        dataset_ids: list[UUID],
+        output_port_ids: list[UUID],
         justification: str,
         *,
         actor: User,
     ) -> list[InputPortModel]:
-        dataset_links = [
+        input_ports = [
             self.request_input_port(id, dataset_id, justification, actor=actor)
-            for dataset_id in dataset_ids
+            for dataset_id in output_port_ids
         ]
         self.db.flush()
-        return dataset_links
+        return input_ports
 
     def remove_input_port(
         self,

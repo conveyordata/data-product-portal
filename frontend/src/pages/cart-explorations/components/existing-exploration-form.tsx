@@ -9,134 +9,121 @@ import { useFormPersist } from '@/hooks/use-form-persist.tsx';
 import { FormIssues } from '@/pages/cart-explorations/components/form-item-issues.tsx';
 import { JustificationFormItem } from '@/pages/cart-explorations/components/form-item-justification.tsx';
 import { useCartOverlapCheck } from '@/pages/cart-explorations/hooks/use-cart-overlap-check.ts';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
+import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
-    useGetDataProductsQuery,
-    useLinkInputPortsToDataProductMutation,
-} from '@/store/api/services/generated/dataProductsApi.ts';
+    useGetExplorationsQuery,
+    useRequestInputPortsForExplorationMutation,
+} from '@/store/api/services/generated/explorationsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { clearCart } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { createDataProductIdPath } from '@/types/navigation.ts';
+import { createExplorationIdPath } from '@/types/navigation.ts';
 
 type CartFormData = {
-    dataProductId?: string;
+    explorationId?: string;
     justification?: string;
 };
 
 type Props = {
     cartOutputPorts?: SearchOutputPortsResponseItem[];
-    setSelectedDataProductId: (id?: string) => void;
+    setSelectedExplorationId: (id?: string) => void;
 };
 
-export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProductId }: Props) => {
+export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExplorationId }: Props) => {
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
 
-    const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
-        useLinkInputPortsToDataProductMutation();
+    const [requestInputPortsForExploration, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
+        useRequestInputPortsForExplorationMutation();
     const [form] = Form.useForm<CartFormData>();
-    const selectedDataProductId = Form.useWatch('dataProductId', form);
+    const selectedExplorationId = Form.useWatch('explorationId', form);
     useEffect(() => {
-        setSelectedDataProductId(selectedDataProductId);
+        setSelectedExplorationId(selectedExplorationId);
         return () => {
-            setSelectedDataProductId(undefined);
+            setSelectedExplorationId(undefined);
         };
-    }, [selectedDataProductId, setSelectedDataProductId]);
+    }, [selectedExplorationId, setSelectedExplorationId]);
     const { onValuesChange, clearStorage, isRestored } = useFormPersist<CartFormData>(
         form,
-        'cart-existing-data-product-form',
+        'cart-existing-exploration-form',
     );
 
-    const { overlappingOutputPortIds, selectedProductOutputPortsInCartIds } = useCartOverlapCheck({
-        selectedDataProductId,
+    const { overlappingOutputPortIds } = useCartOverlapCheck({
+        selectedExplorationId,
     });
 
     useEffect(() => {
-        if (requestingAccessSuccess && selectedDataProductId) {
+        if (requestingAccessSuccess && selectedExplorationId) {
             dispatch(clearCart());
             dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
 
-            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.InputPorts));
+            navigate(createExplorationIdPath(selectedExplorationId, ExplorationTabKeys.InputPorts));
         }
-    }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate]);
+    }, [requestingAccessSuccess, selectedExplorationId, dispatch, navigate]);
     const submitFormIssues = useMemo(() => {
         const submitFormIssues = [];
         if (overlappingOutputPortIds.length > 0) {
             submitFormIssues.push({
                 key: 'overlappingOutputPortId',
                 value: t(
-                    'There are currently {{count}} Output Ports in the cart, for which the selected Data Product already has access, or has an access request.',
+                    'There are currently {{count}} Output Ports in the cart, for which the selected Exploration already has access, or has an access request.',
                     {
                         count: overlappingOutputPortIds.length,
                     },
                 ),
             });
         }
-        if (selectedProductOutputPortsInCartIds.length > 0) {
-            submitFormIssues.push({
-                key: 'selectedProductOutputPortsInCart',
-                value: t(
-                    'There are currently {{count}} Output Ports, that are part of your selected Data Product, please remove them.',
-                    {
-                        count: selectedProductOutputPortsInCartIds.length,
-                    },
-                ),
-            });
-        }
-
         return submitFormIssues;
-    }, [overlappingOutputPortIds, selectedProductOutputPortsInCartIds]);
+    }, [overlappingOutputPortIds]);
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
         if (
             !values.justification ||
-            !values.dataProductId ||
+            !values.explorationId ||
             cartOutputPorts === undefined ||
             cartOutputPorts.length === 0
         ) {
             return;
         }
-        posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED_EXISTING_DATA_PRODUCT, {
+        posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED_EXISTING_EXPLORATION, {
             cartSize: cartOutputPorts?.length,
         });
         clearStorage();
-        requestDatasetAccessForDataProduct({
-            id: values.dataProductId,
-            linkInputPortsToDataProduct: {
-                input_ports: cartOutputPorts?.map((dataset) => dataset.id),
+        requestInputPortsForExploration({
+            id: values.explorationId,
+            requestInputPortsForExplorationRequest: {
+                output_ports: cartOutputPorts?.map((dataset) => dataset.id),
                 justification: values.justification,
             },
         });
     };
     const currentUser = useSelector(selectCurrentUser);
-    const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
-        useGetDataProductsQuery(currentUser?.id, {
+    const { data: { explorations: userExplorations = [] } = {}, isFetching: isFetchingUserExplorations } =
+        useGetExplorationsQuery(currentUser?.id, {
             skip: currentUser === null || !currentUser?.id,
         });
-    const options = userDataProducts.map((dp) => ({
-        value: dp.id,
-        label: dp.name,
-        description: dp.description,
-    }));
     return (
         <Form<CartFormData> layout={'vertical'} form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
             <Form.Item<CartFormData>
-                name="dataProductId"
-                label={t('Data Product')}
-                rules={[{ required: true, message: t('Please select a Data Product') }]}
+                name="explorationId"
+                label={t('Exploration')}
+                rules={[{ required: true, message: t('Please select an Exploration') }]}
             >
                 <Select
-                    placeholder={t('Search Data Products')}
+                    placeholder={t('Search Exploration')}
                     showSearch={{
                         optionFilterProp: 'label',
                     }}
-                    autoFocus={isRestored && selectedDataProductId === undefined}
-                    defaultOpen={isRestored && selectedDataProductId === undefined}
-                    loading={isFetchingUserDataProducts}
-                    options={options}
+                    autoFocus={isRestored && selectedExplorationId === undefined}
+                    defaultOpen={isRestored && selectedExplorationId === undefined}
+                    loading={isFetchingUserExplorations}
+                    options={userExplorations.map((exp) => ({
+                        value: exp.id,
+                        label: exp.name,
+                        description: exp.description,
+                    }))}
                     optionRender={(option) => (
                         <Space vertical>
                             <Typography.Text>{option.data.label}</Typography.Text>

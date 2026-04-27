@@ -29,3 +29,7 @@ class GetExplorationsResponse(ORMModel):
 
 class GetExplorationInputPortsResponse(ORMModel):
     input_ports: Sequence[InputPort]
+
+
+class RequestInputPortsForExplorationResponse(ORMModel):
+    input_port_ids: list[UUID]

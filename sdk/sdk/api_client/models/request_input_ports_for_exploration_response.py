@@ -7,35 +7,30 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="CreateInputPortsForExplorationRequest")
+T = TypeVar("T", bound="RequestInputPortsForExplorationResponse")
 
 
 @_attrs_define
-class CreateInputPortsForExplorationRequest:
+class RequestInputPortsForExplorationResponse:
     """
     Attributes:
-        output_ports (list[UUID]):
-        justification (str):
+        input_port_ids (list[UUID]):
     """
 
-    output_ports: list[UUID]
-    justification: str
+    input_port_ids: list[UUID]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        output_ports = []
-        for output_ports_item_data in self.output_ports:
-            output_ports_item = str(output_ports_item_data)
-            output_ports.append(output_ports_item)
-
-        justification = self.justification
+        input_port_ids = []
+        for input_port_ids_item_data in self.input_port_ids:
+            input_port_ids_item = str(input_port_ids_item_data)
+            input_port_ids.append(input_port_ids_item)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "output_ports": output_ports,
-                "justification": justification,
+                "input_port_ids": input_port_ids,
             }
         )
 
@@ -44,22 +39,19 @@ class CreateInputPortsForExplorationRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        output_ports = []
-        _output_ports = d.pop("output_ports")
-        for output_ports_item_data in _output_ports:
-            output_ports_item = UUID(output_ports_item_data)
+        input_port_ids = []
+        _input_port_ids = d.pop("input_port_ids")
+        for input_port_ids_item_data in _input_port_ids:
+            input_port_ids_item = UUID(input_port_ids_item_data)
 
-            output_ports.append(output_ports_item)
+            input_port_ids.append(input_port_ids_item)
 
-        justification = d.pop("justification")
-
-        create_input_ports_for_exploration_request = cls(
-            output_ports=output_ports,
-            justification=justification,
+        request_input_ports_for_exploration_response = cls(
+            input_port_ids=input_port_ids,
         )
 
-        create_input_ports_for_exploration_request.additional_properties = d
-        return create_input_ports_for_exploration_request
+        request_input_ports_for_exploration_response.additional_properties = d
+        return request_input_ports_for_exploration_response
 
     @property
     def additional_keys(self) -> list[str]:

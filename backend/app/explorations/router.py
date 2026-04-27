@@ -1,8 +1,9 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from starlette import status
 
 from app.abstract_data_product.schema_response import InputPort
 from app.core.auth.auth import get_authenticated_user
@@ -13,12 +14,14 @@ from app.database.database import get_db_session
 from app.explorations.schema_request import (
     CreateExplorationRequest,
     CreateExplorationRequestWithInputPorts,
+    RequestInputPortsForExplorationRequest,
 )
 from app.explorations.schema_response import (
     CreateExplorationResponse,
     GetExplorationInputPortsResponse,
     GetExplorationResponse,
     GetExplorationsResponse,
+    RequestInputPortsForExplorationResponse,
 )
 from app.explorations.service import ExplorationService
 from app.users.model import User
@@ -90,5 +93,33 @@ def get_exploration_input_ports(
         input_ports=[
             InputPort.model_validate(ip)
             for ip in ExplorationService(db).get_input_ports(id)
+        ]
+    )
+
+
+@router.post(
+    "/{id}/input_ports", response_model=RequestInputPortsForExplorationResponse
+)
+def request_input_ports_for_exploration(
+    id: UUID,
+    request: RequestInputPortsForExplorationRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+):
+    exp = ExplorationService(db).get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+    return RequestInputPortsForExplorationResponse(
+        input_port_ids=[
+            ip.id
+            for ip in ExplorationService(db).request_input_ports(
+                id,
+                request.output_ports,
+                request.justification,
+                actor=authenticated_user,
+            )
         ]
     )

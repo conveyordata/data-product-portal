@@ -36,9 +36,6 @@ from .create_exploration_request_with_input_ports import (
 )
 from .create_exploration_response import CreateExplorationResponse
 from .create_global_role_assignment import CreateGlobalRoleAssignment
-from .create_input_ports_for_exploration_request import (
-    CreateInputPortsForExplorationRequest,
-)
 from .create_output_port_request import CreateOutputPortRequest
 from .create_output_port_response import CreateOutputPortResponse
 from .create_output_port_role_assignment import CreateOutputPortRoleAssignment
@@ -230,6 +227,12 @@ from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
 )
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
+from .request_input_ports_for_exploration_request import (
+    RequestInputPortsForExplorationRequest,
+)
+from .request_input_ports_for_exploration_response import (
+    RequestInputPortsForExplorationResponse,
+)
 from .request_output_port_role_assignment import RequestOutputPortRoleAssignment
 from .resource_name_length_limits import ResourceNameLengthLimits
 from .resource_name_model import ResourceNameModel
@@ -315,7 +318,6 @@ __all__ = (
     "CreateExplorationRequestWithInputPorts",
     "CreateExplorationResponse",
     "CreateGlobalRoleAssignment",
-    "CreateInputPortsForExplorationRequest",
     "CreateOutputPortRequest",
     "CreateOutputPortResponse",
     "CreateOutputPortRoleAssignment",
@@ -469,6 +471,8 @@ __all__ = (
     "RenderTechnicalAssetAccessPathRequest",
     "RenderTechnicalAssetAccessPathResponse",
     "RequestDataProductRoleAssignment",
+    "RequestInputPortsForExplorationRequest",
+    "RequestInputPortsForExplorationResponse",
     "RequestOutputPortRoleAssignment",
     "ResourceNameLengthLimits",
     "ResourceNameModel",

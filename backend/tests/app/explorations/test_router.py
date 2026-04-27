@@ -131,3 +131,37 @@ class TestExplorationRouter:
         response = client.get(f"{ROUTE}/{exploration.id}/input_ports")
         assert response.status_code == 200, response.text
         assert len(response.json()["input_ports"]) == 1
+
+    def test_request_input_ports(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports",
+            json={
+                "output_ports": [str(DatasetFactory().id)],
+                "justification": "I am your king!",
+            },
+        )
+        assert response.status_code == 200, response.text
+        assert len(response.json()["input_port_ids"]) == 1
+
+    def test_request_input_ports_exploration_does_not_exist(self, client):
+        response = client.post(
+            f"{ROUTE}/{uuid.uuid4()}/input_ports",
+            json={
+                "output_ports": [str(DatasetFactory().id)],
+                "justification": "I am your king!",
+            },
+        )
+        assert response.status_code == 404, response.text
+
+    def test_request_input_ports_exploration_not_owner(self, client):
+        exploration = ExplorationFactory()
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports",
+            json={
+                "output_ports": [str(DatasetFactory().id)],
+                "justification": "I am your king!",
+            },
+        )
+        assert response.status_code == 403, response.text
