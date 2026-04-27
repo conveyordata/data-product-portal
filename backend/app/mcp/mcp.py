@@ -101,10 +101,10 @@ mcp = FastMCP(
     MODE 1: DISCOVERY (Metadata Only - Fast, No Credentials Required)
     ──────────────────────────────────────────────────────────────────────
     Use this when the user wants to:
-    ✓ Find what data exists: "What sales datasets are available?"
-    ✓ Get metadata: "Who owns the customer data?", "What's in the sales_db?"
-    ✓ Explore the catalog: "Show me all data products in the finance domain"
-    ✓ Check ownership/descriptions: "What does the revenue_monthly table contain?"
+    - Find what data exists: "What sales datasets are available?"
+    - Get metadata: "Who owns the customer data?", "What's in the sales_db?"
+    - Explore the catalog: "Show me all data products in the finance domain"
+    - Check ownership/descriptions: "What does the revenue_monthly table contain?"
 
     Tools for Discovery (no credentials needed):
     • search_output_ports(query) - find datasets
