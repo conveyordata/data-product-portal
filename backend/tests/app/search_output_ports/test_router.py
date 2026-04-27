@@ -130,7 +130,7 @@ class TestOutputPortSearchRouter:
             },
         ]
 
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        user = UserFactory()
         valid_output_ports = {
             port.name
             for port in OutputPortService(session).get_output_ports(None, user)

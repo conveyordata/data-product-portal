@@ -5,12 +5,14 @@ import TextArea from 'antd/es/input/TextArea';
 import { t } from 'i18next';
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 import styles from '@/components/data-products/data-product-form/data-product-form.module.scss';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
+import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
@@ -25,6 +27,7 @@ import {
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { clearCart } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { createExplorationIdPath } from '@/types/navigation.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 type Props = {
@@ -42,6 +45,7 @@ type CreateExplorationRequestForm = {
 export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
+    const navigate = useNavigate();
     const [form] = useForm<CreateExplorationRequestForm>();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
     const currentUser = useSelector(selectCurrentUser);
@@ -84,7 +88,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     return;
                 }
                 const { justification, ...request } = values;
-                await createExploration({
+                const response = await createExploration({
                     input_ports: {
                         output_ports: cartOutputPorts?.map((dataset) => dataset.id),
                         justification,
@@ -97,13 +101,12 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     cartSize: cartOutputPorts?.length,
                 });
                 clearStorage();
-                //Enable once we have the first draft of exploration
-                //navigate(createExplorationIdPath(response.id, DataProductTabKeys.InputPorts));
+                navigate(createExplorationIdPath(response.id, ExplorationTabKeys.InputPorts));
             } catch {
                 dispatchMessage({ content: t('Failed to create Exploration. Please try again.'), type: 'error' });
             }
         },
-        [posthog, createExploration, clearStorage, cartOutputPorts, dispatch],
+        [posthog, createExploration, clearStorage, cartOutputPorts, dispatch, navigate],
     );
     const initialValues = {
         owners: currentUser?.id ? [currentUser?.id] : [],

@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         Dataset,
         InputPort,
     )
+    from app.explorations.model import Exploration
     from app.users.notifications.model import Notification
 
 
@@ -66,6 +67,9 @@ class User(Base, BaseORM):
     )
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_roles", "data_product"
+    )
+    explorations: Mapped[list["Exploration"]] = relationship(
+        foreign_keys="Exploration.owner_id", back_populates="owner", lazy="raise"
     )
 
     global_role: Mapped["GlobalRoleAssignment"] = relationship(

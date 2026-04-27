@@ -1,6 +1,7 @@
+from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.schema_response import InputPort
@@ -29,8 +30,13 @@ router = APIRouter(tags=["Explorations"], prefix=route)
 @router.get("", response_model=GetExplorationsResponse)
 def get_explorations(
     db: Session = Depends(get_db_session),
+    filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
 ):
-    return {"explorations": ExplorationService(db).get_explorations()}
+    return {
+        "explorations": ExplorationService(db).get_explorations(
+            filter_to_user_with_assigment
+        )
+    }
 
 
 @router.post(
@@ -48,6 +54,7 @@ def create_exploration(
 ):
     created_exploration = ExplorationService(db).create_exploration(
         CreateExplorationRequest(**request.model_dump(exclude={"input_ports"})),
+        authenticated_user,
     )
     if request.input_ports:
         input_ports = ExplorationService(db).request_input_ports(
@@ -69,8 +76,9 @@ def create_exploration(
 def get_exploration(
     id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return ExplorationService(db).get_exploration(id)
+    return ExplorationService(db).get_exploration(id, authenticated_user)
 
 
 @router.get("/{id}/input_ports", response_model=GetExplorationInputPortsResponse)

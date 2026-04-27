@@ -2,17 +2,19 @@ import { Button, Flex, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { InputPortTable } from '@/pages/data-product/components/data-product-tabs/input-port-tab/components/input-port-table/input-port-table.component.tsx';
-import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
-import { type InputPort, useGetDataProductInputPortsQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { InputPortTable } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-table.component.tsx';
+import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 type Props = {
-    dataProductId: string;
+    canRequestAccess: boolean;
+    canRemoveAccess: boolean;
+    loadingInputPorts: boolean;
+    handleRemove: (outputPortId: string) => Promise<void>;
+    inputPorts: InputPort[];
 };
 
-function filterDatasets(input_ports: InputPort[], searchTerm: string) {
+function filterInputPorts(input_ports: InputPort[], searchTerm: string) {
     return (
         input_ports.filter(
             (input_port) =>
@@ -22,23 +24,18 @@ function filterDatasets(input_ports: InputPort[], searchTerm: string) {
     );
 }
 
-export function InputPortTab({ dataProductId }: Props) {
+export function InputPortTab({
+    loadingInputPorts,
+    inputPorts,
+    canRequestAccess,
+    handleRemove,
+    canRemoveAccess,
+}: Props) {
     const { t } = useTranslation();
-    const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(dataProductId);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const filteredDatasets = useMemo(() => {
-        return filterDatasets(inputPorts, searchTerm);
+        return filterInputPorts(inputPorts, searchTerm);
     }, [inputPorts, searchTerm]);
-
-    const { data: access } = useCheckAccessQuery(
-        {
-            resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
-        },
-        { skip: !dataProductId },
-    );
-
-    const canCreateDataset = access?.allowed || false;
 
     return (
         <Flex vertical gap={'middle'}>
@@ -49,12 +46,17 @@ export function InputPortTab({ dataProductId }: Props) {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <Link to={ApplicationPaths.Marketplace}>
-                    <Button disabled={!canCreateDataset} type={'primary'}>
+                    <Button disabled={!canRequestAccess} type={'primary'}>
                         {t('Shop for new Output Ports')}
                     </Button>
                 </Link>
             </Flex>
-            <InputPortTable dataProductId={dataProductId} inputPorts={filteredDatasets} />
+            <InputPortTable
+                loadingInputPorts={loadingInputPorts}
+                inputPorts={filteredDatasets}
+                handleRemove={handleRemove}
+                canRemoveAccess={canRemoveAccess}
+            />
         </Flex>
     );
 }

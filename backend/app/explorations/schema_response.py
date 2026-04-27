@@ -4,6 +4,7 @@ from uuid import UUID
 from app.abstract_data_product.schema_response import InputPort
 from app.configuration.domains.schema import Domain
 from app.shared.schema import ORMModel
+from app.users.schema import User
 
 
 class Exploration(ORMModel):
@@ -19,7 +20,7 @@ class CreateExplorationResponse(Exploration):
 
 
 class GetExplorationResponse(Exploration):
-    pass
+    owner: User
 
 
 class GetExplorationsResponse(ORMModel):

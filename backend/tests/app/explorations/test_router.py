@@ -102,14 +102,31 @@ class TestExplorationRouter:
         assert len(response.json()["explorations"]) == 1
         assert response.json()["explorations"][0]["id"] == str(exploration.id)
 
+    def test_get_explorations_filter_assignment(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        ExplorationFactory()
+        response = client.get(
+            ROUTE,
+            params={
+                "filter_to_user_with_assigment": str(user.id),
+            },
+        )
+        assert response.status_code == 200, response.text
+        assert len(response.json()["explorations"]) == 1
+        assert response.json()["explorations"][0]["id"] == str(exploration.id)
+
     def test_get_exploration(self, client):
-        exploration = ExplorationFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
         response = client.get(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 200, response.text
         assert response.json()["id"] == str(exploration.id)
 
     def test_get_exploration_input_ports(self, client):
-        exploration = ExplorationFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        ExplorationFactory()
         InputPortFactory(consuming_abstract_data_product=exploration)
         response = client.get(f"{ROUTE}/{exploration.id}/input_ports")
         assert response.status_code == 200, response.text
