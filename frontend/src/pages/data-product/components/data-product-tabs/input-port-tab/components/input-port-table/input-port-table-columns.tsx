@@ -5,10 +5,12 @@ import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
+import { FreshnessBadge } from '@/components/freshness-badge/freshness-badge.component';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { InputPortActionButton } from '@/pages/data-product/components/data-product-tabs/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
 import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import type { FreshnessStatus } from '@/store/api/services/generated/dataProductsOutputPortsApi';
 import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
@@ -64,6 +66,16 @@ export const getDataProductDatasetsColumns = ({ t, dataProductId, inputPorts }: 
             title: t('Business justification'),
             dataIndex: 'justification',
             render: (_, { justification }) => <Justification justification={justification} />,
+        },
+        {
+            title: t('Freshness'),
+            key: 'freshness',
+            render: (_, { output_port }) => {
+                const freshnessStatus = output_port.freshness_status as FreshnessStatus | null | undefined;
+                if (!freshnessStatus) return null;
+                return <FreshnessBadge status={freshnessStatus} deadlineTime={output_port.freshness_deadline_time} />;
+            },
+            width: '15%',
         },
         {
             title: t('Actions'),

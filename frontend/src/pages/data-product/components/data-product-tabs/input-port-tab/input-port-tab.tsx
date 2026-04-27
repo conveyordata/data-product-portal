@@ -1,4 +1,4 @@
-import { Button, Flex, Input } from 'antd';
+import { Alert, Button, Flex, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -7,6 +7,7 @@ import { useCheckAccessQuery } from '@/store/api/services/generated/authorizatio
 import { type InputPort, useGetDataProductInputPortsQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
+import { DecisionStatus } from '@/types/roles';
 
 type Props = {
     dataProductId: string;
@@ -26,6 +27,10 @@ export function InputPortTab({ dataProductId }: Props) {
     const { t } = useTranslation();
     const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(dataProductId);
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [bannerDismissed, setBannerDismissed] = useState(false);
+    const hasStaleInputPort = inputPorts.some(
+        (p) => p.status === DecisionStatus.Approved && p.output_port?.freshness_status === 'stale',
+    );
     const filteredDatasets = useMemo(() => {
         return filterDatasets(inputPorts, searchTerm);
     }, [inputPorts, searchTerm]);
@@ -42,6 +47,17 @@ export function InputPortTab({ dataProductId }: Props) {
 
     return (
         <Flex vertical gap={'middle'}>
+            {hasStaleInputPort && !bannerDismissed && (
+                <Alert
+                    type="warning"
+                    message={t(
+                        'One or more dependencies have a broken freshness SLO. Your data product may be impacted.',
+                    )}
+                    closable
+                    onClose={() => setBannerDismissed(true)}
+                    showIcon
+                />
+            )}
             <Flex gap={'small'}>
                 <Input.Search
                     placeholder={t('Search existing Output Ports by name')}
