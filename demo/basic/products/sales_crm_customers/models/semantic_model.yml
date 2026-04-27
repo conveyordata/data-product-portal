@@ -1,0 +1,27 @@
+semantic_models:
+  - name: customers
+    defaults:
+      agg_time_dimension: signup_date
+    model: ref('customers')
+    entities:
+      - name: customer
+        type: primary
+        expr: id
+    dimensions:
+      - name: signup_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: customer_count
+        agg: count
+        expr: id
+
+metrics:
+  - name: customer_count
+    label: Customer Count
+    description: Total number of unique customers.
+    type: simple
+    type_params:
+      measure:
+        name: customer_count

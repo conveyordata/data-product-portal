@@ -1,0 +1,41 @@
+semantic_models:
+  - name: orders
+    defaults:
+      agg_time_dimension: order_date
+    model: ref('orders')
+    entities:
+      - name: order
+        type: primary
+        expr: order_id
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: order_count
+        agg: count
+        expr: order_id
+      - name: total_revenue
+        agg: sum
+        expr: total_amount
+
+metrics:
+  - name: order_count
+    label: Order Count
+    description: Total number of orders placed.
+    type: simple
+    type_params:
+      measure:
+        name: order_count
+
+  - name: total_revenue
+    label: Total Revenue
+    description: Sum of all order amounts.
+    type: simple
+    type_params:
+      measure:
+        name: total_revenue

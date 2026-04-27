@@ -1,0 +1,32 @@
+semantic_models:
+  - name: shipments
+    defaults:
+      agg_time_dimension: shipped_date
+    model: ref('shipments')
+    entities:
+      - name: shipment
+        type: primary
+        expr: shipment_id
+      - name: order
+        type: foreign
+        expr: order_ref
+    dimensions:
+      - name: shipped_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: delivery_status
+        type: categorical
+    measures:
+      - name: shipment_count
+        agg: count
+        expr: shipment_id
+
+metrics:
+  - name: shipment_count
+    label: Shipment Count
+    description: Total number of shipments dispatched.
+    type: simple
+    type_params:
+      measure:
+        name: shipment_count
