@@ -35,7 +35,7 @@ class SearchOutputPortsResponseItem:
         tags (list[Tag]):
         domain (Domain):
         lifecycle (DataProductLifeCycle | None):
-        data_product_count (int):
+        abstract_data_product_count (int):
         technical_assets_count (int):
         data_product_name (str):
         quality_status (DataQualityStatus | None):
@@ -52,7 +52,7 @@ class SearchOutputPortsResponseItem:
     tags: list[Tag]
     domain: Domain
     lifecycle: DataProductLifeCycle | None
-    data_product_count: int
+    abstract_data_product_count: int
     technical_assets_count: int
     data_product_name: str
     quality_status: DataQualityStatus | None
@@ -91,7 +91,7 @@ class SearchOutputPortsResponseItem:
         else:
             lifecycle = self.lifecycle
 
-        data_product_count = self.data_product_count
+        abstract_data_product_count = self.abstract_data_product_count
 
         technical_assets_count = self.technical_assets_count
 
@@ -118,7 +118,7 @@ class SearchOutputPortsResponseItem:
                 "tags": tags,
                 "domain": domain,
                 "lifecycle": lifecycle,
-                "data_product_count": data_product_count,
+                "abstract_data_product_count": abstract_data_product_count,
                 "technical_assets_count": technical_assets_count,
                 "data_product_name": data_product_name,
                 "quality_status": quality_status,
@@ -179,7 +179,7 @@ class SearchOutputPortsResponseItem:
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
-        data_product_count = d.pop("data_product_count")
+        abstract_data_product_count = d.pop("abstract_data_product_count")
 
         technical_assets_count = d.pop("technical_assets_count")
 
@@ -212,7 +212,7 @@ class SearchOutputPortsResponseItem:
             tags=tags,
             domain=domain,
             lifecycle=lifecycle,
-            data_product_count=data_product_count,
+            abstract_data_product_count=abstract_data_product_count,
             technical_assets_count=technical_assets_count,
             data_product_name=data_product_name,
             quality_status=quality_status,

@@ -20,14 +20,14 @@ import { useAppDispatch } from '@/store';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { addDatasetToCart, removeDatasetFromCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
-import { DatasetCardTooltip } from './dataset-card-tooltip.component';
-import styles from './dataset-marketplace-card.module.scss';
+import { OutputPortCardTooltip } from './output-port-card-tooltip.component';
+import styles from './output-port-marketplace-card.module.scss';
 
 type Props = {
     dataset: SearchOutputPortsResponseItem;
 };
 
-export function DatasetMarketplaceCard({ dataset }: Props) {
+export function OutputPortMarketplaceCard({ dataset }: Props) {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
@@ -110,10 +110,10 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                     </Space>
                 ),
                 children: (
-                    <DatasetCardTooltip
+                    <OutputPortCardTooltip
                         outputPortId={outputPort.id}
                         dataProductId={outputPort.data_product_id}
-                        number_of_data_products={outputPort.data_product_count}
+                        number_of_consumers={outputPort.abstract_data_product_count}
                     />
                 ),
             },

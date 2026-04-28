@@ -23,7 +23,7 @@ export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
             description: 'domain 1',
         },
         lifecycle: null,
-        data_product_count: 1,
+        abstract_data_product_count: 1,
         technical_assets_count: 1,
         data_product_name: 'dp-1',
         quality_status: null,

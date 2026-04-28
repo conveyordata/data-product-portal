@@ -4,14 +4,14 @@ import { Link } from 'react-router';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { useGetInputPortsForOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createAbstractDataProductIdPath } from '@/types/navigation';
-import styles from './dataset-marketplace-card.module.scss';
+import styles from './output-port-marketplace-card.module.scss';
 
 type Props = {
     outputPortId: string;
     dataProductId: string;
 };
 
-export function DatasetProductList({ outputPortId, dataProductId }: Props) {
+export function ConsumersList({ outputPortId, dataProductId }: Props) {
     const { data: { input_ports: inputPorts = [] } = {} } = useGetInputPortsForOutputPortQuery({
         outputPortId: outputPortId,
         dataProductId,

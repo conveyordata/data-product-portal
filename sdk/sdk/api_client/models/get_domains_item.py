@@ -17,13 +17,13 @@ class GetDomainsItem:
         id (UUID):
         name (str):
         description (str):
-        data_product_count (int):
+        abstract_data_product_count (int):
     """
 
     id: UUID
     name: str
     description: str
-    data_product_count: int
+    abstract_data_product_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -33,7 +33,7 @@ class GetDomainsItem:
 
         description = self.description
 
-        data_product_count = self.data_product_count
+        abstract_data_product_count = self.abstract_data_product_count
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -42,7 +42,7 @@ class GetDomainsItem:
                 "id": id,
                 "name": name,
                 "description": description,
-                "data_product_count": data_product_count,
+                "abstract_data_product_count": abstract_data_product_count,
             }
         )
 
@@ -57,13 +57,13 @@ class GetDomainsItem:
 
         description = d.pop("description")
 
-        data_product_count = d.pop("data_product_count")
+        abstract_data_product_count = d.pop("abstract_data_product_count")
 
         get_domains_item = cls(
             id=id,
             name=name,
             description=description,
-            data_product_count=data_product_count,
+            abstract_data_product_count=abstract_data_product_count,
         )
 
         get_domains_item.additional_properties = d

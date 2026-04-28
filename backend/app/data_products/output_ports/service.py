@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from fastembed import TextEmbedding
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
+from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
 from sqlalchemy.sql.base import ExecutableOption
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -157,6 +157,10 @@ class OutputPortService:
         )
         if current_user_assigned:
             stmt = stmt.where(DatasetModel.assignments.any(user_id=user.id))
+        stmt = stmt.options(
+            undefer(DatasetModel.abstract_data_product_count),
+            undefer(DatasetModel.technical_assets_count),
+        )
         results = self.db.scalars(stmt).unique().all()
 
         visible_candidates: list[DatasetModel] = []

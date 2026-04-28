@@ -9888,9 +9888,9 @@
             "type": "string",
             "title": "Description"
           },
-          "data_product_count": {
+          "abstract_data_product_count": {
             "type": "integer",
-            "title": "Data Product Count"
+            "title": "Abstract Data Product Count"
           }
         },
         "type": "object",
@@ -9898,7 +9898,7 @@
           "id",
           "name",
           "description",
-          "data_product_count"
+          "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"
       },
@@ -12515,9 +12515,9 @@
               }
             ]
           },
-          "data_product_count": {
+          "abstract_data_product_count": {
             "type": "integer",
-            "title": "Data Product Count"
+            "title": "Abstract Data Product Count"
           },
           "technical_assets_count": {
             "type": "integer",
@@ -12551,7 +12551,7 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_count",
+          "abstract_data_product_count",
           "technical_assets_count",
           "data_product_name",
           "quality_status"
