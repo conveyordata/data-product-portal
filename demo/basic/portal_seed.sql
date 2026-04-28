@@ -64,6 +64,14 @@ declare
     draft uuid;
     ready uuid;
 
+    -- DATA QUALITY SUMMARIES
+    sales_crm_customers_dq_id uuid;
+    sales_erp_orders_dq_id uuid;
+    logistics_wms_shipments_dq_id uuid;
+    marketing_customer_360_dq_id uuid;
+    campaign_activation_dq_id uuid;
+    churn_model_dq_id uuid;
+
 begin
     TRUNCATE TABLE public.input_ports CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
@@ -87,6 +95,8 @@ begin
     TRUNCATE TABLE public.output_port_freshness_slos CASCADE;
     TRUNCATE TABLE public.output_port_freshness_observations CASCADE;
     TRUNCATE TABLE public.data_product_lifecycles CASCADE;
+    TRUNCATE TABLE public.output_port_data_quality_summaries CASCADE;
+    TRUNCATE TABLE public.data_quality_technical_assets CASCADE;
 
     -- DATA PRODUCT LIFECYLCE
     INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Draft', 0, 'grey', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO draft;
@@ -483,5 +493,62 @@ begin
         (gen_random_uuid(), sales_erp_orders_ds_id,         NOW() - INTERVAL '2 days', NOW()),
         (gen_random_uuid(), sales_crm_customers_ds_id,      NOW() - INTERVAL '2 hours', NOW()),
         (gen_random_uuid(), logistics_wms_shipments_ds_id,  NOW() - INTERVAL '1 hour',  NOW());
+
+    -- ------------------------------------------------------------------------------------------------
+    -- DATA QUALITY SUMMARIES
+    -- ------------------------------------------------------------------------------------------------
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, overall_status, assets_with_checks, assets_with_issues, dimensions, created_at)
+    VALUES (gen_random_uuid(), sales_crm_customers_ds_id, 'success', 3, 0, '{"completeness": "success", "validity": "success", "freshness": "success"}'::jsonb, NOW() - INTERVAL '1 hour')
+    RETURNING id INTO sales_crm_customers_dq_id;
+
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, overall_status, assets_with_checks, assets_with_issues, dimensions, created_at)
+    VALUES (gen_random_uuid(), sales_erp_orders_ds_id, 'success', 4, 0, '{"completeness": "success", "validity": "success", "freshness": "success"}'::jsonb, NOW() - INTERVAL '2 hours')
+    RETURNING id INTO sales_erp_orders_dq_id;
+
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, overall_status, assets_with_checks, assets_with_issues, dimensions, created_at)
+    VALUES (gen_random_uuid(), logistics_wms_shipments_ds_id, 'success', 4, 0, '{"completeness": "success", "validity": "success", "freshness": "success"}'::jsonb, NOW() - INTERVAL '30 minutes')
+    RETURNING id INTO logistics_wms_shipments_dq_id;
+
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, overall_status, assets_with_checks, assets_with_issues, dimensions, created_at)
+    VALUES (gen_random_uuid(), marketing_customer_360_ds_id, 'success', 10, 0, '{"completeness": "success", "validity": "success", "freshness": "success", "uniqueness": "success"}'::jsonb, NOW() - INTERVAL '3 hours')
+    RETURNING id INTO marketing_customer_360_dq_id;
+
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, overall_status, assets_with_checks, assets_with_issues, dimensions, created_at)
+    VALUES (gen_random_uuid(), campaign_activation_ds_id, 'success', 2, 0, '{"completeness": "success", "validity": "success"}'::jsonb, NOW() - INTERVAL '4 hours')
+    RETURNING id INTO campaign_activation_dq_id;
+
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, overall_status, assets_with_checks, assets_with_issues, dimensions, created_at)
+    VALUES (gen_random_uuid(), churn_model_ds_id, 'success', 2, 0, '{"completeness": "success", "validity": "success"}'::jsonb, NOW() - INTERVAL '5 hours')
+    RETURNING id INTO churn_model_dq_id;
+
+    -- DATA QUALITY TECHNICAL ASSETS
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES
+        ('customers', 'success', sales_crm_customers_dq_id),
+        ('customers_pii', 'success', sales_crm_customers_dq_id),
+        ('customers_contact', 'success', sales_crm_customers_dq_id);
+
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES
+        ('orders', 'success', sales_erp_orders_dq_id),
+        ('order_lines', 'success', sales_erp_orders_dq_id),
+        ('order_status', 'success', sales_erp_orders_dq_id),
+        ('order_payments', 'success', sales_erp_orders_dq_id);
+
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES
+        ('shipments', 'success', logistics_wms_shipments_dq_id),
+        ('shipment_events', 'success', logistics_wms_shipments_dq_id),
+        ('carriers', 'success', logistics_wms_shipments_dq_id),
+        ('delivery_addresses', 'success', logistics_wms_shipments_dq_id);
+
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES
+        ('customer_360', 'success', marketing_customer_360_dq_id),
+        ('rfm_segments', 'success', marketing_customer_360_dq_id);
+
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES
+        ('audience_segments', 'success', campaign_activation_dq_id),
+        ('suppression_lists', 'success', campaign_activation_dq_id);
+
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES
+        ('churn_scores', 'success', churn_model_dq_id),
+        ('model_features', 'success', churn_model_dq_id);
 
 end $$;
