@@ -323,3 +323,98 @@ class TestGetDataProductUsage:
         assert len(qs) == 1
         assert qs[0]["output_port_id"] == str(OUTPUT_PORT_ID_A)
         assert qs[0]["top_consumers"] == []
+
+    def test_invalid_day_range_returns_error(
+        self,
+        mock_stats_svc_cls,
+        mock_output_port_svc_cls,
+        mock_cost_svc_cls,
+        mock_dp_svc_cls,
+        mock_get_user,
+        mock_get_token,
+        mock_get_db,
+    ):
+        """day_range <= 0 returns an error without touching the DB."""
+        mock_get_db.return_value = iter([MagicMock()])
+        mock_get_token.return_value = MagicMock(token="tok")
+        mock_get_user.return_value = {"id": str(uuid4())}
+
+        result = get_data_product_usage(DATA_PRODUCT_ID, day_range=0)
+
+        assert "error" in result
+        assert "day_range" in result["error"]
+        mock_dp_svc_cls.return_value.get_data_product.assert_not_called()
+
+    def test_sentinel_other_consumer_filtered_from_top_consumers(
+        self,
+        mock_stats_svc_cls,
+        mock_output_port_svc_cls,
+        mock_cost_svc_cls,
+        mock_dp_svc_cls,
+        mock_get_user,
+        mock_get_token,
+        mock_get_db,
+    ):
+        """The 'Other' sentinel consumer (UUID all-zeros) is excluded from top_consumers."""
+        SENTINEL_ID = "00000000-0000-0000-0000-000000000000"
+        port_a = _make_output_port(OUTPUT_PORT_ID_A, "Port A")
+        stats_a = _make_query_stats_response(
+            [
+                _make_stat(CONSUMER_ID_1, "Real Consumer", 500),
+                _make_stat(SENTINEL_ID, "Other", 9999),
+            ]
+        )
+        self._setup_mocks(
+            mock_stats_svc_cls,
+            mock_output_port_svc_cls,
+            mock_cost_svc_cls,
+            mock_dp_svc_cls,
+            mock_get_user,
+            mock_get_token,
+            mock_get_db,
+            output_ports=[port_a],
+            query_stats_by_port={OUTPUT_PORT_ID_A: stats_a},
+        )
+
+        result = get_data_product_usage(DATA_PRODUCT_ID)
+
+        consumers = result["consumer_query_stats"][0]["top_consumers"]
+        consumer_ids = [c["consumer_data_product_id"] for c in consumers]
+        assert SENTINEL_ID not in consumer_ids
+        assert len(consumers) == 1
+        assert consumers[0]["consumer_data_product_name"] == "Real Consumer"
+
+    def test_null_consumer_name_falls_back_to_empty_string(
+        self,
+        mock_stats_svc_cls,
+        mock_output_port_svc_cls,
+        mock_cost_svc_cls,
+        mock_dp_svc_cls,
+        mock_get_user,
+        mock_get_token,
+        mock_get_db,
+    ):
+        """consumer_data_product_name=None is stored as empty string, not None."""
+        port_a = _make_output_port(OUTPUT_PORT_ID_A, "Port A")
+        stats_a = _make_query_stats_response(
+            [
+                _make_stat(CONSUMER_ID_1, None, 100),
+            ]
+        )
+        self._setup_mocks(
+            mock_stats_svc_cls,
+            mock_output_port_svc_cls,
+            mock_cost_svc_cls,
+            mock_dp_svc_cls,
+            mock_get_user,
+            mock_get_token,
+            mock_get_db,
+            output_ports=[port_a],
+            query_stats_by_port={OUTPUT_PORT_ID_A: stats_a},
+        )
+
+        result = get_data_product_usage(DATA_PRODUCT_ID)
+
+        consumers = result["consumer_query_stats"][0]["top_consumers"]
+        assert len(consumers) == 1
+        assert consumers[0]["consumer_data_product_name"] == ""
