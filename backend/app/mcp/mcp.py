@@ -45,7 +45,15 @@ from app.data_products.output_ports.schema_response import (
     GetOutputPortResponse,
     OutputPortsGet,
 )
+from app.data_products.output_ports.semantic_models.schema_response import (
+    SemanticModelResponse,
+)
+from app.data_products.output_ports.semantic_models.service import SemanticModelService
 from app.data_products.output_ports.service import OutputPortService
+from app.data_products.output_ports.table_schemas.schema_response import (
+    TableSchemaResponse,
+)
+from app.data_products.output_ports.table_schemas.service import TableSchemaService
 from app.data_products.schema_response import (
     GetDataProductResponse,
     GetDataProductsResponseItem,
@@ -478,6 +486,73 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         return {"error": f"Failed to get dataset details: {str(e)}"}
+
+
+@mcp.tool
+def get_output_port_model(output_port_id: str) -> Dict[str, Any]:
+    """
+    Get the full data model of a single output port: table schemas with column-level
+    tags (including PII classifications) and semantic model definitions.
+
+    Use this to inspect the data structure and semantic metadata of an output port —
+    e.g., for compliance analysis, PII discovery, or schema exploration.
+
+    The response includes:
+    - `output_port`: name, description, about, access_type, and port-level tags
+    - `table_schemas`: list of schemas, each with columns. Column `tags` contain PII
+      and sensitivity classifications (e.g. tag value "PII", "SENSITIVE").
+      Table-level `tags` contain dataset-level classifications.
+    - `semantic_models`: business entity definitions (entities, metrics, dimensions)
+      in MetricsFlow or OpenSemanticInterchange format.
+
+    For compliance questions, combine with `get_data_product_details` to get the
+    data product's `about` field (legal/compliance context).
+
+    Args:
+        output_port_id: UUID obtained from search_output_ports or get_data_product_analytics.
+    """
+    try:
+        db = next(get_db_session())
+        access_token: AccessToken = get_access_token()
+        user = get_mcp_authenticated_user(token=access_token.token)
+        try:
+            dataset = OutputPortService(db).get_dataset(
+                id=UUID(output_port_id), user=user
+            )
+            if not dataset:
+                return {"error": f"Output port {output_port_id} not found"}
+
+            table_schemas = TableSchemaService(db).get_all(UUID(output_port_id))
+            semantic_models = SemanticModelService(db).get_all(UUID(output_port_id))
+
+            return {
+                "output_port": {
+                    "id": str(dataset.id),
+                    "name": dataset.name,
+                    "description": dataset.description,
+                    "about": dataset.about,
+                    "access_type": dataset.access_type.value
+                    if dataset.access_type
+                    else None,
+                    "tags": [
+                        {"id": str(t.id), "value": t.value}
+                        for t in (dataset.tags or [])
+                    ],
+                },
+                "table_schemas": [
+                    TableSchemaResponse.model_validate(ts).model_dump()
+                    for ts in table_schemas
+                ],
+                "semantic_models": [
+                    SemanticModelResponse.model_validate(sm).model_dump()
+                    for sm in semantic_models
+                ],
+            }
+        finally:
+            db.close()
+
+    except Exception as e:
+        return {"error": f"Failed to get output port model: {str(e)}"}
 
 
 @mcp.tool
