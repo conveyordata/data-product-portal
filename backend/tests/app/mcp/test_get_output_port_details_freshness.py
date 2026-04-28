@@ -129,6 +129,7 @@ class TestGetOutputPortDetailsFreshness:
 
         svc = mock_freshness_service_cls.return_value
         svc.get_slo.side_effect = HTTPException(status_code=404, detail="not found")
+        svc.get_latest_observation.return_value = None
 
         result = get_output_port_details(OUTPUT_PORT_ID)
 
