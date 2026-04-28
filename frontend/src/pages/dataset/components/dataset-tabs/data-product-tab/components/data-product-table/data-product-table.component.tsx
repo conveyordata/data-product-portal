@@ -6,7 +6,7 @@ import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
-    type InputPort,
+    type OutputPortInputPort,
     useRemoveOutputPortAsInputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -18,7 +18,7 @@ import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx'
 type Props = {
     dataProductId: string;
     outputPortId: string;
-    dataProducts: InputPort[];
+    dataProducts: OutputPortInputPort[];
     isLoading?: boolean;
 };
 
@@ -56,7 +56,7 @@ export function DataProductTable({ outputPortId, dataProductId, dataProducts, is
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<InputPort>['onChange'] = (pagination) => {
+    const onChange: TableProps<OutputPortInputPort>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -84,7 +84,7 @@ export function DataProductTable({ outputPortId, dataProductId, dataProducts, is
         [outputPortId, removeDatasetFromDataProduct, t],
     );
 
-    const columns: TableColumnsType<InputPort> = useMemo(() => {
+    const columns: TableColumnsType<OutputPortInputPort> = useMemo(() => {
         return getDatasetDataProductsColumns({
             t,
             dataProductId,
@@ -113,7 +113,7 @@ export function DataProductTable({ outputPortId, dataProductId, dataProducts, is
     ]);
 
     return (
-        <Table<InputPort>
+        <Table<OutputPortInputPort>
             loading={isLoading}
             columns={columns}
             dataSource={dataProducts}
