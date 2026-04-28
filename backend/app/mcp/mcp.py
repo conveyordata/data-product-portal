@@ -5,6 +5,7 @@ from uuid import UUID
 from fastmcp import Context, FastMCP
 from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
+from sqlalchemy import select as sql_select
 from sqlalchemy.orm import configure_mappers
 
 from app.authorization.role_assignments.data_product.schema import (
@@ -32,6 +33,9 @@ from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
 from app.data_products.output_ports.cost.service import OutputPortCostService
 from app.data_products.output_ports.freshness.enums import FreshnessStatus
+from app.data_products.output_ports.input_ports.model import (
+    InputPort as InputPortModel,
+)
 from app.data_products.output_ports.query_stats.service import (
     OutputPortStatsService,
     QueryStatsGranularity,
@@ -596,8 +600,10 @@ def get_marketplace_overview() -> Dict[str, Any]:
 @mcp.tool
 def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
     """
-    Get analytics for a data product: its output ports and technical assets with counts.
-    Use this to answer questions like 'what does this data product expose?' or 'how many output ports does it have?'.
+    Get analytics for a data product: its output ports, technical assets, and input ports (what this data product consumes from other data products).
+    Use this to answer:
+    - 'What does this data product expose?' or 'How many output ports does it have?' — see output_ports / technical_assets.
+    - 'What does this data product consume and why?' — see input_ports with justification and status.
 
     Args:
         data_product_id: UUID obtained from search_data_products or get_data_product_details.
@@ -629,6 +635,17 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
                 and do.data_product_id == UUID(data_product_id)
             ]
 
+            input_port_records = (
+                db.scalars(
+                    sql_select(InputPortModel).where(
+                        InputPortModel.consuming_abstract_data_product_id
+                        == UUID(data_product_id)
+                    )
+                )
+                .unique()
+                .all()
+            )
+
             return {
                 "data_product": GetDataProductResponse.model_validate(
                     data_product
@@ -643,6 +660,31 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
                     "technical_assets": [
                         GetTechnicalAssetsResponseItem.model_validate(do).model_dump()
                         for do in related_technical_assets
+                    ],
+                    "input_ports": [
+                        {
+                            "output_port_id": str(ip.dataset_id),
+                            "output_port_name": ip.dataset.name,
+                            "producing_data_product_id": str(
+                                ip.dataset.data_product_id
+                            ),
+                            "producing_data_product_name": ip.dataset.data_product.name,
+                            "status": ip.status.value,
+                            "justification": ip.justification,
+                            "requested_by_email": ip.requested_by.email
+                            if ip.requested_by
+                            else None,
+                            "requested_on": ip.requested_on.isoformat()
+                            if ip.requested_on
+                            else None,
+                            "approved_on": ip.approved_on.isoformat()
+                            if ip.approved_on
+                            else None,
+                            "denied_on": ip.denied_on.isoformat()
+                            if ip.denied_on
+                            else None,
+                        }
+                        for ip in input_port_records
                     ],
                 },
             }
