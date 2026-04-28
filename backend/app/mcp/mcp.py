@@ -397,12 +397,17 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
 def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
     """
     Get full details of a single output port by its UUID, including schema, access type,
-    the data product it belongs to, owner contact information, and freshness status.
+    the data product it belongs to, owner contact information, freshness status, and
+    all data product access grants (consuming_data_products).
 
     The response includes a `freshness` block:
     - `status`: "fresh" | "stale" | "unknown" (always present)
     - `slo_deadline`: SLO deadline as "HH:MM:SS", or null if no SLO is configured
     - `last_refreshed_at`: ISO datetime of the last data refresh, or null if never observed
+
+    The response includes a `consuming_data_products` list — every data product that has
+    requested access to this output port, with their justification and decision status
+    (PENDING, APPROVED, or DENIED).
 
     Use after search_output_ports to get complete information about a specific dataset.
 
@@ -435,6 +440,34 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
                     else None
                 ),
             }
+            consuming = OutputPortService(db).get_consuming_data_products(
+                UUID(output_port_id), dataset.data_product_id
+            )
+            result["consuming_data_products"] = [
+                {
+                    "consuming_data_product_id": str(
+                        ip.consuming_abstract_data_product_id
+                    ),
+                    "consuming_data_product_name": ip.consuming_abstract_data_product.name,
+                    "status": ip.status.value,
+                    "justification": ip.justification,
+                    "requested_by_email": ip.requested_by.email
+                    if ip.requested_by
+                    else None,
+                    "approved_by_email": ip.approved_by.email
+                    if ip.approved_by
+                    else None,
+                    "denied_by_email": ip.denied_by.email if ip.denied_by else None,
+                    "requested_on": ip.requested_on.isoformat()
+                    if ip.requested_on
+                    else None,
+                    "approved_on": ip.approved_on.isoformat()
+                    if ip.approved_on
+                    else None,
+                    "denied_on": ip.denied_on.isoformat() if ip.denied_on else None,
+                }
+                for ip in consuming
+            ]
             return result
         finally:
             db.close()
