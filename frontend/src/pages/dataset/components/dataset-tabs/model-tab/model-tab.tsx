@@ -1,4 +1,4 @@
-import { Divider, Empty, Flex, Typography } from 'antd';
+import { Empty, Flex, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import {
@@ -30,7 +30,7 @@ export function ModelTab({ datasetId, dataProductId }: Props) {
     }
 
     return (
-        <Flex vertical gap="large">
+        <Flex vertical gap="middle">
             <div>
                 <Typography.Title level={5}>{t('Tables')}</Typography.Title>
                 {tableSchemas.length === 0 ? (
@@ -39,7 +39,6 @@ export function ModelTab({ datasetId, dataProductId }: Props) {
                     <TableSchemaList schemas={tableSchemas} />
                 )}
             </div>
-            <Divider />
             <div>
                 <Typography.Title level={5}>{t('Semantic Models')}</Typography.Title>
                 {semanticModels.length === 0 ? (

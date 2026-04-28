@@ -16,3 +16,13 @@ models:
       - name: total_amount
         description: Total monetary value of the order.
         data_type: numeric
+
+  - name: metricflow_time_spine
+    description: Time spine model required by MetricFlow for time series aggregations.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: A calendar date at day granularity.
+        data_type: date
+        granularity: day

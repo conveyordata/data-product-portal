@@ -1,0 +1,43 @@
+<h2>How many new tabs?</h2>
+<p class="subtitle">Schema and semantic models could live in one combined tab or two separate tabs</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>One combined "Schema" tab</h3>
+      <p>A single tab shows both table schema and semantic models in sections. Less navigation, clear co-location of related concepts.</p>
+      <div style="margin-top:12px; background:#f0f4ff; border-radius:6px; padding:12px; font-size:12px; font-family:monospace; line-height:1.8;">
+        <span style="background:#4f6ef7; color:white; padding:2px 8px; border-radius:4px; margin-right:4px">Schema</span>
+        <br><br>
+        <b>Tables</b><br>
+        ▼ orders &nbsp;<span style="color:#888">Order transactions table</span> &nbsp;[finance] [core]<br>
+        &nbsp;&nbsp;id &nbsp;<span style="color:#888">int</span> &nbsp;Primary key<br>
+        &nbsp;&nbsp;amount &nbsp;<span style="color:#888">decimal</span> &nbsp;Order total<br>
+        ▶ invoices<br><br>
+        <b>Semantic Models</b><br>
+        📄 revenue_model &nbsp;<span style="color:#888">MetricsFlow</span><br>
+        📄 finance_entities &nbsp;<span style="color:#888">OSI</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Two tabs: "Schema" + "Semantic Models"</h3>
+      <p>Schema tab shows tables and columns. Semantic Models tab shows the linked semantic model definitions. Cleaner separation for teams that only care about one.</p>
+      <div style="margin-top:12px; background:#f0f4ff; border-radius:6px; padding:12px; font-size:12px; font-family:monospace; line-height:1.8;">
+        <span style="background:#4f6ef7; color:white; padding:2px 8px; border-radius:4px; margin-right:4px">Schema</span>
+        <span style="background:#4f6ef7; color:white; padding:2px 8px; border-radius:4px;">Semantic Models</span>
+        <br><br>
+        <b>Schema tab:</b><br>
+        ▼ orders &nbsp;[finance] [core]<br>
+        &nbsp;&nbsp;id, amount, status …<br><br>
+        <b>Semantic Models tab:</b><br>
+        📄 revenue_model (MetricsFlow)<br>
+        📄 finance_entities (OSI)
+      </div>
+    </div>
+  </div>
+</div>

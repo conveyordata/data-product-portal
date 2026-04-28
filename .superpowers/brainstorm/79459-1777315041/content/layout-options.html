@@ -1,0 +1,55 @@
+<h2>Where should schema + semantic models appear?</h2>
+<p class="subtitle">The current output tab has output ports (left) and technical assets (right). Where does the new content go?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Expand inline on the output port card</h3>
+      <p>Clicking an output port card expands it in-place to show tables → columns and semantic models. Schema lives inside the existing card, no navigation required.</p>
+      <div style="margin-top:12px; background: #f0f4ff; border-radius:6px; padding:10px; font-size:13px; font-family:monospace;">
+        [▼ Finance Data Port]<br>
+        &nbsp;&nbsp;Tables: orders, invoices, customers<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;orders: id (int), amount (decimal) …<br>
+        &nbsp;&nbsp;Semantic models: revenue_model (MetricsFlow)
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Side panel / drawer</h3>
+      <p>Clicking an output port opens a right-side drawer that shows the full schema and semantic models. The main two-column layout stays visible in the background.</p>
+      <div style="margin-top:12px; background: #f0f4ff; border-radius:6px; padding:10px; font-size:13px; font-family:monospace;">
+        [Output Ports] [Tech Assets] | [═══ Finance Data ═══]<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Tables / Semantic Models
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Dedicated output port detail page</h3>
+      <p>Clicking an output port navigates to its own page with tabs: Overview, Schema, Semantic Models. Full screen real estate for rich schema display.</p>
+      <div style="margin-top:12px; background: #f0f4ff; border-radius:6px; padding:10px; font-size:13px; font-family:monospace;">
+        /data-products/:id/output-ports/:portId<br>
+        [Overview] [Schema] [Semantic Models]<br>
+        &nbsp;&nbsp;Table: orders → columns, descriptions, tags
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>New tab at data product level</h3>
+      <p>A "Schema" tab is added alongside the existing Input Ports, Output Ports, Team, etc. tabs. Shows all output ports' schemas aggregated in one view.</p>
+      <div style="margin-top:12px; background: #f0f4ff; border-radius:6px; padding:10px; font-size:13px; font-family:monospace;">
+        [Overview] [Input Ports] [Output] [Schema ★] [Team]<br>
+        Schema tab → grouped by output port → tables → columns
+      </div>
+    </div>
+  </div>
+</div>

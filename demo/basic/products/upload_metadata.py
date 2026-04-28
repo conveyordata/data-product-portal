@@ -34,11 +34,12 @@ def load_portal_config(project_dir: Path) -> tuple[UUID, UUID]:
     return UUID(config["data_product_id"]), UUID(config["output_port_id"])
 
 
-def load_columns(project_dir: Path) -> list[ColumnRequest]:
+def load_columns(project_dir: Path) -> tuple[str | None, list[ColumnRequest]]:
     schema_yml = project_dir / "models" / "schema.yml"
     schema = yaml.safe_load(schema_yml.read_text())
     model = schema["models"][0]
-    return [
+    description = model.get("description")
+    columns = [
         ColumnRequest(
             name=col["name"],
             description=col.get("description"),
@@ -46,6 +47,7 @@ def load_columns(project_dir: Path) -> list[ColumnRequest]:
         )
         for col in model.get("columns", [])
     ]
+    return description, columns
 
 
 def load_semantic_model_content(project_dir: Path) -> SemanticModelRequestContent:
@@ -59,6 +61,7 @@ def upsert_table_schema(
     data_product_id: UUID,
     output_port_id: UUID,
     project_name: str,
+    description: str | None,
     columns: list[ColumnRequest],
 ) -> None:
     print("[table-schema] Fetching existing schemas...")
@@ -67,7 +70,9 @@ def upsert_table_schema(
         id=output_port_id,
         client=client,
     )
-    body = TableSchemaRequest(name=project_name, columns=columns)
+    body = TableSchemaRequest(
+        name=project_name, description=description, columns=columns
+    )
     if isinstance(existing, HTTPValidationError) or not existing:
         if isinstance(existing, HTTPValidationError):
             print(f"[table-schema] ERROR fetching schemas: {existing}", file=sys.stderr)
@@ -162,14 +167,16 @@ def main() -> None:
     print(f"Data product: {data_product_id}")
     print(f"Output port:  {output_port_id}")
 
-    columns = load_columns(project_dir)
+    description, columns = load_columns(project_dir)
     print(f"Columns loaded: {len(columns)}")
 
     content = load_semantic_model_content(project_dir)
 
     client = Client(base_url=portal_url)
 
-    upsert_table_schema(client, data_product_id, output_port_id, args.project, columns)
+    upsert_table_schema(
+        client, data_product_id, output_port_id, args.project, description, columns
+    )
     upsert_semantic_model(
         client, data_product_id, output_port_id, args.project, content
     )

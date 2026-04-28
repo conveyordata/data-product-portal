@@ -19,3 +19,13 @@ models:
       - name: signup_date
         description: Timestamp when the customer registered.
         data_type: timestamp
+
+  - name: metricflow_time_spine
+    description: Time spine model required by MetricFlow for time series aggregations.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: A calendar date at day granularity.
+        data_type: date
+        granularity: day

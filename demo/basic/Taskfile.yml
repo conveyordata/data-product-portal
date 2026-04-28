@@ -5,6 +5,7 @@ tasks:
     desc: Install products poetry dependencies
     dir: products
     cmds:
+      - poetry lock
       - poetry install
 
   install:provisioner:

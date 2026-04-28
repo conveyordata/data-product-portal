@@ -4,6 +4,9 @@ semantic_models:
       agg_time_dimension: activation_date
     model: ref('audience_segments')
     entities:
+      - name: audience_segment
+        type: primary
+        expr: segment_id
       - name: customer
         type: foreign
         expr: customer_id

@@ -25,3 +25,13 @@ models:
       - name: campaign_id
         description: Identifier of the campaign this audience belongs to.
         data_type: text
+
+  - name: metricflow_time_spine
+    description: Time spine model required by MetricFlow for time series aggregations.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: A calendar date at day granularity.
+        data_type: date
+        granularity: day
