@@ -1,5 +1,5 @@
 import { DeleteOutlined, WarningTwoTone } from '@ant-design/icons';
-import { Button, Card, Collapse, Descriptions, Empty, Skeleton, Space, Tag, Tooltip, Typography, theme } from 'antd';
+import { Button, Card, Collapse, Descriptions, Skeleton, Space, Tag, Tooltip, Typography, theme } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -7,7 +7,7 @@ import { useCartOverlapCheck } from '@/pages/cart-explorations/hooks/use-cart-ov
 import { useAppDispatch } from '@/store';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { removeDatasetFromCart } from '@/store/features/cart/cart-slice.ts';
-import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
+import { createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 
 type CartOverviewItemProps = {
@@ -127,16 +127,6 @@ export const CartOverview = ({
         <Card title={<Typography.Title level={3}>{t('Cart summary')}</Typography.Title>}>
             {loading ? (
                 <Skeleton active />
-            ) : cartOutputPorts?.length === 0 ? (
-                <Empty
-                    description={
-                        <Typography.Text>{t('Go to the marketplace to add items to your cart')}</Typography.Text>
-                    }
-                >
-                    <Link to={ApplicationPaths.Marketplace}>
-                        <Button type="primary">{t('Marketplace')}</Button>
-                    </Link>
-                </Empty>
             ) : (
                 <Collapse
                     accordion

@@ -37,6 +37,16 @@ describe('Cart', () => {
         const existingChoice = await screen.findByText('Select an existing Exploration');
         await userEvent.click(existingChoice);
     };
+    describe('Empty cart page', () => {
+        it('Should show a message to direct to the Marketplace', async () => {
+            renderWithProviders(<ExplorationsCart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                currentUser: mockUsers[0],
+            });
+
+            await screen.findByText(/Your cart is currently empty/);
+        });
+    });
     describe('Cart should support existing data products', () => {
         const selectExistingDataProducts = async () => {
             const existingChoice = await screen.findByText('Select an existing Data Product');
