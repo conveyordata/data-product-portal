@@ -15,6 +15,7 @@ import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrum
 import { CardSelection } from '@/pages/cart-explorations/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart-explorations/components/cart-overview.component.tsx';
 import { ExistingDataProductForm } from '@/pages/cart-explorations/components/existing-data-product-form.tsx';
+import { ExistingExplorationForm } from '@/pages/cart-explorations/components/existing-exploration-form.tsx';
 import { NewDataProductForm } from '@/pages/cart-explorations/components/new-data-product-form.tsx';
 import { NewExplorationForm } from '@/pages/cart-explorations/components/new-exploration-form.tsx';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
@@ -42,6 +43,7 @@ function ExplorationsCart() {
         parseAsStringEnum<ExistingOrNew>(Object.values(ExistingOrNew)),
     );
     const [selectedDataProductId, setSelectedDataProductId] = useState<string | undefined>(undefined);
+    const [selectedExplorationId, setSelectedExplorationId] = useState<string | undefined>(undefined);
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
         setBreadcrumbs([
@@ -93,6 +95,14 @@ function ExplorationsCart() {
         if (dataProductTypeChoice === DataProductChoiceOptions.exploration) {
             if (existingOrNewChoice === ExistingOrNew.new) {
                 return <NewExplorationForm cartOutputPorts={cartOutputPorts} />;
+            }
+            if (existingOrNewChoice === ExistingOrNew.existing) {
+                return (
+                    <ExistingExplorationForm
+                        cartOutputPorts={cartOutputPorts}
+                        setSelectedExplorationId={setSelectedExplorationId}
+                    />
+                );
             }
         }
         return null;
@@ -155,6 +165,7 @@ function ExplorationsCart() {
                     loading={fetchingOutputPorts}
                     cartOutputPorts={cartOutputPorts}
                     selectedDataProductId={selectedDataProductId}
+                    selectedExplorationId={selectedExplorationId}
                 />
             </Col>
         </Row>

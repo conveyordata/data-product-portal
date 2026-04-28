@@ -6710,6 +6710,57 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Request Input Ports For Exploration",
+        "operationId": "request_input_ports_for_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestInputPortsForExplorationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestInputPortsForExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/authn/device/device_token": {
@@ -7365,7 +7416,7 @@
           "input_ports": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CreateInputPortsForExplorationRequest"
+                "$ref": "#/components/schemas/RequestInputPortsForExplorationRequest"
               },
               {
                 "type": "null"
@@ -7442,28 +7493,6 @@
           "role_id"
         ],
         "title": "CreateGlobalRoleAssignment"
-      },
-      "CreateInputPortsForExplorationRequest": {
-        "properties": {
-          "output_ports": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Output Ports"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          }
-        },
-        "type": "object",
-        "required": [
-          "output_ports",
-          "justification"
-        ],
-        "title": "CreateInputPortsForExplorationRequest"
       },
       "CreateOutputPortRequest": {
         "properties": {
@@ -12204,6 +12233,45 @@
           "data_product_id"
         ],
         "title": "RequestDataProductRoleAssignment"
+      },
+      "RequestInputPortsForExplorationRequest": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports",
+          "justification"
+        ],
+        "title": "RequestInputPortsForExplorationRequest"
+      },
+      "RequestInputPortsForExplorationResponse": {
+        "properties": {
+          "input_port_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Input Port Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_ids"
+        ],
+        "title": "RequestInputPortsForExplorationResponse"
       },
       "RequestOutputPortRoleAssignment": {
         "properties": {

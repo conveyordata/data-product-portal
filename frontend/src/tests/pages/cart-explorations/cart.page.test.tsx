@@ -7,6 +7,7 @@ import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductT
 import { mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
 import { mockDataProductOutputPorts } from '@/tests/mocks/dataProductOutputPorts.ts';
 import { mockDataProductInputPorts, mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/dataProducts.ts';
+import { mockExplorationInputPorts, mockExplorations, mockExplorationsHttp } from '@/tests/mocks/explorations.ts';
 import { mockOutputPortsSearch } from '@/tests/mocks/outputPortsSearch.ts';
 import {
     mockGetResourceNamesConstraints,
@@ -263,4 +264,77 @@ describe('Cart', () => {
             });
         });
     }, 15000);
+
+    describe('Cart should support existing explorations', () => {
+        const selectExistingExplorations = async () => {
+            const existingChoice = await screen.findByText('Select an existing Exploration');
+            await userEvent.click(existingChoice);
+        };
+        it('should allow users to select an existing exploration', async () => {
+            allowAllAuth();
+
+            // Mock the output ports search (cart items)
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockExplorationsHttp();
+            mockExplorationInputPorts(mockExplorations[0].id, []);
+
+            const submitHandler = vi.fn(() => HttpResponse.json({}));
+            server.use(http.post(`*/api/v2/explorations/${mockExplorations[0].id}/input_ports`, submitHandler));
+
+            renderWithProviders(<ExplorationsCart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await selectExistingExplorations();
+
+            const selectExploration1 = await screen.findByText(mockExplorations[0].name);
+            await userEvent.click(selectExploration1);
+
+            const justificationTextArea = await screen.findByPlaceholderText(
+                'Explain why you need access to these Output Ports',
+            );
+            await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
+
+            const submitButton = await screen.findByText('Submit access requests');
+            await userEvent.click(submitButton);
+
+            // Assert the submit API was called
+            await waitFor(() => {
+                expect(submitHandler).toHaveBeenCalled();
+            });
+        });
+
+        it('When selecting an existing data product with overlap in input ports and the cart it should show a warning', async () => {
+            allowAllAuth();
+
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockExplorationsHttp();
+            mockExplorationInputPorts(mockExplorations[0].id);
+
+            renderWithProviders(<ExplorationsCart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await selectExistingExplorations();
+
+            const selectExploration1 = await screen.findByText(mockExplorations[0].name);
+            await userEvent.click(selectExploration1);
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(/Output Ports in the cart, for which the selected Exploration already has access/),
+                ).toBeTruthy();
+            });
+        });
+    });
 });

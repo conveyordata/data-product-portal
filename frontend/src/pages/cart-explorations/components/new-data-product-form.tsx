@@ -1,7 +1,6 @@
 import { usePostHog } from '@posthog/react';
 import { Button, Flex, Form, type FormProps } from 'antd';
 import { useForm } from 'antd/es/form/Form';
-import TextArea from 'antd/es/input/TextArea';
 import { t } from 'i18next';
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -10,6 +9,7 @@ import styles from '@/components/data-products/data-product-form/data-product-fo
 import { DataProductFormItems } from '@/components/data-products/data-product-form/data-product-form-items.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
+import { JustificationFormItem } from '@/pages/cart-explorations/components/form-item-justification.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -97,18 +97,7 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
             initialValues={initialValues}
         >
             <DataProductFormItems form={form} mode={'create'} setAreFormItemsLoading={setAreFormItemsLoading} />
-            <Form.Item<NewDataProductCartFormData>
-                name="justification"
-                label={t('Business justification')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please explain why you need access to these Output Ports'),
-                    },
-                ]}
-            >
-                <TextArea rows={4} placeholder={t('Explain why you need access to these Output Ports')} />
-            </Form.Item>
+            <JustificationFormItem />
             <Form.Item>
                 <Flex justify="end">
                     <Button

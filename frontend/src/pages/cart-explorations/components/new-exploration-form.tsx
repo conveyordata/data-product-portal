@@ -12,6 +12,7 @@ import { ResourceNameFormItem } from '@/components/resource-name/resource-name-f
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
+import { JustificationFormItem } from '@/pages/cart-explorations/components/form-item-justification.tsx';
 import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -97,7 +98,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                 }).unwrap();
                 dispatch(clearCart());
                 dispatchMessage({ content: t('Your Exploration has been created.'), type: 'success' });
-                posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED_NEW_DATA_PRODUCT, {
+                posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED_NEW_EXPLORATION, {
                     cartSize: cartOutputPorts?.length,
                 });
                 clearStorage();
@@ -188,18 +189,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
             >
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            <Form.Item<CreateExplorationRequestForm>
-                name="justification"
-                label={t('Business justification')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please explain why you need access to these Output Ports'),
-                    },
-                ]}
-            >
-                <TextArea rows={4} placeholder={t('Explain why you need access to these Output Ports')} />
-            </Form.Item>
+            <JustificationFormItem />
             <Form.Item>
                 <Flex justify="end">
                     <Button

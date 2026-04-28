@@ -1,5 +1,6 @@
 export enum TagTypes {
     DataProduct = 'DataProduct',
+    Exploration = 'Exploration',
     DataProductRoleAssignments = 'DataProductRoleAssignments',
     GlobalRoleAssignments = 'GlobalRoleAssignments',
     UserOutputPorts = 'UserOutputPorts',
@@ -20,6 +21,7 @@ export enum TagTypes {
     DataProductInputPorts = 'DataProductInputPorts',
     DataProductRolledUpTags = 'DataProductRolledUpTags',
     DataProductSettings = 'DataProductSettings',
+    ExplorationInputPorts = 'ExplorationInputPorts',
     OutputPortRoleAssignments = 'OutputPortRoleAssignments',
     Domain = 'Domain',
     TechnicalAsset = 'TechnicalAsset',

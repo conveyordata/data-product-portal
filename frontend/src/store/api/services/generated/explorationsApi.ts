@@ -36,6 +36,16 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/explorations/${queryArg}/input_ports`,
       }),
     }),
+    requestInputPortsForExploration: build.mutation<
+      RequestInputPortsForExplorationApiResponse,
+      RequestInputPortsForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports`,
+        method: "POST",
+        body: queryArg.requestInputPortsForExplorationRequest,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -52,6 +62,12 @@ export type GetExplorationApiArg = string;
 export type GetExplorationInputPortsApiResponse =
   /** status 200 Successful Response */ GetExplorationInputPortsResponse;
 export type GetExplorationInputPortsApiArg = string;
+export type RequestInputPortsForExplorationApiResponse =
+  /** status 200 Successful Response */ RequestInputPortsForExplorationResponse;
+export type RequestInputPortsForExplorationApiArg = {
+  id: string;
+  requestInputPortsForExplorationRequest: RequestInputPortsForExplorationRequest;
+};
 export type Domain = {
   id: string;
   name: string;
@@ -84,7 +100,7 @@ export type CreateExplorationResponse = {
   description: string;
   domain: Domain;
 };
-export type CreateInputPortsForExplorationRequest = {
+export type RequestInputPortsForExplorationRequest = {
   output_ports: string[];
   justification: string;
 };
@@ -93,7 +109,7 @@ export type CreateExplorationRequestWithInputPorts = {
   namespace: string;
   description: string;
   domain_id: string;
-  input_ports?: CreateInputPortsForExplorationRequest | null;
+  input_ports?: RequestInputPortsForExplorationRequest | null;
 };
 export type User = {
   id: string;
@@ -137,6 +153,9 @@ export type InputPort = {
 export type GetExplorationInputPortsResponse = {
   input_ports: InputPort[];
 };
+export type RequestInputPortsForExplorationResponse = {
+  input_port_ids: string[];
+};
 export enum DecisionStatus {
   Approved = "approved",
   Pending = "pending",
@@ -161,4 +180,5 @@ export const {
   useLazyGetExplorationQuery,
   useGetExplorationInputPortsQuery,
   useLazyGetExplorationInputPortsQuery,
+  useRequestInputPortsForExplorationMutation,
 } = injectedRtkApi;

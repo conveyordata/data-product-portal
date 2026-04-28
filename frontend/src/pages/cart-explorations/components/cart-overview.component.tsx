@@ -107,15 +107,21 @@ type CartOverviewProps = {
     cartOutputPorts?: SearchOutputPortsResponseItem[];
     loading?: boolean;
     selectedDataProductId?: string;
+    selectedExplorationId?: string;
 };
 
-export const CartOverview = ({ cartOutputPorts, loading, selectedDataProductId }: CartOverviewProps) => {
+export const CartOverview = ({
+    cartOutputPorts,
+    loading,
+    selectedDataProductId,
+    selectedExplorationId,
+}: CartOverviewProps) => {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const removeFromCart = (datasetId: string) => {
         dispatch(removeDatasetFromCart({ datasetId }));
     };
-    const { overlappingOutputPortIds } = useCartOverlapCheck(selectedDataProductId);
+    const { overlappingOutputPortIds } = useCartOverlapCheck({ selectedDataProductId, selectedExplorationId });
 
     return (
         <Card title={<Typography.Title level={3}>{t('Cart summary')}</Typography.Title>}>
