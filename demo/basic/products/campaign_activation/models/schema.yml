@@ -10,6 +10,8 @@ models:
       - name: customer_id
         description: Reference to the customer.
         data_type: integer
+        meta:
+          tags: [PII]
       - name: segment_name
         description: Human-readable name for the audience segment.
         data_type: text

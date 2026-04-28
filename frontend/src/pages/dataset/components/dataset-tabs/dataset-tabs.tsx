@@ -9,13 +9,14 @@ import {
 } from '@ant-design/icons';
 
 import { usePostHog } from '@posthog/react';
-import { Badge, Flex, Tabs } from 'antd';
+import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { AppConfig } from '@/config/app-config';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
@@ -62,74 +63,71 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
     }, [activeTab, posthog]);
 
     const tabs: Tab[] = useMemo(() => {
-        return [
-            {
-                label: t('About'),
-                key: TabKeys.About,
-                icon: <InfoCircleOutlined />,
-                children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Model'),
-                key: TabKeys.Model,
-                icon: <TableOutlined />,
-                children: <ModelTab datasetId={datasetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: (
-                    <Flex className={styles.betaContainer}>
-                        {t('Usage')}
-                        <Badge className={styles.beta} count={t('BETA')} />
-                    </Flex>
-                ),
-                key: TabKeys.Usage,
-                icon: <BarChartOutlined />,
-                children: <UsageTab outputPortId={datasetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Technical Assets'),
-                key: TabKeys.Producers,
-                icon: <DataOutputOutlined />,
-                children: <DataOutputTab datasetId={datasetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Consuming Data Products'),
-                key: TabKeys.Consumers,
-                icon: <DataProductOutlined />,
-                children: <DataProductTab outputPortId={datasetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Explorer'),
-                key: TabKeys.Explorer,
-                icon: <CompassOutlined />,
-                children: <Explorer id={datasetId} type={'dataset'} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Team'),
-                key: TabKeys.Team,
-                icon: <TeamOutlined />,
-                children: <TeamTab datasetId={datasetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Settings'),
-                key: TabKeys.Settings,
-                icon: <SettingOutlined />,
-                children: <SettingsTab datasetId={datasetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('History'),
-                key: TabKeys.History,
-                icon: <HistoryOutlined />,
-                children: (
-                    <HistoryTab
-                        id={datasetId}
-                        type={EventReferenceEntity.Dataset}
-                        history={datasetHistoryData}
-                        isFetching={isFetchingDatasetHistory}
-                    />
-                ),
-            },
-        ];
+        return (
+            [
+                {
+                    label: t('About'),
+                    key: TabKeys.About,
+                    icon: <InfoCircleOutlined />,
+                    children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Model'),
+                    key: TabKeys.Model,
+                    icon: <TableOutlined />,
+                    children: <ModelTab datasetId={datasetId} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Usage'),
+                    key: TabKeys.Usage,
+                    icon: <BarChartOutlined />,
+                    children: <UsageTab outputPortId={datasetId} dataProductId={dataProductId} />,
+                },
+                !AppConfig.isDemoMode() && {
+                    label: t('Technical Assets'),
+                    key: TabKeys.Producers,
+                    icon: <DataOutputOutlined />,
+                    children: <DataOutputTab datasetId={datasetId} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Consuming Data Products'),
+                    key: TabKeys.Consumers,
+                    icon: <DataProductOutlined />,
+                    children: <DataProductTab outputPortId={datasetId} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Explorer'),
+                    key: TabKeys.Explorer,
+                    icon: <CompassOutlined />,
+                    children: <Explorer id={datasetId} type={'dataset'} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Team'),
+                    key: TabKeys.Team,
+                    icon: <TeamOutlined />,
+                    children: <TeamTab datasetId={datasetId} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Settings'),
+                    key: TabKeys.Settings,
+                    icon: <SettingOutlined />,
+                    children: <SettingsTab datasetId={datasetId} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('History'),
+                    key: TabKeys.History,
+                    icon: <HistoryOutlined />,
+                    children: (
+                        <HistoryTab
+                            id={datasetId}
+                            type={EventReferenceEntity.Dataset}
+                            history={datasetHistoryData}
+                            isFetching={isFetchingDatasetHistory}
+                        />
+                    ),
+                },
+            ] as (Tab | false)[]
+        ).filter(Boolean) as Tab[];
     }, [datasetId, t, datasetHistoryData, isFetchingDatasetHistory, dataProductId]);
 
     if (isLoading) {

@@ -54,6 +54,11 @@ interface Config {
     POSTHOG_KEY: string;
     POSTHOG_HOST: string;
     POSTHOG_ENABLED: boolean;
+    /**
+     * Indicates whether the application is running in demo mode.
+     * @description If true, certain UI elements are hidden to reduce distractions during demos.
+     */
+    DEMO_MODE: boolean;
 }
 
 declare global {
@@ -82,6 +87,10 @@ export class AppConfig {
 
     public static isOidcEnabled(): boolean {
         return config.OIDC_ENABLED;
+    }
+
+    public static isDemoMode(): boolean {
+        return config.DEMO_MODE ?? false;
     }
 
     public static getOidcCognitoLogoutParams() {

@@ -10,12 +10,18 @@ models:
       - name: first_name
         description: Customer's first name.
         data_type: text
+        meta:
+          tags: [PII]
       - name: last_name
         description: Customer's last name.
         data_type: text
+        meta:
+          tags: [PII]
       - name: email
         description: Primary contact email address.
         data_type: text
+        meta:
+          tags: [PII]
       - name: signup_date
         description: Timestamp when the customer registered.
         data_type: timestamp

@@ -8,6 +8,7 @@ import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { AppConfig } from '@/config/app-config';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
 import { useGetTechnicalAssetEventHistoryQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
@@ -49,39 +50,41 @@ export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: P
     };
 
     const tabs: Tab[] = useMemo(() => {
-        return [
-            {
-                label: t('Output Ports'),
-                key: TabKeys.Datasets,
-                icon: <Icon component={datasetOutlineIcon} />,
-                children: <DatasetTab dataProductId={dataProductId} technicalAssetId={technicalAssetId} />,
-            },
-            {
-                label: t('Explorer'),
-                key: TabKeys.Explorer,
-                icon: <CompassOutlined />,
-                children: <Explorer id={technicalAssetId} type={'dataoutput'} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Technical information'),
-                key: TabKeys.Technologies,
-                icon: <CodeOutlined />,
-                children: <TechnologiesTab technicalAssetId={technicalAssetId} dataProductId={dataProductId} />,
-            },
-            {
-                label: t('History'),
-                key: TabKeys.History,
-                icon: <HistoryOutlined />,
-                children: (
-                    <HistoryTab
-                        id={technicalAssetId}
-                        type={EventReferenceEntity.DataOutput}
-                        history={dataOutputHistoryData}
-                        isFetching={isFetchingDataOutputHistory}
-                    />
-                ),
-            },
-        ];
+        return (
+            [
+                {
+                    label: t('Output Ports'),
+                    key: TabKeys.Datasets,
+                    icon: <Icon component={datasetOutlineIcon} />,
+                    children: <DatasetTab dataProductId={dataProductId} technicalAssetId={technicalAssetId} />,
+                },
+                {
+                    label: t('Explorer'),
+                    key: TabKeys.Explorer,
+                    icon: <CompassOutlined />,
+                    children: <Explorer id={technicalAssetId} type={'dataoutput'} dataProductId={dataProductId} />,
+                },
+                !AppConfig.isDemoMode() && {
+                    label: t('Technical information'),
+                    key: TabKeys.Technologies,
+                    icon: <CodeOutlined />,
+                    children: <TechnologiesTab technicalAssetId={technicalAssetId} dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('History'),
+                    key: TabKeys.History,
+                    icon: <HistoryOutlined />,
+                    children: (
+                        <HistoryTab
+                            id={technicalAssetId}
+                            type={EventReferenceEntity.DataOutput}
+                            history={dataOutputHistoryData}
+                            isFetching={isFetchingDataOutputHistory}
+                        />
+                    ),
+                },
+            ] as (Tab | false)[]
+        ).filter(Boolean) as Tab[];
     }, [technicalAssetId, t, dataOutputHistoryData, isFetchingDataOutputHistory, dataProductId]);
 
     if (isLoading) {

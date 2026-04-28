@@ -28,8 +28,8 @@ services:
       file: ../../compose.yaml
       service: frontend
     volumes:
-      # Override the root volume mount which uses PWD
-      - ../../frontend/config.docker.js:/app/dist/config.js
+      # Use the demo config to enable DEMO_MODE
+      - ../../frontend/config.demo.js:/app/dist/config.js
 
   provisioner:
     build:

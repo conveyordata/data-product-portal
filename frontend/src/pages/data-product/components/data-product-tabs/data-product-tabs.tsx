@@ -10,7 +10,7 @@ import Icon, {
 } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { TourProps } from 'antd';
-import { Badge, Flex, Tabs, Tooltip, Tour, Typography } from 'antd';
+import { Tabs, Tooltip, Tour, Typography } from 'antd';
 import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -19,6 +19,7 @@ import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
 import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
+import { AppConfig } from '@/config/app-config';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
@@ -101,85 +102,84 @@ export function DataProductTabs({ dataProductId }: Props) {
     }, [activeTab, posthog]);
 
     const tabs: Tab[] = useMemo(() => {
-        return [
-            {
-                label: <Typography.Text ref={aboutRef}>{t('About')}</Typography.Text>,
-                key: TabKeys.About,
-                icon: <InfoCircleOutlined />,
-                children: <AboutTab dataProductId={dataProductId} />,
-            },
-            {
-                label: (
-                    <Flex className={styles.betaContainer}>
-                        {t('Usage')}
-                        <Badge className={styles.beta} count={t('BETA')} />
-                    </Flex>
-                ),
-                key: TabKeys.Usage,
-                icon: <BarChartOutlined />,
-                children: <UsageTab dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Costs'),
-                key: TabKeys.Costs,
-                icon: <EuroOutlined />,
-                children: <CostsTab dataProductId={dataProductId} />,
-            },
-            {
-                label: (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                        <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>
-                        {staleCount > 0 && (
-                            <Tooltip
-                                title={t('{{count}} Input Port(s) have a broken freshness SLO', { count: staleCount })}
-                            >
-                                <WarningOutlined style={{ color: '#faad14' }} />
-                            </Tooltip>
-                        )}
-                    </span>
-                ),
-                key: TabKeys.InputPorts,
-                icon: <Icon component={datasetOutlineIcon} />,
-                children: <InputPortTab dataProductId={dataProductId} staleCount={staleCount} />,
-            },
-            {
-                label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
-                key: TabKeys.OutputPorts,
-                icon: <Icon component={dataOutputOutlineIcon} />,
-                children: <DataOutputTab dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Explorer'),
-                key: TabKeys.Explorer,
-                icon: <CompassOutlined />,
-                children: <Explorer id={dataProductId} type={'dataproduct'} />,
-            },
-            {
-                label: <Typography.Text ref={teamRef}>{t('Team')}</Typography.Text>,
-                key: TabKeys.Team,
-                icon: <TeamOutlined />,
-                children: <TeamTab dataProductId={dataProductId} />,
-            },
-            {
-                label: t('Settings'),
-                key: TabKeys.Settings,
-                icon: <SettingOutlined />,
-                children: <SettingsTab dataProductId={dataProductId} />,
-            },
-            {
-                label: t('History'),
-                key: TabKeys.History,
-                icon: <HistoryOutlined />,
-                children: (
-                    <HistoryTab
-                        id={dataProductId}
-                        type={EventReferenceEntity.DataProduct}
-                        history={dataProductHistoryData}
-                        isFetching={isFetchingDataProductHistory}
-                    />
-                ),
-            },
-        ];
+        return (
+            [
+                {
+                    label: <Typography.Text ref={aboutRef}>{t('About')}</Typography.Text>,
+                    key: TabKeys.About,
+                    icon: <InfoCircleOutlined />,
+                    children: <AboutTab dataProductId={dataProductId} />,
+                },
+                !AppConfig.isDemoMode() && {
+                    label: t('Usage'),
+                    key: TabKeys.Usage,
+                    icon: <BarChartOutlined />,
+                    children: <UsageTab dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Costs'),
+                    key: TabKeys.Costs,
+                    icon: <EuroOutlined />,
+                    children: <CostsTab dataProductId={dataProductId} />,
+                },
+                {
+                    label: (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+                            <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>
+                            {staleCount > 0 && (
+                                <Tooltip
+                                    title={t('{{count}} Input Port(s) have a broken freshness SLO', {
+                                        count: staleCount,
+                                    })}
+                                >
+                                    <WarningOutlined style={{ color: '#faad14' }} />
+                                </Tooltip>
+                            )}
+                        </span>
+                    ),
+                    key: TabKeys.InputPorts,
+                    icon: <Icon component={datasetOutlineIcon} />,
+                    children: <InputPortTab dataProductId={dataProductId} staleCount={staleCount} />,
+                },
+                {
+                    label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
+                    key: TabKeys.OutputPorts,
+                    icon: <Icon component={dataOutputOutlineIcon} />,
+                    children: <DataOutputTab dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Explorer'),
+                    key: TabKeys.Explorer,
+                    icon: <CompassOutlined />,
+                    children: <Explorer id={dataProductId} type={'dataproduct'} />,
+                },
+                {
+                    label: <Typography.Text ref={teamRef}>{t('Team')}</Typography.Text>,
+                    key: TabKeys.Team,
+                    icon: <TeamOutlined />,
+                    children: <TeamTab dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('Settings'),
+                    key: TabKeys.Settings,
+                    icon: <SettingOutlined />,
+                    children: <SettingsTab dataProductId={dataProductId} />,
+                },
+                {
+                    label: t('History'),
+                    key: TabKeys.History,
+                    icon: <HistoryOutlined />,
+                    children: (
+                        <HistoryTab
+                            id={dataProductId}
+                            type={EventReferenceEntity.DataProduct}
+                            history={dataProductHistoryData}
+                            isFetching={isFetchingDataProductHistory}
+                        />
+                    ),
+                },
+            ] as (Tab | false)[]
+        ).filter(Boolean) as Tab[];
     }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory, staleCount]);
 
     const steps: TourProps['steps'] = useMemo(() => {

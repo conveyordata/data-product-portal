@@ -9,6 +9,7 @@ from uuid import UUID
 
 import yaml
 
+from sdk.api_client.api.configuration_tags import create_tag, get_tags
 from sdk.api_client.api.data_products_output_ports import (
     create_output_port_semantic_model,
     create_output_port_table_schema,
@@ -26,6 +27,8 @@ from sdk.api_client.models.semantic_model_request_content import (
     SemanticModelRequestContent,
 )
 from sdk.api_client.models.table_schema_request import TableSchemaRequest
+from sdk.api_client.models.tag_create import TagCreate
+from sdk.api_client.types import UNSET
 
 
 def load_portal_config(project_dir: Path) -> tuple[UUID, UUID]:
@@ -34,19 +37,46 @@ def load_portal_config(project_dir: Path) -> tuple[UUID, UUID]:
     return UUID(config["data_product_id"]), UUID(config["output_port_id"])
 
 
-def load_columns(project_dir: Path) -> tuple[str | None, list[ColumnRequest]]:
+def ensure_pii_tag_uuid(client: Client) -> UUID:
+    """Return the UUID of the 'PII' tag, creating it if absent."""
+    existing = get_tags.sync(client=client)
+    if existing is not None:
+        for tag in existing.tags:
+            if tag.value == "PII":
+                print(f"[tags] Found existing PII tag: {tag.id}")
+                return tag.id
+    print("[tags] PII tag not found — creating")
+    result = create_tag.sync(client=client, body=TagCreate(value="PII"))
+    if result is None or isinstance(result, HTTPValidationError):
+        print(f"[tags] ERROR creating PII tag: {result}", file=sys.stderr)
+        sys.exit(1)
+    print(f"[tags] Created PII tag: {result.id}")
+    return result.id
+
+
+def load_columns(
+    project_dir: Path,
+    tag_name_to_uuid: dict[str, UUID] | None = None,
+) -> tuple[str | None, list[ColumnRequest]]:
     schema_yml = project_dir / "models" / "schema.yml"
     schema = yaml.safe_load(schema_yml.read_text())
     model = schema["models"][0]
     description = model.get("description")
-    columns = [
-        ColumnRequest(
-            name=col["name"],
-            description=col.get("description"),
-            data_type=col.get("data_type"),
+    columns = []
+    for col in model.get("columns", []):
+        tag_ids: list[UUID] = []
+        if tag_name_to_uuid:
+            for tag_name in (col.get("meta") or {}).get("tags", []):
+                if tag_name in tag_name_to_uuid:
+                    tag_ids.append(tag_name_to_uuid[tag_name])
+        columns.append(
+            ColumnRequest(
+                name=col["name"],
+                description=col.get("description"),
+                data_type=col.get("data_type"),
+                tag_ids=tag_ids if tag_ids else UNSET,
+            )
         )
-        for col in model.get("columns", [])
-    ]
     return description, columns
 
 
@@ -167,12 +197,15 @@ def main() -> None:
     print(f"Data product: {data_product_id}")
     print(f"Output port:  {output_port_id}")
 
-    description, columns = load_columns(project_dir)
-    print(f"Columns loaded: {len(columns)}")
-
     content = load_semantic_model_content(project_dir)
 
     client = Client(base_url=portal_url)
+
+    pii_tag_uuid = ensure_pii_tag_uuid(client)
+    tag_name_to_uuid: dict[str, UUID] = {"PII": pii_tag_uuid}
+
+    description, columns = load_columns(project_dir, tag_name_to_uuid)
+    print(f"Columns loaded: {len(columns)}")
 
     upsert_table_schema(
         client, data_product_id, output_port_id, args.project, description, columns

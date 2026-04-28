@@ -31,9 +31,38 @@
         border: 1px solid globals.$primary-color;
     }
 
+    p {
+        margin-bottom: globals.$spacing-s;
+
+        &:empty,
+        &:has(> br:only-child) {
+            margin-bottom: 0;
+        }
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin-top: globals.$spacing-m;
+        margin-bottom: globals.$spacing-xs;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
+    ul,
+    ol {
+        padding-left: globals.$spacing-l;
+    }
+
     pre {
-        margin-top: globals.$spacing-xs;
-        background: globals.$base-text-color;
+        margin-top: globals.$spacing-s;
+        margin-bottom: globals.$spacing-m;
+        background: #282c34;
         border-radius: globals.$border-radius;
         color: globals.$base-text-bg-base;
         padding: globals.$spacing-s globals.$spacing-m;
@@ -45,6 +74,14 @@
             font-size: globals.$font-size-sm;
             padding: 0;
         }
+    }
+
+    code:not(pre code) {
+        background: globals.$secondary-color-fill;
+        border-radius: globals.$border-radius-xs;
+        padding: 0.1em 0.35em;
+        font-family: globals.$font-family-mono;
+        font-size: globals.$font-size-sm;
     }
     table {
         width: 100%;
