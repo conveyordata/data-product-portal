@@ -1,4 +1,5 @@
 # ruff: noqa: S106
+import json
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -56,6 +57,7 @@ class TestGetLineageGraph:
         assert "edges" in result
         assert len(result["nodes"]) == 3
         assert len(result["edges"]) == 2
+        json.dumps(result)  # must not raise
 
     def test_calls_graph_service_with_both_node_types(
         self, mock_graph_svc_cls, mock_get_db

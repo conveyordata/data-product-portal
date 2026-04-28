@@ -651,8 +651,8 @@ def get_lineage_graph() -> Dict[str, Any]:
                 dataset_nodes_enabled=True,
             )
             return {
-                "nodes": [node.model_dump() for node in graph.nodes],
-                "edges": [edge.model_dump() for edge in graph.edges],
+                "nodes": [node.model_dump(mode="json") for node in graph.nodes],
+                "edges": [edge.model_dump(mode="json") for edge in graph.edges],
             }
         finally:
             db.close()
