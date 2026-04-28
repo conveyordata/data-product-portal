@@ -104,6 +104,14 @@ mcp = FastMCP(
 
     Output ports (datasets) are the primary way data is shared in the portal.
     Data products are containers owned by teams that group related output ports and technical assets.
+
+    Entity hierarchy:
+    - Domain → Data Product → Output Port (primary data-sharing unit) / Technical Asset
+    - Input Port: the access link between a consuming Data Product and an Output Port;
+      has status PENDING | APPROVED | DENIED and a justification.
+    - Output ports are always owned by exactly one data product; technical assets likewise.
+
+    For the full entity model, ID provenance, and relationship graph, read resource portal://ontology.
     """,
     auth=get_auth_provider(),
 )
@@ -1049,6 +1057,62 @@ def get_marketplace_resource() -> str:
 
     except Exception as e:
         return f"Error retrieving marketplace overview: {str(e)}"
+
+
+@mcp.resource("portal://ontology")
+def get_ontology_resource() -> str:
+    """Entity model and relationship graph for the Data Product Portal.
+
+    Read this when you need to understand how entities relate, where UUIDs come from,
+    or which tool to call to resolve a given entity type.
+    """
+    return """
+## Entity Model
+
+### Domain
+- Contains: Data Products
+- ID from: get_marketplace_overview() → domains[].id
+- Resolved by: get_domain_details(domain_id)
+
+### Data Product
+- Belongs to: one Domain
+- Exposes: Output Ports, Technical Assets
+- Consumes via Input Ports: Output Ports from other Data Products
+- ID from: search_data_products(), search_output_ports() → data_product_id,
+           get_lineage_graph() → nodes where type=dataProductNode
+- Resolved by: get_data_product_details(id), get_data_product_analytics(id)
+
+### Output Port
+- Belongs to: one Data Product
+- Consumed by: Data Products (via Input Ports, with PENDING/APPROVED/DENIED status)
+- Has: table schemas, semantic models, PII tags, freshness
+- ID from: search_output_ports(), get_data_product_analytics() → analytics.output_ports[].id,
+           get_lineage_graph() → nodes where type=datasetNode
+- Resolved by: get_output_port_details(id), get_output_port_model(id)
+
+### Technical Asset
+- Belongs to: one Data Product
+- ID from: get_data_product_analytics() → analytics.technical_assets[].id
+- Resolved by: get_technical_asset_details(id)
+
+### Input Port (access link, not directly addressable by ID)
+- Connects: consuming Data Product → Output Port it requests access to
+- Status: PENDING | APPROVED | DENIED
+- Has: justification, requestor/approver emails, timestamps
+- Found in: get_output_port_details() → consuming_data_products[]
+            get_data_product_analytics() → analytics.input_ports[]
+
+## Relationships
+Domain -[contains]-> Data Product
+Data Product -[exposes]-> Output Port
+Data Product -[exposes]-> Technical Asset
+Data Product -[consumes via Input Port]-> Output Port
+Output Port -[has access grants as]-> Input Port
+
+## Access Flow
+To check if Data Product A can use Output Port B:
+  get_output_port_details(B) → consuming_data_products[] → filter by consuming_data_product_id == A → check status
+"""
 
 
 # ==============================================================================
