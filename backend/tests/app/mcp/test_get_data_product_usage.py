@@ -22,7 +22,7 @@ def _make_cost_row(output_port_id, name, compute, storage, overhead):
     return row
 
 
-def _make_stat(date_str, consumer_id, consumer_name, query_count):
+def _make_stat(consumer_id, consumer_name, query_count):
     stat = MagicMock()
     stat.consumer_data_product_id = consumer_id
     stat.consumer_data_product_name = consumer_name
@@ -63,14 +63,12 @@ class TestGetDataProductUsage:
         cost_rows=None,
         output_ports=None,
         query_stats_by_port=None,
-        data_product=None,
     ):
         mock_get_db.return_value = iter([MagicMock()])
         mock_get_token.return_value = MagicMock(token="tok")
         mock_get_user.return_value = {"id": str(uuid4())}
 
-        dp = data_product or MagicMock()
-        mock_dp_svc_cls.return_value.get_data_product.return_value = dp
+        mock_dp_svc_cls.return_value.get_data_product.return_value = MagicMock()
 
         mock_cost_svc_cls.return_value.get_data_product_cost_summary.return_value = (
             cost_rows or []
@@ -176,9 +174,9 @@ class TestGetDataProductUsage:
         port_a = _make_output_port(OUTPUT_PORT_ID_A, "Port A")
         stats_a = _make_query_stats_response(
             [
-                _make_stat("2026-04-01", CONSUMER_ID_1, "Consumer One", 100),
-                _make_stat("2026-04-02", CONSUMER_ID_1, "Consumer One", 200),
-                _make_stat("2026-04-01", CONSUMER_ID_2, "Consumer Two", 50),
+                _make_stat(CONSUMER_ID_1, "Consumer One", 100),
+                _make_stat(CONSUMER_ID_1, "Consumer One", 200),
+                _make_stat(CONSUMER_ID_2, "Consumer Two", 50),
             ]
         )
         self._setup_mocks(
@@ -227,7 +225,6 @@ class TestGetDataProductUsage:
             mock_get_user,
             mock_get_token,
             mock_get_db,
-            data_product=None,
         )
         mock_dp_svc_cls.return_value.get_data_product.return_value = None
 
@@ -261,10 +258,10 @@ class TestGetDataProductUsage:
 
         assert result["day_range"] == 90
         mock_cost_svc_cls.return_value.get_data_product_cost_summary.assert_called_once()
-        call_args = (
+        cost_call = (
             mock_cost_svc_cls.return_value.get_data_product_cost_summary.call_args
         )
-        assert call_args[0][1] == 90 or call_args[1].get("day_range") == 90
+        assert cost_call.args[1] == 90
 
     def test_no_data_returns_empty_collections(
         self,
@@ -295,3 +292,34 @@ class TestGetDataProductUsage:
         assert result["cost_summary"]["total_cost"] == 0.0
         assert result["cost_summary"]["by_output_port"] == []
         assert result["consumer_query_stats"] == []
+
+    def test_output_port_with_no_consumers_returns_empty_top_consumers(
+        self,
+        mock_stats_svc_cls,
+        mock_output_port_svc_cls,
+        mock_cost_svc_cls,
+        mock_dp_svc_cls,
+        mock_get_user,
+        mock_get_token,
+        mock_get_db,
+    ):
+        """Output port with no query stats returns top_consumers: []."""
+        port_a = _make_output_port(OUTPUT_PORT_ID_A, "Port A")
+        self._setup_mocks(
+            mock_stats_svc_cls,
+            mock_output_port_svc_cls,
+            mock_cost_svc_cls,
+            mock_dp_svc_cls,
+            mock_get_user,
+            mock_get_token,
+            mock_get_db,
+            output_ports=[port_a],
+            query_stats_by_port={OUTPUT_PORT_ID_A: _make_query_stats_response([])},
+        )
+
+        result = get_data_product_usage(DATA_PRODUCT_ID)
+
+        qs = result["consumer_query_stats"]
+        assert len(qs) == 1
+        assert qs[0]["output_port_id"] == str(OUTPUT_PORT_ID_A)
+        assert qs[0]["top_consumers"] == []
