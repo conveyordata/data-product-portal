@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 from uuid import UUID
 
+from fastapi import HTTPException
 from fastmcp import Context, FastMCP
 from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
@@ -29,6 +30,8 @@ from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
+from app.data_products.output_ports.freshness.enums import FreshnessStatus
+from app.data_products.output_ports.freshness.service import FreshnessService
 from app.data_products.output_ports.schema_response import (
     DatasetsGet,
     GetOutputPortResponse,
@@ -385,7 +388,7 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
 def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
     """
     Get full details of a single output port by its UUID, including schema, access type,
-    the data product it belongs to, and owner contact information.
+    the data product it belongs to, owner contact information, and freshness status.
     Use after search_output_ports to get complete information about a specific dataset.
 
     Args:
@@ -403,7 +406,35 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
             if not dataset:
                 return {"error": f"Dataset {output_port_id} not found"}
 
-            return GetOutputPortResponse.model_validate(dataset).model_dump()
+            result = GetOutputPortResponse.model_validate(dataset).model_dump()
+
+            freshness_service = FreshnessService(db)
+            try:
+                slo = freshness_service.get_slo(UUID(output_port_id))
+                slo_deadline = str(slo.deadline_time)
+            except HTTPException:
+                slo = None
+                slo_deadline = None
+
+            latest_obs = freshness_service.get_latest_observation(UUID(output_port_id))
+            status = (
+                freshness_service.compute_status(dataset)
+                if slo is not None
+                else FreshnessStatus.UNKNOWN
+            )
+
+            result["freshness"] = {
+                "status": status.value,
+                "slo_deadline": slo_deadline,
+                "last_refreshed_at": (
+                    latest_obs.last_refreshed_at.isoformat() if latest_obs else None
+                ),
+                "last_observed_at": (
+                    latest_obs.created_at.isoformat() if latest_obs else None
+                ),
+            }
+
+            return result
         finally:
             db.close()
 
