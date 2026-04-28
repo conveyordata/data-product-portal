@@ -53,6 +53,7 @@ from app.data_products.technical_assets.schema_response import (
 )
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
+from app.graph.service import GraphService
 from app.search_output_ports.schema_response import SearchDatasets
 from app.settings import settings
 
@@ -85,6 +86,9 @@ mcp = FastMCP(
        Use search_data_products only when the user explicitly asks to find a data product.
     3. get_*_details: drill into a specific result by UUID
     4. get_data_product_usage: get cost breakdown and top consumer query stats for a data product
+    5. get_lineage_graph: traverse the full data lineage graph to answer connection-based
+       questions (deprecation impact, upstream/downstream dependencies, transitive consumers).
+       Edges with animated=true are APPROVED access links; animated=false are pending.
 
     Output ports (datasets) are the primary way data is shared in the portal.
     Data products are containers owned by teams that group related output ports and technical assets.
@@ -560,7 +564,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
 def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
     """
     Get analytics for a data product: its output ports and technical assets with counts.
-    Use this to answer questions like 'what does this data product expose?' or 'how many datasets does it have?'.
+    Use this to answer questions like 'what does this data product expose?' or 'how many output ports does it have?'.
 
     Args:
         data_product_id: UUID obtained from search_data_products or get_data_product_details.
@@ -614,6 +618,46 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         return {"error": f"Failed to get data product analytics: {str(e)}"}
+
+
+@mcp.tool
+def get_lineage_graph() -> Dict[str, Any]:
+    """
+    Returns the full data lineage graph of the portal: all data products,
+    output ports, and the access relationships between them.
+
+    Use this to answer any connection-based question:
+    - Which consumers depend on a data product? (deprecation impact)
+    - What output ports does a data product consume?
+    - Who are the indirect / transitive consumers?
+
+    Nodes have types: 'dataProductNode' or 'datasetNode' (output port).
+    Edges represent two kinds of relationships:
+    - Data product → output port: ownership (the product exposes that port)
+    - Output port → data product: access link
+      animated=true  → APPROVED (active dependency)
+      animated=false → PENDING/REQUESTED (not yet approved)
+
+    To find consumers affected by deprecating a data product:
+    1. Find all 'datasetNode' nodes where data.link_to_id == data_product_id (its output ports)
+    2. Find all edges where source == one of those output port ids
+    3. The edge targets are the downstream consumers; animated=true means APPROVED access.
+    """
+    try:
+        db = next(get_db_session())
+        try:
+            graph = GraphService(db).get_graph_data(
+                data_product_nodes_enabled=True,
+                dataset_nodes_enabled=True,
+            )
+            return {
+                "nodes": [node.model_dump() for node in graph.nodes],
+                "edges": [edge.model_dump() for edge in graph.edges],
+            }
+        finally:
+            db.close()
+    except Exception as e:
+        return {"error": f"Failed to get lineage graph: {str(e)}"}
 
 
 @mcp.tool
