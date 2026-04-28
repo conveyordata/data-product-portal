@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Any, Dict, Optional
 from uuid import UUID
 
@@ -29,7 +30,12 @@ from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
+from app.data_products.output_ports.cost.service import OutputPortCostService
 from app.data_products.output_ports.freshness.enums import FreshnessStatus
+from app.data_products.output_ports.query_stats.service import (
+    OutputPortStatsService,
+    QueryStatsGranularity,
+)
 from app.data_products.output_ports.schema_response import (
     DatasetsGet,
     GetOutputPortResponse,
@@ -78,6 +84,7 @@ mcp = FastMCP(
     2. search_output_ports: find specific output ports (preferred for most searches)
        Use search_data_products only when the user explicitly asks to find a data product.
     3. get_*_details: drill into a specific result by UUID
+    4. get_data_product_usage: get cost breakdown and top consumer query stats for a data product
 
     Output ports (datasets) are the primary way data is shared in the portal.
     Data products are containers owned by teams that group related output ports and technical assets.
@@ -607,6 +614,104 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         return {"error": f"Failed to get data product analytics: {str(e)}"}
+
+
+@mcp.tool
+def get_data_product_usage(data_product_id: str, day_range: int = 30) -> Dict[str, Any]:
+    """
+    Get cost breakdown and consumer query stats for a data product over a configurable
+    time window. Use this to answer questions like 'what did X cost last month?' or
+    'which teams query this data product most?'.
+
+    Cost is broken down per output port. Consumer query stats are also per output port,
+    with a ranked list of consumer data products by total query count.
+
+    Args:
+        data_product_id: UUID obtained from search_data_products or get_data_product_details.
+        day_range: Number of days to look back (default 30).
+    """
+    try:
+        db = next(get_db_session())
+        access_token: AccessToken = get_access_token()
+        user = get_mcp_authenticated_user(token=access_token.token)
+        try:
+            data_product = DataProductService(db).get_data_product(
+                id=UUID(data_product_id)
+            )
+            if not data_product:
+                return {"error": f"Data product {data_product_id} not found"}
+
+            # Cost summary aggregated across all output ports
+            cost_rows = OutputPortCostService(db).get_data_product_cost_summary(
+                UUID(data_product_id), day_range
+            )
+            cost_by_port = []
+            total_cost = Decimal(0)
+            for row in cost_rows:
+                row_total = (
+                    row.compute_cost + row.storage_cost + row.platform_overhead_cost
+                )
+                total_cost += row_total
+                cost_by_port.append(
+                    {
+                        "output_port_id": str(row.output_port_id),
+                        "output_port_name": row.output_port_name,
+                        "compute_cost": float(row.compute_cost),
+                        "storage_cost": float(row.storage_cost),
+                        "platform_overhead_cost": float(row.platform_overhead_cost),
+                        "total_cost": float(row_total),
+                    }
+                )
+
+            # Per-output-port consumer query stats
+            output_ports = OutputPortService(db).get_output_ports(
+                user=user, data_product_id=UUID(data_product_id)
+            )
+            consumer_query_stats = []
+            for op in output_ports:
+                stats_response = OutputPortStatsService(db).get_query_stats(
+                    dataset_id=op.id,
+                    granularity=QueryStatsGranularity.DAY,
+                    day_range=day_range,
+                )
+                consumer_totals: Dict[str, Any] = {}
+                for stat in stats_response.output_port_query_stats_responses:
+                    consumer_id = str(stat.consumer_data_product_id)
+                    if consumer_id not in consumer_totals:
+                        consumer_totals[consumer_id] = {
+                            "consumer_data_product_id": consumer_id,
+                            "consumer_data_product_name": stat.consumer_data_product_name,
+                            "total_queries": 0,
+                        }
+                    consumer_totals[consumer_id]["total_queries"] += stat.query_count
+
+                top_consumers = sorted(
+                    consumer_totals.values(),
+                    key=lambda c: c["total_queries"],
+                    reverse=True,
+                )
+                consumer_query_stats.append(
+                    {
+                        "output_port_id": str(op.id),
+                        "output_port_name": op.name,
+                        "top_consumers": top_consumers,
+                    }
+                )
+
+            return {
+                "data_product_id": data_product_id,
+                "day_range": day_range,
+                "cost_summary": {
+                    "total_cost": float(total_cost),
+                    "by_output_port": cost_by_port,
+                },
+                "consumer_query_stats": consumer_query_stats,
+            }
+        finally:
+            db.close()
+
+    except Exception as e:
+        return {"error": f"Failed to get data product usage: {str(e)}"}
 
 
 # ==============================================================================
