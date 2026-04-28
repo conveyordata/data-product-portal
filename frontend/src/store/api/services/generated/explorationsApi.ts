@@ -106,7 +106,7 @@ export type RequestInputPortsForExplorationRequest = {
 };
 export type CreateExplorationRequestWithInputPorts = {
   name: string;
-  namespace: string;
+  namespace?: string | null;
   description: string;
   domain_id: string;
   input_ports?: RequestInputPortsForExplorationRequest | null;

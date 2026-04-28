@@ -42,6 +42,28 @@ class TestExplorationRouter:
         )
         assert response.status_code == 200, response.text
 
+    def test_create_exploration_resource_name_automatically_filled_in(self, client):
+        d = DomainFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__CREATE_EXPLORATION],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+
+        response = client.post(
+            ROUTE,
+            json={
+                "name": str(uuid.uuid4()),
+                "domain_id": str(d.id),
+                "description": faker.Faker().text(),
+            },
+        )
+        assert response.status_code == 200, response.text
+
     def test_create_exploration_invalid_namespace(self, client):
         d = DomainFactory()
         namespace = str(uuid.uuid4())

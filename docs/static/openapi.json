@@ -7473,7 +7473,14 @@
             "title": "Name"
           },
           "namespace": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Namespace"
           },
           "description": {
@@ -7499,7 +7506,6 @@
         "type": "object",
         "required": [
           "name",
-          "namespace",
           "description",
           "domain_id"
         ],

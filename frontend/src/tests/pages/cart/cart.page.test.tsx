@@ -234,9 +234,6 @@ describe('Cart', () => {
 
             mockOutputPortsSearch();
             mockUsersHttp(mockUsers);
-            mockGetResourceNamesConstraints();
-            mockResourceNamesSanitize();
-            mockResourceNamesValidate();
             mockGetDomains();
 
             const createHandler = vi.fn(() => HttpResponse.json({ id: 'id-1' }));
@@ -258,9 +255,6 @@ describe('Cart', () => {
             await userEvent.click(domainSelect);
             const domainOption = await screen.findByText('Finance');
             await userEvent.click(domainOption);
-
-            const descriptionTextArea = screen.getByRole('textbox', { name: /description/i });
-            await userEvent.type(descriptionTextArea, 'A detailed description of the exploration.');
 
             const justificationTextArea = await screen.findByPlaceholderText(
                 'Explain why you need access to these Output Ports',

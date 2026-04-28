@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session, joinedload
 from starlette import status
 
 from app.abstract_data_product.service import AbstractDataProductService
-from app.core.namespace.validation import NamespaceValidator
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User
 
@@ -19,13 +18,17 @@ from .schema_request import CreateExplorationRequest
 class ExplorationService(AbstractDataProductService):
     def __init__(self, db: Session):
         super().__init__(db)
-        self.namespace_validator = NamespaceValidator(ExplorationModel)
 
     def create_exploration(
         self,
         exploration: CreateExplorationRequest,
         authenticated_user: User,
     ) -> ExplorationModel:
+        resource_name_validator = ResourceNameService(model=ExplorationModel)
+        if not exploration.namespace:
+            exploration.namespace = resource_name_validator.resource_name_suggestion(
+                exploration.name
+            ).resource_name
         if (
             validity := ResourceNameService(model=ExplorationModel)
             .validate_resource_name(exploration.namespace, self.db)

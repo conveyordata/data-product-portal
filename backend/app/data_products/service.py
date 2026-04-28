@@ -21,10 +21,6 @@ from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
 from app.core.aws.get_url import _get_data_product_role_arn
-from app.core.namespace.validation import (
-    NamespaceValidator,
-    TechnicalAssetNamespaceValidator,
-)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
@@ -59,8 +55,6 @@ from app.users.schema import User
 class DataProductService(AbstractDataProductService):
     def __init__(self, db: Session):
         super().__init__(db)
-        self.namespace_validator = NamespaceValidator(DataProductModel)
-        self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
 
     def get_data_product_settings(
         self, data_product_id: UUID

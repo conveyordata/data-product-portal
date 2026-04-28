@@ -23,16 +23,16 @@ class CreateExplorationRequestWithInputPorts:
     """
     Attributes:
         name (str):
-        namespace (str):
         description (str):
         domain_id (UUID):
+        namespace (None | str | Unset):
         input_ports (None | RequestInputPortsForExplorationRequest | Unset):
     """
 
     name: str
-    namespace: str
     description: str
     domain_id: UUID
+    namespace: None | str | Unset = UNSET
     input_ports: None | RequestInputPortsForExplorationRequest | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -43,11 +43,15 @@ class CreateExplorationRequestWithInputPorts:
 
         name = self.name
 
-        namespace = self.namespace
-
         description = self.description
 
         domain_id = str(self.domain_id)
+
+        namespace: None | str | Unset
+        if isinstance(self.namespace, Unset):
+            namespace = UNSET
+        else:
+            namespace = self.namespace
 
         input_ports: dict[str, Any] | None | Unset
         if isinstance(self.input_ports, Unset):
@@ -62,11 +66,12 @@ class CreateExplorationRequestWithInputPorts:
         field_dict.update(
             {
                 "name": name,
-                "namespace": namespace,
                 "description": description,
                 "domain_id": domain_id,
             }
         )
+        if namespace is not UNSET:
+            field_dict["namespace"] = namespace
         if input_ports is not UNSET:
             field_dict["input_ports"] = input_ports
 
@@ -81,11 +86,18 @@ class CreateExplorationRequestWithInputPorts:
         d = dict(src_dict)
         name = d.pop("name")
 
-        namespace = d.pop("namespace")
-
         description = d.pop("description")
 
         domain_id = UUID(d.pop("domain_id"))
+
+        def _parse_namespace(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        namespace = _parse_namespace(d.pop("namespace", UNSET))
 
         def _parse_input_ports(
             data: object,
@@ -110,9 +122,9 @@ class CreateExplorationRequestWithInputPorts:
 
         create_exploration_request_with_input_ports = cls(
             name=name,
-            namespace=namespace,
             description=description,
             domain_id=domain_id,
+            namespace=namespace,
             input_ports=input_ports,
         )
 

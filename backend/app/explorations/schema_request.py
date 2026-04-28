@@ -11,7 +11,7 @@ class RequestInputPortsForExplorationRequest(ORMModel):
 
 class CreateExplorationRequest(ORMModel):
     name: str
-    namespace: str
+    namespace: Optional[str] = None
     description: str
     domain_id: UUID
 
