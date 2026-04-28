@@ -631,6 +631,8 @@ def get_data_product_usage(data_product_id: str, day_range: int = 30) -> Dict[st
         day_range: Number of days to look back (default 30).
     """
     try:
+        if day_range <= 0:
+            return {"error": "day_range must be a positive integer"}
         db = next(get_db_session())
         access_token: AccessToken = get_access_token()
         user = get_mcp_authenticated_user(token=access_token.token)
@@ -674,13 +676,17 @@ def get_data_product_usage(data_product_id: str, day_range: int = 30) -> Dict[st
                     granularity=QueryStatsGranularity.DAY,
                     day_range=day_range,
                 )
+                OTHER_CONSUMER_ID = "00000000-0000-0000-0000-000000000000"
                 consumer_totals: Dict[str, Any] = {}
                 for stat in stats_response.output_port_query_stats_responses:
                     consumer_id = str(stat.consumer_data_product_id)
+                    if consumer_id == OTHER_CONSUMER_ID:
+                        continue
                     if consumer_id not in consumer_totals:
                         consumer_totals[consumer_id] = {
                             "consumer_data_product_id": consumer_id,
-                            "consumer_data_product_name": stat.consumer_data_product_name,
+                            "consumer_data_product_name": stat.consumer_data_product_name
+                            or "",
                             "total_queries": 0,
                         }
                     consumer_totals[consumer_id]["total_queries"] += stat.query_count
