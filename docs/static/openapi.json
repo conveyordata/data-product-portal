@@ -1873,6 +1873,7 @@
         ],
         "summary": "Link Input Ports To Data Product",
         "operationId": "link_input_ports_to_data_product",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -1939,6 +1940,120 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/input_ports": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Request Input Ports For Data Product",
+        "operationId": "request_input_ports_for_data_product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestInputPortsForDataProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestInputPortsForDataProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Output port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output port not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Get Data Product Input Ports",
+        "operationId": "get_data_product_input_ports",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataProductInputPortsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{id}/history": {
       "get": {
         "tags": [
@@ -1965,49 +2080,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetEventHistoryResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{id}/input_ports": {
-      "get": {
-        "tags": [
-          "Data Products"
-        ],
-        "summary": "Get Data Product Input Ports",
-        "operationId": "get_data_product_input_ports",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDataProductInputPortsResponse"
                 }
               }
             }
@@ -7917,6 +7989,16 @@
             "type": "array",
             "minItems": 1,
             "title": "Owners"
+          },
+          "input_ports": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestInputPortsForDataProductRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -12233,6 +12315,45 @@
           "data_product_id"
         ],
         "title": "RequestDataProductRoleAssignment"
+      },
+      "RequestInputPortsForDataProductRequest": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports",
+          "justification"
+        ],
+        "title": "RequestInputPortsForDataProductRequest"
+      },
+      "RequestInputPortsForDataProductResponse": {
+        "properties": {
+          "input_port_links": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Input Port Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_links"
+        ],
+        "title": "RequestInputPortsForDataProductResponse"
       },
       "RequestInputPortsForExplorationRequest": {
         "properties": {

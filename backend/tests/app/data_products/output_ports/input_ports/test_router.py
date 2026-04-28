@@ -27,7 +27,7 @@ DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 class TestDataProductsDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_request_data_product_link(self, client):
+    def test_request_input_ports_for_data_product(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -41,15 +41,15 @@ class TestDataProductsDatasetsRouter:
         )
         ds = DatasetFactory()
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
         history_response = self.get_data_product_history(client, data_product.id)
         assert history_response.status_code == 200, history_response.text
         assert len(history_response.json()) == 1
 
-    def test_request_data_product_multiple_link_old(self, client):
+    def test_request_input_ports_for_data_product_deprecated(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -61,15 +61,15 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds1 = DatasetFactory()
-        ds2 = DatasetFactory()
+        ds = DatasetFactory()
 
-        response = self.request_data_product_datasets_link(
-            client, data_product.id, [ds1.id, ds2.id]
+        response = self.request_input_ports_for_data_product_deprecated(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
-        history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history["events"]) == 2
+        history_response = self.get_data_product_history(client, data_product.id)
+        assert history_response.status_code == 200, history_response.text
+        assert len(history_response.json()) == 1
 
     def test_request_data_product_multiple_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -86,14 +86,14 @@ class TestDataProductsDatasetsRouter:
         ds1 = DatasetFactory()
         ds2 = DatasetFactory()
 
-        response = self.request_link_input_ports(
+        response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds1.id, ds2.id]
         )
         assert response.status_code == 200, response.text
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history["events"]) == 2
 
-    def test_request_already_exists(self, client):
+    def test_request_input_ports_for_data_product_already_exists(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -107,25 +107,27 @@ class TestDataProductsDatasetsRouter:
         )
         ds = DatasetFactory()
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 400
 
-    def test_request_data_product_link_private_dataset_no_access(self, client):
+    def test_request_input_ports_for_data_product_private_dataset_no_access(
+        self, client
+    ):
         data_product = DataProductFactory()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 403
 
-    def test_request_data_product_link_private_dataset(self, client):
+    def test_request_input_ports_for_data_product_private_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -141,8 +143,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(scope=Scope.DATASET)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
 
@@ -195,7 +197,9 @@ class TestDataProductsDatasetsRouter:
         data_product = DataProductFactory()
         ds = DatasetFactory()
 
-        link = self.request_data_product_dataset_link(client, data_product.id, ds.id)
+        link = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
+        )
         assert link.status_code == 200
 
     def test_approve_data_product_link(self, client):
@@ -346,8 +350,8 @@ class TestDataProductsDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, self.invalid_id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [self.invalid_id]
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -496,8 +500,8 @@ class TestDataProductsDatasetsRouter:
             data_product_id=data_product.id,
         )
         ds = DatasetFactory()
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
 
         assert response.status_code == 200
@@ -511,32 +515,24 @@ class TestDataProductsDatasetsRouter:
         assert len(history["events"]) == 2
 
     @staticmethod
-    def request_data_product_dataset_link(
+    def request_input_ports_for_data_product(
         client: TestClient,
         data_product_id: UUID,
-        dataset_id: UUID,
+        output_port_ids: list[UUID],
         justification: str = "This is my birth right!",
     ) -> Response:
-        return TestDataProductsDatasetsRouter.request_data_product_datasets_link(
-            client,
-            data_product_id,
-            [dataset_id],
-            justification,
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports",
+            json={
+                "output_ports": [
+                    str(output_port_id) for output_port_id in output_port_ids
+                ],
+                "justification": justification,
+            },
         )
 
     @staticmethod
-    def request_data_product_datasets_link(
-        client: TestClient,
-        data_product_id: UUID,
-        dataset_ids: list[UUID],
-        justification: str = "This is my birth right!",
-    ) -> Response:
-        return TestDataProductsDatasetsRouter.request_link_input_ports(
-            client, data_product_id, dataset_ids, justification
-        )
-
-    @staticmethod
-    def request_link_input_ports(
+    def request_input_ports_for_data_product_deprecated(
         client: TestClient,
         data_product_id: UUID,
         output_port_ids: list[UUID],

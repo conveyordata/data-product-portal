@@ -16,7 +16,6 @@ import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     type DataProductCreate,
     useCreateDataProductMutation,
-    useLinkInputPortsToDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { clearCart } from '@/store/features/cart/cart-slice.ts';
@@ -39,7 +38,6 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
     const currentUser = useSelector(selectCurrentUser);
 
     const [createDataProduct] = useCreateDataProductMutation();
-    const [requestDatasetAccessForDataProduct] = useLinkInputPortsToDataProductMutation();
     const [submitting, setSubmitting] = useState(false);
     const { onValuesChange, clearStorage } = useFormPersist<NewDataProductCartFormData>(
         form,
@@ -53,13 +51,11 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
                 if (cartOutputPorts === undefined || cartOutputPorts.length === 0) {
                     return;
                 }
-                const response = await createDataProduct(request).unwrap();
-
-                await requestDatasetAccessForDataProduct({
-                    id: response.id,
-                    linkInputPortsToDataProduct: {
-                        input_ports: cartOutputPorts?.map((dataset) => dataset.id),
-                        justification: justification,
+                const response = await createDataProduct({
+                    ...request,
+                    input_ports: {
+                        justification,
+                        output_ports: cartOutputPorts?.map((dataset) => dataset.id),
                     },
                 }).unwrap();
                 dispatch(clearCart());
@@ -75,15 +71,7 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
                 setSubmitting(false);
             }
         },
-        [
-            requestDatasetAccessForDataProduct,
-            posthog,
-            createDataProduct,
-            navigate,
-            clearStorage,
-            cartOutputPorts,
-            dispatch,
-        ],
+        [posthog, createDataProduct, navigate, clearStorage, cartOutputPorts, dispatch],
     );
     const initialValues = {
         owners: currentUser?.id ? [currentUser?.id] : [],

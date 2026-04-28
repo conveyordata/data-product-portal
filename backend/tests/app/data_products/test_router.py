@@ -1,6 +1,7 @@
 import json
 import uuid
 from copy import deepcopy
+from typing import Any, Dict
 from uuid import UUID
 
 import pytest
@@ -36,7 +37,21 @@ ENDPOINT = "/api/v2/data_products"
 
 
 @pytest.fixture
-def payload():
+def user_with_create_data_product_rights():
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    role = RoleFactory(
+        scope=Scope.GLOBAL,
+        permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
+    )
+    GlobalRoleAssignmentFactory(
+        user_id=user.id,
+        role_id=role.id,
+    )
+    return user
+
+
+@pytest.fixture
+def payload() -> Dict[str, Any]:
     domain = DomainFactory()
     lifecycle = LifecycleFactory()
     data_product_type = DataProductTypeFactory()
@@ -57,80 +72,58 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_product(self, payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+    def test_create_data_product(
+        self, payload, client, user_with_create_data_product_rights
+    ):
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
-    def test_create_data_product_no_owners(self, payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+    def test_create_data_product_with_input_ports(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        ds = DatasetFactory()
+        payload["input_ports"] = {
+            "output_ports": [str(ds.id)],
+            "justification": "I am your king",
+        }
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 200
+        assert "id" in created_data_product.json()
 
+        input_ports_response = self.get_input_ports(
+            client, created_data_product.json()["id"]
+        )
+        assert input_ports_response.status_code == 200
+        assert len(input_ports_response.json()["input_ports"]) == 1
+
+    def test_create_data_product_no_owners(
+        self, payload, client, user_with_create_data_product_rights
+    ):
         create_payload = deepcopy(payload)
         create_payload["owners"] = []
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
 
-    def test_create_data_product_duplicate_name(self, payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
-
+    def test_create_data_product_duplicate_name(
+        self, payload, client, user_with_create_data_product_rights
+    ):
         DataProductFactory(name=payload["name"])
 
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
 
-    def test_create_data_product_duplicate_namespace(self, payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
-
+    def test_create_data_product_duplicate_namespace(
+        self, payload, client, user_with_create_data_product_rights
+    ):
         DataProductFactory(namespace=payload["namespace"])
 
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
 
     def test_create_data_product_invalid_characters_namespace(
-        self, session, payload, client
+        self, session, payload, client, user_with_create_data_product_rights
     ):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
 
         create_payload = deepcopy(payload)
         create_payload["namespace"] = "!"
@@ -139,17 +132,8 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 400
 
     def test_create_data_product_invalid_length_namespace(
-        self, session, payload, client
+        self, payload, client, user_with_create_data_product_rights
     ):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
 
         create_payload = deepcopy(payload)
         create_payload["namespace"] = "a" * 256
@@ -553,16 +537,9 @@ class TestDataProductsRouter:
 
         assert response.status_code == 400
 
-    def test_get_data_product_event_history(self, payload, client: TestClient):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+    def test_get_data_product_event_history(
+        self, payload, client: TestClient, user_with_create_data_product_rights
+    ):
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
@@ -574,17 +551,8 @@ class TestDataProductsRouter:
         assert len(history_response.json()["events"]) == 2
 
     def test_history_event_created_on_data_product_creation(
-        self, payload, client: TestClient
+        self, payload, client: TestClient, user_with_create_data_product_rights
     ):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()

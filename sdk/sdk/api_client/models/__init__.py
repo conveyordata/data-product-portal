@@ -227,6 +227,12 @@ from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
 )
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
+from .request_input_ports_for_data_product_request import (
+    RequestInputPortsForDataProductRequest,
+)
+from .request_input_ports_for_data_product_response import (
+    RequestInputPortsForDataProductResponse,
+)
 from .request_input_ports_for_exploration_request import (
     RequestInputPortsForExplorationRequest,
 )
@@ -471,6 +477,8 @@ __all__ = (
     "RenderTechnicalAssetAccessPathRequest",
     "RenderTechnicalAssetAccessPathResponse",
     "RequestDataProductRoleAssignment",
+    "RequestInputPortsForDataProductRequest",
+    "RequestInputPortsForDataProductResponse",
     "RequestInputPortsForExplorationRequest",
     "RequestInputPortsForExplorationResponse",
     "RequestOutputPortRoleAssignment",
