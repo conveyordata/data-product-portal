@@ -142,6 +142,7 @@ from .get_event_history_response_item import GetEventHistoryResponseItem
 from .get_exploration_input_ports_response import GetExplorationInputPortsResponse
 from .get_exploration_response import GetExplorationResponse
 from .get_explorations_response import GetExplorationsResponse
+from .get_input_ports_for_output_port_response import GetInputPortsForOutputPortResponse
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
@@ -196,6 +197,7 @@ from .output_port_data_quality_summary_response import (
 from .output_port_data_quality_summary_response_dimensions_type_0 import (
     OutputPortDataQualitySummaryResponseDimensionsType0,
 )
+from .output_port_input_port import OutputPortInputPort
 from .output_port_link import OutputPortLink
 from .output_port_query_stats_delete import OutputPortQueryStatsDelete
 from .output_port_query_stats_response import OutputPortQueryStatsResponse
@@ -401,6 +403,7 @@ __all__ = (
     "GetExplorationInputPortsResponse",
     "GetExplorationResponse",
     "GetExplorationsResponse",
+    "GetInputPortsForOutputPortResponse",
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",
@@ -439,6 +442,7 @@ __all__ = (
     "OutputPortDataQualitySummaryDimensionsType0",
     "OutputPortDataQualitySummaryResponse",
     "OutputPortDataQualitySummaryResponseDimensionsType0",
+    "OutputPortInputPort",
     "OutputPortLink",
     "OutputPortQueryStatsDelete",
     "OutputPortQueryStatsResponse",

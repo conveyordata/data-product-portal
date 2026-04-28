@@ -7,7 +7,7 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 import type {
     ApproveOutputPortAsInputPortApiArg,
     DenyOutputPortAsInputPortApiArg,
-    InputPort,
+    OutputPortInputPort,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
@@ -19,7 +19,7 @@ type Props = {
     t: TFunction;
     dataProductId: string;
     outputPortId: string;
-    dataProductLinks: InputPort[];
+    dataProductLinks: OutputPortInputPort[];
     onAcceptDataProductDatasetLink: (request: ApproveOutputPortAsInputPortApiArg) => void;
     onRejectDataProductDatasetLink: (request: DenyOutputPortAsInputPortApiArg) => void;
     onRemoveDataProductDatasetLink: (data_productId: string, name: string, consumingDataProductId: string) => void;
@@ -39,8 +39,8 @@ export const getDatasetDataProductsColumns = ({
     isLoading,
     canApprove,
     canRevoke,
-}: Props): TableColumnsType<InputPort> => {
-    const sorter = new Sorter<InputPort>();
+}: Props): TableColumnsType<OutputPortInputPort> => {
+    const sorter = new Sorter<OutputPortInputPort>();
     return [
         {
             title: t('Id'),

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DataProductTable } from '@/pages/dataset/components/dataset-tabs/data-product-tab/components/data-product-table/data-product-table.component';
 import {
-    type InputPort,
+    type OutputPortInputPort,
     useGetInputPortsForOutputPortQuery,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 
@@ -13,7 +13,7 @@ type Props = {
     dataProductId: string;
 };
 
-function filterDataProducts(dataProductLinks: InputPort[], searchTerm: string) {
+function filterDataProducts(dataProductLinks: OutputPortInputPort[], searchTerm: string) {
     return (
         dataProductLinks.filter((item) =>
             item?.consuming_abstract_data_product.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),

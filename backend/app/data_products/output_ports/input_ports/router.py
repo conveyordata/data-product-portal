@@ -18,7 +18,7 @@ from app.data_products.output_ports.input_ports.schema_request import (
 )
 from app.data_products.output_ports.input_ports.schema_response import (
     GetInputPortsForOutputPortResponse,
-    InputPort,
+    OutputPortInputPort,
 )
 from app.data_products.output_ports.input_ports.service import DataProductDatasetService
 from app.data_products.output_ports.service import OutputPortService
@@ -41,7 +41,7 @@ def get_input_ports_for_output_port(
 ) -> GetInputPortsForOutputPortResponse:
     return GetInputPortsForOutputPortResponse(
         input_ports=[
-            InputPort.model_validate(x)
+            OutputPortInputPort.model_validate(x)
             for x in OutputPortService(db).get_consuming_data_products(
                 output_port_id, data_product_id
             )
