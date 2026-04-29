@@ -36,7 +36,7 @@ export function TableCellItem({
 
     const tableCellItem = (
         <Flex className={styles.tableCellWrapper} {...otherProps}>
-            {icon && icon}
+            {icon}
             {reactSVGComponent && <Icon component={reactSVGComponent} className={styles.customIcon} />}
             {text && (
                 <Typography.Text

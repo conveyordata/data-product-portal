@@ -1,7 +1,7 @@
 import { Badge, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -40,7 +40,7 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
                     <TableCellAvatar
                         popover={{ title: popoverTitle, content: output_port.description }}
                         linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
-                        icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
+                        icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
                         title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
                         subtitle={
                             <Badge

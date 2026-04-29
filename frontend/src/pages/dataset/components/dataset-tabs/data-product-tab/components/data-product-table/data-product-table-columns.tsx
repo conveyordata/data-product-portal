@@ -1,6 +1,6 @@
 import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
-import chipIcon from '@/assets/icons/chip-icon.svg?react';
+import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';

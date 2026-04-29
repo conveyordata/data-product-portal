@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import datasetOutlineIcon from '@/assets/icons/outline-icons/output-port-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';

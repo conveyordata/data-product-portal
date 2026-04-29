@@ -1,6 +1,7 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
+import { ConsumersIcon } from '@/components/icons';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
 import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
@@ -91,8 +92,7 @@ export const getOutputPortTableColumns = ({
                 if (count === 0) {
                     return <TableCellItem text={t('No consumers yet')} />;
                 }
-
-                return <TableCellItem text={t('{{count}} consumers', { count })} />;
+                return <TableCellItem icon={<ConsumersIcon />} text={t('{{count}} consumers', { count })} />;
             },
             sorter: sorter.numberSorter((op) => op.abstract_data_product_count),
         },

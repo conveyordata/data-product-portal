@@ -2,10 +2,10 @@ import Icon, { InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-de
 import { Tabs } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import chipIcon from '@/assets/icons/chip-icon.svg?react';
-import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
-import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
+import dataProductOutlineIcon from '@/assets/icons/outline-icons/data-product-outline-icon.svg?react';
+import datasetOutlineIcon from '@/assets/icons/outline-icons/output-port-outline-icon.svg?react';
+import dataOutputOutlineIcon from '@/assets/icons/outline-icons/technical-asset-outline-icon.svg?react';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { DataOutputTab } from './data-output-tab/data-output-tab.component';
 import { DataProductTab } from './data-product-tab/data-product-tab.component';

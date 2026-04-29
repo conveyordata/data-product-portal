@@ -12,7 +12,7 @@ import { type ReactNode, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
-import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
+import { ConsumersIcon, DataOutputOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
@@ -84,9 +84,9 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 children: <DataOutputTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
-                label: t('Consuming Data Products'),
+                label: t('Consumers'),
                 key: TabKeys.Consumers,
-                icon: <DataProductOutlined />,
+                icon: <ConsumersIcon />,
                 children: <DataProductTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {

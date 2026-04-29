@@ -13,7 +13,6 @@
 .dataset-header {
     margin-bottom: globals.$spacing-l;
     gap: globals.$column-gap-regular;
-    align-items: center;
 
     .dataset-icon {
         width: globals.$icon-size-ml;
@@ -44,11 +43,6 @@
     gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: flex-start;
-}
-
-.main-content {
-    flex: 1;
-    gap: globals.$column-gap-xl;
 }
 
 .actions-container {
