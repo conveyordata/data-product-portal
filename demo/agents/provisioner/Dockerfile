@@ -12,7 +12,8 @@ ENV POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_HOME='/usr/local'
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y curl && \
+RUN --mount=type=bind,src=./requirements-poetry.txt,dst=/requirements-poetry.txt \
+    apt-get update && apt-get upgrade -y && apt-get install -y curl && \
     pip install -r requirements-poetry.txt --require-hashes
 
 COPY pyproject.toml ./
