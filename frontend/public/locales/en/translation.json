@@ -324,7 +324,6 @@
     "Global role assignment successfully reset": "Global role assignment successfully reset",
     "Global role successfully assigned": "Global role successfully assigned",
     "Go to checkout": "Go to checkout",
-    "Go to the marketplace to add items to your cart": "Go to the marketplace to add items to your cart",
     "Grant Access": "Grant Access",
     "Heading {{value}}": "Heading {{value}}",
     "Hide sidebar": "Hide sidebar",
@@ -715,6 +714,7 @@
     "You have finished the tour!": "You have finished the tour!",
     "You need to be authenticated to access the Data Product Portal": "You need to be authenticated to access the $t(Data Product Portal)",
     "You will get notified when access is granted or denied": "You will get notified when access is granted or denied",
+    "Your cart is currently empty. Explore the marketplace to add items.": "Your cart is currently empty. Explore the marketplace to add items.",
     "Your Exploration has been created.": "Your Exploration has been created.",
     "Your first Data Product!": "Your first $t(Data Product)!",
     "Your requests have successfully been created.": "Your requests have successfully been created."

@@ -6,10 +6,11 @@ import {
     ShoppingCartOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Col, Flex, Row } from 'antd';
+import { Button, Col, Empty, Flex, Row, Typography } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { CardSelection } from '@/pages/cart-explorations/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart-explorations/components/cart-overview.component.tsx';
@@ -112,6 +113,21 @@ function ExplorationsCart() {
         }
         return null;
     }, [dataProductTypeChoice, existingOrNewChoice, cartOutputPorts]);
+    if (cartDatasetIds?.length === 0) {
+        return (
+            <Empty
+                description={
+                    <Typography.Text>
+                        {t('Your cart is currently empty. Explore the marketplace to add items.')}
+                    </Typography.Text>
+                }
+            >
+                <Link to={ApplicationPaths.Marketplace}>
+                    <Button type="primary">{t('Marketplace')}</Button>
+                </Link>
+            </Empty>
+        );
+    }
     return (
         <Row gutter={16}>
             <Col span={16}>
