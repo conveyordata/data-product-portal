@@ -181,7 +181,7 @@ function ExplorationsCart() {
                     {form}
                 </Flex>
             </Col>
-            <Col span={8}>
+            <Col span={8} style={{ position: 'sticky', top: 0, alignSelf: 'flex-start' }}>
                 <CartOverview
                     loading={fetchingOutputPorts}
                     cartOutputPorts={cartOutputPorts}
