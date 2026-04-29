@@ -1,11 +1,11 @@
 import { InboxOutlined, ProductOutlined } from '@ant-design/icons';
 import { Badge, Space, Tabs, Typography, theme } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router';
-import { DataProductOutlined, DatasetOutlined, ExplorationOutlined } from '@/components/icons';
+import { DataProductOutlined, ExplorationOutlined, OutputPortOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { AppConfig } from '@/config/app-config';
+import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { ExplorationsTab } from '@/pages/product-studio/components/explorations-tab/explorations-tab.component';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { DataProductsTab } from './components/data-products-tab/data-products-tab.component';
@@ -16,9 +16,8 @@ import { TabKeys } from './product-studio-tabkeys';
 export function ProductStudio() {
     const { t } = useTranslation();
     const { token } = theme.useToken();
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<string>(TabKeys.DataProducts);
+
+    const { activeTab, onTabChange } = useTabParam(TabKeys.DataProducts, Object.values(TabKeys));
 
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
@@ -34,21 +33,6 @@ export function ProductStudio() {
     }, [setBreadcrumbs, t]);
 
     const { data: { pending_actions } = {} } = useGetUserPendingActionsQuery();
-
-    useEffect(() => {
-        const hash = location.hash.slice(1);
-        if (hash && Object.values(TabKeys).includes(hash as TabKeys)) {
-            setActiveTab(hash);
-        } else if (!hash) {
-            // If no hash is present, set the default tab hash
-            navigate({ hash: TabKeys.DataProducts }, { replace: true });
-        }
-    }, [location.hash, navigate]);
-
-    const onTabChange = (key: string) => {
-        setActiveTab(key);
-        navigate({ hash: key }, { replace: true });
-    };
 
     const pendingCount = pending_actions?.length ?? 0;
 
@@ -72,7 +56,7 @@ export function ProductStudio() {
         {
             key: TabKeys.OutputPorts,
             label: t('Output Ports'),
-            icon: <DatasetOutlined />,
+            icon: <OutputPortOutlined />,
             children: <OutputPortsTab />,
         },
         {

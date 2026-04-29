@@ -16,7 +16,7 @@ import {
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
-import { AbstractProductIcon, DataOutputOutlined, DataProductOutlined, DatasetOutlined } from '../icons';
+import { AbstractProductIcon, DataProductOutlined, OutputPortOutlined, TechnicalAssetOutlined } from '../icons';
 
 type Props = {
     action: PendingAction | null;
@@ -78,7 +78,7 @@ function getRequestDetails(
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
-                icon: <DatasetOutlined />,
+                icon: <OutputPortOutlined />,
             },
             accessType: t('READ ONLY'),
             justification: action.justification || t('No justification provided'),
@@ -97,12 +97,12 @@ function getRequestDetails(
                 name: action.technical_asset.name,
                 email: action.requested_by.email,
                 type: t('Technical Asset'),
-                icon: <DataOutputOutlined />,
+                icon: <TechnicalAssetOutlined />,
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
-                icon: <DatasetOutlined />,
+                icon: <OutputPortOutlined />,
             },
             accessType: t('INCLUDE'),
             justification: '',

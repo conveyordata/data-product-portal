@@ -3,8 +3,8 @@ import type { ComponentProps } from 'react';
 import ProductLogoIcon from '@/assets/icons/logo.svg?react';
 import DataProductOutlinedIcon from '@/assets/icons/outline-icons/data-product-outline-icon.svg?react';
 import ExplorationOutlinedIcon from '@/assets/icons/outline-icons/exploration-outline-icon.svg?react';
-import DatasetOutlinedIcon from '@/assets/icons/outline-icons/output-port-outline-icon.svg?react';
-import DataOutputOutlinedIcon from '@/assets/icons/outline-icons/technical-asset-outline-icon.svg?react';
+import OutputPortOutlinedIcon from '@/assets/icons/outline-icons/output-port-outline-icon.svg?react';
+import TechnicalAssetOutlineIcon from '@/assets/icons/outline-icons/technical-asset-outline-icon.svg?react';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import styles from './index.module.scss';
 
@@ -22,12 +22,12 @@ export function ExplorationOutlined(props: IconProps) {
     return <Icon component={ExplorationOutlinedIcon} {...props} />;
 }
 
-export function DatasetOutlined(props: IconProps) {
-    return <Icon component={DatasetOutlinedIcon} {...props} />;
+export function OutputPortOutlined(props: IconProps) {
+    return <Icon component={OutputPortOutlinedIcon} {...props} />;
 }
 
-export function DataOutputOutlined(props: IconProps) {
-    return <Icon component={DataOutputOutlinedIcon} {...props} />;
+export function TechnicalAssetOutlined(props: IconProps) {
+    return <Icon component={TechnicalAssetOutlineIcon} {...props} />;
 }
 
 export function ConsumersIcon() {
