@@ -3,7 +3,7 @@ import { Badge, Space, Tabs, Typography, theme } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
-import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
+import { DataProductOutlined, DatasetOutlined, ExplorationOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { AppConfig } from '@/config/app-config';
 import { ExplorationsTab } from '@/pages/product-studio/components/explorations-tab/explorations-tab.component';
@@ -64,7 +64,7 @@ export function ProductStudio() {
                   {
                       key: TabKeys.Explorations,
                       label: t('Explorations'),
-                      icon: <DataProductOutlined />,
+                      icon: <ExplorationOutlined />,
                       children: <ExplorationsTab />,
                   },
               ]

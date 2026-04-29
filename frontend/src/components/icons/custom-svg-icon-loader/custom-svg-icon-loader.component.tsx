@@ -28,7 +28,8 @@ export const CustomSvgIconLoader = ({
     return (
         <Icon
             component={iconComponent}
-            className={clsx([styles.defaultIcon, { [styles.iconBorder]: hasRoundBorder }, styles[size]], {
+            className={clsx([styles.defaultIcon, styles[size]], {
+                [styles.iconBorder]: hasRoundBorder,
                 [styles[color]]: color,
                 [styles.inverted]: inverted,
                 [styles.squareBorder]: hasSquareBorder,

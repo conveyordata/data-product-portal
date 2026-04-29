@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
     PendingRequestType_DataProductRoleAssignment,
@@ -15,7 +16,7 @@ import {
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
-import { DataOutputOutlined, DataProductOutlined, DatasetOutlined } from '../icons';
+import { AbstractProductIcon, DataOutputOutlined, DataProductOutlined, DatasetOutlined } from '../icons';
 
 type Props = {
     action: PendingAction | null;
@@ -48,6 +49,17 @@ type RequestDetails = {
     title: string;
 };
 
+const abstractDataProductTypeName = (type: AbstractDataProductType) => {
+    switch (type) {
+        case 'data_products':
+            return 'Data Product';
+        case 'explorations':
+            return 'Exploration';
+        default:
+            return '';
+    }
+};
+
 function getRequestDetails(
     action: PendingAction,
     t: (key: string, params?: Record<string, string>) => string,
@@ -60,8 +72,8 @@ function getRequestDetails(
             source: {
                 name: action.consuming_abstract_data_product.name,
                 email: action.requested_by.email,
-                type: t('Data Product'),
-                icon: <DataProductOutlined />,
+                type: t(abstractDataProductTypeName(action.consuming_abstract_data_product.abstract_data_product_type)),
+                icon: <AbstractProductIcon type={action.consuming_abstract_data_product.abstract_data_product_type} />,
             },
             target: {
                 name: action.output_port.name,

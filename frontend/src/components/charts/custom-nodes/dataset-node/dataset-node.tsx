@@ -1,7 +1,7 @@
 import type { Node, NodeProps, Position } from '@xyflow/react';
 import type { ReactNode } from 'react';
 
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 
 type DatasetNodeProps = Node<{
@@ -38,7 +38,7 @@ export function DatasetNode({
                 isMainNode,
                 name,
                 id,
-                icon: datasetBorderIcon,
+                icon: outputPortBorderIcon,
                 borderType: 'square',
                 nodeToolbarActions,
                 targetHandlePosition,
