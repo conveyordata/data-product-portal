@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, time
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Prototype
 
 
 def _make_mock_dataset(output_port_id: str, data_product_id: str):
@@ -297,3 +298,154 @@ class TestGetDataProductAnalyticsInputPorts:
             result = get_data_product_analytics(data_product_id=DATA_PRODUCT_ID)
 
         assert result["analytics"]["input_ports"] == []
+
+
+def _make_analytics_mocks():
+    mock_db = MagicMock()
+    mock_token = MagicMock()
+    mock_token.token = "test-token"
+    mock_user = {"id": UUID("dddddddd-0000-0000-0000-000000000001"), "email": "u@e.com"}
+
+    mock_dp = MagicMock()
+    mock_dp.id = UUID(DATA_PRODUCT_ID)
+    mock_dp.name = "Marketing Customer 360"
+    mock_dp.namespace = "marketing_customer_360"
+    mock_dp.description = "desc"
+    mock_dp.about = None
+    mock_dp.usage = None
+    mock_dp.status = "active"
+    mock_dp.owner_email = "owner@example.com"
+    mock_dp.created_at = datetime(2024, 1, 1)
+    mock_dp.updated_at = datetime(2024, 1, 1)
+    mock_dp.tags = []
+    mock_dp.domain = MagicMock()
+    mock_dp.domain.name = "Marketing"
+    mock_dp.domain.id = UUID("00000000-0000-0000-0000-000000000001")
+    mock_dp.domain.description = "Marketing domain"
+    mock_dp.lifecycle = None
+    mock_dp.type = MagicMock()
+    mock_dp.type.id = UUID("11111111-0000-0000-0000-000000000001")
+    mock_dp.type.name = "Analytics"
+    mock_dp.type.description = "Analytics type"
+    mock_dp.type.icon_key = "analytics"
+    mock_dp.data_product_settings = []
+
+    mock_ip = MagicMock()
+    mock_ip.dataset_id = UUID(OUTPUT_PORT_ID)
+    mock_ip.dataset = MagicMock()
+    mock_ip.dataset.name = "Raw Events"
+    mock_ip.dataset.data_product_id = UUID("eeeeeeee-0000-0000-0000-000000000001")
+    mock_ip.dataset.data_product = MagicMock()
+    mock_ip.dataset.data_product.name = "Events Platform"
+    mock_ip.status = DecisionStatus.APPROVED
+    mock_ip.justification = "Need raw events for modeling"
+    mock_ip.requested_by = MagicMock()
+    mock_ip.requested_by.email = "analyst@example.com"
+    mock_ip.requested_on = datetime(2024, 2, 15)
+    mock_ip.approved_on = datetime(2024, 2, 20)
+    mock_ip.denied_on = None
+
+    mock_dp_service = MagicMock()
+    mock_dp_service.get_data_product.return_value = mock_dp
+    mock_op_service = MagicMock()
+    mock_op_service.get_output_ports.return_value = []
+    mock_do_service = MagicMock()
+    mock_do_service.get_data_outputs.return_value = []
+    mock_db.scalars.return_value.unique.return_value.all.return_value = [mock_ip]
+
+    return (
+        mock_db,
+        mock_token,
+        mock_user,
+        mock_dp_service,
+        mock_op_service,
+        mock_do_service,
+        mock_ip,
+    )
+
+
+class TestGetDataProductAnalyticsEnrichedInputPorts:
+    def test_input_ports_include_freshness_info(self):
+        (
+            mock_db,
+            mock_token,
+            mock_user,
+            mock_dp_service,
+            mock_op_service,
+            mock_do_service,
+            mock_ip,
+        ) = _make_analytics_mocks()
+        mock_ip.dataset.freshness_status = "stale"
+        mock_ip.dataset.freshness_deadline_time = time(8, 0, 0)
+        mock_ip.dataset.latest_freshness_at = datetime(2024, 4, 28, 6, 0, 0)
+
+        with (
+            patch("app.mcp.mcp.get_db_session", return_value=iter([mock_db])),
+            patch("app.mcp.mcp.get_access_token", return_value=mock_token),
+            patch("app.mcp.mcp.get_mcp_authenticated_user", return_value=mock_user),
+            patch("app.mcp.mcp.DataProductService", return_value=mock_dp_service),
+            patch("app.mcp.mcp.OutputPortService", return_value=mock_op_service),
+            patch("app.mcp.mcp.DataOutputService", return_value=mock_do_service),
+            patch(
+                "app.mcp.mcp.DataProductRoleAssignmentService",
+                return_value=MagicMock(list_assignments=MagicMock(return_value=[])),
+            ),
+        ):
+            from app.mcp.mcp import get_data_product_analytics
+
+            result = get_data_product_analytics(data_product_id=DATA_PRODUCT_ID)
+
+        port = result["analytics"]["input_ports"][0]
+        assert "freshness" in port
+        assert port["freshness"]["status"] == "stale"
+        assert port["freshness"]["slo_deadline"] == "08:00:00"
+        assert port["freshness"]["last_refreshed_at"] == "2024-04-28T06:00:00"
+
+    def test_input_ports_include_owners(self):
+        (
+            mock_db,
+            mock_token,
+            mock_user,
+            mock_dp_service,
+            mock_op_service,
+            mock_do_service,
+            mock_ip,
+        ) = _make_analytics_mocks()
+        mock_ip.dataset.freshness_status = None
+        mock_ip.dataset.freshness_deadline_time = None
+        mock_ip.dataset.latest_freshness_at = None
+
+        mock_owner = MagicMock()
+        mock_owner.user = MagicMock()
+        mock_owner.user.first_name = "Alice"
+        mock_owner.user.last_name = "Smith"
+        mock_owner.user.email = "alice@example.com"
+        mock_owner.role = MagicMock()
+        mock_owner.role.name = "Owner"
+        mock_owner.role.prototype = Prototype.OWNER
+
+        mock_ra_service = MagicMock()
+        mock_ra_service.list_assignments.return_value = [mock_owner]
+
+        with (
+            patch("app.mcp.mcp.get_db_session", return_value=iter([mock_db])),
+            patch("app.mcp.mcp.get_access_token", return_value=mock_token),
+            patch("app.mcp.mcp.get_mcp_authenticated_user", return_value=mock_user),
+            patch("app.mcp.mcp.DataProductService", return_value=mock_dp_service),
+            patch("app.mcp.mcp.OutputPortService", return_value=mock_op_service),
+            patch("app.mcp.mcp.DataOutputService", return_value=mock_do_service),
+            patch(
+                "app.mcp.mcp.DataProductRoleAssignmentService",
+                return_value=mock_ra_service,
+            ),
+        ):
+            from app.mcp.mcp import get_data_product_analytics
+
+            result = get_data_product_analytics(data_product_id=DATA_PRODUCT_ID)
+
+        port = result["analytics"]["input_ports"][0]
+        assert "owners" in port
+        assert len(port["owners"]) == 1
+        assert port["owners"][0]["name"] == "Alice Smith"
+        assert port["owners"][0]["email"] == "alice@example.com"
+        assert port["owners"][0]["role"] == "Owner"

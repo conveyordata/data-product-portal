@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastmcp import Context, FastMCP
 from fastmcp.server.auth.providers.jwt import JWTVerifier
-from fastmcp.server.dependencies import AccessToken, get_access_token
+from fastmcp.server.dependencies import get_access_token
 from sqlalchemy import select as sql_select
 from sqlalchemy.orm import configure_mappers
 
@@ -14,6 +14,7 @@ from app.authorization.role_assignments.data_product.schema import (
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.schema import (
     GlobalRoleAssignmentResponse as GlobalRoleAssignmentResponse,
 )
@@ -26,6 +27,7 @@ from app.authorization.role_assignments.output_port.schema import (
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
+from app.authorization.roles.schema import Prototype
 from app.configuration.domains.schema_response import GetDomainResponse, GetDomainsItem
 from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
@@ -121,10 +123,13 @@ mcp = FastMCP(
 # ==============================================================================
 
 
-def get_mcp_authenticated_user(token: str):
-    user = get_authenticated_user(
-        token=JWTToken(sub="", token=f"Bearer {token}"), db=next(get_db_session())
-    )
+def get_mcp_authenticated_user(token: Optional[str]):
+    if token is None:
+        # OIDC disabled — mirror the REST API fallback (auth.py non-OIDC branch)
+        jwt_token = JWTToken(sub=settings.DEFAULT_USERNAME, token="")
+    else:
+        jwt_token = JWTToken(sub="", token=f"Bearer {token}")
+    user = get_authenticated_user(token=jwt_token, db=next(get_db_session()))
     return {
         "id": user.id,
         "external_id": user.external_id,
@@ -134,13 +139,31 @@ def get_mcp_authenticated_user(token: str):
     }
 
 
+def get_current_mcp_user() -> dict:
+    access_token = get_access_token()
+    return get_mcp_authenticated_user(
+        token=access_token.token if access_token else None
+    )
+
+
+def _build_freshness_dict(dataset: Any) -> Dict[str, Any]:
+    return {
+        "status": dataset.freshness_status or FreshnessStatus.UNKNOWN.value,
+        "slo_deadline": dataset.freshness_deadline_time.isoformat()
+        if dataset.freshness_deadline_time
+        else None,
+        "last_refreshed_at": dataset.latest_freshness_at.isoformat()
+        if dataset.latest_freshness_at
+        else None,
+    }
+
+
 @mcp.tool
 async def get_current_user(ctx: Context) -> dict[str, Any]:
     """Get the profile of the currently authenticated user (id, name, email).
     Use this to resolve 'me' or 'my' in user requests before querying roles or owned resources.
     Requires authentication."""
-    token = get_access_token()
-    return get_mcp_authenticated_user(token=token.token)
+    return get_current_mcp_user()
 
 
 @mcp.tool
@@ -160,10 +183,8 @@ def universal_search(
         limit: Maximum number of results per entity type
     """
     try:
-        access_token: AccessToken = get_access_token()
-
         db = next(get_db_session())
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             results = {
                 "query": query,
@@ -355,8 +376,7 @@ def search_output_ports(
     """
     try:
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             # Get all datasets and filter manually
             all_datasets = OutputPortService(db).search_datasets(
@@ -436,8 +456,7 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
     """
     try:
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             dataset = OutputPortService(db).get_dataset(
                 id=UUID(output_port_id), user=user
@@ -447,19 +466,7 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
                 return {"error": f"Dataset {output_port_id} not found"}
 
             result = GetOutputPortResponse.model_validate(dataset).model_dump()
-            result["freshness"] = {
-                "status": dataset.freshness_status or FreshnessStatus.UNKNOWN.value,
-                "slo_deadline": (
-                    dataset.freshness_deadline_time.isoformat()
-                    if dataset.freshness_deadline_time
-                    else None
-                ),
-                "last_refreshed_at": (
-                    dataset.latest_freshness_at.isoformat()
-                    if dataset.latest_freshness_at
-                    else None
-                ),
-            }
+            result["freshness"] = _build_freshness_dict(dataset)
             consuming = OutputPortService(db).get_consuming_data_products(
                 UUID(output_port_id), dataset.data_product_id
             )
@@ -521,8 +528,7 @@ def get_output_port_model(output_port_id: str) -> Dict[str, Any]:
     """
     try:
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             dataset = OutputPortService(db).get_dataset(
                 id=UUID(output_port_id), user=user
@@ -636,8 +642,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
     """
     try:
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             # Get counts by querying all and taking length
             all_data_products = DataProductService(db).get_data_products()
@@ -687,14 +692,15 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
     Use this to answer:
     - 'What does this data product expose?' or 'How many output ports does it have?' — see output_ports / technical_assets.
     - 'What does this data product consume and why?' — see input_ports with justification and status.
+    - 'Which upstream is stale?' — see input_ports[].freshness.status ('fresh'|'stale'|'unknown').
+    - 'Who do I contact about an upstream?' — see input_ports[].owners with name and email.
 
     Args:
         data_product_id: UUID obtained from search_data_products or get_data_product_details.
     """
     try:
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             # Get the data product using service
             data_product = DataProductService(db).get_data_product(
@@ -728,6 +734,8 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
                 .unique()
                 .all()
             )
+
+            dp_role_service = DataProductRoleAssignmentService(db)
 
             return {
                 "data_product": GetDataProductResponse.model_validate(
@@ -766,6 +774,19 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
                             "denied_on": ip.denied_on.isoformat()
                             if ip.denied_on
                             else None,
+                            "freshness": _build_freshness_dict(ip.dataset),
+                            "owners": [
+                                {
+                                    "name": f"{a.user.first_name} {a.user.last_name}".strip(),
+                                    "email": a.user.email,
+                                    "role": a.role.name if a.role else None,
+                                }
+                                for a in dp_role_service.list_assignments(
+                                    data_product_id=ip.dataset.data_product_id,
+                                    decision=DecisionStatus.APPROVED,
+                                )
+                                if a.role and a.role.prototype == Prototype.OWNER
+                            ],
                         }
                         for ip in input_port_records
                     ],
@@ -836,8 +857,7 @@ def get_data_product_usage(data_product_id: str, day_range: int = 30) -> Dict[st
         if day_range <= 0:
             return {"error": "day_range must be a positive integer"}
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id)
@@ -969,8 +989,7 @@ def get_output_port_resource(output_port_id: str) -> str:
     """Get output port as a resource."""
     try:
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
+        user = get_current_mcp_user()
         try:
             dataset = OutputPortService(db).get_dataset(
                 id=UUID(output_port_id), user=user
@@ -1140,8 +1159,7 @@ def get_user_roles(
     """
     try:
         db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        current_user = get_mcp_authenticated_user(token=access_token.token)
+        current_user = get_current_mcp_user()
 
         try:
             # Use current user if no user_id specified

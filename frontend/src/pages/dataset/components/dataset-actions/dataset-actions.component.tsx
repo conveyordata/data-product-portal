@@ -16,12 +16,12 @@ import styles from './dataset-actions.module.scss';
 // They are currently hardcoded because catalog integration platforms are not yet
 // part of the backend platform_tiles endpoint
 const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<string>[] => [
-    {
-        label: t('Collibra'),
-        value: 'collibra',
-        icon: collibraLogo,
-    },
-    { label: t('Datahub'), value: 'datahub', icon: datahubLogo, disabled: true },
+    // {
+    //     label: t('Collibra'),
+    //     value: 'collibra',
+    //     icon: collibraLogo,
+    // },
+    // { label: t('Datahub'), value: 'datahub', icon: datahubLogo, disabled: true },
 ];
 
 type Props = {
