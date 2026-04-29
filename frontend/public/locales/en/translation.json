@@ -479,6 +479,7 @@
     "Please select the status of the Output Port": "Please select the status of the $t(Output Port)",
     "Please select the type of the Data Product": "Please select the type of the $t(Data Product)",
     "Portal Name": "Portal Name",
+    "Pre-filled from the Exploration description. Please review before submitting.": "Pre-filled from the Exploration description. Please review before submitting.",
     "Private": "Private",
     "Private Output Ports are only visible to owners and users with access": "Private Output Ports are only visible to owners and users with access",
     "Produces": "Produces",
