@@ -1,11 +1,10 @@
 import type { Node, NodeProps, Position } from '@xyflow/react';
 import type { ReactNode } from 'react';
 
+import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
-import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
-type DataOutputNodeProps = Node<{
+type DatasetNodeProps = Node<{
     id: string;
     name: string;
     isMainNode?: boolean;
@@ -13,14 +12,12 @@ type DataOutputNodeProps = Node<{
     targetHandlePosition?: Position;
     sourceHandlePosition?: Position;
     isActive?: boolean;
-    icon_key: string;
     domain?: string;
     centeredHandles?: boolean;
-    onClick?: () => void;
-    plugins?: UiElementMetadataResponse[];
+    onClick: () => void;
 }>;
 
-export function DataOutputNode({
+export function OutputPortNode({
     data: {
         name,
         id,
@@ -28,22 +25,20 @@ export function DataOutputNode({
         nodeToolbarActions,
         targetHandlePosition,
         sourceHandlePosition,
-        icon_key,
         isActive,
         domain,
         centeredHandles,
         onClick,
-        plugins,
     },
     ...props
-}: NodeProps<DataOutputNodeProps>) {
+}: NodeProps<DatasetNodeProps>) {
     return (
         <BaseNode
             data={{
                 isMainNode,
                 name,
                 id,
-                icon: getDataOutputIcon(icon_key, plugins),
+                icon: outputPortBorderIcon,
                 borderType: 'square',
                 nodeToolbarActions,
                 targetHandlePosition,

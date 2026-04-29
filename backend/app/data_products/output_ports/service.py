@@ -8,6 +8,9 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
 from sqlalchemy.sql.base import ExecutableOption
 
+from app.abstract_data_product.graph_utils import (
+    get_graph_data_from_abstract_data_product,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
@@ -93,9 +96,7 @@ class OutputPortService:
         )
 
         if not dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
-            )
+            raise self.not_found_exception(id)
 
         if not self.is_visible_to_user(dataset, user):
             raise HTTPException(
@@ -285,9 +286,7 @@ class OutputPortService:
             id, self.db, data_product_id=data_product_id
         )
         if not dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
-            )
+            raise self.not_found_exception(id)
 
         result = copy.deepcopy(dataset)
         self.db.delete(dataset)
@@ -362,7 +361,7 @@ class OutputPortService:
         return current_dataset
 
     def get_graph_data(self, id: UUID, data_product_id: UUID, level: int) -> Graph:
-        dataset = self.db.scalar(
+        dataset: DatasetModel | None = self.db.scalar(
             select(DatasetModel)
             .where(DatasetModel.id == id)
             .where(DatasetModel.data_product_id == data_product_id)
@@ -371,6 +370,8 @@ class OutputPortService:
                 selectinload(DatasetModel.data_output_links),
             )
         )
+        if not dataset:
+            raise self.not_found_exception(id)
         nodes = [
             Node(
                 id=id,
@@ -380,20 +381,15 @@ class OutputPortService:
                     name=dataset.name,
                     link_to_id=dataset.data_product_id,
                 ),
-                type=NodeType.datasetNode,
+                type=NodeType.outputPortNode,
             )
         ]
         edges = []
         for downstream_products in dataset.data_product_links:
             nodes.append(
-                Node(
-                    id=downstream_products.consuming_abstract_data_product_id,
-                    data=NodeData(
-                        id=downstream_products.consuming_abstract_data_product_id,
-                        name=downstream_products.consuming_abstract_data_product.name,
-                        icon_key=downstream_products.consuming_abstract_data_product.type.icon_key,
-                    ),
-                    type=NodeType.dataProductNode,
+                get_graph_data_from_abstract_data_product(
+                    str(downstream_products.consuming_abstract_data_product_id),
+                    downstream_products.consuming_abstract_data_product,
                 )
             )
             edges.append(
@@ -416,7 +412,7 @@ class OutputPortService:
                         name=data_output.name,
                         link_to_id=data_output.owner_id,
                     ),
-                    type=NodeType.dataOutputNode,
+                    type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
@@ -532,8 +528,11 @@ class OutputPortService:
             )
         )
         if not dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Output port {output_port_id} not found",
-            )
+            raise self.not_found_exception(output_port_id)
         return dataset.data_product_links
+
+    def not_found_exception(self, output_port_id: UUID) -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Output port {output_port_id} not found",
+        )

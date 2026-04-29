@@ -11,6 +11,7 @@ import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-ta
 import {
     createDataOutputIdPath,
     createDataProductIdPath,
+    createExplorationIdPath,
     createMarketplaceOutputPortPath,
 } from '@/types/navigation.ts';
 
@@ -21,6 +22,15 @@ function LinkToDataProductNode({ id }: { id: string }) {
     return (
         <Link to={createDataProductIdPath(id, DataProductTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View Data Product')}</Button>
+        </Link>
+    );
+}
+
+function LinkToExplorationNode({ id }: { id: string }) {
+    const { t } = useTranslation();
+    return (
+        <Link to={createExplorationIdPath(id)} className={styles.link}>
+            <Button type="default">{t('View Exploration')}</Button>
         </Link>
     );
 }
@@ -43,4 +53,4 @@ function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: stri
     );
 }
 
-export { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode };
+export { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode, LinkToExplorationNode };

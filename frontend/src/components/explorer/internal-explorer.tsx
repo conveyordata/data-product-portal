@@ -16,7 +16,7 @@ import { useGetTechnicalAssetGraphDataQuery } from '@/store/api/services/generat
 import { type UiElementMetadataResponse, useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper.ts';
-import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
+import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode, LinkToExplorationNode } from './common.tsx';
 import styles from './explorer.module.scss';
 import { useNodeEditor } from './use-node-editor.tsx';
 import { parseEdges } from './utils.tsx';
@@ -33,7 +33,7 @@ function parseNodes(nodes: GraphNode[], t: TFunction, plugins: UiElementMetadata
         .map((node) => {
             let extra_attributes = {};
             switch (node.type) {
-                case NodeType.DataOutputNode:
+                case NodeType.TechnicalAssetNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? (
                             ''
@@ -47,7 +47,7 @@ function parseNodes(nodes: GraphNode[], t: TFunction, plugins: UiElementMetadata
                         plugins: plugins,
                     };
                     break;
-                case NodeType.DatasetNode:
+                case NodeType.OutputPortNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? (
                             ''
@@ -62,6 +62,13 @@ function parseNodes(nodes: GraphNode[], t: TFunction, plugins: UiElementMetadata
                     extra_attributes = {
                         targetHandlePosition: Position.Left,
                         nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
+                        description: node.data.description,
+                    };
+                    break;
+                case NodeType.ExplorationNode:
+                    extra_attributes = {
+                        targetHandlePosition: Position.Left,
+                        nodeToolbarActions: node.isMain ? '' : <LinkToExplorationNode id={node.data.id} />,
                         description: node.data.description,
                     };
                     break;
