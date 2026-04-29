@@ -15,7 +15,7 @@ class GetDomainResponse(BaseDomainGet):
 
 
 class GetDomainsItem(BaseDomainGet):
-    data_product_count: int
+    abstract_data_product_count: int
 
 
 class GetDomainsResponse(ORMModel):

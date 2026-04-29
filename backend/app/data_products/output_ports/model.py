@@ -116,18 +116,24 @@ class Dataset(Base, BaseORM):
     def data_product_name(self) -> str:
         return self.data_product.name
 
-    data_product_count = column_property(
-        select(func.count(InputPort.id))
-        .where(InputPort.dataset_id == id)
-        .where(InputPort.status == DecisionStatus.APPROVED)
-        .correlate_except(InputPort)
-        .scalar_subquery()
+    abstract_data_product_count = deferred(
+        column_property(
+            select(func.count(InputPort.id))
+            .where(InputPort.dataset_id == id)
+            .where(InputPort.status == DecisionStatus.APPROVED)
+            .correlate_except(InputPort)
+            .scalar_subquery()
+        ),
+        raiseload=True,
     )
-    technical_assets_count = column_property(
-        select(func.count(DataOutputDatasetAssociation.id))
-        .where(DataOutputDatasetAssociation.dataset_id == id)
-        .correlate_except(DataOutputDatasetAssociation)
-        .scalar_subquery()
+    technical_assets_count = deferred(
+        column_property(
+            select(func.count(DataOutputDatasetAssociation.id))
+            .where(DataOutputDatasetAssociation.dataset_id == id)
+            .correlate_except(DataOutputDatasetAssociation)
+            .scalar_subquery()
+        ),
+        raiseload=True,
     )
 
 

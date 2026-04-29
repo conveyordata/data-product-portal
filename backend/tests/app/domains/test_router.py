@@ -1,6 +1,6 @@
 import pytest
 
-from tests.factories import DataProductFactory, DomainFactory
+from tests.factories import DataProductFactory, DomainFactory, ExplorationFactory
 
 ENDPOINT = "/api/v2/configuration/domains"
 
@@ -18,10 +18,13 @@ class TestDomainsRouter:
         assert "id" in response.json()
 
     def test_get_domains(self, client):
-        DomainFactory()
+        domain = DomainFactory()
+        ExplorationFactory(domain=domain)
+        DataProductFactory(domain=domain)
         domains = self.get_domains(client)
         assert domains.status_code == 200
         assert len(domains.json()["domains"]) == 1
+        assert domains.json()["domains"][0]["abstract_data_product_count"] == 2
 
     def test_get_domain(self, client):
         domain = DomainFactory()
@@ -55,9 +58,11 @@ class TestDomainsRouter:
         domain = DomainFactory()
         new_domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
+        exploration = ExplorationFactory(domain=domain)
         response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 200
         assert data_product.domain.id == new_domain.id
+        assert exploration.domain.id == new_domain.id
 
     def test_create_domain_admin_only(self, domain_payload, client):
         response = self.create_domain(client, domain_payload)

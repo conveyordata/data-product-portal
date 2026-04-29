@@ -51,7 +51,7 @@ class GetOutputPortResponse(BaseOutputPortGet):
 
 
 class OutputPortsGet(BaseOutputPortGet):
-    data_product_count: int
+    abstract_data_product_count: int
     technical_assets_count: int
     data_product_name: str
     quality_status: Optional[DataQualityStatus]

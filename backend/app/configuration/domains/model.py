@@ -23,10 +23,9 @@ class Domain(Base, BaseORM):
         "AbstractDataProduct", lazy="raise"
     )
 
-    data_product_count = deferred(
+    abstract_data_product_count = deferred(
         select(func.count(literal_column("id")))
         .select_from(text("abstract_data_products"))
-        .where(text("abstract_data_product_type = 'data_product'"))
         .scalar_subquery(),
         raiseload=True,
     )

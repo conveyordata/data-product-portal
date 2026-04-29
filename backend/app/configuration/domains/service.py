@@ -25,7 +25,7 @@ class DomainService:
             self.db.scalars(
                 select(DomainModel)
                 .options(
-                    undefer(DomainModel.data_product_count),
+                    undefer(DomainModel.abstract_data_product_count),
                 )
                 .order_by(DomainModel.name)
             )
@@ -38,7 +38,7 @@ class DomainService:
             DomainModel,
             id,
             options=[
-                undefer(DomainModel.data_product_count),
+                undefer(DomainModel.abstract_data_product_count),
             ],
         )
 
