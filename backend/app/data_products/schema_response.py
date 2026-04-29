@@ -71,6 +71,10 @@ class LinkInputPortsToDataProductPost(ORMModel):
     input_port_links: list[UUID]
 
 
+class RequestInputPortsForDataProductResponse(ORMModel):
+    input_port_links: list[UUID]
+
+
 class GetDataProductsResponse(ORMModel):
     data_products: Sequence[GetDataProductsResponseItem]
 

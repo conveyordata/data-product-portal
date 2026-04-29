@@ -19,8 +19,15 @@ class DataProductUpdate(ORMModel):
     lifecycle_id: UUID
 
 
+class RequestInputPortsForDataProductRequest(ORMModel):
+    output_ports: list[UUID]
+    justification: str
+
+
 class DataProductCreate(DataProductUpdate):
     owners: Annotated[list[UUID], MinLen(1)]
+
+    input_ports: Optional[RequestInputPortsForDataProductRequest] = None
 
 
 class DataProductAboutUpdate(ORMModel):

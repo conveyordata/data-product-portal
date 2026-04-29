@@ -172,7 +172,7 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        data_product_schema = data_product.parse_pydantic_schema()
+        data_product_schema = data_product.model_dump(exclude={"input_ports"})
         tags = self._get_tags(data_product_schema.pop("tag_ids", []))
         _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)

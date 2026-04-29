@@ -30,6 +30,7 @@ from app.data_products.schema_request import (
     DataProductUpdate,
     DataProductUsageUpdate,
     LinkInputPortsToDataProduct,
+    RequestInputPortsForDataProductRequest,
 )
 from app.data_products.schema_response import (
     CreateDataProductResponse,
@@ -40,6 +41,7 @@ from app.data_products.schema_response import (
     GetDataProductsResponse,
     GetDataProductsResponseItem,
     LinkInputPortsToDataProductPost,
+    RequestInputPortsForDataProductResponse,
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
@@ -55,7 +57,7 @@ from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
 
 
 @router.post(
@@ -84,6 +86,7 @@ router = APIRouter()
 )
 def create_data_product(
     data_product: DataProductCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateDataProductResponse:
@@ -110,9 +113,14 @@ def create_data_product(
         extra_receiver_ids=owners,
     )
     RefreshInfrastructureLambda().trigger()
-    OutputPortService(db).recalculate_search_for_output_ports_of_product(
-        created_data_product.id
-    )
+    if data_product.input_ports is not None:
+        request_input_ports_for_data_product(
+            created_data_product.id,
+            data_product.input_ports,
+            background_tasks=background_tasks,
+            authenticated_user=authenticated_user,
+            db=db,
+        )
     return CreateDataProductResponse(id=created_data_product.id)
 
 
@@ -357,37 +365,35 @@ def set_value_for_data_product(
     RefreshInfrastructureLambda().trigger()
 
 
-_router = router
-router = APIRouter(tags=["Data Products"])
-route = "/v2/data_products"
-
-router.include_router(_router, prefix=route)
+_input_ports_responses = {
+    400: {
+        "description": "Output port not found",
+        "content": {
+            "application/json": {"example": {"detail": "Output port not found"}}
+        },
+    },
+    404: {
+        "description": "Data Product not found",
+        "content": {
+            "application/json": {"example": {"detail": "Data Product id not found"}}
+        },
+    },
+}
+_input_ports_dependencies = [
+    Depends(
+        Authorization.enforce(
+            Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+            DataProductResolver,
+        )
+    ),
+]
 
 
 @router.post(
-    f"{route}/{{id}}/link_input_ports",
-    responses={
-        400: {
-            "description": "Output port not found",
-            "content": {
-                "application/json": {"example": {"detail": "Output port not found"}}
-            },
-        },
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
-                DataProductResolver,
-            )
-        ),
-    ],
+    "/{id}/link_input_ports",
+    responses=_input_ports_responses,
+    dependencies=_input_ports_dependencies,
+    deprecated=True,
 )
 def link_input_ports_to_data_product(
     id: UUID,
@@ -396,10 +402,36 @@ def link_input_ports_to_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> LinkInputPortsToDataProductPost:
+    return LinkInputPortsToDataProductPost(
+        input_port_links=request_input_ports_for_data_product(
+            id,
+            RequestInputPortsForDataProductRequest(
+                output_ports=link_input_ports.input_ports,
+                justification=link_input_ports.justification,
+            ),
+            background_tasks,
+            authenticated_user,
+            db,
+        ).input_port_links
+    )
+
+
+@router.post(
+    "/{id}/input_ports",
+    responses=_input_ports_responses,
+    dependencies=_input_ports_dependencies,
+)
+def request_input_ports_for_data_product(
+    id: UUID,
+    request: RequestInputPortsForDataProductRequest,
+    background_tasks: BackgroundTasks,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> RequestInputPortsForDataProductResponse:
     input_ports = DataProductService(db).request_input_ports(
         id,
-        link_input_ports.input_ports,
-        link_input_ports.justification,
+        request.output_ports,
+        request.justification,
         actor=authenticated_user,
     )
 
@@ -431,12 +463,12 @@ def link_input_ports_to_data_product(
         input_ports, background_tasks, authenticated_user
     )
     RefreshInfrastructureLambda().trigger()
-    return LinkInputPortsToDataProductPost(
+    return RequestInputPortsForDataProductResponse(
         input_port_links=[dataset_link.id for dataset_link in input_ports]
     )
 
 
-@router.get(route)
+@router.get("")
 def get_data_products(
     db: Session = Depends(get_db_session),
     filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
@@ -451,7 +483,7 @@ def get_data_products(
     )
 
 
-@router.get(f"{route}/{{id}}/history")
+@router.get("/{id}/history")
 def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
@@ -465,14 +497,14 @@ def get_data_product_event_history(
     )
 
 
-@router.get(f"{route}/{{id}}")
+@router.get("/{id}")
 def get_data_product(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductResponse:
     return DataProductService(db).get_data_product(id)
 
 
-@router.get(f"{route}/{{id}}/input_ports")
+@router.get("/{id}/input_ports")
 def get_data_product_input_ports(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -485,7 +517,7 @@ def get_data_product_input_ports(
     )
 
 
-@router.get(f"{route}/{{id}}/rolled_up_tags")
+@router.get("/{id}/rolled_up_tags")
 def get_data_product_rolled_up_tags(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductRolledUpTagsResponse:
@@ -495,7 +527,7 @@ def get_data_product_rolled_up_tags(
 
 
 @router.delete(
-    f"{route}/{{id}}/input_ports/{{input_port_id}}",
+    "/{id}/input_ports/{input_port_id}",
     responses={
         400: {
             "description": "Output port not found",
@@ -548,7 +580,7 @@ def unlink_input_port_from_data_product(
     RefreshInfrastructureLambda().trigger()
 
 
-@router.get(f"{route}/{{id}}/settings")
+@router.get("/{id}/settings")
 def get_data_product_settings(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductSettingsResponse:

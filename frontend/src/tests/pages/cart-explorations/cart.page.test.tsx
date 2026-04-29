@@ -64,7 +64,7 @@ describe('Cart', () => {
             mockDataProductOutputPorts(mockDataProducts[0].id, []);
 
             const submitHandler = vi.fn(() => HttpResponse.json({}));
-            server.use(http.post(`*/api/v2/data_products/${mockDataProducts[0].id}/link_input_ports`, submitHandler));
+            server.use(http.post(`*/api/v2/data_products/${mockDataProducts[0].id}/input_ports`, submitHandler));
 
             renderWithProviders(<ExplorationsCart />, {
                 routerProps: { initialEntries: ['/cart'] },
@@ -176,11 +176,7 @@ describe('Cart', () => {
 
             const createdDataProductId = 'new-dp-id';
             const createHandler = vi.fn(() => HttpResponse.json({ id: createdDataProductId }));
-            const linkHandler = vi.fn(() => HttpResponse.json({}));
-            server.use(
-                http.post('*/api/v2/data_products', createHandler),
-                http.post(`*/api/v2/data_products/${createdDataProductId}/link_input_ports`, linkHandler),
-            );
+            server.use(http.post('*/api/v2/data_products', createHandler));
 
             renderWithProviders(<ExplorationsCart />, {
                 routerProps: { initialEntries: ['/cart'] },
@@ -223,7 +219,6 @@ describe('Cart', () => {
             // Assert the create and link APIs were called
             await waitFor(() => {
                 expect(createHandler).toHaveBeenCalled();
-                expect(linkHandler).toHaveBeenCalled();
             });
         });
     }, 20000);

@@ -14,7 +14,7 @@ import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     useGetDataProductsQuery,
-    useLinkInputPortsToDataProductMutation,
+    useRequestInputPortsForDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { clearCart } from '@/store/features/cart/cart-slice.ts';
@@ -36,8 +36,8 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
     const posthog = usePostHog();
     const navigate = useNavigate();
 
-    const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
-        useLinkInputPortsToDataProductMutation();
+    const [requestInputPortsForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
+        useRequestInputPortsForDataProductMutation();
     const [form] = Form.useForm<CartFormData>();
     const selectedDataProductId = Form.useWatch('dataProductId', form);
     useEffect(() => {
@@ -103,10 +103,10 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
             cartSize: cartOutputPorts?.length,
         });
         clearStorage();
-        requestDatasetAccessForDataProduct({
+        requestInputPortsForDataProduct({
             id: values.dataProductId,
-            linkInputPortsToDataProduct: {
-                input_ports: cartOutputPorts?.map((dataset) => dataset.id),
+            requestInputPortsForDataProductRequest: {
+                output_ports: cartOutputPorts?.map((dataset) => dataset.id),
                 justification: values.justification,
             },
         });
