@@ -1,4 +1,4 @@
-import Icon, {
+import {
     BarChartOutlined,
     CompassOutlined,
     HistoryOutlined,
@@ -12,10 +12,9 @@ import { Badge, Flex, Tabs, Tour, Typography } from 'antd';
 import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import datasetOutlineIcon from '@/assets/icons/outline-icons/output-port-outline-icon.svg?react';
-import dataOutputOutlineIcon from '@/assets/icons/outline-icons/technical-asset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
+import { OutputPortOutlined, TechnicalAssetOutlined } from '@/components/icons';
 import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
@@ -105,13 +104,13 @@ export function DataProductTabs({ dataProductId }: Props) {
             {
                 label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
                 key: TabKeys.InputPorts,
-                icon: <Icon component={datasetOutlineIcon} />,
+                icon: <OutputPortOutlined />,
                 children: <DataProductInputPorts dataProductId={dataProductId} />,
             },
             {
                 label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
                 key: TabKeys.OutputPorts,
-                icon: <Icon component={dataOutputOutlineIcon} />,
+                icon: <TechnicalAssetOutlined />,
                 children: <DataOutputTab dataProductId={dataProductId} />,
             },
             {
