@@ -1,5 +1,6 @@
 import { HttpResponse, http } from 'msw';
-import { describe, expect, it, vi } from 'vitest';
+import { Link, Route, Routes } from 'react-router';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import ExplorationsCart from '@/pages/cart-explorations/cart.page.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
@@ -19,6 +20,10 @@ import { mockGetTags } from '@/tests/mocks/tags.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
+afterEach(() => {
+    localStorage.clear();
+});
+
 describe('Cart', () => {
     const selectDataProducts = async () => {
         const dataProductChoice = await screen.findByText('I want to build Data Products');
@@ -27,6 +32,10 @@ describe('Cart', () => {
     const selectExplorations = async () => {
         const explorationsChoice = await screen.findByText('I want to explore this data');
         await userEvent.click(explorationsChoice);
+    };
+    const selectExistingExplorations = async () => {
+        const existingChoice = await screen.findByText('Select an existing Exploration');
+        await userEvent.click(existingChoice);
     };
     describe('Cart should support existing data products', () => {
         const selectExistingDataProducts = async () => {
@@ -266,10 +275,6 @@ describe('Cart', () => {
     }, 15000);
 
     describe('Cart should support existing explorations', () => {
-        const selectExistingExplorations = async () => {
-            const existingChoice = await screen.findByText('Select an existing Exploration');
-            await userEvent.click(existingChoice);
-        };
         it('should allow users to select an existing exploration', async () => {
             allowAllAuth();
 
@@ -334,6 +339,51 @@ describe('Cart', () => {
                 expect(
                     screen.getByText(/Output Ports in the cart, for which the selected Exploration already has access/),
                 ).toBeTruthy();
+            });
+        });
+    });
+
+    describe('Cart should persist selection choices across navigation', () => {
+        it('should restore the exploration and existing/new selection when navigating away and back', async () => {
+            allowAllAuth();
+
+            const cartOutputPortId = 'op-1';
+            mockOutputPortsSearch();
+            mockExplorationsHttp();
+            mockExplorationInputPorts(mockExplorations[0].id, []);
+
+            const CartWithRoutes = () => (
+                <Routes>
+                    <Route
+                        path="/cart"
+                        element={
+                            <>
+                                <ExplorationsCart />
+                                <Link to="/other">Go away</Link>
+                            </>
+                        }
+                    />
+                    <Route path="/other" element={<Link to="/cart">Back to cart</Link>} />
+                </Routes>
+            );
+
+            renderWithProviders(<CartWithRoutes />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await selectExistingExplorations();
+
+            // Navigate away and back
+            await userEvent.click(screen.getByText('Go away'));
+            await screen.findByText('Back to cart');
+            await userEvent.click(screen.getByText('Back to cart'));
+
+            await waitFor(() => {
+                expect(screen.getByText('Select an existing Exploration')).toBeTruthy();
+                expect(screen.getByText('I want to explore this data')).toBeTruthy();
             });
         });
     });

@@ -7,8 +7,7 @@ import {
     UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Col, Flex, Row } from 'antd';
-import { parseAsStringEnum, useQueryState } from 'nuqs';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
@@ -18,29 +17,35 @@ import { ExistingDataProductForm } from '@/pages/cart-explorations/components/ex
 import { ExistingExplorationForm } from '@/pages/cart-explorations/components/existing-exploration-form.tsx';
 import { NewDataProductForm } from '@/pages/cart-explorations/components/new-data-product-form.tsx';
 import { NewExplorationForm } from '@/pages/cart-explorations/components/new-exploration-form.tsx';
+import { useAppDispatch } from '@/store';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
+import {
+    DataProductChoiceOptions,
+    ExistingOrNew,
+    selectCartDataProductTypeChoice,
+    selectCartDatasetIds,
+    selectCartExistingOrNewChoice,
+    setCartExplorationChoices,
+} from '@/store/features/cart/cart-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-
-export enum DataProductChoiceOptions {
-    exploration = 'EXPLORATION',
-    data_product = 'DATA_PRODUCT',
-}
-
-export enum ExistingOrNew {
-    existing = 'EXISTING',
-    new = 'new',
-}
 
 function ExplorationsCart() {
     const { t } = useTranslation();
-    const [dataProductTypeChoice, setDataProductTypeChoice] = useQueryState(
-        'data-product-type-choice',
-        parseAsStringEnum<DataProductChoiceOptions>(Object.values(DataProductChoiceOptions)),
+    const dispatch = useAppDispatch();
+    const dataProductTypeChoice = useSelector(selectCartDataProductTypeChoice);
+    const existingOrNewChoice = useSelector(selectCartExistingOrNewChoice);
+
+    const setDataProductTypeChoice = useCallback(
+        (choice: DataProductChoiceOptions | null) => {
+            dispatch(setCartExplorationChoices({ dataProductTypeChoice: choice, existingOrNewChoice: null }));
+        },
+        [dispatch],
     );
-    const [existingOrNewChoice, setExistingOrNewChoice] = useQueryState(
-        'existing-or-new',
-        parseAsStringEnum<ExistingOrNew>(Object.values(ExistingOrNew)),
+    const setExistingOrNewChoice = useCallback(
+        (choice: ExistingOrNew | null) => {
+            dispatch(setCartExplorationChoices({ dataProductTypeChoice, existingOrNewChoice: choice }));
+        },
+        [dispatch, dataProductTypeChoice],
     );
     const [selectedDataProductId, setSelectedDataProductId] = useState<string | undefined>(undefined);
     const [selectedExplorationId, setSelectedExplorationId] = useState<string | undefined>(undefined);
