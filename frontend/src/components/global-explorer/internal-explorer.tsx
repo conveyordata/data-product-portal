@@ -5,11 +5,16 @@ import { type Edge, type Node, Position, ReactFlowProvider, useReactFlow } from 
 import { Flex, theme } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useState } from 'react';
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { CustomEdgeTypes } from '@/components/charts/node-editor/node-types.ts';
 import type { Node as GraphNode } from '@/store/api/services/generated/graphApi.ts';
 import { NodeType, useGetGraphDataQuery } from '@/store/api/services/generated/graphApi.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper';
-import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from '../explorer/common';
+import {
+    LinkToDataOutputNode,
+    LinkToDataProductNode,
+    LinkToDatasetNode,
+    LinkToExplorationNode,
+} from '../explorer/common';
 import styles from '../explorer/explorer.module.scss';
 import { parseEdges } from '../explorer/utils';
 import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
@@ -42,7 +47,7 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, dom
             domainNodes.push({
                 id: domainId,
                 position: { x: 0, y: 0 },
-                type: CustomNodeTypes.DomainNode,
+                type: NodeType.DomainNode,
                 draggable: true,
                 deletable: false,
                 data: {
@@ -67,7 +72,13 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, dom
                         targetHandlePosition: Position.Left,
                     };
                     break;
-                case NodeType.DatasetNode:
+                case NodeType.ExplorationNode:
+                    extra_attributes = {
+                        nodeToolbarActions: node.isMain ? null : <LinkToExplorationNode id={node.data.id} />,
+                        targetHandlePosition: Position.Left,
+                    };
+                    break;
+                case NodeType.OutputPortNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? (
                             ''
@@ -78,7 +89,7 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, dom
                         targetHandleId: 'left_t',
                     };
                     break;
-                case NodeType.DataOutputNode:
+                case NodeType.TechnicalAssetNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? (
                             ''
@@ -123,7 +134,7 @@ function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | nu
     });
 
     // Domain nodes should stay visible if any of their children are connected
-    const domainNodeIds = new Set(nodes.filter((n) => n.type === CustomNodeTypes.DomainNode).map((n) => n.id));
+    const domainNodeIds = new Set(nodes.filter((n) => n.type === NodeType.DomainNode).map((n) => n.id));
     const activeDomainIds = new Set(
         nodes.filter((n) => n.parentId && connectedNodeIds.has(n.id)).map((n) => n.parentId as string),
     );

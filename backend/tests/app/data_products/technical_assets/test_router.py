@@ -332,7 +332,7 @@ class TestTechnicalAssetsRouter:
             }
         ]
         for node in response.json()["nodes"]:
-            if node["type"] == "dataOutputNode":
+            if node["type"] == "technicalAssetNode":
                 assert node == {
                     "data": {
                         "icon_key": "S3TechnicalAssetConfiguration",
@@ -345,7 +345,7 @@ class TestTechnicalAssetsRouter:
                     },
                     "id": str(data_output.id),
                     "isMain": True,
-                    "type": "dataOutputNode",
+                    "type": "technicalAssetNode",
                 }
             else:
                 assert node == {

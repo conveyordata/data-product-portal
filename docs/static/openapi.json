@@ -11109,8 +11109,9 @@
         "type": "string",
         "enum": [
           "dataProductNode",
-          "dataOutputNode",
-          "datasetNode",
+          "explorationNode",
+          "technicalAssetNode",
+          "outputPortNode",
           "domainNode"
         ],
         "title": "NodeType"

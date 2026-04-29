@@ -583,8 +583,9 @@ export enum DataProductIconKey {
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",
-  DataOutputNode = "dataOutputNode",
-  DatasetNode = "datasetNode",
+  ExplorationNode = "explorationNode",
+  TechnicalAssetNode = "technicalAssetNode",
+  OutputPortNode = "outputPortNode",
   DomainNode = "domainNode",
 }
 export enum DecisionStatus {

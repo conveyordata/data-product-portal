@@ -17,8 +17,9 @@ class NodeData(BaseModel):
 
 class NodeType(str, Enum):
     dataProductNode = "dataProductNode"
-    dataOutputNode = "dataOutputNode"
-    datasetNode = "datasetNode"
+    explorationNode = "explorationNode"
+    technicalAssetNode = "technicalAssetNode"
+    outputPortNode = "outputPortNode"
     domainNode = "domainNode"
 
 

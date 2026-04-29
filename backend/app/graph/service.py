@@ -100,7 +100,7 @@ class GraphService:
                             domain_id=dataset["domain_id"],
                             description=dataset["description"],
                         ),
-                        type=NodeType.datasetNode,
+                        type=NodeType.outputPortNode,
                     )
                     for dataset in datasets
                 ]

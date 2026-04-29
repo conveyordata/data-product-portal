@@ -19,6 +19,7 @@ from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
+    ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
     RoleFactory,
@@ -48,7 +49,7 @@ def dataset_payload():
     }
 
 
-class TestDatasetsRouter:
+class TestOutputPortRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_create_dataset(self, dataset_payload, client):
@@ -445,7 +446,7 @@ class TestDatasetsRouter:
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.json()["status"] == "pending"
 
-    def test_get_graph_data(self, client):
+    def test_get_output_port_graph_data(self, client):
         dp = DataProductFactory()
         ds = DatasetFactory(data_product=dp)
         response = client.get(f"{ENDPOINT.format(dp.id)}/{ds.id}/graph")
@@ -461,7 +462,7 @@ class TestDatasetsRouter:
         ]
         nodes = response.json()["nodes"]
         dp_node = [node for node in nodes if node["type"] == "dataProductNode"][0]
-        ds_node = [node for node in nodes if node["type"] == "datasetNode"][0]
+        ds_node = [node for node in nodes if node["type"] == "outputPortNode"][0]
         assert dp_node == {
             "data": {
                 "id": f"{str(dp.id)}",
@@ -488,8 +489,20 @@ class TestDatasetsRouter:
             },
             "id": str(ds.id),
             "isMain": True,
-            "type": "datasetNode",
+            "type": "outputPortNode",
         }
+
+    def test_get_output_port_graph_data_exploration(self, client):
+        ds = DatasetFactory()
+        exp = ExplorationFactory()
+        InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exp,
+        )
+        response = client.get(
+            f"{ENDPOINT.format(ds.data_product.id)}/{ds.id}/graph", params={"level": 3}
+        )
+        assert response.status_code == 200, response.text
 
     def test_dataset_set_custom_setting_no_role(self, client):
         ds = DatasetFactory()

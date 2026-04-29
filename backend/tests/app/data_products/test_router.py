@@ -21,6 +21,7 @@ from tests.factories import (
     DomainFactory,
     EnvironmentFactory,
     EnvPlatformConfigFactory,
+    ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
     LifecycleFactory,
@@ -410,6 +411,20 @@ class TestDataProductsRouter:
         InputPortFactory(
             dataset=dataset,
             consuming_abstract_data_product=downstream_dataset.data_product,
+        )
+        response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
+        assert len(response.json()["edges"]) == 3
+        assert len(response.json()["nodes"]) == 4
+
+    def test_get_data_product_graph_data_exploration_included(self, client):
+        data_product = DataProductFactory()
+        dataset = DatasetFactory(data_product=data_product)
+        ta = TechnicalAssetFactory(owner=data_product)
+        DataOutputDatasetAssociationFactory(data_output=ta, dataset=dataset)
+        exp = ExplorationFactory()
+        InputPortFactory(
+            dataset=dataset,
+            consuming_abstract_data_product=exp,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert len(response.json()["edges"]) == 3

@@ -1,10 +1,9 @@
 import type { Node, NodeProps, Position } from '@xyflow/react';
 import type { ReactNode } from 'react';
-
-import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
+import explorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 
-type DatasetNodeProps = Node<{
+type ExplorationNodeProps = Node<{
     id: string;
     name: string;
     isMainNode?: boolean;
@@ -13,11 +12,12 @@ type DatasetNodeProps = Node<{
     sourceHandlePosition?: Position;
     isActive?: boolean;
     domain?: string;
+    description?: string;
     centeredHandles?: boolean;
-    onClick: () => void;
+    onClick?: () => void;
 }>;
 
-export function DatasetNode({
+export function ExplorationNode({
     data: {
         name,
         id,
@@ -27,24 +27,26 @@ export function DatasetNode({
         sourceHandlePosition,
         isActive,
         domain,
+        description,
         centeredHandles,
         onClick,
     },
     ...props
-}: NodeProps<DatasetNodeProps>) {
+}: NodeProps<ExplorationNodeProps>) {
     return (
         <BaseNode
             data={{
-                isMainNode,
                 name,
                 id,
-                icon: outputPortBorderIcon,
+                isMainNode,
+                icon: explorationBorderIcon,
                 borderType: 'square',
                 nodeToolbarActions,
-                targetHandlePosition,
                 sourceHandlePosition,
+                targetHandlePosition,
                 isActive,
                 domain,
+                description,
                 centeredHandles,
                 onClick,
             }}

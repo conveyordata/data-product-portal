@@ -3,8 +3,8 @@ import { Flex, Segmented, Select, Switch } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
+import { NodeType } from '@/store/api/services/generated/graphApi.ts';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
-import { CustomNodeTypes } from '../../charts/node-editor/node-types';
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
 
@@ -66,10 +66,11 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
 
     const groupedNodes = useMemo(() => {
         const groups = {
-            Domains: nodes.filter((node) => node.type === CustomNodeTypes.DomainNode),
-            'Data Products': nodes.filter((node) => node.type === CustomNodeTypes.DataProductNode),
-            'Output Ports': nodes.filter((node) => node.type === CustomNodeTypes.DatasetNode),
-            'Technical Assets': nodes.filter((node) => node.type === CustomNodeTypes.DataOutputNode),
+            Domains: nodes.filter((node) => node.type === NodeType.DomainNode),
+            'Data Products': nodes.filter((node) => node.type === NodeType.DataProductNode),
+            'Output Ports': nodes.filter((node) => node.type === NodeType.OutputPortNode),
+            'Technical Assets': nodes.filter((node) => node.type === NodeType.TechnicalAssetNode),
+            Explorations: nodes.filter((node) => node.type === NodeType.ExplorationNode),
         };
 
         // Sort each group by name
@@ -91,6 +92,8 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
                     return t('Output Ports');
                 case 'Technical Assets':
                     return t('Technical Assets');
+                case 'Explorations':
+                    return t('Explorations');
                 default:
                     return t('Undefined group');
             }

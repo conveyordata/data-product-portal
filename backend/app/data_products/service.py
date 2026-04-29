@@ -7,6 +7,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
+from app.abstract_data_product.graph_utils import (
+    get_graph_data_from_abstract_data_product,
+)
 from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype
@@ -309,7 +312,7 @@ class DataProductService(AbstractDataProductService):
                         name=upstream_datasets.dataset.name,
                         link_to_id=upstream_datasets.dataset.data_product_id,
                     ),
-                    type=NodeType.datasetNode,
+                    type=NodeType.outputPortNode,
                 )
             )
             edges.append(
@@ -331,7 +334,7 @@ class DataProductService(AbstractDataProductService):
                         name=data_output.name,
                         link_to_id=data_output.owner_id,
                     ),
-                    type=NodeType.dataOutputNode,
+                    type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
@@ -352,7 +355,7 @@ class DataProductService(AbstractDataProductService):
                                 name=downstream_datasets.dataset.name,
                                 link_to_id=downstream_datasets.dataset.data_product_id,
                             ),
-                            type=NodeType.datasetNode,
+                            type=NodeType.outputPortNode,
                         )
                     )
                     edges.append(
@@ -368,16 +371,11 @@ class DataProductService(AbstractDataProductService):
                         for (
                             downstream_dps
                         ) in downstream_datasets.dataset.data_product_links:
-                            icon = downstream_dps.consuming_abstract_data_product.type.icon_key
+                            node_id = f"{downstream_dps.id}_3"
                             nodes.append(
-                                Node(
-                                    id=f"{downstream_dps.id}_3",
-                                    data=NodeData(
-                                        id=f"{downstream_dps.consuming_abstract_data_product_id}",
-                                        icon_key=icon,
-                                        name=downstream_dps.consuming_abstract_data_product.name,
-                                    ),
-                                    type=NodeType.dataProductNode,
+                                get_graph_data_from_abstract_data_product(
+                                    node_id,
+                                    downstream_dps.consuming_abstract_data_product,
                                 )
                             )
                             edges.append(
@@ -386,7 +384,7 @@ class DataProductService(AbstractDataProductService):
                                         f"{downstream_dps.id}-"
                                         f"{downstream_datasets.dataset.id}-3"
                                     ),
-                                    target=f"{downstream_dps.id}_3",
+                                    target=node_id,
                                     source=f"{downstream_datasets.dataset.id}_2",
                                     animated=downstream_dps.status
                                     == DecisionStatus.APPROVED,
@@ -404,7 +402,7 @@ class DataProductService(AbstractDataProductService):
                             name=downstream_dataset.name,
                             link_to_id=downstream_dataset.data_product_id,
                         ),
-                        type=NodeType.datasetNode,
+                        type=NodeType.outputPortNode,
                     )
                 )
                 edges.append(
