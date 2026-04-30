@@ -608,6 +608,8 @@
     "The About page of your Data Product functions as a wiki page. Any relevant information about the Data Product can be documented here for easy reference by team members and stakeholders.": "The About page of your $t(Data Product) functions as a wiki page. Any relevant information about the $t(Data Product) can be documented here for easy reference by team members and stakeholders.",
     "The access type of the Output Port": "The access type of the $t(Output Port)",
     "The category breaks up the settings into sections": "The category breaks up the settings into sections",
+    "The consumer is a Data Product named: {{name}}": "The consumer is a Data Product named: {{name}}",
+    "The consumer is an Exploration named: {{name}}": "The consumer is an Exploration named: {{name}}",
     "The name of the Data Product Portal": "The name of the $t(Data Product Portal)",
     "The name of your Data Product": "The name of your $t(Data Product)",
     "The name of your Output Port": "The name of your $t(Output Port)",

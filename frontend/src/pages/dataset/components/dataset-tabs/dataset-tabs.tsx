@@ -16,8 +16,8 @@ import { ConsumersIcon, TechnicalAssetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
+import { ConsumersTab } from '@/pages/dataset/components/dataset-tabs/consumers-tab/consumers-tab';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
-import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { UsageTab } from '@/pages/dataset/components/dataset-tabs/usage-tab/usage-tab.tsx';
 import { useGetOutputPortsEventHistoryQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -87,7 +87,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 label: t('Consumers'),
                 key: TabKeys.Consumers,
                 icon: <ConsumersIcon />,
-                children: <DataProductTab outputPortId={datasetId} dataProductId={dataProductId} />,
+                children: <ConsumersTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('Explorer'),

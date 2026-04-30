@@ -1,16 +1,21 @@
 import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
-import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
+import { useTranslation } from 'react-i18next';
+import explorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import type {
-    ApproveOutputPortAsInputPortApiArg,
-    DenyOutputPortAsInputPortApiArg,
-    OutputPortInputPort,
+import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type AbstractDataProductInfo,
+    AbstractDataProductType,
+    type ApproveOutputPortAsInputPortApiArg,
+    type DenyOutputPortAsInputPortApiArg,
+    type OutputPortInputPort,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
-import { createDataProductIdPath } from '@/types/navigation.ts';
+import { createAbstractDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -27,8 +32,51 @@ type Props = {
     canApprove?: boolean;
     canRevoke?: boolean;
 };
+type NameColumnProps = {
+    status: DecisionStatus;
+    consumingAbstractDataProductId: string;
+    consumingAbstractDataProduct: AbstractDataProductInfo;
+};
+const NameColumn = ({ status, consumingAbstractDataProductId, consumingAbstractDataProduct }: NameColumnProps) => {
+    const { t } = useTranslation();
+    const popover = (() => {
+        switch (consumingAbstractDataProduct.abstract_data_product_type) {
+            case AbstractDataProductType.DataProducts:
+                return t('The consumer is a Data Product named: {{name}}', { name: consumingAbstractDataProduct.name });
+            case AbstractDataProductType.Explorations:
+                return t('The consumer is an Exploration named: {{name}}', { name: consumingAbstractDataProduct.name });
+            default:
+                return undefined;
+        }
+    })();
+    const { data: dataProduct } = useGetDataProductQuery(consumingAbstractDataProductId, {
+        skip: consumingAbstractDataProduct.abstract_data_product_type !== AbstractDataProductType.DataProducts,
+    });
+    const icon = (() => {
+        switch (consumingAbstractDataProduct.abstract_data_product_type) {
+            case AbstractDataProductType.DataProducts:
+                return getDataProductTypeIcon(dataProduct?.type?.icon_key);
+            case AbstractDataProductType.Explorations:
+                return explorationBorderIcon;
+            default:
+                return undefined;
+        }
+    })();
+    return (
+        <TableCellAvatar
+            popover={{ title: popover }}
+            linkTo={createAbstractDataProductIdPath(
+                consumingAbstractDataProductId,
+                consumingAbstractDataProduct.abstract_data_product_type,
+            )}
+            icon={<CustomSvgIconLoader iconComponent={icon} hasRoundBorder size={'default'} />}
+            title={consumingAbstractDataProduct.name}
+            subtitle={<Badge status={getDecisionStatusBadgeStatus(status)} text={getDecisionStatusLabel(t, status)} />}
+        />
+    );
+};
 
-export const getDatasetDataProductsColumns = ({
+export const getConsumerColumns = ({
     t,
     dataProductId,
     outputPortId,
@@ -52,17 +100,10 @@ export const getDatasetDataProductsColumns = ({
             dataIndex: 'name',
             render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id, status }) => {
                 return (
-                    <TableCellAvatar
-                        popover={{ title: consuming_abstract_data_product.name }}
-                        linkTo={createDataProductIdPath(consuming_abstract_data_product_id)}
-                        icon={<CustomSvgIconLoader iconComponent={chipIcon} hasRoundBorder size={'default'} />}
-                        title={consuming_abstract_data_product.name}
-                        subtitle={
-                            <Badge
-                                status={getDecisionStatusBadgeStatus(status)}
-                                text={getDecisionStatusLabel(t, status)}
-                            />
-                        }
+                    <NameColumn
+                        status={status}
+                        consumingAbstractDataProductId={consuming_abstract_data_product_id}
+                        consumingAbstractDataProduct={consuming_abstract_data_product}
                     />
                 );
             },

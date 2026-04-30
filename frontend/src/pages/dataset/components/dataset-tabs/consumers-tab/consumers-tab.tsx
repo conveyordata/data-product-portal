@@ -1,12 +1,11 @@
 import { Flex, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { DataProductTable } from '@/pages/dataset/components/dataset-tabs/data-product-tab/components/data-product-table/data-product-table.component';
 import {
     type OutputPortInputPort,
     useGetInputPortsForOutputPortQuery,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
+import { ConsumersTable } from './components/consumers-table/consumers-table.component';
 
 type Props = {
     outputPortId: string;
@@ -21,7 +20,7 @@ function filterDataProducts(dataProductLinks: OutputPortInputPort[], searchTerm:
     );
 }
 
-export function DataProductTab({ outputPortId, dataProductId }: Props) {
+export function ConsumersTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
     const { data: { input_ports: inputPorts = [] } = {}, isLoading } = useGetInputPortsForOutputPortQuery({
         outputPortId: outputPortId,
@@ -39,7 +38,7 @@ export function DataProductTab({ outputPortId, dataProductId }: Props) {
                 allowClear
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <DataProductTable
+            <ConsumersTable
                 outputPortId={outputPortId}
                 dataProductId={dataProductId}
                 dataProducts={filteredDataProducts}
