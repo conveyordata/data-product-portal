@@ -308,7 +308,22 @@ describe('Cart', () => {
             const justificationTextArea = await screen.findByPlaceholderText(
                 'Explain why you need access to these Output Ports',
             );
-            await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
+            await waitFor(() => {
+                expect(justificationTextArea).toHaveValue(mockExplorations[0].description);
+            });
+
+            // Assert that the pre-fill warning is shown
+            expect(
+                screen.getByText('Pre-filled from the Exploration description. Please review before submitting.'),
+            ).toBeTruthy();
+
+            // Assert that typing removes the warning
+            await userEvent.type(justificationTextArea, ' Extra info.');
+            await waitFor(() => {
+                expect(
+                    screen.queryByText('Pre-filled from the Exploration description. Please review before submitting.'),
+                ).toBeNull();
+            });
 
             const submitButton = await screen.findByText('Submit access requests');
             await userEvent.click(submitButton);

@@ -1,7 +1,7 @@
 import { usePostHog } from '@posthog/react';
 import { Button, Form, type FormProps, Select, Space, Typography } from 'antd';
 import { t } from 'i18next';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
@@ -35,17 +35,38 @@ export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExploratio
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
+    const currentUser = useSelector(selectCurrentUser);
+    const { data: { explorations: userExplorations = [] } = {}, isFetching: isFetchingUserExplorations } =
+        useGetExplorationsQuery(currentUser?.id, {
+            skip: currentUser === null || !currentUser?.id,
+        });
 
     const [requestInputPortsForExploration, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
         useRequestInputPortsForExplorationMutation();
     const [form] = Form.useForm<CartFormData>();
     const selectedExplorationId = Form.useWatch('explorationId', form);
+    const justification = Form.useWatch('justification', form);
+    const [justificationPrefilled, setJustificationPrefilled] = useState(false);
     useEffect(() => {
         setSelectedExplorationId(selectedExplorationId);
         return () => {
             setSelectedExplorationId(undefined);
         };
     }, [selectedExplorationId, setSelectedExplorationId]);
+    const handleUserTyping = useCallback(() => {
+        if (justificationPrefilled) {
+            setJustificationPrefilled(false);
+        }
+    }, [justificationPrefilled]);
+    useEffect(() => {
+        const selectedExploration = userExplorations.find((exp) => exp.id === selectedExplorationId);
+        if (selectedExploration && !justification) {
+            if (selectedExploration?.description && !justification) {
+                form.setFieldsValue({ justification: selectedExploration.description });
+                setJustificationPrefilled(true);
+            }
+        }
+    }, [selectedExplorationId, userExplorations, form, justification]);
     const { onValuesChange, clearStorage, isRestored } = useFormPersist<CartFormData>(
         form,
         'cart-existing-exploration-form',
@@ -99,11 +120,6 @@ export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExploratio
             },
         });
     };
-    const currentUser = useSelector(selectCurrentUser);
-    const { data: { explorations: userExplorations = [] } = {}, isFetching: isFetchingUserExplorations } =
-        useGetExplorationsQuery(currentUser?.id, {
-            skip: currentUser === null || !currentUser?.id,
-        });
     return (
         <Form<CartFormData> layout={'vertical'} form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
             <Form.Item<CartFormData>
@@ -133,7 +149,16 @@ export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExploratio
                 />
             </Form.Item>
             <FormIssues submitFormIssues={submitFormIssues} />
-            <JustificationFormItem />
+            <JustificationFormItem
+                extra={
+                    justificationPrefilled ? (
+                        <Typography.Text type="warning">
+                            {t('Pre-filled from the Exploration description. Please review before submitting.')}
+                        </Typography.Text>
+                    ) : undefined
+                }
+                onChange={handleUserTyping}
+            />
             <Form.Item label={null}>
                 <Button
                     type="primary"
