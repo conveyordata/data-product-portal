@@ -12,8 +12,8 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
-import styles from './data-product-table.module.scss';
-import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
+import styles from './consumers-table.module.scss';
+import { getConsumerColumns } from './consumers-table-columns.tsx';
 
 type Props = {
     dataProductId: string;
@@ -22,9 +22,9 @@ type Props = {
     isLoading?: boolean;
 };
 
-export function DataProductTable({ outputPortId, dataProductId, dataProducts, isLoading }: Props) {
+export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLoading }: Props) {
     const { t } = useTranslation();
-    const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
+    const [removeOutputPortAsInputPort, { isLoading: isRemovingOutputPortAsInputPort }] =
         useRemoveOutputPortAsInputPortMutation();
 
     const {
@@ -63,7 +63,7 @@ export function DataProductTable({ outputPortId, dataProductId, dataProducts, is
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (dataProductId: string, consumingDataProductName: string, consumingDataProductId: string) => {
             try {
-                await removeDatasetFromDataProduct({
+                await removeOutputPortAsInputPort({
                     outputPortId: outputPortId,
                     dataProductId,
                     removeOutputPortAsInputPortRequest: {
@@ -81,11 +81,11 @@ export function DataProductTable({ outputPortId, dataProductId, dataProducts, is
                 });
             }
         },
-        [outputPortId, removeDatasetFromDataProduct, t],
+        [outputPortId, removeOutputPortAsInputPort, t],
     );
 
     const columns: TableColumnsType<OutputPortInputPort> = useMemo(() => {
-        return getDatasetDataProductsColumns({
+        return getConsumerColumns({
             t,
             dataProductId,
             outputPortId,
@@ -93,7 +93,7 @@ export function DataProductTable({ outputPortId, dataProductId, dataProducts, is
             onAcceptDataProductDatasetLink: handleAcceptDataProductDatasetLink,
             onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
             onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
-            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataProductLink || isApprovingDataProductLink,
+            isLoading: isRemovingOutputPortAsInputPort || isRejectingDataProductLink || isApprovingDataProductLink,
             canApprove: canApprove,
             canRevoke: canRevoke,
         });
@@ -107,7 +107,7 @@ export function DataProductTable({ outputPortId, dataProductId, dataProducts, is
         handleRemoveDatasetFromDataProduct,
         isApprovingDataProductLink,
         isRejectingDataProductLink,
-        isRemovingDatasetFromDataProduct,
+        isRemovingOutputPortAsInputPort,
         canApprove,
         canRevoke,
     ]);
