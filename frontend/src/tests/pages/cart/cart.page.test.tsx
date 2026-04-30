@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { Link, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import ExplorationsCart from '@/pages/cart-explorations/cart.page.tsx';
+import Cart from '@/pages/cart/cart.page.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductTypes.ts';
@@ -39,7 +39,7 @@ describe('Cart', () => {
     };
     describe('Empty cart page', () => {
         it('Should show a message to direct to the Marketplace', async () => {
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 currentUser: mockUsers[0],
             });
@@ -66,7 +66,7 @@ describe('Cart', () => {
             const submitHandler = vi.fn(() => HttpResponse.json({}));
             server.use(http.post(`*/api/v2/data_products/${mockDataProducts[0].id}/input_ports`, submitHandler));
 
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],
@@ -102,7 +102,7 @@ describe('Cart', () => {
             mockDataProductInputPorts(mockDataProducts[0].id);
             mockDataProductOutputPorts(mockDataProducts[0].id, []);
 
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],
@@ -133,7 +133,7 @@ describe('Cart', () => {
             mockDataProductInputPorts(mockDataProducts[0].id, []);
             mockDataProductOutputPorts(mockDataProducts[0].id);
 
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],
@@ -176,7 +176,7 @@ describe('Cart', () => {
             const createHandler = vi.fn(() => HttpResponse.json({ id: createdDataProductId }));
             server.use(http.post('*/api/v2/data_products', createHandler));
 
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],
@@ -242,7 +242,7 @@ describe('Cart', () => {
             const createHandler = vi.fn(() => HttpResponse.json({ id: 'id-1' }));
             server.use(http.post('*/api/v2/explorations', createHandler));
 
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],
@@ -291,7 +291,7 @@ describe('Cart', () => {
             const submitHandler = vi.fn(() => HttpResponse.json({}));
             server.use(http.post(`*/api/v2/explorations/${mockExplorations[0].id}/input_ports`, submitHandler));
 
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],
@@ -341,7 +341,7 @@ describe('Cart', () => {
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id);
 
-            renderWithProviders(<ExplorationsCart />, {
+            renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],
@@ -376,7 +376,7 @@ describe('Cart', () => {
                         path="/cart"
                         element={
                             <>
-                                <ExplorationsCart />
+                                <Cart />
                                 <Link to="/other">Go away</Link>
                             </>
                         }

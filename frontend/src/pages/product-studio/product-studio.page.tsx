@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, ExplorationOutlined, OutputPortOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
-import { AppConfig } from '@/config/app-config';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { ExplorationsTab } from '@/pages/product-studio/components/explorations-tab/explorations-tab.component';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
@@ -43,16 +42,12 @@ export function ProductStudio() {
             icon: <DataProductOutlined />,
             children: <DataProductsTab />,
         },
-        ...(AppConfig.ExplorationsEnabled()
-            ? [
-                  {
-                      key: TabKeys.Explorations,
-                      label: t('Explorations'),
-                      icon: <ExplorationOutlined />,
-                      children: <ExplorationsTab />,
-                  },
-              ]
-            : []),
+        {
+            key: TabKeys.Explorations,
+            label: t('Explorations'),
+            icon: <ExplorationOutlined />,
+            children: <ExplorationsTab />,
+        },
         {
             key: TabKeys.OutputPorts,
             label: t('Output Ports'),

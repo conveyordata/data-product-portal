@@ -12,7 +12,7 @@ import { ResourceNameFormItem } from '@/components/resource-name/resource-name-f
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
-import { JustificationFormItem } from '@/pages/cart-explorations/components/form-item-justification.tsx';
+import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';

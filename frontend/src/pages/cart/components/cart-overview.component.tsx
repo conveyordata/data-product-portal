@@ -1,37 +1,26 @@
-import { DeleteOutlined, WarningOutlined } from '@ant-design/icons';
-import { Button, Card, Descriptions, Flex, List, Space, Tag, Tooltip, Typography } from 'antd';
+import { DeleteOutlined, WarningTwoTone } from '@ant-design/icons';
+import { Button, Card, Collapse, Descriptions, Skeleton, Space, Tag, Tooltip, Typography, theme } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { useCartOverlapCheck } from '@/pages/cart/hooks/use-cart-overlap-check.ts';
 import { useAppDispatch } from '@/store';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { removeDatasetFromCart } from '@/store/features/cart/cart-slice.ts';
-import { createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
+import { createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 
 type CartOverviewItemProps = {
     outputPort: SearchOutputPortsResponseItem;
-    overlapping?: boolean;
-    selectedDataProductId?: string;
 };
 
-function CartOverviewItem({ outputPort, overlapping, selectedDataProductId }: CartOverviewItemProps) {
+function CartOverviewItem({ outputPort }: CartOverviewItemProps) {
     const { t } = useTranslation();
     const dataProductOwners = useGetDataProductOwners(outputPort.data_product_id);
 
-    const warningTooltip = useMemo(() => {
-        if (selectedDataProductId === outputPort.data_product_id) {
-            return t('You can not request access to your own Output Ports');
-        }
-        if (overlapping) {
-            return t('The selected Data Product already has access, or an access request open for this Output Port');
-        }
-        return null;
-    }, [selectedDataProductId, outputPort.data_product_id, overlapping, t]);
-
     const renderOwners = () => {
-        if (!dataProductOwners || dataProductOwners.length === 0) return null;
+        if (!dataProductOwners || dataProductOwners.length === 0)
+            return <Typography.Text>{t('There are no owners')}</Typography.Text>;
 
         let maxVisible = 2;
         if (dataProductOwners.length > maxVisible) {
@@ -64,21 +53,6 @@ function CartOverviewItem({ outputPort, overlapping, selectedDataProductId }: Ca
     };
     return (
         <Descriptions
-            title={
-                <Tooltip title={warningTooltip}>
-                    <Space size="small">
-                        <Link
-                            to={createMarketplaceOutputPortPath(outputPort.id, outputPort.data_product_id)}
-                            target={'_blank'}
-                        >
-                            <Typography.Text>{outputPort.name}</Typography.Text>
-                        </Link>
-                        {warningTooltip !== null && (
-                            <CustomSvgIconLoader size={'x-small'} iconComponent={WarningOutlined} color={'warning'} />
-                        )}
-                    </Space>
-                </Tooltip>
-            }
             column={1}
             size={'small'}
             items={[
@@ -101,62 +75,88 @@ function CartOverviewItem({ outputPort, overlapping, selectedDataProductId }: Ca
     );
 }
 
+type CartOverviewWarningProps = {
+    outputPort: SearchOutputPortsResponseItem;
+    overlapping?: boolean;
+    selectedDataProductId?: string;
+};
+const CartOverviewWarning = ({ outputPort, overlapping, selectedDataProductId }: CartOverviewWarningProps) => {
+    const { token } = theme.useToken();
+    const { t } = useTranslation();
+
+    const warningTooltip = useMemo(() => {
+        if (selectedDataProductId === outputPort.data_product_id) {
+            return t('You can not request access to your own Output Ports');
+        }
+        if (overlapping) {
+            return t('The selected Data Product already has access, or an access request open for this Output Port');
+        }
+        return null;
+    }, [selectedDataProductId, outputPort.data_product_id, overlapping, t]);
+    if (warningTooltip === null) {
+        return null;
+    }
+    return (
+        <Tooltip title={warningTooltip}>
+            <WarningTwoTone twoToneColor={token.colorWarning} />
+        </Tooltip>
+    );
+};
+
 type CartOverviewProps = {
     cartOutputPorts?: SearchOutputPortsResponseItem[];
-    overlappingDatasetIds?: string[];
     loading?: boolean;
     selectedDataProductId?: string;
+    selectedExplorationId?: string;
 };
 
 export const CartOverview = ({
     cartOutputPorts,
     loading,
-    overlappingDatasetIds,
     selectedDataProductId,
+    selectedExplorationId,
 }: CartOverviewProps) => {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
     const removeFromCart = (datasetId: string) => {
         dispatch(removeDatasetFromCart({ datasetId }));
     };
+    const { overlappingOutputPortIds } = useCartOverlapCheck({ selectedDataProductId, selectedExplorationId });
 
     return (
-        <Card title={<Typography.Title level={3}>{t('Checkout summary')}</Typography.Title>}>
-            <List
-                footer={
-                    <Flex justify={'flex-end'}>
-                        {t('{{count}} Output Ports', {
-                            count: cartOutputPorts?.length || 0,
-                        })}
-                    </Flex>
-                }
-                style={{ width: '100%' }}
-                loading={loading}
-                dataSource={cartOutputPorts}
-                locale={{ emptyText: t('No Output Ports in cart, go to the Marketplace to add new Output Ports') }}
-                rowKey={(ds) => ds.id}
-                renderItem={(dataset) => (
-                    <List.Item>
-                        <Flex justify="space-between" align="start">
-                            <CartOverviewItem
-                                outputPort={dataset}
-                                overlapping={overlappingDatasetIds?.includes(dataset.id)}
-                                selectedDataProductId={selectedDataProductId}
-                            />
-                            <Button
-                                type={'text'}
-                                icon={<DeleteOutlined />}
-                                danger
-                                style={{ marginLeft: 'auto' }}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    removeFromCart(dataset.id);
-                                }}
-                            />
-                        </Flex>
-                    </List.Item>
-                )}
-            />
+        <Card title={<Typography.Title level={3}>{t('Cart summary')}</Typography.Title>}>
+            {loading ? (
+                <Skeleton active />
+            ) : (
+                <Collapse
+                    accordion
+                    items={cartOutputPorts?.map((outputPort) => {
+                        return {
+                            label: outputPort.name,
+                            children: <CartOverviewItem outputPort={outputPort} />,
+                            extra: (
+                                <Space size={'small'} align={'center'}>
+                                    <CartOverviewWarning
+                                        outputPort={outputPort}
+                                        overlapping={overlappingOutputPortIds?.includes(outputPort.id)}
+                                        selectedDataProductId={selectedDataProductId}
+                                    />
+                                    <Button
+                                        type={'text'}
+                                        icon={<DeleteOutlined />}
+                                        danger
+                                        size={'small'}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeFromCart(outputPort.id);
+                                        }}
+                                    />
+                                </Space>
+                            ),
+                        };
+                    })}
+                />
+            )}
         </Card>
     );
 };
