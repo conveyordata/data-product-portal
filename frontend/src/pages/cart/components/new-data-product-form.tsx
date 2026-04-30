@@ -81,6 +81,7 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
             form={form}
             onFinish={onFinish}
             layout={'vertical'}
+            autoComplete={'off'}
             onValuesChange={onValuesChange}
             initialValues={initialValues}
         >

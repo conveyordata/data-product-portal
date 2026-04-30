@@ -144,7 +144,6 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
             autoComplete={'off'}
-            requiredMark={'optional'}
             disabled={isLoading || !canEdit}
             initialValues={initialValues}
         >

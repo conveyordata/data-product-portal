@@ -320,7 +320,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             autoComplete={'off'}
-            requiredMark={'optional'}
             disabled={isLoading || !canSubmit}
             initialValues={initialValues}
         >

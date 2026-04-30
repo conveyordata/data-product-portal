@@ -223,7 +223,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete={'off'}
-                requiredMark={'optional'}
                 disabled={isLoading || !canSubmit}
                 initialValues={initialValues}
             >
