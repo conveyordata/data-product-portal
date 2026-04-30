@@ -79,7 +79,7 @@
         "i18next-cli": "^1.56.9",
         "jsdom": "^29.1.0",
         "knip": "^6.9.0",
-        "msw": "^2.13.6",
+        "msw": "^2.14.2",
         "rollup-plugin-visualizer": "^7.0.1",
         "sass": "^1.99.0",
         "typescript": "^6.0.3",
