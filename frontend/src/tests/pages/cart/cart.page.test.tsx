@@ -2,6 +2,7 @@ import { HttpResponse, http } from 'msw';
 import { Link, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import Cart from '@/pages/cart/cart.page.tsx';
+import { ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductTypes.ts';
@@ -259,9 +260,6 @@ describe('Cart', () => {
             const domainOption = await screen.findByText('Finance');
             await userEvent.click(domainOption);
 
-            const descriptionTextArea = screen.getByRole('textbox', { name: /description/i });
-            await userEvent.type(descriptionTextArea, 'A detailed description of the exploration.');
-
             const justificationTextArea = await screen.findByPlaceholderText(
                 'Explain why you need access to these Output Ports',
             );
@@ -274,8 +272,38 @@ describe('Cart', () => {
             await waitFor(() => {
                 expect(createHandler).toHaveBeenCalled();
             });
+        }, 15000);
+        it('Should show an error on duplicate namespace', async () => {
+            allowAllAuth();
+
+            // Mock the output ports search (cart items)
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize();
+            mockResourceNamesValidate(ResourceNameValidityType.Duplicate);
+            mockGetDomains();
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await createNewExploration();
+
+            const nameInput = await screen.findByRole('textbox', { name: /name/i });
+            await userEvent.type(nameInput, 'My New exploration');
+
+            // Assert the validation error is shown
+            await waitFor(() => {
+                expect(screen.getByText('An Exploration with this name already exists')).toBeTruthy();
+            });
         });
-    }, 15000);
+    });
 
     describe('Cart should support existing explorations', () => {
         it('should allow users to select an existing exploration', async () => {
