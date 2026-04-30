@@ -1,15 +1,12 @@
-import Icon from '@ant-design/icons';
-import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import { Card, Flex } from 'antd';
 import type * as React from 'react';
+import { cloneElement } from 'react';
 import styles from './card-selection.module.scss';
 
 type CardSelectionOptions<T> = {
     title: string;
     description?: string;
-    icon:
-        | React.ComponentType<CustomIconComponentProps | React.SVGProps<SVGSVGElement>>
-        | React.ForwardRefExoticComponent<CustomIconComponentProps>;
+    icon: React.JSX.Element;
     value: T;
 };
 
@@ -31,16 +28,14 @@ export const CardSelection = <T,>({ options, setSelectedChoice, selectedChoice }
                     className={selectedChoice === option.value ? styles.selectedCard : ''}
                 >
                     <Card.Meta
-                        avatar={
-                            <Icon
-                                component={option.icon}
-                                className={
-                                    selectedChoice === option.value
-                                        ? styles.selectedCardIcon
-                                        : styles.selectableCardIcon
-                                }
-                            />
-                        }
+                        avatar={cloneElement(option.icon, {
+                            className: [
+                                option.icon.props.className,
+                                selectedChoice === option.value ? styles.selectedCardIcon : styles.selectableCardIcon,
+                            ]
+                                .filter(Boolean)
+                                .join(' '),
+                        })}
                         title={option.title}
                         description={option.description}
                     />

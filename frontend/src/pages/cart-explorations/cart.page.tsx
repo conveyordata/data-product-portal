@@ -1,16 +1,11 @@
-import {
-    ExperimentOutlined,
-    GiftOutlined,
-    PlusOutlined,
-    ShopOutlined,
-    ShoppingCartOutlined,
-    UnorderedListOutlined,
-} from '@ant-design/icons';
+import { PlusOutlined, ShopOutlined, ShoppingCartOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Button, Col, Empty, Flex, Row, Typography } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
+import ExplorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { CardSelection } from '@/pages/cart-explorations/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart-explorations/components/cart-overview.component.tsx';
@@ -29,6 +24,7 @@ import {
     setCartExplorationChoices,
 } from '@/store/features/cart/cart-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
 function ExplorationsCart() {
     const { t } = useTranslation();
@@ -139,13 +135,19 @@ function ExplorationsCart() {
                             {
                                 title: t('I want to explore this data'),
                                 description: t('I need a one-time answer or personal sandbox'),
-                                icon: ExperimentOutlined,
+                                icon: <ExplorationBorderIcon />,
                                 value: DataProductChoiceOptions.exploration,
                             },
                             {
                                 title: t('I want to build Data Products'),
                                 description: t('I want to transform, govern and share data with others'),
-                                icon: GiftOutlined,
+                                icon: (
+                                    <CustomSvgIconLoader
+                                        iconComponent={getDataProductTypeIcon()}
+                                        hasRoundBorder={true}
+                                        color={'dark'}
+                                    />
+                                ),
                                 value: DataProductChoiceOptions.data_product,
                             },
                         ]}
@@ -162,7 +164,7 @@ function ExplorationsCart() {
                                                 ? t('Data Product')
                                                 : t('Exploration'),
                                     }),
-                                    icon: PlusOutlined,
+                                    icon: <PlusOutlined />,
                                     value: ExistingOrNew.new,
                                 },
                                 {
@@ -172,7 +174,7 @@ function ExplorationsCart() {
                                                 ? t('Data Product')
                                                 : t('Exploration'),
                                     }),
-                                    icon: UnorderedListOutlined,
+                                    icon: <UnorderedListOutlined />,
                                     value: ExistingOrNew.existing,
                                 },
                             ]}

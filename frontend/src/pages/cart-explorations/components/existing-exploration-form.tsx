@@ -90,7 +90,7 @@ export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExploratio
             submitFormIssues.push({
                 key: 'overlappingOutputPortId',
                 value: t(
-                    'There are currently {{count}} Output Ports in the cart, for which the selected Exploration already has access, or has an access request.',
+                    'There are currently {{count}} Output Ports in the cart, for which the selected Exploration already has access, or has an access request. Please remove them from the cart before proceeding.',
                     {
                         count: overlappingOutputPortIds.length,
                     },
