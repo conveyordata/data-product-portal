@@ -1,5 +1,5 @@
 import { usePostHog } from '@posthog/react';
-import { Layout } from 'antd';
+import { Layout, theme } from 'antd';
 import clsx from 'clsx';
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
@@ -48,6 +48,9 @@ export default function RootLayout() {
 
         if (changed_event) posthog.capture(changed_event);
     }, [pathname, posthog]);
+    const {
+        token: { colorBgContainer },
+    } = theme.useToken();
 
     return (
         <Layout className={styles.layoutWrapper} hasSider>
@@ -56,7 +59,15 @@ export default function RootLayout() {
                 <Navbar />
                 <Layout.Content className={styles.layoutContent}>
                     <div className={layoutChildrenWrapperClasses}>
-                        <Outlet />
+                        <div
+                            style={{
+                                padding: 24,
+                                minHeight: 360,
+                                background: colorBgContainer,
+                            }}
+                        >
+                            <Outlet />
+                        </div>
                     </div>
                 </Layout.Content>
             </Layout>
