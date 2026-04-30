@@ -146,9 +146,7 @@ describe('Cart', () => {
             await userEvent.click(selectDataProduct1);
 
             await waitFor(() => {
-                expect(
-                    screen.getByText(/Output Ports, that are part of your selected Data Product, please remove them/),
-                ).toBeTruthy();
+                expect(screen.getByText(/Output Ports, that are part of your selected Data Product/)).toBeTruthy();
             });
         });
     });

@@ -69,7 +69,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
             submitFormIssues.push({
                 key: 'overlappingOutputPortId',
                 value: t(
-                    'There are currently {{count}} Output Ports in the cart, for which the selected Data Product already has access, or has an access request.',
+                    'There are currently {{count}} Output Ports in the cart, for which the selected Data Product already has access, or has an access request. Please remove them from the cart before proceeding.',
                     {
                         count: overlappingOutputPortIds.length,
                     },
@@ -80,7 +80,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
             submitFormIssues.push({
                 key: 'selectedProductOutputPortsInCart',
                 value: t(
-                    'There are currently {{count}} Output Ports, that are part of your selected Data Product, please remove them.',
+                    'There are currently {{count}} Output Ports, that are part of your selected Data Product. Please remove them from the cart before proceeding.',
                     {
                         count: selectedProductOutputPortsInCartIds.length,
                     },

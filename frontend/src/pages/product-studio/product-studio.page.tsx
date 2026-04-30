@@ -77,7 +77,7 @@ export function ProductStudio() {
             <Typography.Title level={3}>{t('Product Studio')}</Typography.Title>
             <Typography.Paragraph>
                 {t(
-                    'Manage your Data Products and Output Ports. View, edit, and monitor all your data assets in one place.',
+                    'Manage your Data Products, Explorations and Output Ports. View, edit, and monitor all your data assets in one place.',
                 )}
             </Typography.Paragraph>
             <Tabs activeKey={activeTab} items={tabs} onChange={onTabChange} />
