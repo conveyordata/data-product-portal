@@ -527,7 +527,7 @@ def get_data_product_rolled_up_tags(
 
 
 @router.delete(
-    "/{id}/input_ports/{input_port_id}",
+    "/{id}/input_ports/{output_port_id}",
     responses={
         400: {
             "description": "Output port not found",
@@ -553,11 +553,11 @@ def get_data_product_rolled_up_tags(
 )
 def unlink_input_port_from_data_product(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_dataset = DataProductService(db).remove_input_port(id, input_port_id)
+    data_product_dataset = DataProductService(db).remove_input_port(id, output_port_id)
 
     event_id = EventService(db).create_event(
         CreateEvent(

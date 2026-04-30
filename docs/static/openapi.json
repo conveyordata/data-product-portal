@@ -2140,7 +2140,7 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/input_ports/{input_port_id}": {
+    "/api/v2/data_products/{id}/input_ports/{output_port_id}": {
       "delete": {
         "tags": [
           "Data Products"
@@ -2159,13 +2159,13 @@
             }
           },
           {
-            "name": "input_port_id",
+            "name": "output_port_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "Input Port Id"
+              "title": "Output Port Id"
             }
           }
         ],
@@ -6819,6 +6819,57 @@
                 "schema": {
                   "$ref": "#/components/schemas/RequestInputPortsForExplorationResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/input_ports/{output_port_id}": {
+      "delete": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Remove Input Port From Exploration",
+        "operationId": "remove_input_port_from_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },

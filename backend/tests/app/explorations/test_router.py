@@ -132,7 +132,7 @@ class TestExplorationRouter:
         assert response.status_code == 200, response.text
         assert len(response.json()["input_ports"]) == 1
 
-    def test_request_input_ports(self, client):
+    def test_request_input_ports_for_exploration(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(owner=user)
         response = client.post(
@@ -145,7 +145,7 @@ class TestExplorationRouter:
         assert response.status_code == 200, response.text
         assert len(response.json()["input_port_ids"]) == 1
 
-    def test_request_input_ports_exploration_does_not_exist(self, client):
+    def test_request_input_ports_for_exploration_does_not_exist(self, client):
         response = client.post(
             f"{ROUTE}/{uuid.uuid4()}/input_ports",
             json={
@@ -155,7 +155,7 @@ class TestExplorationRouter:
         )
         assert response.status_code == 404, response.text
 
-    def test_request_input_ports_exploration_not_owner(self, client):
+    def test_request_input_ports_for_exploration_not_owner(self, client):
         exploration = ExplorationFactory()
         response = client.post(
             f"{ROUTE}/{exploration.id}/input_ports",
@@ -163,5 +163,22 @@ class TestExplorationRouter:
                 "output_ports": [str(DatasetFactory().id)],
                 "justification": "I am your king!",
             },
+        )
+        assert response.status_code == 403, response.text
+
+    def test_remove_input_port_from_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        response = client.delete(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.dataset.id}",
+        )
+        assert response.status_code == 200, response.text
+
+    def test_remove_input_port_from_exploration_not_owner(self, client):
+        exploration = ExplorationFactory()
+        input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        response = client.delete(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.dataset.id}",
         )
         assert response.status_code == 403, response.text

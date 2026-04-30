@@ -149,7 +149,7 @@ const injectedRtkApi = api.injectEndpoints({
       UnlinkInputPortFromDataProductApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.inputPortId}`,
+        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}`,
         method: "DELETE",
       }),
     }),
@@ -239,7 +239,7 @@ export type UnlinkInputPortFromDataProductApiResponse =
   /** status 200 Successful Response */ any;
 export type UnlinkInputPortFromDataProductApiArg = {
   id: string;
-  inputPortId: string;
+  outputPortId: string;
 };
 export type GetDataProductSettingsApiResponse =
   /** status 200 Successful Response */ GetDataProductSettingsResponse;
