@@ -46,6 +46,15 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.requestInputPortsForExplorationRequest,
       }),
     }),
+    removeInputPortFromExploration: build.mutation<
+      RemoveInputPortFromExplorationApiResponse,
+      RemoveInputPortFromExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -67,6 +76,12 @@ export type RequestInputPortsForExplorationApiResponse =
 export type RequestInputPortsForExplorationApiArg = {
   id: string;
   requestInputPortsForExplorationRequest: RequestInputPortsForExplorationRequest;
+};
+export type RemoveInputPortFromExplorationApiResponse =
+  /** status 200 Successful Response */ any;
+export type RemoveInputPortFromExplorationApiArg = {
+  id: string;
+  outputPortId: string;
 };
 export type Domain = {
   id: string;
@@ -181,4 +196,5 @@ export const {
   useGetExplorationInputPortsQuery,
   useLazyGetExplorationInputPortsQuery,
   useRequestInputPortsForExplorationMutation,
+  useRemoveInputPortFromExplorationMutation,
 } = injectedRtkApi;

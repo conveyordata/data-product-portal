@@ -112,6 +112,8 @@ def request_input_ports_for_exploration(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not the owner of this exploration",
         )
+
+    RefreshInfrastructureLambda().trigger()
     return RequestInputPortsForExplorationResponse(
         input_port_ids=[
             ip.id
@@ -123,3 +125,23 @@ def request_input_ports_for_exploration(
             )
         ]
     )
+
+
+@router.delete(
+    "/{id}/input_ports/{output_port_id}",
+)
+def remove_input_port_from_exploration(
+    id: UUID,
+    output_port_id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    exploration_service = ExplorationService(db)
+    exp = exploration_service.get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+    exploration_service.remove_input_port(id, output_port_id)
+    RefreshInfrastructureLambda().trigger()

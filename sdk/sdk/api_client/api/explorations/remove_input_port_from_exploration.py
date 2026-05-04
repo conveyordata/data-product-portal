@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, cast
+from typing import Any
 from urllib.parse import quote
 from uuid import UUID
 
@@ -18,7 +18,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "delete",
-        "url": "/api/v2/data_products/{id}/input_ports/{output_port_id}".format(
+        "url": "/api/v2/explorations/{id}/input_ports/{output_port_id}".format(
             id=quote(str(id), safe=""),
             output_port_id=quote(str(output_port_id), safe=""),
         ),
@@ -33,14 +33,6 @@ def _parse_response(
     if response.status_code == 200:
         response_200 = response.json()
         return response_200
-
-    if response.status_code == 400:
-        response_400 = cast(Any, None)
-        return response_400
-
-    if response.status_code == 404:
-        response_404 = cast(Any, None)
-        return response_404
 
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
@@ -70,7 +62,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
-    """Unlink Input Port From Data Product
+    """Remove Input Port From Exploration
 
     Args:
         id (UUID):
@@ -102,7 +94,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
-    """Unlink Input Port From Data Product
+    """Remove Input Port From Exploration
 
     Args:
         id (UUID):
@@ -129,7 +121,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
-    """Unlink Input Port From Data Product
+    """Remove Input Port From Exploration
 
     Args:
         id (UUID):
@@ -159,7 +151,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
-    """Unlink Input Port From Data Product
+    """Remove Input Port From Exploration
 
     Args:
         id (UUID):

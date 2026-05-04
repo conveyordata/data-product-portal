@@ -48,9 +48,9 @@ class AbstractDataProductService:
             .all()
         )
 
-    def request_input_port(
+    def _add_single_input_port(
         self,
-        consuming_abstract_data_product_id: UUID,
+        adp: AbstractDataProduct,
         output_port_id: UUID,
         justification: str,
         *,
@@ -65,18 +65,6 @@ class AbstractDataProductService:
                 .selectinload(AbstractDataProduct.input_ports)
             ],
         )
-        adp = self.db.get(
-            AbstractDataProduct,
-            consuming_abstract_data_product_id,
-            options=[selectinload(AbstractDataProduct.input_ports)],
-            populate_existing=True,
-        )
-        if not adp:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Abstract data product {consuming_abstract_data_product_id} not found",
-            )
-
         if output_port.id in [
             link.dataset_id
             for link in adp.input_ports
@@ -84,7 +72,7 @@ class AbstractDataProductService:
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Input port connection to Output Port ({output_port_id}) already exists in {adp.abstract_data_product_type} {consuming_abstract_data_product_id}",
+                detail=f"Input port connection to Output Port ({output_port_id}) already exists in {adp.abstract_data_product_type} {adp.id}",
             )
         if output_port.data_product_id == adp.id:
             raise HTTPException(
@@ -122,8 +110,19 @@ class AbstractDataProductService:
         *,
         actor: User,
     ) -> list[InputPortModel]:
+        adp = self.db.get(
+            AbstractDataProduct,
+            id,
+            options=[selectinload(AbstractDataProduct.input_ports)],
+            populate_existing=True,
+        )
+        if not adp:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Abstract data product {id} not found",
+            )
         input_ports = [
-            self.request_input_port(id, dataset_id, justification, actor=actor)
+            self._add_single_input_port(adp, dataset_id, justification, actor=actor)
             for dataset_id in output_port_ids
         ]
         self.db.flush()
@@ -136,7 +135,10 @@ class AbstractDataProductService:
     ) -> InputPortModel:
         ensure_output_port_exists(dataset_id, self.db)
         adp = ensure_abstract_data_product_exists(
-            id, self.db, options=[selectinload(AbstractDataProduct.input_ports)]
+            id,
+            self.db,
+            options=[selectinload(AbstractDataProduct.input_ports)],
+            populate_existing=True,
         )
         data_product_dataset = next(
             (
