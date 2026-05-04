@@ -83,7 +83,6 @@ export function ThemeSettingsForm() {
                 onFinish={onSubmit}
                 onFinishFailed={onSubmitFailed}
                 autoComplete={'off'}
-                requiredMark={'optional'}
                 labelWrap
                 disabled={isLoading || !canEditForm}
                 initialValues={data}
