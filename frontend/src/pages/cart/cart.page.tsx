@@ -145,7 +145,11 @@ function ExplorationsCart() {
                                     <CustomSvgIconLoader
                                         iconComponent={getDataProductTypeIcon()}
                                         hasRoundBorder={true}
-                                        color={'dark'}
+                                        color={
+                                            dataProductTypeChoice === DataProductChoiceOptions.data_product
+                                                ? 'primary'
+                                                : 'dark'
+                                        }
                                     />
                                 ),
                                 value: DataProductChoiceOptions.data_product,
