@@ -4279,14 +4279,14 @@ shellingham = ">=1.3.0"
 
 [[package]]
 name = "types-cachetools"
-version = "6.2.0.20260408"
+version = "7.0.0.20260503"
 description = "Typing stubs for cachetools"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "types_cachetools-6.2.0.20260408-py3-none-any.whl", hash = "sha256:470e0b274737feae74beed3d764885bf4664002ecc393fba3778846b13ce92cb"},
-    {file = "types_cachetools-6.2.0.20260408.tar.gz", hash = "sha256:0d8ae2dd5ba0b4cfe6a55c34396dd0415f1be07d0033d84781cdc4ed9c2ebc6b"},
+    {file = "types_cachetools-7.0.0.20260503-py3-none-any.whl", hash = "sha256:011b4fe0e85ef05c4a2471a4fda40254a78746b501cc1727359233872bb3a4e9"},
+    {file = "types_cachetools-7.0.0.20260503.tar.gz", hash = "sha256:dfa4dcdf453f397dfc6d69fc0a57423ac1f248393f70aa56b5d05fac2df7a96c"},
 ]
 
 [[package]]
