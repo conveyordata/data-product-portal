@@ -39,7 +39,7 @@ export function DataProductLifecyclesTable() {
     const handleRemove = useCallback(
         async (lifeCycle: DataProductLifeCyclesGetItem) => {
             try {
-                await onRemoveDataProductLifecycle(lifeCycle.id);
+                await onRemoveDataProductLifecycle(lifeCycle.id).unwrap();
                 dispatchMessage({ content: t('Lifecycle removed successfully'), type: 'success' });
             } catch (_) {
                 dispatchMessage({ content: t('Could not remove lifecycle'), type: 'error' });

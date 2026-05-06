@@ -47,14 +47,14 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     const handleFinish = async (values: DomainCreate) => {
         try {
             if (mode === 'create') {
-                await createDomain(values);
+                await createDomain(values).unwrap();
             } else {
                 await editDomain({
                     id: initial?.id as string,
                     domainUpdate: {
                         ...values,
                     },
-                });
+                }).unwrap();
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
