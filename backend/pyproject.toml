@@ -71,7 +71,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.45.0"
-mypy = ">=1.20.2"
+mypy = ">=2.0.0"
 types-cachetools = "*"
 types-requests = "*"
 types-pytz = "*"
