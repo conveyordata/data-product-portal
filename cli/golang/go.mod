@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.60.2
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.19.0
-	github.com/getkin/kin-openapi v0.137.0
+	github.com/getkin/kin-openapi v0.138.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/labstack/echo/v4 v4.15.2
 	github.com/mitchellh/go-homedir v1.1.0
