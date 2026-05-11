@@ -26,9 +26,11 @@ from app.data_products.output_ports.input_ports.schema_response import (
     OutputPortInputPort,
 )
 from app.data_products.output_ports.input_ports.service import DataProductDatasetService
-from app.data_products.output_ports.schema_response import DatasetGet
+from app.data_products.output_ports.schema_response import (
+    GetOutputPortResponse,
+)
 from app.data_products.output_ports.service import OutputPortService
-from app.data_products.schema_response import DatasetLinks, GetDataProductResponse
+from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
@@ -88,9 +90,9 @@ def approve_output_port_as_input_port(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(
+        output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(output_port_id, data_product_id)
-        ).convert(),
+        ),
     )
 
     event_id = EventService(db).create_event(
@@ -142,9 +144,9 @@ def deny_output_port_as_input_port(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(
+        output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(output_port_id, data_product_id)
-        ).convert(),
+        ),
     )
 
     event_id = EventService(db).create_event(

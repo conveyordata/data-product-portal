@@ -82,7 +82,7 @@ class OutputPortService:
 
     def get_dataset(
         self, id: UUID, data_product_id: Optional[UUID] = None
-    ) -> DatasetGet:
+    ) -> DatasetModel:
         """DB fetch with all required eager loads, lifecycle defaulting, and tag roll-up.
 
         Does not enforce any visibility policy — callers decide whether to gate on user.

@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -174,9 +174,7 @@ def create_output_port(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(
-            OutputPortService(db).get_dataset(new_dataset.id, data_product_id)
-        ).convert(),
+        output_port=GetOutputPortResponse.model_validate(new_dataset),
     )
     _assign_owner_role_assignments(
         new_dataset.id, output_port.owners, db=db, actor=authenticated_user
@@ -224,7 +222,7 @@ def remove_output_port(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(output_port_for_event).convert(),
+        output_port=GetOutputPortResponse.model_validate(output_port_for_event),
     )
     dataset = OutputPortService(db).remove_dataset(id, data_product_id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
@@ -282,9 +280,9 @@ def update_output_port(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(
+        output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
+        ),
     )
 
     EventService(db).create_event(
@@ -331,9 +329,9 @@ def update_output_port_about(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(
+        output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
+        ),
     )
 
     EventService(db).create_event(
@@ -376,9 +374,9 @@ def update_output_port_status(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(
+        output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
+        ),
     )
 
     EventService(db).create_event(
@@ -425,9 +423,9 @@ def set_value_for_output_port(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=DatasetGet.model_validate(
+        output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(id, data_product_id)
-        ).convert(),
+        ),
     )
     EventService(db).create_event(
         CreateEvent(

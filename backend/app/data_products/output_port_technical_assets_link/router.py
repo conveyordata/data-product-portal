@@ -35,7 +35,9 @@ from app.data_products.output_port_technical_assets_link.service import (
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets import email
-from app.data_products.technical_assets.schema_response import DataOutputGet
+from app.data_products.technical_assets.schema_response import (
+    GetTechnicalAssetsResponseItem,
+)
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
@@ -82,12 +84,12 @@ def approve_output_port_technical_asset_link(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
             DataOutputService(db).get_data_output(
                 uuid.UUID(str(output_link.data_output.owner_id)),
                 output_link.data_output_id,
             )
-        ).convert(),
+        ),
     )
 
     event_id = EventService(db).create_event(
@@ -139,12 +141,12 @@ def deny_output_port_technical_asset_link(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
             DataOutputService(db).get_data_output(
                 uuid.UUID(str(output_link.data_output.owner_id)),
                 output_link.data_output_id,
             )
-        ).convert(),
+        ),
     )
 
     event_id = EventService(db).create_event(
@@ -204,12 +206,12 @@ def link_output_port_to_technical_asset(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
             DataOutputService(db).get_data_output(
                 uuid.UUID(str(dataset_link.data_output.owner_id)),
                 dataset_link.data_output_id,
             )
-        ).convert(),
+        ),
     )
 
     EventService(db).create_event(
@@ -278,11 +280,11 @@ def unlink_output_port_from_technical_asset(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
             DataOutputService(db).get_data_output(
                 data_product_id, uuid.UUID(str(data_output.id))
             )
-        ).convert(),
+        ),
     )
 
     event_id = EventService(db).create_event(

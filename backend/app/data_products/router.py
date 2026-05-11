@@ -5,10 +5,8 @@ from fastapi import (
     APIRouter,
     BackgroundTasks,
     Depends,
-    HTTPException,
     Query,
     Request,
-    status,
 )
 from sqlalchemy.orm import Session
 
@@ -115,11 +113,6 @@ def create_data_product(
 ) -> CreateDataProductResponse:
     created_data_product = DataProductService(db).create_data_product(data_product)
     created_id = created_data_product.id
-    request.state.event = DataProductCreatedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(created_id)
-        )
-    )
     owners = data_product.owners
     _assign_owner_role_assignments(
         created_id,
@@ -144,12 +137,19 @@ def create_data_product(
     RefreshInfrastructureLambda().trigger()
     if data_product.input_ports is not None:
         request_input_ports_for_data_product(
-            created_data_product.id,
+            created_id,
             data_product.input_ports,
             background_tasks=background_tasks,
+            http_request=request,
             authenticated_user=authenticated_user,
             db=db,
         )
+    request.state.event = DataProductCreatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(created_id)
+        )
+    )
+    return CreateDataProductResponse(id=created_id)
 
 
 def _assign_owner_role_assignments(
@@ -454,7 +454,7 @@ _input_ports_dependencies = [
 @router.post(
     "/{id}/link_input_ports",
     responses=_input_ports_responses,
-    dependencies=_input_ports_dependencies + [Depends(_emits_event(DataProductInputPortLinkedEvent))],
+    dependencies=_input_ports_dependencies,
     deprecated=True,
 )
 def link_input_ports_to_data_product(
@@ -473,8 +473,9 @@ def link_input_ports_to_data_product(
                 justification=link_input_ports.justification,
             ),
             background_tasks,
-            authenticated_user,
-            db,
+            http_request=request,
+            authenticated_user=authenticated_user,
+            db=db,
         ).input_port_links
     )
 
@@ -482,22 +483,24 @@ def link_input_ports_to_data_product(
 @router.post(
     "/{id}/input_ports",
     responses=_input_ports_responses,
-    dependencies=_input_ports_dependencies,
+    dependencies=_input_ports_dependencies
+    + [Depends(_emits_event(DataProductInputPortLinkedEvent))],
 )
 def request_input_ports_for_data_product(
     id: UUID,
-    request: RequestInputPortsForDataProductRequest,
+    body: RequestInputPortsForDataProductRequest,
     background_tasks: BackgroundTasks,
+    http_request: Request,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> RequestInputPortsForDataProductResponse:
     input_ports = DataProductService(db).request_input_ports(
         id,
-        request.output_ports,
-        request.justification,
+        body.output_ports,
+        body.justification,
         actor=authenticated_user,
     )
-    request.state.event = DataProductInputPortLinkedEvent(
+    http_request.state.event = DataProductInputPortLinkedEvent(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
         )
@@ -628,11 +631,12 @@ def unlink_input_port_from_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_product_dataset = DataProductService(db).remove_input_port(id, output_port_id)
-    )
+
     request.state.event = DataProductInputPortUnlinkedEvent(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(id)
         )
+    )
 
     event_id = EventService(db).create_event(
         CreateEvent(
