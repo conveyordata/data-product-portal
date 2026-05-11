@@ -778,9 +778,8 @@ class TestDataProductsRouter:
 
     @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_created_fires_event(self, mock_webhook, client, session, payload):
+    def test_created_fires_event(self, mock_webhook, client, payload):
         mock_webhook.return_value = AsyncMock()
-        RoleService(db=session).initialize_prototype_roles()
 
         with webhook_v2_config():
             response = client.post(ENDPOINT, json=payload)
@@ -883,8 +882,8 @@ class TestDataProductsRouter:
 
         with webhook_v2_config():
             response = client.post(
-                f"{ENDPOINT}/{dp.id}/link_input_ports",
-                json={"input_ports": [str(output_port.id)], "justification": "test"},
+                f"{ENDPOINT}/{dp.id}/input_ports",
+                json={"output_ports": [str(output_port.id)], "justification": "test"},
             )
 
         assert response.status_code == 200
@@ -899,7 +898,7 @@ class TestDataProductsRouter:
         mock_webhook.return_value = AsyncMock()
         dp = DataProductFactory()
         output_port = DatasetFactory()
-        DataProductDatasetAssociationFactory(data_product=dp, dataset=output_port)
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=output_port)
 
         with webhook_v2_config():
             response = client.delete(f"{ENDPOINT}/{dp.id}/input_ports/{output_port.id}")

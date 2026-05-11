@@ -174,7 +174,9 @@ def create_output_port(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        output_port=GetOutputPortResponse.model_validate(new_dataset),
+        output_port=GetOutputPortResponse.model_validate(
+            OutputPortService(db).get_dataset(new_dataset.id, data_product_id)
+        ),
     )
     _assign_owner_role_assignments(
         new_dataset.id, output_port.owners, db=db, actor=authenticated_user

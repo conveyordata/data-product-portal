@@ -122,7 +122,7 @@ def remove_technical_asset(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(asset_for_event).convert(),
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(asset_for_event),
     )
     data_output = DataOutputService(db).remove_data_output(data_product_id, id)
     event_id = EventService(db).create_event(
@@ -178,9 +178,9 @@ def update_technical_asset(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
             DataOutputService(db).get_data_output(data_product_id, id)
-        ).convert(),
+        ),
     )
     EventService(db).create_event(
         CreateEvent(
@@ -229,9 +229,9 @@ def update_technical_asset_status(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
             DataOutputService(db).get_data_output(data_product_id, id)
-        ).convert(),
+        ),
     )
     EventService(db).create_event(
         CreateEvent(
@@ -290,9 +290,9 @@ def create_technical_asset(
         data_product=GetDataProductResponse.model_validate(
             DataProductService(db).get_data_product(data_product_id)
         ),
-        technical_asset=DataOutputGet.model_validate(
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
             DataOutputService(db).get_data_output(data_product_id, technical_asset.id)
-        ).convert(),
+        ),
     )
     event_id = EventService(db).create_event(
         CreateEvent(
