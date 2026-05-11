@@ -26,7 +26,7 @@ async def call_v2_webhook(event_type: str, data: dict) -> None:
     }
     try:
         async with httpx.AsyncClient() as client:
-            resp = await client.post(url, json=body)
+            resp = await client.post(url, json=body, timeout=5.0)
             if resp.status_code != 200:
                 logger.warning("v2 webhook returned %d", resp.status_code)
     except Exception as e:
