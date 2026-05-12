@@ -93,6 +93,8 @@ class DataProductService(AbstractDataProductService):
         return rolled_up_tags
 
     def get_data_product(self, id: UUID) -> GetDataProductResponse:
+        # db.scalar instead of db.get: db.get uses the identity map and may return a
+        # cached object without tags loaded, silently ignoring the selectinload option.
         data_product = self.db.scalar(
             select(DataProductModel)
             .where(DataProductModel.id == id)
