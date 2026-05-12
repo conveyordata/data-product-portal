@@ -20,10 +20,14 @@ class V2Event(BaseModel):
     class-definition time so mistakes are caught on import.
     """
 
+    events = {}
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if "event_type" not in cls.__dict__:
             raise TypeError(f"{cls.__name__} must define an event_type() classmethod")
+        if cls.event_type() in cls.events:
+            raise Exception("Duplicated event type detected")
+        cls.event_type[cls.event_type()] = cls
 
     @classmethod
     def event_type(cls) -> str:
