@@ -52,7 +52,6 @@ function ExplorationsCart() {
             {
                 title: (
                     <>
-                        {' '}
                         <ShopOutlined /> {t('Marketplace')}
                     </>
                 ),

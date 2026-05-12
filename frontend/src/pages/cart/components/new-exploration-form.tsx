@@ -56,6 +56,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
         { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess, isFetching: sanitizingResourceName },
     ] = useLazySanitizeResourceNameQuery();
     const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), 500);
+    const isResourceNamePending = fetchResourceNameDebounced.isPending();
     useEffect(() => {
         fetchResourceNameDebounced(dataProductNameValue ?? '');
     }, [dataProductNameValue, fetchResourceNameDebounced]);
@@ -186,7 +187,12 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                         type="primary"
                         htmlType={'submit'}
                         loading={isCreatingExploration}
-                        disabled={isFetchingDomains || sanitizingResourceName || validatingResourceName}
+                        disabled={
+                            isFetchingDomains ||
+                            sanitizingResourceName ||
+                            validatingResourceName ||
+                            isResourceNamePending
+                        }
                     >
                         {t('Create')}
                     </Button>

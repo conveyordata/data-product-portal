@@ -13,7 +13,6 @@ export function Settings() {
             {
                 title: (
                     <>
-                        {' '}
                         <SettingOutlined /> {t('Settings')}
                     </>
                 ),

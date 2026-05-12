@@ -28,67 +28,65 @@ type Props = {
 };
 
 function parseNodes(nodes: GraphNode[], t: TFunction, plugins: UiElementMetadataResponse[]): Node[] {
-    return nodes
-        .filter((node) => node.type !== NodeType.DomainNode)
-        .map((node) => {
-            let extra_attributes = {};
-            switch (node.type) {
-                case NodeType.TechnicalAssetNode:
-                    extra_attributes = {
-                        nodeToolbarActions: node.isMain ? (
-                            ''
-                        ) : (
-                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id || ''} />
-                        ),
-                        sourceHandlePosition: Position.Left,
-                        isActive: true,
-                        targetHandlePosition: Position.Right,
-                        targetHandleId: 'left_t',
-                        plugins: plugins,
-                    };
-                    break;
-                case NodeType.OutputPortNode:
-                    extra_attributes = {
-                        nodeToolbarActions: node.isMain ? (
-                            ''
-                        ) : (
-                            <LinkToDatasetNode id={node.data.id} product_id={node.data.link_to_id || ''} />
-                        ),
-                        targetHandlePosition: Position.Right,
-                        targetHandleId: 'left_t',
-                    };
-                    break;
-                case NodeType.DataProductNode:
-                    extra_attributes = {
-                        targetHandlePosition: Position.Left,
-                        nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
-                        description: node.data.description,
-                    };
-                    break;
-                case NodeType.ExplorationNode:
-                    extra_attributes = {
-                        targetHandlePosition: Position.Left,
-                        nodeToolbarActions: node.isMain ? '' : <LinkToExplorationNode id={node.data.id} />,
-                        description: node.data.description,
-                    };
-                    break;
-                default:
-                    dispatchMessage({
-                        content: t('Unknown node type: {{ nodeType }}', { nodeType: node.type }),
-                        type: 'error',
-                    });
-            }
+    return nodes.map((node) => {
+        let extra_attributes = {};
+        switch (node.type) {
+            case NodeType.TechnicalAssetNode:
+                extra_attributes = {
+                    nodeToolbarActions: node.isMain ? (
+                        ''
+                    ) : (
+                        <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id || ''} />
+                    ),
+                    sourceHandlePosition: Position.Left,
+                    isActive: true,
+                    targetHandlePosition: Position.Right,
+                    targetHandleId: 'left_t',
+                    plugins: plugins,
+                };
+                break;
+            case NodeType.OutputPortNode:
+                extra_attributes = {
+                    nodeToolbarActions: node.isMain ? (
+                        ''
+                    ) : (
+                        <LinkToDatasetNode id={node.data.id} product_id={node.data.link_to_id || ''} />
+                    ),
+                    targetHandlePosition: Position.Right,
+                    targetHandleId: 'left_t',
+                };
+                break;
+            case NodeType.DataProductNode:
+                extra_attributes = {
+                    targetHandlePosition: Position.Left,
+                    nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
+                    description: node.data.description,
+                };
+                break;
+            case NodeType.ExplorationNode:
+                extra_attributes = {
+                    targetHandlePosition: Position.Left,
+                    nodeToolbarActions: node.isMain ? '' : <LinkToExplorationNode id={node.data.id} />,
+                    description: node.data.description,
+                };
+                break;
+            default:
+                dispatchMessage({
+                    content: t('Unknown node type: {{ nodeType }}', { nodeType: node.type }),
+                    type: 'error',
+                });
+        }
 
-            return parseRegularNode(
-                node,
-                () => {
-                    /*no sidebar with node info so no need for nodeId*/
-                },
-                false,
-                false,
-                extra_attributes,
-            );
-        });
+        return parseRegularNode(
+            node,
+            () => {
+                /*no sidebar with node info so no need for nodeId*/
+            },
+            false,
+            false,
+            extra_attributes,
+        );
+    });
 }
 
 function InternalExplorerContent({ id, type, dataProductId }: Props) {

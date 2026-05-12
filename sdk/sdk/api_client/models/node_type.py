@@ -3,7 +3,6 @@ from enum import Enum
 
 class NodeType(str, Enum):
     DATAPRODUCTNODE = "dataProductNode"
-    DOMAINNODE = "domainNode"
     EXPLORATIONNODE = "explorationNode"
     OUTPUTPORTNODE = "outputPortNode"
     TECHNICALASSETNODE = "technicalAssetNode"

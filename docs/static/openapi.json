@@ -6158,23 +6158,23 @@
         "operationId": "get_graph_data",
         "parameters": [
           {
-            "name": "data_product_nodes_enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true,
-              "title": "Data Product Nodes Enabled"
-            }
-          },
-          {
             "name": "output_port_nodes_enabled",
             "in": "query",
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "Output Port Nodes Enabled"
+            }
+          },
+          {
+            "name": "exploration_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Exploration Nodes Enabled"
             }
           }
         ],
@@ -11162,8 +11162,7 @@
           "dataProductNode",
           "explorationNode",
           "technicalAssetNode",
-          "outputPortNode",
-          "domainNode"
+          "outputPortNode"
         ],
         "title": "NodeType"
       },

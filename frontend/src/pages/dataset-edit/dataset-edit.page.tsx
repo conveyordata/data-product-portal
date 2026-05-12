@@ -52,7 +52,6 @@ export function DatasetEdit() {
                 {
                     title: (
                         <>
-                            {' '}
                             <ShopOutlined /> {t('Marketplace')}
                         </>
                     ),

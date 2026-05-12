@@ -227,6 +227,7 @@ describe('Cart', () => {
             const existingChoice = await screen.findByText('Create a new Exploration');
             await userEvent.click(existingChoice);
         };
+
         it('Should succeed when filling in the form completely', async () => {
             allowAllAuth();
 
@@ -265,7 +266,8 @@ describe('Cart', () => {
             );
             await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
 
-            const submitButton = await screen.findByText('Create');
+            const submitButton = await screen.findByRole('button', { name: 'Create' });
+            await waitFor(() => expect(submitButton).not.toBeDisabled());
             await userEvent.click(submitButton);
 
             // Assert the create and link APIs were called
@@ -273,6 +275,7 @@ describe('Cart', () => {
                 expect(createHandler).toHaveBeenCalled();
             });
         }, 15000);
+
         it('Should show an error on duplicate namespace', async () => {
             allowAllAuth();
 
