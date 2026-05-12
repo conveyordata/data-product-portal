@@ -1,19 +1,15 @@
 import { usePostHog } from '@posthog/react';
 import { Button, Flex, Form, type FormProps, Input, Select } from 'antd';
 import { useForm } from 'antd/es/form/Form';
-import TextArea from 'antd/es/input/TextArea';
 import { t } from 'i18next';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 import styles from '@/components/data-products/data-product-form/data-product-form.module.scss';
-import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
-import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
-import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
@@ -22,9 +18,9 @@ import { useCreateExplorationMutation } from '@/store/api/services/generated/exp
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import {
     ResourceNameModel,
+    ResourceNameValidityType,
     useLazySanitizeResourceNameQuery,
     useLazyValidateResourceNameQuery,
-    useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { clearCart } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -37,8 +33,6 @@ type Props = {
 
 type CreateExplorationRequestForm = {
     name: string;
-    namespace: string;
-    description: string;
     domain_id: string;
     justification: string;
 };
@@ -57,29 +51,14 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
         'cart-new-exploration-form',
     );
     const dataProductNameValue = Form.useWatch('name', form);
-    const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
-    const [sanitizeResourceName, { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess }] =
-        useLazySanitizeResourceNameQuery();
+    const [
+        sanitizeResourceName,
+        { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess, isFetching: sanitizingResourceName },
+    ] = useLazySanitizeResourceNameQuery();
     const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), 500);
     useEffect(() => {
-        if (!canEditResourceName) {
-            form.setFields([
-                {
-                    name: 'namespace',
-                    validating: true,
-                    errors: [],
-                },
-            ]);
-            fetchResourceNameDebounced(dataProductNameValue ?? '');
-        }
-    }, [form, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
-
-    useEffect(() => {
-        if (!canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
-            form.setFieldValue('namespace', sanitizedResourceName.resource_name);
-            form.validateFields(['namespace']);
-        }
-    }, [form, canEditResourceName, sanitizedResourceName, sanitizedResourceNameSuccess]);
+        fetchResourceNameDebounced(dataProductNameValue ?? '');
+    }, [dataProductNameValue, fetchResourceNameDebounced]);
 
     const onFinish: FormProps<CreateExplorationRequestForm>['onFinish'] = useCallback(
         async (values: CreateExplorationRequestForm) => {
@@ -88,8 +67,16 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     console.error('No items in cart');
                     return;
                 }
+                if (!sanitizedResourceNameSuccess || sanitizedResourceName === undefined) {
+                    console.error('resource name should be fetched first');
+                    return;
+                }
                 const { justification, ...request } = values;
                 const response = await createExploration({
+                    //For an Exploration we use the justification as description
+                    //since the meaning should be the same for an exploration
+                    description: justification,
+                    namespace: sanitizedResourceName.resource_name,
                     input_ports: {
                         output_ports: cartOutputPorts?.map((dataset) => dataset.id),
                         justification,
@@ -102,64 +89,85 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     cartSize: cartOutputPorts?.length,
                 });
                 clearStorage();
-                navigate(createExplorationIdPath(response.id, ExplorationTabKeys.InputPorts));
+                navigate(createExplorationIdPath(response.id));
             } catch {
                 dispatchMessage({ content: t('Failed to create Exploration. Please try again.'), type: 'error' });
             }
         },
-        [posthog, createExploration, clearStorage, cartOutputPorts, dispatch, navigate],
+        [
+            posthog,
+            createExploration,
+            clearStorage,
+            cartOutputPorts,
+            dispatch,
+            navigate,
+            sanitizedResourceNameSuccess,
+            sanitizedResourceName,
+        ],
     );
     const initialValues = {
         owners: currentUser?.id ? [currentUser?.id] : [],
     };
-    const [validateResourceName, { isFetching: validatingResourceName }] = useLazyValidateResourceNameQuery();
-    const { data: constraints, isFetching: loadingResourceNameConstraints } = useResourceNameConstraintsQuery();
-    const resourceNameValidationCallback = useCallback(
-        (resourceName: string) =>
+    const [validateResourceName, { data: validationResult, isFetching: validatingResourceName }] =
+        useLazyValidateResourceNameQuery();
+    useEffect(() => {
+        if (sanitizedResourceName?.resource_name) {
             validateResourceName({
-                resourceName: resourceName,
+                resourceName: sanitizedResourceName?.resource_name,
                 model: ResourceNameModel.Exploration,
-            }).unwrap(),
-        [validateResourceName],
-    );
+            });
+        }
+    }, [sanitizedResourceName, validateResourceName]);
+    useEffect(() => {
+        if (validationResult && validationResult.validity !== ResourceNameValidityType.Valid) {
+            const errorMessages: Record<string, string> = {
+                [ResourceNameValidityType.Duplicate]: t('An Exploration with this name already exists'),
+                [ResourceNameValidityType.InvalidLength]: t('The name of the Exploration is too long'),
+            };
+            form.setFields([
+                {
+                    name: 'name',
+                    errors: [errorMessages[validationResult.validity] ?? t('Invalid Exploration name')],
+                },
+            ]);
+        } else if (validationResult?.validity === ResourceNameValidityType.Valid) {
+            form.setFields([
+                {
+                    name: 'name',
+                    errors: [],
+                },
+            ]);
+        }
+    }, [validationResult, form]);
     return (
         <Form<CreateExplorationRequestForm>
             form={form}
             onFinish={onFinish}
             layout={'vertical'}
             onValuesChange={onValuesChange}
+            autoComplete={'off'}
             initialValues={initialValues}
         >
             <Form.Item<DataProductCreate>
                 name={'name'}
                 label={t('Name')}
-                tooltip={t('The name of your Data Product')}
+                tooltip={t('The name of your Exploration')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please provide the name of the Data Product'),
+                        message: t('Please provide the name of the Exploration'),
                     },
                 ]}
             >
                 <Input />
             </Form.Item>
-            <ResourceNameFormItem
-                form={form}
-                tooltip={t('The namespace of the Data Product')}
-                max_length={constraints?.max_length}
-                editToggleDisabled={false}
-                canEditResourceName={canEditResourceName}
-                toggleCanEditResourceName={() => setCanEditResourceName((prev) => !prev)}
-                validationRequired
-                validateResourceName={resourceNameValidationCallback}
-            />
             <Form.Item<CreateExplorationRequestForm>
                 name={'domain_id'}
                 label={t('Domain')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the domain of the Data Product'),
+                        message: t('Please select the domain of the Exploration'),
                     },
                 ]}
             >
@@ -170,25 +178,6 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     allowClear
                 />
             </Form.Item>
-            <Form.Item<CreateExplorationRequestForm>
-                name={'description'}
-                label={t('Description')}
-                tooltip={t('A description for the Data Product')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please provide a description for the Data Product'),
-                    },
-                    {
-                        max: MAX_DESCRIPTION_INPUT_LENGTH,
-                        message: t('Description must be less than {{length}} characters', {
-                            length: MAX_DESCRIPTION_INPUT_LENGTH,
-                        }),
-                    },
-                ]}
-            >
-                <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
-            </Form.Item>
             <JustificationFormItem />
             <Form.Item>
                 <Flex justify="end">
@@ -197,7 +186,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                         type="primary"
                         htmlType={'submit'}
                         loading={isCreatingExploration}
-                        disabled={isFetchingDomains || validatingResourceName || loadingResourceNameConstraints}
+                        disabled={isFetchingDomains || sanitizingResourceName || validatingResourceName}
                     >
                         {t('Create')}
                     </Button>
