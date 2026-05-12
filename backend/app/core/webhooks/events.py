@@ -4,6 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from app.abstract_data_product.schema_response import GetAbstractDataProductResponse
 from app.data_products.output_ports.schema_response import GetOutputPortResponse
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.technical_assets.schema_response import (
@@ -186,7 +187,7 @@ class OutputPortLinkApprovedEvent(V2Event):
     def event_type(cls) -> str:
         return "output_port.link_approved"
 
-    data_product: GetDataProductResponse
+    abstract_data_product: GetAbstractDataProductResponse
     output_port: GetOutputPortResponse
 
 
@@ -195,7 +196,7 @@ class OutputPortLinkDeniedEvent(V2Event):
     def event_type(cls) -> str:
         return "output_port.link_denied"
 
-    data_product: GetDataProductResponse
+    abstract_data_product: GetAbstractDataProductResponse
     output_port: GetOutputPortResponse
 
 

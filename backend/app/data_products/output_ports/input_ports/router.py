@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.schema_response import GetAbstractDataProductResponse
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import (
@@ -30,8 +31,6 @@ from app.data_products.output_ports.schema_response import (
     GetOutputPortResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
-from app.data_products.schema_response import GetDataProductResponse
-from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -87,8 +86,8 @@ def approve_output_port_as_input_port(
         actor=authenticated_user,
     )
     http_request.state.event = OutputPortLinkApprovedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
+        abstract_data_product=GetAbstractDataProductResponse.model_validate(
+            data_product_link.consuming_abstract_data_product
         ),
         output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(output_port_id, data_product_id)
@@ -141,8 +140,8 @@ def deny_output_port_as_input_port(
         actor=authenticated_user,
     )
     http_request.state.event = OutputPortLinkDeniedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(data_product_id)
+        abstract_data_product=GetAbstractDataProductResponse.model_validate(
+            data_product_link.consuming_abstract_data_product
         ),
         output_port=GetOutputPortResponse.model_validate(
             OutputPortService(db).get_dataset(output_port_id, data_product_id)
