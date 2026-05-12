@@ -46,7 +46,7 @@ export function DataProductTypeTable() {
                 setMigrateFrom(type);
                 handleOpenMigrate();
             } else {
-                await onRemoveDataProductType(type.id);
+                await onRemoveDataProductType(type.id).unwrap();
                 dispatchMessage({ content: t('Type removed successfully'), type: 'success' });
             }
         } catch (_error) {

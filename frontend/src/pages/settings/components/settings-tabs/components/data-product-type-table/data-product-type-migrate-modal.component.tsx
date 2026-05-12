@@ -29,8 +29,8 @@ export function CreateDataProductTypeMigrateModal({ isOpen, onClose, migrateFrom
 
     const handleFinish = async (values: DataProductTypeMigrateFormValues) => {
         try {
-            await migrateDataProductType({ fromId: migrateFrom?.id, toId: values.toId });
-            await onRemoveDataProductType(migrateFrom?.id);
+            await migrateDataProductType({ fromId: migrateFrom?.id, toId: values.toId }).unwrap();
+            await onRemoveDataProductType(migrateFrom?.id).unwrap();
             dispatchMessage({ content: t('Type migrated and deleted successfully'), type: 'success' });
             form.resetFields();
             onClose();

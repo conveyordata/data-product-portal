@@ -53,14 +53,14 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
     const handleFinish = async (values: DataProductTypeCreate) => {
         try {
             if (mode === 'create') {
-                await createDataProductType(values);
+                await createDataProductType(values).unwrap();
             } else {
                 await editDataProductType({
                     id: initial?.id as string,
                     dataProductTypeUpdate: {
                         ...values,
                     },
-                });
+                }).unwrap();
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
