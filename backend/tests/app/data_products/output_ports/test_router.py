@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.authorization.roles.schema import Scope
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
@@ -49,6 +49,19 @@ def dataset_payload():
         "access_type": OutputPortAccessType.RESTRICTED.value,
         "domain_id": str(domain.id),
         "data_product_id": str(data_product.id),
+    }
+
+
+@pytest.fixture
+def output_port_event_payload():
+    user = UserFactory()
+    return {
+        "name": "Test Output Port",
+        "description": "Test Description",
+        "namespace": "test-op-event-ns",
+        "tag_ids": [],
+        "owners": [str(user.id)],
+        "access_type": "restricted",
     }
 
 
@@ -859,30 +872,14 @@ class TestOutputPortRouter:
             f"{ENDPOINT.format(data_product_id)}/{output_port_id}/history"
         )
 
-
-@pytest.fixture
-def output_port_event_payload():
-    user = UserFactory()
-    return {
-        "name": "Test Output Port",
-        "description": "Test Description",
-        "namespace": "test-op-event-ns",
-        "tag_ids": [],
-        "owners": [str(user.id)],
-        "access_type": "restricted",
-    }
-
     @staticmethod
     def _op_endpoint(dp_id):
         return ENDPOINT.format(dp_id)
 
     @pytest.mark.usefixtures("admin")
     @patch("app.core.webhooks.v2.call_v2_webhook")
-    def test_created_fires_event(
-        self, mock_webhook, client, session, output_port_event_payload
-    ):
+    def test_created_fires_event(self, mock_webhook, client, output_port_event_payload):
         mock_webhook.return_value = AsyncMock()
-        RoleService(db=session).initialize_prototype_roles()
         dp = DataProductFactory()
 
         with webhook_v2_config():
@@ -999,8 +996,10 @@ def output_port_event_payload():
         dp = DataProductFactory()
         op = DatasetFactory(data_product=dp)
         consumer_dp = DataProductFactory()
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_dp, dataset=op, status=DecisionStatus.PENDING
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_dp,
+            dataset=op,
+            status=DecisionStatus.PENDING,
         )
 
         with webhook_v2_config():
@@ -1013,7 +1012,7 @@ def output_port_event_payload():
         mock_webhook.assert_awaited_once()
         event_type, data = mock_webhook.call_args.args
         assert event_type == "output_port.link_approved"
-        assert "data_product" in data
+        assert "abstract_data_product" in data
         assert "output_port" in data
 
     @pytest.mark.usefixtures("admin")
@@ -1023,8 +1022,10 @@ def output_port_event_payload():
         dp = DataProductFactory()
         op = DatasetFactory(data_product=dp)
         consumer_dp = DataProductFactory()
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_dp, dataset=op, status=DecisionStatus.PENDING
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_dp,
+            dataset=op,
+            status=DecisionStatus.PENDING,
         )
 
         with webhook_v2_config():
@@ -1037,7 +1038,7 @@ def output_port_event_payload():
         mock_webhook.assert_awaited_once()
         event_type, data = mock_webhook.call_args.args
         assert event_type == "output_port.link_denied"
-        assert "data_product" in data
+        assert "abstract_data_product" in data
         assert "output_port" in data
 
     @pytest.mark.usefixtures("admin")
