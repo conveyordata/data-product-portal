@@ -23,7 +23,7 @@
     },
     "dependencies": {
         "@ant-design/charts": "^2.6.7",
-        "@ant-design/icons": "^6.2.2",
+        "@ant-design/icons": "^6.2.3",
         "@dagrejs/dagre": "^2.0.4",
         "@fontsource/inter": "^5.2.8",
         "@posthog/react": "^1.9.0",
