@@ -66,7 +66,6 @@ export function Dataset() {
                 {
                     title: (
                         <>
-                            {' '}
                             <ShopOutlined /> {t('Marketplace')}
                         </>
                     ),

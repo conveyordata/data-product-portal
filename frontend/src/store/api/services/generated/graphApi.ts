@@ -5,8 +5,8 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/graph`,
         params: {
-          data_product_nodes_enabled: queryArg.dataProductNodesEnabled,
           output_port_nodes_enabled: queryArg.outputPortNodesEnabled,
+          exploration_nodes_enabled: queryArg.explorationNodesEnabled,
         },
       }),
     }),
@@ -17,8 +17,8 @@ export { injectedRtkApi as api };
 export type GetGraphDataApiResponse =
   /** status 200 Successful Response */ Graph;
 export type GetGraphDataApiArg = {
-  dataProductNodesEnabled?: boolean;
   outputPortNodesEnabled?: boolean;
+  explorationNodesEnabled?: boolean;
 };
 export type Edge = {
   id: string;
@@ -62,7 +62,6 @@ export enum NodeType {
   ExplorationNode = "explorationNode",
   TechnicalAssetNode = "technicalAssetNode",
   OutputPortNode = "outputPortNode",
-  DomainNode = "domainNode",
 }
 export const { useGetGraphDataQuery, useLazyGetGraphDataQuery } =
   injectedRtkApi;

@@ -12,15 +12,15 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    data_product_nodes_enabled: bool | Unset = True,
-    output_port_nodes_enabled: bool | Unset = True,
+    output_port_nodes_enabled: bool | Unset = False,
+    exploration_nodes_enabled: bool | Unset = False,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    params["data_product_nodes_enabled"] = data_product_nodes_enabled
-
     params["output_port_nodes_enabled"] = output_port_nodes_enabled
+
+    params["exploration_nodes_enabled"] = exploration_nodes_enabled
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -66,14 +66,14 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    data_product_nodes_enabled: bool | Unset = True,
-    output_port_nodes_enabled: bool | Unset = True,
+    output_port_nodes_enabled: bool | Unset = False,
+    exploration_nodes_enabled: bool | Unset = False,
 ) -> Response[Graph | HTTPValidationError]:
     """Get Graph Data
 
     Args:
-        data_product_nodes_enabled (bool | Unset):  Default: True.
-        output_port_nodes_enabled (bool | Unset):  Default: True.
+        output_port_nodes_enabled (bool | Unset):  Default: False.
+        exploration_nodes_enabled (bool | Unset):  Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -84,8 +84,8 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        data_product_nodes_enabled=data_product_nodes_enabled,
         output_port_nodes_enabled=output_port_nodes_enabled,
+        exploration_nodes_enabled=exploration_nodes_enabled,
     )
 
     response = client.get_httpx_client().request(
@@ -98,14 +98,14 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    data_product_nodes_enabled: bool | Unset = True,
-    output_port_nodes_enabled: bool | Unset = True,
+    output_port_nodes_enabled: bool | Unset = False,
+    exploration_nodes_enabled: bool | Unset = False,
 ) -> Graph | HTTPValidationError | None:
     """Get Graph Data
 
     Args:
-        data_product_nodes_enabled (bool | Unset):  Default: True.
-        output_port_nodes_enabled (bool | Unset):  Default: True.
+        output_port_nodes_enabled (bool | Unset):  Default: False.
+        exploration_nodes_enabled (bool | Unset):  Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -117,22 +117,22 @@ def sync(
 
     return sync_detailed(
         client=client,
-        data_product_nodes_enabled=data_product_nodes_enabled,
         output_port_nodes_enabled=output_port_nodes_enabled,
+        exploration_nodes_enabled=exploration_nodes_enabled,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    data_product_nodes_enabled: bool | Unset = True,
-    output_port_nodes_enabled: bool | Unset = True,
+    output_port_nodes_enabled: bool | Unset = False,
+    exploration_nodes_enabled: bool | Unset = False,
 ) -> Response[Graph | HTTPValidationError]:
     """Get Graph Data
 
     Args:
-        data_product_nodes_enabled (bool | Unset):  Default: True.
-        output_port_nodes_enabled (bool | Unset):  Default: True.
+        output_port_nodes_enabled (bool | Unset):  Default: False.
+        exploration_nodes_enabled (bool | Unset):  Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -143,8 +143,8 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        data_product_nodes_enabled=data_product_nodes_enabled,
         output_port_nodes_enabled=output_port_nodes_enabled,
+        exploration_nodes_enabled=exploration_nodes_enabled,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -155,14 +155,14 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    data_product_nodes_enabled: bool | Unset = True,
-    output_port_nodes_enabled: bool | Unset = True,
+    output_port_nodes_enabled: bool | Unset = False,
+    exploration_nodes_enabled: bool | Unset = False,
 ) -> Graph | HTTPValidationError | None:
     """Get Graph Data
 
     Args:
-        data_product_nodes_enabled (bool | Unset):  Default: True.
-        output_port_nodes_enabled (bool | Unset):  Default: True.
+        output_port_nodes_enabled (bool | Unset):  Default: False.
+        exploration_nodes_enabled (bool | Unset):  Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -175,7 +175,7 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
-            data_product_nodes_enabled=data_product_nodes_enabled,
             output_port_nodes_enabled=output_port_nodes_enabled,
+            exploration_nodes_enabled=exploration_nodes_enabled,
         )
     ).parsed

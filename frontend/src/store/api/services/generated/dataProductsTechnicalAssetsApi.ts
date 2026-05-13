@@ -609,7 +609,6 @@ export enum NodeType {
   ExplorationNode = "explorationNode",
   TechnicalAssetNode = "technicalAssetNode",
   OutputPortNode = "outputPortNode",
-  DomainNode = "domainNode",
 }
 export const {
   useApproveOutputPortTechnicalAssetLinkMutation,

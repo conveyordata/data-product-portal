@@ -39,8 +39,7 @@ class TestGraphServiceEnumMatching:
         # Get graph data
         service = GraphService(test_session)
         graph_data = service.get_graph_data(
-            data_product_nodes_enabled=True,
-            dataset_nodes_enabled=True,
+            output_port_nodes_enabled=True,
         )
 
         # Check that only the approved link is animated
@@ -68,8 +67,7 @@ class TestGraphServiceEnumMatching:
         # Get graph data
         service = GraphService(test_session)
         graph_data = service.get_graph_data(
-            data_product_nodes_enabled=True,
-            dataset_nodes_enabled=True,
+            output_port_nodes_enabled=True,
         )
 
         # Check that only the approved link is animated
@@ -97,24 +95,10 @@ class TestGraphServiceEnumMatching:
         # Get graph data
         service = GraphService(test_session)
         graph_data = service.get_graph_data(
-            data_product_nodes_enabled=True,
-            dataset_nodes_enabled=True,
+            output_port_nodes_enabled=True,
         )
 
         # Check that only the approved link is animated
         animated_edges = [edge for edge in graph_data.edges if edge.animated]
 
         assert len(animated_edges) == 1
-
-    def test_get_graph_data_only_dataset_nodes(self):
-        consumer = DatasetFactory()
-        InputPortFactory(consuming_abstract_data_product=consumer.data_product)
-
-        # Get graph data
-        service = GraphService(test_session)
-        graph_data = service.get_graph_data(
-            data_product_nodes_enabled=False,
-            dataset_nodes_enabled=True,
-        )
-
-        assert len(graph_data.edges) == 1

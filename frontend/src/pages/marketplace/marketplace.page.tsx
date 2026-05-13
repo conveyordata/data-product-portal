@@ -20,7 +20,6 @@ export function Marketplace() {
             {
                 title: (
                     <>
-                        {' '}
                         <ShopOutlined /> {t('Marketplace')}
                     </>
                 ),

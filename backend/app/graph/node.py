@@ -20,7 +20,6 @@ class NodeType(str, Enum):
     explorationNode = "explorationNode"
     technicalAssetNode = "technicalAssetNode"
     outputPortNode = "outputPortNode"
-    domainNode = "domainNode"
 
 
 class Node(BaseModel):
