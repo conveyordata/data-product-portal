@@ -1,4 +1,5 @@
 import time
+from contextlib import contextmanager
 from typing import Any, Type, TypeVar
 from uuid import UUID
 
@@ -97,3 +98,6 @@ def get_db_session():
         raise
     finally:
         db.close()
+
+
+get_db_context = contextmanager(get_db_session)

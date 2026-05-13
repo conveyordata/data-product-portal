@@ -44,7 +44,7 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
 from app.data_products.technical_assets.service import DataOutputService
-from app.database.database import get_db_session
+from app.database.database import get_db_context
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.settings import settings
 
@@ -89,9 +89,10 @@ mcp = FastMCP(
 
 
 def get_mcp_authenticated_user(token: str):
-    user = get_authenticated_user(
-        token=JWTToken(sub="", token=f"Bearer {token}"), db=next(get_db_session())
-    )
+    with get_db_context() as db:
+        user = get_authenticated_user(
+            token=JWTToken(sub="", token=f"Bearer {token}"), db=db
+        )
     return {
         "id": user.id,
         "external_id": user.external_id,
@@ -129,9 +130,8 @@ def universal_search(
     try:
         access_token: AccessToken = get_access_token()
 
-        db = next(get_db_session())
-        user = get_mcp_authenticated_user(token=access_token.token)
-        try:
+        with get_db_context() as db:
+            user = get_mcp_authenticated_user(token=access_token.token)
             results = {
                 "query": query,
                 "results": {},
@@ -232,8 +232,6 @@ def universal_search(
             results["total_count"] = total_count
             results["results"] = query_results
             return results
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Search failed: {str(e)}"}
@@ -260,8 +258,7 @@ def search_data_products(
         limit: Maximum number of results to return.
     """
     try:
-        db = next(get_db_session())
-        try:
+        with get_db_context() as db:
             # Get all data products and filter manually
             all_data_products = DataProductService(db).get_data_products()
             filtered_data_products = []
@@ -279,7 +276,7 @@ def search_data_products(
                     continue
                 if domain_id and str(dp.domain_id) != domain_id:
                     continue
-                if status and str(dp.status) != status:
+                if status and dp.status != status:
                     continue
 
                 filtered_data_products.append(
@@ -299,8 +296,6 @@ def search_data_products(
                     "status": status,
                 },
             }
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to search data products: {str(e)}"}
@@ -323,10 +318,9 @@ def search_output_ports(
         limit: Maximum number of results to return.
     """
     try:
-        db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
-        try:
+        with get_db_context() as db:
+            access_token: AccessToken = get_access_token()
+            user = get_mcp_authenticated_user(token=access_token.token)
             # Get all datasets and filter manually
             all_output_ports = OutputPortService(db).search_output_ports(
                 query=query, user=user, limit=limit, current_user_assigned=False
@@ -341,8 +335,6 @@ def search_output_ports(
                     "query": query,
                 },
             }
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to search datasets: {str(e)}"}
@@ -364,8 +356,7 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
         data_product_id: UUID obtained from search_data_products or universal_search.
     """
     try:
-        db = next(get_db_session())
-        try:
+        with get_db_context() as db:
             data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id),
             )
@@ -375,8 +366,6 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
 
             # Use Pydantic schema for serialization
             return GetDataProductResponse.model_validate(data_product).model_dump()
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to get data product details: {str(e)}"}
@@ -393,10 +382,9 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
         output_port_id: UUID obtained from search_output_ports or universal_search.
     """
     try:
-        db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
-        try:
+        with get_db_context() as db:
+            access_token: AccessToken = get_access_token()
+            user = get_mcp_authenticated_user(token=access_token.token)
             dataset = OutputPortService(db).get_visible_dataset(
                 id=UUID(output_port_id), user=user
             )
@@ -405,8 +393,6 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
                 return {"error": f"Dataset {output_port_id} not found"}
 
             return GetOutputPortResponse.model_validate(dataset).model_dump()
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to get dataset details: {str(e)}"}
@@ -422,9 +408,8 @@ def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
         technical_asset_id: UUID obtained from universal_search or get_data_product_analytics.
     """
     try:
-        db = next(get_db_session())
-        do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
-        try:
+        with get_db_context() as db:
+            do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
             data_output = DataOutputService(db).get_data_output(
                 do.owner_id,
                 id=UUID(technical_asset_id),
@@ -436,8 +421,6 @@ def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
             return GetTechnicalAssetsResponseItem.model_validate(
                 data_output
             ).model_dump()
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to get data output details: {str(e)}"}
@@ -453,8 +436,7 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
         domain_id: UUID obtained from get_marketplace_overview or search results.
     """
     try:
-        db = next(get_db_session())
-        try:
+        with get_db_context() as db:
             domain = DomainService(db).get_domain(
                 id=UUID(domain_id),
             )
@@ -463,8 +445,6 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
                 return {"error": f"Domain {domain_id} not found"}
 
             return GetDomainResponse.model_validate(domain).model_dump()
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to get domain details: {str(e)}"}
@@ -484,10 +464,9 @@ def get_marketplace_overview() -> Dict[str, Any]:
     or answer questions like 'what data is available?'.
     """
     try:
-        db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
-        try:
+        with get_db_context() as db:
+            access_token: AccessToken = get_access_token()
+            user = get_mcp_authenticated_user(token=access_token.token)
             # Get counts by querying all and taking length
             all_data_products = DataProductService(db).get_data_products()
             all_output_ports = OutputPortService(db).search_output_ports(
@@ -524,8 +503,6 @@ def get_marketplace_overview() -> Dict[str, Any]:
                     for domain in all_domains
                 ],
             }
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to get marketplace overview: {str(e)}"}
@@ -541,10 +518,9 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
         data_product_id: UUID obtained from search_data_products or get_data_product_details.
     """
     try:
-        db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
-        try:
+        with get_db_context() as db:
+            access_token: AccessToken = get_access_token()
+            user = get_mcp_authenticated_user(token=access_token.token)
             # Get the data product using service
             data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id),
@@ -584,8 +560,6 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
                     ],
                 },
             }
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to get data product analytics: {str(e)}"}
@@ -600,8 +574,7 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
 def get_data_product_resource(data_product_id: str) -> str:
     """Get data product as a resource."""
     try:
-        db = next(get_db_session())
-        try:
+        with get_db_context() as db:
             data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id),
             )
@@ -626,8 +599,6 @@ def get_data_product_resource(data_product_id: str) -> str:
 - **Owner:** {dp_data.owner_email or "N/A"}
 
 """
-        finally:
-            db.close()
 
     except Exception as e:
         return f"Error retrieving data product resource: {str(e)}"
@@ -637,10 +608,9 @@ def get_data_product_resource(data_product_id: str) -> str:
 def get_output_port_resource(output_port_id: str) -> str:
     """Get output port as a resource."""
     try:
-        db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        user = get_mcp_authenticated_user(token=access_token.token)
-        try:
+        with get_db_context() as db:
+            access_token: AccessToken = get_access_token()
+            user = get_mcp_authenticated_user(token=access_token.token)
             dataset = OutputPortService(db).get_visible_dataset(
                 id=UUID(output_port_id), user=user
             )
@@ -666,8 +636,6 @@ def get_output_port_resource(output_port_id: str) -> str:
 **ID:** {ds_data.data_product_id}
 **Name:** {ds_data.data_product_name}
 """
-        finally:
-            db.close()
 
     except Exception as e:
         return f"Error retrieving dataset resource: {str(e)}"
@@ -752,11 +720,10 @@ def get_user_roles(
         limit: Maximum number of role assignments to return.
     """
     try:
-        db = next(get_db_session())
-        access_token: AccessToken = get_access_token()
-        current_user = get_mcp_authenticated_user(token=access_token.token)
+        with get_db_context() as db:
+            access_token: AccessToken = get_access_token()
+            current_user = get_mcp_authenticated_user(token=access_token.token)
 
-        try:
             # Use current user if no user_id specified
             target_user_id = user_id or str(current_user["id"])
 
@@ -833,9 +800,6 @@ def get_user_roles(
                 },
             }
 
-        finally:
-            db.close()
-
     except Exception as e:
         return {"error": f"Failed to get user roles: {str(e)}"}
 
@@ -855,9 +819,7 @@ def get_resource_roles(
         limit: Maximum number of role assignments to return.
     """
     try:
-        db = next(get_db_session())
-
-        try:
+        with get_db_context() as db:
             resource_uuid = UUID(resource_id)
 
             # Get role assignments based on resource type
@@ -923,9 +885,6 @@ def get_resource_roles(
                     "total_users": len(users_with_roles),
                 },
             }
-
-        finally:
-            db.close()
 
     except Exception as e:
         return {"error": f"Failed to get resource roles: {str(e)}"}
