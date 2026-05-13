@@ -15,6 +15,7 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
+    ExplorationFactory,
     InputPortFactory,
     RoleFactory,
     UserFactory,
@@ -446,6 +447,54 @@ class TestDataProductsDatasetsRouter:
             client, link.consuming_abstract_data_product.id
         ).json()
         assert len(history["events"]) == 1
+
+    def test_approve_output_port_as_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        exploration = ExplorationFactory()
+        link = InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = self.approve_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            exploration.id,
+        )
+        assert response.status_code == 200, response.text
+
+    def test_deny_output_port_as_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        exploration = ExplorationFactory()
+        link = InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = self.deny_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            exploration.id,
+        )
+        assert response.status_code == 200, response.text
 
     def test_get_input_ports_for_output_port(self, client):
         # Create a dataset (output port) with a data product

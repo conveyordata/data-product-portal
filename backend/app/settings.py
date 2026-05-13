@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
     WEBHOOK_SECRET: Optional[str] = None
+    WEBHOOK_V2_URL: Optional[str] = None
 
     # Email templating and SMTP settings
     PORTAL_NAME: str = "Data Product Portal"

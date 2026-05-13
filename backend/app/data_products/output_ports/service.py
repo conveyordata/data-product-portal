@@ -81,8 +81,12 @@ class OutputPortService:
         self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
     def get_dataset(
-        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
+        self, id: UUID, data_product_id: Optional[UUID] = None
     ) -> DatasetModel:
+        """DB fetch with all required eager loads, lifecycle defaulting, and tag roll-up.
+
+        Does not enforce any visibility policy — callers decide whether to gate on user.
+        """
         query = select(DatasetModel).where(DatasetModel.id == id)
 
         if data_product_id is not None:
@@ -98,12 +102,6 @@ class OutputPortService:
         if not dataset:
             raise self.not_found_exception(id)
 
-        if not self.is_visible_to_user(dataset, user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private dataset",
-            )
-
         rolled_up_tags = set()
         for output_link in dataset.data_output_links:
             rolled_up_tags.update(output_link.data_output.tags)
@@ -118,6 +116,24 @@ class OutputPortService:
             )
             dataset.lifecycle = default_lifecycle
         dataset.domain = dataset.data_product.domain
+        return dataset
+
+    def get_visible_dataset(
+        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
+    ) -> DatasetModel:
+        """Fetch a dataset, raising 403 if the user cannot see it as a consumer.
+
+        Use this for endpoints where dataset visibility must be enforced.
+
+        For system/internal callers already authorised at the endpoint level, use
+        get_dataset() instead.
+        """
+        dataset = self.get_dataset(id, data_product_id)
+        if not self.is_visible_to_user(dataset, user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private dataset",
+            )
         return dataset
 
     def search_output_ports(

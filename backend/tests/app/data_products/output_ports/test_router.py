@@ -1,7 +1,9 @@
 from copy import deepcopy
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -11,6 +13,7 @@ from app.events.service import EventService
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests import test_session
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
@@ -46,6 +49,19 @@ def dataset_payload():
         "access_type": OutputPortAccessType.RESTRICTED.value,
         "domain_id": str(domain.id),
         "data_product_id": str(data_product.id),
+    }
+
+
+@pytest.fixture
+def output_port_event_payload():
+    user = UserFactory()
+    return {
+        "name": "Test Output Port",
+        "description": "Test Description",
+        "namespace": "test-op-event-ns",
+        "tag_ids": [],
+        "owners": [str(user.id)],
+        "access_type": "restricted",
     }
 
 
@@ -855,3 +871,201 @@ class TestOutputPortRouter:
         return client.get(
             f"{ENDPOINT.format(data_product_id)}/{output_port_id}/history"
         )
+
+    @staticmethod
+    def _op_endpoint(dp_id):
+        return ENDPOINT.format(dp_id)
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_created_fires_event(self, mock_webhook, client, output_port_event_payload):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+
+        with webhook_v2_config():
+            response = client.post(
+                self._op_endpoint(dp.id), json=output_port_event_payload
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.created"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_updated_fires_event(self, mock_webhook, client, output_port_event_payload):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._op_endpoint(dp.id)}/{op.id}", json=output_port_event_payload
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.updated"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_deleted_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.delete(f"{self._op_endpoint(dp.id)}/{op.id}")
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.deleted"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_about_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._op_endpoint(dp.id)}/{op.id}/about", json={"about": "new text"}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.about_updated"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_status_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._op_endpoint(dp.id)}/{op.id}/status", json={"status": "active"}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.status_updated"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_setting_changed_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        setting = DataProductSettingFactory(scope="dataset")
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(dp.id)}/{op.id}/settings/{setting.id}",
+                params={"value": "test-value"},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.setting_changed"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_approved_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        consumer_dp = DataProductFactory()
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_dp,
+            dataset=op,
+            status=DecisionStatus.PENDING,
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(dp.id)}/{op.id}/input_ports/approve",
+                json={"consuming_data_product_id": str(consumer_dp.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.link_approved"
+        assert "abstract_data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_denied_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        consumer_dp = DataProductFactory()
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_dp,
+            dataset=op,
+            status=DecisionStatus.PENDING,
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(dp.id)}/{op.id}/input_ports/deny",
+                json={"consuming_data_product_id": str(consumer_dp.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.link_denied"
+        assert "abstract_data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        ("method", "path", "body"),
+        [
+            (
+                "post",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/output_ports",
+                {},
+            ),
+            (
+                "put",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/output_ports/00000000-0000-0000-0000-000000000000",
+                {},
+            ),
+            (
+                "delete",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/output_ports/00000000-0000-0000-0000-000000000000",
+                None,
+            ),
+        ],
+    )
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_no_event_fired_on_failure(self, mock_webhook, client, method, path, body):
+        mock_webhook.return_value = AsyncMock()
+        with webhook_v2_config():
+            kwargs = {"json": body} if body is not None else {}
+            getattr(client, method)(path, **kwargs)
+        mock_webhook.assert_not_awaited()
