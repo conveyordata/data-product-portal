@@ -70,7 +70,7 @@ freezegun = "^1.5.5"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.45.0"
+poethepoet = "^0.46.0"
 mypy = ">=1.20.2"
 types-cachetools = "*"
 types-requests = "*"
