@@ -86,6 +86,10 @@ class Settings(BaseSettings):
 
     AWS_SESSION_DURATION: int = 900
 
+    # Frontend hosting
+    SERVE_FRONTEND: bool = False
+    FRONTEND_DIST_DIR: str = ""
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

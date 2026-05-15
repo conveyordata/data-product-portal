@@ -15,7 +15,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap_backend.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret_backend.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -90,20 +90,27 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+            {{- if .Values.custom_translation_file_path }}
+            - name: translation
+              mountPath: /app/frontend_dist/locales/en-override/translation.json
+              subPath: translation.json
+            {{- end }}
 
-      {{- with .Values.volumes }}
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.cloudwatch_enabled }}
+        {{- toYaml .Values.volumes | nindent 8 }}
+        {{- if .Values.cloudwatch_enabled }}
         - name: cwagentconfig
           configMap:
             name: cwagentstatsdconfig
-      {{- end }}
+        {{- end }}
+        {{- if .Values.custom_translation_file_path }}
+        - name: translation
+          configMap:
+            name: translation
+            optional: True
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
