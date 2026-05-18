@@ -4,32 +4,6 @@ services:
     ports:
       - "8025:8025"
       - "1025:1025"
-  backend:
-    build: ./backend
-    env_file:
-      - .env.docker
-    depends_on:
-      mailhog:
-         condition: service_started
-      postgresql:
-        condition: service_healthy
-    command: >
-      bash -c "python -m app.db_tool init --force sample_data.sql
-      && uvicorn app.main:app --host 0.0.0.0 --port 5050"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5050"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-  frontend:
-    build: ./frontend
-    volumes:
-      - ${PWD:-.}/frontend/config.docker.js:/app/dist/config.js
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
 
   postgresql:
     image: pgvector/pgvector:0.8.0-pg17
@@ -43,14 +17,6 @@ services:
       interval: 2s
       timeout: 1s
       retries: 120
-  nginx:
-    build: ./nginx
-    ports:
-      - "8080:80"
-      - "5050:5050"
-    depends_on:
-      - backend
-      - frontend
 
   jaeger:
     image: jaegertracing/jaeger:2.15.1
@@ -59,3 +25,28 @@ services:
       - "4317:4317"   # OTLP gRPC receiver
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+
+  portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.docker
+    ports:
+      - "5050:5050"
+    volumes:
+      # Mount the runtime config.js so OIDC / API URL settings can be injected
+      - ${PWD:-.}/frontend/config.docker.js:/frontend_dist/config.js
+    depends_on:
+      mailhog:
+        condition: service_started
+      postgresql:
+        condition: service_healthy
+    command: >
+      bash -c "python -m app.db_tool init --force sample_data.sql
+      && uvicorn app.main:app --host 0.0.0.0 --port 5050"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

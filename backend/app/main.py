@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.authorization.service import AuthorizationService
@@ -40,7 +41,7 @@ oidc_kwargs = (
             "usePkceWithAuthorizationCodeGrant": True,
             "scopes": "openid email profile",
         },
-        "swagger_ui_oauth2_redirect_url": "/",
+        "swagger_ui_oauth2_redirect_url": "/api/oauth2-redirect",
     }
     if settings.OIDC_ENABLED
     else {}
@@ -155,12 +156,6 @@ async def send_response_to_webhook(request: Request, call_next):
     return response
 
 
-# K8S health and liveness check
-@app.get("/", include_in_schema=False)
-def root():
-    return {"message": "Hello World"}
-
-
 class VersionResponse(ORMModel):
     version: str
 
@@ -181,6 +176,18 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
 
 
 use_route_names_as_operation_ids(app)
+
+if settings.SERVE_FRONTEND:
+    _frontend_dir = Path(settings.FRONTEND_DIST_DIR)
+    if _frontend_dir.exists():
+        app.mount(
+            "/",
+            StaticFiles(directory=str(_frontend_dir), html=True),
+            name="frontend",
+        )
+    else:
+        raise Exception("Frontend dist directory not found")
+
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     logger.info(
         f"Tracing enabled setting it up with service name: ${settings.OPENTELEMETRY_TRACES_SERVICE_NAME}"

@@ -1,5 +1,6 @@
 from base64 import b64encode
 from datetime import timedelta
+from urllib.parse import parse_qs, urlparse
 
 from freezegun import freeze_time
 
@@ -41,17 +42,34 @@ class TestAuthDeviceRouter:
         response = client.post(f"{ENDPOINT}/device_token?client_id=test")
         device_code = response.json()["device_code"]
         response = client.get(
-            f"{ENDPOINT}/allow?client_id=test&device_code={device_code}"
+            f"{ENDPOINT}/allow?client_id=test&device_code={device_code}",
+            follow_redirects=False,
         )
-        assert response.status_code == 200
+        assert response.status_code == 302, response.text
+
+        location = response.headers["location"]
+        parsed = urlparse(location)
+        params = parse_qs(parsed.query)
+
+        assert parsed.scheme == "http"
+        assert parsed.netloc == "test-authorization-endpoint"
+        assert params["response_type"] == ["code"]
+        assert params["client_id"] == ["test"]
+        assert params["code_challenge_method"] == ["S256"]
+        assert params["identity_provider"] == ["test-provider"]
+        assert params["redirect_uri"] == [
+            "http://test-redirect-uri/api/v2/authn/device/callback"
+        ]
 
     def test_get_deny(self, client):
         response = client.post(f"{ENDPOINT}/device_token?client_id=test")
         device_code = response.json()["device_code"]
         response = client.get(
-            f"{ENDPOINT}/deny?client_id=test&device_code={device_code}"
+            f"{ENDPOINT}/deny?client_id=test&device_code={device_code}",
+            follow_redirects=False,
         )
-        assert response.status_code == 200
+        assert response.status_code == 307, response.text
+        assert response.headers["location"] == "/"
 
     def test_get_callback(self, client):
         response = client.get(f"{ENDPOINT}/callback?code=test&state=test")

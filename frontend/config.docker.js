@@ -4,7 +4,7 @@ const config = (() => {
          * The base URL of the API.
          * This is where the frontend will send API requests.
          */
-        API_BASE_URL: 'http://localhost:8080',
+        API_BASE_URL: 'http://localhost:5050',
         /**
          * Indicates whether OpenID Connect (OIDC) should be enabled.
          * If true, OIDC is enabled.
