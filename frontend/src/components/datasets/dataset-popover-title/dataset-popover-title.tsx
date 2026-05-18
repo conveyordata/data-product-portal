@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import { OutputPortAccessType } from '@/store/api/services/generated/dataProductsApi.ts';
 
+const { Text } = Typography;
+
 type Props = {
     name: string;
     accessType: OutputPortAccessType;
-    titleProps?: TypographyProps['Text'];
+    titleProps?: TypographyProps;
     isApproved?: boolean;
 };
 
@@ -16,8 +18,8 @@ export function DatasetPopoverTitle({ name, accessType, titleProps, isApproved }
 
     return (
         <Space>
-            <Typography.Text {...titleProps}>{name}</Typography.Text>
-            {accessType !== OutputPortAccessType.Unrestricted && <Typography.Text italic>({subtitle})</Typography.Text>}
+            <Text {...titleProps}>{name}</Text>
+            {accessType !== OutputPortAccessType.Unrestricted && <Text italic>({subtitle})</Text>}
         </Space>
     );
 }
