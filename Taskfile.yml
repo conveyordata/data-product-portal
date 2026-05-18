@@ -124,3 +124,9 @@ tasks:
     cmds:
       - npm install
       - npm test run
+
+  test:helm:
+    desc: "Validate the Helm chart (lint + dry-run template rendering)"
+    cmds:
+      - helm lint helm/
+      - helm template data-product-portal helm/ > /dev/null

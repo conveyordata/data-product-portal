@@ -119,6 +119,17 @@ jobs:
           args: --timeout 15m0s
           working-directory: cli/golang
 
+  validate-helm:
+    name: Validate Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout github repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install Task
+        uses: go-task/setup-task@v1
+      - name: Validate Helm chart
+        run: task test:helm
+
   pre-commit:
     name: Run pre-commit hooks
     runs-on: ubuntu-latest
