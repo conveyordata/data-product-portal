@@ -82,8 +82,45 @@ Cognito->>Backend: return access token
 
 ---
 
-## Extra material
+## Setting up OIDC
 
-To find out more about how to integrate the Data Product Portal with OIDC, visit [this blogpost](https://medium.com/conveyordata/data-product-portal-integrations-1-oidc-8d1dcdc0896e)
+Portal has been tested with AWS Cognito but should work with any OIDC provider.
+
+OIDC returns identity, refresh and access tokens.
+Providers may vary in the information they pass in tokens, and the application depends on this information, so integrating a new provider might require some code changes there as well.
+
+The claims our provider is required to pass are at least email, family_name and name.
+
+### Cognito setup
+
+This is not a full explanation on how to set up Cognito, but the key points to keep in mind for the Portal are listed below:
+
+- Add email, family_name and name to the required_attributesin your user pool.
+- Create an app integration and note the client ID and secret.
+- Find the authority URL using the format: `https://cognito-idp.<COGNITO_REGION>.amazonaws.com/<COGNITO_USER_POOL_ID>`
+
+### Configuring callback urls
+
+We also need to configure the right callback urls for the app integration.
+
+For a production setup the following is required:
+```
+https://<HOST>/
+https://<HOST>/api/auth/device/callback/
+https://<HOST>/logout/
+https://<HOST>/mcp/auth/callback #Needed for the MCP server authentication flow
+```
+
+For development the following extra callbacks are required:
+```
+http://localhost:3000/
+http://localhost:3000/logout/
+http://localhost:5050/
+http://localhost:5050/logout/
+http://localhost:5050/api/auth/device/callback/
+https://localhost:5050/mcp/auth/callback #Needed for the MCP server authentication flow
+```
+
+The following blog post goes a bit more into details: [Data Product Portal Integrations 1: OIDC](https://medium.com/conveyordata/data-product-portal-integrations-1-oidc-8d1dcdc0896e)
 
 To understand better the details of the Device code Flow, take a look at the following [blogpost](https://medium.com/datamindedbe/demystifying-device-flow-ae15854bac24) instead.

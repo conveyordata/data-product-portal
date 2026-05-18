@@ -16,6 +16,7 @@ sidebar_position: 200
 - The Get Input Ports For Output Port (GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports) now does not return the output port anymore in every of the input ports, as that is the one from the path parameter `output_port_id`. It also returns `consuming_abstract_data_product` instead in preparation of adding explorations to input ports
 - The Get User Pending Actions endpoint (GET /api/v2/users/current/pending_actions) now returns for input ports the consuming_abstract_data_product instead of the data_product. Also the pending action type `DataProductOutputPort` is renamed to `InputPort` In preparation of adding explorations to input ports.
 - The output port links in technical assets endpoints now returns the output port under `output_port` instead of `output`
+- MCP: The MCP authentication has been improved to work with more applications, however for this to work the callback  `<HOST>/mcp/auth/callback` needs to be added to the callback url of the OIDC provider.
 
 ### features
 
@@ -27,6 +28,7 @@ sidebar_position: 200
 - **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
 - **[Events]**: v2 implementation of the webhook events, making it easier to react to changes in Portal.
 - **[General]**: Migrated portal to run in a single container, making deployment easier.
+- **[MCP]**: Improved mcp authentication flow that works with more applications and doesn't require a locally running proxy. For more info see [Using the Portal's MCP server](./user-guide/experimental-features.md#using-the-portals-mcp-server).
 
 ### bugfixes
 
