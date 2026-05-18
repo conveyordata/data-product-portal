@@ -411,12 +411,6 @@ export type SchemaPropertyResponse = {
   physical_type?: string | null;
   description?: string | null;
   examples?: any[] | null;
-  primary_key?: boolean;
-  primary_key_position?: number | null;
-  unique?: boolean;
-  required?: boolean;
-  partitioned?: boolean;
-  partition_key_position?: number | null;
   position: number;
   properties?: SchemaPropertyResponse[];
 };
@@ -441,12 +435,6 @@ export type SchemaPropertyRequest = {
   physicalType?: string | null;
   description?: string | null;
   examples?: any[] | null;
-  primaryKey?: boolean;
-  primaryKeyPosition?: number | null;
-  unique?: boolean;
-  required?: boolean;
-  partitioned?: boolean;
-  partitionKeyPosition?: number | null;
   properties?: SchemaPropertyRequest[];
 };
 export type SchemaObjectRequest = {

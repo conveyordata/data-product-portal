@@ -2,6 +2,11 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Data product portal",
+    "summary": "Backend API implementation for Data product portal",
+    "contact": {
+      "name": "Stijn Janssens",
+      "email": "stijn.janssens@dataminded.com"
+    },
     "version": "0.5.1"
   },
   "paths": {
@@ -27,9 +32,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Resource",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Resource"
             }
           },
           {
@@ -37,9 +49,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Domain",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Domain"
             }
           }
         ],
@@ -107,9 +126,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Query",
-              "type": "string",
-              "minLength": 3
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 3
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Query"
             }
           },
           {
@@ -667,142 +693,6 @@
               "application/json": {
                 "example": {
                   "detail": "Not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract": {
-      "get": {
-        "tags": [
-          "Data Products - Output ports",
-          "Data Products - Output Ports - Contract"
-        ],
-        "summary": "Get Output Port Schema",
-        "operationId": "get_output_port_schema",
-        "parameters": [
-          {
-            "name": "data_product_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Data Product Id"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OutputPortSchemaResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Output Port not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Output Port ID not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Data Products - Output ports",
-          "Data Products - Output Ports - Contract"
-        ],
-        "summary": "Ingest Output Port Contract",
-        "operationId": "ingest_output_port_contract",
-        "parameters": [
-          {
-            "name": "data_product_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Data Product Id"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BitolContractRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OutputPortSchemaResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Output Port not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Output Port ID not found"
                 }
               }
             }
@@ -1500,9 +1390,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Filter To User With Assigment",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter To User With Assigment"
             }
           }
         ],
@@ -5337,9 +5234,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
             }
           },
           {
@@ -5347,9 +5251,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role Id"
             }
           }
         ],
@@ -5633,9 +5544,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Data Product Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Data Product Id"
             }
           },
           {
@@ -5643,9 +5561,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
             }
           },
           {
@@ -5653,9 +5578,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role Id"
             }
           },
           {
@@ -5663,8 +5595,15 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Decision",
-              "$ref": "#/components/schemas/DecisionStatus"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DecisionStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decision"
             }
           }
         ],
@@ -5932,9 +5871,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Output Port Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Output Port Id"
             }
           },
           {
@@ -5942,9 +5888,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
             }
           },
           {
@@ -5952,9 +5905,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role Id"
             }
           },
           {
@@ -5962,8 +5922,15 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Decision",
-              "$ref": "#/components/schemas/DecisionStatus"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DecisionStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decision"
             }
           }
         ],
@@ -6388,9 +6355,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Data Product Id",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Data Product Id"
             }
           }
         ],
@@ -6558,8 +6532,15 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Environment",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Environment"
             }
           }
         ],
@@ -6641,9 +6622,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Filter To User With Assigment",
-              "type": "string",
-              "format": "uuid"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter To User With Assigment"
             }
           }
         ],
@@ -6914,13 +6902,11 @@
           {
             "name": "client_id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "deprecated": true,
-              "title": "Client Id",
-              "type": "string"
-            },
-            "deprecated": true
+              "type": "string",
+              "title": "Client Id"
+            }
           },
           {
             "name": "scope",
@@ -6938,9 +6924,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeviceFlow"
-                }
+                "schema": {}
               }
             }
           },
@@ -6971,6 +6955,15 @@
         ],
         "parameters": [
           {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
             "name": "device_code",
             "in": "query",
             "required": true,
@@ -6987,17 +6980,6 @@
               "type": "string",
               "title": "Grant Type"
             }
-          },
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "deprecated": true,
-              "title": "Client Id",
-              "type": "string"
-            },
-            "deprecated": true
           }
         ],
         "responses": {
@@ -7005,9 +6987,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OIDCTokenResponse"
-                }
+                "schema": {}
               }
             }
           },
@@ -7332,8 +7312,7 @@
           411,
           412,
           413,
-          414,
-          415
+          414
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
@@ -7423,21 +7402,6 @@
           "expiry"
         ],
         "title": "BecomeAdmin"
-      },
-      "BitolContractRequest": {
-        "properties": {
-          "schema": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaObjectRequest"
-            },
-            "type": "array",
-            "title": "Schema",
-            "default": []
-          }
-        },
-        "type": "object",
-        "title": "BitolContractRequest",
-        "description": "Accepts a BitOL data contract (https://bitol-io.github.io/open-data-contract-standard/).\nOnly the `schema` section is extracted; all other fields are ignored."
       },
       "CanBecomeAdminUpdate": {
         "properties": {
@@ -9358,100 +9322,6 @@
         ],
         "title": "DenyOutputPortAsInputPortRequest"
       },
-      "DeviceFlow": {
-        "properties": {
-          "device_code": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Device Code"
-          },
-          "user_code": {
-            "type": "string",
-            "title": "User Code"
-          },
-          "scope": {
-            "type": "string",
-            "title": "Scope"
-          },
-          "interval": {
-            "type": "integer",
-            "title": "Interval"
-          },
-          "expiration": {
-            "type": "integer",
-            "title": "Expiration"
-          },
-          "oidc_redirect_uri": {
-            "type": "string",
-            "title": "Oidc Redirect Uri"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DeviceFlowStatus"
-          },
-          "authz_code": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Authz Code"
-          },
-          "authz_state": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Authz State"
-          },
-          "authz_verif": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Authz Verif"
-          },
-          "verification_uri_complete": {
-            "type": "string",
-            "title": "Verification Uri Complete"
-          }
-        },
-        "type": "object",
-        "required": [
-          "device_code",
-          "user_code",
-          "scope",
-          "interval",
-          "expiration",
-          "oidc_redirect_uri",
-          "status",
-          "authz_code",
-          "authz_state",
-          "authz_verif",
-          "verification_uri_complete"
-        ],
-        "title": "DeviceFlow"
-      },
-      "DeviceFlowStatus": {
-        "type": "string",
-        "enum": [
-          "authorization_pending",
-          "expired",
-          "denied",
-          "authorized"
-        ],
-        "title": "DeviceFlowStatus"
-      },
       "Domain": {
         "properties": {
           "id": {
@@ -11296,52 +11166,6 @@
         ],
         "title": "NodeType"
       },
-      "OIDCTokenResponse": {
-        "properties": {
-          "access_token": {
-            "type": "string",
-            "title": "Access Token"
-          },
-          "token_type": {
-            "type": "string",
-            "title": "Token Type"
-          },
-          "expires_in": {
-            "type": "integer",
-            "title": "Expires In"
-          },
-          "id_token": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id Token"
-          },
-          "refresh_token": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Refresh Token"
-          }
-        },
-        "type": "object",
-        "required": [
-          "access_token",
-          "token_type",
-          "expires_in"
-        ],
-        "title": "OIDCTokenResponse",
-        "description": "OIDC token endpoint response."
-      },
       "OSISemanticModelTechnicalAssetConfiguration": {
         "properties": {
           "configuration_type": {
@@ -11930,28 +11754,6 @@
           "decided_by"
         ],
         "title": "OutputPortRoleAssignmentResponse"
-      },
-      "OutputPortSchemaResponse": {
-        "properties": {
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "schema_objects": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaObjectResponse"
-            },
-            "type": "array",
-            "title": "Schema Objects",
-            "default": []
-          }
-        },
-        "type": "object",
-        "required": [
-          "output_port_id"
-        ],
-        "title": "OutputPortSchemaResponse"
       },
       "OutputPortSettingValue": {
         "properties": {
@@ -12797,396 +12599,6 @@
           "path"
         ],
         "title": "S3TechnicalAssetConfiguration"
-      },
-      "SchemaObjectRequest": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "logicalType": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Logicaltype"
-          },
-          "physicalType": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Physicaltype"
-          },
-          "physicalName": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Physicalname"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "properties": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaPropertyRequest"
-            },
-            "type": "array",
-            "title": "Properties",
-            "default": []
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "SchemaObjectRequest"
-      },
-      "SchemaObjectResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "logical_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Logical Type"
-          },
-          "physical_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Physical Type"
-          },
-          "physical_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Physical Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "position": {
-            "type": "integer",
-            "title": "Position"
-          },
-          "properties": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaPropertyResponse"
-            },
-            "type": "array",
-            "title": "Properties",
-            "default": []
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "position"
-        ],
-        "title": "SchemaObjectResponse"
-      },
-      "SchemaPropertyRequest": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "businessName": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Businessname"
-          },
-          "logicalType": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Logicaltype"
-          },
-          "physicalType": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Physicaltype"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "examples": {
-            "anyOf": [
-              {
-                "items": {},
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Examples"
-          },
-          "primaryKey": {
-            "type": "boolean",
-            "title": "Primarykey",
-            "default": false
-          },
-          "primaryKeyPosition": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Primarykeyposition"
-          },
-          "unique": {
-            "type": "boolean",
-            "title": "Unique",
-            "default": false
-          },
-          "required": {
-            "type": "boolean",
-            "title": "Required",
-            "default": false
-          },
-          "partitioned": {
-            "type": "boolean",
-            "title": "Partitioned",
-            "default": false
-          },
-          "partitionKeyPosition": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Partitionkeyposition"
-          },
-          "properties": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaPropertyRequest"
-            },
-            "type": "array",
-            "title": "Properties",
-            "default": []
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "SchemaPropertyRequest"
-      },
-      "SchemaPropertyResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "business_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Business Name"
-          },
-          "logical_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Logical Type"
-          },
-          "physical_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Physical Type"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "examples": {
-            "anyOf": [
-              {
-                "items": {},
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Examples"
-          },
-          "primary_key": {
-            "type": "boolean",
-            "title": "Primary Key",
-            "default": false
-          },
-          "primary_key_position": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Primary Key Position"
-          },
-          "unique": {
-            "type": "boolean",
-            "title": "Unique",
-            "default": false
-          },
-          "required": {
-            "type": "boolean",
-            "title": "Required",
-            "default": false
-          },
-          "partitioned": {
-            "type": "boolean",
-            "title": "Partitioned",
-            "default": false
-          },
-          "partition_key_position": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Partition Key Position"
-          },
-          "position": {
-            "type": "integer",
-            "title": "Position"
-          },
-          "properties": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaPropertyResponse"
-            },
-            "type": "array",
-            "title": "Properties",
-            "default": []
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "position"
-        ],
-        "title": "SchemaPropertyResponse"
       },
       "Scope": {
         "type": "string",
