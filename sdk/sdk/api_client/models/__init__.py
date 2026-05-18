@@ -24,6 +24,7 @@ from .azure_environment_platform_configuration import (
     AzureEnvironmentPlatformConfiguration,
 )
 from .become_admin import BecomeAdmin
+from .bitol_contract_request import BitolContractRequest
 from .can_become_admin_update import CanBecomeAdminUpdate
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
@@ -201,6 +202,7 @@ from .output_port_query_stats_response import OutputPortQueryStatsResponse
 from .output_port_query_stats_responses import OutputPortQueryStatsResponses
 from .output_port_query_stats_update import OutputPortQueryStatsUpdate
 from .output_port_role_assignment_response import OutputPortRoleAssignmentResponse
+from .output_port_schema_response import OutputPortSchemaResponse
 from .output_port_setting_value import OutputPortSettingValue
 from .output_port_status import OutputPortStatus
 from .owned_technical_asset import OwnedTechnicalAsset
@@ -247,6 +249,10 @@ from .resource_name_validation import ResourceNameValidation
 from .resource_name_validity_type import ResourceNameValidityType
 from .role import Role
 from .s3_technical_asset_configuration import S3TechnicalAssetConfiguration
+from .schema_object_request import SchemaObjectRequest
+from .schema_object_response import SchemaObjectResponse
+from .schema_property_request import SchemaPropertyRequest
+from .schema_property_response import SchemaPropertyResponse
 from .scope import Scope
 from .search_output_ports_response import SearchOutputPortsResponse
 from .search_output_ports_response_item import SearchOutputPortsResponseItem
@@ -314,6 +320,7 @@ __all__ = (
     "AzureBlobTechnicalAssetConfiguration",
     "AzureEnvironmentPlatformConfiguration",
     "BecomeAdmin",
+    "BitolContractRequest",
     "CanBecomeAdminUpdate",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
@@ -457,6 +464,7 @@ __all__ = (
     "OutputPortQueryStatsResponses",
     "OutputPortQueryStatsUpdate",
     "OutputPortRoleAssignmentResponse",
+    "OutputPortSchemaResponse",
     "OutputPortSettingValue",
     "OutputPortStatus",
     "OwnedTechnicalAsset",
@@ -489,6 +497,10 @@ __all__ = (
     "ResourceNameValidityType",
     "Role",
     "S3TechnicalAssetConfiguration",
+    "SchemaObjectRequest",
+    "SchemaObjectResponse",
+    "SchemaPropertyRequest",
+    "SchemaPropertyResponse",
     "Scope",
     "SearchOutputPortsResponse",
     "SearchOutputPortsResponseItem",
