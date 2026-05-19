@@ -66,11 +66,11 @@ Soft deletes (Option 1) require a cross-cutting DB schema change and still leave
 
 Four reusable payload models compose all event payloads:
 
-**`DataProductPayload`** — `id`, `name`, `namespace`, `domain_id`, `domain_name`, `type_id`, `type_name`, `lifecycle_name` (nullable), `status`
+**`DataProductPayload`** — `id`, `name`, `namespace`, `domain_id`, `domain_name`, `type_id`, `type_name`, `lifecycle_name` (nullable), `status` //TODO: status, lifecycle_name
 
-**`OutputPortPayload`** — `id`, `name`, `namespace`, `data_product_id`, `access_type`, `status`, `settings`
+**`OutputPortPayload`** — `id`, `name`, `namespace`, `data_product_id`, `access_type`, `status`, `settings` //TODO: Settings needed?, status
 
-**`TechnicalAssetPayload`** — `id`, `name`, `namespace`, `platform_id`, `service_id`, `configuration`, `status`
+**`TechnicalAssetPayload`** — `id`, `name`, `namespace`, `platform_id`, `service_id`, `configuration`, `status` //TODO: status
 
 **`RoleAssignmentPayload`** — `id`, `user_id`, `user_email`, `role`
 
@@ -89,7 +89,7 @@ Four reusable payload models compose all event payloads:
 |---|---|
 | `data_product.created` | `DataProductPayload` |
 | `data_product.updated` | `DataProductPayload` |
-| `data_product.deleted` | `DataProductPayload` + `technical_assets: list[TechnicalAssetPayload]` |
+| `data_product.deleted` | `DataProductPayload` + `technical_assets: list[TechnicalAssetPayload]` | //TODO: what is the impact of deleting a data product and all it's output ports
 | `data_product.about_updated` | `DataProductPayload` |
 | `data_product.status_updated` | `DataProductPayload` |
 | `data_product.setting_changed` | `DataProductPayload` + `setting_id: str` |
