@@ -656,4 +656,298 @@ begin
     UNION ALL
     SELECT dataset_name || '_view', 'warning', summary_id FROM summary_mapping;
 
+    -- ------------------------------------------------------------------------------------------------
+    -- Schema objects and properties for output ports
+    -- ------------------------------------------------------------------------------------------------
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), sales_performance_model_output_port, 'sales_transactions', 'sales_txn', 'table', 'table', 'Daily sales transaction records per rep and territory', 1),
+        (gen_random_uuid(), sales_performance_model_output_port, 'territory_assignments', 'territory_assignments', 'table', 'table', 'Mapping of sales reps to territories and quotas', 2);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('sales_transactions', 'transaction_id',   'Transaction ID',   'string',    'VARCHAR(36)',  true,  true,  true,  false, null, 1, 'Unique transaction identifier',       '["txn-00123"]',   1),
+        ('sales_transactions', 'sale_date',         'Sale Date',        'date',      'DATE',         false, false, true,  true,  1,    null,'Date the sale was made',              '["2024-03-15"]',  2),
+        ('sales_transactions', 'rep_id',            'Rep ID',           'string',    'VARCHAR(36)',  false, false, true,  false, null, null,'Sales representative identifier',      '["rep-456"]',     3),
+        ('sales_transactions', 'territory_code',    'Territory Code',   'string',    'VARCHAR(10)',  false, false, true,  false, null, null,'Geographic territory code',            '["US-WEST-01"]',  4),
+        ('sales_transactions', 'product_sku',       'Product SKU',      'string',    'VARCHAR(50)',  false, false, true,  false, null, null,'Stock-keeping unit of the product',   '["SKU-9981"]',    5),
+        ('sales_transactions', 'quantity',          'Quantity',         'integer',   'INT',          false, false, true,  false, null, null,'Units sold',                          '[12]',            6),
+        ('sales_transactions', 'unit_price',        'Unit Price',       'decimal',   'DECIMAL(10,2)',false, false, true,  false, null, null,'Price per unit at time of sale',      '[49.99]',         7),
+        ('sales_transactions', 'discount_pct',      'Discount %',       'decimal',   'DECIMAL(5,2)', false, false, false, false, null, null,'Discount percentage applied',         '[5.0]',           8),
+        ('sales_transactions', 'total_amount',      'Total Amount',     'decimal',   'DECIMAL(12,2)',false, false, true,  false, null, null,'Gross sale amount after discount',    '[569.88]',        9),
+        ('territory_assignments', 'assignment_id',  'Assignment ID',    'string',    'VARCHAR(36)',  true,  true,  true,  false, null, 1, 'Unique assignment record ID',          '["asgn-001"]',    1),
+        ('territory_assignments', 'rep_id',         'Rep ID',           'string',    'VARCHAR(36)',  false, false, true,  false, null, null,'Sales rep identifier',                '["rep-456"]',     2),
+        ('territory_assignments', 'territory_code', 'Territory Code',   'string',    'VARCHAR(10)',  false, false, true,  false, null, null,'Territory the rep is assigned to',    '["US-WEST-01"]',  3),
+        ('territory_assignments', 'quota_usd',      'Quota (USD)',       'decimal',   'DECIMAL(14,2)',false, false, true,  false, null, null,'Annual revenue quota in USD',         '[250000.00]',     4),
+        ('territory_assignments', 'valid_from',     'Valid From',       'date',      'DATE',         false, false, true,  false, null, null,'Start date of assignment',            '["2024-01-01"]',  5),
+        ('territory_assignments', 'valid_to',       'Valid To',         'date',      'DATE',         false, false, false, false, null, null,'End date of assignment (null=active)','["2024-12-31"]',  6),
+        ('territory_assignments', 'manager_id',     'Manager ID',       'string',    'VARCHAR(36)',  false, false, false, false, null, null,'ID of the territory manager',         '["mgr-012"]',     7)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = sales_performance_model_output_port AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), order_fulfillment_analysis_output_port, 'order_fulfillment_events', 'order_fulfillment_events', 'table', 'table', 'Fulfillment lifecycle events per order line', 1);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('order_fulfillment_events', 'event_id',        'Event ID',         'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique fulfillment event ID',        '["evt-10001"]',   1),
+        ('order_fulfillment_events', 'event_date',       'Event Date',       'date',    'DATE',         false, false, true,  true,  1,    null,'Date the event occurred',           '["2024-04-10"]',  2),
+        ('order_fulfillment_events', 'order_id',         'Order ID',         'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Parent order identifier',            '["ord-88812"]',   3),
+        ('order_fulfillment_events', 'order_line_id',    'Order Line ID',    'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Order line item identifier',         '["line-3"]',      4),
+        ('order_fulfillment_events', 'event_type',       'Event Type',       'string',  'VARCHAR(30)',  false, false, true,  false, null, null,'Type: PICKED, PACKED, SHIPPED, etc', '["SHIPPED"]',     5),
+        ('order_fulfillment_events', 'warehouse_code',   'Warehouse Code',   'string',  'VARCHAR(10)',  false, false, true,  false, null, null,'Warehouse where event occurred',     '["WH-EU-02"]',    6),
+        ('order_fulfillment_events', 'carrier_code',     'Carrier Code',     'string',  'VARCHAR(20)',  false, false, false, false, null, null,'Shipping carrier code',              '["DHL"]',         7),
+        ('order_fulfillment_events', 'tracking_number',  'Tracking Number',  'string',  'VARCHAR(50)',  false, false, false, false, null, null,'Carrier tracking number',            '["1Z999AA10123"]',8),
+        ('order_fulfillment_events', 'sla_breached',     'SLA Breached',     'boolean', 'BOOLEAN',      false, false, true,  false, null, null,'Whether SLA was breached',           '[false]',         9)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = order_fulfillment_analysis_output_port AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), inventory_management_output_port, 'inventory_snapshots',   'inv_snapshots',   'table', 'Iceberg', 'Daily end-of-day inventory levels per SKU and warehouse', 1),
+        (gen_random_uuid(), inventory_management_output_port, 'reorder_recommendations','reorder_recs',    'table', 'Iceberg', 'Automated reorder suggestions based on forecast demand',  2);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('inventory_snapshots', 'snapshot_id',    'Snapshot ID',    'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique snapshot record ID',           '["snap-20240401-SKU001-WH01"]', 1),
+        ('inventory_snapshots', 'snapshot_date',  'Snapshot Date',  'date',    'DATE',         false, false, true,  true,  1,    null,'Date of the inventory snapshot',      '["2024-04-01"]',               2),
+        ('inventory_snapshots', 'sku',            'SKU',            'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Product stock-keeping unit',          '["SKU-1234"]',                 3),
+        ('inventory_snapshots', 'warehouse_id',   'Warehouse ID',   'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Warehouse identifier',                '["WH-EU-01"]',                 4),
+        ('inventory_snapshots', 'qty_on_hand',    'Qty On Hand',    'integer', 'INT',          false, false, true,  false, null, null,'Units physically in warehouse',       '[340]',                        5),
+        ('inventory_snapshots', 'qty_reserved',   'Qty Reserved',   'integer', 'INT',          false, false, true,  false, null, null,'Units reserved for open orders',      '[80]',                         6),
+        ('inventory_snapshots', 'qty_available',  'Qty Available',  'integer', 'INT',          false, false, true,  false, null, null,'Available = on_hand − reserved',      '[260]',                        7),
+        ('inventory_snapshots', 'reorder_point',  'Reorder Point',  'integer', 'INT',          false, false, false, false, null, null,'Units level that triggers reorder',   '[100]',                        8),
+        ('inventory_snapshots', 'unit_cost',      'Unit Cost',      'decimal', 'DECIMAL(10,2)',false, false, false, false, null, null,'Average unit cost in USD',            '[12.50]',                      9),
+        ('reorder_recommendations', 'rec_id',         'Rec ID',         'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Recommendation record ID',            '["rec-88711"]',    1),
+        ('reorder_recommendations', 'created_date',   'Created Date',   'date',    'DATE',         false, false, true,  true,  1,    null,'Date recommendation was generated',  '["2024-04-02"]',   2),
+        ('reorder_recommendations', 'sku',            'SKU',            'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Product SKU to reorder',              '["SKU-1234"]',     3),
+        ('reorder_recommendations', 'warehouse_id',   'Warehouse ID',   'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Target warehouse',                    '["WH-EU-01"]',     4),
+        ('reorder_recommendations', 'suggested_qty',  'Suggested Qty',  'integer', 'INT',          false, false, true,  false, null, null,'Recommended units to order',          '[500]',            5),
+        ('reorder_recommendations', 'supplier_id',    'Supplier ID',    'string',  'VARCHAR(36)',  false, false, false, false, null, null,'Preferred supplier identifier',       '["sup-002"]',      6),
+        ('reorder_recommendations', 'lead_time_days', 'Lead Time (days)','integer','INT',          false, false, false, false, null, null,'Expected supplier lead time in days', '[7]',              7),
+        ('reorder_recommendations', 'status',         'Status',         'string',  'VARCHAR(20)',  false, false, true,  false, null, null,'PENDING, APPROVED, or REJECTED',      '["PENDING"]',      8)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = inventory_management_output_port AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), feature_usage_metrics_daily, 'feature_events',       'feature_events',       'table', 'table', 'Raw feature interaction events emitted by the product', 1),
+        (gen_random_uuid(), feature_usage_metrics_daily, 'daily_feature_summary','daily_feature_summary','table', 'table', 'Aggregated daily metrics rolled up from feature_events',2);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('feature_events', 'event_id',       'Event ID',       'string',    'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique event identifier',              '["evt-feats-7712"]', 1),
+        ('feature_events', 'event_ts',       'Event Timestamp','timestamp', 'TIMESTAMPTZ',  false, false, true,  true,  1,    null,'UTC timestamp of the event',          '["2024-04-10T14:32:00Z"]', 2),
+        ('feature_events', 'user_id',        'User ID',        'string',    'VARCHAR(36)',  false, false, true,  false, null, null,'Authenticated user identifier',        '["usr-334"]',        3),
+        ('feature_events', 'session_id',     'Session ID',     'string',    'VARCHAR(36)',  false, false, true,  false, null, null,'Browser or app session ID',            '["sess-9900"]',      4),
+        ('feature_events', 'feature_key',    'Feature Key',    'string',    'VARCHAR(100)', false, false, true,  false, null, null,'Identifier of the product feature',    '["dark_mode_toggle"]',5),
+        ('feature_events', 'action',         'Action',         'string',    'VARCHAR(30)',  false, false, true,  false, null, null,'User action: CLICK, VIEW, SUBMIT, etc','["CLICK"]',          6),
+        ('feature_events', 'platform',       'Platform',       'string',    'VARCHAR(20)',  false, false, true,  false, null, null,'web, ios, or android',                 '["web"]',            7),
+        ('feature_events', 'duration_ms',    'Duration (ms)',  'integer',   'INT',          false, false, false, false, null, null,'Time spent on the feature in ms',      '[1240]',             8),
+        ('daily_feature_summary', 'summary_id',   'Summary ID',   'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Composite PK for the summary row',     '["smry-date-feat"]', 1),
+        ('daily_feature_summary', 'summary_date', 'Summary Date', 'date',    'DATE',         false, false, true,  true,  1,    null,'Date of the aggregation window',       '["2024-04-10"]',     2),
+        ('daily_feature_summary', 'feature_key',  'Feature Key',  'string',  'VARCHAR(100)', false, false, true,  false, null, null,'Product feature identifier',           '["dark_mode_toggle"]',3),
+        ('daily_feature_summary', 'unique_users', 'Unique Users', 'integer', 'INT',          false, false, true,  false, null, null,'Distinct users who triggered feature', '[412]',              4),
+        ('daily_feature_summary', 'total_events', 'Total Events', 'integer', 'INT',          false, false, true,  false, null, null,'Total number of events recorded',      '[1803]',             5),
+        ('daily_feature_summary', 'avg_duration_ms','Avg Duration (ms)','decimal','DECIMAL(10,2)',false,false,true,false, null, null,'Mean time spent per interaction',      '[980.5]',            6),
+        ('daily_feature_summary', 'platform',      'Platform',     'string',  'VARCHAR(20)',  false, false, true,  false, null, null,'Aggregation platform: web/ios/android','["web"]',           7)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = feature_usage_metrics_daily AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), customer_segmentation_weekly_output_port_id, 'customer_segments', 'customer_segments', 'table', 'Parquet', 'Weekly customer segment assignments with RFM scores', 1);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('customer_segments', 'segment_key',       'Segment Key',        'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Composite PK: customer_id + week_start',   '["cust-001-2024-W14"]',  1),
+        ('customer_segments', 'week_start',         'Week Start',         'date',    'DATE',         false, false, true,  true,  1,    null,'Monday of the ISO week',                  '["2024-04-08"]',         2),
+        ('customer_segments', 'customer_id',        'Customer ID',        'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Customer identifier',                     '["cust-001"]',           3),
+        ('customer_segments', 'segment_label',      'Segment',            'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Assigned segment: Champions, At Risk, etc','["Champions"]',         4),
+        ('customer_segments', 'recency_score',      'Recency Score',      'integer', 'SMALLINT',     false, false, true,  false, null, null,'RFM recency score (1-5)',                 '[5]',                    5),
+        ('customer_segments', 'frequency_score',    'Frequency Score',    'integer', 'SMALLINT',     false, false, true,  false, null, null,'RFM frequency score (1-5)',               '[4]',                    6),
+        ('customer_segments', 'monetary_score',     'Monetary Score',     'integer', 'SMALLINT',     false, false, true,  false, null, null,'RFM monetary score (1-5)',                '[5]',                    7),
+        ('customer_segments', 'ltv_usd',            'LTV (USD)',           'decimal', 'DECIMAL(14,2)',false, false, false, false, null, null,'Predicted customer lifetime value',       '[4820.00]',              8),
+        ('customer_segments', 'churn_probability',  'Churn Probability',  'decimal', 'DECIMAL(5,4)', false, false, false, false, null, null,'Model-predicted churn probability',       '[0.0321]',               9),
+        ('customer_segments', 'preferred_channel',  'Preferred Channel',  'string',  'VARCHAR(20)',  false, false, false, false, null, null,'Most-used contact channel',               '["email"]',              10)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = customer_segmentation_weekly_output_port_id AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), production_planning_insights_forecast, 'production_forecast',    'prod_forecast',    'table', 'Delta Table', 'Rolling 90-day production demand forecast per SKU and plant', 1),
+        (gen_random_uuid(), production_planning_insights_forecast, 'capacity_utilization',   'capacity_util',    'table', 'Delta Table', 'Daily plant capacity utilization metrics',                    2);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('production_forecast', 'forecast_id',     'Forecast ID',      'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique forecast row ID',                '["fcst-sku-plant-date"]',  1),
+        ('production_forecast', 'forecast_date',   'Forecast Date',    'date',    'DATE',         false, false, true,  true,  1,    null,'Production date being forecasted',     '["2024-05-01"]',           2),
+        ('production_forecast', 'sku',             'SKU',              'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Product SKU',                           '["SKU-7701"]',             3),
+        ('production_forecast', 'plant_id',        'Plant ID',         'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Manufacturing plant identifier',        '["plant-DE-01"]',          4),
+        ('production_forecast', 'forecasted_units','Forecasted Units',  'integer', 'INT',          false, false, true,  false, null, null,'Predicted units to produce',            '[1200]',                   5),
+        ('production_forecast', 'confidence_pct',  'Confidence %',     'decimal', 'DECIMAL(5,2)', false, false, true,  false, null, null,'Model confidence (0–100)',              '[87.4]',                   6),
+        ('production_forecast', 'raw_material_id', 'Raw Material ID',  'string',  'VARCHAR(36)',  false, false, false, false, null, null,'Primary raw material required',         '["mat-steel-02"]',         7),
+        ('production_forecast', 'model_version',   'Model Version',    'string',  'VARCHAR(20)',  false, false, true,  false, null, null,'ML model version used',                 '["v2.3.1"]',               8),
+        ('capacity_utilization', 'util_id',         'Util ID',         'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique utilization record ID',           '["util-plant-date"]',      1),
+        ('capacity_utilization', 'util_date',       'Utilization Date','date',    'DATE',         false, false, true,  true,  1,    null,'Date of the measurement',               '["2024-04-15"]',           2),
+        ('capacity_utilization', 'plant_id',        'Plant ID',        'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Manufacturing plant identifier',         '["plant-DE-01"]',          3),
+        ('capacity_utilization', 'shift',           'Shift',           'string',  'VARCHAR(10)',  false, false, true,  false, null, null,'Shift: MORNING, AFTERNOON, NIGHT',       '["MORNING"]',              4),
+        ('capacity_utilization', 'planned_units',   'Planned Units',   'integer', 'INT',          false, false, true,  false, null, null,'Units planned for the shift',            '[400]',                    5),
+        ('capacity_utilization', 'actual_units',    'Actual Units',    'integer', 'INT',          false, false, true,  false, null, null,'Units actually produced',                '[388]',                    6),
+        ('capacity_utilization', 'downtime_mins',   'Downtime (mins)', 'integer', 'INT',          false, false, false, false, null, null,'Total unplanned downtime in minutes',    '[18]',                     7),
+        ('capacity_utilization', 'oee_pct',         'OEE %',           'decimal', 'DECIMAL(5,2)', false, false, true,  false, null, null,'Overall Equipment Effectiveness score', '[91.2]',                   8)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = production_planning_insights_forecast AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), release_impact_summary, 'release_kpi_snapshots', 'release_kpi_snapshots', 'table', 'Parquet', 'Pre/post KPI snapshots per release version', 1);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('release_kpi_snapshots', 'snapshot_id',      'Snapshot ID',      'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique snapshot record',              '["snap-v2.4.1-pre"]',  1),
+        ('release_kpi_snapshots', 'release_version',  'Release Version',  'string',  'VARCHAR(30)',  false, false, true,  true,  1,    null,'Semver release tag',                 '["v2.4.1"]',           2),
+        ('release_kpi_snapshots', 'snapshot_type',    'Snapshot Type',    'string',  'VARCHAR(10)',  false, false, true,  false, null, null,'PRE or POST release',                '["PRE"]',              3),
+        ('release_kpi_snapshots', 'snapshot_date',    'Snapshot Date',    'date',    'DATE',         false, false, true,  false, null, null,'Date snapshot was taken',            '["2024-04-01"]',       4),
+        ('release_kpi_snapshots', 'error_rate_pct',   'Error Rate %',     'decimal', 'DECIMAL(6,4)', false, false, true,  false, null, null,'API error rate at snapshot time',    '[0.0042]',             5),
+        ('release_kpi_snapshots', 'p99_latency_ms',   'P99 Latency (ms)', 'integer', 'INT',          false, false, true,  false, null, null,'99th percentile API latency',        '[312]',                6),
+        ('release_kpi_snapshots', 'active_users',     'Active Users',     'integer', 'INT',          false, false, true,  false, null, null,'DAU at snapshot time',               '[14302]',              7),
+        ('release_kpi_snapshots', 'conversion_rate',  'Conversion Rate',  'decimal', 'DECIMAL(6,4)', false, false, false, false, null, null,'Checkout conversion rate',           '[0.0381]',             8)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = release_impact_summary AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), release_engagement_by_segment, 'engagement_by_segment', 'engagement_by_segment', 'table', 'Parquet', 'Per-segment engagement metrics broken down by release version', 1);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('engagement_by_segment', 'row_id',           'Row ID',           'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Surrogate key',                        '["rowid-seg-rel"]',    1),
+        ('engagement_by_segment', 'release_version',  'Release Version',  'string',  'VARCHAR(30)',  false, false, true,  true,  1,    null,'Semver release tag',                  '["v2.4.1"]',           2),
+        ('engagement_by_segment', 'segment_label',    'Segment',          'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Customer segment name',               '["Champions"]',        3),
+        ('engagement_by_segment', 'sessions',         'Sessions',         'integer', 'INT',          false, false, true,  false, null, null,'Number of sessions in window',         '[9812]',               4),
+        ('engagement_by_segment', 'avg_session_mins', 'Avg Session (min)','decimal', 'DECIMAL(8,2)', false, false, true,  false, null, null,'Mean session duration in minutes',     '[6.4]',                5),
+        ('engagement_by_segment', 'feature_adoption_pct','Feature Adoption %','decimal','DECIMAL(5,2)',false,false,true,  false, null, null,'% of users who used new feature',     '[34.7]',               6),
+        ('engagement_by_segment', 'nps_score',        'NPS Score',        'decimal', 'DECIMAL(4,1)', false, false, false, false, null, null,'Net Promoter Score for the segment',  '[42.0]',               7),
+        ('engagement_by_segment', 'churn_30d_pct',    'Churn 30d %',      'decimal', 'DECIMAL(5,2)', false, false, false, false, null, null,'30-day churn rate post release',       '[2.1]',                8)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = release_engagement_by_segment AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), margin_trends_by_product, 'product_margin_monthly', 'product_margin_monthly', 'table', 'Delta Table', 'Monthly gross and net margin per product line',          1),
+        (gen_random_uuid(), margin_trends_by_product, 'cost_breakdown',          'cost_breakdown',          'table', 'Delta Table', 'Cost component breakdown: COGS, fulfillment, overhead', 2);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('product_margin_monthly', 'margin_key',        'Margin Key',       'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'PK: product_id + month',                '["prod-001-2024-04"]',  1),
+        ('product_margin_monthly', 'month_start',       'Month Start',      'date',    'DATE',         false, false, true,  true,  1,    null,'First day of the reporting month',     '["2024-04-01"]',        2),
+        ('product_margin_monthly', 'product_id',        'Product ID',       'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Product identifier',                   '["prod-001"]',          3),
+        ('product_margin_monthly', 'product_line',      'Product Line',     'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Product line / category',              '["Enterprise SaaS"]',   4),
+        ('product_margin_monthly', 'revenue_usd',       'Revenue (USD)',     'decimal', 'DECIMAL(14,2)',false, false, true,  false, null, null,'Total revenue for the month',          '[182000.00]',           5),
+        ('product_margin_monthly', 'cogs_usd',          'COGS (USD)',        'decimal', 'DECIMAL(14,2)',false, false, true,  false, null, null,'Cost of goods sold',                  '[62000.00]',            6),
+        ('product_margin_monthly', 'gross_margin_pct',  'Gross Margin %',   'decimal', 'DECIMAL(6,2)', false, false, true,  false, null, null,'(Revenue - COGS) / Revenue × 100',    '[65.93]',               7),
+        ('product_margin_monthly', 'net_margin_pct',    'Net Margin %',     'decimal', 'DECIMAL(6,2)', false, false, false, false, null, null,'After-overhead net margin percentage', '[31.20]',               8),
+        ('cost_breakdown', 'breakdown_id',   'Breakdown ID',   'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique cost breakdown record',          '["bd-prod-001-2024-04"]', 1),
+        ('cost_breakdown', 'month_start',    'Month Start',    'date',    'DATE',         false, false, true,  true,  1,    null,'First day of the reporting month',     '["2024-04-01"]',           2),
+        ('cost_breakdown', 'product_id',     'Product ID',     'string',  'VARCHAR(36)',  false, false, true,  false, null, null,'Product identifier',                   '["prod-001"]',             3),
+        ('cost_breakdown', 'cost_category',  'Cost Category',  'string',  'VARCHAR(30)',  false, false, true,  false, null, null,'COGS, FULFILLMENT, OVERHEAD, OTHER',   '["COGS"]',                 4),
+        ('cost_breakdown', 'amount_usd',     'Amount (USD)',   'decimal', 'DECIMAL(14,2)',false, false, true,  false, null, null,'Cost amount in USD',                   '[62000.00]',               5),
+        ('cost_breakdown', 'cost_driver',    'Cost Driver',    'string',  'VARCHAR(100)', false, false, false, false, null, null,'Free-text label for the cost driver',  '["Cloud hosting fees"]',  6),
+        ('cost_breakdown', 'variance_usd',   'Variance (USD)', 'decimal', 'DECIMAL(14,2)',false, false, false, false, null, null,'Delta vs prior month',                 '[1200.00]',                7)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = margin_trends_by_product AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), user_feedback_insights_report, 'feedback_analysis', 'feedback_analysis', 'table', 'Parquet', 'NLP-enriched user feedback records with sentiment and topic tags', 1);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('feedback_analysis', 'feedback_id',      'Feedback ID',      'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Unique feedback record',               '["fb-77123"]',         1),
+        ('feedback_analysis', 'submitted_date',   'Submitted Date',   'date',    'DATE',         false, false, true,  true,  1,    null,'Date feedback was submitted',          '["2024-04-09"]',       2),
+        ('feedback_analysis', 'user_id',          'User ID',          'string',  'VARCHAR(36)',  false, false, false, false, null, null,'User identifier (nullable = anonymous)','["usr-334"]',         3),
+        ('feedback_analysis', 'channel',          'Channel',          'string',  'VARCHAR(20)',  false, false, true,  false, null, null,'Feedback channel: in-app, email, etc',  '["in-app"]',          4),
+        ('feedback_analysis', 'raw_text',         'Raw Text',         'string',  'TEXT',         false, false, true,  false, null, null,'Original feedback text',               '["Love the new UI!"]', 5),
+        ('feedback_analysis', 'sentiment',        'Sentiment',        'string',  'VARCHAR(10)',  false, false, true,  false, null, null,'POSITIVE, NEUTRAL, or NEGATIVE',       '["POSITIVE"]',        6),
+        ('feedback_analysis', 'sentiment_score',  'Sentiment Score',  'decimal', 'DECIMAL(4,3)', false, false, true,  false, null, null,'Sentiment confidence (0–1)',            '[0.921]',             7),
+        ('feedback_analysis', 'topics',           'Topics',           'array',   'JSONB',        false, false, false, false, null, null,'Extracted topic labels',               '[["UX","Performance"]]',8),
+        ('feedback_analysis', 'csat_score',       'CSAT Score',       'integer', 'SMALLINT',     false, false, false, false, null, null,'Customer satisfaction score (1–5)',     '[5]',                 9)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = user_feedback_insights_report AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+    VALUES
+        (gen_random_uuid(), feature_usage_metrics_weekly, 'weekly_feature_summary', 'weekly_feature_summary', 'table', 'Delta Table', 'Weekly rollup of feature engagement aggregated from daily data', 1);
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    SELECT
+        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
+        p.description, p.examples::jsonb, p.position
+    FROM public.output_port_schema_objects o
+    JOIN (VALUES
+        ('weekly_feature_summary', 'week_key',        'Week Key',         'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'PK: feature_key + week_start',          '["dark_mode-2024-W14"]',  1),
+        ('weekly_feature_summary', 'week_start',      'Week Start',       'date',    'DATE',         false, false, true,  true,  1,    null,'Monday of the ISO week',               '["2024-04-08"]',          2),
+        ('weekly_feature_summary', 'feature_key',     'Feature Key',      'string',  'VARCHAR(100)', false, false, true,  false, null, null,'Product feature identifier',           '["dark_mode_toggle"]',    3),
+        ('weekly_feature_summary', 'unique_users',    'Unique Users',     'integer', 'INT',          false, false, true,  false, null, null,'Distinct weekly active users',         '[2901]',                  4),
+        ('weekly_feature_summary', 'total_events',    'Total Events',     'integer', 'INT',          false, false, true,  false, null, null,'Total events across all days',         '[12430]',                 5),
+        ('weekly_feature_summary', 'avg_daily_users', 'Avg Daily Users',  'decimal', 'DECIMAL(10,2)',false, false, true,  false, null, null,'Mean daily unique users',              '[414.4]',                 6),
+        ('weekly_feature_summary', 'retention_pct',   'Retention %',      'decimal', 'DECIMAL(5,2)', false, false, false, false, null, null,'% of users returning in the same week','[68.3]',                  7),
+        ('weekly_feature_summary', 'top_platform',    'Top Platform',     'string',  'VARCHAR(20)',  false, false, false, false, null, null,'Platform with most usage: web/ios/android','["web"]',             8)
+    ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = feature_usage_metrics_weekly AND o.name = p.schema_name;
+
 end $$;

@@ -1,4 +1,4 @@
-import { Card, Space, Table, Tag, Typography } from 'antd';
+import { Card, List, Space, Table, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
@@ -50,9 +50,7 @@ function getPropertyColumns(t: ReturnType<typeof useTranslation>['t']) {
             render: (description: string | null) =>
                 description ? (
                     <Typography.Text>{description}</Typography.Text>
-                ) : (
-                    <Typography.Text type="secondary">—</Typography.Text>
-                ),
+                ) : null,
         },
         {
             title: t('Example'),
@@ -105,34 +103,47 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
     const columns = getPropertyColumns(t);
 
     return (
-        <>
-            {schemaObjects.map((obj, index) => (
-                <Card
-                    key={obj.id}
-                    size="small"
-                    style={{ marginTop: index > 0 ? 16 : 0 }}
-                    title={
-                        <Space size="small">
-                            <h3>{obj.name}</h3>
-                            {obj.physical_type && <Tag>{obj.physical_type}</Tag>}
-                        </Space>
-                    }
-                >
-                    {obj.description ? (
-                        <div style={{ marginBottom: 12 }}>
-                            {obj.description && <Typography.Text type="secondary">{obj.description}</Typography.Text>}
-                        </div>
-                    ) : null}
-                    <Table<SchemaPropertyResponse>
-                        dataSource={obj.properties ?? []}
-                        columns={columns}
-                        rowKey="id"
+        <List
+            dataSource={schemaObjects}
+            rowKey="id"
+            pagination={{ pageSize: 1, hideOnSinglePage: true, size: 'small', align: 'end' }}
+            renderItem={(obj) => (
+                <List.Item style={{ display: 'block', padding: '0 0 16px', border: 'none' }}>
+                    <Card
                         size="small"
-                        pagination={false}
-                        locale={{ emptyText: t('No properties defined') }}
-                    />
-                </Card>
-            ))}
-        </>
+                        title={
+                            <Space size="small">
+                                {obj.name}
+                                {obj.physical_type && <Tag style={{ fontWeight: 'normal' }}>{obj.physical_type}</Tag>}
+                            </Space>
+                        }
+                    >
+                        {((obj.physical_name && obj.physical_name !== obj.name) || obj.description) && (
+                            <div style={{ marginBottom: 12 }}>
+                                {obj.physical_name && obj.physical_name !== obj.name && (
+                                    <Typography.Text type="secondary">
+                                        {obj.physical_name}
+                                    </Typography.Text>
+                                )}
+                                {obj.description && (
+                                    <Typography.Text type="secondary">
+                                        {obj.description}
+                                    </Typography.Text>
+                                )}
+                            </div>
+                        )}
+                        <Table<SchemaPropertyResponse>
+                            dataSource={obj.properties ?? []}
+                            columns={columns}
+                            rowKey="id"
+                            size="small"
+                            pagination={false}
+                            scroll={{ x: 'max-content' }}
+                            locale={{ emptyText: t('No properties defined') }}
+                        />
+                    </Card>
+                </List.Item>
+            )}
+        />
     );
 }

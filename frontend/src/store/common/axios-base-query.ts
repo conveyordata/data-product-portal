@@ -48,7 +48,7 @@ function showErrorMessageToast(err: AxiosResponse<ApiError>, api: BaseQueryApi) 
 
 function shouldShowErrorToast(status: number, url: string) {
     if (status === 404) {
-        if (url.includes('data_quality_summary')) {
+        if (url.includes('data_quality_summary') || url.includes('data_contract')) {
             return false;
         }
     }

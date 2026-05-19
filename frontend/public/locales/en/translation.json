@@ -420,7 +420,6 @@
     "NotificationDataProductRoleAssignmentUpdated": "role updated for <target>{{target_entity}}</target> in <subject>{{subject_entity}}</subject> {{subject_entity_type}}",
     "Notifications": "Notifications",
     "Notifications acknowledged": "Notifications acknowledged",
-    "Nullable": "Nullable",
     "Numbered list": "Numbered list",
     "Open your preferred SQL tool and start querying datasets available in the ": "Open your preferred SQL tool and start querying datasets available in the ",
     "Order": "Order",
