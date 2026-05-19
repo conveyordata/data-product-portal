@@ -62,6 +62,7 @@ declare
     margin_trends_by_product uuid;
     feature_usage_metrics_daily uuid;
     feature_usage_metrics_weekly uuid;
+    release_version_prop_id uuid;
 
     -- PLATFORMS
     returned_platform_id uuid;
@@ -857,23 +858,32 @@ begin
     VALUES
         (gen_random_uuid(), release_engagement_by_segment, 'engagement_by_segment', 'engagement_by_segment', 'table', 'Parquet', 'Per-segment engagement metrics broken down by release version', 1);
 
+    release_version_prop_id := gen_random_uuid();
+
     INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
     SELECT
-        gen_random_uuid(), o.id, p.name, p.business_name, p.logical_type, p.physical_type,
+        CASE WHEN p.name = 'release_version' THEN release_version_prop_id ELSE gen_random_uuid() END,
+        o.id, p.name, p.business_name, p.logical_type, p.physical_type,
         p.primary_key, p."unique", p.required, p.partitioned, p.partition_key_position, p.primary_key_position,
         p.description, p.examples::jsonb, p.position
     FROM public.output_port_schema_objects o
     JOIN (VALUES
-        ('engagement_by_segment', 'row_id',           'Row ID',           'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Surrogate key',                        '["rowid-seg-rel"]',    1),
-        ('engagement_by_segment', 'release_version',  'Release Version',  'string',  'VARCHAR(30)',  false, false, true,  true,  1,    null,'Semver release tag',                  '["v2.4.1"]',           2),
-        ('engagement_by_segment', 'segment_label',    'Segment',          'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Customer segment name',               '["Champions"]',        3),
-        ('engagement_by_segment', 'sessions',         'Sessions',         'integer', 'INT',          false, false, true,  false, null, null,'Number of sessions in window',         '[9812]',               4),
-        ('engagement_by_segment', 'avg_session_mins', 'Avg Session (min)','decimal', 'DECIMAL(8,2)', false, false, true,  false, null, null,'Mean session duration in minutes',     '[6.4]',                5),
-        ('engagement_by_segment', 'feature_adoption_pct','Feature Adoption %','decimal','DECIMAL(5,2)',false,false,true,  false, null, null,'% of users who used new feature',     '[34.7]',               6),
-        ('engagement_by_segment', 'nps_score',        'NPS Score',        'decimal', 'DECIMAL(4,1)', false, false, false, false, null, null,'Net Promoter Score for the segment',  '[42.0]',               7),
-        ('engagement_by_segment', 'churn_30d_pct',    'Churn 30d %',      'decimal', 'DECIMAL(5,2)', false, false, false, false, null, null,'30-day churn rate post release',       '[2.1]',                8)
+        ('engagement_by_segment', 'row_id',              'Row ID',             'string',  'VARCHAR(36)',  true,  true,  true,  false, null, 1,   'Surrogate key',                       '["rowid-seg-rel"]', 1),
+        ('engagement_by_segment', 'release_version',     'Release Version',    'object',  'object',       false, false, true,  true,  1,    null,'Semver release object',               'null',              2),
+        ('engagement_by_segment', 'segment_label',       'Segment',            'string',  'VARCHAR(50)',  false, false, true,  false, null, null,'Customer segment name',               '["Champions"]',     3),
+        ('engagement_by_segment', 'sessions',            'Sessions',           'integer', 'INT',          false, false, true,  false, null, null,'Number of sessions in window',        '[9812]',            4),
+        ('engagement_by_segment', 'avg_session_mins',    'Avg Session (min)',  'decimal', 'DECIMAL(8,2)', false, false, true,  false, null, null,'Mean session duration in minutes',    '[6.4]',             5),
+        ('engagement_by_segment', 'feature_adoption_pct','Feature Adoption %', 'decimal', 'DECIMAL(5,2)', false, false, true,  false, null, null,'% of users who used new feature',    '[34.7]',            6),
+        ('engagement_by_segment', 'nps_score',           'NPS Score',          'decimal', 'DECIMAL(4,1)', false, false, false, false, null, null,'Net Promoter Score for the segment', '[42.0]',            7),
+        ('engagement_by_segment', 'churn_30d_pct',       'Churn 30d %',        'decimal', 'DECIMAL(5,2)', false, false, false, false, null, null,'30-day churn rate post release',      '[2.1]',             8)
     ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
     ON o.output_port_id = release_engagement_by_segment AND o.name = p.schema_name;
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, parent_property_id, name, business_name, logical_type, physical_type, required, primary_key, "unique", partitioned, description, examples, position)
+    VALUES
+        (gen_random_uuid(), (SELECT schema_object_id FROM public.output_port_schema_properties WHERE id = release_version_prop_id), release_version_prop_id, 'major_version', 'Major Version', 'integer', 'INT',     true,  false, false, false, 'Breaking-change version number', '[2]',  1),
+        (gen_random_uuid(), (SELECT schema_object_id FROM public.output_port_schema_properties WHERE id = release_version_prop_id), release_version_prop_id, 'minor_version', 'Minor Version', 'integer', 'INT',     true,  false, false, false, 'Backwards-compatible feature number', '[4]',  2),
+        (gen_random_uuid(), (SELECT schema_object_id FROM public.output_port_schema_properties WHERE id = release_version_prop_id), release_version_prop_id, 'hotfix_version','Hotfix Version','integer', 'INT',     true,  false, false, false, 'Patch / hotfix number',         '[1]',  3);
 
     INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
     VALUES

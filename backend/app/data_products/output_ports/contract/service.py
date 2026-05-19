@@ -112,27 +112,32 @@ class OutputPortContractService:
         props_by_parent: dict[UUID | None, list[OutputPortSchemaProperty]],
         parent_id: UUID | None,
     ) -> list[SchemaPropertyResponse]:
-        return [
-            SchemaPropertyResponse(
-                id=p.id,
-                name=p.name,
-                business_name=p.business_name,
-                logical_type=p.logical_type,
-                physical_type=p.physical_type,
-                description=p.description,
-                examples=p.examples,
-                position=p.position,
-                partitioned=p.partitioned,
-                partition_key_position=p.partition_key_position,
-                required=p.required,
-                primary_key=p.primary_key,
-                primary_key_position=p.primary_key_position,
-                properties=OutputPortContractService._build_properties_tree(
-                    props_by_parent, p.id
-                ),
+        schema_properties: list[SchemaPropertyResponse] = []
+        for p in props_by_parent.get(parent_id, []):
+            nested_properties = OutputPortContractService._build_properties_tree(
+                props_by_parent, p.id
             )
-            for p in props_by_parent.get(parent_id, [])
-        ]
+            schema_properties.append(
+                SchemaPropertyResponse(
+                    id=p.id,
+                    name=p.name,
+                    business_name=p.business_name,
+                    logical_type=p.logical_type,
+                    physical_type=p.physical_type,
+                    description=p.description,
+                    examples=p.examples,
+                    position=p.position,
+                    partitioned=p.partitioned,
+                    partition_key_position=p.partition_key_position,
+                    required=p.required,
+                    primary_key=p.primary_key,
+                    primary_key_position=p.primary_key_position,
+                    properties=nested_properties
+                    if len(nested_properties) > 0
+                    else None,
+                )
+            )
+        return schema_properties
 
     @staticmethod
     def _flatten_properties(

@@ -48,9 +48,7 @@ function getPropertyColumns(t: ReturnType<typeof useTranslation>['t']) {
             dataIndex: 'description',
             key: 'description',
             render: (description: string | null) =>
-                description ? (
-                    <Typography.Text>{description}</Typography.Text>
-                ) : null,
+                description ? <Typography.Text>{description}</Typography.Text> : null,
         },
         {
             title: t('Example'),
@@ -121,14 +119,10 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                         {((obj.physical_name && obj.physical_name !== obj.name) || obj.description) && (
                             <div style={{ marginBottom: 12 }}>
                                 {obj.physical_name && obj.physical_name !== obj.name && (
-                                    <Typography.Text type="secondary">
-                                        {obj.physical_name}
-                                    </Typography.Text>
+                                    <Typography.Text type="secondary">{obj.physical_name}</Typography.Text>
                                 )}
                                 {obj.description && (
-                                    <Typography.Text type="secondary">
-                                        {obj.description}
-                                    </Typography.Text>
+                                    <Typography.Text type="secondary">{obj.description}</Typography.Text>
                                 )}
                             </div>
                         )}
@@ -139,6 +133,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                             size="small"
                             pagination={false}
                             scroll={{ x: 'max-content' }}
+                            expandable={{ childrenColumnName: 'properties' }}
                             locale={{ emptyText: t('No properties defined') }}
                         />
                     </Card>

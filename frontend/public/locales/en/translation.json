@@ -6,8 +6,6 @@
     "{{count}} available Technical Assets_other": "{{count}} available $t(Technical Assets)",
     "{{count}} consumers_one": "{{count}} consumer",
     "{{count}} consumers_other": "{{count}} consumers",
-    "{{count}} fields_one": "{{count}} fields",
-    "{{count}} fields_other": "{{count}} fields",
     "{{count}} linked Output Ports_one": "{{count}} linked $t(Output Port)",
     "{{count}} linked Output Ports_other": "{{count}} linked $t(Output Ports)",
     "{{count}} linked Technical Assets_one": "{{count}} linked $t(Technical Asset)",

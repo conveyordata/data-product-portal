@@ -124,6 +124,7 @@ class TestContractRouter:
         assert trial_id_prop["physical_type"] == "varchar"
         assert trial_id_prop["examples"] == ["CT-12345", "AX-45678"]
         assert trial_id_prop["position"] == 0
+        assert trial_id_prop["properties"] is None
 
         retention_metrics = body["schema_objects"][1]
         assert retention_metrics["name"] == "retention_metrics"
@@ -144,6 +145,7 @@ class TestContractRouter:
         assert patient_id_prop["physical_type"] == "varchar"
         assert patient_id_prop["examples"] == ["M-12345", "F-45678"]
         assert patient_id_prop["position"] == 1
+        assert patient_id_prop["properties"] is None
 
     def test_post_contract_no_permissions(self, client):
         dataset = DatasetFactory()
