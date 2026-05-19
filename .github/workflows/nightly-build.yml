@@ -9,7 +9,8 @@ jobs:
   compose:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Test Docker Compose
@@ -20,14 +21,13 @@ jobs:
       - name: Test Curl command
         id: run_command
         run: |
-            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:8080)
+            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:5050)
             echo "Status code: $STATUS_CODE"
             # Set the output for GitHub Actions
             echo "::set-output name=status_code::$STATUS_CODE"
       - name: Check command success
         if: ${{ steps.run_command.outputs.status_code == '200' }}
         run: echo "Command was successful (200)"
-
       - name: Check command failure
         if: ${{ steps.run_command.outputs.status_code != '200' }}
         run: |
