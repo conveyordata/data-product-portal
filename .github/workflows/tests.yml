@@ -126,7 +126,7 @@ jobs:
       - name: Checkout github repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install Task
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
       - name: Validate Helm chart
         run: task test:helm
 
