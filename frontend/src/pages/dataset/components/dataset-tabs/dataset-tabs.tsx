@@ -1,6 +1,7 @@
 import {
     BarChartOutlined,
     CompassOutlined,
+    FileTextOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
     SettingOutlined,
@@ -17,6 +18,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { ConsumersTab } from '@/pages/dataset/components/dataset-tabs/consumers-tab/consumers-tab';
+import { DataModelTab } from '@/pages/dataset/components/dataset-tabs/data-model-tab/data-model-tab';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { UsageTab } from '@/pages/dataset/components/dataset-tabs/usage-tab/usage-tab.tsx';
@@ -67,6 +69,12 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
+                label: t('Data Model'),
+                key: TabKeys.DataModel,
+                icon: <FileTextOutlined />,
+                children: <DataModelTab datasetId={datasetId} dataProductId={dataProductId} />,
+            },
+            {
                 label: (
                     <Flex className={styles.betaContainer}>
                         {t('Usage')}
@@ -83,6 +91,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 icon: <TechnicalAssetOutlined />,
                 children: <DataOutputTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
+
             {
                 label: t('Consumers'),
                 key: TabKeys.Consumers,

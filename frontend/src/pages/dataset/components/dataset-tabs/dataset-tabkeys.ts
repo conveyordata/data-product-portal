@@ -3,6 +3,7 @@ export enum TabKeys {
     Usage = 'usage',
     Consumers = 'consumers',
     Producers = 'producers',
+    DataModel = 'data model',
     Team = 'team',
     Explorer = 'explorer',
     Settings = 'settings',
