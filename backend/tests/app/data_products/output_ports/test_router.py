@@ -118,7 +118,7 @@ class TestOutputPortRouter:
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
-        output_port: Dataset = (
+        output_port = (
             session.query(Dataset).filter_by(id=created_dataset.json()["id"]).first()
         )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
@@ -243,7 +243,7 @@ class TestOutputPortRouter:
 
         assert updated_dataset.status_code == 200
         dataset_id = updated_dataset.json()["id"]
-        output_port: Dataset = session.query(Dataset).filter_by(id=dataset_id).first()
+        output_port = session.query(Dataset).filter_by(id=dataset_id).first()
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_update_dataset(self, client):

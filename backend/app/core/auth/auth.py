@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.api_key import secured_api_key
-from app.core.auth.jwt import JWTToken, JWTTokenValid, PyJWTError, get_oidc
+from app.core.auth.jwt import JWTToken, JWTTokenValid, PyJWTError
 from app.core.auth.oidc import OIDCIdentity
 from app.database.database import get_db_session
 from app.settings import settings
@@ -44,6 +44,7 @@ def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> Use
 
 
 if settings.OIDC_ENABLED:
+    from app.core.auth.jwt import get_oidc
 
     def unvalidated_token(token: str = Depends(get_oidc().oidc_dependency)) -> str:
         return token
@@ -65,7 +66,7 @@ if settings.OIDC_ENABLED:
 
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
-    ):
+    ) -> JWTToken:
         if not api_key and not jwt_token:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Unauthenticated"

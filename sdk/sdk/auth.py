@@ -124,7 +124,9 @@ class PortalAuth:
                 grant_type="urn:ietf:params:oauth:grant-type:device_code",
             )
             if token_response.status_code == 200:
-                self._store_token_response(json.loads(token_response.content), persist=True)
+                self._store_token_response(
+                    json.loads(token_response.content), persist=True
+                )
                 return
 
             jwt_data = json.loads(token_response.content)

@@ -7007,11 +7007,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Get Jwt Token Api V2 Authn Device Jwt Token Post"
-                }
+                "schema": {}
               }
             }
           },

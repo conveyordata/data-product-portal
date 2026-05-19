@@ -30,7 +30,7 @@ async def get_jwt_token(
     auth_client_id: Annotated[str, Depends(verify_auth_header)],
     client_id: Optional[str] = Query(default=None, deprecated=True),
     db: Session = Depends(get_db_session),
-) -> dict[str, Any]:
+):
     return DeviceFlowService().get_jwt_token(
         request, auth_client_id, device_code, grant_type, db
     )
