@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional, Sequence
 from uuid import UUID
 
 from fastmcp import Context, FastMCP
@@ -62,7 +62,8 @@ initialize_models()
 
 def get_auth_provider() -> Optional[JWTVerifier]:
     if settings.OIDC_ENABLED:
-        return JWTVerifier(issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri)
+        oidc = get_oidc()
+        return JWTVerifier(issuer=oidc.authority, jwks_uri=oidc.jwks_uri)
     return None
 
 
@@ -113,8 +114,8 @@ async def get_current_user(ctx: Context) -> dict[str, Any]:
 
 @mcp.tool
 def universal_search(
-    query: str, entity_types: list[str] = [], limit: int = 10
-) -> Dict[str, Any]:
+    query: str, entity_types: Sequence[str] = (), limit: int = 10
+) -> dict[str, Any]:
     """
     Search across data products, output ports, technical assets, and domains in a single call.
     Use this only when the user hasn't specified what type of entity they're looking for.
@@ -243,7 +244,7 @@ def search_data_products(
     domain_id: Optional[str] = None,
     status: Optional[str] = None,
     limit: int = 20,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Search and filter data products. Only use this when the user explicitly asks to find a data product.
     For general data discovery, prefer search_output_ports instead.
@@ -305,7 +306,7 @@ def search_data_products(
 def search_output_ports(
     query: Optional[str] = None,
     limit: int = 20,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Search output ports (datasets) using semantic search. This is the preferred tool for finding data in the portal.
     Use this for any question about finding datasets, tables, or data sources — unless the user explicitly asks for a data product.
@@ -346,7 +347,7 @@ def search_output_ports(
 
 
 @mcp.tool
-def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
+def get_data_product_details(data_product_id: str) -> dict[str, Any]:
     """
     Get full details of a single data product by its UUID, including its description,
     domain, lifecycle status, owners, output ports, and technical assets.
@@ -372,7 +373,7 @@ def get_data_product_details(data_product_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool
-def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
+def get_output_port_details(output_port_id: str) -> dict[str, Any]:
     """
     Get full details of a single output port by its UUID, including schema, access type,
     the data product it belongs to, and owner contact information.
@@ -399,7 +400,7 @@ def get_output_port_details(output_port_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool
-def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
+def get_technical_asset_details(technical_asset_id: str) -> dict[str, Any]:
     """
     Get full details of a specific technical asset (data output) by its UUID,
     including its type, configuration, and the data product it belongs to.
@@ -427,7 +428,7 @@ def get_technical_asset_details(technical_asset_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool
-def get_domain_details(domain_id: str) -> Dict[str, Any]:
+def get_domain_details(domain_id: str) -> dict[str, Any]:
     """
     Get details of a specific domain by its UUID, including its name and description.
     Use get_marketplace_overview first to discover available domain IDs.
@@ -456,7 +457,7 @@ def get_domain_details(domain_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool
-def get_marketplace_overview() -> Dict[str, Any]:
+def get_marketplace_overview() -> dict[str, Any]:
     """
     Get a high-level overview of the portal: total counts of data products, output ports,
     technical assets, a list of all domains with their IDs, and featured content.
@@ -509,7 +510,7 @@ def get_marketplace_overview() -> Dict[str, Any]:
 
 
 @mcp.tool
-def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
+def get_data_product_analytics(data_product_id: str) -> dict[str, Any]:
     """
     Get analytics for a data product: its output ports and technical assets with counts.
     Use this to answer questions like 'what does this data product expose?' or 'how many datasets does it have?'.
@@ -706,7 +707,7 @@ def get_user_roles(
     user_id: Optional[str] = None,
     scope_type: Optional[str] = None,
     limit: int = 50,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get role assignments for a user across the portal.
     Use get_current_user first to resolve 'me' or 'my' to a user ID.
@@ -728,9 +729,9 @@ def get_user_roles(
             target_user_id = user_id or str(current_user["id"])
 
             # Get role assignments using the different service classes
-            global_roles: list[Dict[str, Any]] = []
-            data_product_roles: Dict[str, list[Dict[str, Any]]] = {}
-            dataset_roles: Dict[str, list[Dict[str, Any]]] = {}
+            global_roles: list[dict[str, Any]] = []
+            data_product_roles: dict[str, list[dict[str, Any]]] = {}
+            dataset_roles: dict[str, list[dict[str, Any]]] = {}
 
             # Get global roles if not filtered or if specifically requested
             if not scope_type or scope_type == "global":
@@ -809,7 +810,7 @@ def get_resource_roles(
     resource_type: str,
     resource_id: str,
     limit: int = 50,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     List all users and their roles on a specific data product or output port.
 
@@ -823,7 +824,7 @@ def get_resource_roles(
             resource_uuid = UUID(resource_id)
 
             # Get role assignments based on resource type
-            assignment_responses: list[Dict[str, Any]] = []
+            assignment_responses: list[dict[str, Any]] = []
             if resource_type == "data_product":
                 assignments = DataProductRoleAssignmentService(db).list_assignments(
                     data_product_id=resource_uuid
@@ -851,8 +852,8 @@ def get_resource_roles(
                 }
 
             # Group by role for better organization
-            roles_by_type: Dict[str, list[Dict[str, Any]]] = {}
-            users_with_roles: list[Dict[str, Any]] = []
+            roles_by_type: dict[str, list[dict[str, Any]]] = {}
+            users_with_roles: list[dict[str, Any]] = []
 
             for assignment_data in assignment_responses:
                 role_info = assignment_data.get("role", {})

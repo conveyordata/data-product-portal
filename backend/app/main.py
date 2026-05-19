@@ -13,7 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
-from app.core.auth.jwt import oidc
+from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
 from app.core.errors.error_handling import add_exception_handlers
@@ -36,7 +36,7 @@ TITLE = "Data product portal"
 oidc_kwargs = (
     {
         "swagger_ui_init_oauth": {
-            "clientId": oidc.client_id,
+            "clientId": get_oidc().client_id,
             "appName": TITLE,
             "usePkceWithAuthorizationCodeGrant": True,
             "scopes": "openid email profile",

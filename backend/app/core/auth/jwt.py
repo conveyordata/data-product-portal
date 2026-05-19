@@ -1,4 +1,5 @@
 import json
+from functools import cache
 
 import jwt
 from jwt.algorithms import RSAAlgorithm
@@ -8,11 +9,10 @@ from pydantic import BaseModel
 from app.core.auth.oidc import OIDCConfiguration
 from app.core.logging import logger
 
-oidc = OIDCConfiguration()
 
-
+@cache
 def get_oidc():
-    return oidc
+    return OIDCConfiguration()
 
 
 class JWTToken(BaseModel):
@@ -22,7 +22,7 @@ class JWTToken(BaseModel):
 
 class JWTTokenValid:
     def __init__(self, token: str):
-        self.oidc = oidc
+        self.oidc = get_oidc()
         self.logger = logger
         self.token = token
         self.valid_jwt_token: dict[str, str] = {}

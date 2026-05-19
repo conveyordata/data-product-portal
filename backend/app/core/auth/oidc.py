@@ -24,20 +24,19 @@ class OIDCConfiguration:
         audience: Optional[str] = None,
         redirect_uri: Optional[str] = None,
     ):
-        if oidc_enabled or get_boolean_variable("OIDC_ENABLED", False):
-            self.client_id = client_id or os.getenv("OIDC_CLIENT_ID")
-            self.client_secret = client_secret or os.getenv("OIDC_CLIENT_SECRET")
-            self.authority = authority or os.getenv("OIDC_AUTHORITY")
-            self.audience = audience or os.getenv("OIDC_AUDIENCE")
-            self.redirect_uri = redirect_uri or os.getenv("OIDC_REDIRECT_URI")
-            if self.redirect_uri:
-                self.redirect_uri = self.redirect_uri.removesuffix("/")
-            self.oidc_enabled = oidc_enabled
-            self.provider = provider
-            self.configuration_url = (
-                f"{self.authority}/.well-known/openid-configuration"
-            )
-            json_config = httpx.get(self.configuration_url).json()
+        self.oidc_enabled = oidc_enabled or get_boolean_variable("OIDC_ENABLED", False)
+        self.provider = provider
+        self.client_id = client_id or os.getenv("OIDC_CLIENT_ID")
+        self.client_secret = client_secret or os.getenv("OIDC_CLIENT_SECRET")
+        self.authority = authority or os.getenv("OIDC_AUTHORITY")
+        self.audience = audience or os.getenv("OIDC_AUDIENCE")
+        self.redirect_uri = (redirect_uri or os.getenv("OIDC_REDIRECT_URI", "")).removesuffix(
+            "/"
+        )
+
+        if self.oidc_enabled:
+            configuration_url = f"{self.authority}/.well-known/openid-configuration"
+            json_config = httpx.get(configuration_url).json()
             self.authorization_endpoint = json_config.get("authorization_endpoint")
             self.userinfo_endpoint = json_config.get("userinfo_endpoint")
             self.token_endpoint = json_config.get("token_endpoint")
@@ -46,7 +45,7 @@ class OIDCConfiguration:
             )
             self.jwks_keys = httpx.get(url=self.jwks_uri).json()
             self.oidc_dependency = OpenIdConnect(
-                openIdConnectUrl=self.configuration_url, auto_error=False
+                openIdConnectUrl=configuration_url, auto_error=False
             )
 
 
@@ -59,6 +58,6 @@ class OIDCIdentity(BaseModel):
     preferred_username: Optional[str] = None
 
     @model_validator(mode="before")
-    def populate_username(cls, values):
+    def populate_username(self, values):
         values["username"] = values.get("username") or values.get("preferred_username")
         return values
