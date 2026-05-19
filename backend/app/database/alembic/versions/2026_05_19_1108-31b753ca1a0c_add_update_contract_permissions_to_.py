@@ -1,4 +1,4 @@
-"""Add update contract permissions to member role
+"""Add update contract permissions to owner role
 
 Revision ID: 31b753ca1a0c
 Revises: 8aa8df18d6ff
