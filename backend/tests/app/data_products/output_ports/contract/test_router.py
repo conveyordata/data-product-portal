@@ -10,7 +10,7 @@ from tests.factories import (
 
 ENDPOINT = "/api/v2/data_products"
 
-CONTRACT_PAYLOAD = {
+DEFAULT_PAYLOAD = {
     "apiVersion": "v3.1.0",
     "kind": "DataContract",
     "id": "clinical-trial-dashboard-contract",
@@ -27,6 +27,9 @@ CONTRACT_PAYLOAD = {
                     "businessName": "Trial Identifier",
                     "logicalType": "string",
                     "physicalType": "varchar",
+                    "required": True,
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
                     "description": "Unique identifier for the clinical trial",
                     "examples": ["CT-12345", "AX-45678"],
                 },
@@ -50,6 +53,27 @@ CONTRACT_PAYLOAD = {
                     "name": "trial_id",
                     "logicalType": "string",
                     "physicalType": "varchar",
+                    "partitioned": True,
+                    "partitionKeyPosition": 1,
+                    "description": "Unique identifier for the clinical trial",
+                    "examples": ["CT-12345", "AX-45678"],
+                },
+                {
+                    "name": "patient_id",
+                    "businessName": "Patient Identifier",
+                    "logicalType": "string",
+                    "physicalType": "varchar",
+                    "partitioned": True,
+                    "partitionKeyPosition": 2,
+                    "description": "Unique identifier for the patient",
+                    "examples": ["M-12345", "F-45678"],
+                },
+                {
+                    "name": "visits_count",
+                    "businessName": "Yearly visits",
+                    "logicalType": "number",
+                    "physicalType": "integer",
+                    "description": "Number of yearly visits by the patient",
                 },
             ],
         },
@@ -76,7 +100,7 @@ class TestContractRouter:
 
         response = client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
-            json=CONTRACT_PAYLOAD,
+            json=DEFAULT_PAYLOAD,
         )
 
         assert response.status_code == 200
@@ -94,17 +118,39 @@ class TestContractRouter:
         trial_id_prop = trial_master["properties"][0]
         assert trial_id_prop["name"] == "trial_id"
         assert trial_id_prop["business_name"] == "Trial Identifier"
+        assert trial_id_prop["primary_key"]
+        assert trial_id_prop["primary_key_position"] == 1
         assert trial_id_prop["logical_type"] == "string"
         assert trial_id_prop["physical_type"] == "varchar"
         assert trial_id_prop["examples"] == ["CT-12345", "AX-45678"]
         assert trial_id_prop["position"] == 0
+
+        retention_metrics = body["schema_objects"][1]
+        assert retention_metrics["name"] == "retention_metrics"
+        assert retention_metrics["physical_type"] == "table"
+        assert (
+            retention_metrics["physical_name"]
+            == "clinical-trial-dashboard.retention_metrics"
+        )
+        assert retention_metrics["position"] == 1
+        assert len(retention_metrics["properties"]) == 3
+
+        patient_id_prop = retention_metrics["properties"][1]
+        assert patient_id_prop["name"] == "patient_id"
+        assert patient_id_prop["business_name"] == "Patient Identifier"
+        assert patient_id_prop["partitioned"]
+        assert patient_id_prop["partition_key_position"] == 2
+        assert patient_id_prop["logical_type"] == "string"
+        assert patient_id_prop["physical_type"] == "varchar"
+        assert patient_id_prop["examples"] == ["M-12345", "F-45678"]
+        assert patient_id_prop["position"] == 1
 
     def test_post_contract_no_permissions(self, client):
         dataset = DatasetFactory()
 
         response = client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
-            json=CONTRACT_PAYLOAD,
+            json=DEFAULT_PAYLOAD,
         )
 
         assert response.status_code == 403
@@ -116,7 +162,7 @@ class TestContractRouter:
 
         response = client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{other_dataset.id}/data_contract",
-            json=CONTRACT_PAYLOAD,
+            json=DEFAULT_PAYLOAD,
         )
 
         assert response.status_code == 404
@@ -138,7 +184,7 @@ class TestContractRouter:
 
         client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
-            json=CONTRACT_PAYLOAD,
+            json=DEFAULT_PAYLOAD,
         )
 
         response = client.get(
@@ -157,7 +203,7 @@ class TestContractRouter:
 
         client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
-            json=CONTRACT_PAYLOAD,
+            json=DEFAULT_PAYLOAD,
         )
 
         replacement = {
@@ -224,7 +270,7 @@ class TestContractRouter:
 
         response = client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
-            json=CONTRACT_PAYLOAD,
+            json=DEFAULT_PAYLOAD,
         )
 
         assert response.status_code == 200
@@ -249,11 +295,11 @@ class TestContractRouter:
 
     def test_delete_output_port_removes_schema(self, client, session):
         dataset = DatasetFactory()
-        _assign_update_role(session, dataset.id)
+        user = _assign_update_role(session, dataset.id)
 
         client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
-            json=CONTRACT_PAYLOAD,
+            json=DEFAULT_PAYLOAD,
         )
 
         role = RoleFactory(
@@ -261,7 +307,7 @@ class TestContractRouter:
             permissions=[AuthorizationAction.OUTPUT_PORT__DELETE],
         )
         DatasetRoleAssignmentFactory(
-            user_id=UserFactory(external_id=settings.DEFAULT_USERNAME).id,
+            user_id=user.id,
             role_id=role.id,
             dataset_id=dataset.id,
         )

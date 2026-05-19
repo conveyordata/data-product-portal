@@ -55,14 +55,14 @@ class OutputPortContractService:
         return self.get_schema(output_port_id)
 
     def get_schema(self, output_port_id: UUID) -> OutputPortSchemaResponse:
-        objects = (
+        schema_objects = (
             self.db.query(OutputPortSchemaObject)
             .filter(OutputPortSchemaObject.output_port_id == output_port_id)
             .order_by(OutputPortSchemaObject.position)
             .all()
         )
 
-        if not objects:
+        if not schema_objects:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"No schemas found for output port {output_port_id}",
@@ -71,7 +71,7 @@ class OutputPortContractService:
         all_properties = (
             self.db.query(OutputPortSchemaProperty)
             .filter(
-                OutputPortSchemaProperty.schema_object_id.in_([o.id for o in objects])
+                OutputPortSchemaProperty.schema_object_id.in_([o.id for o in schema_objects])
             )
             .order_by(
                 OutputPortSchemaProperty.schema_object_id,
@@ -80,9 +80,9 @@ class OutputPortContractService:
             .all()
         )
 
-        props_by_object: dict[UUID, list[OutputPortSchemaProperty]] = defaultdict(list)
+        props_by_schema_object: dict[UUID, list[OutputPortSchemaProperty]] = defaultdict(list)
         for p in all_properties:
-            props_by_object[p.schema_object_id].append(p)
+            props_by_schema_object[p.schema_object_id].append(p)
 
         return OutputPortSchemaResponse(
             output_port_id=output_port_id,
@@ -95,16 +95,16 @@ class OutputPortContractService:
                     physical_name=obj.physical_name,
                     description=obj.description,
                     position=obj.position,
-                    properties=self._build_property_tree(
-                        props_by_object[obj.id], parent_id=None
+                    properties=self._build_properties_tree(
+                        props_by_schema_object[obj.id], parent_id=None
                     ),
                 )
-                for obj in objects
+                for obj in schema_objects
             ],
         )
 
     @staticmethod
-    def _build_property_tree(
+    def _build_properties_tree(
         properties: list[OutputPortSchemaProperty],
         parent_id: UUID | None,
     ) -> list[SchemaPropertyResponse]:
@@ -118,7 +118,12 @@ class OutputPortContractService:
                 description=p.description,
                 examples=p.examples,
                 position=p.position,
-                properties=OutputPortContractService._build_property_tree(
+                partitioned=p.partitioned,
+                partition_key_position=p.partition_key_position,
+                required=p.required,
+                primary_key=p.primary_key,
+                primary_key_position=p.primary_key_position,
+                properties=OutputPortContractService._build_properties_tree(
                     properties, p.id
                 ),
             )
@@ -148,6 +153,12 @@ class OutputPortContractService:
                     description=prop.description,
                     examples=prop.examples,
                     position=start_position + i,
+                    partitioned=prop.partitioned,
+                    partition_key_position=prop.partition_key_position,
+                    primary_key=prop.primary_key,
+                    primary_key_position=prop.primary_key_position,
+                    unique=prop.unique,
+                    required=prop.required,
                 )
             )
             if prop.properties:

@@ -21,6 +21,12 @@ class SchemaPropertyRequest:
         physical_type (None | str | Unset):
         description (None | str | Unset):
         examples (list[Any] | None | Unset):
+        primary_key (bool | Unset):  Default: False.
+        primary_key_position (int | None | Unset):
+        unique (bool | Unset):  Default: False.
+        required (bool | Unset):  Default: False.
+        partitioned (bool | Unset):  Default: False.
+        partition_key_position (int | None | Unset):
         properties (list[SchemaPropertyRequest] | Unset):
     """
 
@@ -30,6 +36,12 @@ class SchemaPropertyRequest:
     physical_type: None | str | Unset = UNSET
     description: None | str | Unset = UNSET
     examples: list[Any] | None | Unset = UNSET
+    primary_key: bool | Unset = False
+    primary_key_position: int | None | Unset = UNSET
+    unique: bool | Unset = False
+    required: bool | Unset = False
+    partitioned: bool | Unset = False
+    partition_key_position: int | None | Unset = UNSET
     properties: list[SchemaPropertyRequest] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -69,6 +81,26 @@ class SchemaPropertyRequest:
         else:
             examples = self.examples
 
+        primary_key = self.primary_key
+
+        primary_key_position: int | None | Unset
+        if isinstance(self.primary_key_position, Unset):
+            primary_key_position = UNSET
+        else:
+            primary_key_position = self.primary_key_position
+
+        unique = self.unique
+
+        required = self.required
+
+        partitioned = self.partitioned
+
+        partition_key_position: int | None | Unset
+        if isinstance(self.partition_key_position, Unset):
+            partition_key_position = UNSET
+        else:
+            partition_key_position = self.partition_key_position
+
         properties: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.properties, Unset):
             properties = []
@@ -93,6 +125,18 @@ class SchemaPropertyRequest:
             field_dict["description"] = description
         if examples is not UNSET:
             field_dict["examples"] = examples
+        if primary_key is not UNSET:
+            field_dict["primaryKey"] = primary_key
+        if primary_key_position is not UNSET:
+            field_dict["primaryKeyPosition"] = primary_key_position
+        if unique is not UNSET:
+            field_dict["unique"] = unique
+        if required is not UNSET:
+            field_dict["required"] = required
+        if partitioned is not UNSET:
+            field_dict["partitioned"] = partitioned
+        if partition_key_position is not UNSET:
+            field_dict["partitionKeyPosition"] = partition_key_position
         if properties is not UNSET:
             field_dict["properties"] = properties
 
@@ -156,6 +200,36 @@ class SchemaPropertyRequest:
 
         examples = _parse_examples(d.pop("examples", UNSET))
 
+        primary_key = d.pop("primaryKey", UNSET)
+
+        def _parse_primary_key_position(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        primary_key_position = _parse_primary_key_position(
+            d.pop("primaryKeyPosition", UNSET)
+        )
+
+        unique = d.pop("unique", UNSET)
+
+        required = d.pop("required", UNSET)
+
+        partitioned = d.pop("partitioned", UNSET)
+
+        def _parse_partition_key_position(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        partition_key_position = _parse_partition_key_position(
+            d.pop("partitionKeyPosition", UNSET)
+        )
+
         _properties = d.pop("properties", UNSET)
         properties: list[SchemaPropertyRequest] | Unset = UNSET
         if _properties is not UNSET:
@@ -172,6 +246,12 @@ class SchemaPropertyRequest:
             physical_type=physical_type,
             description=description,
             examples=examples,
+            primary_key=primary_key,
+            primary_key_position=primary_key_position,
+            unique=unique,
+            required=required,
+            partitioned=partitioned,
+            partition_key_position=partition_key_position,
             properties=properties,
         )
 

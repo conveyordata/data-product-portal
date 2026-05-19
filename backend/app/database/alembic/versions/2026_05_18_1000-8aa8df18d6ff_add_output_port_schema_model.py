@@ -63,6 +63,8 @@ def upgrade() -> None:
         sa.Column("required", sa.Boolean(), nullable=False, default=False),
         sa.Column("unique", sa.Boolean(), nullable=False, default=False),
         sa.Column("primary_key", sa.Boolean(), nullable=False, default=False),
+        sa.Column("partitioned", sa.Boolean(), nullable=False, default=False),
+        sa.Column("partition_key_position", sa.SmallInteger(), nullable=True),
         sa.Column("primary_key_position", sa.SmallInteger(), nullable=True),
         sa.Column("examples", sa.JSON(), nullable=True),
         sa.Column(

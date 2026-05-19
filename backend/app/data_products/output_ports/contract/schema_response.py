@@ -12,6 +12,12 @@ class SchemaPropertyResponse(ORMModel):
     physical_type: Optional[str] = None
     description: Optional[str] = None
     examples: Optional[list[Any]] = None
+    primary_key: bool = False
+    primary_key_position: Optional[int] = None
+    unique: bool = False
+    required: bool = False
+    partitioned: bool = False
+    partition_key_position: Optional[int] = None
     position: int
     properties: list["SchemaPropertyResponse"] = []
 

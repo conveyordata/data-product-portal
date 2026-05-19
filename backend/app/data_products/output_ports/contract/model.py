@@ -49,6 +49,10 @@ class OutputPortSchemaProperty(Base):
     primary_key: Mapped[bool] = mapped_column(Boolean, default=False)
     unique: Mapped[bool] = mapped_column(Boolean, default=False)
     required: Mapped[bool] = mapped_column(Boolean, default=False)
+    partitioned: Mapped[bool] = mapped_column(Boolean, default=False)
+    partition_key_position: Mapped[Optional[int]] = mapped_column(
+        SmallInteger, nullable=True
+    )
     primary_key_position: Mapped[Optional[int]] = mapped_column(
         SmallInteger, nullable=True
     )
