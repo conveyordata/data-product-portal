@@ -71,7 +71,9 @@ class OutputPortContractService:
         all_properties = (
             self.db.query(OutputPortSchemaProperty)
             .filter(
-                OutputPortSchemaProperty.schema_object_id.in_([o.id for o in schema_objects])
+                OutputPortSchemaProperty.schema_object_id.in_(
+                    [o.id for o in schema_objects]
+                )
             )
             .order_by(
                 OutputPortSchemaProperty.schema_object_id,
@@ -80,9 +82,11 @@ class OutputPortContractService:
             .all()
         )
 
-        props_by_schema_object: dict[UUID, list[OutputPortSchemaProperty]] = defaultdict(list)
+        props_by_schema_object: dict[
+            UUID, dict[UUID | None, list[OutputPortSchemaProperty]]
+        ] = defaultdict(lambda: defaultdict(list))
         for p in all_properties:
-            props_by_schema_object[p.schema_object_id].append(p)
+            props_by_schema_object[p.schema_object_id][p.parent_property_id].append(p)
 
         return OutputPortSchemaResponse(
             output_port_id=output_port_id,
@@ -105,7 +109,7 @@ class OutputPortContractService:
 
     @staticmethod
     def _build_properties_tree(
-        properties: list[OutputPortSchemaProperty],
+        props_by_parent: dict[UUID | None, list[OutputPortSchemaProperty]],
         parent_id: UUID | None,
     ) -> list[SchemaPropertyResponse]:
         return [
@@ -124,11 +128,10 @@ class OutputPortContractService:
                 primary_key=p.primary_key,
                 primary_key_position=p.primary_key_position,
                 properties=OutputPortContractService._build_properties_tree(
-                    properties, p.id
+                    props_by_parent, p.id
                 ),
             )
-            for p in properties
-            if p.parent_property_id == parent_id
+            for p in props_by_parent.get(parent_id, [])
         ]
 
     @staticmethod
