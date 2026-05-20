@@ -29,7 +29,7 @@ def _make_request(**state_attrs):
     return req
 
 
-def test_v2event_subclass_without_event_type_raises():
+def test_v2event_subclass_without_event_type_raises() -> None:
     with pytest.raises(TypeError, match="must define an event_type"):
 
         class _Bad(V2Event):
@@ -67,7 +67,7 @@ def test_emits_event_raises_if_state_event_not_set():
         asyncio.run(_run())
 
 
-def test_emits_event_raises_if_wrong_event_type():
+def test_emits_event_raises_if_wrong_event_type() -> None:
     """Handler set wrong event type → TypeError after yield."""
 
     class _OtherEvent(V2Event):

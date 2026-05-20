@@ -26,16 +26,21 @@ class OIDCConfiguration:
     ):
         self.oidc_enabled = oidc_enabled or get_boolean_variable("OIDC_ENABLED", False)
         self.provider = provider
-        self.client_id = client_id or os.getenv("OIDC_CLIENT_ID")
-        self.client_secret = client_secret or os.getenv("OIDC_CLIENT_SECRET")
-        self.authority = authority or os.getenv("OIDC_AUTHORITY")
-        self.audience = audience or os.getenv("OIDC_AUDIENCE")
-        self.redirect_uri = redirect_uri or os.getenv("OIDC_REDIRECT_URI")
-        if self.redirect_uri:
-            self.redirect_uri = self.redirect_uri.removesuffix("/")
 
         if self.oidc_enabled:
+            self.client_id = client_id or os.getenv("OIDC_CLIENT_ID")
+            self.client_secret = client_secret or os.getenv("OIDC_CLIENT_SECRET")
+            self.authority = authority or os.getenv("OIDC_AUTHORITY")
+            self.audience = audience or os.getenv("OIDC_AUDIENCE")
+            self.redirect_uri = redirect_uri or os.getenv("OIDC_REDIRECT_URI")
+            if self.redirect_uri:
+                self.redirect_uri = self.redirect_uri.removesuffix("/")
+
             configuration_url = f"{self.authority}/.well-known/openid-configuration"
+            self.oidc_dependency = OpenIdConnect(
+                openIdConnectUrl=configuration_url, auto_error=False
+            )
+
             json_config = httpx.get(configuration_url).json()
             self.authorization_endpoint = json_config.get("authorization_endpoint")
             self.userinfo_endpoint = json_config.get("userinfo_endpoint")
@@ -44,9 +49,6 @@ class OIDCConfiguration:
                 "jwks_uri", f"{self.authority}/.well-known/jwks.json"
             )
             self.jwks_keys = httpx.get(url=self.jwks_uri).json()
-            self.oidc_dependency = OpenIdConnect(
-                openIdConnectUrl=configuration_url, auto_error=False
-            )
 
 
 class OIDCIdentity(BaseModel):
