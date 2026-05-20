@@ -44,12 +44,12 @@ def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> Use
 
 
 if settings.OIDC_ENABLED:
-    from app.core.auth.jwt import get_oidc
+    from app.core.auth.jwt import oidc
 
-    def unvalidated_token(token: str = Depends(get_oidc().oidc_dependency)) -> str:
+    def unvalidated_token(token: str = Depends(oidc.oidc_dependency)) -> str:
         return token
 
-    def secured_call(token: str = Depends(get_oidc().oidc_dependency)) -> JWTToken:
+    def secured_call(token: str = Depends(oidc.oidc_dependency)) -> JWTToken:
         jwt = JWTTokenValid(token)
         if not jwt.is_valid():
             raise PyJWTError
@@ -59,7 +59,7 @@ if settings.OIDC_ENABLED:
         token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
     ) -> User:
         response = httpx.post(
-            url=get_oidc().userinfo_endpoint, headers={"Authorization": token.token}
+            url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
         )
         oidc_user = OIDCIdentity.model_validate(response.json())
         return update_db_user(oidc_user, token, db)
@@ -99,7 +99,9 @@ else:
     def secured_call(token: str = Depends(dummy_token)) -> JWTToken:
         return generate_default_jwt_token()
 
-    def generate_default_jwt_token(default_username=settings.DEFAULT_USERNAME):
+    def generate_default_jwt_token(
+        default_username=settings.DEFAULT_USERNAME,
+    ) -> JWTToken:
         return JWTToken(sub=default_username, token="")
 
     def authorize_user(
@@ -130,5 +132,5 @@ else:
 
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
-    ):
+    ) -> JWTToken:
         return secured_call(jwt_token)
