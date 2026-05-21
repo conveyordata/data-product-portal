@@ -48,6 +48,23 @@ tasks:
     cmds:
       - poetry run python -m app.open_api_export ../docs/static/openapi-no-deprecated.json --exclude-deprecated
 
+  go-sdk:setup:
+    desc: "Setup Go SDK generation"
+    cmds:
+      - go install github.com/doordash-oss/oapi-codegen-dd/v3/cmd/oapi-codegen@latest
+
+  go-sdk:generate:
+    desc: "Generate the Go SDK from the OpenAPI spec"
+    sources: [docs/static/openapi-no-deprecated.json, sdk-go/oapi-codegen.yaml]
+    generates: [sdk-go/client.go]
+    preconditions:
+      - oapi-codegen --help # has no --version flag
+    dir: sdk-go
+    cmds:
+      - oapi-codegen --config oapi-codegen.yaml ../docs/static/openapi-no-deprecated.json
+      - gofmt -w .
+      - go mod tidy
+
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
