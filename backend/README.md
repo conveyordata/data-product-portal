@@ -20,7 +20,7 @@
 
 Both for local execution and local development, you need to specify some configuration arguments.
 
-You can use the following `'env` file to get started:
+You can use the following `.env` file to get started:
 
 ```dotenv
 POSTGRES_PASSWORD=abc123

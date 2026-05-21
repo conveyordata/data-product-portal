@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   VERSION_FILE: VERSION
@@ -31,11 +31,22 @@ tasks:
         fs.writeFileSync(file, updated);
         '
 
-  update:open-api-spec:
-    desc: "Update OpenAPI spec with new version"
+  openapi-spec:generate:
+    desc: "Generate OpenAPI spec from backend pydantic models"
+    generates:
+      - docs/static/openapi.json
+    dir: backend
+    dotenv: [.test.env]
     cmds:
-      - cd backend && poetry run python -m app.open_api_export
-      - mv backend/openapi.json docs/static/openapi.json
+      - poetry run python -m app.open_api_export ../docs/static/openapi.json
+
+  openapi-spec:generate-no-deprecated:
+    desc: "Generate OpenAPI spec without deprecated endpoints"
+    generates: [docs/static/openapi-no-deprecated.json]
+    dir: backend
+    dotenv: [.test.env]
+    cmds:
+      - poetry run python -m app.open_api_export ../docs/static/openapi-no-deprecated.json --exclude-deprecated
 
   update:event-docs:
     desc: "Update the event documentation with new version"
@@ -105,7 +116,7 @@ tasks:
     cmds:
       - task: bump:version-file
       - task: bump:release-notes
-      - task: update:open-api-spec
+      - task: openapi-spec:generate
       - task: release:commit
       - task: release:pr
 
@@ -130,3 +141,9 @@ tasks:
     cmds:
       - helm lint helm/
       - helm template data-product-portal helm/ > /dev/null
+      
+  poetry:setup:
+    desc: "Install the backend python project so the precommit does not fail"
+    dir: backend
+    cmds:
+      - poetry install
