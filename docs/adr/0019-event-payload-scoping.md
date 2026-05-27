@@ -90,9 +90,9 @@ Four reusable payload models compose all event payloads:
 | `data_product.created` | `DataProductPayload` |
 | `data_product.updated` | `DataProductPayload` |
 | `data_product.deleted` | `DataProductPayload` + `technical_assets: list[TechnicalAssetPayload]` | //TODO: what is the impact of deleting a data product and all it's output ports
-| `data_product.about_updated` | `DataProductPayload` |
+| `data_product.about_updated` | `DataProductPayload` | //TODO: weird that the about is not included and needs to be fetched. Ok for me
 | `data_product.status_updated` | `DataProductPayload` |
-| `data_product.setting_changed` | `DataProductPayload` + `setting_id: str` |
+| `data_product.setting_changed` | `DataProductPayload` + `setting_id: str` | /TODO: weird that the about is not included and needs to be fetched. Why add the setting_id?
 | `data_product.input_port_linked` | `data_product: DataProductPayload` + `output_port: OutputPortPayload` + `owning_data_product: DataProductPayload` |
 | `data_product.input_port_unlinked` | `data_product: DataProductPayload` + `output_port: OutputPortPayload` + `owning_data_product: DataProductPayload` |
 | `data_product.team_member_added` | `DataProductPayload` + `RoleAssignmentPayload` |
