@@ -1,3 +1,4 @@
 - [ ] Update the release notes document if needed in the [release notes](../docs/docs/release-notes.md).
 - [ ] When updating the UI please provide screenshots or videos to the reviewers.
-- [ ] Updated sample data so the new feature can be easily tested
+- [ ] Updated sample data so the new feature can be easily tested.
+- [ ] Verified these changes do not interfere with the demos in `/demo`.
