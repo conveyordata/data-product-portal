@@ -107,6 +107,8 @@ from .deny_link_between_technical_asset_and_output_port_request import (
     DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
 )
 from .deny_output_port_as_input_port_request import DenyOutputPortAsInputPortRequest
+from .device_flow import DeviceFlow
+from .device_flow_status import DeviceFlowStatus
 from .domain import Domain
 from .domain_create import DomainCreate
 from .domain_update import DomainUpdate
@@ -381,6 +383,8 @@ __all__ = (
     "DeleteOutputPortRoleAssignmentResponse",
     "DenyLinkBetweenTechnicalAssetAndOutputPortRequest",
     "DenyOutputPortAsInputPortRequest",
+    "DeviceFlow",
+    "DeviceFlowStatus",
     "Domain",
     "DomainCreate",
     "DomainUpdate",

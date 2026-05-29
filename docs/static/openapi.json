@@ -6902,11 +6902,20 @@
           {
             "name": "client_id",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "deprecated": true,
               "title": "Client Id"
-            }
+            },
+            "deprecated": true
           },
           {
             "name": "scope",
@@ -6924,7 +6933,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceFlow"
+                }
               }
             }
           },
@@ -6955,15 +6966,6 @@
         ],
         "parameters": [
           {
-            "name": "client_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
-          },
-          {
             "name": "device_code",
             "in": "query",
             "required": true,
@@ -6980,6 +6982,24 @@
               "type": "string",
               "title": "Grant Type"
             }
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "deprecated": true,
+              "title": "Client Id"
+            },
+            "deprecated": true
           }
         ],
         "responses": {
@@ -9321,6 +9341,100 @@
           "consuming_data_product_id"
         ],
         "title": "DenyOutputPortAsInputPortRequest"
+      },
+      "DeviceFlow": {
+        "properties": {
+          "device_code": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Device Code"
+          },
+          "user_code": {
+            "type": "string",
+            "title": "User Code"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope"
+          },
+          "interval": {
+            "type": "integer",
+            "title": "Interval"
+          },
+          "expiration": {
+            "type": "integer",
+            "title": "Expiration"
+          },
+          "oidc_redirect_uri": {
+            "type": "string",
+            "title": "Oidc Redirect Uri"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeviceFlowStatus"
+          },
+          "authz_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz Code"
+          },
+          "authz_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz State"
+          },
+          "authz_verif": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz Verif"
+          },
+          "verification_uri_complete": {
+            "type": "string",
+            "title": "Verification Uri Complete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_code",
+          "user_code",
+          "scope",
+          "interval",
+          "expiration",
+          "oidc_redirect_uri",
+          "status",
+          "authz_code",
+          "authz_state",
+          "authz_verif",
+          "verification_uri_complete"
+        ],
+        "title": "DeviceFlow"
+      },
+      "DeviceFlowStatus": {
+        "type": "string",
+        "enum": [
+          "authorization_pending",
+          "expired",
+          "denied",
+          "authorized"
+        ],
+        "title": "DeviceFlowStatus"
       },
       "Domain": {
         "properties": {
