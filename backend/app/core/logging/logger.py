@@ -13,11 +13,11 @@ LOG_CONFIG_PATH = os.path.join(
 )
 
 
-def get_logger(name: str, prefix: str = "local"):
+def get_logger(name: str, filename: str = "data-product-portal.log"):
     with open(LOG_CONFIG_PATH) as log_config_file:
         dict_config = json.load(log_config_file)
         dict_config["handlers"]["fileHandler"]["filename"] = os.path.join(
-            settings.LOGGING_DIRECTORY, prefix
+            settings.LOGGING_DIRECTORY, filename
         )
 
         if not os.path.exists(settings.LOGGING_DIRECTORY):

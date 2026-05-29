@@ -125,7 +125,7 @@ volumes:
 
 volumeMounts:
   - name: varlog
-    mountPath: /var/logs
+    mountPath: /var/log
   - name: sampledata
     mountPath: /sampledata
   - name: tmpdir
