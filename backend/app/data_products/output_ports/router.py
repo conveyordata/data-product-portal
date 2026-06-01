@@ -26,6 +26,9 @@ from app.core.webhooks.events import (
     OutputPortUpdatedEvent,
 )
 from app.core.webhooks.v2 import _emits_event
+from app.data_products.output_ports.contract.router import (
+    router as contract_router,
+)
 from app.data_products.output_ports.curated_queries.router import (
     router as curated_queries_router,
 )
@@ -103,6 +106,7 @@ route = "/v2/data_products/{data_product_id}/output_ports"
 router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
+router.include_router(contract_router)
 
 
 @router.get(route)

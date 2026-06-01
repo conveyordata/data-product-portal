@@ -80,7 +80,8 @@ export type AuthorizationAction =
   | 411
   | 412
   | 413
-  | 414;
+  | 414
+  | 415;
 export type Prototype = 0 | 1 | 2 | 3;
 export type Role = {
   name: string;

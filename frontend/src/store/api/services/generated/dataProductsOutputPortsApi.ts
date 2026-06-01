@@ -79,6 +79,24 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.outputPortDataQualitySummary,
       }),
     }),
+    getOutputPortSchema: build.query<
+      GetOutputPortSchemaApiResponse,
+      GetOutputPortSchemaApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract`,
+      }),
+    }),
+    ingestOutputPortContract: build.mutation<
+      IngestOutputPortContractApiResponse,
+      IngestOutputPortContractApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract`,
+        method: "POST",
+        body: queryArg.bitolContractRequest,
+      }),
+    }),
     getDataProductOutputPorts: build.query<
       GetDataProductOutputPortsApiResponse,
       GetDataProductOutputPortsApiArg
@@ -232,6 +250,19 @@ export type OverwriteOutputPortDataQualitySummaryApiArg = {
   summaryId: string;
   outputPortDataQualitySummary: OutputPortDataQualitySummary;
 };
+export type GetOutputPortSchemaApiResponse =
+  /** status 200 Successful Response */ OutputPortSchemaResponse;
+export type GetOutputPortSchemaApiArg = {
+  dataProductId: string;
+  id: string;
+};
+export type IngestOutputPortContractApiResponse =
+  /** status 200 Successful Response */ OutputPortSchemaResponse;
+export type IngestOutputPortContractApiArg = {
+  dataProductId: string;
+  id: string;
+  bitolContractRequest: BitolContractRequest;
+};
 export type GetDataProductOutputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductOutputPortsResponse;
 export type GetDataProductOutputPortsApiArg = string;
@@ -371,6 +402,63 @@ export type OutputPortDataQualitySummary = {
   dimensions?: {
     [key: string]: DataQualityStatus;
   } | null;
+};
+export type SchemaPropertyResponse = {
+  id: string;
+  name: string;
+  business_name?: string | null;
+  logical_type?: string | null;
+  physical_type?: string | null;
+  description?: string | null;
+  examples?: any[] | null;
+  primary_key?: boolean;
+  primary_key_position?: number | null;
+  unique?: boolean;
+  required?: boolean;
+  partitioned?: boolean;
+  partition_key_position?: number | null;
+  position: number;
+  properties?: SchemaPropertyResponse[];
+};
+export type SchemaObjectResponse = {
+  id: string;
+  name: string;
+  logical_type?: string | null;
+  physical_type?: string | null;
+  physical_name?: string | null;
+  description?: string | null;
+  position: number;
+  properties?: SchemaPropertyResponse[];
+};
+export type OutputPortSchemaResponse = {
+  output_port_id: string;
+  schema_objects?: SchemaObjectResponse[];
+};
+export type SchemaPropertyRequest = {
+  name: string;
+  businessName?: string | null;
+  logicalType?: string | null;
+  physicalType?: string | null;
+  description?: string | null;
+  examples?: any[] | null;
+  primaryKey?: boolean;
+  primaryKeyPosition?: number | null;
+  unique?: boolean;
+  required?: boolean;
+  partitioned?: boolean;
+  partitionKeyPosition?: number | null;
+  properties?: SchemaPropertyRequest[];
+};
+export type SchemaObjectRequest = {
+  name: string;
+  logicalType?: string | null;
+  physicalType?: string | null;
+  physicalName?: string | null;
+  description?: string | null;
+  properties?: SchemaPropertyRequest[];
+};
+export type BitolContractRequest = {
+  schema?: SchemaObjectRequest[];
 };
 export type Tag = {
   id: string;
@@ -733,6 +821,9 @@ export const {
   useLazyGetLatestDataQualitySummaryForOutputPortQuery,
   useAddOutputPortDataQualityRunMutation,
   useOverwriteOutputPortDataQualitySummaryMutation,
+  useGetOutputPortSchemaQuery,
+  useLazyGetOutputPortSchemaQuery,
+  useIngestOutputPortContractMutation,
   useGetDataProductOutputPortsQuery,
   useLazyGetDataProductOutputPortsQuery,
   useCreateOutputPortMutation,
