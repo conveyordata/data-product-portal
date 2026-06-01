@@ -9,6 +9,7 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.authorization.service import AuthorizationService
@@ -177,12 +178,27 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
 
 use_route_names_as_operation_ids(app)
 
+
+class SPAStaticFiles(StaticFiles):
+    """StaticFiles subclass that falls back to index.html for unknown paths.
+    Which is required for SPAs (single page applications).
+    """
+
+    async def get_response(self, path: str, scope):  # type: ignore[override]
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code == 404:
+                return await super().get_response("index.html", scope)
+            raise
+
+
 if settings.SERVE_FRONTEND:
     _frontend_dir = Path(settings.FRONTEND_DIST_DIR)
     if _frontend_dir.exists():
         app.mount(
             "/",
-            StaticFiles(directory=str(_frontend_dir), html=True),
+            SPAStaticFiles(directory=str(_frontend_dir), html=True),
             name="frontend",
         )
     else:
