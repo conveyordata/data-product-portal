@@ -1,7 +1,7 @@
 from base64 import urlsafe_b64encode
 from datetime import datetime, timedelta
 from hashlib import sha256
-from typing import Annotated, Any
+from typing import Annotated
 from uuid import uuid4
 
 import httpx
@@ -21,6 +21,7 @@ from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
 from app.core.auth.device_flows.schema import (
     DeviceFlow,
     DeviceFlowStatus,
+    OIDCTokenResponse,
 )
 from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
@@ -86,7 +87,7 @@ class DeviceFlowService:
 
     def fetch_jwt_tokens(
         self, request: Request, db: Session, device_code: str, client_id: str
-    ) -> dict[str, Any]:
+    ) -> OIDCTokenResponse:
         self.logger.debug("requesting JWTs")
         device_flow = db.get(DeviceFlowModel, device_code)
 
@@ -156,7 +157,7 @@ class DeviceFlowService:
             self.logger.debug(tokens)
             device_flow.status = DeviceFlowStatus.EXPIRED
             db.commit()
-            return tokens
+            return OIDCTokenResponse(**tokens)
         else:
             raise ExpiredDeviceCodeError
 
@@ -187,7 +188,7 @@ class DeviceFlowService:
         device_code: str,
         grant_type: str,
         db: Session,
-    ) -> dict[str, Any]:
+    ) -> OIDCTokenResponse:
         if grant_type != "urn:ietf:params:oauth:grant-type:device_code":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

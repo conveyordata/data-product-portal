@@ -7006,9 +7006,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Get Jwt Token Api V2 Authn Device Jwt Token Post"
+                  "$ref": "#/components/schemas/OIDCTokenResponse"
                 }
               }
             }
@@ -11297,6 +11295,52 @@
           "outputPortNode"
         ],
         "title": "NodeType"
+      },
+      "OIDCTokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          },
+          "id_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Token"
+          },
+          "refresh_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in"
+        ],
+        "title": "OIDCTokenResponse",
+        "description": "OIDC token endpoint response."
       },
       "OSISemanticModelTechnicalAssetConfiguration": {
         "properties": {

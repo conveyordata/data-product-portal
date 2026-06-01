@@ -143,9 +143,6 @@ from .get_exploration_input_ports_response import GetExplorationInputPortsRespon
 from .get_exploration_response import GetExplorationResponse
 from .get_explorations_response import GetExplorationsResponse
 from .get_input_ports_for_output_port_response import GetInputPortsForOutputPortResponse
-from .get_jwt_token_response_get_jwt_token_api_v2_authn_device_jwt_token_post import (
-    GetJwtTokenResponseGetJwtTokenApiV2AuthnDeviceJwtTokenPost,
-)
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
@@ -181,6 +178,7 @@ from .modify_output_port_role_assignment import ModifyOutputPortRoleAssignment
 from .node import Node
 from .node_data import NodeData
 from .node_type import NodeType
+from .oidc_token_response import OIDCTokenResponse
 from .osi_semantic_model_technical_asset_configuration import (
     OSISemanticModelTechnicalAssetConfiguration,
 )
@@ -426,7 +424,6 @@ __all__ = (
     "GetExplorationResponse",
     "GetExplorationsResponse",
     "GetInputPortsForOutputPortResponse",
-    "GetJwtTokenResponseGetJwtTokenApiV2AuthnDeviceJwtTokenPost",
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",
@@ -454,6 +451,7 @@ __all__ = (
     "Node",
     "NodeData",
     "NodeType",
+    "OIDCTokenResponse",
     "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
     "OutputPortAccessType",
