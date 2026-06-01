@@ -30,6 +30,10 @@ export enum PosthogEvents {
     DATA_PRODUCT_TOUR_CLOSED = 'data_product_tour_closed',
 
     CART_CHECKOUT_COMPLETED = 'cart_checkout_completed',
+    CART_CHECKOUT_COMPLETED_EXISTING_DATA_PRODUCT = 'cart_checkout_completed_existing_data_product',
+    CART_CHECKOUT_COMPLETED_NEW_DATA_PRODUCT = 'cart_checkout_completed_new_data_product',
+    CART_CHECKOUT_COMPLETED_EXISTING_EXPLORATION = 'cart_checkout_completed_existing_exploration',
+    CART_CHECKOUT_COMPLETED_NEW_EXPLORATION = 'cart_checkout_completed_new_exploration',
     CART_CREATE_DATA_PRODUCT = 'cart_create_data_product',
 
     ADMIN_PRIVILEGES_GRANTED = 'admin_privileges_granted',

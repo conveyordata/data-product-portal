@@ -29,8 +29,8 @@ export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props
 
     const handleFinish = async (values: DomainMigrateFormValues) => {
         try {
-            await migrateDomain({ fromId: migrateFrom.id, toId: values.toId });
-            await onRemoveDomain(migrateFrom.id);
+            await migrateDomain({ fromId: migrateFrom.id, toId: values.toId }).unwrap();
+            await onRemoveDomain(migrateFrom.id).unwrap();
             dispatchMessage({ content: t('Domain migrated and deleted successfully'), type: 'success' });
             form.resetFields();
             onClose();

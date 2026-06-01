@@ -98,6 +98,7 @@ export type AuthorizationAction =
   | 105
   | 106
   | 107
+  | 108
   | 301
   | 302
   | 303
@@ -126,7 +127,8 @@ export type AuthorizationAction =
   | 411
   | 412
   | 413
-  | 414;
+  | 414
+  | 415;
 export type Prototype = 0 | 1 | 2 | 3;
 export type Role = {
   name: string;
@@ -194,42 +196,28 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
-export type DataProductStatus = "pending" | "active" | "archived";
-export type DataProductIconKey =
-  | "reporting"
-  | "processing"
-  | "exploration"
-  | "ingestion"
-  | "machine_learning"
-  | "analytics"
-  | "default";
-export type DataProductType = {
-  id: string;
-  name: string;
-  description: string;
-  icon_key: DataProductIconKey;
-};
-export type DataProduct = {
-  id: string;
+export type AbstractDataProductType =
+  | "unknown"
+  | "data_products"
+  | "explorations";
+export type AbstractDataProductInfo = {
   name: string;
   namespace: string;
-  description: string;
-  status: DataProductStatus;
-  type: DataProductType;
+  abstract_data_product_type: AbstractDataProductType;
 };
 export type DataProductOutputPortPendingAction = {
   id: string;
   justification: string;
-  data_product_id: string;
+  consuming_abstract_data_product_id: string;
   output_port_id: string;
   status: DecisionStatus;
   requested_on: string;
   output_port: OutputPort;
-  data_product: DataProduct;
+  consuming_abstract_data_product: AbstractDataProductInfo;
   requested_by: User;
   denied_by: User | null;
   approved_by: User | null;
-  pending_action_type?: "DataProductOutputPort";
+  pending_action_type?: "InputPort";
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
@@ -297,6 +285,29 @@ export type SnowflakeTechnicalAssetConfiguration = {
   database_path?: string;
   table_path?: string;
   access_granularity: AccessGranularity;
+};
+export type DataProductStatus = "pending" | "active" | "archived";
+export type DataProductIconKey =
+  | "reporting"
+  | "processing"
+  | "exploration"
+  | "ingestion"
+  | "machine_learning"
+  | "analytics"
+  | "default";
+export type DataProductType = {
+  id: string;
+  name: string;
+  description: string;
+  icon_key: DataProductIconKey;
+};
+export type DataProduct = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  status: DataProductStatus;
+  type: DataProductType;
 };
 export type OwnedTechnicalAsset = {
   id: string;

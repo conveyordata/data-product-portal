@@ -1,18 +1,21 @@
 import uuid
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.settings import settings
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
 from tests.factories import (
+    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
@@ -332,7 +335,7 @@ class TestTechnicalAssetsRouter:
             }
         ]
         for node in response.json()["nodes"]:
-            if node["type"] == "dataOutputNode":
+            if node["type"] == "technicalAssetNode":
                 assert node == {
                     "data": {
                         "icon_key": "S3TechnicalAssetConfiguration",
@@ -345,7 +348,7 @@ class TestTechnicalAssetsRouter:
                     },
                     "id": str(data_output.id),
                     "isMain": True,
-                    "type": "dataOutputNode",
+                    "type": "technicalAssetNode",
                 }
             else:
                 assert node == {
@@ -727,3 +730,231 @@ class TestTechnicalAssetsRouter:
     @staticmethod
     def get_data_product_history(client, data_product_id):
         return client.get(f"/api/v2/data_products/{data_product_id}/history")
+
+
+@pytest.fixture
+def ta_event_payload():
+    service = PlatformServiceFactory()
+    tag = TagFactory()
+    return {
+        "name": "Test Asset",
+        "description": "desc",
+        "namespace": "test-ta-event-ns",
+        "technical_mapping": "default",
+        "configuration": {
+            "bucket": "test",
+            "path": "test",
+            "configuration_type": "S3TechnicalAssetConfiguration",
+        },
+        "platform_id": str(service.platform.id),
+        "service_id": str(service.id),
+        "tag_ids": [str(tag.id)],
+    }
+
+
+class TestTechnicalAssetsRouterV2Events:
+    @staticmethod
+    def _ta_endpoint(dp_id):
+        return ENDPOINT.format(dp_id)
+
+    @staticmethod
+    def _link_endpoint(dp_id, op_id):
+        return f"/api/v2/data_products/{dp_id}/output_ports/{op_id}/technical_assets"
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_created_fires_event(self, mock_webhook, client, ta_event_payload):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+
+        with webhook_v2_config():
+            response = client.post(self._ta_endpoint(dp.id), json=ta_event_payload)
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.created"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        ta = TechnicalAssetFactory(owner=dp)
+        tag = TagFactory()
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._ta_endpoint(dp.id)}/{ta.id}",
+                json={
+                    "name": "Updated",
+                    "description": "desc",
+                    "tag_ids": [str(tag.id)],
+                },
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.updated"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_deleted_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        ta = TechnicalAssetFactory(owner=dp)
+
+        with webhook_v2_config():
+            response = client.delete(f"{self._ta_endpoint(dp.id)}/{ta.id}")
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.deleted"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_linked_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(dp.id, op.id)}/add",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.linked"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_approved_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+        DataOutputDatasetAssociationFactory(
+            data_output=ta, dataset=op, status=DecisionStatus.PENDING
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(dp.id, op.id)}/approve_link_request",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.link_approved"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_denied_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+        DataOutputDatasetAssociationFactory(
+            data_output=ta, dataset=op, status=DecisionStatus.PENDING
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._link_endpoint(dp.id, op.id)}/deny_link_request",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.link_denied"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_unlinked_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        ta = TechnicalAssetFactory(owner=dp)
+        DataOutputDatasetAssociationFactory(data_output=ta, dataset=op)
+
+        with webhook_v2_config():
+            response = client.request(
+                method="DELETE",
+                url=f"{self._link_endpoint(dp.id, op.id)}/remove",
+                json={"technical_asset_id": str(ta.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.unlinked"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_status_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        ta = TechnicalAssetFactory(owner=dp)
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._ta_endpoint(dp.id)}/{ta.id}/status", json={"status": "active"}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "technical_asset.status_updated"
+        assert "data_product" in data
+        assert "technical_asset" in data
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        ("method", "path", "body"),
+        [
+            (
+                "post",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/technical_assets",
+                {},
+            ),
+            (
+                "put",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/technical_assets/00000000-0000-0000-0000-000000000000",
+                {},
+            ),
+            (
+                "delete",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/technical_assets/00000000-0000-0000-0000-000000000000",
+                None,
+            ),
+        ],
+    )
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_no_event_fired_on_failure(self, mock_webhook, client, method, path, body):
+        mock_webhook.return_value = AsyncMock()
+        with webhook_v2_config():
+            kwargs = {"json": body} if body is not None else {}
+            getattr(client, method)(path, **kwargs)
+        mock_webhook.assert_not_awaited()

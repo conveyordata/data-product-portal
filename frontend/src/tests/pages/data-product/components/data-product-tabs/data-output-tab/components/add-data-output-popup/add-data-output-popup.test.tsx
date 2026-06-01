@@ -1,7 +1,7 @@
 import { AddDataOutputPopup } from '@/pages/data-product/components/data-product-tabs/data-output-tab/components/add-data-output-popup/add-data-output-popup.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockGetPlatformConfigs } from '@/tests/mocks/configuration.ts';
-import { mock_data_products, mockDataProductHttp } from '@/tests/mocks/data_product.ts';
+import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
+import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import { mockGetPlatformTiles, mockGetPlugins, mockRenderTechnicalAssetAccessPath } from '@/tests/mocks/plugins.ts';
 import {
     mockGetResourceNamesConstraints,
@@ -24,7 +24,7 @@ describe('TechnicalAssetPopup', async () => {
         mockResourceNamesSanitize();
         mockResourceNamesValidate();
         mockRenderTechnicalAssetAccessPath();
-        mockCreateTechnicalAsset(mock_data_products[0].id);
+        mockCreateTechnicalAsset(mockDataProducts[0].id);
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
         const mockCloseFunction = vi.fn();
@@ -32,7 +32,7 @@ describe('TechnicalAssetPopup', async () => {
             <AddDataOutputPopup
                 onClose={mockCloseFunction}
                 isOpen
-                dataProductId={mock_data_products[0].id}
+                dataProductId={mockDataProducts[0].id}
                 debounce={0}
             />,
         );

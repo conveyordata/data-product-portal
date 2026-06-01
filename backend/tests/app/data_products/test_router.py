@@ -1,18 +1,20 @@
 import json
+import uuid
 from copy import deepcopy
+from typing import Any, Dict
+from unittest.mock import AsyncMock, patch
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.exc import IntegrityError
 
 from app.authorization.roles.schema import Scope
-from app.authorization.roles.service import RoleService
 from app.core.authz import Action
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
-    DataProductDatasetAssociationFactory,
+    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
@@ -21,7 +23,9 @@ from tests.factories import (
     DomainFactory,
     EnvironmentFactory,
     EnvPlatformConfigFactory,
+    ExplorationFactory,
     GlobalRoleAssignmentFactory,
+    InputPortFactory,
     LifecycleFactory,
     PlatformFactory,
     RoleFactory,
@@ -36,16 +40,30 @@ ENDPOINT = "/api/v2/data_products"
 
 
 @pytest.fixture
-def payload():
+def user_with_create_data_product_rights():
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    role = RoleFactory(
+        scope=Scope.GLOBAL,
+        permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
+    )
+    GlobalRoleAssignmentFactory(
+        user_id=user.id,
+        role_id=role.id,
+    )
+    return user
+
+
+@pytest.fixture
+def payload() -> Dict[str, Any]:
     domain = DomainFactory()
     lifecycle = LifecycleFactory()
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
     tag = TagFactory()
     return {
-        "name": "Data Product Name",
+        "name": str(uuid.uuid4()),
         "description": "Updated Data Product Description",
-        "namespace": "namespace",
+        "namespace": str(uuid.uuid4()),
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "owners": [str(user.id)],
@@ -57,81 +75,58 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_product(self, payload, client, session):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+    def test_create_data_product(
+        self, payload, client, user_with_create_data_product_rights
+    ):
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
-    def test_create_data_product_no_owner_role(self, payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+    def test_create_data_product_with_input_ports(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        ds = DatasetFactory()
+        payload["input_ports"] = {
+            "output_ports": [str(ds.id)],
+            "justification": "I am your king",
+        }
         created_data_product = self.create_data_product(client, payload)
-        assert created_data_product.status_code == 400
+        assert created_data_product.status_code == 200
+        assert "id" in created_data_product.json()
 
-    def test_create_data_product_no_owners(self, session, payload, client):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
+        input_ports_response = self.get_input_ports(
+            client, created_data_product.json()["id"]
         )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+        assert input_ports_response.status_code == 200
+        assert len(input_ports_response.json()["input_ports"]) == 1
 
+    def test_create_data_product_no_owners(
+        self, payload, client, user_with_create_data_product_rights
+    ):
         create_payload = deepcopy(payload)
         create_payload["owners"] = []
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
 
-    def test_create_data_product_duplicate_namespace(self, session, payload, client):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+    def test_create_data_product_duplicate_name(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        DataProductFactory(name=payload["name"])
 
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 400
+
+    def test_create_data_product_duplicate_namespace(
+        self, payload, client, user_with_create_data_product_rights
+    ):
         DataProductFactory(namespace=payload["namespace"])
 
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
 
     def test_create_data_product_invalid_characters_namespace(
-        self, session, payload, client
+        self, session, payload, client, user_with_create_data_product_rights
     ):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
 
         create_payload = deepcopy(payload)
         create_payload["namespace"] = "!"
@@ -140,18 +135,8 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 400
 
     def test_create_data_product_invalid_length_namespace(
-        self, session, payload, client
+        self, payload, client, user_with_create_data_product_rights
     ):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
 
         create_payload = deepcopy(payload)
         create_payload["namespace"] = "a" * 256
@@ -351,18 +336,18 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         setting = DataProductSettingFactory(scope="dataset")
-        with pytest.raises(IntegrityError):
-            client.post(
-                f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
-            )
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
+        )
+        assert response.status_code == 400, response.text
 
-    def test_dataset_set_custom_setting_not_owner(self, client):
+    def test_set_value_for_data_product_not_owner(self, client):
         data_product = DataProductFactory()
         setting = DataProductSettingFactory()
         response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")
         assert response.status_code == 403
 
-    def test_dataproduct_set_custom_setting(self, client):
+    def test_dataset_set_custom_setting_not_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -399,7 +384,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200, response.text
         assert response.json()["data_product_settings"][0]["value"] == dps.value
 
-    def test_get_graph_data(self, client):
+    def test_get_data_product_graph_data(self, client):
         data_product = DataProductFactory()
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert response.json()["edges"] == []
@@ -418,6 +403,34 @@ class TestDataProductsRouter:
                 "isMain": True,
                 "type": "dataProductNode",
             }
+
+    def test_get_data_product_graph_data_level3(self, client):
+        data_product = DataProductFactory()
+        dataset = DatasetFactory(data_product=data_product)
+        ta = TechnicalAssetFactory(owner=data_product)
+        DataOutputDatasetAssociationFactory(data_output=ta, dataset=dataset)
+        downstream_dataset = DatasetFactory()
+        InputPortFactory(
+            dataset=dataset,
+            consuming_abstract_data_product=downstream_dataset.data_product,
+        )
+        response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
+        assert len(response.json()["edges"]) == 3
+        assert len(response.json()["nodes"]) == 4
+
+    def test_get_data_product_graph_data_exploration_included(self, client):
+        data_product = DataProductFactory()
+        dataset = DatasetFactory(data_product=data_product)
+        ta = TechnicalAssetFactory(owner=data_product)
+        DataOutputDatasetAssociationFactory(data_output=ta, dataset=dataset)
+        exp = ExplorationFactory()
+        InputPortFactory(
+            dataset=dataset,
+            consuming_abstract_data_product=exp,
+        )
+        response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
+        assert len(response.json()["edges"]) == 3
+        assert len(response.json()["nodes"]) == 4
 
     def test_get_signin_url_not_implemented(self, client):
         EnvironmentFactory(name="production")
@@ -541,17 +554,9 @@ class TestDataProductsRouter:
 
         assert response.status_code == 400
 
-    def test_get_data_product_event_history(self, payload, client: TestClient, session):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
+    def test_get_data_product_event_history(
+        self, payload, client: TestClient, user_with_create_data_product_rights
+    ):
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
@@ -563,18 +568,8 @@ class TestDataProductsRouter:
         assert len(history_response.json()["events"]) == 2
 
     def test_history_event_created_on_data_product_creation(
-        self, payload, client: TestClient, session
+        self, payload, client: TestClient, user_with_create_data_product_rights
     ):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
@@ -712,8 +707,8 @@ class TestDataProductsRouter:
         ]
 
     def test_get_data_product_input_ports(self, client: TestClient):
-        link = DataProductDatasetAssociationFactory()
-        response = self.get_input_ports(client, link.data_product.id)
+        link = InputPortFactory()
+        response = self.get_input_ports(client, link.consuming_abstract_data_product.id)
         assert response.status_code == 200, f"Response failed with: {response.text}"
         assert len(response.json()["input_ports"]) == 1
 
@@ -780,3 +775,157 @@ class TestDataProductsRouter:
     @staticmethod
     def get_data_product_settings(client: TestClient, data_product_id: UUID):
         return client.get(f"{ENDPOINT}/{data_product_id}/settings")
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_created_fires_event(self, mock_webhook, client, payload):
+        mock_webhook.return_value = AsyncMock()
+
+        with webhook_v2_config():
+            response = client.post(ENDPOINT, json=payload)
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.created"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_updated_fires_event(self, mock_webhook, client, payload):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+
+        with webhook_v2_config():
+            response = client.put(f"{ENDPOINT}/{dp.id}", json=payload)
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.updated"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_deleted_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+
+        with webhook_v2_config():
+            response = client.delete(f"{ENDPOINT}/{dp.id}")
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.deleted"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_about_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{ENDPOINT}/{dp.id}/about", json={"about": "new text"}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.about_updated"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_status_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{ENDPOINT}/{dp.id}/status", json={"status": "active"}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.status_updated"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_setting_changed_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        setting = DataProductSettingFactory()
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{ENDPOINT}/{dp.id}/settings/{setting.id}",
+                params={"value": "test-value"},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.setting_changed"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_input_port_linked_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        output_port = DatasetFactory()
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{ENDPOINT}/{dp.id}/input_ports",
+                json={"output_ports": [str(output_port.id)], "justification": "test"},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.input_port_linked"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_input_port_unlinked_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        output_port = DatasetFactory()
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=output_port)
+
+        with webhook_v2_config():
+            response = client.delete(f"{ENDPOINT}/{dp.id}/input_ports/{output_port.id}")
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.input_port_unlinked"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        ("method", "path", "body"),
+        [
+            ("post", "/api/v2/data_products", {}),
+            ("put", "/api/v2/data_products/00000000-0000-0000-0000-000000000000", {}),
+            (
+                "delete",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000",
+                None,
+            ),
+        ],
+    )
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_no_event_fired_on_failure(self, mock_webhook, client, method, path, body):
+        mock_webhook.return_value = AsyncMock()
+        with webhook_v2_config():
+            kwargs = {"json": body} if body is not None else {}
+            getattr(client, method)(path, **kwargs)
+        mock_webhook.assert_not_awaited()

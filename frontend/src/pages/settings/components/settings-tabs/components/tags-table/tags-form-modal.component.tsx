@@ -43,9 +43,9 @@ export function CreateTagsModal({ isOpen, onClose, mode, initial }: Props) {
     const handleFinish = async (values: TagContract) => {
         try {
             if (mode === 'create') {
-                await createTag(values);
+                await createTag(values).unwrap();
             } else {
-                await editTag({ id: initial?.id ?? '', tagUpdate: { ...values } });
+                await editTag({ id: initial?.id ?? '', tagUpdate: { ...values } }).unwrap();
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });

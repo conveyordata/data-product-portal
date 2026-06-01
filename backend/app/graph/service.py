@@ -1,8 +1,9 @@
 from typing import List
 
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.model import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.logging import logger
 from app.graph.edge import Edge
@@ -17,54 +18,90 @@ class GraphService:
 
     def get_graph_data(
         self,
-        data_product_nodes_enabled: bool = True,
-        dataset_nodes_enabled: bool = True,
+        exploration_nodes_enabled: bool = False,
+        output_port_nodes_enabled: bool = False,
     ) -> Graph:
-        if not data_product_nodes_enabled and not dataset_nodes_enabled:
-            raise ValueError(
-                "At least one of dataproduct_nodes_enabled or dataset_nodes_enabled must be True"
+        data_products = (
+            self.db.execute(
+                text(
+                    """
+                    SELECT
+                        data_products.id as id,
+                        adp.name as name,
+                        adp.description as description,
+                        data_product_types.icon_key as icon_key,
+                        domains.name as domain_name,
+                        domains.id as domain_id
+                    FROM data_products
+                    LEFT JOIN abstract_data_products as adp on data_products.id = adp.id
+                    LEFT JOIN data_product_types on data_products.type_id = data_product_types.id
+                    LEFT JOIN domains on adp.domain_id = domains.id
+                    """
+                )
             )
-        nodes: List[Node] = []
-        if data_product_nodes_enabled:
-            data_products = (
+            .mappings()
+            .all()
+        )
+        nodes = [
+            Node(
+                id=data_product["id"],
+                data=NodeData(
+                    id=data_product["id"],
+                    name=data_product["name"],
+                    icon_key=data_product["icon_key"],
+                    domain=data_product["domain_name"],
+                    domain_id=data_product["domain_id"],
+                    description=data_product["description"],
+                ),
+                type=NodeType.dataProductNode,
+            )
+            for data_product in data_products
+        ]
+        edges: List[Edge] = []
+
+        if exploration_nodes_enabled:
+            exploration_nodes = (
                 self.db.execute(
                     text(
                         """
-                SELECT
-                    data_products.id as id,
-                    data_products.name as name,
-                    data_products.description as description,
-                    data_product_types.icon_key as icon_key,
-                    domains.name as domain_name,
-                    domains.id as domain_id
-                FROM data_products
-                LEFT JOIN data_product_types on data_products.type_id = data_product_types.id
-                LEFT JOIN domains on data_products.domain_id = domains.id
-                """
+                        SELECT explorations.id            as id,
+                               adp.name                    as name,
+                               adp.description             as description,
+                               domains.name                as domain_name,
+                               domains.id                  as domain_id
+                        FROM explorations
+                        LEFT JOIN abstract_data_products as adp on explorations.id = adp.id
+                        LEFT JOIN domains on adp.domain_id = domains.id
+                        """
                     )
                 )
                 .mappings()
                 .all()
             )
-            nodes = [
-                Node(
-                    id=data_product["id"],
-                    data=NodeData(
-                        id=data_product["id"],
-                        name=data_product["name"],
-                        icon_key=data_product["icon_key"],
-                        domain=data_product["domain_name"],
-                        domain_id=data_product["domain_id"],
-                        # assignments=data_product_get.assignments,
-                        description=data_product["description"],
-                    ),
-                    type=NodeType.dataProductNode,
-                )
-                for data_product in data_products
-            ]
-        edges: List[Edge] = []
-        datasets = []
-        if dataset_nodes_enabled:
+            nodes.extend(
+                [
+                    Node(
+                        id=exploration["id"],
+                        data=NodeData(
+                            id=exploration["id"],
+                            name=exploration["name"],
+                            domain=exploration["domain_name"],
+                            domain_id=exploration["domain_id"],
+                            description=exploration["description"],
+                        ),
+                        type=NodeType.explorationNode,
+                    )
+                    for exploration in exploration_nodes
+                ]
+            )
+
+        data_product_types = (
+            [AbstractDataProductType.EXPLORATION, AbstractDataProductType.DATA_PRODUCT]
+            if exploration_nodes_enabled
+            else [AbstractDataProductType.DATA_PRODUCT]
+        )
+
+        if output_port_nodes_enabled:
             datasets = (
                 self.db.execute(
                     text(
@@ -77,7 +114,8 @@ class GraphService:
                        domains.id                  as domain_id
                 FROM datasets
                 LEFT JOIN data_products on data_products.id = datasets.data_product_id
-                LEFT JOIN domains on data_products.domain_id = domains.id
+                LEFT JOIN abstract_data_products as adp on data_products.id = adp.id
+                LEFT JOIN domains on adp.domain_id = domains.id
                 """
                     )
                 )
@@ -98,12 +136,11 @@ class GraphService:
                             domain_id=dataset["domain_id"],
                             description=dataset["description"],
                         ),
-                        type=NodeType.datasetNode,
+                        type=NodeType.outputPortNode,
                     )
                     for dataset in datasets
                 ]
             )
-        if data_product_nodes_enabled and dataset_nodes_enabled:
             edges.extend(
                 [
                     Edge(
@@ -115,16 +152,19 @@ class GraphService:
                     for dataset in datasets
                 ]
             )
-            data_product_links = (
+            abstract_data_product_links = (
                 self.db.execute(
                     text(
                         """
-                SELECT data_products_datasets.data_product_id as consumer_id,
-                       data_products_datasets.dataset_id as dataset_id,
-                       data_products_datasets.status          as status
-                FROM data_products_datasets
+                SELECT input_ports.consuming_abstract_data_product_id as consumer_id,
+                       input_ports.dataset_id as dataset_id,
+                       input_ports.status          as status
+                FROM input_ports
+                JOIN abstract_data_products on abstract_data_products.id = input_ports.consuming_abstract_data_product_id
+                WHERE abstract_data_products.abstract_data_product_type in :data_product_types
                 """
-                    )
+                    ).bindparams(bindparam("data_product_types", expanding=True)),
+                    {"data_product_types": data_product_types},
                 )
                 .mappings()
                 .all()
@@ -137,52 +177,26 @@ class GraphService:
                         target=link["consumer_id"],
                         animated=link["status"] == DecisionStatus.APPROVED.name,
                     )
-                    for link in data_product_links
-                ]
-            )
-        elif data_product_nodes_enabled:
-            data_product_links = (
-                self.db.execute(
-                    text(
-                        """
-                SELECT
-                    data_products.id as producer_id,
-                    data_products_datasets.data_product_id as consumer_id,
-                    data_products_datasets.status as status
-                FROM data_products
-                JOIN datasets on data_products.id = datasets.data_product_id
-                JOIN data_products_datasets on datasets.id = data_products_datasets.dataset_id
-                """
-                    )
-                )
-                .mappings()
-                .all()
-            )
-            edges.extend(
-                [
-                    Edge(
-                        id=f"{link['producer_id']}-{link['consumer_id']}",
-                        source=link["producer_id"],
-                        target=link["consumer_id"],
-                        animated=link["status"] == DecisionStatus.APPROVED.name,
-                    )
-                    for link in data_product_links
+                    for link in abstract_data_product_links
                 ]
             )
         else:
-            # Only dataset nodes enabled
-            data_product_links = (
+            abstract_data_product_links = (
                 self.db.execute(
                     text(
                         """
-                SELECT
-                    datasets.id as consumer_id,
-                    data_products_datasets.dataset_id as producer_id,
-                    data_products_datasets.status as status
-                FROM data_products_datasets
-                JOIN datasets on datasets.data_product_id = data_products_datasets.data_product_id
-                """
-                    )
+                        SELECT data_products.id          as producer_id,
+                               abstract_data_products.id as consumer_id,
+                               input_ports.status        as status
+                        FROM data_products
+                                 JOIN datasets ON data_products.id = datasets.data_product_id
+                                 JOIN input_ports ON datasets.id = input_ports.dataset_id
+                                 JOIN abstract_data_products
+                                      ON abstract_data_products.id = input_ports.consuming_abstract_data_product_id
+                        WHERE abstract_data_products.abstract_data_product_type IN :data_product_types
+                        """
+                    ).bindparams(bindparam("data_product_types", expanding=True)),
+                    {"data_product_types": data_product_types},
                 )
                 .mappings()
                 .all()
@@ -195,7 +209,7 @@ class GraphService:
                         target=link["consumer_id"],
                         animated=link["status"] == DecisionStatus.APPROVED.name,
                     )
-                    for link in data_product_links
+                    for link in abstract_data_product_links
                 ]
             )
 

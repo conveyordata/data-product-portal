@@ -1,13 +1,14 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.model import Dataset
 from app.database.database import get_db_session
+from app.explorations.model import Exploration
 from app.resource_names.enums import ResourceNameModel
 from app.resource_names.service import (
     DataOutputResourceNameValidator,
@@ -33,22 +34,35 @@ def validate_resource_name(
     data_product_id: Optional[UUID] = Query(None),
     db: Session = Depends(get_db_session),
 ) -> ResourceNameValidation:
-    scope: Optional[UUID | DataProductSettingScope] = None
-    if model == ResourceNameModel.DATA_PRODUCT:
-        service = ResourceNameService(model=DataProduct)
-    elif model == ResourceNameModel.TECHNICAL_ASSET:
-        service = DataOutputResourceNameValidator()
-        scope = data_product_id
-    elif model == ResourceNameModel.OUTPUT_PORT:
-        service = ResourceNameService(model=Dataset)
-    elif model == ResourceNameModel.DATA_PRODUCT_SETTING:
-        service = DataProductSettingResourceNameValidator()
-        scope = DataProductSettingScope.DATAPRODUCT
-    elif model == ResourceNameModel.OUTPUT_PORT_SETTING:
-        service = DataProductSettingResourceNameValidator()
-        scope = DataProductSettingScope.DATASET
-
-    return service.validate_resource_name(resource_name, db, scope=scope)
+    match model:
+        case ResourceNameModel.DATA_PRODUCT:
+            return ResourceNameService(model=DataProduct).validate_resource_name(
+                resource_name, db
+            )
+        case ResourceNameModel.TECHNICAL_ASSET:
+            return DataOutputResourceNameValidator().validate_resource_name(
+                resource_name, db, scope=data_product_id
+            )
+        case ResourceNameModel.OUTPUT_PORT:
+            return ResourceNameService(model=Dataset).validate_resource_name(
+                resource_name, db
+            )
+        case ResourceNameModel.DATA_PRODUCT_SETTING:
+            return DataProductSettingResourceNameValidator().validate_resource_name(
+                resource_name, db, DataProductSettingScope.DATAPRODUCT
+            )
+        case ResourceNameModel.OUTPUT_PORT_SETTING:
+            return DataProductSettingResourceNameValidator().validate_resource_name(
+                resource_name, db, DataProductSettingScope.DATASET
+            )
+        case ResourceNameModel.EXPLORATION:
+            return ResourceNameService(model=Exploration).validate_resource_name(
+                resource_name, db
+            )
+    raise HTTPException(  # noqa: unreachable
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Invalid model: {}".format(model),
+    )
 
 
 @router.get("/constraints")

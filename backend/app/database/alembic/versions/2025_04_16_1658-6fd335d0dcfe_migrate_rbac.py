@@ -9,7 +9,7 @@ Create Date: 2025-04-16 16:58:38.284751
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Sequence, Union
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import sqlalchemy as sa
 from alembic import op
@@ -24,9 +24,8 @@ from app.authorization.role_assignments.global_.model import GlobalRoleAssignmen
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment,
 )
-from app.authorization.roles.model import Role as RoleModel
-from app.authorization.roles.schema import CreateRole, Prototype, Scope
-from app.authorization.roles.service import RoleService
+from app.authorization.roles import ADMIN_UUID
+from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action, Authorization
 
@@ -91,7 +90,6 @@ class DataProductUserRole(str, Enum):
 class RoleMigrationService:
     def __init__(self, db: Session, data_product_membership):
         self.db = db
-        self.role_service = RoleService(db)
         self.data_product_membership = data_product_membership
 
     def migrate(self):
@@ -109,21 +107,25 @@ class RoleMigrationService:
         if not memberships:
             return
 
-        owner_role = self.role_service.find_prototype(
-            Scope.DATA_PRODUCT, Prototype.OWNER
-        )
-        if owner_role is None:
-            raise Exception(
-                "Unable to transfer product memberships: owner role does not exist"
+        owner_role_id = self.db.scalar(
+            sa.select(_roles_table.c.id).where(
+                _roles_table.c.prototype == Prototype.OWNER,
+                _roles_table.c.scope == Scope.DATA_PRODUCT,
             )
+        )
 
         # Create the member role if it doesn't exist
-        member_role = self.db.scalars(
-            sa.select(RoleModel).filter_by(name="Member", scope=Scope.DATA_PRODUCT)
-        ).one_or_none()
-        if member_role is None:
-            member_role = self.role_service.create_role(
-                CreateRole(
+        member_role_id = self.db.scalar(
+            sa.select(_roles_table.c.id).where(
+                _roles_table.c.name == "Member",
+                _roles_table.c.scope == Scope.DATA_PRODUCT,
+            )
+        )
+        if member_role_id is None:
+            member_role_id = uuid4()
+            self.db.execute(
+                sa.insert(_roles_table).values(
+                    id=member_role_id,
                     name="Member",
                     scope=Scope.DATA_PRODUCT,
                     description="A member of the data product",
@@ -132,14 +134,15 @@ class RoleMigrationService:
                         Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
                         Action.DATA_PRODUCT__READ_INTEGRATIONS,
                     ],
+                    created_on=sa.func.now(),
                 )
             )
 
         for membership in memberships:
             role_id = (
-                owner_role.id
+                owner_role_id
                 if membership.role == DataProductUserRole.OWNER
-                else member_role.id
+                else member_role_id
             )
             decision, decided_by_id, decided_on = self.map_decision(membership)
             self.db.add(
@@ -181,11 +184,12 @@ class RoleMigrationService:
         datasets = self.db.scalars(sa.select(dataset_table)).unique().all()
         if not datasets:
             return
-        owner_role = self.role_service.find_prototype(Scope.DATASET, Prototype.OWNER)
-        if owner_role is None:
-            raise Exception(
-                "Unable to transfer dataset memberships: owner role does not exist"
+        owner_role_id = self.db.scalar(
+            sa.select(_roles_table.c.id).where(
+                _roles_table.c.prototype == Prototype.OWNER,
+                _roles_table.c.scope == Scope.DATASET,
             )
+        )
 
         for dataset in datasets:
             for owner in dataset.owners:
@@ -193,7 +197,7 @@ class RoleMigrationService:
                     DatasetRoleAssignment(
                         dataset_id=dataset.id,
                         user_id=owner.id,
-                        role_id=owner_role.id,
+                        role_id=owner_role_id,
                         decision=DecisionStatus.APPROVED,
                         requested_on=dataset.updated_on,
                         decided_on=dataset.updated_on,
@@ -205,24 +209,109 @@ class RoleMigrationService:
         users = self.db.execute(sa.sql.text("""select * from users""")).all()
         if not users:
             return
-        admin_role = self.role_service.find_prototype(Scope.GLOBAL, Prototype.ADMIN)
-        if admin_role is None:
-            raise ValueError(
-                "Unable to transfer global memberships: admin role does not exist"
+        admin_role_id = self.db.scalar(
+            sa.select(_roles_table.c.id).where(
+                _roles_table.c.prototype == Prototype.ADMIN,
+                _roles_table.c.scope == Scope.GLOBAL,
             )
+        )
 
         for user in users:
             if user.is_admin:
                 self.db.add(
                     GlobalRoleAssignment(
                         user_id=user.id,
-                        role_id=admin_role.id,
+                        role_id=admin_role_id,
                         decision=DecisionStatus.APPROVED,
                         requested_on=user.updated_on,
                         decided_on=user.updated_on,
                     )
                 )
         self.db.commit()
+
+
+_roles_table = sa.Table(
+    "roles",
+    sa.MetaData(),
+    sa.Column("id", PGUUID(as_uuid=True), primary_key=True),
+    sa.Column("name", sa.String),
+    sa.Column("scope", sa.String),
+    sa.Column("prototype", sa.SmallInteger),
+    sa.Column("description", sa.String),
+    sa.Column("permissions", sa.ARRAY(sa.Integer)),
+    sa.Column("created_on", sa.DateTime),
+)
+
+_PROTOTYPE_ROLES = [
+    {
+        "id": ADMIN_UUID,
+        "name": "Admin",
+        "scope": Scope.GLOBAL,
+        "prototype": Prototype.ADMIN,
+        "description": "Administrators have blanket permissions",
+        "permissions": [],
+    },
+    {
+        "id": uuid4(),
+        "name": "Everyone",
+        "scope": Scope.GLOBAL,
+        "prototype": Prototype.EVERYONE,
+        "description": "This is the role that is used as fallback for users that don't have another role",
+        "permissions": [
+            int(Action.GLOBAL__CREATE_DATAPRODUCT),
+            int(Action.GLOBAL__CREATE_OUTPUT_PORT),
+            int(Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS),
+            int(Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS),
+        ],
+    },
+    {
+        "id": uuid4(),
+        "name": "Owner",
+        "scope": Scope.DATASET,
+        "prototype": Prototype.OWNER,
+        "description": "The owner of a Dataset",
+        "permissions": [
+            int(Action.OUTPUT_PORT__UPDATE_PROPERTIES),
+            int(Action.OUTPUT_PORT__UPDATE_SETTINGS),
+            int(Action.OUTPUT_PORT__UPDATE_STATUS),
+            int(Action.OUTPUT_PORT__DELETE),
+            int(Action.OUTPUT_PORT__CREATE_USER),
+            int(Action.OUTPUT_PORT__UPDATE_USER),
+            int(Action.OUTPUT_PORT__DELETE_USER),
+            int(Action.OUTPUT_PORT__APPROVE_USER_REQUEST),
+            int(Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST),
+            int(Action.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK),
+            int(Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST),
+            int(Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS),
+            int(Action.OUTPUT_PORT__READ_INTEGRATIONS),
+            int(Action.OUTPUT_PORT__UPDATE_DATA_QUALITY),
+        ],
+    },
+    {
+        "id": uuid4(),
+        "name": "Owner",
+        "scope": Scope.DATA_PRODUCT,
+        "prototype": Prototype.OWNER,
+        "description": "The owner of a Data Product",
+        "permissions": [
+            int(Action.DATA_PRODUCT__UPDATE_PROPERTIES),
+            int(Action.DATA_PRODUCT__UPDATE_SETTINGS),
+            int(Action.DATA_PRODUCT__UPDATE_STATUS),
+            int(Action.DATA_PRODUCT__DELETE),
+            int(Action.DATA_PRODUCT__CREATE_USER),
+            int(Action.DATA_PRODUCT__UPDATE_USER),
+            int(Action.DATA_PRODUCT__DELETE_USER),
+            int(Action.DATA_PRODUCT__APPROVE_USER_REQUEST),
+            int(Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET),
+            int(Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET),
+            int(Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET),
+            int(Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK),
+            int(Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS),
+            int(Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS),
+            int(Action.DATA_PRODUCT__READ_INTEGRATIONS),
+        ],
+    },
+]
 
 
 def upgrade() -> None:
@@ -232,10 +321,22 @@ def upgrade() -> None:
 
     data_product_membership = metadata.tables["data_product_memberships"]
 
+    for role in _PROTOTYPE_ROLES:
+        session.execute(
+            sa.insert(_roles_table).values(
+                id=role["id"],
+                name=role["name"],
+                scope=role["scope"],
+                prototype=role["prototype"],
+                description=role["description"],
+                permissions=role["permissions"],
+                created_on=sa.func.now(),
+            )
+        )
+
     service = RoleMigrationService(
         db=session, data_product_membership=data_product_membership
     )
-    service.role_service.initialize_prototype_roles()
     service.migrate()
 
 

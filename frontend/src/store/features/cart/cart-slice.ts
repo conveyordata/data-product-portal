@@ -1,11 +1,24 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-type CartState = {
+export enum DataProductChoiceOptions {
+    exploration = 'EXPLORATION',
+    data_product = 'DATA_PRODUCT',
+}
+
+export enum ExistingOrNew {
+    existing = 'EXISTING',
+    new = 'new',
+}
+
+export type CartState = {
     DatasetIds: string[];
+    dataProductTypeChoice: DataProductChoiceOptions | null;
+    existingOrNewChoice: ExistingOrNew | null;
 };
 
 const DATASET_IDS_KEY = 'CartDatasetIds';
+const EXPLORATION_CHOICES_KEY = 'CartExplorationChoices';
 
 const saveDatasetIds = (datasetIds: string[]): void => {
     localStorage.setItem(DATASET_IDS_KEY, JSON.stringify(datasetIds));
@@ -25,9 +38,33 @@ const clearDatasetIds = (): void => {
     localStorage.removeItem(DATASET_IDS_KEY);
 };
 
+const saveExplorationChoices = (dataProductTypeChoice: string | null, existingOrNewChoice: string | null): void => {
+    localStorage.setItem(EXPLORATION_CHOICES_KEY, JSON.stringify({ dataProductTypeChoice, existingOrNewChoice }));
+};
+
+const loadExplorationChoices = (): { dataProductTypeChoice: string | null; existingOrNewChoice: string | null } => {
+    try {
+        const stored = localStorage.getItem(EXPLORATION_CHOICES_KEY);
+        return stored ? JSON.parse(stored) : { dataProductTypeChoice: null, existingOrNewChoice: null };
+    } catch {
+        return { dataProductTypeChoice: null, existingOrNewChoice: null };
+    }
+};
+
+const clearExplorationChoicesStorage = (): void => {
+    localStorage.removeItem(EXPLORATION_CHOICES_KEY);
+};
+
+const { dataProductTypeChoice: initialDataProductTypeChoice, existingOrNewChoice: initialExistingOrNewChoice } =
+    loadExplorationChoices();
+
 const cartSlice = createSlice({
     name: 'cart',
-    initialState: { DatasetIds: loadDatasetIds() } as CartState,
+    initialState: {
+        DatasetIds: loadDatasetIds(),
+        dataProductTypeChoice: initialDataProductTypeChoice,
+        existingOrNewChoice: initialExistingOrNewChoice,
+    } as CartState,
     reducers: {
         addDatasetToCart: (
             state,
@@ -57,16 +94,35 @@ const cartSlice = createSlice({
         },
         clearCart: (state) => {
             clearDatasetIds();
+            clearExplorationChoicesStorage();
             state.DatasetIds = [];
+            state.dataProductTypeChoice = null;
+            state.existingOrNewChoice = null;
+        },
+        setCartExplorationChoices: (
+            state,
+            {
+                payload: { dataProductTypeChoice, existingOrNewChoice },
+            }: PayloadAction<{
+                dataProductTypeChoice: DataProductChoiceOptions | null;
+                existingOrNewChoice: ExistingOrNew | null;
+            }>,
+        ) => {
+            state.dataProductTypeChoice = dataProductTypeChoice;
+            state.existingOrNewChoice = existingOrNewChoice;
+            saveExplorationChoices(dataProductTypeChoice, existingOrNewChoice);
         },
     },
     selectors: {
         selectCartDatasetIds: (state) => state.DatasetIds,
+        selectCartDataProductTypeChoice: (state) => state.dataProductTypeChoice,
+        selectCartExistingOrNewChoice: (state) => state.existingOrNewChoice,
     },
 });
 
-export const { addDatasetToCart, removeDatasetFromCart, clearCart } = cartSlice.actions;
+export const { addDatasetToCart, removeDatasetFromCart, clearCart, setCartExplorationChoices } = cartSlice.actions;
 
 export default cartSlice.reducer;
 
-export const { selectCartDatasetIds } = cartSlice.selectors;
+export const { selectCartDatasetIds, selectCartDataProductTypeChoice, selectCartExistingOrNewChoice } =
+    cartSlice.selectors;

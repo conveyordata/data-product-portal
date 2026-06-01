@@ -13,14 +13,14 @@ from ...types import Response
 
 def _get_kwargs(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
         "method": "delete",
-        "url": "/api/v2/data_products/{id}/input_ports/{input_port_id}".format(
+        "url": "/api/v2/data_products/{id}/input_ports/{output_port_id}".format(
             id=quote(str(id), safe=""),
-            input_port_id=quote(str(input_port_id), safe=""),
+            output_port_id=quote(str(output_port_id), safe=""),
         ),
     }
 
@@ -66,7 +66,7 @@ def _build_response(
 
 def sync_detailed(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
@@ -74,7 +74,7 @@ def sync_detailed(
 
     Args:
         id (UUID):
-        input_port_id (UUID):
+        output_port_id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -86,7 +86,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         id=id,
-        input_port_id=input_port_id,
+        output_port_id=output_port_id,
     )
 
     response = client.get_httpx_client().request(
@@ -98,7 +98,7 @@ def sync_detailed(
 
 def sync(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
@@ -106,7 +106,7 @@ def sync(
 
     Args:
         id (UUID):
-        input_port_id (UUID):
+        output_port_id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -118,14 +118,14 @@ def sync(
 
     return sync_detailed(
         id=id,
-        input_port_id=input_port_id,
+        output_port_id=output_port_id,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
@@ -133,7 +133,7 @@ async def asyncio_detailed(
 
     Args:
         id (UUID):
-        input_port_id (UUID):
+        output_port_id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -145,7 +145,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         id=id,
-        input_port_id=input_port_id,
+        output_port_id=output_port_id,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -155,7 +155,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
@@ -163,7 +163,7 @@ async def asyncio(
 
     Args:
         id (UUID):
-        input_port_id (UUID):
+        output_port_id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -176,7 +176,7 @@ async def asyncio(
     return (
         await asyncio_detailed(
             id=id,
-            input_port_id=input_port_id,
+            output_port_id=output_port_id,
             client=client,
         )
     ).parsed

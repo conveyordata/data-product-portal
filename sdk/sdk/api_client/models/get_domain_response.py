@@ -1,15 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-if TYPE_CHECKING:
-    from ..models.data_product import DataProduct
-
 
 T = TypeVar("T", bound="GetDomainResponse")
 
@@ -21,13 +17,11 @@ class GetDomainResponse:
         id (UUID):
         name (str):
         description (str):
-        data_products (list[DataProduct]):
     """
 
     id: UUID
     name: str
     description: str
-    data_products: list[DataProduct]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -37,11 +31,6 @@ class GetDomainResponse:
 
         description = self.description
 
-        data_products = []
-        for data_products_item_data in self.data_products:
-            data_products_item = data_products_item_data.to_dict()
-            data_products.append(data_products_item)
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -49,7 +38,6 @@ class GetDomainResponse:
                 "id": id,
                 "name": name,
                 "description": description,
-                "data_products": data_products,
             }
         )
 
@@ -57,8 +45,6 @@ class GetDomainResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product import DataProduct
-
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
@@ -66,18 +52,10 @@ class GetDomainResponse:
 
         description = d.pop("description")
 
-        data_products = []
-        _data_products = d.pop("data_products")
-        for data_products_item_data in _data_products:
-            data_products_item = DataProduct.from_dict(data_products_item_data)
-
-            data_products.append(data_products_item)
-
         get_domain_response = cls(
             id=id,
             name=name,
             description=description,
-            data_products=data_products,
         )
 
         get_domain_response.additional_properties = d

@@ -2,7 +2,7 @@ import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Typography } fro
 import { type DragEvent, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -198,7 +198,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
             >
                 <Flex vertical gap="small">
                     <Flex gap="small" align="center">
-                        <CustomSvgIconLoader iconComponent={datasetBorderIcon} />
+                        <CustomSvgIconLoader iconComponent={outputPortBorderIcon} />
                         <Flex vertical flex={1} style={{ minWidth: 0 }}>
                             {' '}
                             {/*Min width is needed to ensure the elipsis of description*/}

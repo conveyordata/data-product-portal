@@ -317,7 +317,7 @@ export type OutputPortLink = {
   output_port_id: string;
   technical_asset_id: string;
   status: DecisionStatus;
-  output: OutputPort;
+  output_port: OutputPort;
 };
 export type GetTechnicalAssetsResponseItem = {
   id: string;
@@ -606,9 +606,9 @@ export enum EventEntityType {
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",
-  DataOutputNode = "dataOutputNode",
-  DatasetNode = "datasetNode",
-  DomainNode = "domainNode",
+  ExplorationNode = "explorationNode",
+  TechnicalAssetNode = "technicalAssetNode",
+  OutputPortNode = "outputPortNode",
 }
 export const {
   useApproveOutputPortTechnicalAssetLinkMutation,

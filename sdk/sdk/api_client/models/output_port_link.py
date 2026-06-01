@@ -24,14 +24,14 @@ class OutputPortLink:
         output_port_id (UUID):
         technical_asset_id (UUID):
         status (DecisionStatus):
-        output (OutputPort):
+        output_port (OutputPort):
     """
 
     id: UUID
     output_port_id: UUID
     technical_asset_id: UUID
     status: DecisionStatus
-    output: OutputPort
+    output_port: OutputPort
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -43,7 +43,7 @@ class OutputPortLink:
 
         status = self.status.value
 
-        output = self.output.to_dict()
+        output_port = self.output_port.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -53,7 +53,7 @@ class OutputPortLink:
                 "output_port_id": output_port_id,
                 "technical_asset_id": technical_asset_id,
                 "status": status,
-                "output": output,
+                "output_port": output_port,
             }
         )
 
@@ -72,14 +72,14 @@ class OutputPortLink:
 
         status = DecisionStatus(d.pop("status"))
 
-        output = OutputPort.from_dict(d.pop("output"))
+        output_port = OutputPort.from_dict(d.pop("output_port"))
 
         output_port_link = cls(
             id=id,
             output_port_id=output_port_id,
             technical_asset_id=technical_asset_id,
             status=status,
-            output=output,
+            output_port=output_port,
         )
 
         output_port_link.additional_properties = d

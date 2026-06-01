@@ -8,14 +8,15 @@ import {
 } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
-    PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import { formatDate } from '@/utils/date.helper';
-import { DataOutputOutlined, DataProductOutlined, DatasetOutlined } from '../icons';
+import { AbstractProductIcon, DataProductOutlined, OutputPortOutlined, TechnicalAssetOutlined } from '../icons';
 
 type Props = {
     action: PendingAction | null;
@@ -48,25 +49,36 @@ type RequestDetails = {
     title: string;
 };
 
+const abstractDataProductTypeName = (type: AbstractDataProductType) => {
+    switch (type) {
+        case 'data_products':
+            return 'Data Product';
+        case 'explorations':
+            return 'Exploration';
+        default:
+            return '';
+    }
+};
+
 function getRequestDetails(
     action: PendingAction,
     t: (key: string, params?: Record<string, string>) => string,
 ): RequestDetails | undefined {
-    if (action.pending_action_type === PendingRequestType_DataProductOutputPort) {
+    if (action.pending_action_type === PendingRequestType_InputPort) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
             requestType: t('Output Port Access'),
             source: {
-                name: action.data_product.name,
+                name: action.consuming_abstract_data_product.name,
                 email: action.requested_by.email,
-                type: t('Data Product'),
-                icon: <DataProductOutlined />,
+                type: t(abstractDataProductTypeName(action.consuming_abstract_data_product.abstract_data_product_type)),
+                icon: <AbstractProductIcon type={action.consuming_abstract_data_product.abstract_data_product_type} />,
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
-                icon: <DatasetOutlined />,
+                icon: <OutputPortOutlined />,
             },
             accessType: t('READ ONLY'),
             justification: action.justification || t('No justification provided'),
@@ -85,12 +97,12 @@ function getRequestDetails(
                 name: action.technical_asset.name,
                 email: action.requested_by.email,
                 type: t('Technical Asset'),
-                icon: <DataOutputOutlined />,
+                icon: <TechnicalAssetOutlined />,
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
-                icon: <DatasetOutlined />,
+                icon: <OutputPortOutlined />,
             },
             accessType: t('INCLUDE'),
             justification: '',

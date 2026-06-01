@@ -1,5 +1,5 @@
 import { CompassOutlined } from '@ant-design/icons';
-import { Typography } from 'antd';
+import { Flex, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FullExplorer } from '@/components/global-explorer/full-explorer.tsx';
@@ -14,7 +14,6 @@ export function ExplorerPage() {
             {
                 title: (
                     <>
-                        {' '}
                         <CompassOutlined /> {t('Explorer')}
                     </>
                 ),
@@ -22,13 +21,11 @@ export function ExplorerPage() {
         ]);
     }, [setBreadcrumbs, t]);
     return (
-        <div className={styles.explorerPage}>
-            <Typography.Title level={3} className={styles.title}>
-                {t('Explorer')}
-            </Typography.Title>
-            <div className={styles.explorerContainer}>
+        <Flex vertical className={styles.explorerPage}>
+            <Typography.Title level={3}>{t('Explorer')}</Typography.Title>
+            <Flex flex={1}>
                 <FullExplorer />
-            </div>
-        </div>
+            </Flex>
+        </Flex>
     );
 }

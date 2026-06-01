@@ -3,16 +3,22 @@ import '@xyflow/react/dist/base.css';
 import { G2 } from '@ant-design/plots';
 import { type Edge, type Node, Position, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
+import { parseAsBoolean, useQueryStates } from 'nuqs';
 import { type MouseEvent, useCallback, useEffect, useState } from 'react';
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { CustomEdgeTypes, ExplorerNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import type { Node as GraphNode } from '@/store/api/services/generated/graphApi.ts';
 import { NodeType, useGetGraphDataQuery } from '@/store/api/services/generated/graphApi.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper';
-import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from '../explorer/common';
+import {
+    LinkToDataOutputNode,
+    LinkToDataProductNode,
+    LinkToDatasetNode,
+    LinkToExplorationNode,
+} from '../explorer/common';
 import styles from '../explorer/explorer.module.scss';
 import { parseEdges } from '../explorer/utils';
-import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
+import { Sidebar } from './sidebar/sidebar';
 import { useNodeEditor } from './use-node-editor';
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -42,7 +48,7 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, dom
             domainNodes.push({
                 id: domainId,
                 position: { x: 0, y: 0 },
-                type: CustomNodeTypes.DomainNode,
+                type: ExplorerNodeTypes.DomainNode,
                 draggable: true,
                 deletable: false,
                 data: {
@@ -56,46 +62,50 @@ function parseFullNodes(nodes: GraphNode[], setNodeId: (id: string) => void, dom
     }
 
     // Parse regular nodes
-    const regularNodes = nodes
-        .filter((node) => node.type !== NodeType.DomainNode)
-        .map((node) => {
-            let extra_attributes = {};
-            switch (node.type) {
-                case NodeType.DataProductNode:
-                    extra_attributes = {
-                        nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
-                        targetHandlePosition: Position.Left,
-                    };
-                    break;
-                case NodeType.DatasetNode:
-                    extra_attributes = {
-                        nodeToolbarActions: node.isMain ? (
-                            ''
-                        ) : (
-                            <LinkToDatasetNode id={node.data.id} product_id={node.data.link_to_id || ''} />
-                        ),
-                        targetHandlePosition: Position.Right,
-                        targetHandleId: 'left_t',
-                    };
-                    break;
-                case NodeType.DataOutputNode:
-                    extra_attributes = {
-                        nodeToolbarActions: node.isMain ? (
-                            ''
-                        ) : (
-                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id || ''} />
-                        ),
-                        sourceHandlePosition: Position.Left,
-                        isActive: true,
-                        targetHandlePosition: Position.Right,
-                        targetHandleId: 'left_t',
-                    };
-                    break;
-                default:
-                    throw new Error(`Unknown node type: ${node.type}`);
-            }
-            return parseRegularNode(node, setNodeId, domainsEnabled, true, extra_attributes);
-        });
+    const regularNodes = nodes.map((node) => {
+        let extra_attributes = {};
+        switch (node.type) {
+            case NodeType.DataProductNode:
+                extra_attributes = {
+                    nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
+                    targetHandlePosition: Position.Left,
+                };
+                break;
+            case NodeType.ExplorationNode:
+                extra_attributes = {
+                    nodeToolbarActions: node.isMain ? null : <LinkToExplorationNode id={node.data.id} />,
+                    targetHandlePosition: Position.Left,
+                };
+                break;
+            case NodeType.OutputPortNode:
+                extra_attributes = {
+                    nodeToolbarActions: node.isMain ? (
+                        ''
+                    ) : (
+                        <LinkToDatasetNode id={node.data.id} product_id={node.data.link_to_id || ''} />
+                    ),
+                    targetHandlePosition: Position.Right,
+                    targetHandleId: 'left_t',
+                };
+                break;
+            case NodeType.TechnicalAssetNode:
+                extra_attributes = {
+                    nodeToolbarActions: node.isMain ? (
+                        ''
+                    ) : (
+                        <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id || ''} />
+                    ),
+                    sourceHandlePosition: Position.Left,
+                    isActive: true,
+                    targetHandlePosition: Position.Right,
+                    targetHandleId: 'left_t',
+                };
+                break;
+            default:
+                throw new Error(`Unknown node type: ${node.type}`);
+        }
+        return parseRegularNode(node, setNodeId, domainsEnabled, true, extra_attributes);
+    });
 
     return [...domainNodes, ...regularNodes];
 }
@@ -123,7 +133,7 @@ function applyHighlighting(nodes: Node[], edges: Edge[], selectedId: string | nu
     });
 
     // Domain nodes should stay visible if any of their children are connected
-    const domainNodeIds = new Set(nodes.filter((n) => n.type === CustomNodeTypes.DomainNode).map((n) => n.id));
+    const domainNodeIds = new Set(nodes.filter((n) => n.type === ExplorerNodeTypes.DomainNode).map((n) => n.id));
     const activeDomainIds = new Set(
         nodes.filter((n) => n.parentId && connectedNodeIds.has(n.id)).map((n) => n.parentId as string),
     );
@@ -170,21 +180,18 @@ function InternalFullExplorerContent() {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout } = useNodeEditor();
     const { fitView } = useReactFlow();
 
-    const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
-        dataProductsEnabled: true,
-        datasetsEnabled: true,
-        domainsEnabled: true,
+    const [sidebarFilters, setSidebarFilters] = useQueryStates({
+        explorationsEnabled: parseAsBoolean.withDefault(false),
+        outputPortsEnabled: parseAsBoolean.withDefault(false),
+        domainsEnabled: parseAsBoolean.withDefault(true),
     });
 
     const [nodeId, setNodeId] = useState<string | null>(null);
 
-    const { data: graph, isFetching } = useGetGraphDataQuery(
-        {
-            dataProductNodesEnabled: sidebarFilters.dataProductsEnabled,
-            outputPortNodesEnabled: sidebarFilters.datasetsEnabled,
-        },
-        { skip: false },
-    );
+    const { data: graph, isFetching } = useGetGraphDataQuery({
+        explorationNodesEnabled: sidebarFilters.explorationsEnabled,
+        outputPortNodesEnabled: sidebarFilters.outputPortsEnabled,
+    });
 
     // Helper function to apply highlighting logic
 

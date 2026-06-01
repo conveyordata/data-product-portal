@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -11,6 +11,15 @@ from app.core.authz import (
     DataProductResolver,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.webhooks.events import (
+    TechnicalAssetCreatedEvent,
+    TechnicalAssetDeletedEvent,
+    TechnicalAssetStatusUpdatedEvent,
+    TechnicalAssetUpdatedEvent,
+)
+from app.core.webhooks.v2 import _emits_event
+from app.data_products.schema_response import GetDataProductResponse
+from app.data_products.service import DataProductService
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
@@ -19,7 +28,6 @@ from app.data_products.technical_assets.schema_request import (
 )
 from app.data_products.technical_assets.schema_response import (
     CreateTechnicalAssetResponse,
-    DataOutputGet,
     GetTechnicalAssetsResponse,
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
@@ -38,6 +46,7 @@ from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 route = "/v2/data_products/{data_product_id}/technical_assets"
+
 router = APIRouter(tags=["Data Products - Technical assets"])
 
 
@@ -47,7 +56,7 @@ def get_data_product_technical_assets(
 ) -> GetTechnicalAssetsResponse:
     return GetTechnicalAssetsResponse(
         technical_assets=[
-            DataOutputGet.model_validate(do).convert()
+            GetTechnicalAssetsResponseItem.model_validate(do)
             for do in DataOutputService(db).get_data_outputs_for_data_product(
                 data_product_id
             )
@@ -59,9 +68,9 @@ def get_data_product_technical_assets(
 def get_technical_asset(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponseItem:
-    return DataOutputGet.model_validate(
+    return GetTechnicalAssetsResponseItem.model_validate(
         DataOutputService(db).get_data_output(data_product_id, id)
-    ).convert()
+    )
 
 
 @router.get(f"{route}/{{id}}/history")
@@ -98,14 +107,23 @@ def get_technical_asset_event_history(
                 DataOutputResolver,
             )
         ),
+        Depends(_emits_event(TechnicalAssetDeletedEvent)),
     ],
 )
 def remove_technical_asset(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
+    asset_for_event = DataOutputService(db).get_data_output(data_product_id, id)
+    request.state.event = TechnicalAssetDeletedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(asset_for_event),
+    )
     data_output = DataOutputService(db).remove_data_output(data_product_id, id)
     event_id = EventService(db).create_event(
         CreateEvent(
@@ -144,9 +162,11 @@ def remove_technical_asset(
                 DataOutputResolver,
             )
         ),
+        Depends(_emits_event(TechnicalAssetUpdatedEvent)),
     ],
 )
 def update_technical_asset(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     data_output: DataOutputUpdate,
@@ -154,6 +174,14 @@ def update_technical_asset(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateTechnicalAssetResponse:
     result = DataOutputService(db).update_data_output(data_product_id, id, data_output)
+    request.state.event = TechnicalAssetUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
+            DataOutputService(db).get_data_output(data_product_id, id)
+        ),
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_UPDATED,
@@ -183,9 +211,11 @@ def update_technical_asset(
                 DataOutputResolver,
             )
         ),
+        Depends(_emits_event(TechnicalAssetStatusUpdatedEvent)),
     ],
 )
 def update_technical_asset_status(
+    request: Request,
     data_product_id: UUID,
     id: UUID,
     data_output: DataOutputStatusUpdate,
@@ -194,6 +224,14 @@ def update_technical_asset_status(
 ) -> None:
     DataOutputService(db).update_data_output_status(
         data_product_id, id, data_output, actor=authenticated_user
+    )
+    request.state.event = TechnicalAssetStatusUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
+            DataOutputService(db).get_data_output(data_product_id, id)
+        ),
     )
     EventService(db).create_event(
         CreateEvent(
@@ -234,10 +272,12 @@ def get_technical_asset_graph_data(
                 DataProductResolver,
                 object_id="data_product_id",
             )
-        )
+        ),
+        Depends(_emits_event(TechnicalAssetCreatedEvent)),
     ],
 )
 def create_technical_asset(
+    request: Request,
     data_product_id: UUID,
     technical_asset: CreateTechnicalAssetRequest,
     db: Session = Depends(get_db_session),
@@ -245,6 +285,14 @@ def create_technical_asset(
 ) -> CreateTechnicalAssetResponse:
     technical_asset = DataOutputService(db).create_data_output(
         data_product_id, technical_asset
+    )
+    request.state.event = TechnicalAssetCreatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(data_product_id)
+        ),
+        technical_asset=GetTechnicalAssetsResponseItem.model_validate(
+            DataOutputService(db).get_data_output(data_product_id, technical_asset.id)
+        ),
     )
     event_id = EventService(db).create_event(
         CreateEvent(

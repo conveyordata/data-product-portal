@@ -1,12 +1,12 @@
-import Icon, { CodeOutlined, CompassOutlined, HistoryOutlined } from '@ant-design/icons';
+import { CodeOutlined, CompassOutlined, HistoryOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
+import { OutputPortOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
@@ -53,7 +53,7 @@ export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: P
             {
                 label: t('Output Ports'),
                 key: TabKeys.Datasets,
-                icon: <Icon component={datasetOutlineIcon} />,
+                icon: <OutputPortOutlined />,
                 children: <DatasetTab dataProductId={dataProductId} technicalAssetId={technicalAssetId} />,
             },
             {

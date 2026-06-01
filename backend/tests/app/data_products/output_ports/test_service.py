@@ -1,7 +1,6 @@
 from sqlalchemy.orm import selectinload
 
-from app.authorization.roles import ADMIN_UUID
-from app.authorization.roles.schema import Prototype, Scope
+from app.authorization.roles.schema import Scope
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.service import OutputPortService
@@ -9,12 +8,12 @@ from app.settings import settings
 from tests import test_session
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
+    InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     UserFactory,
@@ -30,7 +29,7 @@ class TestDatasetsService:
 
     def test_get_private_dataset_by_owner(self):
         owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        role = RoleFactory.dataset_owner()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(
             role_id=role.id, dataset_id=ds.id, user_id=owner.id
@@ -40,7 +39,7 @@ class TestDatasetsService:
 
     def test_get_private_dataset_by_admin(self):
         admin = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
+        role = RoleFactory.admin()
         GlobalRoleAssignmentFactory(role_id=role.id, user_id=admin.id)
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         ds = self.get_dataset(ds)
@@ -54,7 +53,7 @@ class TestDatasetsService:
         DataProductRoleAssignmentFactory(
             role_id=role.id, data_product_id=dp.id, user_id=user.id
         )
-        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
         ds = self.get_dataset(ds)
         assert OutputPortService(test_session).is_visible_to_user(ds, user) is True
 
@@ -91,7 +90,7 @@ class TestDatasetsService:
 
         # Create another private output port owned by a different user
         owner = UserFactory()
-        owner_role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        owner_role = RoleFactory.dataset_owner()
         owned_private_dataset = DatasetFactory(
             name="Owner Private Dataset", access_type=OutputPortAccessType.PRIVATE
         )
@@ -105,7 +104,7 @@ class TestDatasetsService:
         OutputPortService(test_session).recalculate_search(owned_private_dataset.id)
 
         # Search as the regular user
-        search_results = OutputPortService(test_session).search_datasets(
+        search_results = OutputPortService(test_session).search_output_ports(
             query=None, limit=100, user=regular_user, current_user_assigned=False
         )
 
@@ -129,7 +128,7 @@ class TestDatasetsService:
         """Test that owners can see their own private output ports in search results"""
         # Create a user who will own a private dataset
         owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        owner_role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        owner_role = RoleFactory.dataset_owner()
 
         # Create a private output port owned by this user
         private_dataset = DatasetFactory(
@@ -149,7 +148,7 @@ class TestDatasetsService:
         OutputPortService(test_session).recalculate_search(unrestricted_dataset.id)
 
         # Search as the owner
-        search_results = OutputPortService(test_session).search_datasets(
+        search_results = OutputPortService(test_session).search_output_ports(
             query=None, limit=100, user=owner, current_user_assigned=False
         )
 

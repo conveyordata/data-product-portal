@@ -3,15 +3,15 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, selectinload, undefer
 
 from app.configuration.domains.model import Domain as DomainModel
 from app.configuration.domains.model import ensure_domain_exists
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
     CreateDomainResponse,
-    DomainGetOld,
-    GetDomainsItemOld,
+    GetDomainResponse,
+    GetDomainsItem,
     UpdateDomainResponse,
 )
 
@@ -20,12 +20,12 @@ class DomainService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_domains(self) -> Sequence[GetDomainsItemOld]:
+    def get_domains(self) -> Sequence[GetDomainsItem]:
         return (
             self.db.scalars(
                 select(DomainModel)
                 .options(
-                    selectinload(DomainModel.data_products),
+                    undefer(DomainModel.abstract_data_product_count),
                 )
                 .order_by(DomainModel.name)
             )
@@ -33,12 +33,12 @@ class DomainService:
             .all()
         )
 
-    def get_domain(self, id: UUID) -> DomainGetOld:
+    def get_domain(self, id: UUID) -> GetDomainResponse:
         domain = self.db.get(
             DomainModel,
             id,
             options=[
-                selectinload(DomainModel.data_products),
+                undefer(DomainModel.abstract_data_product_count),
             ],
         )
 
@@ -50,8 +50,8 @@ class DomainService:
 
         return domain
 
-    def create_domain(self, domain: DomainCreate) -> CreateDomainResponse:
-        domain = DomainModel(**domain.parse_pydantic_schema())
+    def create_domain(self, domain_create: DomainCreate) -> CreateDomainResponse:
+        domain = DomainModel(**domain_create.parse_pydantic_schema())
         self.db.add(domain)
         self.db.commit()
         return CreateDomainResponse(id=domain.id)
@@ -71,11 +71,16 @@ class DomainService:
             DomainModel,
             id,
             options=[
-                selectinload(DomainModel.data_products),
+                selectinload(DomainModel.abstract_data_products),
             ],
         )
+        if not domain:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Domain not found",
+            )
 
-        if domain.data_products:
+        if domain.abstract_data_products:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
@@ -92,12 +97,12 @@ class DomainService:
             from_id,
             self.db,
             options=[
-                selectinload(DomainModel.data_products),
+                selectinload(DomainModel.abstract_data_products),
             ],
         )
         new_domain = ensure_domain_exists(to_id, self.db)
 
-        for data_product in domain.data_products:
+        for data_product in domain.abstract_data_products:
             data_product.domain_id = new_domain.id
 
         self.db.commit()

@@ -53,9 +53,9 @@ declare
     ready uuid;
 
 begin
-    TRUNCATE TABLE public.data_products_datasets CASCADE;
+    TRUNCATE TABLE public.input_ports CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
-    TRUNCATE TABLE public.data_products CASCADE;
+    TRUNCATE TABLE public.abstract_data_products CASCADE;
     TRUNCATE TABLE public.data_product_types CASCADE;
     TRUNCATE TABLE public.domains CASCADE;
     TRUNCATE TABLE public.tags CASCADE;
@@ -132,7 +132,8 @@ begin
     FROM public.users WHERE email = 'john.scientist@pharma.com';
 
     -- DATA PRODUCTS
-    INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'Sales CRM Customers', 'sales-crm-customers', 'Provides a clean, trusted view of customer account information, sourced directly from our CRM.', '<h3>Value Proposition</h3>
+    INSERT INTO public.abstract_data_products (id, "name", namespace, description, domain_id, abstract_data_product_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales CRM Customers', 'sales-crm-customers', 'Provides a clean, trusted view of customer account information, sourced directly from our CRM.', sales_id, 'data_products', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_crm_customers_dp_id;
+    INSERT INTO public.data_products (id, about, status, type_id, lifecycle_id) VALUES (sales_crm_customers_dp_id, '<h3>Value Proposition</h3>
 <p>This data product establishes a single source of truth for customer identities. By unifying fragmented CRM records, it enables consistent personalization, improved customer relationship management, and highly targeted marketing efforts across all business units.<br></p>
 
 <h3>User Consumption Mode</h3>
@@ -147,9 +148,10 @@ begin
 
 <h3>Terms of Use</h3>
 <p><strong>Usage:</strong> Approved for all internal analytics, marketing automation, and customer support workflows.</p>
-<p><strong>Limitations:</strong> Not authorized for external regulatory reporting. Handing of PII must strictly adhere to the corporate GDPR compliance framework.</p>', 'ACTIVE', source_aligned_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_dp_id;
+<p><strong>Limitations:</strong> Not authorized for external regulatory reporting. Handing of PII must strictly adhere to the corporate GDPR compliance framework.</p>', 'ACTIVE', source_aligned_type_id, ready);
 
-    INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'Sales ERP Orders', 'sales-erp-orders', 'Provides real-time order data from our ERP system.', '<h3>Value Proposition</h3>
+    INSERT INTO public.abstract_data_products (id, "name", namespace, description, domain_id, abstract_data_product_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales ERP Orders', 'sales-erp-orders', 'Provides real-time order data from our ERP system.', sales_id, 'data_products', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_erp_orders_dp_id;
+    INSERT INTO public.data_products (id, about, status, type_id, lifecycle_id) VALUES (sales_erp_orders_dp_id, '<h3>Value Proposition</h3>
 <p>Provides immediate visibility into sales transactions as they happen. This real-time feed empowers leadership with instant revenue recognition and allows supply chain teams to react quickly to shifting demand patterns.<br></p>
 
 <h3>User Consumption Mode</h3>
@@ -164,9 +166,10 @@ begin
 
 <h3>Terms of Use</h3>
 <p><strong>Usage:</strong> Approved for internal financial planning, operational monitoring, and sales performance tracking.</p>
-<p><strong>Limitations:</strong> This is a real-time feed and may include pending transactions. It is not the master record for audited financial statements. Historical corrections can occur within a 24-hour window.</p>', 'ACTIVE', source_aligned_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_erp_orders_dp_id;
+<p><strong>Limitations:</strong> This is a real-time feed and may include pending transactions. It is not the master record for audited financial statements. Historical corrections can occur within a 24-hour window.</p>', 'ACTIVE', source_aligned_type_id, ready);
 
-    INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'Logistics WMS Shipments', 'logistics-wms-shipments', 'Tracks order shipment and delivery status from the warehouse.', '<h3>Value Proposition</h3>
+    INSERT INTO public.abstract_data_products (id, "name", namespace, description, domain_id, abstract_data_product_type, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics WMS Shipments', 'logistics-wms-shipments', 'Tracks order shipment and delivery status from the warehouse.', logistics_id, 'data_products', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_wms_shipments_dp_id;
+    INSERT INTO public.data_products (id, about, status, type_id, lifecycle_id) VALUES (logistics_wms_shipments_dp_id, '<h3>Value Proposition</h3>
 <p>Optimizes the "last mile" of the supply chain by providing granular, end-to-end tracking of every package. It reduces operational overhead by automating status updates and proactively identifying potential delivery delays.<br></p>
 
 <h3>User Consumption Mode</h3>
@@ -181,7 +184,7 @@ begin
 
 <h3>Terms of Use</h3>
 <p><strong>Usage:</strong> Approved for logistics optimization, carrier management, and customer service inquiry resolution.</p>
-<p><strong>Limitations:</strong> Data accuracy is dependent on third-party carrier scan events. Not suitable as sole evidence in legal delivery disputes without secondary carrier documentation.</p>', 'ACTIVE', source_aligned_type_id, logistics_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO logistics_wms_shipments_dp_id;
+<p><strong>Limitations:</strong> Data accuracy is dependent on third-party carrier scan events. Not suitable as sole evidence in legal delivery disputes without secondary carrier documentation.</p>', 'ACTIVE', source_aligned_type_id, ready);
 
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router';
 
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
 import { OutputPortAccessIcon } from '@/components/datasets/output-port-access-icon/output-port-access-icon.tsx';
@@ -66,7 +66,6 @@ export function Dataset() {
                 {
                     title: (
                         <>
-                            {' '}
                             <ShopOutlined /> {t('Marketplace')}
                         </>
                     ),
@@ -104,8 +103,8 @@ export function Dataset() {
         <Flex className={styles.datasetContainer}>
             <Flex vertical className={styles.datasetContent}>
                 <Flex className={styles.datasetHeaderContainer}>
-                    <Flex className={styles.datasetHeader}>
-                        <CustomSvgIconLoader iconComponent={datasetBorderIcon} size="large" />
+                    <Flex className={styles.datasetHeader} align={'center'}>
+                        <CustomSvgIconLoader iconComponent={outputPortBorderIcon} size="large" />
                         <Typography.Title level={3}>{outputPort?.name}</Typography.Title>
                         <OutputPortAccessIcon accessType={outputPort.access_type} hasPopover />
                     </Flex>
@@ -117,25 +116,22 @@ export function Dataset() {
                         />
                     )}
                 </Flex>
-                {/* Main content */}
-                <Flex className={styles.mainContent}>
-                    {/* Dataset description */}
-                    <Flex vertical className={styles.datasetOverview}>
-                        <OutputPortDescription
-                            lifecycle={outputPort.lifecycle}
-                            data_product={data_product}
-                            description={outputPort.description}
-                            domain={outputPort.domain.name}
-                            namespace={outputPort.namespace}
-                            accessType={getDatasetAccessTypeLabel(t, outputPort.access_type)}
-                            tags={[
-                                ...outputPort.tags,
-                                ...outputPort.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
-                            ]}
-                        />
-                        {/*  Tabs  */}
-                        <DatasetTabs datasetId={outputPort.id} dataProductId={dataProductId} isLoading={isLoading} />
-                    </Flex>
+                {/* Dataset description */}
+                <Flex vertical className={styles.datasetOverview}>
+                    <OutputPortDescription
+                        lifecycle={outputPort.lifecycle}
+                        data_product={data_product}
+                        description={outputPort.description}
+                        domain={outputPort.domain.name}
+                        namespace={outputPort.namespace}
+                        accessType={getDatasetAccessTypeLabel(t, outputPort.access_type)}
+                        tags={[
+                            ...outputPort.tags,
+                            ...outputPort.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
+                        ]}
+                    />
+                    {/*  Tabs  */}
+                    <DatasetTabs datasetId={outputPort.id} dataProductId={dataProductId} isLoading={isLoading} />
                 </Flex>
             </Flex>
             {/* Sidebar */}

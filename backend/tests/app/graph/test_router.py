@@ -1,10 +1,9 @@
-import pytest
-
 from tests.factories import (
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DatasetFactory,
     DomainFactory,
+    ExplorationFactory,
+    InputPortFactory,
     TechnicalAssetFactory,
 )
 
@@ -12,18 +11,29 @@ ENDPOINT = "/api/v2/graph"
 
 
 class TestGraphRouter:
-    @pytest.mark.parametrize(
-        "route",
-        [
-            ENDPOINT,
-        ],
-    )
-    def test_get_graph_data(self, client, route):
+    def test_get_graph_data(self, client):
         domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
-        DatasetFactory(data_product=data_product)
+        exp = ExplorationFactory(domain=domain)
+        dataset = DatasetFactory(data_product=data_product)
+        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
         TechnicalAssetFactory(owner=data_product)
-        response = client.get(route)
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200, response.text
+        assert len(response.json()["edges"]) == 0
+        assert len(response.json()["nodes"]) == 1
+        for node in response.json()["nodes"]:
+            assert node["data"]["domain_id"] == str(domain.id)
+            assert node["data"]["domain"] == domain.name
+
+    def test_get_graph_data_include_output_ports(self, client):
+        domain = DomainFactory()
+        data_product = DataProductFactory(domain=domain)
+        exp = ExplorationFactory(domain=domain)
+        dataset = DatasetFactory(data_product=data_product)
+        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
+        TechnicalAssetFactory(owner=data_product)
+        response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "true"})
         assert response.status_code == 200, response.text
         assert len(response.json()["edges"]) == 1
         assert len(response.json()["nodes"]) == 2
@@ -31,26 +41,52 @@ class TestGraphRouter:
             assert node["data"]["domain_id"] == str(domain.id)
             assert node["data"]["domain"] == domain.name
 
-    def test_get_graph_data_1_link(self, client):
+    def test_get_graph_data_include_explorations(self, client):
+        domain = DomainFactory()
+        data_product = DataProductFactory(domain=domain)
+        exp = ExplorationFactory(domain=domain)
+        dataset = DatasetFactory(data_product=data_product)
+        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
+        response = client.get(ENDPOINT, params={"exploration_nodes_enabled": "true"})
+        assert response.status_code == 200, response.text
+        assert len(response.json()["nodes"]) == 2
+
+    def test_get_graph_data_include_output_ports_and_explorations(self, client):
+        domain = DomainFactory()
+        data_product = DataProductFactory(domain=domain)
+        exp = ExplorationFactory(domain=domain)
+        dataset = DatasetFactory(data_product=data_product)
+        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
+        response = client.get(
+            ENDPOINT,
+            params={
+                "output_port_nodes_enabled": "true",
+                "exploration_nodes_enabled": "true",
+            },
+        )
+        assert response.status_code == 200, response.text
+        assert len(response.json()["nodes"]) == 3
+
+    def test_get_graph_data_single_consumer_show_output_ports(self, client):
         data_product_1 = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
-        DataProductDatasetAssociationFactory(
-            data_product=data_product_2, dataset=dataset
+        InputPortFactory(
+            consuming_abstract_data_product=data_product_2, dataset=dataset
         )
-        response = client.get(ENDPOINT)
+        response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "true"})
         assert response.status_code == 200, response.text
         assert len(response.json()["edges"]) == 2
         assert len(response.json()["nodes"]) == 3
 
-    def test_get_graph_data_only_data_products_one_link(self, client):
+    def test_get_graph_data_single_consumer(self, client):
         data_product_1 = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
-        DataProductDatasetAssociationFactory(
-            data_product=data_product_2, dataset=dataset
+        InputPortFactory(
+            consuming_abstract_data_product=data_product_2, dataset=dataset
         )
-        response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
+        response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
         assert len(response.json()["edges"]) == 1
         assert len(response.json()["nodes"]) == 2
@@ -60,7 +96,7 @@ class TestGraphRouter:
         producer = DataProductFactory()
         dataset = DatasetFactory(data_product=producer)
         consumer = DataProductFactory()
-        DataProductDatasetAssociationFactory(data_product=consumer, dataset=dataset)
+        InputPortFactory(consuming_abstract_data_product=consumer, dataset=dataset)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
         assert response.status_code == 200, response.text
         edge = response.json()["edges"][0]

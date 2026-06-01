@@ -1,7 +1,7 @@
 from base64 import urlsafe_b64encode
 from datetime import datetime, timedelta
 from hashlib import sha256
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import uuid4
 
 import httpx
@@ -21,22 +21,25 @@ from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
 from app.core.auth.device_flows.schema import (
     DeviceFlow,
     DeviceFlowStatus,
-    OIDCTokenResponse,
 )
 from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
 from app.core.logging import logger
 from app.settings import settings
 
-basic_auth = HTTPBasic()
-
 
 def verify_auth_header(
-    credentials: Annotated[HTTPBasicCredentials, Depends(basic_auth)],
-) -> bool:
+    credentials: Annotated[HTTPBasicCredentials, Depends(HTTPBasic())],
+) -> str:
+    oidc = get_oidc()
+    if not oidc.oidc_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="OIDC is not enabled"
+        )
+
     if (
-        credentials.username != get_oidc().client_id
-        or credentials.password != get_oidc().client_secret
+        credentials.username != oidc.client_id
+        or credentials.password != oidc.client_secret
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,8 +59,9 @@ class DeviceFlowService:
     def __init__(self):
         self.logger = logger
 
+    @staticmethod
     def generate_device_flow_codes(
-        self, db: Session, client_id: str, request: Request, scope: str = "openid"
+        db: Session, client_id: str, request: Request, scope: str = "openid"
     ) -> DeviceFlow:
         device_flow = DeviceFlowModel(
             client_id=client_id,
@@ -82,7 +86,7 @@ class DeviceFlowService:
 
     def fetch_jwt_tokens(
         self, request: Request, db: Session, device_code: str, client_id: str
-    ) -> OIDCTokenResponse:
+    ) -> dict[str, Any]:
         self.logger.debug("requesting JWTs")
         device_flow = db.get(DeviceFlowModel, device_code)
 
@@ -122,8 +126,6 @@ class DeviceFlowService:
             device_flow.status == DeviceFlowStatus.AUTHORIZED
             and not device_flow.authz_code
         ):
-            # This should not really be a 400 bad request?
-            # Or maybe it should? This is thrown when the user has not yet authorized.
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=device_flow.status
             )
@@ -132,8 +134,9 @@ class DeviceFlowService:
         ):
             self.logger.debug("Launching Request for Tokens")
 
+            oidc = get_oidc()
             response = httpx.post(
-                get_oidc().token_endpoint,
+                oidc.token_endpoint,
                 headers={
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Authorization": request.headers.get("Authorization"),
@@ -141,22 +144,24 @@ class DeviceFlowService:
                 data={
                     "grant_type": "authorization_code",
                     "client_id": client_id,
-                    "redirect_uri": f"{get_oidc().redirect_uri}"
+                    "redirect_uri": f"{oidc.redirect_uri}"
                     f"{request.app.url_path_for('device_flow_callback')}",
                     "code": device_flow.authz_code,
                     "code_verifier": device_flow.authz_verif,
                 },
             )
 
-            data = response.json()
-            self.logger.debug(data)
+            response.raise_for_status()
+            tokens = response.json()
+            self.logger.debug(tokens)
             device_flow.status = DeviceFlowStatus.EXPIRED
             db.commit()
-            return OIDCTokenResponse.model_validate(data)
+            return tokens
         else:
             raise ExpiredDeviceCodeError
 
-    def _verify_auth_header(self, auth_client_id: str, client_id: str):
+    @staticmethod
+    def _verify_auth_header(auth_client_id: str, client_id: str) -> None:
         if auth_client_id != client_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -168,35 +173,31 @@ class DeviceFlowService:
 
     def get_device_token(
         self,
-        auth_client_id: str,
         client_id: str,
         db: Session,
         request: Request,
         scope: str = "openid",
     ) -> DeviceFlow:
-        self._verify_auth_header(auth_client_id, client_id)
         return self.generate_device_flow_codes(db, client_id, request, scope)
 
     def get_jwt_token(
         self,
         request: Request,
-        auth_client_id: str,
         client_id: str,
         device_code: str,
         grant_type: str,
         db: Session,
-    ):
+    ) -> dict[str, Any]:
         if grant_type != "urn:ietf:params:oauth:grant-type:device_code":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="POST Call on /token invalid: incorrect grant type",
             )
-        self._verify_auth_header(auth_client_id, client_id)
         return self.fetch_jwt_tokens(request, db, device_code, client_id)
 
     def request_user_code_processing(
         self, user_code: str, request: Request, db: Session
-    ):
+    ) -> HTMLResponse:
         device_flows = db.scalars(
             select(DeviceFlowModel).where(DeviceFlowModel.user_code == user_code)
         ).all()
@@ -239,18 +240,20 @@ class DeviceFlowService:
             )
         )
 
-    def deny_device_flow(self, device_code: str, db: Session):
+    @staticmethod
+    def deny_device_flow(device_code: str, db: Session) -> RedirectResponse:
         device = db.get(DeviceFlowModel, device_code)
         device.status = DeviceFlowStatus.DENIED
         db.commit()
         return RedirectResponse("/")
 
+    @staticmethod
     def allow_device_flow(
-        self, client_id: str, device_code: str, db: Session, request: Request
-    ):
+        client_id: str, device_code: str, db: Session, request: Request
+    ) -> RedirectResponse:
         code_verifier = uuid4().hex
-        hash = sha256(code_verifier.encode("utf-8")).digest()
-        code_challenge = urlsafe_b64encode(hash).decode("utf-8").replace("=", "")
+        digest = sha256(code_verifier.encode("utf-8")).digest()
+        code_challenge = urlsafe_b64encode(digest).decode("utf-8").replace("=", "")
 
         state = uuid4().hex
 
@@ -259,28 +262,33 @@ class DeviceFlowService:
         device.authz_verif = code_verifier
         db.commit()
 
-        callback_url = f"{get_oidc().redirect_uri}{request.app.url_path_for('device_flow_callback')}"
+        oidc = get_oidc()
+        callback_url = (
+            f"{oidc.redirect_uri}{request.app.url_path_for('device_flow_callback')}"
+        )
 
         return RedirectResponse(
             status_code=302,
             url=(
-                f"{get_oidc().authorization_endpoint}?"
+                f"{oidc.authorization_endpoint}?"
                 f"response_type=code&client_id={client_id}"
                 f"&scope={device.scope}&"
                 f"redirect_uri={callback_url}"
                 f"&state={state}&scope={device.scope}&code_challenge_method=S256"
                 f"&code_challenge={code_challenge}"
-                f"&identity_provider={get_oidc().provider.name}"
+                f"&identity_provider={oidc.provider.name}"
             ),
         )
 
-    def process_authz_code_callback(self, authz_code: str, state: str, db: Session):
+    def process_authz_code_callback(
+        self, authz_code: str, state: str, db: Session
+    ) -> HTMLResponse:
         devices = db.scalars(
             select(DeviceFlowModel).where(DeviceFlowModel.authz_state == state)
         ).all()
         if len(devices) != 1:
             self.logger.debug("Not exactly one device flow found with this state")
-            return HTTPException(
+            raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="not exactly one device flow found with this state",
             )

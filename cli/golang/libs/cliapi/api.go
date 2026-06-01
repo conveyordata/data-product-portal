@@ -2,10 +2,23 @@ package cliapi
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	"portal/libs/core"
 	"portal/pkg/api"
 )
+
+type bearerTransport struct {
+	accessToken string
+	base        http.RoundTripper
+}
+
+func (t *bearerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	r := req.Clone(req.Context())
+	r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", t.accessToken))
+	return t.base.RoundTrip(r)
+}
 
 func AuthenticatedContext(ctx context.Context) (api.Invoker, error) {
 	token, err := core.FetchToken(ctx)
@@ -17,7 +30,13 @@ func AuthenticatedContext(ctx context.Context) (api.Invoker, error) {
 	if config.DevMode {
 		baseUrl = "http://localhost:5050"
 	}
-	client, err := api.NewClient(baseUrl, &basicAuthSource{username: token.AccessToken})
+	httpClient := &http.Client{
+		Transport: &bearerTransport{
+			accessToken: token.AccessToken,
+			base:        http.DefaultTransport,
+		},
+	}
+	client, err := api.NewClient(baseUrl, &basicAuthSource{}, api.WithClient(httpClient))
 	if err != nil {
 		return nil, err
 	}

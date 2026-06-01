@@ -684,6 +684,142 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Contract"
+        ],
+        "summary": "Get Output Port Schema",
+        "operationId": "get_output_port_schema",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortSchemaResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Output Port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output Port ID not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Contract"
+        ],
+        "summary": "Ingest Output Port Contract",
+        "operationId": "ingest_output_port_contract",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BitolContractRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortSchemaResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Output Port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output Port ID not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/output_ports": {
       "get": {
         "tags": [
@@ -1840,6 +1976,7 @@
         ],
         "summary": "Link Input Ports To Data Product",
         "operationId": "link_input_ports_to_data_product",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -1906,6 +2043,120 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/input_ports": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Request Input Ports For Data Product",
+        "operationId": "request_input_ports_for_data_product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestInputPortsForDataProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestInputPortsForDataProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Output port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output port not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Get Data Product Input Ports",
+        "operationId": "get_data_product_input_ports",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataProductInputPortsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{id}/history": {
       "get": {
         "tags": [
@@ -1932,49 +2183,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetEventHistoryResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{id}/input_ports": {
-      "get": {
-        "tags": [
-          "Data Products"
-        ],
-        "summary": "Get Data Product Input Ports",
-        "operationId": "get_data_product_input_ports",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDataProductInputPortsResponse"
                 }
               }
             }
@@ -2035,7 +2243,7 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/input_ports/{input_port_id}": {
+    "/api/v2/data_products/{id}/input_ports/{output_port_id}": {
       "delete": {
         "tags": [
           "Data Products"
@@ -2054,13 +2262,13 @@
             }
           },
           {
-            "name": "input_port_id",
+            "name": "output_port_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "Input Port Id"
+              "title": "Output Port Id"
             }
           }
         ],
@@ -5983,23 +6191,23 @@
         "operationId": "get_graph_data",
         "parameters": [
           {
-            "name": "data_product_nodes_enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true,
-              "title": "Data Product Nodes Enabled"
-            }
-          },
-          {
             "name": "output_port_nodes_enabled",
             "in": "query",
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "Output Port Nodes Enabled"
+            }
+          },
+          {
+            "name": "exploration_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Exploration Nodes Enabled"
             }
           }
         ],
@@ -6420,6 +6628,276 @@
         }
       }
     },
+    "/api/v2/explorations": {
+      "get": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Get Explorations",
+        "operationId": "get_explorations",
+        "parameters": [
+          {
+            "name": "filter_to_user_with_assigment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "title": "Filter To User With Assigment",
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExplorationsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Create Exploration",
+        "operationId": "create_exploration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExplorationRequestWithInputPorts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}": {
+      "get": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Get Exploration",
+        "operationId": "get_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/input_ports": {
+      "get": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Get Exploration Input Ports",
+        "operationId": "get_exploration_input_ports",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExplorationInputPortsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Request Input Ports For Exploration",
+        "operationId": "request_input_ports_for_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestInputPortsForExplorationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestInputPortsForExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/input_ports/{output_port_id}": {
+      "delete": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Remove Input Port From Exploration",
+        "operationId": "remove_input_port_from_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
@@ -6436,11 +6914,13 @@
           {
             "name": "client_id",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
+              "deprecated": true,
+              "title": "Client Id",
+              "type": "string"
+            },
+            "deprecated": true
           },
           {
             "name": "scope",
@@ -6458,7 +6938,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceFlow"
+                }
               }
             }
           },
@@ -6489,15 +6971,6 @@
         ],
         "parameters": [
           {
-            "name": "client_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
-          },
-          {
             "name": "device_code",
             "in": "query",
             "required": true,
@@ -6514,6 +6987,17 @@
               "type": "string",
               "title": "Grant Type"
             }
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "deprecated": true,
+              "title": "Client Id",
+              "type": "string"
+            },
+            "deprecated": true
           }
         ],
         "responses": {
@@ -6522,7 +7006,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OIDCTokenResponse"
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Jwt Token Api V2 Authn Device Jwt Token Post"
                 }
               }
             }
@@ -6729,6 +7215,37 @@
         ],
         "title": "AWSS3Config"
       },
+      "AbstractDataProductInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "abstract_data_product_type": {
+            "$ref": "#/components/schemas/AbstractDataProductType"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "namespace",
+          "abstract_data_product_type"
+        ],
+        "title": "AbstractDataProductInfo"
+      },
+      "AbstractDataProductType": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "data_products",
+          "explorations"
+        ],
+        "title": "AbstractDataProductType"
+      },
       "AccessGranularity": {
         "type": "string",
         "enum": [
@@ -6788,6 +7305,7 @@
           105,
           106,
           107,
+          108,
           301,
           302,
           303,
@@ -6816,7 +7334,8 @@
           411,
           412,
           413,
-          414
+          414,
+          415
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
@@ -6906,6 +7425,21 @@
           "expiry"
         ],
         "title": "BecomeAdmin"
+      },
+      "BitolContractRequest": {
+        "properties": {
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaObjectRequest"
+            },
+            "type": "array",
+            "title": "Schema",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "BitolContractRequest",
+        "description": "Accepts a BitOL data contract (https://bitol-io.github.io/open-data-contract-standard/).\nOnly the `schema` section is extracted; all other fields are ignored."
       },
       "CanBecomeAdminUpdate": {
         "properties": {
@@ -7020,6 +7554,78 @@
           "id"
         ],
         "title": "CreateDomainResponse"
+      },
+      "CreateExplorationRequestWithInputPorts": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Domain Id"
+          },
+          "input_ports": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestInputPortsForExplorationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "namespace",
+          "description",
+          "domain_id"
+        ],
+        "title": "CreateExplorationRequestWithInputPorts"
+      },
+      "CreateExplorationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain"
+        ],
+        "title": "CreateExplorationResponse"
       },
       "CreateGlobalRoleAssignment": {
         "properties": {
@@ -7456,7 +8062,8 @@
               "format": "uuid"
             },
             "type": "array",
-            "title": "Tag Ids"
+            "title": "Tag Ids",
+            "default": []
           },
           "lifecycle_id": {
             "type": "string",
@@ -7471,6 +8078,16 @@
             "type": "array",
             "minItems": 1,
             "title": "Owners"
+          },
+          "input_ports": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestInputPortsForDataProductRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -7480,7 +8097,6 @@
           "description",
           "type_id",
           "domain_id",
-          "tag_ids",
           "lifecycle_id",
           "owners"
         ],
@@ -7498,23 +8114,6 @@
           "default"
         ],
         "title": "DataProductIconKey"
-      },
-      "DataProductInfo": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "type": {
-            "$ref": "#/components/schemas/DataProductType"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "type"
-        ],
-        "title": "DataProductInfo"
       },
       "DataProductLifeCycle": {
         "properties": {
@@ -7667,10 +8266,10 @@
             "type": "string",
             "title": "Justification"
           },
-          "data_product_id": {
+          "consuming_abstract_data_product_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Data Product Id"
+            "title": "Consuming Abstract Data Product Id"
           },
           "output_port_id": {
             "type": "string",
@@ -7688,8 +8287,8 @@
           "output_port": {
             "$ref": "#/components/schemas/OutputPort"
           },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct"
+          "consuming_abstract_data_product": {
+            "$ref": "#/components/schemas/AbstractDataProductInfo"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -7716,21 +8315,21 @@
           },
           "pending_action_type": {
             "type": "string",
-            "const": "DataProductOutputPort",
+            "const": "InputPort",
             "title": "Pending Action Type",
-            "default": "DataProductOutputPort"
+            "default": "InputPort"
           }
         },
         "type": "object",
         "required": [
           "id",
           "justification",
-          "data_product_id",
+          "consuming_abstract_data_product_id",
           "output_port_id",
           "status",
           "requested_on",
           "output_port",
-          "data_product",
+          "consuming_abstract_data_product",
           "requested_by",
           "denied_by",
           "approved_by"
@@ -8396,7 +8995,8 @@
               "format": "uuid"
             },
             "type": "array",
-            "title": "Tag Ids"
+            "title": "Tag Ids",
+            "default": []
           },
           "lifecycle_id": {
             "type": "string",
@@ -8411,7 +9011,6 @@
           "description",
           "type_id",
           "domain_id",
-          "tag_ids",
           "lifecycle_id"
         ],
         "title": "DataProductUpdate"
@@ -8761,6 +9360,100 @@
         ],
         "title": "DenyOutputPortAsInputPortRequest"
       },
+      "DeviceFlow": {
+        "properties": {
+          "device_code": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Device Code"
+          },
+          "user_code": {
+            "type": "string",
+            "title": "User Code"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope"
+          },
+          "interval": {
+            "type": "integer",
+            "title": "Interval"
+          },
+          "expiration": {
+            "type": "integer",
+            "title": "Expiration"
+          },
+          "oidc_redirect_uri": {
+            "type": "string",
+            "title": "Oidc Redirect Uri"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeviceFlowStatus"
+          },
+          "authz_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz Code"
+          },
+          "authz_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz State"
+          },
+          "authz_verif": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz Verif"
+          },
+          "verification_uri_complete": {
+            "type": "string",
+            "title": "Verification Uri Complete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_code",
+          "user_code",
+          "scope",
+          "interval",
+          "expiration",
+          "oidc_redirect_uri",
+          "status",
+          "authz_code",
+          "authz_state",
+          "authz_verif",
+          "verification_uri_complete"
+        ],
+        "title": "DeviceFlow"
+      },
+      "DeviceFlowStatus": {
+        "type": "string",
+        "enum": [
+          "authorization_pending",
+          "expired",
+          "denied",
+          "authorized"
+        ],
+        "title": "DeviceFlowStatus"
+      },
       "Domain": {
         "properties": {
           "id": {
@@ -9086,6 +9779,39 @@
         ],
         "title": "EventEntityType"
       },
+      "Exploration": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain"
+        ],
+        "title": "Exploration"
+      },
       "FieldDependency": {
         "properties": {
           "field_name": {
@@ -9361,9 +10087,9 @@
             "type": "integer",
             "title": "User Count"
           },
-          "output_port_count": {
+          "input_port_count": {
             "type": "integer",
-            "title": "Output Port Count"
+            "title": "Input Port Count"
           },
           "technical_asset_count": {
             "type": "integer",
@@ -9383,7 +10109,7 @@
           "type",
           "lifecycle",
           "user_count",
-          "output_port_count",
+          "input_port_count",
           "technical_asset_count"
         ],
         "title": "GetDataProductsResponseItem"
@@ -9402,21 +10128,13 @@
           "description": {
             "type": "string",
             "title": "Description"
-          },
-          "data_products": {
-            "items": {
-              "$ref": "#/components/schemas/DataProduct"
-            },
-            "type": "array",
-            "title": "Data Products"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description",
-          "data_products"
+          "description"
         ],
         "title": "GetDomainResponse"
       },
@@ -9435,9 +10153,9 @@
             "type": "string",
             "title": "Description"
           },
-          "data_product_count": {
+          "abstract_data_product_count": {
             "type": "integer",
-            "title": "Data Product Count"
+            "title": "Abstract Data Product Count"
           }
         },
         "type": "object",
@@ -9445,7 +10163,7 @@
           "id",
           "name",
           "description",
-          "data_product_count"
+          "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"
       },
@@ -9610,11 +10328,80 @@
         ],
         "title": "GetEventHistoryResponseItem"
       },
-      "GetInputPortsForOutputPortResponse": {
+      "GetExplorationInputPortsResponse": {
         "properties": {
           "input_ports": {
             "items": {
               "$ref": "#/components/schemas/InputPort"
+            },
+            "type": "array",
+            "title": "Input Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_ports"
+        ],
+        "title": "GetExplorationInputPortsResponse"
+      },
+      "GetExplorationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain",
+          "owner"
+        ],
+        "title": "GetExplorationResponse"
+      },
+      "GetExplorationsResponse": {
+        "properties": {
+          "explorations": {
+            "items": {
+              "$ref": "#/components/schemas/Exploration"
+            },
+            "type": "array",
+            "title": "Explorations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "explorations"
+        ],
+        "title": "GetExplorationsResponse"
+      },
+      "GetInputPortsForOutputPortResponse": {
+        "properties": {
+          "input_ports": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortInputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -10167,23 +10954,15 @@
             "type": "string",
             "title": "Justification"
           },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProductInfo"
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
           },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
             "title": "Output Port Id"
           },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "input_port": {
+          "output_port": {
             "$ref": "#/components/schemas/OutputPort"
           }
         },
@@ -10191,11 +10970,9 @@
         "required": [
           "id",
           "justification",
-          "data_product_id",
-          "data_product",
-          "output_port_id",
           "status",
-          "input_port"
+          "output_port_id",
+          "output_port"
         ],
         "title": "InputPort"
       },
@@ -10515,57 +11292,11 @@
         "type": "string",
         "enum": [
           "dataProductNode",
-          "dataOutputNode",
-          "datasetNode",
-          "domainNode"
+          "explorationNode",
+          "technicalAssetNode",
+          "outputPortNode"
         ],
         "title": "NodeType"
-      },
-      "OIDCTokenResponse": {
-        "properties": {
-          "access_token": {
-            "type": "string",
-            "title": "Access Token"
-          },
-          "token_type": {
-            "type": "string",
-            "title": "Token Type"
-          },
-          "expires_in": {
-            "type": "integer",
-            "title": "Expires In"
-          },
-          "id_token": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id Token"
-          },
-          "refresh_token": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Refresh Token"
-          }
-        },
-        "type": "object",
-        "required": [
-          "access_token",
-          "token_type",
-          "expires_in"
-        ],
-        "title": "OIDCTokenResponse",
-        "description": "OIDC token endpoint response."
       },
       "OSISemanticModelTechnicalAssetConfiguration": {
         "properties": {
@@ -10909,6 +11640,39 @@
         ],
         "title": "OutputPortDataQualitySummaryResponse"
       },
+      "OutputPortInputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "consuming_abstract_data_product": {
+            "$ref": "#/components/schemas/AbstractDataProductInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "status",
+          "consuming_abstract_data_product_id",
+          "consuming_abstract_data_product"
+        ],
+        "title": "OutputPortInputPort"
+      },
       "OutputPortLink": {
         "properties": {
           "id": {
@@ -10929,7 +11693,7 @@
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
           },
-          "output": {
+          "output_port": {
             "$ref": "#/components/schemas/OutputPort"
           }
         },
@@ -10939,7 +11703,7 @@
           "output_port_id",
           "technical_asset_id",
           "status",
-          "output"
+          "output_port"
         ],
         "title": "OutputPortLink"
       },
@@ -11122,6 +11886,28 @@
           "decided_by"
         ],
         "title": "OutputPortRoleAssignmentResponse"
+      },
+      "OutputPortSchemaResponse": {
+        "properties": {
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "schema_objects": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaObjectResponse"
+            },
+            "type": "array",
+            "title": "Schema Objects",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_id"
+        ],
+        "title": "OutputPortSchemaResponse"
       },
       "OutputPortSettingValue": {
         "properties": {
@@ -11735,6 +12521,84 @@
         ],
         "title": "RequestDataProductRoleAssignment"
       },
+      "RequestInputPortsForDataProductRequest": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports",
+          "justification"
+        ],
+        "title": "RequestInputPortsForDataProductRequest"
+      },
+      "RequestInputPortsForDataProductResponse": {
+        "properties": {
+          "input_port_links": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Input Port Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_links"
+        ],
+        "title": "RequestInputPortsForDataProductResponse"
+      },
+      "RequestInputPortsForExplorationRequest": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports",
+          "justification"
+        ],
+        "title": "RequestInputPortsForExplorationRequest"
+      },
+      "RequestInputPortsForExplorationResponse": {
+        "properties": {
+          "input_port_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Input Port Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_ids"
+        ],
+        "title": "RequestInputPortsForExplorationResponse"
+      },
       "RequestOutputPortRoleAssignment": {
         "properties": {
           "user_id": {
@@ -11781,7 +12645,8 @@
           "technical_asset",
           "output_port",
           "data_product_setting",
-          "output_port_setting"
+          "output_port_setting",
+          "exploration"
         ],
         "title": "ResourceNameModel"
       },
@@ -11889,6 +12754,396 @@
         ],
         "title": "S3TechnicalAssetConfiguration"
       },
+      "SchemaObjectRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "logicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logicaltype"
+          },
+          "physicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physicaltype"
+          },
+          "physicalName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physicalname"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaPropertyRequest"
+            },
+            "type": "array",
+            "title": "Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SchemaObjectRequest"
+      },
+      "SchemaObjectResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "logical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logical Type"
+          },
+          "physical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Type"
+          },
+          "physical_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaPropertyResponse"
+            },
+            "type": "array",
+            "title": "Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "position"
+        ],
+        "title": "SchemaObjectResponse"
+      },
+      "SchemaPropertyRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "businessName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Businessname"
+          },
+          "logicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logicaltype"
+          },
+          "physicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physicaltype"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "examples": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Examples"
+          },
+          "primaryKey": {
+            "type": "boolean",
+            "title": "Primarykey",
+            "default": false
+          },
+          "primaryKeyPosition": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primarykeyposition"
+          },
+          "unique": {
+            "type": "boolean",
+            "title": "Unique",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": false
+          },
+          "partitioned": {
+            "type": "boolean",
+            "title": "Partitioned",
+            "default": false
+          },
+          "partitionKeyPosition": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partitionkeyposition"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaPropertyRequest"
+            },
+            "type": "array",
+            "title": "Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SchemaPropertyRequest"
+      },
+      "SchemaPropertyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "business_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Name"
+          },
+          "logical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logical Type"
+          },
+          "physical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Type"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "examples": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Examples"
+          },
+          "primary_key": {
+            "type": "boolean",
+            "title": "Primary Key",
+            "default": false
+          },
+          "primary_key_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Key Position"
+          },
+          "unique": {
+            "type": "boolean",
+            "title": "Unique",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": false
+          },
+          "partitioned": {
+            "type": "boolean",
+            "title": "Partitioned",
+            "default": false
+          },
+          "partition_key_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partition Key Position"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaPropertyResponse"
+            },
+            "type": "array",
+            "title": "Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "position"
+        ],
+        "title": "SchemaPropertyResponse"
+      },
       "Scope": {
         "type": "string",
         "enum": [
@@ -11976,9 +13231,9 @@
               }
             ]
           },
-          "data_product_count": {
+          "abstract_data_product_count": {
             "type": "integer",
-            "title": "Data Product Count"
+            "title": "Abstract Data Product Count"
           },
           "technical_assets_count": {
             "type": "integer",
@@ -12012,7 +13267,7 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_count",
+          "abstract_data_product_count",
           "technical_assets_count",
           "data_product_name",
           "quality_status"

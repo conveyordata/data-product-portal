@@ -2,23 +2,19 @@ from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
+from pydantic import Field
+
+from app.abstract_data_product.schema_response import InputPort
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import DataProductSettingValue
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema_response import (
-    BaseDataOutputDatasetAssociationGet,
     BaseTechnicalAssetOutputPortAssociationGet,
 )
-from app.data_products.output_ports.input_ports.schema import (
-    DataProductDatasetAssociation,
-    DataProductOutputPortAssociation,
-)
-from app.data_products.output_ports.schema import Dataset, OutputPort
 from app.data_products.status import DataProductStatus
 from app.data_products.technical_assets.schema_response import (
-    BaseDataOutputGet,
     BaseTechnicalAssetGet,
 )
 from app.shared.schema import ORMModel
@@ -44,48 +40,6 @@ class TechnicalAssetLinks(BaseTechnicalAssetGet):
     output_port_links: list[BaseTechnicalAssetOutputPortAssociationGet]
 
 
-@deprecated("Use TechnicalAssetLinks instead")
-class DataOutputLinks(BaseDataOutputGet):
-    # Nested schemas
-    dataset_links: list[BaseDataOutputDatasetAssociationGet]
-
-    def convert(self) -> TechnicalAssetLinks:
-        base = self.model_dump(exclude={"dataset_links"})
-        return TechnicalAssetLinks(
-            **base, output_port_links=[dl.convert() for dl in self.dataset_links]
-        )
-
-
-@deprecated("Use InputPort instead")
-class DatasetLinks(DataProductDatasetAssociation):
-    # Nested schemas
-    dataset: Dataset
-
-    def convert(self) -> "InputPort":
-        base = self.model_dump(exclude={"dataset", "dataset_id"})
-        return InputPort(
-            **base,
-            output_port_id=self.dataset_id,
-            input_port=self.dataset.convert(),
-        )
-
-
-class InputPort(DataProductOutputPortAssociation):
-    input_port: OutputPort
-
-
-@deprecated("Use GetDataProductResponse instead")
-class DataProductGet(BaseDataProductGet):
-    about: Optional[str]
-
-    # Nested schemas
-    dataset_links: list[DatasetLinks]
-    data_outputs: list[DataOutputLinks]
-    datasets: list[Dataset]
-    rolled_up_tags: set[Tag]
-    data_product_settings: list[DataProductSettingValue]
-
-
 class GetDataProductResponse(BaseDataProductGet):
     about: Optional[str]
 
@@ -104,23 +58,8 @@ class GetDataProductRolledUpTagsResponse(ORMModel):
 
 class GetDataProductsResponseItem(BaseDataProductGet):
     user_count: int
-    output_port_count: int
-    technical_asset_count: int
-
-
-@deprecated("Use GetDataProductsResponseItem instead")
-class DataProductsGet(BaseDataProductGet):
-    user_count: int
-    dataset_count: int
-    data_outputs_count: int
-
-    def convert(self) -> GetDataProductsResponseItem:
-        base = self.model_dump(exclude={"dataset_count", "data_outputs_count"})
-        return GetDataProductsResponseItem(
-            **base,
-            output_port_count=self.dataset_count,
-            technical_asset_count=self.data_outputs_count,
-        )
+    input_port_count: int
+    technical_asset_count: int = Field(validation_alias="data_outputs_count")
 
 
 @deprecated("Use LinkInputPortsToDataProductPost instead")
@@ -129,6 +68,10 @@ class LinkDatasetsToDataProductPost(ORMModel):
 
 
 class LinkInputPortsToDataProductPost(ORMModel):
+    input_port_links: list[UUID]
+
+
+class RequestInputPortsForDataProductResponse(ORMModel):
     input_port_links: list[UUID]
 
 

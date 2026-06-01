@@ -1,5 +1,5 @@
 import Icon, { EditOutlined, LeftOutlined, ProductOutlined, RightOutlined } from '@ant-design/icons';
-import { Flex, Space, Typography } from 'antd';
+import { Flex, Space, Splitter, Typography } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -94,65 +94,55 @@ export function DataProduct() {
     }
 
     return (
-        <Flex className={clsx(styles.dataProductContainer, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
-            <Flex vertical className={styles.content}>
-                <Flex justify={'space-between'}>
-                    <Space className={styles.header}>
-                        <Icon
-                            component={dataProductTypeIcon}
-                            className={clsx([styles.defaultIcon, styles.iconBorder])}
-                        />
-                        <Typography.Title level={3} ellipsis={{ tooltip: dataProduct?.name, rows: 2 }}>
-                            {dataProduct?.name}
-                        </Typography.Title>
-                    </Space>
-                    <Space className={styles.editIcon}>
-                        {canEdit && (
-                            <CircleIconButton
-                                icon={<EditOutlined />}
-                                tooltip={t('Edit Data Product')}
-                                onClick={navigateToEditPage}
+        <Splitter className={styles.invisibleSplitter}>
+            <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false} className={styles.container}>
+                <Flex vertical gap={'middle'} className={styles.mainPanel}>
+                    <Flex justify={'space-between'}>
+                        <Flex gap={'middle'} align={'center'} justify={'center'}>
+                            <Icon
+                                component={dataProductTypeIcon}
+                                className={clsx([styles.defaultIcon, styles.iconBorder])}
                             />
-                        )}
-                        <CircleIconButton
-                            icon={sidebarCollapsed ? <LeftOutlined /> : <RightOutlined />}
-                            tooltip={sidebarCollapsed ? t('Show sidebar') : t('Hide sidebar')}
-                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        />
-                    </Space>
-                </Flex>
-                {/* Main content */}
-                <Flex className={styles.mainContent}>
-                    {/* Data Product description */}
-                    <Flex vertical className={styles.overview}>
-                        <DataProductDescription
-                            lifecycle={dataProduct.lifecycle}
-                            type={dataProduct.type.name}
-                            description={dataProduct.description}
-                            domain={dataProduct.domain.name}
-                            namespace={dataProduct.namespace}
-                            tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
-                        />
-                        {/*  Tabs  */}
-                        <DataProductTabs dataProductId={dataProduct.id} />
+                            <Typography.Title
+                                level={3}
+                                ellipsis={{ tooltip: dataProduct?.name, rows: 2 }}
+                                style={{ margin: 0 }}
+                            >
+                                {dataProduct?.name}
+                            </Typography.Title>
+                        </Flex>
+                        <Space>
+                            {canEdit && (
+                                <CircleIconButton
+                                    icon={<EditOutlined />}
+                                    tooltip={t('Edit Data Product')}
+                                    onClick={navigateToEditPage}
+                                />
+                            )}
+                            <CircleIconButton
+                                icon={sidebarCollapsed ? <LeftOutlined /> : <RightOutlined />}
+                                tooltip={sidebarCollapsed ? t('Show sidebar') : t('Hide sidebar')}
+                                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            />
+                        </Space>
                     </Flex>
+                    <DataProductDescription
+                        lifecycle={dataProduct.lifecycle}
+                        type={dataProduct.type.name}
+                        description={dataProduct.description}
+                        domain={dataProduct.domain.name}
+                        namespace={dataProduct.namespace}
+                        tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
+                    />
+                    <DataProductTabs dataProductId={dataProduct.id} />
                 </Flex>
-            </Flex>
-
-            {/* Sidebar */}
-            <div
-                data-testid="product-studio-sidebar"
-                className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}
-            >
-                {!sidebarCollapsed ? (
-                    <Flex vertical>
-                        <DataProductActions dataProductId={dataProductId} />
-                        <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
-                    </Flex>
-                ) : (
-                    <div style={{ background: 'red' }} /> //Div is needed to make transition work
-                )}
-            </div>
-        </Flex>
+            </Splitter.Panel>
+            <Splitter.Panel size={sidebarCollapsed ? '0%' : '20%'} resizable={false}>
+                <Flex vertical className={styles.sidebarPanel}>
+                    <DataProductActions dataProductId={dataProductId} />
+                    <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
+                </Flex>
+            </Splitter.Panel>
+        </Splitter>
     );
 }

@@ -4,10 +4,13 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from fastembed import TextEmbedding
-from sqlalchemy import asc, func, select
-from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
 from sqlalchemy.sql.base import ExecutableOption
 
+from app.abstract_data_product.graph_utils import (
+    get_graph_data_from_abstract_data_product,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
@@ -28,10 +31,10 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation,
+    InputPort,
 )
 from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
+    InputPort as DataProductDatasetAssociationModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_output_port_exists
@@ -43,10 +46,6 @@ from app.data_products.output_ports.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.data_products.output_ports.schema_response import (
-    DatasetGet,
-    DatasetsGet,
-)
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
@@ -54,7 +53,6 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.resource_names.service import ResourceNameValidityType
-from app.search_output_ports.schema_response import SearchDatasets
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -62,7 +60,9 @@ from app.users.schema import User
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
     return [
         selectinload(DatasetModel.data_product_links)
-        .selectinload(DataProductDatasetAssociationModel.data_product)
+        .selectinload(
+            DataProductDatasetAssociationModel.consuming_abstract_data_product
+        )
         .raiseload("*"),
         selectinload(DatasetModel.data_output_links)
         .selectinload(DataOutputDatasetAssociationModel.data_output)
@@ -81,8 +81,12 @@ class OutputPortService:
         self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
     def get_dataset(
-        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
-    ) -> DatasetGet:
+        self, id: UUID, data_product_id: Optional[UUID] = None
+    ) -> DatasetModel:
+        """DB fetch with all required eager loads, lifecycle defaulting, and tag roll-up.
+
+        Does not enforce any visibility policy — callers decide whether to gate on user.
+        """
         query = select(DatasetModel).where(DatasetModel.id == id)
 
         if data_product_id is not None:
@@ -90,22 +94,13 @@ class OutputPortService:
 
         dataset = self.db.scalar(
             query.options(
-                selectinload(DatasetModel.data_product_links),
                 selectinload(DatasetModel.data_output_links),
                 selectinload(DatasetModel.data_product_settings),
             )
         )
 
         if not dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
-            )
-
-        if not self.is_visible_to_user(dataset, user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private dataset",
-            )
+            raise self.not_found_exception(id)
 
         rolled_up_tags = set()
         for output_link in dataset.data_output_links:
@@ -123,13 +118,31 @@ class OutputPortService:
         dataset.domain = dataset.data_product.domain
         return dataset
 
-    def search_datasets(
+    def get_visible_dataset(
+        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
+    ) -> DatasetModel:
+        """Fetch a dataset, raising 403 if the user cannot see it as a consumer.
+
+        Use this for endpoints where dataset visibility must be enforced.
+
+        For system/internal callers already authorised at the endpoint level, use
+        get_dataset() instead.
+        """
+        dataset = self.get_dataset(id, data_product_id)
+        if not self.is_visible_to_user(dataset, user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private dataset",
+            )
+        return dataset
+
+    def search_output_ports(
         self,
         query: Optional[str],
         limit: int,
         user: UserModel,
         current_user_assigned: bool,
-    ) -> Sequence[SearchDatasets]:
+    ) -> Sequence[DatasetModel]:
         """An attempt was made to use the elbow method to determine a cut-off for returned results.
         The results of this method were quite poor, hence the search currently works as a sorting operation only,
         no filtering is applied other than the limit.
@@ -161,6 +174,10 @@ class OutputPortService:
         )
         if current_user_assigned:
             stmt = stmt.where(DatasetModel.assignments.any(user_id=user.id))
+        stmt = stmt.options(
+            undefer(DatasetModel.abstract_data_product_count),
+            undefer(DatasetModel.technical_assets_count),
+        )
         results = self.db.scalars(stmt).unique().all()
 
         visible_candidates: list[DatasetModel] = []
@@ -247,32 +264,6 @@ class OutputPortService:
                 self.db.flush()
         self.db.commit()
 
-    def get_datasets(
-        self, user: UserModel, check_user_assigned: bool = False
-    ) -> Sequence[DatasetsGet]:
-        load_options = get_dataset_load_options()
-        default_lifecycle = self.db.scalar(
-            select(DataProductLifeCycleModel).filter(
-                DataProductLifeCycleModel.is_default
-            )
-        )
-        query = (
-            select(DatasetModel).options(*load_options).order_by(asc(DatasetModel.name))
-        )
-        if check_user_assigned:
-            query = query.filter(DatasetModel.assignments.any(user_id=user.id))
-        datasets = [
-            dataset
-            for dataset in self.db.scalars(query).unique().all()
-            if self.is_visible_to_user(dataset, user)
-        ]
-
-        for dataset in datasets:
-            if not dataset.lifecycle:
-                dataset.lifecycle = default_lifecycle
-            dataset.domain = dataset.data_product.domain
-        return datasets
-
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
         for tag_id in tag_ids:
@@ -311,9 +302,7 @@ class OutputPortService:
             id, self.db, data_product_id=data_product_id
         )
         if not dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
-            )
+            raise self.not_found_exception(id)
 
         result = copy.deepcopy(dataset)
         self.db.delete(dataset)
@@ -388,7 +377,7 @@ class OutputPortService:
         return current_dataset
 
     def get_graph_data(self, id: UUID, data_product_id: UUID, level: int) -> Graph:
-        dataset = self.db.scalar(
+        dataset: DatasetModel | None = self.db.scalar(
             select(DatasetModel)
             .where(DatasetModel.id == id)
             .where(DatasetModel.data_product_id == data_product_id)
@@ -397,6 +386,8 @@ class OutputPortService:
                 selectinload(DatasetModel.data_output_links),
             )
         )
+        if not dataset:
+            raise self.not_found_exception(id)
         nodes = [
             Node(
                 id=id,
@@ -406,26 +397,21 @@ class OutputPortService:
                     name=dataset.name,
                     link_to_id=dataset.data_product_id,
                 ),
-                type=NodeType.datasetNode,
+                type=NodeType.outputPortNode,
             )
         ]
         edges = []
         for downstream_products in dataset.data_product_links:
             nodes.append(
-                Node(
-                    id=downstream_products.data_product_id,
-                    data=NodeData(
-                        id=downstream_products.data_product_id,
-                        name=downstream_products.data_product.name,
-                        icon_key=downstream_products.data_product.type.icon_key,
-                    ),
-                    type=NodeType.dataProductNode,
+                get_graph_data_from_abstract_data_product(
+                    str(downstream_products.consuming_abstract_data_product_id),
+                    downstream_products.consuming_abstract_data_product,
                 )
             )
             edges.append(
                 Edge(
                     id=f"{downstream_products.id}-{dataset.id}",
-                    target=downstream_products.data_product_id,
+                    target=downstream_products.consuming_abstract_data_product_id,
                     source=dataset.id,
                     animated=downstream_products.status == DecisionStatus.APPROVED,
                 )
@@ -442,7 +428,7 @@ class OutputPortService:
                         name=data_output.name,
                         link_to_id=data_output.owner_id,
                     ),
-                    type=NodeType.dataOutputNode,
+                    type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
@@ -498,7 +484,7 @@ class OutputPortService:
 
         return Graph(nodes=set(nodes), edges=set(edges))
 
-    def is_visible_to_user(self, dataset: DatasetModel, user: User) -> bool:
+    def is_visible_to_user(self, dataset: DatasetModel, user: UserModel) -> bool:
         if (
             dataset.access_type != OutputPortAccessType.PRIVATE
             or Authorization().has_admin_role(user_id=str(user.id))
@@ -514,7 +500,7 @@ class OutputPortService:
         )
 
         consuming_data_products = {
-            link.data_product
+            link.consuming_abstract_data_product
             for link in dataset.data_product_links
             if link.status == DecisionStatus.APPROVED
         }
@@ -546,20 +532,23 @@ class OutputPortService:
 
     def get_consuming_data_products(
         self, output_port_id: UUID, data_product_id: UUID
-    ) -> Sequence[DataProductDatasetAssociation]:
+    ) -> Sequence[InputPort]:
         dataset = self.db.scalar(
             select(DatasetModel)
             .where(DatasetModel.id == output_port_id)
             .where(DatasetModel.data_product_id == data_product_id)
             .options(
                 selectinload(DatasetModel.data_product_links).selectinload(
-                    DataProductDatasetAssociationModel.data_product
+                    DataProductDatasetAssociationModel.consuming_abstract_data_product
                 )
             )
         )
         if not dataset:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Output port {output_port_id} not found",
-            )
+            raise self.not_found_exception(output_port_id)
         return dataset.data_product_links
+
+    def not_found_exception(self, output_port_id: UUID) -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Output port {output_port_id} not found",
+        )

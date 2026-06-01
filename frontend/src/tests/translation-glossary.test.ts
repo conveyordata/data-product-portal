@@ -21,7 +21,11 @@ const GLOSSARY_TERMS: GlossaryRule[] = [
     },
     {
         expected: 'Technical Asset',
-        pattern: /techincal asset/i,
+        pattern: /technical asset/i,
+    },
+    {
+        expected: 'Exploration',
+        pattern: /exploration/i,
     },
 ];
 
@@ -31,7 +35,10 @@ describe('Glossary Enforcement', () => {
             Object.entries(translations).forEach(([key, text]) => {
                 const matches = [...(text.match(pattern) ?? []), ...(key.match(pattern) ?? [])];
                 matches.forEach((match) => {
-                    expect(match).toEqual(expected);
+                    expect(
+                        match,
+                        `Key "${key}" contains incorrect casing: found "${match}", expected "${expected}"`,
+                    ).toEqual(expected);
                 });
             });
         });

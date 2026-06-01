@@ -49,7 +49,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
     const handleFinish = async (lifeCycle: DataProductLifeCycle) => {
         try {
             if (mode === 'create') {
-                await createDataProductLifecycle(lifeCycle);
+                await createDataProductLifecycle(lifeCycle).unwrap();
             } else {
                 await editDataProductLifecycle({
                     id: lifeCycle.id,
@@ -59,7 +59,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                         color: lifeCycle.color,
                         is_default: lifeCycle.is_default,
                     },
-                });
+                }).unwrap();
             }
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
             form.resetFields();

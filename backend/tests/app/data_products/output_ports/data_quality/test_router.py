@@ -1,7 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
 from app.authorization.roles.schema import Scope
-from app.authorization.roles.service import RoleService
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.data_quality.schema_request import (
@@ -23,7 +22,6 @@ ENDPOINT = "/api/v2/data_products"
 
 
 def _assign_update_role(session, dataset):
-    RoleService(db=session).initialize_prototype_roles()
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(
         scope=Scope.DATASET,
@@ -63,9 +61,8 @@ class TestDataQualityRouter:
         assert body["overall_status"] == payload["overall_status"]
         assert body["details_url"] == payload["details_url"]
 
-    def test_post_data_quality_no_permissions(self, client, session):
+    def test_post_data_quality_no_permissions(self, client):
         dataset = DatasetFactory()
-        RoleService(db=session).initialize_prototype_roles()
 
         payload = {
             "overall_status": "success",

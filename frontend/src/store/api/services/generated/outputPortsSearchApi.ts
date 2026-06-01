@@ -53,7 +53,7 @@ export type SearchOutputPortsResponseItem = {
   tags: Tag[];
   domain: Domain;
   lifecycle: DataProductLifeCycle | null;
-  data_product_count: number;
+  abstract_data_product_count: number;
   technical_assets_count: number;
   data_product_name: string;
   quality_status: DataQualityStatus | null;

@@ -42,11 +42,11 @@ export function DomainTable() {
 
     const handleRemove = async (domain: GetDomainsItem) => {
         try {
-            if (domain.data_product_count > 0) {
+            if (domain.abstract_data_product_count > 0) {
                 setMigrateFrom(domain);
                 handleOpenMigrate();
             } else {
-                await onRemoveDomain(domain.id);
+                await onRemoveDomain(domain.id).unwrap();
                 dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
             }
         } catch (_error) {

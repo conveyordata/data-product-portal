@@ -40,7 +40,6 @@ export function PeoplePage() {
             {
                 title: (
                     <>
-                        {' '}
                         <TeamOutlined /> {t('People')}
                     </>
                 ),

@@ -1,7 +1,7 @@
 import { Badge, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -27,21 +27,21 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { output, status }) => {
+            render: (_, { output_port, status }) => {
                 const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
-                        name={output.name}
-                        accessType={output.access_type}
+                        name={output_port.name}
+                        accessType={output_port.access_type}
                         isApproved={isDatasetRequestApproved}
                     />
                 );
                 return (
                     <TableCellAvatar
-                        popover={{ title: popoverTitle, content: output.description }}
-                        linkTo={createMarketplaceOutputPortPath(output.id, output.data_product_id)}
-                        icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                        title={<OutputPortTitle name={output.name} accessType={output.access_type} />}
+                        popover={{ title: popoverTitle, content: output_port.description }}
+                        linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
+                        icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
+                        title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
                         subtitle={
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
@@ -57,10 +57,10 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { output, output_port_id, status }) => {
+            render: (_, { output_port, output_port_id, status }) => {
                 return (
                     <DatasetActionButton
-                        outputPort={output}
+                        outputPort={output_port}
                         technicalAssetId={output_port_id}
                         dataProductId={dataProductId}
                         status={status}

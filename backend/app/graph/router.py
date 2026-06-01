@@ -11,10 +11,10 @@ router = APIRouter(tags=["Graph"])
 @router.get("/v2/graph")
 def get_graph_data(
     db: Session = Depends(get_db_session),
-    data_product_nodes_enabled: bool = True,
-    output_port_nodes_enabled: bool = True,
+    output_port_nodes_enabled: bool = False,
+    exploration_nodes_enabled: bool = False,
 ) -> Graph:
     return GraphService(db).get_graph_data(
-        data_product_nodes_enabled=data_product_nodes_enabled,
-        dataset_nodes_enabled=output_port_nodes_enabled,
+        exploration_nodes_enabled=exploration_nodes_enabled,
+        output_port_nodes_enabled=output_port_nodes_enabled,
     )

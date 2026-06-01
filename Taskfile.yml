@@ -37,6 +37,12 @@ tasks:
       - cd backend && poetry run python -m app.open_api_export
       - mv backend/openapi.json docs/static/openapi.json
 
+  update:event-docs:
+    desc: "Update the event documentation with new version"
+    cmds:
+      - cd backend && poetry run python -m app.webhook_doc_export
+      - mv backend/webhook-events.md docs/docs/developer-guide/webhook-events.md
+
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
@@ -118,3 +124,9 @@ tasks:
     cmds:
       - npm install
       - npm test run
+
+  test:helm:
+    desc: "Validate the Helm chart (lint + dry-run template rendering)"
+    cmds:
+      - helm lint helm/
+      - helm template data-product-portal helm/ > /dev/null

@@ -113,7 +113,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                         size="small"
                         dataSource={technicalAsset.output_port_links}
                         renderItem={(link) => (
-                            <List.Item style={{ padding: '0 0', border: 'none' }}>• {link.output.name}</List.Item>
+                            <List.Item style={{ padding: '0 0', border: 'none' }}>• {link.output_port.name}</List.Item>
                         )}
                     />
                 </Flex>
@@ -216,7 +216,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                                                 status={getDecisionStatusBadgeStatus(link.status)}
                                                                 size="small"
                                                             />
-                                                            <Typography.Text>{link.output.name}</Typography.Text>
+                                                            <Typography.Text>{link.output_port.name}</Typography.Text>
                                                         </Flex>
                                                         <Button
                                                             type="text"
@@ -224,7 +224,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                                             danger
                                                             onClick={() =>
                                                                 handleRemoveDatasetLink(
-                                                                    link.output.id,
+                                                                    link.output_port_id,
                                                                     link.technical_asset_id,
                                                                 )
                                                             }

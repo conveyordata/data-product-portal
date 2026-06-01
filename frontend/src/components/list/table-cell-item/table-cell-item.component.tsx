@@ -3,8 +3,9 @@ import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/
 import { Flex, Popover, Typography, type TypographyProps } from 'antd';
 import type { TooltipPlacement } from 'antd/es/tooltip';
 import { type ComponentType, type ForwardRefExoticComponent, type ReactNode, type SVGProps, useState } from 'react';
-
 import styles from './table-cell-item.module.scss';
+
+const { Text } = Typography;
 
 type Props = {
     icon?: ReactNode;
@@ -14,7 +15,7 @@ type Props = {
     children?: ReactNode;
     text?: string;
     textComponent?: ReactNode;
-    textProps?: TypographyProps['Text'];
+    textProps?: TypographyProps;
     tooltip?: {
         title?: ReactNode;
         content?: ReactNode;
@@ -36,10 +37,10 @@ export function TableCellItem({
 
     const tableCellItem = (
         <Flex className={styles.tableCellWrapper} {...otherProps}>
-            {icon && icon}
+            {icon}
             {reactSVGComponent && <Icon component={reactSVGComponent} className={styles.customIcon} />}
             {text && (
-                <Typography.Text
+                <Text
                     {...textProps}
                     ellipsis={{
                         onEllipsis: () => {
@@ -51,7 +52,7 @@ export function TableCellItem({
                     className={styles.text}
                 >
                     {text}
-                </Typography.Text>
+                </Text>
             )}
             {textComponent && textComponent}
             {children}

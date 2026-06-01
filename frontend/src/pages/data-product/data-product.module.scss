@@ -1,58 +1,18 @@
 @use '@/styles/globals';
 
-.data-product-container {
+.sidebarPanel {
+    padding-left: 24px;
+}
+
+.main-panel {
     @extend .container;
-    gap: globals.$column-gap-xl;
+    padding-top: 5px;
+    padding-right: 5px;
 }
 
-.sidebarCollapsed {
-  gap: 0;
-}
-
-.edit-icon {
-    align-items: flex-start;
-    justify-content: flex-start;
-}
-
-.header {
-    display: flex;
-    align-items: center;
-    margin-bottom: globals.$spacing-l;
-    gap: globals.$column-gap-regular;
-
-    h3 {
-        margin: 0;
-        text-wrap: avoid;
+.invisibleSplitter {
+    // This targets the internal Ant Design splitter bar and removes it
+    :global(.ant-splitter-bar) {
+        display: none;
     }
-}
-
-.content {
-    @extend .container;
-    .overview {
-        flex: 1;
-        gap: globals.$column-gap-regular;
-        justify-content: flex-start;
-        align-items: flex-start;
-    }
-
-    transition: all 0.3s ease;
-}
-
-.sidebar {
-    flex: 1;
-    min-width: globals.$min-sidebar-width;
-    justify-content: flex-start;
-    align-items: flex-start;
-    transition: all 0.3s ease;
-
-    &.sidebarCollapsed {
-        min-width: 0;
-        width: 0;
-        overflow: visible;
-    }
-}
-
-.main-content {
-    flex: 1;
-    gap: globals.$column-gap-xl;
 }

@@ -1,9 +1,10 @@
 from copy import deepcopy
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.authorization.roles.schema import Prototype, Scope
-from app.authorization.roles.service import RoleService
+from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
@@ -12,16 +13,18 @@ from app.events.service import EventService
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests import test_session
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
+    ExplorationFactory,
     GlobalRoleAssignmentFactory,
+    InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     UserFactory,
@@ -49,11 +52,23 @@ def dataset_payload():
     }
 
 
-class TestDatasetsRouter:
+@pytest.fixture
+def output_port_event_payload():
+    user = UserFactory()
+    return {
+        "name": "Test Output Port",
+        "description": "Test Description",
+        "namespace": "test-op-event-ns",
+        "tag_ids": [],
+        "owners": [str(user.id)],
+        "access_type": "restricted",
+    }
+
+
+class TestOutputPortRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_dataset(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_create_dataset(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -66,11 +81,10 @@ class TestDatasetsRouter:
         created_dataset = self.create_output_port(
             client, dataset_payload["data_product_id"], dataset_payload
         )
-        assert created_dataset.status_code == 200
+        assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
 
     def test_create_output_port(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -87,8 +101,9 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-    def test_create_output_port_type_public(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_create_output_port_type_public(
+        self, session, dataset_payload, client
+    ) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -110,23 +125,7 @@ class TestDatasetsRouter:
         )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
-    def test_create_dataset_no_owner_role(self, dataset_payload, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-        )
-        created_dataset = self.create_output_port(
-            client, dataset_payload["data_product_id"], dataset_payload
-        )
-        assert created_dataset.status_code == 400
-
     def test_create_dataset_no_owners(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -144,7 +143,6 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 422
 
     def test_create_dataset_duplicate_namespace(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -164,7 +162,6 @@ class TestDatasetsRouter:
     def test_create_dataset_invalid_characters_namespace(
         self, session, dataset_payload, client
     ):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -185,7 +182,6 @@ class TestDatasetsRouter:
     def test_create_dataset_invalid_length_namespace(
         self, session, dataset_payload, client
     ):
-        RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -227,7 +223,7 @@ class TestDatasetsRouter:
 
         assert updated_dataset.status_code == 403
 
-    def test_update_dataset_type_public_renamed(self, session, client):
+    def test_update_dataset_type_public_renamed(self, session, client) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -468,7 +464,7 @@ class TestDatasetsRouter:
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.json()["status"] == "pending"
 
-    def test_get_graph_data(self, client):
+    def test_get_output_port_graph_data(self, client):
         dp = DataProductFactory()
         ds = DatasetFactory(data_product=dp)
         response = client.get(f"{ENDPOINT.format(dp.id)}/{ds.id}/graph")
@@ -484,7 +480,7 @@ class TestDatasetsRouter:
         ]
         nodes = response.json()["nodes"]
         dp_node = [node for node in nodes if node["type"] == "dataProductNode"][0]
-        ds_node = [node for node in nodes if node["type"] == "datasetNode"][0]
+        ds_node = [node for node in nodes if node["type"] == "outputPortNode"][0]
         assert dp_node == {
             "data": {
                 "id": f"{str(dp.id)}",
@@ -511,8 +507,20 @@ class TestDatasetsRouter:
             },
             "id": str(ds.id),
             "isMain": True,
-            "type": "datasetNode",
+            "type": "outputPortNode",
         }
+
+    def test_get_output_port_graph_data_exploration(self, client):
+        ds = DatasetFactory()
+        exp = ExplorationFactory()
+        InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exp,
+        )
+        response = client.get(
+            f"{ENDPOINT.format(ds.data_product.id)}/{ds.id}/graph", params={"level": 3}
+        )
+        assert response.status_code == 200, response.text
 
     def test_dataset_set_custom_setting_no_role(self, client):
         ds = DatasetFactory()
@@ -563,7 +571,7 @@ class TestDatasetsRouter:
 
     def test_get_private_dataset_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        role = RoleFactory.dataset_owner()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.get_output_port(client, ds.id, ds.data_product.id)
@@ -578,7 +586,7 @@ class TestDatasetsRouter:
     def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         dp = DataProductFactory()
-        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
         DataProductRoleAssignmentFactory(
@@ -586,7 +594,7 @@ class TestDatasetsRouter:
         )
 
         response = self.get_output_port(client, ds.id, ds.data_product.id)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
     def test_get_private_datasets_not_allowed(self, client):
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
@@ -596,7 +604,7 @@ class TestDatasetsRouter:
 
     def test_get_private_datasets_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
+        role = RoleFactory.data_product_owner()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = client.get(ENDPOINT.format(ds.data_product.id))
@@ -618,7 +626,7 @@ class TestDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=dp.id
         )
-        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
 
         response = client.get(ENDPOINT.format(ds.data_product_id))
         assert response.status_code == 200
@@ -679,10 +687,7 @@ class TestDatasetsRouter:
 
         assert response.status_code == 400
 
-    def test_history_event_created_on_create_dataset(
-        self, session, dataset_payload, client
-    ):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_history_event_created_on_create_dataset(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -705,8 +710,7 @@ class TestDatasetsRouter:
         )
         assert len(history.json()["events"]) == 2
 
-    def test_get_output_port_history(self, session, dataset_payload, client):
-        RoleService(db=session).initialize_prototype_roles()
+    def test_get_output_port_history(self, dataset_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -869,3 +873,201 @@ class TestDatasetsRouter:
         return client.get(
             f"{ENDPOINT.format(data_product_id)}/{output_port_id}/history"
         )
+
+    @staticmethod
+    def _op_endpoint(dp_id):
+        return ENDPOINT.format(dp_id)
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_created_fires_event(self, mock_webhook, client, output_port_event_payload):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+
+        with webhook_v2_config():
+            response = client.post(
+                self._op_endpoint(dp.id), json=output_port_event_payload
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.created"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_updated_fires_event(self, mock_webhook, client, output_port_event_payload):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._op_endpoint(dp.id)}/{op.id}", json=output_port_event_payload
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.updated"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_deleted_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.delete(f"{self._op_endpoint(dp.id)}/{op.id}")
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.deleted"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_about_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._op_endpoint(dp.id)}/{op.id}/about", json={"about": "new text"}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.about_updated"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_status_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{self._op_endpoint(dp.id)}/{op.id}/status", json={"status": "active"}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.status_updated"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_setting_changed_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        setting = DataProductSettingFactory(scope="dataset")
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(dp.id)}/{op.id}/settings/{setting.id}",
+                params={"value": "test-value"},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.setting_changed"
+        assert "data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_approved_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        consumer_dp = DataProductFactory()
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_dp,
+            dataset=op,
+            status=DecisionStatus.PENDING,
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(dp.id)}/{op.id}/input_ports/approve",
+                json={"consuming_data_product_id": str(consumer_dp.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.link_approved"
+        assert "abstract_data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_link_denied_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        op = DatasetFactory(data_product=dp)
+        consumer_dp = DataProductFactory()
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_dp,
+            dataset=op,
+            status=DecisionStatus.PENDING,
+        )
+
+        with webhook_v2_config():
+            response = client.post(
+                f"{self._op_endpoint(dp.id)}/{op.id}/input_ports/deny",
+                json={"consuming_data_product_id": str(consumer_dp.id)},
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "output_port.link_denied"
+        assert "abstract_data_product" in data
+        assert "output_port" in data
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        ("method", "path", "body"),
+        [
+            (
+                "post",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/output_ports",
+                {},
+            ),
+            (
+                "put",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/output_ports/00000000-0000-0000-0000-000000000000",
+                {},
+            ),
+            (
+                "delete",
+                "/api/v2/data_products/00000000-0000-0000-0000-000000000000/output_ports/00000000-0000-0000-0000-000000000000",
+                None,
+            ),
+        ],
+    )
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_no_event_fired_on_failure(self, mock_webhook, client, method, path, body):
+        mock_webhook.return_value = AsyncMock()
+        with webhook_v2_config():
+            kwargs = {"json": body} if body is not None else {}
+            getattr(client, method)(path, **kwargs)
+        mock_webhook.assert_not_awaited()

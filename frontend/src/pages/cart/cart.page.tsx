@@ -1,67 +1,57 @@
-import {
-    BellOutlined,
-    CheckCircleOutlined,
-    MessageOutlined,
-    PlusOutlined,
-    ShopOutlined,
-    ShoppingCartOutlined,
-} from '@ant-design/icons';
-import { usePostHog } from '@posthog/react';
-import {
-    Alert,
-    Button,
-    Card,
-    Col,
-    Divider,
-    Flex,
-    Form,
-    type FormProps,
-    Row,
-    Select,
-    Skeleton,
-    Typography,
-    theme,
-} from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import { parseAsString, useQueryState } from 'nuqs';
-import { useEffect, useMemo } from 'react';
+import { PlusOutlined, ShopOutlined, ShoppingCartOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Button, Col, Empty, Flex, Row, Typography } from 'antd';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
+import ExplorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
-import { PosthogEvents } from '@/constants/posthog.constants.ts';
+import { CardSelection } from '@/pages/cart/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
+import { ExistingDataProductForm } from '@/pages/cart/components/existing-data-product-form.tsx';
+import { ExistingExplorationForm } from '@/pages/cart/components/existing-exploration-form.tsx';
+import { NewDataProductForm } from '@/pages/cart/components/new-data-product-form.tsx';
+import { NewExplorationForm } from '@/pages/cart/components/new-exploration-form.tsx';
 import { useAppDispatch } from '@/store';
-import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
-import {
-    useGetDataProductInputPortsQuery,
-    useGetDataProductQuery,
-    useGetDataProductsQuery,
-    useLinkInputPortsToDataProductMutation,
-} from '@/store/api/services/generated/dataProductsApi.ts';
-import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
+import {
+    DataProductChoiceOptions,
+    ExistingOrNew,
+    selectCartDataProductTypeChoice,
+    selectCartDatasetIds,
+    selectCartExistingOrNewChoice,
+    setCartExplorationChoices,
+} from '@/store/features/cart/cart-slice.ts';
+import { ApplicationPaths } from '@/types/navigation.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
-const cartFormDataStorageKey = 'cart-form-data';
-
-function Cart() {
+function ExplorationsCart() {
     const { t } = useTranslation();
-    const { token } = theme.useToken();
-    const posthog = usePostHog();
-    const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
+    const dataProductTypeChoice = useSelector(selectCartDataProductTypeChoice);
+    const existingOrNewChoice = useSelector(selectCartExistingOrNewChoice);
+
+    const setDataProductTypeChoice = useCallback(
+        (choice: DataProductChoiceOptions | null) => {
+            dispatch(setCartExplorationChoices({ dataProductTypeChoice: choice, existingOrNewChoice: null }));
+        },
+        [dispatch],
+    );
+    const setExistingOrNewChoice = useCallback(
+        (choice: ExistingOrNew | null) => {
+            dispatch(setCartExplorationChoices({ dataProductTypeChoice, existingOrNewChoice: choice }));
+        },
+        [dispatch, dataProductTypeChoice],
+    );
+    const [selectedDataProductId, setSelectedDataProductId] = useState<string | undefined>(undefined);
+    const [selectedExplorationId, setSelectedExplorationId] = useState<string | undefined>(undefined);
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
         setBreadcrumbs([
             {
                 title: (
                     <>
-                        {' '}
                         <ShopOutlined /> {t('Marketplace')}
                     </>
                 ),
@@ -79,8 +69,6 @@ function Cart() {
 
     const { data: { output_ports: outputPorts = [] } = {}, isFetching: fetchingOutputPorts } =
         useSearchOutputPortsQuery({ limit: 1000 });
-    const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
-        useLinkInputPortsToDataProductMutation();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
     const cartOutputPorts = useMemo(() => {
         if (cartDatasetIds.length === 0) {
@@ -88,275 +76,126 @@ function Cart() {
         }
         return outputPorts?.filter((dataset) => cartDatasetIds.includes(dataset.id));
     }, [outputPorts, cartDatasetIds]);
-
-    const currentUser = useSelector(selectCurrentUser);
-    const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
-        useGetDataProductsQuery(currentUser?.id, {
-            skip: currentUser === null || !currentUser?.id,
-        });
-    const [form] = Form.useForm<CartFormData>();
-
-    type CartFormData = {
-        dataProductId?: string;
-        justification?: string;
-    };
-    const initialValues: CartFormData | undefined = useMemo(() => {
-        let data: CartFormData = {};
-        if (isFetchingUserDataProducts) {
-            return undefined;
+    const form = useMemo(() => {
+        if (!dataProductTypeChoice || !existingOrNewChoice) {
+            return null;
         }
-        const savedData = localStorage.getItem(cartFormDataStorageKey);
-        if (savedData) {
-            data = JSON.parse(savedData) as CartFormData;
+        if (dataProductTypeChoice === DataProductChoiceOptions.data_product) {
+            if (existingOrNewChoice === ExistingOrNew.existing) {
+                return (
+                    <ExistingDataProductForm
+                        cartOutputPorts={cartOutputPorts}
+                        setSelectedDataProductId={setSelectedDataProductId}
+                    />
+                );
+            }
+            if (existingOrNewChoice === ExistingOrNew.new) {
+                return <NewDataProductForm cartOutputPorts={cartOutputPorts} />;
+            }
         }
-        if (createdProductId !== '') {
-            data.dataProductId = createdProductId;
+        if (dataProductTypeChoice === DataProductChoiceOptions.exploration) {
+            if (existingOrNewChoice === ExistingOrNew.new) {
+                return <NewExplorationForm cartOutputPorts={cartOutputPorts} />;
+            }
+            if (existingOrNewChoice === ExistingOrNew.existing) {
+                return (
+                    <ExistingExplorationForm
+                        cartOutputPorts={cartOutputPorts}
+                        setSelectedExplorationId={setSelectedExplorationId}
+                    />
+                );
+            }
         }
-        if (data.dataProductId && !userDataProducts.map((dataProduct) => dataProduct.id).includes(data.dataProductId)) {
-            data.dataProductId = undefined;
-        }
-        return data;
-    }, [createdProductId, userDataProducts, isFetchingUserDataProducts]);
-
-    const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
-        if (
-            !values.justification ||
-            !values.dataProductId ||
-            cartOutputPorts === undefined ||
-            cartOutputPorts.length === 0
-        ) {
-            return;
-        }
-        posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED, {
-            cartSize: cartOutputPorts?.length,
-        });
-        requestDatasetAccessForDataProduct({
-            id: values.dataProductId,
-            linkInputPortsToDataProduct: {
-                input_ports: cartOutputPorts?.map((dataset) => dataset.id),
-                justification: values.justification,
-            },
-        });
-    };
-    const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {
-        localStorage.setItem(cartFormDataStorageKey, JSON.stringify(values));
-    };
-    const dataProductOptions =
-        userDataProducts?.map((dataProduct) => {
-            return {
-                value: dataProduct?.id,
-                label: dataProduct?.name,
-            };
-        }) ?? [];
-    const selectedDataProductId = Form.useWatch('dataProductId', form);
-    const createNewDataProduct = () => {
-        posthog.capture(PosthogEvents.CART_CREATE_DATA_PRODUCT);
-        navigate({
-            pathname: ApplicationPaths.DataProductNew,
-            search: new URLSearchParams({ fromMarketplace: 'true' }).toString(),
-        });
-    };
-
-    const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductQuery(
-        selectedDataProductId ?? '',
-        {
-            skip: !selectedDataProductId || isFetchingUserDataProducts || userDataProducts === undefined,
-        },
-    );
-    const { data: { input_ports: inputPorts = [] } = {} } = useGetDataProductInputPortsQuery(
-        selectedDataProductId ?? '',
-        {
-            skip: !selectedDataProductId || isFetchingUserDataProducts || userDataProducts === undefined,
-        },
-    );
-    const { data: { output_ports: selectedDataProductOutputPorts = [] } = {} } = useGetDataProductOutputPortsQuery(
-        selectedDataProductId ?? '',
-        {
-            skip: !selectedDataProductId || isFetchingUserDataProducts || userDataProducts === undefined,
-        },
-    );
-    useEffect(() => {
-        if (!selectedDataProduct) {
-            return;
-        }
-        if (selectedDataProduct.id !== selectedDataProductId) {
-            refetchSelectedDataProduct();
-        }
-    });
-
-    const overlappingOutputPortIds = useMemo(() => {
-        return inputPorts
-            .filter((link) => cartDatasetIds.includes(link.output_port_id))
-            .map((link) => link.output_port_id);
-    }, [cartDatasetIds, inputPorts]);
-
-    const selectedProductOutputPortsInCart = useMemo(() => {
-        return selectedDataProductOutputPorts.filter((ds) => cartDatasetIds.includes(ds.id));
-    }, [selectedDataProductOutputPorts, cartDatasetIds]);
-
-    useEffect(() => {
-        if (requestingAccessSuccess && selectedDataProductId) {
-            dispatch(clearCart());
-            localStorage.removeItem(cartFormDataStorageKey);
-            dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
-
-            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.InputPorts));
-        }
-    }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
-
-    const submitFormIssues = useMemo(() => {
-        const submitFormIssues = [];
-        if (overlappingOutputPortIds.length > 0) {
-            submitFormIssues.push({
-                key: 'overlappingOutputPortId',
-                value: t(
-                    'There are currently {{count}} Output Ports in the cart, for which the selected Data Product already has access, or has an access request.',
-                    {
-                        count: overlappingOutputPortIds.length,
-                    },
-                ),
-            });
-        }
-        if (selectedProductOutputPortsInCart.length > 0) {
-            submitFormIssues.push({
-                key: 'selectedProductOutputPortsInCart',
-                value: t(
-                    'There are currently {{count}} Output Ports, that are part of your selected Data Product, please remove them.',
-                    {
-                        count: selectedProductOutputPortsInCart.length,
-                    },
-                ),
-            });
-        }
-
-        return submitFormIssues;
-    }, [overlappingOutputPortIds, selectedProductOutputPortsInCart, t]);
+        return null;
+    }, [dataProductTypeChoice, existingOrNewChoice, cartOutputPorts]);
+    if (cartDatasetIds?.length === 0) {
+        return (
+            <Empty
+                description={
+                    <Typography.Text>
+                        {t('Your cart is currently empty. Explore the marketplace to add items.')}
+                    </Typography.Text>
+                }
+            >
+                <Link to={ApplicationPaths.Marketplace}>
+                    <Button type="primary">{t('Marketplace')}</Button>
+                </Link>
+            </Empty>
+        );
+    }
     return (
         <Row gutter={16}>
-            <Col span={10}>
+            <Col span={16}>
+                <Flex vertical gap={'middle'}>
+                    <CardSelection
+                        selectedChoice={dataProductTypeChoice}
+                        setSelectedChoice={setDataProductTypeChoice}
+                        options={[
+                            {
+                                title: t('I want to explore this data'),
+                                description: t('I need a one-time answer or personal sandbox'),
+                                icon: <ExplorationBorderIcon />,
+                                value: DataProductChoiceOptions.exploration,
+                            },
+                            {
+                                title: t('I want to build Data Products'),
+                                description: t('I want to transform, govern and share data with others'),
+                                icon: (
+                                    <CustomSvgIconLoader
+                                        iconComponent={getDataProductTypeIcon()}
+                                        hasRoundBorder={true}
+                                        color={
+                                            dataProductTypeChoice === DataProductChoiceOptions.data_product
+                                                ? 'primary'
+                                                : 'dark'
+                                        }
+                                    />
+                                ),
+                                value: DataProductChoiceOptions.data_product,
+                            },
+                        ]}
+                    />
+                    {dataProductTypeChoice && (
+                        <CardSelection
+                            selectedChoice={existingOrNewChoice}
+                            setSelectedChoice={setExistingOrNewChoice}
+                            options={[
+                                {
+                                    title: t('Create a new {{dataProductChoice}}', {
+                                        dataProductChoice:
+                                            dataProductTypeChoice === DataProductChoiceOptions.data_product
+                                                ? t('Data Product')
+                                                : t('Exploration'),
+                                    }),
+                                    icon: <PlusOutlined />,
+                                    value: ExistingOrNew.new,
+                                },
+                                {
+                                    title: t('Select an existing {{dataProductChoice}}', {
+                                        dataProductChoice:
+                                            dataProductTypeChoice === DataProductChoiceOptions.data_product
+                                                ? t('Data Product')
+                                                : t('Exploration'),
+                                    }),
+                                    icon: <UnorderedListOutlined />,
+                                    value: ExistingOrNew.existing,
+                                },
+                            ]}
+                        />
+                    )}
+                    {form}
+                </Flex>
+            </Col>
+            <Col span={8} style={{ position: 'sticky', top: 0, alignSelf: 'flex-start' }}>
                 <CartOverview
                     loading={fetchingOutputPorts}
                     cartOutputPorts={cartOutputPorts}
-                    overlappingDatasetIds={overlappingOutputPortIds}
                     selectedDataProductId={selectedDataProductId}
+                    selectedExplorationId={selectedExplorationId}
                 />
-            </Col>
-            <Col span={14}>
-                <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>
-                    {initialValues === undefined ? (
-                        <Skeleton />
-                    ) : (
-                        <Form<CartFormData>
-                            key={initialValues.dataProductId}
-                            layout={'vertical'}
-                            onFinish={onFinish}
-                            form={form}
-                            onValuesChange={onValuesChange}
-                            initialValues={initialValues}
-                        >
-                            <Form.Item<CartFormData>
-                                name="dataProductId"
-                                label={t('Data Product')}
-                                rules={[{ required: true, message: t('Please select a Data Product') }]}
-                            >
-                                <Select
-                                    placeholder={t('Select a Data Product')}
-                                    options={dataProductOptions}
-                                    loading={isFetchingUserDataProducts}
-                                    showSearch={{
-                                        filterOption: (input, option) =>
-                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
-                                    }}
-                                    popupRender={(menu) => (
-                                        <>
-                                            <Button
-                                                type="text"
-                                                icon={<PlusOutlined />}
-                                                style={{ width: '100%' }}
-                                                onClick={createNewDataProduct}
-                                            >
-                                                {t('Create new Data Product')}
-                                            </Button>
-                                            <Divider style={{ margin: '8px 0' }} />
-                                            {menu}
-                                        </>
-                                    )}
-                                />
-                            </Form.Item>
-                            {submitFormIssues.length > 0 && (
-                                <Alert
-                                    title={t('Cannot submit request')}
-                                    description={
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {submitFormIssues.map((reason) => (
-                                                <li key={reason.key}>{reason.value}</li>
-                                            ))}
-                                        </ul>
-                                    }
-                                    type="warning"
-                                    showIcon
-                                    style={{ marginBottom: 16 }}
-                                />
-                            )}
-                            <Form.Item<CartFormData>
-                                name="justification"
-                                label={'Business justification'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t('Please explain why you need access to these Output Ports'),
-                                    },
-                                ]}
-                            >
-                                <TextArea
-                                    rows={4}
-                                    placeholder={t('Explain why you need access to these Output Ports')}
-                                />
-                            </Form.Item>
-                            <Form.Item label={null}>
-                                <Flex gap={'small'}>
-                                    <Link to={ApplicationPaths.Marketplace} style={{ width: '100%' }}>
-                                        <Button type="default" style={{ width: '100%' }}>
-                                            {t('Continue browsing')}
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        style={{ width: '100%' }}
-                                        loading={isRequestingAccess}
-                                        disabled={
-                                            fetchingOutputPorts ||
-                                            submitFormIssues.length > 0 ||
-                                            cartOutputPorts === undefined ||
-                                            cartOutputPorts?.length === 0
-                                        }
-                                    >
-                                        {t('Submit access requests')}
-                                    </Button>
-                                </Flex>
-                            </Form.Item>
-                        </Form>
-                    )}
-                    <Divider />
-                    <Flex vertical>
-                        <Typography.Text>
-                            <CheckCircleOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('Owners typically respond within 24-48 hours')}
-                        </Typography.Text>
-                        <Typography.Text>
-                            <BellOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('You will get notified when access is granted or denied')}
-                        </Typography.Text>
-                        <Typography.Text>
-                            <MessageOutlined style={{ color: `${token.colorPrimary}` }} />{' '}
-                            {t('Message owners directly for questions')}
-                        </Typography.Text>
-                    </Flex>
-                </Card>
             </Col>
         </Row>
     );
 }
 
-export default Cart;
+export default ExplorationsCart;

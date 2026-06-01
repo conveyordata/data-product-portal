@@ -11,11 +11,12 @@ from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
+    ExplorationFactory,
+    InputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -27,7 +28,7 @@ DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 class TestDataProductsDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_request_data_product_link(self, client):
+    def test_request_input_ports_for_data_product(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -41,15 +42,15 @@ class TestDataProductsDatasetsRouter:
         )
         ds = DatasetFactory()
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
         history_response = self.get_data_product_history(client, data_product.id)
         assert history_response.status_code == 200, history_response.text
         assert len(history_response.json()) == 1
 
-    def test_request_data_product_multiple_link_old(self, client):
+    def test_request_input_ports_for_data_product_deprecated(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -61,15 +62,15 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds1 = DatasetFactory()
-        ds2 = DatasetFactory()
+        ds = DatasetFactory()
 
-        response = self.request_data_product_datasets_link(
-            client, data_product.id, [ds1.id, ds2.id]
+        response = self.request_input_ports_for_data_product_deprecated(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
-        history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history["events"]) == 2
+        history_response = self.get_data_product_history(client, data_product.id)
+        assert history_response.status_code == 200, history_response.text
+        assert len(history_response.json()) == 1
 
     def test_request_data_product_multiple_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -86,14 +87,14 @@ class TestDataProductsDatasetsRouter:
         ds1 = DatasetFactory()
         ds2 = DatasetFactory()
 
-        response = self.request_link_input_ports(
+        response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds1.id, ds2.id]
         )
         assert response.status_code == 200, response.text
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history["events"]) == 2
 
-    def test_request_already_exists(self, client):
+    def test_request_input_ports_for_data_product_already_exists(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -107,25 +108,27 @@ class TestDataProductsDatasetsRouter:
         )
         ds = DatasetFactory()
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 400
 
-    def test_request_data_product_link_private_dataset_no_access(self, client):
+    def test_request_input_ports_for_data_product_private_dataset_no_access(
+        self, client
+    ):
         data_product = DataProductFactory()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 403
 
-    def test_request_data_product_link_private_dataset(self, client):
+    def test_request_input_ports_for_data_product_private_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -141,13 +144,13 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(scope=Scope.DATASET)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
 
     def test_request_data_product_remove_old(self, client):
-        assoc = DataProductDatasetAssociationFactory()
+        assoc = InputPortFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -159,16 +162,16 @@ class TestDataProductsDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            data_product_id=assoc.data_product.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
         )
 
         response = self.request_data_product_input_port_unlink(
-            client, assoc.data_product.id, assoc.dataset.id
+            client, assoc.consuming_abstract_data_product.id, assoc.dataset.id
         )
         assert response.status_code == 200
 
     def test_request_data_product_remove(self, client):
-        assoc = DataProductDatasetAssociationFactory()
+        assoc = InputPortFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -180,12 +183,12 @@ class TestDataProductsDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            data_product_id=assoc.data_product.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
         )
 
         response = self.request_data_product_input_port_unlink(
             client,
-            assoc.data_product.id,
+            assoc.consuming_abstract_data_product.id,
             assoc.dataset.id,
         )
         assert response.status_code == 200
@@ -195,43 +198,53 @@ class TestDataProductsDatasetsRouter:
         data_product = DataProductFactory()
         ds = DatasetFactory()
 
-        link = self.request_data_product_dataset_link(client, data_product.id, ds.id)
+        link = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
+        )
         assert link.status_code == 200
 
     def test_approve_data_product_link(self, client):
         link = self.create_link_with_status()
         response = self.approve_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
     def test_approve_output_port_as_input_port(self, client):
         link = self.create_link_with_status()
         response = self.approve_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_approve_data_product_link_by_admin(self, client):
         ds = DatasetFactory()
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
-        )
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.approve_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
     def test_approved_link_no_role(self, client):
         ds = DatasetFactory()
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
-        )
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.approve_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 403
         assert (
@@ -251,7 +264,7 @@ class TestDataProductsDatasetsRouter:
             ],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        return DataProductDatasetAssociationFactory(
+        return InputPortFactory(
             dataset=ds,
             status=status,
         )
@@ -259,37 +272,45 @@ class TestDataProductsDatasetsRouter:
     def test_deny_data_product_link(self, client):
         link = self.create_link_with_status()
         response = self.deny_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
     def test_deny_output_port_as_input_port(self, client):
         link = self.create_link_with_status()
         response = self.deny_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_deny_data_product_link_by_admin(self, client):
         ds = DatasetFactory()
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
-        )
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.deny_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
     def test_deny_link_no_role(self, client):
         ds = DatasetFactory()
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
-        )
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.deny_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 403
         assert (
@@ -300,17 +321,23 @@ class TestDataProductsDatasetsRouter:
     def test_remove_output_port_as_input_port(self, client):
         link = self.create_link_with_status()
         response = self.remove_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
     def test_remove_data_product_link_by_admin(self, client):
         ds = DatasetFactory()
-        link = DataProductDatasetAssociationFactory(dataset=ds)
+        link = InputPortFactory(dataset=ds)
 
         response = self.remove_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
@@ -324,8 +351,8 @@ class TestDataProductsDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, self.invalid_id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [self.invalid_id]
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -338,17 +365,18 @@ class TestDataProductsDatasetsRouter:
         DatasetRoleAssignmentFactory(
             user_id=str(user.id), role_id=str(role.id), dataset_id=str(ds.id)
         )
-        link = DataProductDatasetAssociationFactory(dataset=ds)
+        link = InputPortFactory(dataset=ds)
         response = client.get(
-            f"/api/v2/data_products/{link.data_product_id}/input_ports"
+            f"/api/v2/data_products/{link.consuming_abstract_data_product.id}/input_ports"
         )
+        assert response.status_code == 200, response.text
         assert len(response.json()["input_ports"]) == 1
         response = client.delete(
             f"/api/v2/data_products/{ds.data_product.id}/output_ports/{ds.id}"
         )
         assert response.status_code == 200
         response = client.get(
-            f"/api/v2/data_products/{link.data_product_id}/input_ports"
+            f"/api/v2/data_products/{link.consuming_abstract_data_product.id}/input_ports"
         )
         assert len(response.json()["input_ports"]) == 0
 
@@ -360,14 +388,19 @@ class TestDataProductsDatasetsRouter:
             permissions=[Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataProductDatasetAssociationFactory(dataset=ds)
+        link = InputPortFactory(dataset=ds)
 
         response = self.remove_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
-        history = self.get_data_product_history(client, link.data_product_id).json()
+        history = self.get_data_product_history(
+            client, link.consuming_abstract_data_product.id
+        ).json()
         assert len(history) == 1
 
     def test_history_event_created_on_approval(self, client):
@@ -379,15 +412,18 @@ class TestDataProductsDatasetsRouter:
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
-        )
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
         response = self.approve_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
-        history = self.get_data_product_history(client, link.data_product_id).json()
+        history = self.get_data_product_history(
+            client, link.consuming_abstract_data_product.id
+        ).json()
         assert len(history["events"]) == 1
 
     def test_history_event_created_on_denial(self, client):
@@ -398,16 +434,67 @@ class TestDataProductsDatasetsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING
-        )
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
         response = self.deny_output_port_as_input_port(
-            client, link.dataset.data_product.id, link.dataset.id, link.data_product.id
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200
 
-        history = self.get_data_product_history(client, link.data_product_id).json()
+        history = self.get_data_product_history(
+            client, link.consuming_abstract_data_product.id
+        ).json()
         assert len(history["events"]) == 1
+
+    def test_approve_output_port_as_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        exploration = ExplorationFactory()
+        link = InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = self.approve_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            exploration.id,
+        )
+        assert response.status_code == 200, response.text
+
+    def test_deny_output_port_as_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        exploration = ExplorationFactory()
+        link = InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = self.deny_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            exploration.id,
+        )
+        assert response.status_code == 200, response.text
 
     def test_get_input_ports_for_output_port(self, client):
         # Create a dataset (output port) with a data product
@@ -418,11 +505,15 @@ class TestDataProductsDatasetsRouter:
         consuming_dp2 = DataProductFactory()
 
         # Create associations (links) between consuming data products and the dataset
-        DataProductDatasetAssociationFactory(
-            dataset=ds, data_product=consuming_dp1, status=DecisionStatus.APPROVED
+        InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=consuming_dp1,
+            status=DecisionStatus.APPROVED,
         )
-        DataProductDatasetAssociationFactory(
-            dataset=ds, data_product=consuming_dp2, status=DecisionStatus.APPROVED
+        InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=consuming_dp2,
+            status=DecisionStatus.APPROVED,
         )
 
         # Get the input ports for the output port
@@ -430,13 +521,15 @@ class TestDataProductsDatasetsRouter:
             DATA_PRODUCTS_DATASETS_ENDPOINT.format(ds.data_product.id, ds.id)
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert "input_ports" in data
         assert len(data["input_ports"]) == 2
 
         # Verify the consuming data product IDs are in the response
-        consuming_dp_ids = {ip["data_product_id"] for ip in data["input_ports"]}
+        consuming_dp_ids = {
+            ip["consuming_abstract_data_product_id"] for ip in data["input_ports"]
+        }
         assert str(consuming_dp1.id) in consuming_dp_ids
         assert str(consuming_dp2.id) in consuming_dp_ids
 
@@ -456,8 +549,8 @@ class TestDataProductsDatasetsRouter:
             data_product_id=data_product.id,
         )
         ds = DatasetFactory()
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
 
         assert response.status_code == 200
@@ -471,32 +564,24 @@ class TestDataProductsDatasetsRouter:
         assert len(history["events"]) == 2
 
     @staticmethod
-    def request_data_product_dataset_link(
+    def request_input_ports_for_data_product(
         client: TestClient,
         data_product_id: UUID,
-        dataset_id: UUID,
+        output_port_ids: list[UUID],
         justification: str = "This is my birth right!",
     ) -> Response:
-        return TestDataProductsDatasetsRouter.request_data_product_datasets_link(
-            client,
-            data_product_id,
-            [dataset_id],
-            justification,
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports",
+            json={
+                "output_ports": [
+                    str(output_port_id) for output_port_id in output_port_ids
+                ],
+                "justification": justification,
+            },
         )
 
     @staticmethod
-    def request_data_product_datasets_link(
-        client: TestClient,
-        data_product_id: UUID,
-        dataset_ids: list[UUID],
-        justification: str = "This is my birth right!",
-    ) -> Response:
-        return TestDataProductsDatasetsRouter.request_link_input_ports(
-            client, data_product_id, dataset_ids, justification
-        )
-
-    @staticmethod
-    def request_link_input_ports(
+    def request_input_ports_for_data_product_deprecated(
         client: TestClient,
         data_product_id: UUID,
         output_port_ids: list[UUID],

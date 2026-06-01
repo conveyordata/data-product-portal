@@ -366,6 +366,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         response = client.get(
             f"/api/v2/data_products/{link.data_output.owner.id}/technical_assets"
         )
+        assert response.status_code == 200, response.text
         assert response.json()["technical_assets"][0]["output_port_links"][0][
             "output_port_id"
         ] == str(ds.id)

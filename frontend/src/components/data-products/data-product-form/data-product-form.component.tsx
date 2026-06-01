@@ -1,22 +1,17 @@
 import { ProductOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space, Typography } from 'antd';
+import { Button, Col, Form, type FormProps, Popconfirm, Row, Skeleton, Space, Typography } from 'antd';
 import { parseAsBoolean, useQueryState } from 'nuqs';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { useDebouncedCallback } from 'use-debounce';
+import { DataProductFormItems } from '@/components/data-products/data-product-form/data-product-form-items.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
-import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
-import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
-import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
-import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     type DataProductCreate,
     type DataProductUpdate,
@@ -25,23 +20,11 @@ import {
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import {
-    ResourceNameModel,
-    useLazySanitizeResourceNameQuery,
-    useLazyValidateResourceNameQuery,
-    useResourceNameConstraintsQuery,
-} from '@/store/api/services/generated/resourceNamesApi.ts';
-import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
-import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import styles from './data-product-form.module.scss';
-
-const { TextArea } = Input;
-
-const DEBOUNCE = 500;
 
 type Props = {
     mode: 'create' | 'edit';
@@ -60,22 +43,11 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         dataProductId || '',
         { skip: mode === 'create' || !dataProductId || isDeleted || isDeleting },
     );
-    const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
-    const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
-    const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
-        useGetDataProductsTypesQuery();
-    const { data: { users: dataProductOwners = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
-    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
+    const [areFormItemsLoading, setAreFormItemsLoading] = useState(true);
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
-    const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
-    const [validateResourceName] = useLazyValidateResourceNameQuery();
-    const { data: constraints } = useResourceNameConstraintsQuery();
 
     const [form] = Form.useForm<DataProductCreate>();
-    const dataProductNameValue = Form.useWatch('name', form);
-
-    const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
 
     const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const { data: update_access } = useCheckAccessQuery(
@@ -99,25 +71,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const canSubmit = canCreate || canEdit;
 
     const isLoading =
-        isCreating ||
-        isUpdating ||
-        isCreating ||
-        isUpdating ||
-        isFetchingInitialValues ||
-        isFetchingTags ||
-        isFetchingLifecycles;
-
-    const dataProductTypeSelectOptions = dataProductTypes?.data_product_types.map((type) => ({
-        label: type.name,
-        value: type.id,
-    }));
-    const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
-    const userSelectOptions = dataProductOwners.map((owner) => ({
-        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
-        value: owner.id,
-        disabled: owner.id === currentUser?.id,
-    }));
-    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
+        isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || areFormItemsLoading;
 
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
@@ -235,34 +189,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
-    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), DEBOUNCE);
-
-    useEffect(() => {
-        if (mode === 'create' && !canEditResourceName) {
-            form.setFields([
-                {
-                    name: 'namespace',
-                    validating: true,
-                    errors: [],
-                },
-            ]);
-            fetchResourceNameDebounced(dataProductNameValue ?? '');
-        }
-    }, [form, mode, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
-
-    useEffect(() => {
-        if (mode === 'create' && !canEditResourceName) {
-            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
-            form.validateFields(['namespace']);
-        }
-    }, [form, mode, canEditResourceName, sanitizedResourceName]);
-
-    const resourceNameValidationCallback = useCallback(
-        (resourceName: string) =>
-            validateResourceName({ resourceName: resourceName, model: ResourceNameModel.DataProduct }).unwrap(),
-        [validateResourceName],
-    );
-
     const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
 
     if (mode === 'edit' && (!currentDataProduct || ownerIds === undefined)) {
@@ -297,135 +223,15 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete={'off'}
-                requiredMark={'optional'}
                 disabled={isLoading || !canSubmit}
                 initialValues={initialValues}
             >
-                <Form.Item<DataProductCreate>
-                    name={'name'}
-                    label={t('Name')}
-                    tooltip={t('The name of your Data Product')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please provide the name of the Data Product'),
-                        },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-                <ResourceNameFormItem
+                <DataProductFormItems
                     form={form}
-                    tooltip={t('The namespace of the Data Product')}
-                    max_length={constraints?.max_length}
-                    editToggleDisabled={mode === 'edit'}
-                    canEditResourceName={canEditResourceName}
-                    toggleCanEditResourceName={() => setCanEditResourceName((prev) => !prev)}
-                    validationRequired={mode === 'create'}
-                    validateResourceName={resourceNameValidationCallback}
+                    mode={mode}
+                    currentDataProduct={currentDataProduct}
+                    setAreFormItemsLoading={setAreFormItemsLoading}
                 />
-                <Form.Item<DataProductCreate>
-                    name={'owners'}
-                    label={t('Owners')}
-                    tooltip={t('The owners of the Data Product')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please select at least one owner for the Data Product'),
-                        },
-                    ]}
-                >
-                    <Select
-                        loading={isFetchingUsers}
-                        mode={'multiple'}
-                        options={userSelectOptions}
-                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                        disabled={mode !== 'create'}
-                        tokenSeparators={[',']}
-                    />
-                </Form.Item>
-                <Form.Item<DataProductCreate>
-                    name={'type_id'}
-                    label={t('Type')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please select the type of the Data Product'),
-                        },
-                    ]}
-                >
-                    <Select
-                        loading={isFetchingDataProductTypes}
-                        allowClear
-                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                        options={dataProductTypeSelectOptions}
-                    />
-                </Form.Item>
-                <Form.Item<DataProductCreate>
-                    name={'lifecycle_id'}
-                    label={t('Status')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please select the status of the Data Product'),
-                        },
-                    ]}
-                >
-                    <Select
-                        loading={isFetchingLifecycles}
-                        options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
-                            value: lifecycle.id,
-                            label: lifecycle.name,
-                        }))}
-                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                        allowClear
-                    />
-                </Form.Item>
-                <Form.Item<DataProductCreate>
-                    name={'domain_id'}
-                    label={t('Domain')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please select the domain of the Data Product'),
-                        },
-                    ]}
-                >
-                    <Select
-                        loading={isFetchingDomains}
-                        options={domainSelectOptions}
-                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                        allowClear
-                    />
-                </Form.Item>
-                <Form.Item<DataProductCreate> name={'tag_ids'} label={t('Tags')}>
-                    <Select
-                        tokenSeparators={[',']}
-                        placeholder={t('Select Data Product tags')}
-                        mode={'multiple'}
-                        options={tagSelectOptions}
-                        showSearch={{ filterOption: selectFilterOptionByLabel }}
-                    />
-                </Form.Item>
-                <Form.Item<DataProductCreate>
-                    name={'description'}
-                    label={t('Description')}
-                    tooltip={t('A description for the Data Product')}
-                    rules={[
-                        {
-                            required: true,
-                            message: t('Please provide a description for the Data Product'),
-                        },
-                        {
-                            max: MAX_DESCRIPTION_INPUT_LENGTH,
-                            message: t('Description must be less than {{length}} characters', {
-                                length: MAX_DESCRIPTION_INPUT_LENGTH,
-                            }),
-                        },
-                    ]}
-                >
-                    <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
-                </Form.Item>
                 <Form.Item>
                     <Row>
                         {mode !== 'create' && (

@@ -5,10 +5,11 @@ from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException
 
 from app.core.logging import logger
-from app.exceptions import DataProductPortalException, NotFoundInDB
+from app.exceptions import NotFoundInDB
 
 
 class ErrorHandler:
@@ -69,12 +70,12 @@ class ErrorHandler:
         )
 
     def raise_bad_request_exception(
-        self, exception: DataProductPortalException | ValueError
+        self, exception: Exception | ValueError, detail: str | None = None
     ):
         error = {
             **self._create_basic_error(exception),
             "status": status.HTTP_400_BAD_REQUEST,
-            "detail": str(exception),
+            "detail": detail or str(exception),
         }
         self.logger.error(error)
         return JSONResponse(
@@ -94,14 +95,15 @@ def add_exception_handlers(app: FastAPI):
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(NotFoundInDB, db_not_found_exception_handler)
     app.add_exception_handler(ValueError, value_error_exception_handler)
+    app.add_exception_handler(IntegrityError, integrity_error_exception_handler)
 
 
-async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+async def http_exception_handler(_: Request, exc: HTTPException) -> JSONResponse:
     return ErrorHandler().raise_exception(exc)
 
 
 async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
+    _: Request, exc: RequestValidationError
 ) -> JSONResponse:
     return ErrorHandler().raise_validation_exception(exc)
 
@@ -110,9 +112,19 @@ async def generic_exception_handler(request: Request, exc: Exception):
     return ErrorHandler().raise_generic_exception(request, exc)
 
 
-async def db_not_found_exception_handler(request: Request, exc: NotFoundInDB):
+async def db_not_found_exception_handler(_: Request, exc: NotFoundInDB):
     return ErrorHandler().raise_bad_request_exception(exc)
 
 
-async def value_error_exception_handler(request: Request, exc: ValueError):
+async def value_error_exception_handler(_: Request, exc: ValueError):
+    return ErrorHandler().raise_bad_request_exception(exc)
+
+
+async def integrity_error_exception_handler(
+    _: Request, exc: IntegrityError
+) -> JSONResponse:
+    if "uq_data_product_name" in str(exc.orig):
+        ErrorHandler().raise_bad_request_exception(
+            exc, "A data product with this name already exists."
+        )
     return ErrorHandler().raise_bad_request_exception(exc)

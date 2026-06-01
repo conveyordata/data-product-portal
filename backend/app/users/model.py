@@ -24,9 +24,10 @@ if TYPE_CHECKING:
         DataOutputDatasetAssociation,
     )
     from app.data_products.output_ports.model import (
-        DataProductDatasetAssociation,
         Dataset,
+        InputPort,
     )
+    from app.explorations.model import Exploration
     from app.users.notifications.model import Notification
 
 
@@ -67,6 +68,9 @@ class User(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_roles", "data_product"
     )
+    explorations: Mapped[list["Exploration"]] = relationship(
+        foreign_keys="Exploration.owner_id", back_populates="owner", lazy="raise"
+    )
 
     global_role: Mapped["GlobalRoleAssignment"] = relationship(
         foreign_keys="GlobalRoleAssignment.user_id",
@@ -90,18 +94,18 @@ class User(Base, BaseORM):
         lazy="select",
     )
     datasets: Mapped[list["Dataset"]] = association_proxy("dataset_roles", "dataset")
-    requested_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        foreign_keys="DataProductDatasetAssociation.requested_by_id",
+    requested_input_ports: Mapped[list["InputPort"]] = relationship(
+        foreign_keys="InputPort.requested_by_id",
         back_populates="requested_by",
         lazy="raise",
     )
-    denied_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        foreign_keys="DataProductDatasetAssociation.denied_by_id",
+    denied_input_ports: Mapped[list["InputPort"]] = relationship(
+        foreign_keys="InputPort.denied_by_id",
         back_populates="denied_by",
         lazy="raise",
     )
-    approved_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
-        foreign_keys="DataProductDatasetAssociation.approved_by_id",
+    approved_input_ports: Mapped[list["InputPort"]] = relationship(
+        foreign_keys="InputPort.approved_by_id",
         back_populates="approved_by",
         lazy="raise",
     )

@@ -249,6 +249,12 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     description: t('Allows the creation of a Data Product'),
                 },
                 {
+                    type: 'Instance' as const,
+                    id: AuthorizationAction.GLOBAL__CREATE_EXPLORATION,
+                    name: 'Create Exploration',
+                    description: t('Allows the creation of an Exploration'),
+                },
+                {
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,
                     name: 'Create Output Port',

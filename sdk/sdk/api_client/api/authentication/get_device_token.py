@@ -5,13 +5,14 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.device_flow import DeviceFlow
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    client_id: str,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
 ) -> dict[str, Any]:
 
@@ -34,9 +35,10 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Any | HTTPValidationError | None:
+) -> DeviceFlow | HTTPValidationError | None:
     if response.status_code == 200:
-        response_200 = response.json()
+        response_200 = DeviceFlow.from_dict(response.json())
+
         return response_200
 
     if response.status_code == 422:
@@ -52,7 +54,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError]:
+) -> Response[DeviceFlow | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -64,13 +66,13 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    client_id: str,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
-) -> Response[Any | HTTPValidationError]:
+) -> Response[DeviceFlow | HTTPValidationError]:
     """Get Device Token
 
     Args:
-        client_id (str):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -78,7 +80,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | HTTPValidationError]
+        Response[DeviceFlow | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -96,13 +98,13 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-    client_id: str,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
-) -> Any | HTTPValidationError | None:
+) -> DeviceFlow | HTTPValidationError | None:
     """Get Device Token
 
     Args:
-        client_id (str):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -110,7 +112,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | HTTPValidationError
+        DeviceFlow | HTTPValidationError
     """
 
     return sync_detailed(
@@ -123,13 +125,13 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    client_id: str,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
-) -> Response[Any | HTTPValidationError]:
+) -> Response[DeviceFlow | HTTPValidationError]:
     """Get Device Token
 
     Args:
-        client_id (str):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -137,7 +139,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | HTTPValidationError]
+        Response[DeviceFlow | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -153,13 +155,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    client_id: str,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
-) -> Any | HTTPValidationError | None:
+) -> DeviceFlow | HTTPValidationError | None:
     """Get Device Token
 
     Args:
-        client_id (str):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -167,7 +169,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | HTTPValidationError
+        DeviceFlow | HTTPValidationError
     """
 
     return (

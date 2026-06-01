@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ogen-go/ogen/validate"
 	"github.com/pkg/browser"
 
 	"portal/libs/cliapi"
@@ -27,6 +28,20 @@ func requestJWT(ctx context.Context, config core.Config, device string) (*token.
 		GrantType:  "urn:ietf:params:oauth:grant-type:device_code",
 	})
 	if err != nil {
+		var statusErr *validate.UnexpectedStatusCodeError
+		if errors.As(err, &statusErr) && statusErr.StatusCode == 400 && statusErr.Payload != nil {
+			var body struct {
+				Detail string `json:"detail"`
+			}
+			if jsonErr := json.NewDecoder(statusErr.Payload.Body).Decode(&body); jsonErr == nil {
+				if body.Detail == "denied" {
+					fmt.Println("Verification request was denied")
+					return nil, errors.New("denied")
+				}
+				// authorization_pending or other transient states — signal caller to keep polling
+				return nil, nil
+			}
+		}
 		return nil, err
 	}
 
@@ -92,6 +107,9 @@ func Login(ctx context.Context) (*token.Token, error) {
 				t, err := requestJWT(ctx, config, tokenBody.DeviceCode)
 				if err != nil {
 					return nil, err
+				}
+				if t == nil {
+					continue
 				}
 				if t.AccessToken != "" {
 					return t, core.WriteToken(t, core.GetActiveProfile())

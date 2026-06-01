@@ -56,20 +56,13 @@ posthog:
 replicaCount: 1
 
 image:
-  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
-  pullPolicy: Always
-  tag: 0.5.1
-
-frontendimage:
-  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal
   pullPolicy: Always
   tag: 0.5.1
 
 imagePullSecrets: []
 nameOverride: ""
-frontendnameOverride: ""
 fullnameOverride: ""
-frontendfullnameOverride: ""
 
 serviceAccount:
   create: true
@@ -89,11 +82,6 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
-
-frontendservice:
-  type: NodePort
-  port: 8080
-
 service:
   type: NodePort
   port: 5050
@@ -105,22 +93,10 @@ ingress:
   pathType: Prefix
   hosts:
     - paths:
-      - path: /mcp
-        pathType: Prefix
-        name: data-product-portal
-        number: 5050
-      - path: /.well-known
-        pathType: Prefix
-        name: data-product-portal
-        number: 5050
-      - path: /api
-        pathType: Prefix
-        name: data-product-portal
-        number: 5050
       - path: /
         pathType: Prefix
-        name: frontend
-        number: 8080
+        name: data-product-portal
+        number: 5050
   tls: []
 
 resources: {}
@@ -134,29 +110,6 @@ readinessProbe:
     path: /
     port: http
 
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
-
-frontendvolumes:
-- name: nginxcache
-- name: nginxrun
-- name: config
-  configMap:
-    name: frontend
-
-frontendvolumeMounts:
-  - name: nginxcache
-    mountPath: /var/cache/nginx
-  - name: nginxrun
-    mountPath: /var/run
-  - name: config
-    mountPath: /app/dist/config.js
-    subPath: config.js
-
 volumes:
   - name: varlog
     emptyDir: {}
@@ -166,15 +119,20 @@ volumes:
       optional: true
   - name: tmpdir
     emptyDir: {}
-
+  - name: frontend-config
+    configMap:
+      name: frontend
 
 volumeMounts:
   - name: varlog
-    mountPath: /var/logs
+    mountPath: /var/log
   - name: sampledata
     mountPath: /sampledata
   - name: tmpdir
     mountPath: /tmp
+  - name: frontend-config
+    mountPath: /frontend_dist/config.js
+    subPath: config.js
 
 nodeSelector: {}
 

@@ -107,4 +107,8 @@ export class AppConfig {
             redirect_uri: config.OIDC_REDIRECT_URI,
         };
     }
+
+    public static ExplorationsEnabled(): boolean {
+        return localStorage.getItem('explorations') === 'true';
+    }
 }

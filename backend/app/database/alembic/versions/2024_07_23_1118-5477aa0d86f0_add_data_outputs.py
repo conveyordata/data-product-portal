@@ -93,3 +93,5 @@ def downgrade() -> None:
     op.drop_table("data_outputs_datasets")
     op.drop_table("data_output_configurations")
     op.drop_table("data_outputs")
+    op.execute("DROP TYPE technicalassetstatus;")
+    op.execute("DROP TYPE dataoutputdatasetlinkstatus;")

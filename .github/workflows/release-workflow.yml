@@ -1,5 +1,4 @@
 name: Release workflow
-
 on:
   push:
     tags:
@@ -18,7 +17,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Get Previous tag
@@ -41,6 +41,7 @@ jobs:
               core.setFailed('VERSION is not the latest tag, did you do a version bump?')
     outputs:
       version: ${{ env.APP_VERSION }}
+
   helm:
     runs-on: ubuntu-latest
     permissions:
@@ -48,47 +49,50 @@ jobs:
       contents: read
     needs: ["prep-version"]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
           aws-region: us-east-1
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@376925c9d111252e87ae59691e5a442dd100ef6a # v2.1.3
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
         with:
           registries: ${{ secrets.PUBLICAWSACCOUNTID }}
           registry-type: public
           mask-password: "true"
+      - name: Install helm
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
       - name: Publish Helm package
-        uses: WyriHaximus/github-action-helm3@e3894d973c282349e3d41d3347767f2b2545b583 # v4.0.2
         env:
           VERSION: ${{ needs.prep-version.outputs.version }}
-        with:
-          exec: |
-            helm package helm
-            helm push data-product-portal-$VERSION.tgz oci://public.ecr.aws/conveyordata
-  backend:
+        run: |
+          helm package helm
+          helm push data-product-portal-$VERSION.tgz oci://public.ecr.aws/conveyordata
+
+  portal-docker:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
     needs: ["prep-version"]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
           aws-region: us-east-1
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@376925c9d111252e87ae59691e5a442dd100ef6a # v2.1.3
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
         with:
           registries: ${{ secrets.PUBLICAWSACCOUNTID }}
           registry-type: public
@@ -98,57 +102,24 @@ jobs:
         shell: bash
         env:
           ECR_REGISTRY: public.ecr.aws/conveyordata
-          ECR_REPOSITORY: data-product-portal/backend
+          ECR_REPOSITORY: data-product-portal
           IMAGE_TAG: ${{ needs.prep-version.outputs.version }}
         run: |
-          docker build ./backend -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG"
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-  frontend:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    needs: ["prep-version"]
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
-          aws-region: us-east-1
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@376925c9d111252e87ae59691e5a442dd100ef6a # v2.1.3
-        with:
-          registries: ${{ secrets.PUBLICAWSACCOUNTID }}
-          registry-type: public
-          mask-password: "true"
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-publish
-        shell: bash
-        env:
-          ECR_REGISTRY: public.ecr.aws/conveyordata
-          ECR_REPOSITORY: data-product-portal/frontend
-          IMAGE_TAG: ${{ needs.prep-version.outputs.version }}
-        run: |
-          docker build ./frontend -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
-          echo "image_tag=$IMAGE_TAG"
-          echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
   create-gh-release-notes:
     name: Create GitHub release notes and release
     runs-on: ubuntu-latest
-    needs: [ "backend", "frontend", "prep-version"]
+    needs: ["portal-docker", "prep-version"]
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
       - name: Create release notes in github
@@ -164,7 +135,6 @@ jobs:
           echo "${RELEASENOTES}"
           echo EOF
           } >> $GITHUB_OUTPUT
-
       - name: Create Release
         env:
           TAG: ${{ github.ref_name }}
@@ -175,11 +145,12 @@ jobs:
           echo "$NOTES"
           gh release create "$TAG" --title "$TAG" --notes "$NOTES"
           echo "Release created successfully"
+
   cli:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [ "create-gh-release-notes" ]
+    needs: ["create-gh-release-notes"]
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -191,7 +162,7 @@ jobs:
           go-version-file: cli/golang/go.mod
           cache-dependency-path: cli/golang/go.sum
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
         with:
           distribution: goreleaser
           version: '~> v2'
@@ -204,6 +175,7 @@ jobs:
         with:
           name: Data product portal CLI
           path: cli/golang/dist/*
+
   release-docs:
     runs-on: ubuntu-24.04
     permissions:
@@ -215,7 +187,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: arn:aws:iam::553817834567:role/github-actions-docs
           role-session-name: GithubActions
@@ -225,7 +197,7 @@ jobs:
         with:
           arch: amd64
       - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version-file: docs/package.json
           cache: 'npm'
@@ -238,14 +210,16 @@ jobs:
         run: |
           npm run build
           aws s3 cp build/ s3://data-product-portal-user-docs-tfhgye/ --recursive
+
   deploy-on-portal-demo:
     name: Deploy to portal demo
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    needs: ["backend","frontend"]
+    needs: ["portal-docker"]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
       - name: Dispatch to demo-portal-infrastructure dev

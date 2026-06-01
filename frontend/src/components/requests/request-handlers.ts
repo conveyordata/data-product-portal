@@ -8,8 +8,8 @@ import type {
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
-    PendingRequestType_DataProductOutputPort,
     PendingRequestType_DataProductRoleAssignment,
+    PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types';
 import type { DataProductRoleRequest } from '../../utils/pending-request.helper';
@@ -25,12 +25,12 @@ type ActionHandlers = {
 
 export async function acceptRequest(action: PendingAction, handlers: ActionHandlers): Promise<void> {
     switch (action.pending_action_type) {
-        case PendingRequestType_DataProductOutputPort:
+        case PendingRequestType_InputPort:
             return handlers.handleAcceptDataProductDatasetLink({
                 dataProductId: action.output_port.data_product_id,
                 outputPortId: action.output_port_id,
                 approveOutputPortAsInputPortRequest: {
-                    consuming_data_product_id: action.data_product_id,
+                    consuming_data_product_id: action.consuming_abstract_data_product_id,
                 },
             });
         case PendingRequestType_TechnicalAssetOutputPort:
@@ -51,12 +51,12 @@ export async function acceptRequest(action: PendingAction, handlers: ActionHandl
 
 export async function rejectRequest(action: PendingAction, handlers: ActionHandlers): Promise<void> {
     switch (action.pending_action_type) {
-        case PendingRequestType_DataProductOutputPort:
+        case PendingRequestType_InputPort:
             return handlers.handleRejectDataProductDatasetLink({
                 dataProductId: action.output_port.data_product_id,
                 outputPortId: action.output_port_id,
                 denyOutputPortAsInputPortRequest: {
-                    consuming_data_product_id: action.data_product_id,
+                    consuming_data_product_id: action.consuming_abstract_data_product_id,
                 },
             });
         case PendingRequestType_TechnicalAssetOutputPort:

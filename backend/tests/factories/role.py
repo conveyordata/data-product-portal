@@ -2,10 +2,11 @@ from typing import Final
 
 import factory
 from faker import Faker
+from sqlalchemy import select
 
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.model import Role
-from app.authorization.roles.schema import Prototype, Scope
+from app.authorization.roles.schema import Prototype
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
 from tests import test_session
@@ -22,7 +23,6 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
     scope = factory.Faker(
         "random_element", elements=("global", "data_product", "dataset")
     )
-    prototype = Prototype.CUSTOM
     description = factory.Faker("text")
     permissions = factory.Faker(
         "random_elements", elements=list(map(int, AuthorizationAction)), unique=True
@@ -39,6 +39,20 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @classmethod
     def admin(cls):
-        return cls(
-            id=ADMIN_UUID, name="Admin", scope=Scope.GLOBAL, prototype=Prototype.ADMIN
+        return test_session.get(Role, ADMIN_UUID)
+
+    @classmethod
+    def data_product_owner(cls) -> Role:
+        return test_session.scalar(
+            select(Role)
+            .where(Role.prototype == Prototype.OWNER)
+            .where(Role.scope == "data_product")
+        )
+
+    @classmethod
+    def dataset_owner(cls) -> Role:
+        return test_session.scalar(
+            select(Role)
+            .where(Role.prototype == Prototype.OWNER)
+            .where(Role.scope == "dataset")
         )

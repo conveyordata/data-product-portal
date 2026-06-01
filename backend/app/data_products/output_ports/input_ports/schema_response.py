@@ -3,10 +3,10 @@ from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
+from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.data_products.output_ports.input_ports.schema import InputPortBase
 from app.data_products.output_ports.schema import Dataset, OutputPort
-from app.data_products.schema import DataProduct
-from app.data_products.schema_response import InputPort
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -14,14 +14,14 @@ from app.users.schema import User
 class BaseDataProductOutputPortAssociationGet(ORMModel):
     id: UUID
     justification: str
-    data_product_id: UUID
+    consuming_abstract_data_product_id: UUID
     output_port_id: UUID
     status: DecisionStatus
     requested_on: datetime
 
     # Nested schemas
     output_port: OutputPort
-    data_product: DataProduct
+    consuming_abstract_data_product: AbstractDataProductInfo
     requested_by: User
     denied_by: Optional[User]
     approved_by: Optional[User]
@@ -31,14 +31,14 @@ class BaseDataProductOutputPortAssociationGet(ORMModel):
 class BaseDataProductDatasetAssociationGet(ORMModel):
     id: UUID
     justification: str
-    data_product_id: UUID
+    consuming_abstract_data_product_id: UUID
     dataset_id: UUID
     status: DecisionStatus
     requested_on: datetime
 
     # Nested schemas
     dataset: Dataset
-    data_product: DataProduct
+    consuming_abstract_data_product: AbstractDataProductInfo
     requested_by: User
     denied_by: Optional[User]
     approved_by: Optional[User]
@@ -64,5 +64,10 @@ class DataProductOutputPortAssociationsGet(BaseDataProductOutputPortAssociationG
     pass
 
 
+class OutputPortInputPort(InputPortBase):
+    consuming_abstract_data_product_id: UUID
+    consuming_abstract_data_product: AbstractDataProductInfo
+
+
 class GetInputPortsForOutputPortResponse(ORMModel):
-    input_ports: Sequence[InputPort]
+    input_ports: Sequence[OutputPortInputPort]

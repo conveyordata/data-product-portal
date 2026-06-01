@@ -1,14 +1,15 @@
 from typing import TYPE_CHECKING
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.roles.schema import Prototype, Role, Scope
+from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -177,9 +178,8 @@ class TestDataProductRoleAssignmentsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
         )
-
+        role = RoleFactory.data_product_owner()
         user_1, user_2 = UserFactory.create_batch(2)
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
         assignment_1 = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user_1.id,
@@ -323,13 +323,12 @@ class TestDataProductRoleAssignmentsRouter:
     def test_modify_last_owner(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
-        owner: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.CUSTOM)
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
-            role_id=owner.id,
+            role_id=RoleFactory.data_product_owner().id,
             decision=DecisionStatus.APPROVED,
         )
 
@@ -584,3 +583,95 @@ class TestDataProductRoleAssignmentsRouter:
     @staticmethod
     def get_data_product_history(client: TestClient, data_product_id):
         return client.get(f"/api/v2/data_products/{data_product_id}/history")
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_added_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        member = UserFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+
+        with webhook_v2_config():
+            response = client.post(
+                ENDPOINT,
+                json={
+                    "data_product_id": str(dp.id),
+                    "user_id": str(member.id),
+                    "role_id": str(role.id),
+                },
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.team_member_added"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_removed_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        member = UserFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        assignment = DataProductRoleAssignmentFactory(
+            data_product_id=dp.id, user_id=member.id, role_id=role.id
+        )
+
+        with webhook_v2_config():
+            response = client.delete(f"{ENDPOINT}/{assignment.id}")
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.team_member_removed"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_team_member_updated_fires_event(self, mock_webhook, client):
+        mock_webhook.return_value = AsyncMock()
+        dp = DataProductFactory()
+        member = UserFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        new_role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        assignment = DataProductRoleAssignmentFactory(
+            data_product_id=dp.id, user_id=member.id, role_id=role.id
+        )
+
+        with webhook_v2_config():
+            response = client.put(
+                f"{ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
+            )
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, data = mock_webhook.call_args.args
+        assert event_type == "data_product.team_member_updated"
+        assert "data_product" in data
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        ("method", "path", "body"),
+        [
+            ("post", "/api/v2/authz/role_assignments/data_product", {}),
+            (
+                "delete",
+                "/api/v2/authz/role_assignments/data_product/00000000-0000-0000-0000-000000000000",
+                None,
+            ),
+            (
+                "put",
+                "/api/v2/authz/role_assignments/data_product/00000000-0000-0000-0000-000000000000",
+                {},
+            ),
+        ],
+    )
+    @patch("app.core.webhooks.v2.call_v2_webhook")
+    def test_no_event_fired_on_failure(self, mock_webhook, client, method, path, body):
+        mock_webhook.return_value = AsyncMock()
+        with webhook_v2_config():
+            kwargs = {"json": body} if body is not None else {}
+            getattr(client, method)(path, **kwargs)
+        mock_webhook.assert_not_awaited()

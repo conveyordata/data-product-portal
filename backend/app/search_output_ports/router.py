@@ -7,8 +7,8 @@ from app.core.auth.auth import get_authenticated_user
 from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_db_session
 from app.search_output_ports.schema_response import (
-    SearchDatasets,
     SearchOutputPortsResponse,
+    SearchOutputPortsResponseItem,
 )
 from app.users.model import User
 
@@ -25,8 +25,8 @@ def search_output_ports(
 ) -> SearchOutputPortsResponse:
     return SearchOutputPortsResponse(
         output_ports=[
-            SearchDatasets.model_validate(ds).convert()
-            for ds in OutputPortService(db).search_datasets(
+            SearchOutputPortsResponseItem.model_validate(ds)
+            for ds in OutputPortService(db).search_output_ports(
                 query=query,
                 limit=limit,
                 user=user,

@@ -7,7 +7,6 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     String,
-    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,7 +14,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.database.database import Base
 
 if TYPE_CHECKING:
-    from app.data_products.model import DataProduct
+    from app.abstract_data_product.model import AbstractDataProduct
     from app.data_products.output_ports.model import Dataset
     from app.users.model import User
 
@@ -24,8 +23,8 @@ import uuid
 from app.shared.model import BaseORM, utcnow
 
 
-class DataProductDatasetAssociation(Base, BaseORM):
-    __tablename__ = "data_products_datasets"
+class InputPort(Base, BaseORM):
+    __tablename__ = "input_ports"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     justification = Column(String)
@@ -38,8 +37,8 @@ class DataProductDatasetAssociation(Base, BaseORM):
     denied_on = Column(DateTime(timezone=False))
 
     # Foreign keys
-    data_product_id: Mapped[uuid.UUID] = mapped_column(
-        "data_product_id", ForeignKey("data_products.id")
+    consuming_abstract_data_product_id: Mapped[uuid.UUID] = mapped_column(
+        "consuming_abstract_data_product_id", ForeignKey("abstract_data_products.id")
     )
     dataset_id: Mapped[uuid.UUID] = mapped_column(
         "dataset_id", ForeignKey("datasets.id")
@@ -55,30 +54,24 @@ class DataProductDatasetAssociation(Base, BaseORM):
         order_by="Dataset.name",
         lazy="joined",
     )
-    data_product: Mapped["DataProduct"] = relationship(
-        "DataProduct",
-        back_populates="dataset_links",
-        order_by="DataProduct.name",
+    consuming_abstract_data_product: Mapped["AbstractDataProduct"] = relationship(
+        "AbstractDataProduct",
+        back_populates="input_ports",
+        order_by="AbstractDataProduct.name",
         lazy="joined",
     )
     requested_by: Mapped["User"] = relationship(
         foreign_keys=[requested_by_id],
-        back_populates="requested_datasets",
+        back_populates="requested_input_ports",
         lazy="joined",
     )
     approved_by: Mapped["User"] = relationship(
         foreign_keys=[approved_by_id],
-        back_populates="approved_datasets",
+        back_populates="approved_input_ports",
         lazy="joined",
     )
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id],
-        back_populates="denied_datasets",
+        back_populates="denied_input_ports",
         lazy="joined",
-    )
-
-    __table_args__ = (
-        UniqueConstraint(
-            "data_product_id", "dataset_id", name="unique_data_product_dataset"
-        ),
     )

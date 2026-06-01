@@ -4,7 +4,7 @@ from .data_product import DataProductFactory
 from .data_product_setting import DataProductSettingFactory
 from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
-from .data_products_datasets import DataProductDatasetAssociationFactory
+from .data_products_datasets import InputPortFactory
 from .dataset import DatasetFactory
 from .dataset_query_stats_daily import DatasetQueryStatsFactory
 from .domain import DomainFactory
@@ -12,6 +12,7 @@ from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
 from .event import EventFactory
+from .exploration import ExplorationFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
 from .platform import PlatformFactory
@@ -33,7 +34,7 @@ factories = [
     DataProductSettingFactory,
     DataProductSettingValueFactory,
     DataProductTypeFactory,
-    DataProductDatasetAssociationFactory,
+    InputPortFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetQueryStatsFactory,
@@ -55,6 +56,7 @@ factories = [
     TechnicalAssetFactory,
     ThemeSettingsFactory,
     NotificationFactory,
+    ExplorationFactory,
 ]
 
 for factory_model in factories:

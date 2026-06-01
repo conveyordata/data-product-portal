@@ -23,4 +23,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column("data_output_configuration", "schema_path")
+    op.drop_column("data_output_configurations", "schema_path")

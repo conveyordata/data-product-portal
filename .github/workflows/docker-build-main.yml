@@ -1,5 +1,4 @@
 name: Docker Image CI
-
 on:
   push:
     branches:
@@ -15,7 +14,8 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Get commit hash
@@ -23,24 +23,26 @@ jobs:
         run: echo "version=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
     outputs:
         version: ${{ steps.vars.outputs.version }}
-  backend:
+
+  portal-docker:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
     needs: ["prep-version"]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
           aws-region: us-east-1
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@376925c9d111252e87ae59691e5a442dd100ef6a # v2.1.3
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
         with:
           registries: ${{ secrets.PUBLICAWSACCOUNTID }}
           registry-type: public
@@ -50,79 +52,46 @@ jobs:
         shell: bash
         env:
           ECR_REGISTRY: public.ecr.aws/conveyordata
-          ECR_REPOSITORY: data-product-portal/backend
+          ECR_REPOSITORY: data-product-portal
           IMAGE_TAG: ${{ needs.prep-version.outputs.version }}
         run: |
-          docker build ./backend -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG"
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-  frontend:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    needs: ["prep-version"]
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
-          aws-region: us-east-1
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@376925c9d111252e87ae59691e5a442dd100ef6a # v2.1.3
-        with:
-          registries: ${{ secrets.PUBLICAWSACCOUNTID }}
-          registry-type: public
-          mask-password: "true"
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-publish
-        shell: bash
-        env:
-          ECR_REGISTRY: public.ecr.aws/conveyordata
-          ECR_REPOSITORY: data-product-portal/frontend
-          IMAGE_TAG: ${{ needs.prep-version.outputs.version }}
-        run: |
-          docker build ./frontend -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
-          echo "image_tag=$IMAGE_TAG"
-          echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
   helm:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    needs: [ "prep-version" ]
+    needs: ["prep-version"]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
           aws-region: us-east-1
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@376925c9d111252e87ae59691e5a442dd100ef6a # v2.1.3
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
         with:
           registries: ${{ secrets.PUBLICAWSACCOUNTID }}
           registry-type: public
           mask-password: "true"
+      - name: Install helm
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
       - name: Publish Helm package
-        uses: WyriHaximus/github-action-helm3@e3894d973c282349e3d41d3347767f2b2545b583 # v4.0.2
         env:
           VERSION: ${{ needs.prep-version.outputs.version }}
-        with:
-          exec: |
-            helm package helm --version 0.0.0-$VERSION
-            helm push data-product-portal-0.0.0-$VERSION.tgz oci://public.ecr.aws/conveyordata
+        run: |
+          helm package helm --version 0.0.0-$VERSION
+          helm push data-product-portal-0.0.0-$VERSION.tgz oci://public.ecr.aws/conveyordata
 
   deploy-on-portal-dev:
     name: Deploy to portal dev
@@ -130,9 +99,10 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: ["backend", "frontend", "helm"]
+    needs: ["portal-docker", "helm"]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
       - name: Dispatch to demo-portal-infrastructure

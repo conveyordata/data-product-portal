@@ -15,6 +15,7 @@ type Props = {
     hasSquareBorder?: boolean;
     color?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'light' | 'dark';
     inverted?: boolean;
+    className?: string;
 };
 export const CustomSvgIconLoader = ({
     iconComponent,
@@ -23,16 +24,22 @@ export const CustomSvgIconLoader = ({
     size = 'default',
     color = 'primary',
     inverted = false,
+    className,
     ...otherProps
 }: Props) => {
     return (
         <Icon
             component={iconComponent}
-            className={clsx([styles.defaultIcon, { [styles.iconBorder]: hasRoundBorder }, styles[size]], {
-                [styles[color]]: color,
-                [styles.inverted]: inverted,
-                [styles.squareBorder]: hasSquareBorder,
-            })}
+            className={clsx(
+                [styles.defaultIcon, styles[size]],
+                {
+                    [styles.iconBorder]: hasRoundBorder,
+                    [styles[color]]: color,
+                    [styles.inverted]: inverted,
+                    [styles.squareBorder]: hasSquareBorder,
+                },
+                className,
+            )}
             {...otherProps}
         />
     );

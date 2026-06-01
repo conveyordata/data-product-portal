@@ -17,13 +17,11 @@ class TestRolesRouter:
     }
 
     def test_get_roles(self, client: TestClient):
-        role: Role = RoleFactory(scope="global")
         response = client.get(f"{ENDPOINT}/global")
 
         assert response.status_code == 200
         data = response.json()
-        assert len(data["roles"]) == 1
-        assert data["roles"][0]["scope"] == role.scope
+        assert len(data["roles"]) == 2  # We return the 2 global roles
 
     @pytest.mark.usefixtures("admin")
     def test_create_role(self, client: TestClient):
@@ -107,11 +105,11 @@ class TestRolesRouter:
         role: Role = RoleFactory(scope=Scope.DATASET)
         response = client.get(f"{ENDPOINT}/{role.scope}")
         assert response.status_code == 200
-        assert len(response.json()["roles"]) == 1
+        roles_before = len(response.json()["roles"])
 
         response = client.delete(f"{ENDPOINT}/{role.id}")
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}/{role.scope}")
         assert response.status_code == 200
-        assert len(response.json()["roles"]) == 0
+        assert roles_before - len(response.json()["roles"]) == 1

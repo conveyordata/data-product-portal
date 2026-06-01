@@ -4,10 +4,10 @@ services:
       file: ../../compose.yaml
       service: mailhog
 
-  backend:
+  portal:
     extends:
       file: ../../compose.yaml
-      service: backend
+      service: portal
     env_file:
       - .env.portal
     # Override the command to use the local portal_seed.sql
@@ -15,21 +15,10 @@ services:
       bash -c "python -m app.db_tool init --force /demo/basic/portal_seed.sql
       && uvicorn app.main:app --host 0.0.0.0 --port 5050"
     volumes:
-      # Mount the demo directory so the backend can access the local portal_seed.sql
+      # Override the PWD-based config.js mount from the base service (last mount wins)
+      - ../../frontend/config.docker.js:/frontend_dist/config.js
+      # Mount the demo directory so the portal can access the local portal_seed.sql
       - .:/demo/basic
-    depends_on:
-      mailhog:
-         condition: service_started
-      postgresql:
-        condition: service_healthy
-
-  frontend:
-    extends:
-      file: ../../compose.yaml
-      service: frontend
-    volumes:
-      # Override the root volume mount which uses PWD
-      - ../../frontend/config.docker.js:/app/dist/config.js
 
   provisioner:
     build:
@@ -71,19 +60,6 @@ services:
       interval: 2s
       timeout: 1s
       retries: 120
-
-  nginx:
-    extends:
-      file: ../../compose.yaml
-      service: nginx
-    ports:
-      - "8080:80"
-      - "5050:5050"
-      - "6060:6060"
-    depends_on:
-      - backend
-      - frontend
-      - provisioner
 
 volumes:
   postgresql-demo-data:

@@ -10,9 +10,9 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.graph.service import GraphService
 from tests import test_session
 from tests.factories import (
-    DataProductDatasetAssociationFactory,
     DataProductFactory,
     DatasetFactory,
+    InputPortFactory,
 )
 
 
@@ -30,8 +30,8 @@ class TestGraphServiceEnumMatching:
         consumer_approved = DataProductFactory()
 
         # Create links with different statuses
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_approved,
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_approved,
             dataset=dataset,
             status=DecisionStatus.APPROVED,
         )
@@ -39,8 +39,7 @@ class TestGraphServiceEnumMatching:
         # Get graph data
         service = GraphService(test_session)
         graph_data = service.get_graph_data(
-            data_product_nodes_enabled=True,
-            dataset_nodes_enabled=True,
+            output_port_nodes_enabled=True,
         )
 
         # Check that only the approved link is animated
@@ -59,8 +58,8 @@ class TestGraphServiceEnumMatching:
         consumer_pending = DataProductFactory()
 
         # Create links with different statuses
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_pending,
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_pending,
             dataset=dataset,
             status=DecisionStatus.PENDING,
         )
@@ -68,8 +67,7 @@ class TestGraphServiceEnumMatching:
         # Get graph data
         service = GraphService(test_session)
         graph_data = service.get_graph_data(
-            data_product_nodes_enabled=True,
-            dataset_nodes_enabled=True,
+            output_port_nodes_enabled=True,
         )
 
         # Check that only the approved link is animated
@@ -88,8 +86,8 @@ class TestGraphServiceEnumMatching:
         consumer_denied = DataProductFactory()
 
         # Create links with different statuses
-        DataProductDatasetAssociationFactory(
-            data_product=consumer_denied,
+        InputPortFactory(
+            consuming_abstract_data_product=consumer_denied,
             dataset=dataset,
             status=DecisionStatus.DENIED,
         )
@@ -97,8 +95,7 @@ class TestGraphServiceEnumMatching:
         # Get graph data
         service = GraphService(test_session)
         graph_data = service.get_graph_data(
-            data_product_nodes_enabled=True,
-            dataset_nodes_enabled=True,
+            output_port_nodes_enabled=True,
         )
 
         # Check that only the approved link is animated

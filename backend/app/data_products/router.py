@@ -1,10 +1,16 @@
-from copy import deepcopy
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Query,
+    Request,
+)
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.schema_response import InputPort
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
@@ -15,9 +21,6 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
@@ -25,11 +28,17 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.data_products import email
-from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.input_ports.model import (
-    DataProductDatasetAssociation,
+from app.core.webhooks.events import (
+    DataProductAboutUpdatedEvent,
+    DataProductCreatedEvent,
+    DataProductDeletedEvent,
+    DataProductInputPortLinkedEvent,
+    DataProductInputPortUnlinkedEvent,
+    DataProductSettingChangedEvent,
+    DataProductStatusUpdatedEvent,
+    DataProductUpdatedEvent,
 )
+from app.core.webhooks.v2 import _emits_event
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -38,17 +47,18 @@ from app.data_products.schema_request import (
     DataProductUpdate,
     DataProductUsageUpdate,
     LinkInputPortsToDataProduct,
+    RequestInputPortsForDataProductRequest,
 )
 from app.data_products.schema_response import (
     CreateDataProductResponse,
-    DataProductsGet,
-    DatasetLinks,
     GetDataProductInputPortsResponse,
     GetDataProductResponse,
     GetDataProductRolledUpTagsResponse,
     GetDataProductSettingsResponse,
     GetDataProductsResponse,
+    GetDataProductsResponseItem,
     LinkInputPortsToDataProductPost,
+    RequestInputPortsForDataProductResponse,
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
@@ -64,7 +74,7 @@ from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
 
 
 @router.post(
@@ -88,18 +98,24 @@ router = APIRouter()
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver))
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver)
+        ),
+        Depends(_emits_event(DataProductCreatedEvent)),
     ],
 )
 def create_data_product(
+    request: Request,
     data_product: DataProductCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateDataProductResponse:
     created_data_product = DataProductService(db).create_data_product(data_product)
+    created_id = created_data_product.id
     owners = data_product.owners
     _assign_owner_role_assignments(
-        created_data_product.id,
+        created_id,
         owners=owners,
         db=db,
         actor=authenticated_user,
@@ -108,32 +124,38 @@ def create_data_product(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_CREATED,
-            subject_id=created_data_product.id,
+            subject_id=created_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_data_product_notifications(
-        data_product_id=created_data_product.id,
+        data_product_id=created_id,
         event_id=event_id,
         extra_receiver_ids=owners,
     )
     RefreshInfrastructureLambda().trigger()
-    OutputPortService(db).recalculate_search_for_output_ports_of_product(
-        created_data_product.id
+    if data_product.input_ports is not None:
+        request_input_ports_for_data_product(
+            created_id,
+            data_product.input_ports,
+            background_tasks=background_tasks,
+            http_request=request,
+            authenticated_user=authenticated_user,
+            db=db,
+        )
+    request.state.event = DataProductCreatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(created_id)
+        )
     )
-    return CreateDataProductResponse(id=created_data_product.id)
+    return CreateDataProductResponse(id=created_id)
 
 
 def _assign_owner_role_assignments(
     data_product_id: UUID, owners: Sequence[UUID], db: Session, actor: User
 ) -> None:
     owner_role = RoleService(db).find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
-    if not owner_role:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Owner role not found",
-        )
 
     assignment_service = RoleAssignmentService(db)
     for owner_id in owners:
@@ -176,13 +198,19 @@ def _assign_owner_role_assignments(
         Depends(
             Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
         ),
+        Depends(_emits_event(DataProductDeletedEvent)),
     ],
 )
 def remove_data_product(
     id: UUID,
+    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
+    data_product_for_event = DataProductService(db).get_data_product(id)
+    request.state.event = DataProductDeletedEvent(
+        data_product=GetDataProductResponse.model_validate(data_product_for_event)
+    )
     data_product = DataProductService(db).remove_data_product(id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
@@ -216,15 +244,22 @@ def remove_data_product(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
+        Depends(_emits_event(DataProductUpdatedEvent)),
     ],
 )
 def update_data_product(
     id: UUID,
     data_product: DataProductUpdate,
+    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateDataProductResponse:
     result = DataProductService(db).update_data_product(id, data_product)
+    request.state.event = DataProductUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
@@ -254,19 +289,26 @@ def update_data_product(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
+        Depends(_emits_event(DataProductAboutUpdatedEvent)),
     ],
 )
 def update_data_product_about(
     id: UUID,
     data_product: DataProductAboutUpdate,
+    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product = DataProductService(db).update_data_product_about(id, data_product)
+    DataProductService(db).update_data_product_about(id, data_product)
+    request.state.event = DataProductAboutUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
-            subject_id=data_product.id,
+            subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
@@ -289,19 +331,26 @@ def update_data_product_about(
                 Action.DATA_PRODUCT__UPDATE_STATUS, DataProductResolver
             )
         ),
+        Depends(_emits_event(DataProductStatusUpdatedEvent)),
     ],
 )
 def update_data_product_status(
     id: UUID,
     data_product: DataProductStatusUpdate,
+    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product = DataProductService(db).update_data_product_status(id, data_product)
+    DataProductService(db).update_data_product_status(id, data_product)
+    request.state.event = DataProductStatusUpdatedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
-            subject_id=data_product.id,
+            subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
@@ -335,28 +384,6 @@ def update_data_product_usage(
     )
 
 
-def _send_dataset_link_emails(
-    dataset_links: list[DataProductDatasetAssociation],
-    background_tasks: BackgroundTasks,
-    actor: User,
-    db: Session,
-) -> None:
-    for dataset_link in dataset_links:
-        if dataset_link.dataset.access_type != OutputPortAccessType.UNRESTRICTED:
-            approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
-                dataset_link.dataset_id,
-                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-            )
-            background_tasks.add_task(
-                email.send_dataset_link_email(
-                    dataset_link.data_product,
-                    dataset_link.dataset,
-                    requester=deepcopy(actor),
-                    approvers=[deepcopy(approver) for approver in approvers],
-                )
-            )
-
-
 @router.get("/{id}/graph")
 def get_data_product_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
@@ -372,16 +399,23 @@ def get_data_product_graph_data(
                 Action.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
             )
         ),
+        Depends(_emits_event(DataProductSettingChangedEvent)),
     ],
 )
 def set_value_for_data_product(
     id: UUID,
     setting_id: UUID,
     value: str,
+    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     DataProductSettingService(db).set_value_for_product(setting_id, id, value)
+    request.state.event = DataProductSettingChangedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_SETTING_UPDATED,
@@ -393,50 +427,83 @@ def set_value_for_data_product(
     RefreshInfrastructureLambda().trigger()
 
 
-_router = router
-router = APIRouter(tags=["Data Products"])
-route = "/v2/data_products"
-
-router.include_router(_router, prefix=route)
+_input_ports_responses = {
+    400: {
+        "description": "Output port not found",
+        "content": {
+            "application/json": {"example": {"detail": "Output port not found"}}
+        },
+    },
+    404: {
+        "description": "Data Product not found",
+        "content": {
+            "application/json": {"example": {"detail": "Data Product id not found"}}
+        },
+    },
+}
+_input_ports_dependencies = [
+    Depends(
+        Authorization.enforce(
+            Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+            DataProductResolver,
+        )
+    ),
+]
 
 
 @router.post(
-    f"{route}/{{id}}/link_input_ports",
-    responses={
-        400: {
-            "description": "Output port not found",
-            "content": {
-                "application/json": {"example": {"detail": "Output port not found"}}
-            },
-        },
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
-                DataProductResolver,
-            )
-        ),
-    ],
+    "/{id}/link_input_ports",
+    responses=_input_ports_responses,
+    dependencies=_input_ports_dependencies,
+    deprecated=True,
 )
 def link_input_ports_to_data_product(
     id: UUID,
     link_input_ports: LinkInputPortsToDataProduct,
+    request: Request,
     background_tasks: BackgroundTasks,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> LinkInputPortsToDataProductPost:
-    dataset_links = DataProductService(db).link_datasets_to_data_product(
+    return LinkInputPortsToDataProductPost(
+        input_port_links=request_input_ports_for_data_product(
+            id,
+            RequestInputPortsForDataProductRequest(
+                output_ports=link_input_ports.input_ports,
+                justification=link_input_ports.justification,
+            ),
+            background_tasks,
+            http_request=request,
+            authenticated_user=authenticated_user,
+            db=db,
+        ).input_port_links
+    )
+
+
+@router.post(
+    "/{id}/input_ports",
+    responses=_input_ports_responses,
+    dependencies=_input_ports_dependencies
+    + [Depends(_emits_event(DataProductInputPortLinkedEvent))],
+)
+def request_input_ports_for_data_product(
+    id: UUID,
+    body: RequestInputPortsForDataProductRequest,
+    background_tasks: BackgroundTasks,
+    http_request: Request,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> RequestInputPortsForDataProductResponse:
+    input_ports = DataProductService(db).request_input_ports(
         id,
-        link_input_ports.input_ports,
-        link_input_ports.justification,
+        body.output_ports,
+        body.justification,
         actor=authenticated_user,
+    )
+    http_request.state.event = DataProductInputPortLinkedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
     )
 
     event_ids = EventService(db).create_events(
@@ -447,44 +514,47 @@ def link_input_ports_to_data_product(
                     if dataset_link.status == DecisionStatus.PENDING
                     else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
-                subject_id=dataset_link.data_product_id,
+                subject_id=dataset_link.consuming_abstract_data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=dataset_link.dataset_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
             )
-            for dataset_link in dataset_links
+            for dataset_link in input_ports
         ]
     )
-    for dataset_link, event_id in zip(dataset_links, event_ids):
+    for dataset_link, event_id in zip(input_ports, event_ids):
         if dataset_link.status == DecisionStatus.APPROVED:
             NotificationService(db).create_data_product_notifications(
-                data_product_id=dataset_link.data_product_id, event_id=event_id
+                data_product_id=dataset_link.consuming_abstract_data_product_id,
+                event_id=event_id,
             )
 
-    _send_dataset_link_emails(dataset_links, background_tasks, authenticated_user, db)
+    DataProductService(db).send_input_port_requested_emails_to_output_port_owners(
+        input_ports, background_tasks, authenticated_user
+    )
     RefreshInfrastructureLambda().trigger()
-    return LinkInputPortsToDataProductPost(
-        input_port_links=[dataset_link.id for dataset_link in dataset_links]
+    return RequestInputPortsForDataProductResponse(
+        input_port_links=[dataset_link.id for dataset_link in input_ports]
     )
 
 
-@router.get(route)
+@router.get("")
 def get_data_products(
     db: Session = Depends(get_db_session),
     filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
-            DataProductsGet.model_validate(data_product_old).convert()
-            for data_product_old in DataProductService(db).get_data_products(
+            GetDataProductsResponseItem.model_validate(dp)
+            for dp in DataProductService(db).get_data_products(
                 filter_to_user_with_assigment
             )
         ]
     )
 
 
-@router.get(f"{route}/{{id}}/history")
+@router.get("/{id}/history")
 def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
@@ -498,27 +568,27 @@ def get_data_product_event_history(
     )
 
 
-@router.get(f"{route}/{{id}}")
+@router.get("/{id}")
 def get_data_product(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductResponse:
     return DataProductService(db).get_data_product(id)
 
 
-@router.get(f"{route}/{{id}}/input_ports")
+@router.get("/{id}/input_ports")
 def get_data_product_input_ports(
     id: UUID,
     db: Session = Depends(get_db_session),
 ) -> GetDataProductInputPortsResponse:
     return GetDataProductInputPortsResponse(
         input_ports=[
-            DatasetLinks.model_validate(input_port).convert()
+            InputPort.model_validate(input_port)
             for input_port in DataProductService(db).get_input_ports(id)
         ]
     )
 
 
-@router.get(f"{route}/{{id}}/rolled_up_tags")
+@router.get("/{id}/rolled_up_tags")
 def get_data_product_rolled_up_tags(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductRolledUpTagsResponse:
@@ -528,7 +598,7 @@ def get_data_product_rolled_up_tags(
 
 
 @router.delete(
-    f"{route}/{{id}}/input_ports/{{input_port_id}}",
+    "/{id}/input_ports/{output_port_id}",
     responses={
         400: {
             "description": "Output port not found",
@@ -550,16 +620,22 @@ def get_data_product_rolled_up_tags(
                 DataProductResolver,
             )
         ),
+        Depends(_emits_event(DataProductInputPortUnlinkedEvent)),
     ],
 )
 def unlink_input_port_from_data_product(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
+    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_dataset = DataProductService(db).unlink_dataset_from_data_product(
-        id, input_port_id
+    data_product_dataset = DataProductService(db).remove_input_port(id, output_port_id)
+
+    request.state.event = DataProductInputPortUnlinkedEvent(
+        data_product=GetDataProductResponse.model_validate(
+            DataProductService(db).get_data_product(id)
+        )
     )
 
     event_id = EventService(db).create_event(
@@ -583,7 +659,7 @@ def unlink_input_port_from_data_product(
     RefreshInfrastructureLambda().trigger()
 
 
-@router.get(f"{route}/{{id}}/settings")
+@router.get("/{id}/settings")
 def get_data_product_settings(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductSettingsResponse:

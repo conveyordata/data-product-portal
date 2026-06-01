@@ -1,5 +1,6 @@
 from uuid import UUID
-from warnings import deprecated
+
+from pydantic import Field
 
 from app.configuration.data_product_settings.enums import (
     DataProductSettingScope,
@@ -34,14 +35,4 @@ class DataProductSettingValue(BaseValue):
 
 
 class OutputPortSettingValue(BaseValue):
-    output_port_id: UUID
-
-
-@deprecated("Use OutputPortSettingValue instead")
-class DatasetSettingValue(BaseValue):
-    dataset_id: UUID
-
-    def convert(self) -> OutputPortSettingValue:
-        return OutputPortSettingValue(
-            **self.model_dump(exclude={"dataset_id"}), output_port_id=self.dataset_id
-        )
+    output_port_id: UUID = Field(validation_alias="dataset_id")

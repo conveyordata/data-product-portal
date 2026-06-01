@@ -2,7 +2,6 @@ import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { TagModel } from '@/types/tag';
-import styles from './data-product-description.module.scss';
 
 type Props = {
     lifecycle: DataProductLifeCycle | null;
@@ -17,21 +16,21 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
     const { t } = useTranslation();
 
     return (
-        <Flex vertical className={styles.statusInfo}>
-            <Space className={styles.contentSubtitle}>
-                <Flex className={styles.statusBadge}>
+        <Flex vertical gap={'middle'}>
+            <Space size={'large'}>
+                <Flex gap={'small'}>
                     <Typography.Text strong>{t('Status')}</Typography.Text>
                     <Tag color={lifecycle?.color ?? 'default'}>{lifecycle?.name ?? t('Unknown')}</Tag>
                 </Flex>
-                <Flex className={styles.statusBadge}>
+                <Flex gap={'small'}>
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>
                     <Typography.Text>{namespace}</Typography.Text>
                 </Flex>
-                <Flex className={styles.statusBadge}>
+                <Flex gap={'small'}>
                     <Typography.Text strong>{t('Domain')}</Typography.Text>
                     <Typography.Text>{domain}</Typography.Text>
                 </Flex>
-                <Flex className={styles.statusBadge}>
+                <Flex gap={'small'}>
                     <Typography.Text strong>{t('Type')}</Typography.Text>
                     <Typography.Text>{type}</Typography.Text>
                 </Flex>
@@ -43,9 +42,7 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
                     </Tag>
                 ))}
             </Space>
-            <Space>
-                <Typography.Paragraph italic>{description}</Typography.Paragraph>
-            </Space>
+            <Typography.Paragraph italic>{description}</Typography.Paragraph>
         </Flex>
     );
 }

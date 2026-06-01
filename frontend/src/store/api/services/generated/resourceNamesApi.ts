@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/dataProductsOutputPortsDataQualityApi";
+import { api } from "@/store/api/services/generated/explorationsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     sanitizeResourceName: build.query<
@@ -79,6 +79,7 @@ export enum ResourceNameModel {
   OutputPort = "output_port",
   DataProductSetting = "data_product_setting",
   OutputPortSetting = "output_port_setting",
+  Exploration = "exploration",
 }
 export const {
   useSanitizeResourceNameQuery,

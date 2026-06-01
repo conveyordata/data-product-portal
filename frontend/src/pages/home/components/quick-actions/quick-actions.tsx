@@ -33,16 +33,16 @@ export function QuickActions() {
         },
         {
             icon: <FundViewOutlined />,
-            title: t('Manage Products'),
-            description: t('Monitor and maintain your Data Products.'),
-            primaryAction: { label: t('Product Studio'), route: ApplicationPaths.Studio },
+            title: t('Manage Products and Explorations'),
+            description: t('Monitor and maintain your Data Products and Explorations.'),
+            primaryAction: { label: t('Go to Product Studio'), route: ApplicationPaths.Studio },
             color: 'green',
         },
         {
             icon: <EnvironmentOutlined />,
             title: t('Navigate Data Landscape'),
-            description: t('Visualise and harmonise your data landscape.'),
-            primaryAction: { label: t('Domain Explorer'), route: ApplicationPaths.Explorer },
+            description: t('Visualise your data landscape.'),
+            primaryAction: { label: t('Go to Explorer'), route: ApplicationPaths.Explorer },
             color: 'orange',
         },
     ];

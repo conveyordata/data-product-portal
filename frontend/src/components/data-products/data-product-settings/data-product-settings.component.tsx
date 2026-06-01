@@ -241,7 +241,6 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                 onFinish={onSubmit}
                 onFinishFailed={onSubmitFailed}
                 autoComplete={'off'}
-                requiredMark={'optional'}
                 labelWrap
                 labelAlign={'left'}
                 disabled={
