@@ -6,6 +6,8 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import type { SchemaPropertyResponse } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetOutputPortSchemaQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 
+import styles from './data-model-tab.module.scss';
+
 type Props = {
     datasetId: string;
     dataProductId: string;
@@ -68,15 +70,13 @@ function getPropertyColumns(t: ReturnType<typeof useTranslation>['t']) {
             render: (_: unknown, record: SchemaPropertyResponse) => (
                 <Space size={8}>
                     {record.primary_key && (
-                        <Typography.Text style={{ color: '#1677ff', fontWeight: 500 }}>{t('PK')}</Typography.Text>
+                        <Typography.Text className={styles['primary-key-flag']}>{t('PK')}</Typography.Text>
                     )}
                     {record.unique && (
-                        <Typography.Text style={{ color: '#722ed1', fontWeight: 500 }}>{t('Unique')}</Typography.Text>
+                        <Typography.Text className={styles['unique-flag']}>{t('Unique')}</Typography.Text>
                     )}
                     {record.partitioned && (
-                        <Typography.Text style={{ color: '#13c2c2', fontWeight: 500 }}>
-                            {t('Partitioned')}
-                        </Typography.Text>
+                        <Typography.Text className={styles['partitioned-flag']}>{t('Partitioned')}</Typography.Text>
                     )}
                 </Space>
             ),
