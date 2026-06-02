@@ -25,6 +25,8 @@ A worked example for an AWS S3-backed platform — covering every event in the c
 - **Option 2: Full API response objects embedded** — continue embedding `GetDataProductResponse` and friends directly (current approach).
 - **Option 3: Dedicated per-event payload models** — define a small set of purpose-built payload models independent of the API response layer.
 - **Option 4: ID-only events + finalizers (Kubernetes-style)** — events carry only IDs; deletes go through a finalizer protocol where the portal marks an object for deletion, waits for every registered provisioner to run teardown and remove its finalizer, and only then completes the delete.
+- **Option 5**: To facilitate easy deletes or migrations for domain for example, we could guide people to keep the state of their latest "apply". For example if the provisioner created an s3 bucket or location for a data product, it should keep that in a state object (dynamodb or ssm parameter), that way when the domain changes you can check the state object, see the name of the bucket and see it needs changing. This also helps with a delete since you know keep track of every infra component for an object
+- **Option 6**: to facicilate deletes a delete product should also trigger delete events for all Technical assets and Output ports and links. 
 
 ## Decision Outcome
 
@@ -32,7 +34,7 @@ A worked example for an AWS S3-backed platform — covering every event in the c
 
 Soft deletes (Option 1) require a cross-cutting DB schema change and still leave the provisioner dependent on SDK round-trips for every event — including the hot paths (`link_approved`, `technical_asset.linked`) where two-sided hydration is exactly what the provisioner needs. Full API objects (Option 2) accidentally solve the delete problem but couple the event contract to internal API shapes and ship a lot of display metadata the provisioner never touches.
 
-Finalizers (Option 4) are conceptually clean — Kubernetes uses the same pattern to give controllers a chance to clean up before an object is removed — but they invert the operational model. Portal deletes become asynchronous and block on external systems: UI affordances like "delete this data product" no longer reflect an immediate state change, partial failures are easy (one provisioner stuck, the object stuck with it), and the portal must take on finalizer registration, retries, timeouts, abandonment policies, and dead-letter handling. Beyond the delete case, non-delete events would still need SDK round-trips — the finalizer trick only buys delete semantics. Moving from fire-and-forget events to two-phase commit deletes is a significantly larger architectural step than this problem warrants. We may revisit this if we later need strong delete-ordering guarantees across multiple provisioners.
+Finalizers (Option 4) are conceptually clean — Kubernetes uses the same pattern to give controllers a chance to clean up before an object is removed — but they invert the operational model. Portal deletes become asynchronous and block on external systems: UI affordances like "delete this data product" no longer reflect an immediate state change, partial failures are easy (one provisioner stuck, the object stuck with it). Beyond the delete case, non-delete events would still need SDK round-trips — the finalizer trick only buys delete semantics. Moving from fire-and-forget events to two-phase commit deletes is a significantly larger architectural step than this problem warrants.
 
 Dedicated models give provisioners a stable, right-sized contract that survives internal refactors, keeps deletes fire-and-forget, and lets each event carry exactly the state needed for the provisioner's branching logic.
 
@@ -70,6 +72,8 @@ Dedicated models give provisioners a stable, right-sized contract that survives 
 - **Good, because** branching state (link status APPROVED vs PENDING, TA status transitions) can be carried explicitly on the event.
 - **Neutral, because** requires upfront scoping of each event (see Appendix A) and a worked use case to validate the scope.
 - **Bad, because** two model hierarchies (API responses + event payloads) must be maintained in parallel; care is needed to keep them from drifting back into coupling.
+- 
+- **Bad, because** Payloads might still not include what you need in a provisioner, it is very hard to product. So you might still need to use the SDK to fetch extra information. Which is possible for update, but not for delete
 
 ### Option 4: ID-only events + finalizers (Kubernetes-style)
 
@@ -77,8 +81,7 @@ Dedicated models give provisioners a stable, right-sized contract that survives 
 - **Good, because** the delete-cascade problem dissolves cleanly: deletes are explicitly blocked until every provisioner signs off, so nothing is gone before teardown finishes.
 - **Good, because** the pattern is well understood from Kubernetes; provisioners that already think in terms of controllers map onto it directly.
 - **Bad, because** portal deletes become asynchronous and block on external systems, changing the UX contract of every delete affordance in the product.
-- **Bad, because** the portal must take ownership of finalizer registration, retries, timeouts, abandonment, and dead-letter handling — significant new infrastructure for one half of the problem.
-- **Bad, because** non-delete events (the majority) still need SDK round-trips; the finalizer trick only addresses delete semantics.
+- **Bad, because** events still need SDK round-trips; the finalizer trick only addresses delete semantics.
 - **Bad, because** moving from fire-and-forget events to two-phase-commit deletes is a much larger architectural shift than this ADR is scoped to make.
 
 ---
