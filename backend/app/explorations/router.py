@@ -71,7 +71,8 @@ def create_exploration(
             background_tasks,
             authenticated_user,
         )
-        RefreshInfrastructureLambda().trigger()
+
+    RefreshInfrastructureLambda().trigger()
     return created_exploration
 
 

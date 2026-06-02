@@ -42,7 +42,12 @@ export type UpdateRoleApiArg = {
 export type GetRolesApiResponse =
   /** status 200 Successful Response */ GetRolesResponse;
 export type GetRolesApiArg = Scope;
-export type Scope = "dataset" | "data_product" | "domain" | "global";
+export type Scope =
+  | "dataset"
+  | "data_product"
+  | "exploration"
+  | "domain"
+  | "global";
 export type AuthorizationAction =
   | 101
   | 102
@@ -95,8 +100,6 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
-  input?: any;
-  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];

@@ -532,6 +532,8 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                 },
             ];
             break;
+        case Scope.EXPLORATION:
+            break;
     }
 
     const determineAccess = (permission: AuthorizationAction) => {

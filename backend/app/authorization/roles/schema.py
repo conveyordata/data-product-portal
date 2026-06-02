@@ -10,6 +10,7 @@ from app.shared.schema import ORMModel
 class Scope(StrEnum):
     DATASET = "dataset"
     DATA_PRODUCT = "data_product"
+    EXPLORATION = "exploration"
     DOMAIN = "domain"
     GLOBAL = "global"
 

@@ -50,7 +50,7 @@ export const ExplorationStart = () => {
                     <Flex align="center" gap="small">
                         <BookOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
                         <Title level={5} style={{ margin: 0 }}>
-                            {t('How to Use This Exploration')}
+                            {t('How to use this Exploration')}
                         </Title>
                     </Flex>
                     <Text type="secondary">{t('Follow these steps to get started with exploring data.')}</Text>

@@ -73,8 +73,6 @@ export type ValidationError = {
   loc: (string | number)[];
   msg: string;
   type: string;
-  input?: any;
-  ctx?: object;
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
@@ -89,7 +87,12 @@ export type User = {
   can_become_admin: boolean;
   admin_expiry?: string | null;
 };
-export type Scope = "dataset" | "data_product" | "domain" | "global";
+export type Scope =
+  | "dataset"
+  | "data_product"
+  | "exploration"
+  | "domain"
+  | "global";
 export type AuthorizationAction =
   | 101
   | 102

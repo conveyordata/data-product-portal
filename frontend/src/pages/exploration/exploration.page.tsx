@@ -1,4 +1,4 @@
-import { ProductOutlined, RocketOutlined } from '@ant-design/icons';
+import { ProductOutlined, RocketOutlined, TeamOutlined } from '@ant-design/icons';
 import { Flex, Space, Tabs, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import { ExplorationStart } from '@/pages/exploration/components/exploration-sta
 import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
 import { useGetExplorationQuery } from '@/store/api/services/generated/explorationsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
+import { ExplorationTeam } from '@/pages/exploration/components/exploration-team.tsx';
 
 export function ExplorationPage() {
     const { t } = useTranslation();
@@ -47,8 +48,8 @@ export function ExplorationPage() {
         return null;
     }
 
-    return (
-        <Flex vertical gap={'middle'}>
+    const header = (
+        <>
             <Flex gap={'middle'} align={'center'} justify={'left'}>
                 <CustomSvgIconLoader iconComponent={explorationBorderIcon} size="large" />
                 <Typography.Title level={3} style={{ margin: 0 }} ellipsis={{ tooltip: exploration?.name, rows: 2 }}>
@@ -70,6 +71,12 @@ export function ExplorationPage() {
                 </Flex>
             </Space>
             <Typography.Paragraph italic>{exploration?.description}</Typography.Paragraph>
+        </>
+    );
+
+    return (
+        <Flex vertical gap={'middle'}>
+            {header}
             <Tabs
                 activeKey={activeTab}
                 onChange={onTabChange}
@@ -86,6 +93,12 @@ export function ExplorationPage() {
                         icon: <OutputPortOutlined />,
                         children: <ExplorationInputPorts explorationId={explorationId} />,
                     },
+                    {
+                        label: <Typography.Text>{t('Team')}</Typography.Text>,
+                        key: ExplorationTabKeys.Team,
+                        icon: <TeamOutlined />,
+                        children: <ExplorationTeam explorationId={explorationId} />
+                    }
                 ]}
             />
         </Flex>

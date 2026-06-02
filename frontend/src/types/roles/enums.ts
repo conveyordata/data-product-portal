@@ -17,6 +17,7 @@ export const Scope = {
     GLOBAL: 'global' as ApiScope,
     DATA_PRODUCT: 'data_product' as ApiScope,
     DATASET: 'dataset' as ApiScope,
+    EXPLORATION: 'exploration' as ApiScope,
 };
 
 export type Scope = (typeof Scope)[keyof typeof Scope];

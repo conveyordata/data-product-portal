@@ -4,7 +4,7 @@ import { Flex, Tabs, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DataProductOutlined, OutputPortOutlined } from '@/components/icons';
+import { DataProductOutlined, ExplorationOutlined, OutputPortOutlined } from '@/components/icons';
 import { CreateRoleButton } from '@/pages/roles/components/roles-button.component';
 import { RolesTable } from '@/pages/roles/components/roles-table.component';
 import { Scope } from '@/types/roles';
@@ -24,6 +24,11 @@ export function RoleConfiguration() {
             icon: <GlobalOutlined />,
         },
         {
+            label: t('Exploration'),
+            key: Scope.EXPLORATION,
+            icon: <ExplorationOutlined />
+        },
+        {
             label: t('Data Product'),
             key: Scope.DATA_PRODUCT,
             icon: <DataProductOutlined />,
@@ -40,7 +45,7 @@ export function RoleConfiguration() {
     };
 
     return (
-        <div>
+        <>
             <Flex justify="space-between">
                 <Typography.Title level={3}>{t('Manage Roles')}</Typography.Title>
                 <CreateRoleButton scope={current} />
@@ -49,6 +54,6 @@ export function RoleConfiguration() {
 
             <Tabs onChange={onChange} activeKey={current} items={items} />
             <RolesTable scope={current} />
-        </div>
+        </>
     );
 }
