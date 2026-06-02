@@ -96,7 +96,7 @@ The provisioner needs the data product's namespace, domain, type, and the list o
    - Permission policy: read/write access to `s3://{domain-bucket}/{namespace}/*`.
    - If the data product type confers additional permissions (e.g. cross-account access for a shared type), apply them now.
 3. Create the S3 prefix by uploading a placeholder or relying on the first write.
-4. Call the Portal API to register the subfolder as a `default` technical asset on this data product. This triggers a `technical_asset.created` event — that handler will update the IAM role. Make the handler idempotent so re-running it on an already-existing prefix is safe.
+4. Call the Portal API to register the subfolder as a `default` technical asset on this data product. This triggers a `technical_asset.created` event. That handler should be idempotent and see we already have access.
 5. Update the data product status from `Draft` to `Ready`.
 
 > **Note**: The data product type may influence the base permissions attached to the IAM role. The exact mapping is platform-specific and should be documented per type. Tags and status could similarly influence permissions, but their semantics are not yet defined.
