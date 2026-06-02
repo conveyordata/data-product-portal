@@ -418,7 +418,7 @@ export type SchemaPropertyResponse = {
   partitioned?: boolean;
   partition_key_position?: number | null;
   position: number;
-  properties?: SchemaPropertyResponse[];
+  properties?: SchemaPropertyResponse[] | null;
 };
 export type SchemaObjectResponse = {
   id: string;

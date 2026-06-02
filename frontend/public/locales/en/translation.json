@@ -390,7 +390,7 @@
     "No assignments found for the {{ name }} role.": "No assignments found for the {{ name }} role.",
     "No consumers yet": "No consumers yet",
     "No curated queries available": "No curated queries available",
-    "No data model defined for this output port": "No data model defined for this output port",
+    "No data model defined for this Output Port": "No data model defined for this Output Port",
     "No justification provided": "No justification provided",
     "No Output Ports found": "No $t(Output Ports) found",
     "No Output Ports found matching your search": "No $t(Output Ports) found matching your search",
