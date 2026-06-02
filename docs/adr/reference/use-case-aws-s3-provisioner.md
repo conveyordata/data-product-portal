@@ -260,7 +260,7 @@ No action required. The link was PENDING; no access was ever granted.
 
 Fires when a data product's access to an output port is removed. This can happen to both approved and pending links.
 
-The provisioner needs the requesting data product's namespace and settings, the link status at the time of removal (APPROVED or PENDING), and the S3 configuration of the technical assets behind the output port. Without the status the provisioner cannot tell whether access was ever granted and therefore whether there is anything to revoke.
+The provisioner needs the requesting data product's namespace and settings, the link status at the time of removal (APPROVED or PENDING), and the S3 configuration of the technical assets behind the output port. Without the status the provisioner would need to check the AWS to tell whether access was ever granted and therefore whether there is anything to revoke.
 
 If the link was **APPROVED**:
 
