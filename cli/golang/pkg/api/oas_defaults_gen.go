@@ -3,6 +3,18 @@
 package api
 
 // setDefaults set default value of fields.
+func (s *AzureBlobTechnicalAssetConfiguration) setDefaults() {
+	{
+		val := string("")
+		s.Domain.SetTo(val)
+	}
+	{
+		val := string("")
+		s.Path.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *DataProductLifeCycleCreate) setDefaults() {
 	{
 		val := bool(false)
@@ -122,7 +134,7 @@ func (s *OSISemanticModelTechnicalAssetConfiguration) setDefaults() {
 	}
 	{
 		val := string("")
-		s.FilePath.SetTo(val)
+		s.Location.SetTo(val)
 	}
 }
 
@@ -183,6 +195,46 @@ func (s *S3TechnicalAssetConfiguration) setDefaults() {
 	{
 		val := string("")
 		s.Suffix.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *SchemaPropertyRequest) setDefaults() {
+	{
+		val := bool(false)
+		s.PrimaryKey.SetTo(val)
+	}
+	{
+		val := bool(false)
+		s.Unique.SetTo(val)
+	}
+	{
+		val := bool(false)
+		s.Required.SetTo(val)
+	}
+	{
+		val := bool(false)
+		s.Partitioned.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *SchemaPropertyResponse) setDefaults() {
+	{
+		val := bool(false)
+		s.PrimaryKey.SetTo(val)
+	}
+	{
+		val := bool(false)
+		s.Unique.SetTo(val)
+	}
+	{
+		val := bool(false)
+		s.Required.SetTo(val)
+	}
+	{
+		val := bool(false)
+		s.Partitioned.SetTo(val)
 	}
 }
 

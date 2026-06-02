@@ -9,53 +9,20 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s AccessGranularity) Validate() error {
-	switch s {
-	case "schema":
-		return nil
-	case "table":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s *AppDataProductsTechnicalAssetsSchemaTechnicalAsset) Validate() error {
+func (s *AbstractDataProductInfo) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Status.Validate(); err != nil {
+		if err := s.AbstractDataProductType.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "status",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.TechnicalMapping.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "technical_mapping",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.Configuration.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "configuration",
+			Name:  "abstract_data_product_type",
 			Error: err,
 		})
 	}
@@ -65,39 +32,27 @@ func (s *AppDataProductsTechnicalAssetsSchemaTechnicalAsset) Validate() error {
 	return nil
 }
 
-func (s AppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration) Validate() error {
-	switch s.Type {
-	case S3TechnicalAssetConfigurationAppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration:
-		return nil // no validation needed
-	case GlueTechnicalAssetConfigurationAppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration:
-		if err := s.GlueTechnicalAssetConfiguration.Validate(); err != nil {
-			return err
-		}
+func (s AbstractDataProductType) Validate() error {
+	switch s {
+	case "unknown":
 		return nil
-	case DatabricksTechnicalAssetConfigurationAppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration:
-		if err := s.DatabricksTechnicalAssetConfiguration.Validate(); err != nil {
-			return err
-		}
+	case "data_products":
 		return nil
-	case SnowflakeTechnicalAssetConfigurationAppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration:
-		if err := s.SnowflakeTechnicalAssetConfiguration.Validate(); err != nil {
-			return err
-		}
+	case "explorations":
 		return nil
-	case RedshiftTechnicalAssetConfigurationAppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration:
-		if err := s.RedshiftTechnicalAssetConfiguration.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case PostgreSQLTechnicalAssetConfigurationAppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration:
-		if err := s.PostgreSQLTechnicalAssetConfiguration.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case OSISemanticModelTechnicalAssetConfigurationAppDataProductsTechnicalAssetsSchemaTechnicalAssetConfiguration:
-		return nil // no validation needed
 	default:
-		return errors.Errorf("invalid type %q", s.Type)
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s AccessGranularity) Validate() error {
+	switch s {
+	case "schema":
+		return nil
+	case "table":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
 	}
 }
 
@@ -116,6 +71,8 @@ func (s AuthorizationAction) Validate() error {
 	case 106:
 		return nil
 	case 107:
+		return nil
+	case 108:
 		return nil
 	case 301:
 		return nil
@@ -175,9 +132,78 @@ func (s AuthorizationAction) Validate() error {
 		return nil
 	case 414:
 		return nil
+	case 415:
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *BitolContractRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Schema {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "schema",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *CreateExplorationRequestWithInputPorts) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.InputPorts.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "input_ports",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *CreateOutputPortRequest) Validate() error {
@@ -291,17 +317,6 @@ func (s *CreateTechnicalAssetRequest) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Status.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "status",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if err := s.Configuration.Validate(); err != nil {
 			return err
 		}
@@ -377,6 +392,8 @@ func (s CreateTechnicalAssetRequestConfiguration) Validate() error {
 		}
 		return nil
 	case OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
+		return nil // no validation needed
+	case AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
 		return nil // no validation needed
 	default:
 		return errors.Errorf("invalid type %q", s.Type)
@@ -470,17 +487,6 @@ func (s *DataProductCreate) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.TagIds == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "tag_ids",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if s.Owners == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -496,6 +502,24 @@ func (s *DataProductCreate) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "owners",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.InputPorts.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "input_ports",
 			Error: err,
 		})
 	}
@@ -524,29 +548,6 @@ func (s DataProductIconKey) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
-}
-
-func (s *DataProductInfo) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Type.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "type",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
 }
 
 func (s *DataProductLifeCyclesGet) Validate() error {
@@ -1113,29 +1114,6 @@ func (s *DataProductTypesGetItem) Validate() error {
 	return nil
 }
 
-func (s *DataProductUpdate) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.TagIds == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "tag_ids",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s DataQualityStatus) Validate() error {
 	switch s {
 	case "success":
@@ -1332,6 +1310,44 @@ func (s DecisionStatus) Validate() error {
 	case "pending":
 		return nil
 	case "denied":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *DeviceFlow) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s DeviceFlowStatus) Validate() error {
+	switch s {
+	case "authorization_pending":
+		return nil
+	case "expired":
+		return nil
+	case "denied":
+		return nil
+	case "authorized":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -1723,46 +1739,6 @@ func (s *GetDataProductsResponseItem) Validate() error {
 	return nil
 }
 
-func (s *GetDomainResponse) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.DataProducts == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.DataProducts {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "data_products",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *GetDomainsResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -1941,6 +1917,92 @@ func (s *GetEventHistoryResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "technical_asset",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetExplorationInputPortsResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.InputPorts == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.InputPorts {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "input_ports",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetExplorationResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Owner.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "owner",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetExplorationsResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Explorations == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "explorations",
 			Error: err,
 		})
 	}
@@ -2353,6 +2415,8 @@ func (s GetTechnicalAssetsResponseItemConfiguration) Validate() error {
 		return nil
 	case OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
 		return nil // no validation needed
+	case AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
+		return nil // no validation needed
 	default:
 		return errors.Errorf("invalid type %q", s.Type)
 	}
@@ -2620,17 +2684,6 @@ func (s *InputPort) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.DataProduct.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "data_product",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if err := s.Status.Validate(); err != nil {
 			return err
 		}
@@ -2642,13 +2695,13 @@ func (s *InputPort) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.InputPort.Validate(); err != nil {
+		if err := s.OutputPort.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "input_port",
+			Name:  "output_port",
 			Error: err,
 		})
 	}
@@ -2824,29 +2877,6 @@ func (s *ListOutputPortRoleAssignmentsResponse) Validate() error {
 	return nil
 }
 
-func (s *NamespaceValidation) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Validity.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "validity",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *OutputPort) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -2900,6 +2930,8 @@ func (s OutputPortAccessType) Validate() error {
 		return nil
 	case "private":
 		return nil
+	case "unrestricted":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
@@ -2951,7 +2983,7 @@ func (s *OutputPortCuratedQueriesUpdate) Validate() error {
 	return nil
 }
 
-func (s *OutputPortDataQualitySummaryInput) Validate() error {
+func (s *OutputPortDataQualitySummary) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -3020,98 +3052,7 @@ func (s *OutputPortDataQualitySummaryInput) Validate() error {
 	return nil
 }
 
-func (s OutputPortDataQualitySummaryInputDimensions) Validate() error {
-	var failures []validate.FieldError
-	for key, elem := range s {
-		if err := func() error {
-			if err := elem.Validate(); err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			failures = append(failures, validate.FieldError{
-				Name:  key,
-				Error: err,
-			})
-		}
-	}
-
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *OutputPortDataQualitySummaryOutput) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.OverallStatus.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "overall_status",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if s.TechnicalAssets == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.TechnicalAssets {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "technical_assets",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.Dimensions.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "dimensions",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s OutputPortDataQualitySummaryOutputDimensions) Validate() error {
+func (s OutputPortDataQualitySummaryDimensions) Validate() error {
 	var failures []validate.FieldError
 	for key, elem := range s {
 		if err := func() error {
@@ -3224,6 +3165,40 @@ func (s OutputPortDataQualitySummaryResponseDimensions) Validate() error {
 	return nil
 }
 
+func (s *OutputPortInputPort) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ConsumingAbstractDataProduct.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "consuming_abstract_data_product",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *OutputPortLink) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3242,13 +3217,13 @@ func (s *OutputPortLink) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Output.Validate(); err != nil {
+		if err := s.OutputPort.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "output",
+			Name:  "output_port",
 			Error: err,
 		})
 	}
@@ -3371,6 +3346,43 @@ func (s *OutputPortRoleAssignmentResponse) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "decided_by",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortSchemaResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.SchemaObjects {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "schema_objects",
 			Error: err,
 		})
 	}
@@ -3630,9 +3642,103 @@ func (s RenderTechnicalAssetAccessPathRequestConfiguration) Validate() error {
 		return nil
 	case OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
 		return nil // no validation needed
+	case AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
+		return nil // no validation needed
 	default:
 		return errors.Errorf("invalid type %q", s.Type)
 	}
+}
+
+func (s *RequestInputPortsForDataProductRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.OutputPorts == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "output_ports",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *RequestInputPortsForDataProductResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.InputPortLinks == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "input_port_links",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *RequestInputPortsForExplorationRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.OutputPorts == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "output_ports",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *RequestInputPortsForExplorationResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.InputPortIds == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "input_port_ids",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s ResourceNameModel) Validate() error {
@@ -3646,6 +3752,8 @@ func (s ResourceNameModel) Validate() error {
 	case "data_product_setting":
 		return nil
 	case "output_port_setting":
+		return nil
+	case "exploration":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -3743,6 +3851,190 @@ func (s *Role) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "prototype",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *SchemaObjectRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Properties {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "properties",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *SchemaObjectResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Properties {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "properties",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *SchemaPropertyRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Examples.Get(); ok {
+			if err := func() error {
+				if value == nil {
+					return errors.New("nil is invalid value")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "examples",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Properties {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "properties",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *SchemaPropertyResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Examples.Get(); ok {
+			if err := func() error {
+				if value == nil {
+					return errors.New("nil is invalid value")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "examples",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Properties {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "properties",
 			Error: err,
 		})
 	}
@@ -3914,6 +4206,89 @@ func (s *TagsGet) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s *TechnicalAsset) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.TechnicalMapping.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "technical_mapping",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Configuration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "configuration",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s TechnicalAssetConfiguration) Validate() error {
+	switch s.Type {
+	case S3TechnicalAssetConfigurationTechnicalAssetConfiguration:
+		return nil // no validation needed
+	case GlueTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		if err := s.GlueTechnicalAssetConfiguration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		if err := s.DatabricksTechnicalAssetConfiguration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		if err := s.SnowflakeTechnicalAssetConfiguration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		if err := s.RedshiftTechnicalAssetConfiguration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		if err := s.PostgreSQLTechnicalAssetConfiguration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		return nil // no validation needed
+	case AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
 }
 
 func (s *TechnicalAssetLink) Validate() error {

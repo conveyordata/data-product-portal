@@ -11,7 +11,7 @@ import (
 )
 
 func encodeAddOutputPortDataQualityRunRequest(
-	req *OutputPortDataQualitySummaryInput,
+	req *OutputPortDataQualitySummary,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -138,6 +138,20 @@ func encodeCreateDataProductTypeRequest(
 
 func encodeCreateDomainRequest(
 	req *DomainCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateExplorationRequest(
+	req *CreateExplorationRequestWithInputPorts,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -318,6 +332,20 @@ func encodeDenyOutputPortTechnicalAssetLinkRequest(
 	return nil
 }
 
+func encodeIngestOutputPortContractRequest(
+	req *BitolContractRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeLinkInputPortsToDataProductRequest(
 	req *LinkInputPortsToDataProduct,
 	r *http.Request,
@@ -375,7 +403,7 @@ func encodeModifyOutputPortRoleAssignmentRequest(
 }
 
 func encodeOverwriteOutputPortDataQualitySummaryRequest(
-	req *OutputPortDataQualitySummaryInput,
+	req *OutputPortDataQualitySummary,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -432,6 +460,34 @@ func encodeReplaceOutputPortCuratedQueriesRequest(
 
 func encodeRequestDataProductRoleAssignmentRequest(
 	req *RequestDataProductRoleAssignment,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeRequestInputPortsForDataProductRequest(
+	req *RequestInputPortsForDataProductRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeRequestInputPortsForExplorationRequest(
+	req *RequestInputPortsForExplorationRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

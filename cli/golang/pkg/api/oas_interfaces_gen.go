@@ -45,6 +45,10 @@ type CreateDomainRes interface {
 	createDomainRes()
 }
 
+type CreateExplorationRes interface {
+	createExplorationRes()
+}
+
 type CreateOutputPortRes interface {
 	createOutputPortRes()
 }
@@ -129,10 +133,6 @@ type GetDataProductRolledUpTagsRes interface {
 	getDataProductRolledUpTagsRes()
 }
 
-type GetDataProductSettingsNamespaceSuggestionRes interface {
-	getDataProductSettingsNamespaceSuggestionRes()
-}
-
 type GetDataProductSettingsRes interface {
 	getDataProductSettingsRes()
 }
@@ -161,6 +161,18 @@ type GetEnvironmentRes interface {
 	getEnvironmentRes()
 }
 
+type GetExplorationInputPortsRes interface {
+	getExplorationInputPortsRes()
+}
+
+type GetExplorationRes interface {
+	getExplorationRes()
+}
+
+type GetExplorationsRes interface {
+	getExplorationsRes()
+}
+
 type GetInputPortsForOutputPortRes interface {
 	getInputPortsForOutputPortRes()
 }
@@ -183,6 +195,10 @@ type GetOutputPortQueryStatsRes interface {
 
 type GetOutputPortRes interface {
 	getOutputPortRes()
+}
+
+type GetOutputPortSchemaRes interface {
+	getOutputPortSchemaRes()
 }
 
 type GetOutputPortsEventHistoryRes interface {
@@ -219,6 +235,10 @@ type GetTechnicalAssetEventHistoryRes interface {
 
 type GetTechnicalAssetRes interface {
 	getTechnicalAssetRes()
+}
+
+type IngestOutputPortContractRes interface {
+	ingestOutputPortContractRes()
 }
 
 type LinkInputPortsToDataProductRes interface {
@@ -281,6 +301,10 @@ type RemoveDomainRes interface {
 	removeDomainRes()
 }
 
+type RemoveInputPortFromExplorationRes interface {
+	removeInputPortFromExplorationRes()
+}
+
 type RemoveOutputPortAsInputPortRes interface {
 	removeOutputPortAsInputPortRes()
 }
@@ -319,6 +343,14 @@ type ReplaceOutputPortCuratedQueriesRes interface {
 
 type RequestDataProductRoleAssignmentRes interface {
 	requestDataProductRoleAssignmentRes()
+}
+
+type RequestInputPortsForDataProductRes interface {
+	requestInputPortsForDataProductRes()
+}
+
+type RequestInputPortsForExplorationRes interface {
+	requestInputPortsForExplorationRes()
 }
 
 type RequestOutputPortRoleAssignmentRes interface {
@@ -419,10 +451,6 @@ type UpdateTechnicalAssetStatusRes interface {
 
 type UpdateThemeSettingsRes interface {
 	updateThemeSettingsRes()
-}
-
-type ValidateDataProductSettingsNamespaceRes interface {
-	validateDataProductSettingsNamespaceRes()
 }
 
 type ValidateResourceNameRes interface {

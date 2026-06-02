@@ -27,7 +27,7 @@ type Invoker interface {
 	// Add Output Port Data Quality Run.
 	//
 	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary
-	AddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummaryInput, params AddOutputPortDataQualityRunParams) (AddOutputPortDataQualityRunRes, error)
+	AddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummary, params AddOutputPortDataQualityRunParams) (AddOutputPortDataQualityRunRes, error)
 	// ApproveOutputPortAsInputPort invokes approve_output_port_as_input_port operation.
 	//
 	// Approve Output Port As Input Port.
@@ -89,6 +89,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/configuration/domains
 	CreateDomain(ctx context.Context, request *DomainCreate) (CreateDomainRes, error)
+	// CreateExploration invokes create_exploration operation.
+	//
+	// Create Exploration.
+	//
+	// POST /api/v2/explorations
+	CreateExploration(ctx context.Context, request *CreateExplorationRequestWithInputPorts) (CreateExplorationRes, error)
 	// CreateOutputPort invokes create_output_port operation.
 	//
 	// Create Output Port.
@@ -239,22 +245,6 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{id}/settings
 	GetDataProductSettings(ctx context.Context, params GetDataProductSettingsParams) (GetDataProductSettingsRes, error)
-	// GetDataProductSettingsNamespaceLengthLimits invokes get_data_product_settings_namespace_length_limits operation.
-	//
-	// Get Data Product Settings Namespace Length Limits.
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// GET /api/v2/configuration/data_product_settings/namespace_length_limits
-	GetDataProductSettingsNamespaceLengthLimits(ctx context.Context) (*NamespaceLengthLimits, error)
-	// GetDataProductSettingsNamespaceSuggestion invokes get_data_product_settings_namespace_suggestion operation.
-	//
-	// Get Data Product Settings Namespace Suggestion.
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// GET /api/v2/configuration/data_product_settings/namespace_suggestion
-	GetDataProductSettingsNamespaceSuggestion(ctx context.Context, params GetDataProductSettingsNamespaceSuggestionParams) (GetDataProductSettingsNamespaceSuggestionRes, error)
 	// GetDataProductTechnicalAssets invokes get_data_product_technical_assets operation.
 	//
 	// Get Data Product Technical Assets.
@@ -321,6 +311,24 @@ type Invoker interface {
 	//
 	// GET /api/v2/configuration/environments
 	GetEnvironments(ctx context.Context) (*EnvironmentsGet, error)
+	// GetExploration invokes get_exploration operation.
+	//
+	// Get Exploration.
+	//
+	// GET /api/v2/explorations/{id}
+	GetExploration(ctx context.Context, params GetExplorationParams) (GetExplorationRes, error)
+	// GetExplorationInputPorts invokes get_exploration_input_ports operation.
+	//
+	// Get Exploration Input Ports.
+	//
+	// GET /api/v2/explorations/{id}/input_ports
+	GetExplorationInputPorts(ctx context.Context, params GetExplorationInputPortsParams) (GetExplorationInputPortsRes, error)
+	// GetExplorations invokes get_explorations operation.
+	//
+	// Get Explorations.
+	//
+	// GET /api/v2/explorations
+	GetExplorations(ctx context.Context, params GetExplorationsParams) (GetExplorationsRes, error)
 	// GetInputPortsForOutputPort invokes get_input_ports_for_output_port operation.
 	//
 	// Get Input Ports For Output Port.
@@ -357,6 +365,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	GetOutputPortQueryStats(ctx context.Context, params GetOutputPortQueryStatsParams) (GetOutputPortQueryStatsRes, error)
+	// GetOutputPortSchema invokes get_output_port_schema operation.
+	//
+	// Get Output Port Schema.
+	//
+	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+	GetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (GetOutputPortSchemaRes, error)
 	// GetOutputPortsEventHistory invokes get_output_ports_event_history operation.
 	//
 	// Get Output Ports Event History.
@@ -453,6 +467,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/version
 	GetVersion(ctx context.Context) (jx.Raw, error)
+	// IngestOutputPortContract invokes ingest_output_port_contract operation.
+	//
+	// Ingest Output Port Contract.
+	//
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+	IngestOutputPortContract(ctx context.Context, request *BitolContractRequest, params IngestOutputPortContractParams) (IngestOutputPortContractRes, error)
 	// IsAdmin invokes is_admin operation.
 	//
 	// Is Admin.
@@ -462,6 +482,8 @@ type Invoker interface {
 	// LinkInputPortsToDataProduct invokes link_input_ports_to_data_product operation.
 	//
 	// Link Input Ports To Data Product.
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// POST /api/v2/data_products/{id}/link_input_ports
 	LinkInputPortsToDataProduct(ctx context.Context, request *LinkInputPortsToDataProduct, params LinkInputPortsToDataProductParams) (LinkInputPortsToDataProductRes, error)
@@ -524,7 +546,7 @@ type Invoker interface {
 	// Overwrite Output Port Data Quality Summary.
 	//
 	// PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary/{summary_id}
-	OverwriteOutputPortDataQualitySummary(ctx context.Context, request *OutputPortDataQualitySummaryInput, params OverwriteOutputPortDataQualitySummaryParams) (OverwriteOutputPortDataQualitySummaryRes, error)
+	OverwriteOutputPortDataQualitySummary(ctx context.Context, request *OutputPortDataQualitySummary, params OverwriteOutputPortDataQualitySummaryParams) (OverwriteOutputPortDataQualitySummaryRes, error)
 	// RemoveAllUserNotifications invokes remove_all_user_notifications operation.
 	//
 	// Remove All User Notifications.
@@ -561,6 +583,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/configuration/domains/{id}
 	RemoveDomain(ctx context.Context, params RemoveDomainParams) (RemoveDomainRes, error)
+	// RemoveInputPortFromExploration invokes remove_input_port_from_exploration operation.
+	//
+	// Remove Input Port From Exploration.
+	//
+	// DELETE /api/v2/explorations/{id}/input_ports/{output_port_id}
+	RemoveInputPortFromExploration(ctx context.Context, params RemoveInputPortFromExplorationParams) (RemoveInputPortFromExplorationRes, error)
 	// RemoveOutputPort invokes remove_output_port operation.
 	//
 	// Remove Output Port.
@@ -621,6 +649,18 @@ type Invoker interface {
 	//
 	// POST /api/v2/authz/role_assignments/data_product/request
 	RequestDataProductRoleAssignment(ctx context.Context, request *RequestDataProductRoleAssignment) (RequestDataProductRoleAssignmentRes, error)
+	// RequestInputPortsForDataProduct invokes request_input_ports_for_data_product operation.
+	//
+	// Request Input Ports For Data Product.
+	//
+	// POST /api/v2/data_products/{id}/input_ports
+	RequestInputPortsForDataProduct(ctx context.Context, request *RequestInputPortsForDataProductRequest, params RequestInputPortsForDataProductParams) (RequestInputPortsForDataProductRes, error)
+	// RequestInputPortsForExploration invokes request_input_ports_for_exploration operation.
+	//
+	// Request Input Ports For Exploration.
+	//
+	// POST /api/v2/explorations/{id}/input_ports
+	RequestInputPortsForExploration(ctx context.Context, request *RequestInputPortsForExplorationRequest, params RequestInputPortsForExplorationParams) (RequestInputPortsForExplorationRes, error)
 	// RequestOutputPortRoleAssignment invokes request_output_port_role_assignment operation.
 	//
 	// Request Output Port Role Assignment.
@@ -673,7 +713,7 @@ type Invoker interface {
 	//
 	// Unlink Input Port From Data Product.
 	//
-	// DELETE /api/v2/data_products/{id}/input_ports/{input_port_id}
+	// DELETE /api/v2/data_products/{id}/input_ports/{output_port_id}
 	UnlinkInputPortFromDataProduct(ctx context.Context, params UnlinkInputPortFromDataProductParams) (UnlinkInputPortFromDataProductRes, error)
 	// UnlinkOutputPortFromTechnicalAsset invokes unlink_output_port_from_technical_asset operation.
 	//
@@ -769,8 +809,6 @@ type Invoker interface {
 	//
 	// Update Technical Asset.
 	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
 	// PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}
 	UpdateTechnicalAsset(ctx context.Context, request *DataOutputUpdate, params UpdateTechnicalAssetParams) (UpdateTechnicalAssetRes, error)
 	// UpdateTechnicalAssetStatus invokes update_technical_asset_status operation.
@@ -785,14 +823,6 @@ type Invoker interface {
 	//
 	// PUT /api/v2/configuration/theme_settings
 	UpdateThemeSettings(ctx context.Context, request *ThemeSettings) (UpdateThemeSettingsRes, error)
-	// ValidateDataProductSettingsNamespace invokes validate_data_product_settings_namespace operation.
-	//
-	// Validate Data Product Settings Namespace.
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// GET /api/v2/configuration/data_product_settings/validate_namespace
-	ValidateDataProductSettingsNamespace(ctx context.Context, params ValidateDataProductSettingsNamespaceParams) (ValidateDataProductSettingsNamespaceRes, error)
 	// ValidateResourceName invokes validate_resource_name operation.
 	//
 	// Validate Resource Name.
@@ -847,12 +877,12 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // Add Output Port Data Quality Run.
 //
 // POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary
-func (c *Client) AddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummaryInput, params AddOutputPortDataQualityRunParams) (AddOutputPortDataQualityRunRes, error) {
+func (c *Client) AddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummary, params AddOutputPortDataQualityRunParams) (AddOutputPortDataQualityRunRes, error) {
 	res, err := c.sendAddOutputPortDataQualityRun(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendAddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummaryInput, params AddOutputPortDataQualityRunParams) (res AddOutputPortDataQualityRunRes, err error) {
+func (c *Client) sendAddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummary, params AddOutputPortDataQualityRunParams) (res AddOutputPortDataQualityRunRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [5]string
@@ -1442,6 +1472,46 @@ func (c *Client) sendCreateDomain(ctx context.Context, request *DomainCreate) (r
 	defer body.Close()
 
 	result, err := decodeCreateDomainResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateExploration invokes create_exploration operation.
+//
+// Create Exploration.
+//
+// POST /api/v2/explorations
+func (c *Client) CreateExploration(ctx context.Context, request *CreateExplorationRequestWithInputPorts) (CreateExplorationRes, error) {
+	res, err := c.sendCreateExploration(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateExploration(ctx context.Context, request *CreateExplorationRequestWithInputPorts) (res CreateExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/explorations"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateExplorationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeCreateExplorationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2817,101 +2887,6 @@ func (c *Client) sendGetDataProductSettings(ctx context.Context, params GetDataP
 	return result, nil
 }
 
-// GetDataProductSettingsNamespaceLengthLimits invokes get_data_product_settings_namespace_length_limits operation.
-//
-// Get Data Product Settings Namespace Length Limits.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /api/v2/configuration/data_product_settings/namespace_length_limits
-func (c *Client) GetDataProductSettingsNamespaceLengthLimits(ctx context.Context) (*NamespaceLengthLimits, error) {
-	res, err := c.sendGetDataProductSettingsNamespaceLengthLimits(ctx)
-	return res, err
-}
-
-func (c *Client) sendGetDataProductSettingsNamespaceLengthLimits(ctx context.Context) (res *NamespaceLengthLimits, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/v2/configuration/data_product_settings/namespace_length_limits"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer body.Close()
-
-	result, err := decodeGetDataProductSettingsNamespaceLengthLimitsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetDataProductSettingsNamespaceSuggestion invokes get_data_product_settings_namespace_suggestion operation.
-//
-// Get Data Product Settings Namespace Suggestion.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /api/v2/configuration/data_product_settings/namespace_suggestion
-func (c *Client) GetDataProductSettingsNamespaceSuggestion(ctx context.Context, params GetDataProductSettingsNamespaceSuggestionParams) (GetDataProductSettingsNamespaceSuggestionRes, error) {
-	res, err := c.sendGetDataProductSettingsNamespaceSuggestion(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetDataProductSettingsNamespaceSuggestion(ctx context.Context, params GetDataProductSettingsNamespaceSuggestionParams) (res GetDataProductSettingsNamespaceSuggestionRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/v2/configuration/data_product_settings/namespace_suggestion"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "name" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "name",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.Name))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer body.Close()
-
-	result, err := decodeGetDataProductSettingsNamespaceSuggestionResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // GetDataProductTechnicalAssets invokes get_data_product_technical_assets operation.
 //
 // Get Data Product Technical Assets.
@@ -3218,7 +3193,10 @@ func (c *Client) sendGetDeviceToken(ctx context.Context, params GetDeviceTokenPa
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.ClientID))
+			if val, ok := params.ClientID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
 		}); err != nil {
 			return res, errors.Wrap(err, "encode query")
 		}
@@ -3479,6 +3457,174 @@ func (c *Client) sendGetEnvironments(ctx context.Context) (res *EnvironmentsGet,
 	return result, nil
 }
 
+// GetExploration invokes get_exploration operation.
+//
+// Get Exploration.
+//
+// GET /api/v2/explorations/{id}
+func (c *Client) GetExploration(ctx context.Context, params GetExplorationParams) (GetExplorationRes, error) {
+	res, err := c.sendGetExploration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetExploration(ctx context.Context, params GetExplorationParams) (res GetExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeGetExplorationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetExplorationInputPorts invokes get_exploration_input_ports operation.
+//
+// Get Exploration Input Ports.
+//
+// GET /api/v2/explorations/{id}/input_ports
+func (c *Client) GetExplorationInputPorts(ctx context.Context, params GetExplorationInputPortsParams) (GetExplorationInputPortsRes, error) {
+	res, err := c.sendGetExplorationInputPorts(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetExplorationInputPorts(ctx context.Context, params GetExplorationInputPortsParams) (res GetExplorationInputPortsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeGetExplorationInputPortsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetExplorations invokes get_explorations operation.
+//
+// Get Explorations.
+//
+// GET /api/v2/explorations
+func (c *Client) GetExplorations(ctx context.Context, params GetExplorationsParams) (GetExplorationsRes, error) {
+	res, err := c.sendGetExplorations(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetExplorations(ctx context.Context, params GetExplorationsParams) (res GetExplorationsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/explorations"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "filter_to_user_with_assigment" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "filter_to_user_with_assigment",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.FilterToUserWithAssigment.Get(); ok {
+				return e.EncodeValue(conv.UUIDToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeGetExplorationsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetInputPortsForOutputPort invokes get_input_ports_for_output_port operation.
 //
 // Get Input Ports For Output Port.
@@ -3573,20 +3719,6 @@ func (c *Client) sendGetJwtToken(ctx context.Context, params GetJwtTokenParams) 
 
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "client_id" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "client_id",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.ClientID))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
 		// Encode "device_code" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "device_code",
@@ -3610,6 +3742,23 @@ func (c *Client) sendGetJwtToken(ctx context.Context, params GetJwtTokenParams) 
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			return e.EncodeValue(conv.StringToString(params.GrantType))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "client_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "client_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ClientID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
 		}); err != nil {
 			return res, errors.Wrap(err, "encode query")
 		}
@@ -3998,6 +4147,81 @@ func (c *Client) sendGetOutputPortQueryStats(ctx context.Context, params GetOutp
 	defer body.Close()
 
 	result, err := decodeGetOutputPortQueryStatsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetOutputPortSchema invokes get_output_port_schema operation.
+//
+// Get Output Port Schema.
+//
+// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+func (c *Client) GetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (GetOutputPortSchemaRes, error) {
+	res, err := c.sendGetOutputPortSchema(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (res GetOutputPortSchemaRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/data_contract"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeGetOutputPortSchemaResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4874,6 +5098,84 @@ func (c *Client) sendGetVersion(ctx context.Context) (res jx.Raw, err error) {
 	return result, nil
 }
 
+// IngestOutputPortContract invokes ingest_output_port_contract operation.
+//
+// Ingest Output Port Contract.
+//
+// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+func (c *Client) IngestOutputPortContract(ctx context.Context, request *BitolContractRequest, params IngestOutputPortContractParams) (IngestOutputPortContractRes, error) {
+	res, err := c.sendIngestOutputPortContract(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendIngestOutputPortContract(ctx context.Context, request *BitolContractRequest, params IngestOutputPortContractParams) (res IngestOutputPortContractRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/data_contract"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeIngestOutputPortContractRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeIngestOutputPortContractResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // IsAdmin invokes is_admin operation.
 //
 // Is Admin.
@@ -4914,6 +5216,8 @@ func (c *Client) sendIsAdmin(ctx context.Context) (res *IsAdminResponse, err err
 // LinkInputPortsToDataProduct invokes link_input_ports_to_data_product operation.
 //
 // Link Input Ports To Data Product.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // POST /api/v2/data_products/{id}/link_input_ports
 func (c *Client) LinkInputPortsToDataProduct(ctx context.Context, request *LinkInputPortsToDataProduct, params LinkInputPortsToDataProductParams) (LinkInputPortsToDataProductRes, error) {
@@ -5644,12 +5948,12 @@ func (c *Client) sendModifyOutputPortRoleAssignment(ctx context.Context, request
 // Overwrite Output Port Data Quality Summary.
 //
 // PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary/{summary_id}
-func (c *Client) OverwriteOutputPortDataQualitySummary(ctx context.Context, request *OutputPortDataQualitySummaryInput, params OverwriteOutputPortDataQualitySummaryParams) (OverwriteOutputPortDataQualitySummaryRes, error) {
+func (c *Client) OverwriteOutputPortDataQualitySummary(ctx context.Context, request *OutputPortDataQualitySummary, params OverwriteOutputPortDataQualitySummaryParams) (OverwriteOutputPortDataQualitySummaryRes, error) {
 	res, err := c.sendOverwriteOutputPortDataQualitySummary(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendOverwriteOutputPortDataQualitySummary(ctx context.Context, request *OutputPortDataQualitySummaryInput, params OverwriteOutputPortDataQualitySummaryParams) (res OverwriteOutputPortDataQualitySummaryRes, err error) {
+func (c *Client) sendOverwriteOutputPortDataQualitySummary(ctx context.Context, request *OutputPortDataQualitySummary, params OverwriteOutputPortDataQualitySummaryParams) (res OverwriteOutputPortDataQualitySummaryRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [6]string
@@ -6040,6 +6344,80 @@ func (c *Client) sendRemoveDomain(ctx context.Context, params RemoveDomainParams
 	defer body.Close()
 
 	result, err := decodeRemoveDomainResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RemoveInputPortFromExploration invokes remove_input_port_from_exploration operation.
+//
+// Remove Input Port From Exploration.
+//
+// DELETE /api/v2/explorations/{id}/input_ports/{output_port_id}
+func (c *Client) RemoveInputPortFromExploration(ctx context.Context, params RemoveInputPortFromExplorationParams) (RemoveInputPortFromExplorationRes, error) {
+	res, err := c.sendRemoveInputPortFromExploration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveInputPortFromExploration(ctx context.Context, params RemoveInputPortFromExplorationParams) (res RemoveInputPortFromExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeRemoveInputPortFromExplorationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6651,6 +7029,124 @@ func (c *Client) sendRequestDataProductRoleAssignment(ctx context.Context, reque
 	return result, nil
 }
 
+// RequestInputPortsForDataProduct invokes request_input_ports_for_data_product operation.
+//
+// Request Input Ports For Data Product.
+//
+// POST /api/v2/data_products/{id}/input_ports
+func (c *Client) RequestInputPortsForDataProduct(ctx context.Context, request *RequestInputPortsForDataProductRequest, params RequestInputPortsForDataProductParams) (RequestInputPortsForDataProductRes, error) {
+	res, err := c.sendRequestInputPortsForDataProduct(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRequestInputPortsForDataProduct(ctx context.Context, request *RequestInputPortsForDataProductRequest, params RequestInputPortsForDataProductParams) (res RequestInputPortsForDataProductRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRequestInputPortsForDataProductRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeRequestInputPortsForDataProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RequestInputPortsForExploration invokes request_input_ports_for_exploration operation.
+//
+// Request Input Ports For Exploration.
+//
+// POST /api/v2/explorations/{id}/input_ports
+func (c *Client) RequestInputPortsForExploration(ctx context.Context, request *RequestInputPortsForExplorationRequest, params RequestInputPortsForExplorationParams) (RequestInputPortsForExplorationRes, error) {
+	res, err := c.sendRequestInputPortsForExploration(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRequestInputPortsForExploration(ctx context.Context, request *RequestInputPortsForExplorationRequest, params RequestInputPortsForExplorationParams) (res RequestInputPortsForExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRequestInputPortsForExplorationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeRequestInputPortsForExplorationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RequestOutputPortRoleAssignment invokes request_output_port_role_assignment operation.
 //
 // Request Output Port Role Assignment.
@@ -7155,7 +7651,7 @@ func (c *Client) sendSetValueForOutputPort(ctx context.Context, params SetValueF
 //
 // Unlink Input Port From Data Product.
 //
-// DELETE /api/v2/data_products/{id}/input_ports/{input_port_id}
+// DELETE /api/v2/data_products/{id}/input_ports/{output_port_id}
 func (c *Client) UnlinkInputPortFromDataProduct(ctx context.Context, params UnlinkInputPortFromDataProductParams) (UnlinkInputPortFromDataProductRes, error) {
 	res, err := c.sendUnlinkInputPortFromDataProduct(ctx, params)
 	return res, err
@@ -7186,14 +7682,14 @@ func (c *Client) sendUnlinkInputPortFromDataProduct(ctx context.Context, params 
 	}
 	pathParts[2] = "/input_ports/"
 	{
-		// Encode "input_port_id" parameter.
+		// Encode "output_port_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "input_port_id",
+			Param:   "output_port_id",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.InputPortID))
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -8201,8 +8697,6 @@ func (c *Client) sendUpdateTag(ctx context.Context, request *TagUpdate, params U
 //
 // Update Technical Asset.
 //
-// Deprecated: schema marks this operation as deprecated.
-//
 // PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}
 func (c *Client) UpdateTechnicalAsset(ctx context.Context, request *DataOutputUpdate, params UpdateTechnicalAssetParams) (UpdateTechnicalAssetRes, error) {
 	res, err := c.sendUpdateTechnicalAsset(ctx, request, params)
@@ -8387,76 +8881,6 @@ func (c *Client) sendUpdateThemeSettings(ctx context.Context, request *ThemeSett
 	defer body.Close()
 
 	result, err := decodeUpdateThemeSettingsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// ValidateDataProductSettingsNamespace invokes validate_data_product_settings_namespace operation.
-//
-// Validate Data Product Settings Namespace.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /api/v2/configuration/data_product_settings/validate_namespace
-func (c *Client) ValidateDataProductSettingsNamespace(ctx context.Context, params ValidateDataProductSettingsNamespaceParams) (ValidateDataProductSettingsNamespaceRes, error) {
-	res, err := c.sendValidateDataProductSettingsNamespace(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendValidateDataProductSettingsNamespace(ctx context.Context, params ValidateDataProductSettingsNamespaceParams) (res ValidateDataProductSettingsNamespaceRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/v2/configuration/data_product_settings/validate_namespace"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "namespace" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "namespace",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.Namespace))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "scope" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "scope",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(string(params.Scope)))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer body.Close()
-
-	result, err := decodeValidateDataProductSettingsNamespaceResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

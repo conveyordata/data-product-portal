@@ -125,11 +125,6 @@ type GetDataProductSettingsParams struct {
 	ID uuid.UUID
 }
 
-// GetDataProductSettingsNamespaceSuggestionParams is parameters of get_data_product_settings_namespace_suggestion operation.
-type GetDataProductSettingsNamespaceSuggestionParams struct {
-	Name string
-}
-
 // GetDataProductTechnicalAssetsParams is parameters of get_data_product_technical_assets operation.
 type GetDataProductTechnicalAssetsParams struct {
 	DataProductID uuid.UUID
@@ -147,7 +142,8 @@ type GetDataProductsParams struct {
 
 // GetDeviceTokenParams is parameters of get_device_token operation.
 type GetDeviceTokenParams struct {
-	ClientID string
+	// Deprecated: schema marks this parameter as deprecated.
+	ClientID OptString `json:",omitempty,omitzero"`
 	Scope    OptString `json:",omitempty,omitzero"`
 }
 
@@ -161,6 +157,21 @@ type GetEnvironmentParams struct {
 	ID uuid.UUID
 }
 
+// GetExplorationParams is parameters of get_exploration operation.
+type GetExplorationParams struct {
+	ID uuid.UUID
+}
+
+// GetExplorationInputPortsParams is parameters of get_exploration_input_ports operation.
+type GetExplorationInputPortsParams struct {
+	ID uuid.UUID
+}
+
+// GetExplorationsParams is parameters of get_explorations operation.
+type GetExplorationsParams struct {
+	FilterToUserWithAssigment OptUUID `json:",omitempty,omitzero"`
+}
+
 // GetInputPortsForOutputPortParams is parameters of get_input_ports_for_output_port operation.
 type GetInputPortsForOutputPortParams struct {
 	DataProductID uuid.UUID
@@ -169,9 +180,10 @@ type GetInputPortsForOutputPortParams struct {
 
 // GetJwtTokenParams is parameters of get_jwt_token operation.
 type GetJwtTokenParams struct {
-	ClientID   string
 	DeviceCode string
 	GrantType  string
+	// Deprecated: schema marks this parameter as deprecated.
+	ClientID OptString `json:",omitempty,omitzero"`
 }
 
 // GetLatestDataQualitySummaryForOutputPortParams is parameters of get_latest_data_quality_summary_for_output_port operation.
@@ -198,6 +210,12 @@ type GetOutputPortQueryStatsParams struct {
 	ID            uuid.UUID
 	Granularity   OptQueryStatsGranularity `json:",omitempty,omitzero"`
 	DayRange      OptInt                   `json:",omitempty,omitzero"`
+}
+
+// GetOutputPortSchemaParams is parameters of get_output_port_schema operation.
+type GetOutputPortSchemaParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
 }
 
 // GetOutputPortsEventHistoryParams is parameters of get_output_ports_event_history operation.
@@ -247,6 +265,12 @@ type GetTechnicalAssetParams struct {
 
 // GetTechnicalAssetEventHistoryParams is parameters of get_technical_asset_event_history operation.
 type GetTechnicalAssetEventHistoryParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
+// IngestOutputPortContractParams is parameters of ingest_output_port_contract operation.
+type IngestOutputPortContractParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
 }
@@ -338,6 +362,12 @@ type RemoveDomainParams struct {
 	ID uuid.UUID
 }
 
+// RemoveInputPortFromExplorationParams is parameters of remove_input_port_from_exploration operation.
+type RemoveInputPortFromExplorationParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
 // RemoveOutputPortParams is parameters of remove_output_port operation.
 type RemoveOutputPortParams struct {
 	DataProductID uuid.UUID
@@ -382,6 +412,16 @@ type ReplaceOutputPortCuratedQueriesParams struct {
 	ID            uuid.UUID
 }
 
+// RequestInputPortsForDataProductParams is parameters of request_input_ports_for_data_product operation.
+type RequestInputPortsForDataProductParams struct {
+	ID uuid.UUID
+}
+
+// RequestInputPortsForExplorationParams is parameters of request_input_ports_for_exploration operation.
+type RequestInputPortsForExplorationParams struct {
+	ID uuid.UUID
+}
+
 // SanitizeResourceNameParams is parameters of sanitize_resource_name operation.
 type SanitizeResourceNameParams struct {
 	Name string
@@ -411,8 +451,8 @@ type SetValueForOutputPortParams struct {
 
 // UnlinkInputPortFromDataProductParams is parameters of unlink_input_port_from_data_product operation.
 type UnlinkInputPortFromDataProductParams struct {
-	ID          uuid.UUID
-	InputPortID uuid.UUID
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
 }
 
 // UnlinkOutputPortFromTechnicalAssetParams is parameters of unlink_output_port_from_technical_asset operation.
@@ -505,12 +545,6 @@ type UpdateTechnicalAssetParams struct {
 type UpdateTechnicalAssetStatusParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
-}
-
-// ValidateDataProductSettingsNamespaceParams is parameters of validate_data_product_settings_namespace operation.
-type ValidateDataProductSettingsNamespaceParams struct {
-	Namespace string
-	Scope     DataProductSettingScope
 }
 
 // ValidateResourceNameParams is parameters of validate_resource_name operation.
