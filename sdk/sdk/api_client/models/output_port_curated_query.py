@@ -7,7 +7,6 @@ from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 T = TypeVar("T", bound="OutputPortCuratedQuery")
 
@@ -88,7 +87,7 @@ class OutputPortCuratedQuery:
 
         query_text = d.pop("query_text")
 
-        created_at = isoparse(d.pop("created_at"))
+        created_at = datetime.datetime.fromisoformat(d.pop("created_at"))
 
         def _parse_updated_at(data: object) -> datetime.datetime | None:
             if data is None:
@@ -96,7 +95,7 @@ class OutputPortCuratedQuery:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                updated_at_type_0 = isoparse(data)
+                updated_at_type_0 = datetime.datetime.fromisoformat(data)
 
                 return updated_at_type_0
             except (TypeError, ValueError, AttributeError, KeyError):

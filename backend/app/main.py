@@ -22,7 +22,7 @@ from app.core.authz.background_tasks import check_expired_admins
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
-from app.core.webhooks.webhook import call_webhook
+from app.core.webhooks.webhook import call_webhook, register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
@@ -91,6 +91,7 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     lifespan=combine_lifespans(lifespan, mcp_app.lifespan),
     **oidc_kwargs,
+    separate_input_output_schemas=False,
     swagger_ui_parameters={
         "docExpansion": "none",
         "tagsSorter": "alpha",
@@ -148,6 +149,7 @@ app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
 
 add_exception_handlers(app)
+register_webhooks(app)
 
 app.add_middleware(
     CORSMiddleware,

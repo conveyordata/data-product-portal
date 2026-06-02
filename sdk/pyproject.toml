@@ -23,7 +23,7 @@ python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
 # Used to regenerate sdk/sdk/api_client/ from the OpenAPI spec
-openapi-python-client = ">=0.21"
+openapi-python-client = ">=0.29.0"
 mypy = ">=1.0"
 
 [tool.mypy]
