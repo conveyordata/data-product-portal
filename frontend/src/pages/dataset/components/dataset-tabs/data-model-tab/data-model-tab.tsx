@@ -95,7 +95,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
     const schemaObjects = data?.schema_objects ?? [];
 
     if (schemaObjects.length === 0) {
-        return <EmptyList description={t('No data model defined for this output port')} />;
+        return <EmptyList description={t('No data model defined for this Output Port')} />;
     }
 
     const columns = getPropertyColumns(t);
