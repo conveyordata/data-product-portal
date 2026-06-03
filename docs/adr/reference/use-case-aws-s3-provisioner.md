@@ -127,7 +127,7 @@ This is the most disruptive change. Proceed carefully:
 6. For each consumer data product identified in step 4b, revoke their access to the old S3 location.
 7. Mark the old technical asset as archived via the Portal API.
 
-> **Warning**: This sequence involves multiple Portal API calls that each trigger further events. Design all handlers to be idempotent.
+> **Warning**: This sequence involves multiple Portal API calls that each trigger further events. Design all handlers to be idempotent. Consider how to deal with concurrent updates to the same underlying objects.
 
 **Status changed / Tag changed:**
 
@@ -148,7 +148,7 @@ The provisioner needs the data product's namespace, its settings, the full S3 co
 3. Delete the IAM role `dpp-{namespace}`.
 4. Archive or delete S3 objects under `s3://{domain-bucket}/{namespace}/`.
 
-> **Recovery note**: Restoring a deleted data product requires both S3 object recovery (possible via bucket versioning) and database recovery. Enable versioning on all domain buckets. There is no automated restore path — restoring the data product record requires a database recovery operation.
+> **Recovery note**: Restoring a deleted data product requires both data (S3 object) recovery and metadata (dpp database) recovery.
 
 ---
 
@@ -182,8 +182,6 @@ The provisioner needs to know which setting changed, the data product's namespac
 **`read-only-role` disabled:**
 
 1. Delete `dpp-{namespace}-ro`.
-
-> Warn any external consumers (e.g. BI tools) that were granted access to this role before deleting it.
 
 **`scheduled` enabled:**
 
@@ -408,9 +406,9 @@ The provisioner needs the owning data product's namespace, settings, the technic
 
 **Default (portal-managed subfolder):**
 
-1. Create the S3 prefix (upload a placeholder object if needed).
-2. Grant read/write access to `s3://{bucket}/{prefix}/*` on `dpp-{namespace}`.
-3. If `read-only-role` is enabled: also grant read-only access on `dpp-{namespace}-ro`.
+1. Create the S3 prefix (upload a placeholder object if needed) to s3://{domain}/{namespace}/{path}.
+
+> **Note**: The IAM Roles already have already have `s3://{domain}/{namespace}/*` access so no need to update.
 
 **Custom (user-registered existing location):**
 
