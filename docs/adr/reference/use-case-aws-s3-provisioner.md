@@ -217,8 +217,7 @@ The provisioner needs the data product's namespace, the user's email, and their 
 
 Since both `owner` and `developer` have integration access, a role change does not require any change to the IAM trust policy. No action required.
 
-> **Note**: If future roles are introduced without integration access, the provisioner would need the user's email, and their new role. They can then read the roles of the data product to decided whether to add or remove the principal from the trust policy. 
-The old role is not needed since the provisioner can just check all roles
+> **Note**: If future roles are introduced without integration access, the provisioner would need the user's email, and their new role. They can then read the roles of the data product to decided whether to add or remove the principal from the trust policy. The old role is not needed since the provisioner can just check all roles.
 
 ---
 
