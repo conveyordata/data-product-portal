@@ -96,7 +96,7 @@ The provisioner needs the data product's namespace, domain, type, and the list o
    - Permission policy: read/write access to `s3://{domain-bucket}/{namespace}/*`.
    - If the data product type confers additional permissions (e.g. cross-account access for a shared type), apply them now.
 3. Create the S3 prefix by uploading a placeholder or relying on the first write.
-4. Call the Portal API to register the subfolder as a `default` technical asset on this data product. This triggers a `technical_asset.created` event — that handler will update the IAM role. Make the handler idempotent so re-running it on an already-existing prefix is safe.
+4. Call the Portal API to register the subfolder as a `default` technical asset on this data product. This triggers a `technical_asset.created` event. That handler should be idempotent and see we already have access.
 5. Update the data product status from `Draft` to `Ready`.
 
 > **Note**: The data product type may influence the base permissions attached to the IAM role. The exact mapping is platform-specific and should be documented per type. Tags and status could similarly influence permissions, but their semantics are not yet defined.
@@ -217,7 +217,8 @@ The provisioner needs the data product's namespace, the user's email, and their 
 
 Since both `owner` and `developer` have integration access, a role change does not require any change to the IAM trust policy. No action required.
 
-> **Note**: If future roles are introduced without integration access, the provisioner would need the user's email, their old role, and their new role to decide whether to add or remove the principal from the trust policy. The old role is not available when the update event fires — it would need to be tracked externally or included alongside the new role.
+> **Note**: If future roles are introduced without integration access, the provisioner would need the user's email, and their new role. They can then read the roles of the data product to decided whether to add or remove the principal from the trust policy. 
+The old role is not needed since the provisioner can just check all roles
 
 ---
 
@@ -257,7 +258,7 @@ No action required. The link was PENDING; no access was ever granted.
 
 Fires when a data product's access to an output port is removed. This can happen to both approved and pending links.
 
-The provisioner needs the requesting data product's namespace and settings, the link status at the time of removal (APPROVED or PENDING), and the S3 configuration of the technical assets behind the output port. Without the status the provisioner cannot tell whether access was ever granted and therefore whether there is anything to revoke.
+The provisioner needs the requesting data product's namespace and settings, the link status at the time of removal (APPROVED or PENDING), and the S3 configuration of the technical assets behind the output port. Without the status the provisioner would need to check the AWS to tell whether access was ever granted and therefore whether there is anything to revoke.
 
 If the link was **APPROVED**:
 
