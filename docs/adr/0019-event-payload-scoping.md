@@ -137,7 +137,7 @@ Today, events are emitted from the router layer. A future refactor will move eve
 
 ## Appendix A: Event Payload Catalogue
 
-The catalogue is deliberately small. There are six entities: five of them have `created` / `updated` / `deleted` events, and `technical_asset_link` has only `created` / `deleted` (the link has no updateable state) — seventeen events total. Payloads aim for the 80% of provisioner work; the remaining 20% (rarer flows, display-only fields, deep relationship state) is served by SDK calls against the still-live entity, or by the provisioner maintaining its own cache from prior events.
+The catalogue is deliberately small. There are six entities: five of them have `created` / `updated` / `deleted` events, and `port_asset` has only `created` / `deleted` (the link has no updateable state) — seventeen events total. Payloads aim for the 80% of provisioner work; the remaining 20% (rarer flows, display-only fields, deep relationship state) is served by SDK calls against the still-live entity, or by the provisioner maintaining its own cache from prior events.
 
 State-specific transitions that previous drafts modelled as their own events — `setting_changed`, `team_member_added`, `status_updated`, `about_updated`, `link_approved`, `link_denied` — are folded into the relevant entity's `updated` event. Provisioners diff `old` and `new` to discover what changed. This is the Kubernetes-operator reconciliation pattern: a simpler event surface, more provisioner-side logic.
 
@@ -148,7 +148,7 @@ State-specific transitions that previous drafts modelled as their own events —
 3. **`output_port`**
 4. **`technical_asset`**
 5. **`input_port`** — the link between a requester (a data product or an exploration) and an output port. Treated as a first-class entity, with its own lifecycle (`created` when requested, `updated` when the status transitions PENDING → APPROVED, `deleted` when removed), rather than living inside its parents' events.
-6. **`technical_asset_link`** — the link between an output port and a technical asset. Treated as a first-class entity for symmetry with `input_port`: the relationship has its own lifecycle, and modelling it directly keeps `output_port.updated` from doubling as a link-event channel. The link itself has no updateable state, so `technical_asset_link` has only `created` and `deleted`.
+6. **`port_asset`** — the link between an output port and a technical asset. Treated as a first-class entity for symmetry with `input_port`: the relationship has its own lifecycle, and modelling it directly keeps `output_port.updated` from doubling as a link-event channel. The link itself has no updateable state, so `port_asset` has only `created` and `deleted`.
 
 ### Substructures
 
@@ -183,7 +183,7 @@ Every event for a given entity carries the same payload shape: `created` and `de
 - `settings: list[setting]`
 - `team_members: list[role_assignment]`
 
-The OP does not carry a list of its linked technical assets. That relationship lives in the `technical_asset_link` entity; provisioners reconstruct per-OP TA lists from `technical_asset_link` events.
+The OP does not carry a list of its linked technical assets. That relationship lives in the `port_asset` entity; provisioners reconstruct per-OP TA lists from `port_asset` events.
 
 #### `technical_asset`
 
@@ -198,9 +198,9 @@ The OP does not carry a list of its linked technical assets. That relationship l
 - `requester`: discriminated reference object — `type` (`data_product` or `exploration`), `id`, `name`, `namespace`
 - `output_port`: reference object — `id`, `name`, `namespace`, `data_product_id`
 
-The requester carries `namespace` directly because that is the identifier the consumer-side provisioner uses to address the resource it grants access on (e.g., the IAM role `dpp-{namespace}` in the AWS S3 use case). Full requester and output-port state — including which TAs are behind the output port — is read from the provisioner's caches of `data_product` / `exploration` / `output_port` / `technical_asset` / `technical_asset_link` events.
+The requester carries `namespace` directly because that is the identifier the consumer-side provisioner uses to address the resource it grants access on (e.g., the IAM role `dpp-{namespace}` in the AWS S3 use case). Full requester and output-port state — including which TAs are behind the output port — is read from the provisioner's caches of `data_product` / `exploration` / `output_port` / `technical_asset` / `port_asset` events.
 
-#### `technical_asset_link`
+#### `port_asset`
 
 - `id`
 - `output_port`: reference object — `id`, `name`, `namespace`, `data_product_id`
@@ -210,13 +210,13 @@ Carries no state of its own beyond the two references. Only `created` and `delet
 
 ### Event semantics
 
-The five primary entities each have three events; `technical_asset_link` has two.
+The five primary entities each have three events; `port_asset` has two.
 
 - **`<entity>.created`** — carries the entity payload. Fires when the entity comes into existence.
-- **`<entity>.updated`** — carries `old: <entity>` and `new: <entity>`. Fires for any change to the payload fields. Provisioners diff old vs. new to find what changed (status, settings, team members, link status, …). Not defined for `technical_asset_link`, which has no updateable state.
+- **`<entity>.updated`** — carries `old: <entity>` and `new: <entity>`. Fires for any change to the payload fields. Provisioners diff old vs. new to find what changed (status, settings, team members, link status, …). Not defined for `port_asset`, which has no updateable state.
 - **`<entity>.deleted`** — carries the entity payload as it was just before deletion. Fires after the cascade children (see below). Final state for tear-down.
 
-Seventeen events total: 5 entities × 3 events, plus `technical_asset_link.created` and `technical_asset_link.deleted`.
+Seventeen events total: 5 entities × 3 events, plus `port_asset.created` and `port_asset.deleted`.
 
 Folding examples:
 
@@ -228,7 +228,7 @@ Folding examples:
 | `data_product.team_member_added` / `_removed` / `_updated` | `data_product.updated` with a changed `team_members` list |
 | `data_product.input_port_linked` / `_unlinked` | `input_port.created` / `input_port.deleted` |
 | `output_port.link_approved` / `link_denied` | `input_port.updated` (PENDING → APPROVED) / `input_port.deleted` while PENDING |
-| `technical_asset.linked` / `_unlinked` | `technical_asset_link.created` / `technical_asset_link.deleted` |
+| `technical_asset.linked` / `_unlinked` | `port_asset.created` / `port_asset.deleted` |
 | `technical_asset.status_updated` | `technical_asset.updated` with `new.status ≠ old.status` |
 
 ### Cascade Emission Order
@@ -236,21 +236,21 @@ Folding examples:
 When a parent is deleted, the portal emits per-child events *before* the database cascade commits, so each child event still carries readable state.
 
 - **`exploration.deleted`** → `input_port.deleted` for every input port owned by the exploration, then `exploration.deleted`.
-- **`output_port.deleted`** → `input_port.deleted` for every input port pointing at the output port, `technical_asset_link.deleted` for every link involving the output port, then `output_port.deleted`. The TAs themselves survive (they belong to the data product).
-- **`technical_asset.deleted`** (standalone — not as a cascade child of a data product delete) → `technical_asset_link.deleted` for every link involving this TA, then `technical_asset.deleted`.
+- **`output_port.deleted`** → `input_port.deleted` for every input port pointing at the output port, `port_asset.deleted` for every link involving the output port, then `output_port.deleted`. The TAs themselves survive (they belong to the data product).
+- **`technical_asset.deleted`** (standalone — not as a cascade child of a data product delete) → `port_asset.deleted` for every link involving this TA, then `technical_asset.deleted`.
 - **`data_product.deleted`** →
   1. `input_port.deleted` for every input port owned by the data product.
-  2. For each output port owned by the data product: `input_port.deleted` for every consumer pointing at it, `technical_asset_link.deleted` for every TA linked to it, then `output_port.deleted`.
-  3. `technical_asset.deleted` for each technical asset owned by the data product. Same-DP assumption: `technical_asset_link` rows for these TAs were already cleared in step 2; cross-DP linking, if introduced later, would require cascading `technical_asset_link.deleted` here too.
+  2. For each output port owned by the data product: `input_port.deleted` for every consumer pointing at it, `port_asset.deleted` for every TA linked to it, then `output_port.deleted`.
+  3. `technical_asset.deleted` for each technical asset owned by the data product. Same-DP assumption: `port_asset` rows for these TAs were already cleared in step 2; cross-DP linking, if introduced later, would require cascading `port_asset.deleted` here too.
   4. `data_product.deleted`.
-- **`input_port.deleted`** and **`technical_asset_link.deleted`** are terminal (no children).
+- **`input_port.deleted`** and **`port_asset.deleted`** are terminal (no children).
 
 ### What the 80/20 leaves to the SDK
 
 Fields and relationships intentionally not on events; the provisioner SDK-fetches when needed:
 
 - Display-only fields: `about`, `tags`, descriptions.
-- Full state of an entity referenced from another entity (e.g., the `output_port` and `technical_asset` references on `technical_asset_link`, or the `requester` and `output_port` references on `input_port`, carry only minimal identifying fields; the provisioner reads underlying state from caches built from the referenced entities' own `created` / `updated` / `deleted` events, or SDK-fetches on cold start).
+- Full state of an entity referenced from another entity (e.g., the `output_port` and `technical_asset` references on `port_asset`, or the `requester` and `output_port` references on `input_port`, carry only minimal identifying fields; the provisioner reads underlying state from caches built from the referenced entities' own `created` / `updated` / `deleted` events, or SDK-fetches on cold start).
 - Anything else a specific provisioner needs. If a use case shows a field is hot-path-critical, the catalogue can grow via a follow-up ADR.
 
 ---
@@ -270,12 +270,12 @@ T4 ─► T5 ──────┘
 ```
 
 **T1 — Define substructures and entity payloads.** No dependencies.
-- Create Pydantic models under `backend/app/core/webhooks/` for the two substructures (`setting`, `role_assignment`) and the six entity payloads (`data_product`, `exploration`, `output_port`, `technical_asset`, `input_port`, `technical_asset_link`) per Appendix A.
+- Create Pydantic models under `backend/app/core/webhooks/` for the two substructures (`setting`, `role_assignment`) and the six entity payloads (`data_product`, `exploration`, `output_port`, `technical_asset`, `input_port`, `port_asset`) per Appendix A.
 - Pure addition. No existing code consumes the new models yet.
 
 **T2 — Define CRUD event types.** Depends on T1.
 - For each of the five primary entities, define three event types: `<entity>.created`, `<entity>.updated`, `<entity>.deleted`. `created` and `deleted` carry the entity payload directly; `updated` carries `old` and `new` of it.
-- For `technical_asset_link`, define only `technical_asset_link.created` and `technical_asset_link.deleted` (the link has no updateable state).
+- For `port_asset`, define only `port_asset.created` and `port_asset.deleted` (the link has no updateable state).
 - Seventeen events total.
 - Still no consumers; existing `V2Event` subclasses are not yet rewired.
 
@@ -293,7 +293,7 @@ T4 ─► T5 ──────┘
 - Implement the chosen approach's mechanics: on a parent delete, iterate children and fire their events *before* the database cascade commits.
 - Adds the per-child events to the dispatch path but does not yet change individual event payloads — those flip in T6.x.
 
-**T6.x — Per-entity migration (parallelizable).** Depends on T2 and T5. Six tasks, one per entity (data_product / exploration / output_port / technical_asset / input_port / technical_asset_link). Each task:
+**T6.x — Per-entity migration (parallelizable).** Depends on T2 and T5. Six tasks, one per entity (data_product / exploration / output_port / technical_asset / input_port / port_asset). Each task:
 1. Switches the dispatch sites for that entity's `created`, `updated`, `deleted` to the new payload models.
 2. Removes any of the now-obsolete state-specific events for that entity (`setting_changed`, `team_member_added`, `status_updated`, `about_updated`, `link_approved`, `link_denied`, `technical_asset.linked`, etc.); those signals are now expressed by the entity's `updated` event.
 3. Updates integration tests and fixtures tied to the old shape.
