@@ -79,22 +79,21 @@ trio = ["trio (>=0.32.0)"]
 
 [[package]]
 name = "asgi-correlation-id"
-version = "4.3.4"
+version = "5.0.0"
 description = "Middleware correlating project logs to individual requests"
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "asgi_correlation_id-4.3.4-py3-none-any.whl", hash = "sha256:36ce69b06c7d96b4acb89c7556a4c4f01a972463d3d49c675026cbbd08e9a0a2"},
-    {file = "asgi_correlation_id-4.3.4.tar.gz", hash = "sha256:ea6bc310380373cb9f731dc2e8b2b6fb978a76afe33f7a2384f697b8d6cd811d"},
+    {file = "asgi_correlation_id-5.0.0-py3-none-any.whl", hash = "sha256:68d156ecd44e9c828dc7b20f8b7edb47070751c0739ba8ff0dd35a7b62bf579e"},
+    {file = "asgi_correlation_id-5.0.0.tar.gz", hash = "sha256:31fb8e5bce229fdf01b7be83d7969957a5adc4f99c3c2bc31338d3ff3070f5fc"},
 ]
 
 [package.dependencies]
-packaging = "*"
 starlette = ">=0.18"
 
 [package.extras]
-celery = ["celery"]
+sentry = ["sentry-sdk (>=2.12.0)"]
 
 [[package]]
 name = "asgiref"
@@ -4781,4 +4780,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "cfff8f0cf4b490a740964050efd28286c75523517d70b2c07f17312ac4d9938f"
+content-hash = "278111ec741786bdce4c26d15a455c6621e3e5c9102034760058bf14b6dd4369"
