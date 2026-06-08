@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, cast
 from urllib.parse import urlencode
 from sdk.api_client.api.authentication import get_jwt_token, get_device_token
-from sdk.api_client.client import Client
+from sdk.api_client.client import AuthenticatedClient, Client
 from sdk.api_client.models import DeviceFlow, DeviceFlowStatus
 
 logger = logging.getLogger(__name__)
@@ -99,7 +99,9 @@ class PortalAuth:
             httpx_args={"auth": httpx.BasicAuth(self.client_id, self.client_secret)},
         )
 
-        response = get_device_token.sync_detailed(client=client, scope=self.scope)
+        response = get_device_token.sync_detailed(
+            client=cast(AuthenticatedClient, client), scope=self.scope
+        )
         if not (200 <= response.status_code < 300):
             raise RuntimeError(f"Device authorization failed: {response.status_code}")
 

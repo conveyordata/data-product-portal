@@ -148,7 +148,7 @@ export type UnlinkOutputPortFromTechnicalAssetApiArg = {
   unLinkTechnicalAssetToOutputPortRequest: UnLinkTechnicalAssetToOutputPortRequest;
 };
 export type GetDataProductTechnicalAssetsApiResponse =
-  /** status 200 Successful Response */ GetTechnicalAssetsResponseRead;
+  /** status 200 Successful Response */ GetTechnicalAssetsResponse;
 export type GetDataProductTechnicalAssetsApiArg = string;
 export type CreateTechnicalAssetApiResponse =
   /** status 200 Technical asset successfully created */ CreateTechnicalAssetResponse;
@@ -157,7 +157,7 @@ export type CreateTechnicalAssetApiArg = {
   createTechnicalAssetRequest: CreateTechnicalAssetRequest;
 };
 export type GetTechnicalAssetApiResponse =
-  /** status 200 Successful Response */ GetTechnicalAssetsResponseItemRead;
+  /** status 200 Successful Response */ GetTechnicalAssetsResponseItem;
 export type GetTechnicalAssetApiArg = {
   dataProductId: string;
   id: string;
@@ -319,51 +319,12 @@ export type OutputPortLink = {
   status: DecisionStatus;
   output_port: OutputPort;
 };
-export type GetTechnicalAssetsResponseItem = {
-  id: string;
-  name: string;
-  description: string;
-  namespace: string;
-  owner_id: string;
-  platform_id: string;
-  service_id: string;
-  status: TechnicalAssetStatus;
-  technical_mapping: TechnicalMapping;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
-  owner: DataProduct;
-  output_port_links: OutputPortLink[];
-  tags: Tag[];
-};
 export type TechnicalInfo = {
   environment_id: string;
   environment: string;
   info: string | null;
 };
-export type GetTechnicalAssetsResponseItemRead = {
+export type GetTechnicalAssetsResponseItem = {
   id: string;
   name: string;
   description: string;
@@ -408,9 +369,6 @@ export type GetTechnicalAssetsResponseItemRead = {
 };
 export type GetTechnicalAssetsResponse = {
   technical_assets: GetTechnicalAssetsResponseItem[];
-};
-export type GetTechnicalAssetsResponseRead = {
-  technical_assets: GetTechnicalAssetsResponseItemRead[];
 };
 export type CreateTechnicalAssetResponse = {
   id: string;

@@ -19,26 +19,26 @@ async def call_webhook(
     webhook_url = settings.WEBHOOK_URL
     try:
         async with httpx.AsyncClient() as client:
-            content = {
+            message = {
                 "method": method,
                 "url": url,
                 "query": query,
                 "response": content,
                 "status_code": status_code,
             }
-            logger.info("Webhook triggered with content: %s", content)
+            logger.info("Webhook triggered with content: %s", message)
 
             headers = {}
             if settings.WEBHOOK_SECRET:
                 headers = {
                     "Sign": hmac.new(
                         bytes(settings.WEBHOOK_SECRET, encoding="utf-8"),
-                        bytes(json.dumps(content), encoding="utf-8"),
+                        bytes(json.dumps(message), encoding="utf-8"),
                         digestmod=hashlib.sha512,
                     ).hexdigest()
                 }
 
-            resp = await client.post(webhook_url, json=content, headers=headers)
+            resp = await client.post(webhook_url, json=message, headers=headers)
             if resp.status_code != 200:
                 logger.warning(f"Failed to send notification to {webhook_url}")
     except Exception as e:
@@ -108,7 +108,7 @@ def register_webhooks(app: FastAPI) -> None:
     # Programmatically construct a Discriminated Union across all event shapes
     # Union.__getitem__ is used to pass a dynamic list of classes into a Union type block
     V2EventUnion = Union.__getitem__(tuple(event_models))
-    UnifiedWebhookPayload = Annotated[V2EventUnion, Field(discriminator="type")]
+    UnifiedWebhookPayload = Annotated[V2EventUnion, Field(discriminator="type")]  # type: ignore[valid-type]
 
     # Define a single handler for the event stream
     async def v2_webhook_stream_handler(body: UnifiedWebhookPayload) -> None:

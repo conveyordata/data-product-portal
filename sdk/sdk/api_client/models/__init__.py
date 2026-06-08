@@ -401,6 +401,7 @@ from .user_create import UserCreate
 from .user_create_response import UserCreateResponse
 from .users_get import UsersGet
 from .validation_error import ValidationError
+from .validation_error_context import ValidationErrorContext
 
 __all__ = (
     "AbstractDataProductInfo",
@@ -700,4 +701,5 @@ __all__ = (
     "UserCreateResponse",
     "UsersGet",
     "ValidationError",
+    "ValidationErrorContext",
 )

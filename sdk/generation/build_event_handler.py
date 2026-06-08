@@ -57,7 +57,7 @@ def generate_event_handler_base():
         all_imports.add(e["inner_class_name"])
     imports = "\n    ".join((i + "," for i in sorted(all_imports)))
 
-    dispatch_blocks = []
+    dispatch_blocks = ["        parsed_event: Any"]
     for i, e in enumerate(events):
         keyword = "if" if i == 0 else "elif"
         dispatch_blocks.append(f"""        {keyword} event_type == "{e["event_type"]}":
