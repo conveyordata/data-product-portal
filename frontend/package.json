@@ -76,7 +76,7 @@
         "@vitejs/plugin-react": "^6.0.2",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.28.0",
-        "i18next-cli": "^1.61.0",
+        "i18next-cli": "^1.61.1",
         "jsdom": "^29.1.1",
         "knip": "^6.16.0",
         "msw": "^2.14.6",
