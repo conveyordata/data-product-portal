@@ -1051,38 +1051,38 @@ tqdm = ">=4.66,<5.0"
 
 [[package]]
 name = "fastmcp"
-version = "3.3.1"
+version = "3.4.2"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp-3.3.1-py3-none-any.whl", hash = "sha256:862440c5c4d281363a5995eee59d77f0f7cac1f18869038729cecf03b02fc522"},
-    {file = "fastmcp-3.3.1.tar.gz", hash = "sha256:979362ea557de42a5f40342563c7e4b236bcc8e7cd192715f50030695d1a71cd"},
+    {file = "fastmcp-3.4.2-py3-none-any.whl", hash = "sha256:c87a62b029f0c5400ada85f683629345d2466c39169f0cb853e487b2f7308c08"},
+    {file = "fastmcp-3.4.2.tar.gz", hash = "sha256:b468722946fc467c3796a6572f7a14d93d48c014cf8fea12910245220cbbe4e1"},
 ]
 
 [package.dependencies]
-fastmcp-slim = {version = "3.3.1", extras = ["client", "server"]}
+fastmcp-slim = {version = "3.4.2", extras = ["client", "server"]}
 
 [package.extras]
-anthropic = ["fastmcp-slim[anthropic] (==3.3.1)"]
-apps = ["fastmcp-slim[apps] (==3.3.1)"]
-azure = ["fastmcp-slim[azure] (==3.3.1)"]
-code-mode = ["fastmcp-slim[code-mode] (==3.3.1)"]
-gemini = ["fastmcp-slim[gemini] (==3.3.1)"]
-openai = ["fastmcp-slim[openai] (==3.3.1)"]
-tasks = ["fastmcp-slim[tasks] (==3.3.1)"]
+anthropic = ["fastmcp-slim[anthropic] (==3.4.2)"]
+apps = ["fastmcp-slim[apps] (==3.4.2)"]
+azure = ["fastmcp-slim[azure] (==3.4.2)"]
+code-mode = ["fastmcp-slim[code-mode] (==3.4.2)"]
+gemini = ["fastmcp-slim[gemini] (==3.4.2)"]
+openai = ["fastmcp-slim[openai] (==3.4.2)"]
+tasks = ["fastmcp-slim[tasks] (==3.4.2)"]
 
 [[package]]
 name = "fastmcp-slim"
-version = "3.3.1"
+version = "3.4.2"
 description = "The dependency-slim FastMCP package."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp_slim-3.3.1-py3-none-any.whl", hash = "sha256:6cf1c2d77e3adb0d409d6825ed6b0b2a999062973e00b8eea03bd48bf9b4c043"},
-    {file = "fastmcp_slim-3.3.1.tar.gz", hash = "sha256:0957835fc59452e143ab2f4b7836d2d2df9b2d9958408edc79ba8b56232b2a88"},
+    {file = "fastmcp_slim-3.4.2-py3-none-any.whl", hash = "sha256:bdc72492212681ca502755fa8acc0457f559295da1fc3dfc0599adc1c04b82f3"},
+    {file = "fastmcp_slim-3.4.2.tar.gz", hash = "sha256:290646e0955a516235a317151034559aa48336cb843d3f006131aedad8759bb4"},
 ]
 
 [package.dependencies]
@@ -1091,6 +1091,7 @@ cyclopts = {version = ">=4.0.0", optional = true, markers = "extra == \"server\"
 exceptiongroup = {version = ">=1.2.2", optional = true, markers = "extra == \"client\" or extra == \"server\""}
 griffelib = {version = ">=2.0.0", optional = true, markers = "extra == \"server\""}
 httpx = {version = ">=0.28.1,<1.0", optional = true, markers = "extra == \"client\" or extra == \"server\""}
+joserfc = {version = ">=1.1.0", optional = true, markers = "extra == \"server\""}
 jsonref = {version = ">=1.1.0", optional = true, markers = "extra == \"server\""}
 jsonschema-path = {version = ">=0.3.4", optional = true, markers = "extra == \"server\""}
 mcp = {version = ">=1.24.0,<2.0", optional = true, markers = "extra == \"client\" or extra == \"server\""}
@@ -1106,6 +1107,7 @@ python-dotenv = ">=1.1.0"
 python-multipart = {version = ">=0.0.26", optional = true, markers = "extra == \"server\""}
 pyyaml = {version = ">=6.0,<7.0", optional = true, markers = "extra == \"server\""}
 rich = ">=13.9.4"
+starlette = {version = ">=1.0.1", optional = true, markers = "extra == \"client\" or extra == \"server\""}
 typing-extensions = ">=4.0.0"
 uncalled-for = {version = ">=0.2.0", optional = true, markers = "extra == \"server\""}
 uvicorn = {version = ">=0.35", optional = true, markers = "extra == \"server\""}
@@ -1116,12 +1118,12 @@ websockets = {version = ">=15.0.1", optional = true, markers = "extra == \"serve
 anthropic = ["anthropic (>=0.48.0)"]
 apps = ["prefab-ui (>=0.18.0)"]
 azure = ["azure-identity (>=1.16.0)", "pyjwt (>=2.12.0)"]
-client = ["authlib (>=1.6.11)", "exceptiongroup (>=1.2.2)", "httpx (>=0.28.1,<1.0)", "mcp (>=1.24.0,<2.0)", "opentelemetry-api (>=1.20.0)", "py-key-value-aio[filetree,keyring,memory] (>=0.4.4,<0.5.0)"]
-code-mode = ["pydantic-monty (==0.0.16)"]
+client = ["authlib (>=1.6.11)", "exceptiongroup (>=1.2.2)", "httpx (>=0.28.1,<1.0)", "mcp (>=1.24.0,<2.0)", "opentelemetry-api (>=1.20.0)", "py-key-value-aio[filetree,keyring,memory] (>=0.4.4,<0.5.0)", "starlette (>=1.0.1)"]
+code-mode = ["pydantic-monty (==0.0.17)"]
 gemini = ["google-genai (>=1.18.0)", "jsonref (>=1.1.0)"]
-mcp = ["exceptiongroup (>=1.2.2)", "httpx (>=0.28.1,<1.0)", "mcp (>=1.24.0,<2.0)", "opentelemetry-api (>=1.20.0)"]
+mcp = ["exceptiongroup (>=1.2.2)", "httpx (>=0.28.1,<1.0)", "mcp (>=1.24.0,<2.0)", "opentelemetry-api (>=1.20.0)", "starlette (>=1.0.1)"]
 openai = ["openai (>=1.102.0)"]
-server = ["authlib (>=1.6.11)", "cyclopts (>=4.0.0)", "exceptiongroup (>=1.2.2)", "griffelib (>=2.0.0)", "httpx (>=0.28.1,<1.0)", "jsonref (>=1.1.0)", "jsonschema-path (>=0.3.4)", "mcp (>=1.24.0,<2.0)", "openapi-pydantic (>=0.5.1)", "opentelemetry-api (>=1.20.0)", "packaging (>=24.0)", "py-key-value-aio[filetree,keyring,memory] (>=0.4.4,<0.5.0)", "pyperclip (>=1.9.0)", "python-multipart (>=0.0.26)", "pyyaml (>=6.0,<7.0)", "uncalled-for (>=0.2.0)", "uvicorn (>=0.35)", "watchfiles (>=1.0.0)", "websockets (>=15.0.1)"]
+server = ["authlib (>=1.6.11)", "cyclopts (>=4.0.0)", "exceptiongroup (>=1.2.2)", "griffelib (>=2.0.0)", "httpx (>=0.28.1,<1.0)", "joserfc (>=1.1.0)", "jsonref (>=1.1.0)", "jsonschema-path (>=0.3.4)", "mcp (>=1.24.0,<2.0)", "openapi-pydantic (>=0.5.1)", "opentelemetry-api (>=1.20.0)", "packaging (>=24.0)", "py-key-value-aio[filetree,keyring,memory] (>=0.4.4,<0.5.0)", "pyperclip (>=1.9.0)", "python-multipart (>=0.0.26)", "pyyaml (>=6.0,<7.0)", "starlette (>=1.0.1)", "uncalled-for (>=0.2.0)", "uvicorn (>=0.35)", "watchfiles (>=1.0.0)", "websockets (>=15.0.1)"]
 tasks = ["pydocket (>=0.20.0)"]
 
 [[package]]
@@ -4780,4 +4782,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "7301a2732646aeb4fe400914343cbb78f69e5dfcf7f4d015e36e0d5388876e1f"
+content-hash = "14f8f8991f143a32f34e0b1512cc84a4e338c569994b74baf3de74428ac7ebcc"
