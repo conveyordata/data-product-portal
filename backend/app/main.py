@@ -1,5 +1,6 @@
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -7,7 +8,6 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 from fastmcp.utilities.lifespan import combine_lifespans
@@ -131,7 +131,9 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def send_response_to_webhook(request: Request, call_next):
+async def send_response_to_webhook(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     response = await call_next(request)
     # Gets are not logged
     if (

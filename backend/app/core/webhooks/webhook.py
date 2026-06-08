@@ -1,7 +1,6 @@
 import hashlib
 import hmac
 import json
-from http import HTTPStatus
 from typing import Annotated, Literal, Union
 
 import httpx
@@ -14,7 +13,7 @@ from app.settings import settings
 
 
 async def call_webhook(
-    content: str, method: str, url: str, query: str, status_code: HTTPStatus
+    content: str, method: str, url: str, query: str, status_code: int
 ) -> None:
     webhook_url = settings.WEBHOOK_URL
     try:

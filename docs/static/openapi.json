@@ -9312,43 +9312,6 @@
         ],
         "title": "DataOutputUpdate"
       },
-      "DataProduct": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
-          },
-          "type": {
-            "$ref": "#/components/schemas/DataProductType"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "type"
-        ],
-        "title": "DataProduct"
-      },
       "DataProductAboutUpdate": {
         "properties": {
           "about": {
@@ -11099,62 +11062,6 @@
         ],
         "title": "EnvironmentConfigsGet"
       },
-      "EnvironmentConfigsGetItem": {
-        "properties": {
-          "config": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/AWSS3Config"
-                },
-                {
-                  "$ref": "#/components/schemas/AWSGlueConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/DatabricksConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/SnowflakeConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/RedshiftConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/PostgreSQLConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/AzureBlobConfig"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Config"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "platform": {
-            "$ref": "#/components/schemas/Platform"
-          },
-          "environment": {
-            "$ref": "#/components/schemas/Environment"
-          },
-          "service": {
-            "$ref": "#/components/schemas/PlatformService"
-          }
-        },
-        "type": "object",
-        "required": [
-          "config",
-          "id",
-          "platform",
-          "environment",
-          "service"
-        ],
-        "title": "EnvironmentConfigsGetItem"
-      },
       "EnvironmentGetItem": {
         "properties": {
           "id": {
@@ -11403,90 +11310,6 @@
           "output_ports"
         ],
         "title": "GetDataProductOutputPortsResponse"
-      },
-      "GetDataProductResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
-          },
-          "tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "title": "Tags"
-          },
-          "usage": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage"
-          },
-          "domain": {
-            "$ref": "#/components/schemas/Domain"
-          },
-          "type": {
-            "$ref": "#/components/schemas/DataProductType"
-          },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "about": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "About"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "namespace",
-          "status",
-          "tags",
-          "usage",
-          "domain",
-          "type",
-          "lifecycle",
-          "about"
-        ],
-        "title": "GetDataProductResponse"
       },
       "GetDataProductRolledUpTagsResponse": {
         "properties": {
@@ -14806,104 +14629,6 @@
         ],
         "title": "TagsGetItem"
       },
-      "TechnicalAsset": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "technical_mapping",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration"
-        ],
-        "title": "TechnicalAsset"
-      },
       "TechnicalAssetCreatedEvent": {
         "properties": {
           "data_product": {
@@ -15932,6 +15657,183 @@
         ],
         "title": "ValidationError"
       },
+      "DataProduct": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataProductStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DataProductType"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "status",
+          "type"
+        ],
+        "title": "DataProduct"
+      },
+      "EnvironmentConfigsGetItem": {
+        "properties": {
+          "config": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AWSS3Config"
+                },
+                {
+                  "$ref": "#/components/schemas/AWSGlueConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/DatabricksConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/SnowflakeConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/RedshiftConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/PostgreSQLConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/AzureBlobConfig"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Config"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "platform": {
+            "$ref": "#/components/schemas/Platform"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/Environment"
+          },
+          "service": {
+            "$ref": "#/components/schemas/PlatformService"
+          }
+        },
+        "type": "object",
+        "required": [
+          "config",
+          "id",
+          "platform",
+          "environment",
+          "service"
+        ],
+        "title": "EnvironmentConfigsGetItem"
+      },
+      "GetDataProductResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataProductStatus"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DataProductType"
+          },
+          "lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataProductLifeCycle"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "About"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "namespace",
+          "status",
+          "tags",
+          "usage",
+          "domain",
+          "type",
+          "lifecycle",
+          "about"
+        ],
+        "title": "GetDataProductResponse"
+      },
       "GetOutputPortResponse": {
         "properties": {
           "id": {
@@ -16252,6 +16154,104 @@
           "output_port_id"
         ],
         "title": "OutputPortSettingValue"
+      },
+      "TechnicalAsset": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TechnicalAssetStatus"
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Id"
+          },
+          "platform_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Platform Id"
+          },
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
+          },
+          "configuration": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+              }
+            ],
+            "title": "Configuration",
+            "discriminator": {
+              "propertyName": "configuration_type",
+              "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
+                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "status",
+          "technical_mapping",
+          "owner_id",
+          "platform_id",
+          "service_id",
+          "configuration"
+        ],
+        "title": "TechnicalAsset"
       },
       "TechnicalAssetLink": {
         "properties": {

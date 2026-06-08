@@ -299,3 +299,91 @@ class AbstractEventHandler(ABC):
     async def on_output_port_link_denied(self, data: OutputPortLinkDeniedEvent) -> Any:
         """Handler for the parsed payload of 'output_port.link_denied'"""
         pass
+
+
+class EmptyEventHandler(AbstractEventHandler):
+    """
+    An empty implementation of AbstractEventHandler for testing purposes.
+    Inherit from this in your tests to avoid implementing every single abstract method.
+    """
+
+    async def on_data_product_team_member_updated(self, data: DataProductTeamMemberUpdatedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_created(self, data: TechnicalAssetCreatedEvent) -> Any:
+        pass
+
+    async def on_data_product_team_member_removed(self, data: DataProductTeamMemberRemovedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_unlinked(self, data: TechnicalAssetUnlinkedEvent) -> Any:
+        pass
+
+    async def on_data_product_input_port_unlinked(self, data: DataProductInputPortUnlinkedEvent) -> Any:
+        pass
+
+    async def on_output_port_setting_changed(self, data: OutputPortSettingChangedEvent) -> Any:
+        pass
+
+    async def on_output_port_created(self, data: OutputPortCreatedEvent) -> Any:
+        pass
+
+    async def on_output_port_status_updated(self, data: OutputPortStatusUpdatedEvent) -> Any:
+        pass
+
+    async def on_data_product_team_member_added(self, data: DataProductTeamMemberAddedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_linked(self, data: TechnicalAssetLinkedEvent) -> Any:
+        pass
+
+    async def on_output_port_updated(self, data: OutputPortUpdatedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_updated(self, data: TechnicalAssetUpdatedEvent) -> Any:
+        pass
+
+    async def on_data_product_deleted(self, data: DataProductDeletedEvent) -> Any:
+        pass
+
+    async def on_data_product_setting_changed(self, data: DataProductSettingChangedEvent) -> Any:
+        pass
+
+    async def on_output_port_link_approved(self, data: OutputPortLinkApprovedEvent) -> Any:
+        pass
+
+    async def on_data_product_status_updated(self, data: DataProductStatusUpdatedEvent) -> Any:
+        pass
+
+    async def on_data_product_created(self, data: DataProductCreatedEvent) -> Any:
+        pass
+
+    async def on_data_product_about_updated(self, data: DataProductAboutUpdatedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_link_denied(self, data: TechnicalAssetLinkDeniedEvent) -> Any:
+        pass
+
+    async def on_output_port_deleted(self, data: OutputPortDeletedEvent) -> Any:
+        pass
+
+    async def on_data_product_input_port_linked(self, data: DataProductInputPortLinkedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_link_approved(self, data: TechnicalAssetLinkApprovedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_status_updated(self, data: TechnicalAssetStatusUpdatedEvent) -> Any:
+        pass
+
+    async def on_data_product_updated(self, data: DataProductUpdatedEvent) -> Any:
+        pass
+
+    async def on_output_port_about_updated(self, data: OutputPortAboutUpdatedEvent) -> Any:
+        pass
+
+    async def on_technical_asset_deleted(self, data: TechnicalAssetDeletedEvent) -> Any:
+        pass
+
+    async def on_output_port_link_denied(self, data: OutputPortLinkDeniedEvent) -> Any:
+        pass
