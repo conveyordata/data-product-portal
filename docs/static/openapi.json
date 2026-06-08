@@ -2,11 +2,6 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Data product portal",
-    "summary": "Backend API implementation for Data product portal",
-    "contact": {
-      "name": "Stijn Janssens",
-      "email": "stijn.janssens@dataminded.com"
-    },
     "version": "0.5.1"
   },
   "paths": {
@@ -32,16 +27,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Resource"
+              "title": "Resource",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -49,16 +37,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Domain"
+              "title": "Domain",
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -126,16 +107,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "minLength": 3
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Query"
+              "title": "Query",
+              "type": "string",
+              "minLength": 3
             }
           },
           {
@@ -1526,16 +1500,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Filter To User With Assigment"
+              "title": "Filter To User With Assigment",
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -5370,16 +5337,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "User Id"
+              "title": "User Id",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -5387,16 +5347,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Role Id"
+              "title": "Role Id",
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -5680,16 +5633,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Data Product Id"
+              "title": "Data Product Id",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -5697,16 +5643,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "User Id"
+              "title": "User Id",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -5714,16 +5653,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Role Id"
+              "title": "Role Id",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -5731,15 +5663,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/DecisionStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Decision"
+              "title": "Decision",
+              "$ref": "#/components/schemas/DecisionStatus"
             }
           }
         ],
@@ -6007,16 +5932,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Output Port Id"
+              "title": "Output Port Id",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -6024,16 +5942,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "User Id"
+              "title": "User Id",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -6041,16 +5952,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Role Id"
+              "title": "Role Id",
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -6058,15 +5962,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/DecisionStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Decision"
+              "title": "Decision",
+              "$ref": "#/components/schemas/DecisionStatus"
             }
           }
         ],
@@ -6491,16 +6388,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Data Product Id"
+              "title": "Data Product Id",
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -6668,15 +6558,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Environment"
+              "title": "Environment",
+              "type": "string"
             }
           }
         ],
@@ -6758,16 +6641,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Filter To User With Assigment"
+              "title": "Filter To User With Assigment",
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -7040,16 +6916,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
               "deprecated": true,
-              "title": "Client Id"
+              "title": "Client Id",
+              "type": "string"
             },
             "deprecated": true
           },
@@ -7124,16 +6993,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
               "deprecated": true,
-              "title": "Client Id"
+              "title": "Client Id",
+              "type": "string"
             },
             "deprecated": true
           }
@@ -7143,7 +7005,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/OIDCTokenResponse"
+                }
               }
             }
           },
@@ -11431,6 +11295,52 @@
           "outputPortNode"
         ],
         "title": "NodeType"
+      },
+      "OIDCTokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          },
+          "id_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Token"
+          },
+          "refresh_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in"
+        ],
+        "title": "OIDCTokenResponse",
+        "description": "OIDC token endpoint response."
       },
       "OSISemanticModelTechnicalAssetConfiguration": {
         "properties": {

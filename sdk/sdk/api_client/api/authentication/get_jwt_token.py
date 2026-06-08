@@ -6,6 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
+from ...models.oidc_token_response import OIDCTokenResponse
 from ...types import UNSET, Response, Unset
 
 
@@ -13,7 +14,7 @@ def _get_kwargs(
     *,
     device_code: str,
     grant_type: str,
-    client_id: None | str | Unset = UNSET,
+    client_id: str | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -22,12 +23,7 @@ def _get_kwargs(
 
     params["grant_type"] = grant_type
 
-    json_client_id: None | str | Unset
-    if isinstance(client_id, Unset):
-        json_client_id = UNSET
-    else:
-        json_client_id = client_id
-    params["client_id"] = json_client_id
+    params["client_id"] = client_id
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -42,9 +38,10 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Any | HTTPValidationError | None:
+) -> HTTPValidationError | OIDCTokenResponse | None:
     if response.status_code == 200:
-        response_200 = response.json()
+        response_200 = OIDCTokenResponse.from_dict(response.json())
+
         return response_200
 
     if response.status_code == 422:
@@ -60,7 +57,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | HTTPValidationError]:
+) -> Response[HTTPValidationError | OIDCTokenResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,21 +71,21 @@ def sync_detailed(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: None | str | Unset = UNSET,
-) -> Response[Any | HTTPValidationError]:
+    client_id: str | Unset = UNSET,
+) -> Response[HTTPValidationError | OIDCTokenResponse]:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (None | str | Unset):
+        client_id (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | HTTPValidationError]
+        Response[HTTPValidationError | OIDCTokenResponse]
     """
 
     kwargs = _get_kwargs(
@@ -109,21 +106,21 @@ def sync(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: None | str | Unset = UNSET,
-) -> Any | HTTPValidationError | None:
+    client_id: str | Unset = UNSET,
+) -> HTTPValidationError | OIDCTokenResponse | None:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (None | str | Unset):
+        client_id (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | HTTPValidationError
+        HTTPValidationError | OIDCTokenResponse
     """
 
     return sync_detailed(
@@ -139,21 +136,21 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: None | str | Unset = UNSET,
-) -> Response[Any | HTTPValidationError]:
+    client_id: str | Unset = UNSET,
+) -> Response[HTTPValidationError | OIDCTokenResponse]:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (None | str | Unset):
+        client_id (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | HTTPValidationError]
+        Response[HTTPValidationError | OIDCTokenResponse]
     """
 
     kwargs = _get_kwargs(
@@ -172,21 +169,21 @@ async def asyncio(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: None | str | Unset = UNSET,
-) -> Any | HTTPValidationError | None:
+    client_id: str | Unset = UNSET,
+) -> HTTPValidationError | OIDCTokenResponse | None:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (None | str | Unset):
+        client_id (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | HTTPValidationError
+        HTTPValidationError | OIDCTokenResponse
     """
 
     return (

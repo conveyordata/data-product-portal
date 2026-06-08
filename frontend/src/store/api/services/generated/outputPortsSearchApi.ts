@@ -21,7 +21,7 @@ export { injectedRtkApi as api };
 export type SearchOutputPortsApiResponse =
   /** status 200 Successful Response */ SearchOutputPortsResponse;
 export type SearchOutputPortsApiArg = {
-  query?: string | null;
+  query?: string;
   limit?: number;
   currentUserAssigned?: boolean;
 };

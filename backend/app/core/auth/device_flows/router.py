@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
-from app.core.auth.device_flows.schema import DeviceFlow
+from app.core.auth.device_flows.schema import DeviceFlow, OIDCTokenResponse
 from app.core.auth.device_flows.service import DeviceFlowService, verify_auth_header
 from app.database.database import get_db_session
 
@@ -30,7 +30,7 @@ async def get_jwt_token(
     auth_client_id: Annotated[str, Depends(verify_auth_header)],
     client_id: Optional[str] = Query(default=None, deprecated=True),
     db: Session = Depends(get_db_session),
-):
+) -> OIDCTokenResponse:
     return DeviceFlowService().get_jwt_token(
         request, auth_client_id, device_code, grant_type, db
     )

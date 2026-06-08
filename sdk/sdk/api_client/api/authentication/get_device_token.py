@@ -12,18 +12,13 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    client_id: None | str | Unset = UNSET,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    json_client_id: None | str | Unset
-    if isinstance(client_id, Unset):
-        json_client_id = UNSET
-    else:
-        json_client_id = client_id
-    params["client_id"] = json_client_id
+    params["client_id"] = client_id
 
     params["scope"] = scope
 
@@ -71,13 +66,13 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    client_id: None | str | Unset = UNSET,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
 ) -> Response[DeviceFlow | HTTPValidationError]:
     """Get Device Token
 
     Args:
-        client_id (None | str | Unset):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -103,13 +98,13 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-    client_id: None | str | Unset = UNSET,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
 ) -> DeviceFlow | HTTPValidationError | None:
     """Get Device Token
 
     Args:
-        client_id (None | str | Unset):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -130,13 +125,13 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    client_id: None | str | Unset = UNSET,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
 ) -> Response[DeviceFlow | HTTPValidationError]:
     """Get Device Token
 
     Args:
-        client_id (None | str | Unset):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -160,13 +155,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    client_id: None | str | Unset = UNSET,
+    client_id: str | Unset = UNSET,
     scope: str | Unset = "openid",
 ) -> DeviceFlow | HTTPValidationError | None:
     """Get Device Token
 
     Args:
-        client_id (None | str | Unset):
+        client_id (str | Unset):
         scope (str | Unset):  Default: 'openid'.
 
     Raises:

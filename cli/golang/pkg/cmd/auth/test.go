@@ -10,11 +10,10 @@ var testCommand = &cobra.Command{
 	Use:   "test",
 	Short: "Test auth flow with API",
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		_, err := test.TestApi(cmd.Context())
-		if err != nil {
+		if err := test.TestApi(cmd.Context()); err != nil {
 			return err
 		}
-		return err
+		return nil
 	},
 }
 

@@ -93,6 +93,13 @@ repos:
       types: [text]
       files: ^docs/static/openapi.json$
       pass_filenames: false
+    - id: check-generated-cli
+      name: Check generated CLI is up to date
+      entry: ./scripts/check_generated_cli.sh
+      language: script
+      types: [text]
+      files: ^docs/static/openapi.json$
+      pass_filenames: false
     - id: local-fe-check
       name: fe check
       entry: bash -c "cd frontend && npm run check:fix"
