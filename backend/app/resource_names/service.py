@@ -1,8 +1,10 @@
 import re
 from enum import Enum
-from typing import Final, Optional, Type, TypeVar
+from typing import Annotated, Final, Optional, Type, TypeVar
 
+from fastapi import Query
 from pydantic import BaseModel
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy import UUID, and_, exists, select
 from sqlalchemy.orm import Mapper, Session
 
@@ -69,7 +71,9 @@ class ResourceNameService:
         self,
         resource_name: str,
         db: Session,
-        scope: Optional[UUID | Enum] = None,
+        scope: Annotated[
+            UUID | DataProductSettingScope | SkipJsonSchema[None], Query()
+        ] = None,
     ) -> ResourceNameValidation:
         if not (len(resource_name) <= self.max_length):
             validity = ResourceNameValidityType.INVALID_LENGTH

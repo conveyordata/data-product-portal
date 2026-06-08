@@ -14,7 +14,7 @@ def _get_kwargs(
     *,
     device_code: str,
     grant_type: str,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -71,14 +71,14 @@ def sync_detailed(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
 ) -> Response[HTTPValidationError | OIDCTokenResponse]:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -106,14 +106,14 @@ def sync(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
 ) -> HTTPValidationError | OIDCTokenResponse | None:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -136,14 +136,14 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
 ) -> Response[HTTPValidationError | OIDCTokenResponse]:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -169,14 +169,14 @@ async def asyncio(
     client: AuthenticatedClient,
     device_code: str,
     grant_type: str,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
 ) -> HTTPValidationError | OIDCTokenResponse | None:
     """Get Jwt Token
 
     Args:
         device_code (str):
         grant_type (str):
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

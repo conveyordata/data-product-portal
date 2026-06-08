@@ -28,9 +28,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Resource",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Resource"
             }
           },
           {
@@ -38,9 +38,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Domain",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Domain"
             }
           }
         ],
@@ -108,9 +108,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Query",
               "type": "string",
-              "minLength": 3
+              "minLength": 3,
+              "title": "Query"
             }
           },
           {
@@ -1501,9 +1501,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Filter To User With Assigment",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Filter To User With Assigment"
             }
           }
         ],
@@ -5338,9 +5338,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "User Id"
             }
           },
           {
@@ -5348,9 +5348,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Role Id"
             }
           }
         ],
@@ -5634,9 +5634,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Data Product Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Data Product Id"
             }
           },
           {
@@ -5644,9 +5644,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "User Id"
             }
           },
           {
@@ -5654,9 +5654,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Role Id"
             }
           },
           {
@@ -5664,7 +5664,6 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Decision",
               "$ref": "#/components/schemas/DecisionStatus"
             }
           }
@@ -5933,9 +5932,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Output Port Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Output Port Id"
             }
           },
           {
@@ -5943,9 +5942,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "User Id"
             }
           },
           {
@@ -5953,9 +5952,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Role Id"
             }
           },
           {
@@ -5963,7 +5962,6 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Decision",
               "$ref": "#/components/schemas/DecisionStatus"
             }
           }
@@ -6389,9 +6387,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Data Product Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Data Product Id"
             }
           }
         ],
@@ -6559,8 +6557,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Environment",
-              "type": "string"
+              "type": "string",
+              "title": "Environment"
             }
           }
         ],
@@ -6642,9 +6640,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Filter To User With Assigment",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Filter To User With Assigment"
             }
           }
         ],
@@ -6917,9 +6915,10 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "deprecated": true,
-              "title": "Client Id",
-              "type": "string"
+              "default": "",
+              "title": "Client Id"
             },
             "deprecated": true
           },
@@ -6994,9 +6993,10 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "deprecated": true,
-              "title": "Client Id",
-              "type": "string"
+              "default": "",
+              "title": "Client Id"
             },
             "deprecated": true
           }

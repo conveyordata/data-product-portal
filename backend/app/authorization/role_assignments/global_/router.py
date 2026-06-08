@@ -1,7 +1,8 @@
-from typing import Literal, Optional, Union, cast
+from typing import Annotated, Literal, Union, cast
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -107,8 +108,8 @@ def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
 
 @router.get("")
 def list_global_role_assignments(
-    user_id: Optional[UUID] = None,
-    role_id: Optional[UUID] = None,
+    user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     db: Session = Depends(get_db_session),
 ) -> ListGlobalRoleAssignmentsResponse:
     return ListGlobalRoleAssignmentsResponse(

@@ -15,7 +15,7 @@ router = APIRouter(prefix="/device")
 async def get_device_token(
     request: Request,
     auth_client_id: Annotated[str, Depends(verify_auth_header)],
-    client_id: Optional[str] = Query(default=None, deprecated=True),
+    client_id: str = Query(default="", deprecated=True),
     scope: str = "openid",
     db: Session = Depends(get_db_session),
 ) -> DeviceFlow:
@@ -28,7 +28,7 @@ async def get_jwt_token(
     device_code: str,
     grant_type: str,
     auth_client_id: Annotated[str, Depends(verify_auth_header)],
-    client_id: Optional[str] = Query(default=None, deprecated=True),
+    client_id: str = Query(default="", deprecated=True),
     db: Session = Depends(get_db_session),
 ) -> OIDCTokenResponse:
     return DeviceFlowService().get_jwt_token(

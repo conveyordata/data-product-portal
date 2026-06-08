@@ -97,42 +97,6 @@ app = FastAPI(
     },
 )
 
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-
-    openapi_schema = get_openapi(
-        title=TITLE,
-        version=API_VERSION,
-        routes=app.routes,
-    )
-
-    # Walk through all paths and parameters
-    for path in openapi_schema.get("paths", {}).values():
-        for method in path.values():
-            parameters = method.get("parameters", [])
-            for param in parameters:
-                schema = param.get("schema", {})
-
-                # Check if 'anyOf' exists and contains a null type
-                if "anyOf" in schema:
-                    # Filter out the {'type': 'null'} entry
-                    new_any_of = [x for x in schema["anyOf"] if x.get("type") != "null"]
-
-                    if len(new_any_of) == 1:
-                        # If only one type remains, move it to the root schema
-                        schema.update(new_any_of[0])
-                        del schema["anyOf"]
-                    else:
-                        schema["anyOf"] = new_any_of
-
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi
-
 app.mount("/mcp", mcp_app)
 # We need to add the MCP well known authentication routes here.
 # The problem is we mounted the MCP under `/mcp`, but these need to be mounted without that.
