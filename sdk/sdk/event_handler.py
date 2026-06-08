@@ -57,12 +57,13 @@ from sdk.api_client.models import (
     TechnicalAssetLinkedEvent,
     TechnicalAssetStatusUpdatedEvent,
     TechnicalAssetUnlinkedEvent,
-    TechnicalAssetUpdatedEvent
+    TechnicalAssetUpdatedEvent,
 )
+
 
 class AbstractEventHandler(ABC):
     """
-    Abstract Base Class that automatically handles parsing and routing 
+    Abstract Base Class that automatically handles parsing and routing
     incoming OpenAPI CloudEvents and unpacking their envelope,
     exposing the inner payload to their strongly-typed handler methods.
     """

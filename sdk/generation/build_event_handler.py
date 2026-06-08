@@ -32,12 +32,14 @@ def generate_event_handler_base():
             inner_class_name = data_match.group(1)
             method_name = f"on_{event_type.replace('.', '_').replace('-', '_')}"
 
-            events.append({
-                "class_name": class_name,
-                "inner_class_name": inner_class_name,
-                "event_type": event_type,
-                "method_name": method_name
-            })
+            events.append(
+                {
+                    "class_name": class_name,
+                    "inner_class_name": inner_class_name,
+                    "event_type": event_type,
+                    "method_name": method_name,
+                }
+            )
         elif class_match and not (type_match and data_match):
             raise FileNotFoundError(f"Could not process class '{class_match.group(1)}'")
 
@@ -51,24 +53,24 @@ def generate_event_handler_base():
 
     all_imports = set()
     for e in events:
-        all_imports.add(e['class_name'])
-        all_imports.add(e['inner_class_name'])
-    imports = ",\n    ".join(sorted(all_imports))
+        all_imports.add(e["class_name"])
+        all_imports.add(e["inner_class_name"])
+    imports = "\n    ".join((i + "," for i in sorted(all_imports)))
 
     dispatch_blocks = []
     for i, e in enumerate(events):
         keyword = "if" if i == 0 else "elif"
-        dispatch_blocks.append(f"""        {keyword} event_type == "{e['event_type']}":
-            parsed_event = {e['class_name']}.from_dict(payload)
-            return await self.{e['method_name']}(parsed_event.data)""")
+        dispatch_blocks.append(f"""        {keyword} event_type == "{e["event_type"]}":
+            parsed_event = {e["class_name"]}.from_dict(payload)
+            return await self.{e["method_name"]}(parsed_event.data)""")
 
     dispatch_code = "\n".join(dispatch_blocks)
 
     abstract_methods = []
     for e in events:
         abstract_methods.append(f"""    @abstractmethod
-    async def {e['method_name']}(self, data: {e['inner_class_name']}) -> Any:
-        \"\"\"Handler for the parsed payload of '{e['event_type']}'\"\"\"
+    async def {e["method_name"]}(self, data: {e["inner_class_name"]}) -> Any:
+        \"\"\"Handler for the parsed payload of '{e["event_type"]}'\"\"\"
         pass""")
 
     abstract_methods_code = "\n\n".join(abstract_methods)
@@ -83,9 +85,10 @@ from sdk.api_client.models import (
     {imports}
 )
 
+
 class AbstractEventHandler(ABC):
     \"\"\"
-    Abstract Base Class that automatically handles parsing and routing 
+    Abstract Base Class that automatically handles parsing and routing
     incoming OpenAPI CloudEvents and unpacking their envelope,
     exposing the inner payload to their strongly-typed handler methods.
     \"\"\"
@@ -111,6 +114,7 @@ class AbstractEventHandler(ABC):
     output_file = sdk_dir / "event_handler.py"
     output_file.write_text(base_class_content)
     print(f"✅ Generated base class successfully at: {output_file}")
+
 
 if __name__ == "__main__":
     generate_event_handler_base()
