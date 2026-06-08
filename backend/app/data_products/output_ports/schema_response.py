@@ -45,7 +45,9 @@ class GetOutputPortResponse(BaseOutputPortGet):
 
     rolled_up_tags: set[Tag]
     data_product_settings: list[OutputPortSettingValue]
-    technical_asset_links: list[TechnicalAssetLink]
+    technical_asset_links: list[TechnicalAssetLink] = Field(
+        validation_alias="data_output_links"
+    )
 
 
 class OutputPortsGet(BaseOutputPortGet):

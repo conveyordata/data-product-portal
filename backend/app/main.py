@@ -91,7 +91,6 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     lifespan=combine_lifespans(lifespan, mcp_app.lifespan),
     **oidc_kwargs,
-    separate_input_output_schemas=False,
     swagger_ui_parameters={
         "docExpansion": "none",
         "tagsSorter": "alpha",
