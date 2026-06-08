@@ -68,7 +68,7 @@ def generate_event_handler_base():
     for e in events:
         abstract_methods.append(f"""    @abstractmethod
     async def {e['method_name']}(self, data: {e['inner_class_name']}) -> Any:
-        \"\"\"Handler for the parsed payload of '{e['event_type']}' \"\"\"
+        \"\"\"Handler for the parsed payload of '{e['event_type']}'\"\"\"
         pass""")
 
     abstract_methods_code = "\n\n".join(abstract_methods)

@@ -164,135 +164,135 @@ class AbstractEventHandler(ABC):
 
     @abstractmethod
     async def on_data_product_team_member_updated(self, data: DataProductTeamMemberUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.team_member_updated' """
+        """Handler for the parsed payload of 'data_product.team_member_updated'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_created(self, data: TechnicalAssetCreatedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.created' """
+        """Handler for the parsed payload of 'technical_asset.created'"""
         pass
 
     @abstractmethod
     async def on_data_product_team_member_removed(self, data: DataProductTeamMemberRemovedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.team_member_removed' """
+        """Handler for the parsed payload of 'data_product.team_member_removed'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_unlinked(self, data: TechnicalAssetUnlinkedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.unlinked' """
+        """Handler for the parsed payload of 'technical_asset.unlinked'"""
         pass
 
     @abstractmethod
     async def on_data_product_input_port_unlinked(self, data: DataProductInputPortUnlinkedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.input_port_unlinked' """
+        """Handler for the parsed payload of 'data_product.input_port_unlinked'"""
         pass
 
     @abstractmethod
     async def on_output_port_setting_changed(self, data: OutputPortSettingChangedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.setting_changed' """
+        """Handler for the parsed payload of 'output_port.setting_changed'"""
         pass
 
     @abstractmethod
     async def on_output_port_created(self, data: OutputPortCreatedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.created' """
+        """Handler for the parsed payload of 'output_port.created'"""
         pass
 
     @abstractmethod
     async def on_output_port_status_updated(self, data: OutputPortStatusUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.status_updated' """
+        """Handler for the parsed payload of 'output_port.status_updated'"""
         pass
 
     @abstractmethod
     async def on_data_product_team_member_added(self, data: DataProductTeamMemberAddedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.team_member_added' """
+        """Handler for the parsed payload of 'data_product.team_member_added'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_linked(self, data: TechnicalAssetLinkedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.linked' """
+        """Handler for the parsed payload of 'technical_asset.linked'"""
         pass
 
     @abstractmethod
     async def on_output_port_updated(self, data: OutputPortUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.updated' """
+        """Handler for the parsed payload of 'output_port.updated'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_updated(self, data: TechnicalAssetUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.updated' """
+        """Handler for the parsed payload of 'technical_asset.updated'"""
         pass
 
     @abstractmethod
     async def on_data_product_deleted(self, data: DataProductDeletedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.deleted' """
+        """Handler for the parsed payload of 'data_product.deleted'"""
         pass
 
     @abstractmethod
     async def on_data_product_setting_changed(self, data: DataProductSettingChangedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.setting_changed' """
+        """Handler for the parsed payload of 'data_product.setting_changed'"""
         pass
 
     @abstractmethod
     async def on_output_port_link_approved(self, data: OutputPortLinkApprovedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.link_approved' """
+        """Handler for the parsed payload of 'output_port.link_approved'"""
         pass
 
     @abstractmethod
     async def on_data_product_status_updated(self, data: DataProductStatusUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.status_updated' """
+        """Handler for the parsed payload of 'data_product.status_updated'"""
         pass
 
     @abstractmethod
     async def on_data_product_created(self, data: DataProductCreatedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.created' """
+        """Handler for the parsed payload of 'data_product.created'"""
         pass
 
     @abstractmethod
     async def on_data_product_about_updated(self, data: DataProductAboutUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.about_updated' """
+        """Handler for the parsed payload of 'data_product.about_updated'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_link_denied(self, data: TechnicalAssetLinkDeniedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.link_denied' """
+        """Handler for the parsed payload of 'technical_asset.link_denied'"""
         pass
 
     @abstractmethod
     async def on_output_port_deleted(self, data: OutputPortDeletedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.deleted' """
+        """Handler for the parsed payload of 'output_port.deleted'"""
         pass
 
     @abstractmethod
     async def on_data_product_input_port_linked(self, data: DataProductInputPortLinkedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.input_port_linked' """
+        """Handler for the parsed payload of 'data_product.input_port_linked'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_link_approved(self, data: TechnicalAssetLinkApprovedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.link_approved' """
+        """Handler for the parsed payload of 'technical_asset.link_approved'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_status_updated(self, data: TechnicalAssetStatusUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.status_updated' """
+        """Handler for the parsed payload of 'technical_asset.status_updated'"""
         pass
 
     @abstractmethod
     async def on_data_product_updated(self, data: DataProductUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.updated' """
+        """Handler for the parsed payload of 'data_product.updated'"""
         pass
 
     @abstractmethod
     async def on_output_port_about_updated(self, data: OutputPortAboutUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.about_updated' """
+        """Handler for the parsed payload of 'output_port.about_updated'"""
         pass
 
     @abstractmethod
     async def on_technical_asset_deleted(self, data: TechnicalAssetDeletedEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.deleted' """
+        """Handler for the parsed payload of 'technical_asset.deleted'"""
         pass
 
     @abstractmethod
     async def on_output_port_link_denied(self, data: OutputPortLinkDeniedEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.link_denied' """
+        """Handler for the parsed payload of 'output_port.link_denied'"""
         pass
