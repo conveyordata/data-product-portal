@@ -44,3 +44,5 @@ data:
   INFRASTRUCTURE_LAMBDA_ARN: {{ .Values.infrastructure_lambda_arn }}
   ENABLED_PLUGINS: {{ .Values.enabled_plugins | toJson | quote }}
   AWS_SESSION_DURATION: {{ .Values.aws_session_duration }}
+  FASTMCP_HOME: /tmp/fastmcp
+  SERVE_FRONTEND: "true"

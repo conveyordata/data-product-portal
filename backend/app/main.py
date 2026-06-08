@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
+from fastmcp.utilities.lifespan import combine_lifespans
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -25,7 +26,6 @@ from app.core.webhooks.webhook import call_webhook
 from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
-from app.mcp.router import router as mcp_router
 from app.settings import settings
 from app.shared.router import router
 from app.shared.schema import ORMModel
@@ -80,13 +80,8 @@ async def lifespan(_: FastAPI):
     device_flow_cleanup_task.cancel()
 
 
-# Combine both lifespans
-@asynccontextmanager
-async def combined_lifespan(app: FastAPI):
-    # Run both lifespans
-    async with lifespan(app), mcp_app.lifespan(app):
-        yield
-
+mcp.add_middleware(LoggingMiddleware())
+mcp_app = mcp.http_app("/")
 
 app = FastAPI(
     title=TITLE,
@@ -94,7 +89,7 @@ app = FastAPI(
     version=API_VERSION,
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
-    lifespan=combined_lifespan,
+    lifespan=combine_lifespans(lifespan, mcp_app.lifespan),
     **oidc_kwargs,
     swagger_ui_parameters={
         "docExpansion": "none",
@@ -138,12 +133,19 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-mcp_app = mcp.http_app(path="/mcp")
-mcp.add_middleware(LoggingMiddleware())
+app.mount("/mcp", mcp_app)
+# We need to add the MCP well known authentication routes here.
+# The problem is we mounted the MCP under `/mcp`, but these need to be mounted without that.
+# So we add the well_known routes properly
+if mcp_auth := mcp.auth:
+    for route in mcp_auth.get_well_known_routes("/"):
+        logger.debug(f"Adding route {route.path} for MCP authentication")
+        app.add_route(
+            route.path, route.endpoint, methods=route.methods, include_in_schema=False
+        )
 
 app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
-app.include_router(mcp_router)
 
 add_exception_handlers(app)
 
@@ -161,7 +163,6 @@ app.add_middleware(
     header_name="X-Request-ID",
     update_request_header=True,
 )
-app.mount("/mcp", mcp_app)
 
 
 @app.middleware("http")

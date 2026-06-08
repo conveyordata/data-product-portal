@@ -42,8 +42,7 @@ docker-compose up
 ```
 
 This will start:
-- The **backend**
-- The **frontend**
+- **Portal**
 - A **PostgreSQL** database
 - A **mailhog** local mail server
 - A **nginx** server to direct backend and frontend traffic
@@ -57,7 +56,7 @@ INFO: Uvicorn running on http://0.0.0.0:5050 (Press CTRL+C to quit)
 
 ## 🌐 Open the App in Browser
 
-Visit http://localhost:8080
+Visit http://localhost:5050
 
 
 You should see the **Data Product Portal** UI!

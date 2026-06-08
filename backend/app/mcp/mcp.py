@@ -1,10 +1,12 @@
 from typing import Any, Optional, Sequence
 from uuid import UUID
 
+import jwt as pyjwt
 from fastmcp import Context, FastMCP
-from fastmcp.server.auth.providers.jwt import JWTVerifier
-from fastmcp.server.dependencies import AccessToken, get_access_token
-from sqlalchemy.orm import configure_mappers
+from fastmcp.server.auth.oidc_proxy import OIDCProxy
+from fastmcp.server.dependencies import get_access_token
+from sqlalchemy import select as sa_select
+from sqlalchemy.orm import Session, configure_mappers
 
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignmentResponse as DataProductRoleAssignmentResponse,
@@ -27,7 +29,7 @@ from app.authorization.role_assignments.output_port.service import (
 from app.configuration.domains.schema_response import GetDomainResponse, GetDomainsItem
 from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
-from app.core.auth.jwt import JWTToken, get_oidc
+from app.core.auth.jwt import get_oidc
 from app.core.logging import logger
 from app.data_products.output_ports.schema_response import (
     GetOutputPortResponse,
@@ -47,6 +49,7 @@ from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_context
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.settings import settings
+from app.users.model import User as UserModel
 
 
 def initialize_models():
@@ -60,10 +63,50 @@ def initialize_models():
 initialize_models()
 
 
-def get_auth_provider() -> Optional[JWTVerifier]:
+class PortalOIDCProxy(OIDCProxy):
+    async def _extract_upstream_claims(
+        self, idp_tokens: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        for key in ("id_token", "access_token"):
+            raw = idp_tokens.get(key, "")
+            if not raw:
+                continue
+            try:
+                claims = pyjwt.decode(raw, options={"verify_signature": False})
+                extracted = {
+                    k: claims[k]
+                    for k in ("sub", "email", "name", "family_name")
+                    if k in claims
+                }
+                if extracted.get("sub"):
+                    logger.debug(
+                        f"[MCP] Extracted upstream claims from {key}: "
+                        f"sub={extracted.get('sub')!r}, email={extracted.get('email')!r}"
+                    )
+                    return extracted
+            except Exception as exc:
+                logger.error(f"[MCP] Could not decode {key} as JWT: {exc}")
+        logger.warning(
+            "[MCP] _extract_upstream_claims: no usable token found in IDP response"
+        )
+        return None
+
+
+def get_auth_provider() -> Optional[PortalOIDCProxy]:
     if settings.OIDC_ENABLED:
         oidc = get_oidc()
-        return JWTVerifier(issuer=oidc.authority, jwks_uri=oidc.jwks_uri)
+        p = PortalOIDCProxy(
+            config_url=f"{oidc.authority}/.well-known/openid-configuration",
+            client_id=oidc.client_id,
+            client_secret=oidc.client_secret,
+            base_url=f"{settings.HOST.rstrip('/')}/mcp",
+            require_authorization_consent="external",
+            allowed_client_redirect_uris=settings.MCP_AUTH_REDIRECT_URIS,
+        )
+        logger.info("Routes")
+        logger.info(p.get_routes("/mcp"))
+        return p
+    logger.debug("[MCP] OIDC disabled — MCP server will run without authentication")
     return None
 
 
@@ -89,11 +132,8 @@ mcp = FastMCP(
 # ==============================================================================
 
 
-def get_mcp_authenticated_user(token: str):
-    with get_db_context() as db:
-        user = get_authenticated_user(
-            token=JWTToken(sub="", token=f"Bearer {token}"), db=db
-        )
+def _user_to_dict(user: UserModel) -> dict[str, Any]:
+    """Read user fields while the SQLAlchemy session is still open."""
     return {
         "id": user.id,
         "external_id": user.external_id,
@@ -103,13 +143,63 @@ def get_mcp_authenticated_user(token: str):
     }
 
 
+def get_mcp_authenticated_user(db: Session) -> UserModel:
+    """Get the authenticated portal user from the current MCP request context.
+
+    When OIDC is enabled the FastMCP access token (issued by PortalOIDCProxy)
+    carries upstream identity claims extracted from the upstream OIDC id_token.
+    These claims are used for a direct DB lookup — no extra userinfo round-trip.
+
+    When OIDC is disabled the default portal user is returned.
+
+    A Session must be provided by the caller so that all ORM attribute reads
+    happen inside an active session, avoiding DetachedInstanceError.
+    """
+
+    if not settings.OIDC_ENABLED:
+        from app.core.auth.auth import generate_default_jwt_token
+
+        logger.debug("[MCP] OIDC disabled — resolving default user")
+        return get_authenticated_user(token=generate_default_jwt_token(), db=db)
+
+    access_token = get_access_token()
+    if access_token is None:
+        logger.warning("[MCP] get_mcp_authenticated_user: no access token in context")
+        raise ValueError("No access token found in MCP context")
+
+    logger.debug(
+        f"[MCP] Access token present: client_id={access_token.client_id!r}, "
+        f"scopes={access_token.scopes!r}, has_claims={bool(access_token.claims)}"
+    )
+
+    # OIDCProxy embeds upstream identity under claims["upstream_claims"]
+    upstream_claims = (
+        access_token.claims.get("upstream_claims") if access_token.claims else None
+    )
+    if not upstream_claims:
+        raise ValueError("No upstream_claims found in access token")
+
+    sub = upstream_claims.get("sub")
+    if not sub:
+        raise ValueError(f"upstream_claims missing 'sub' claim: {upstream_claims!r}")
+    logger.debug(f"[MCP] Resolving user from upstream_claims: sub={sub!r}")
+
+    user_model = db.scalar(sa_select(UserModel).where(UserModel.external_id == sub))
+    if not user_model:
+        logger.error(f"[MCP] Authenticated user not found in DB: sub={sub!r}")
+        raise ValueError(f"Authenticated user not found: sub={sub!r}")
+
+    logger.debug(f"[MCP] Resolved user from upstream_claims: sub={sub!r}")
+    return user_model
+
+
 @mcp.tool
 async def get_current_user(ctx: Context) -> dict[str, Any]:
     """Get the profile of the currently authenticated user (id, name, email).
     Use this to resolve 'me' or 'my' in user requests before querying roles or owned resources.
     Requires authentication."""
-    token = get_access_token()
-    return get_mcp_authenticated_user(token=token.token)
+    with get_db_context() as db:
+        return _user_to_dict(get_mcp_authenticated_user(db))
 
 
 @mcp.tool
@@ -129,10 +219,8 @@ def universal_search(
         limit: Maximum number of results per entity type
     """
     try:
-        access_token: AccessToken = get_access_token()
-
         with get_db_context() as db:
-            user = get_mcp_authenticated_user(token=access_token.token)
+            user = get_mcp_authenticated_user(db)
             results = {
                 "query": query,
                 "results": {},
@@ -320,8 +408,7 @@ def search_output_ports(
     """
     try:
         with get_db_context() as db:
-            access_token: AccessToken = get_access_token()
-            user = get_mcp_authenticated_user(token=access_token.token)
+            user = get_mcp_authenticated_user(db)
             # Get all datasets and filter manually
             all_output_ports = OutputPortService(db).search_output_ports(
                 query=query, user=user, limit=limit, current_user_assigned=False
@@ -384,8 +471,7 @@ def get_output_port_details(output_port_id: str) -> dict[str, Any]:
     """
     try:
         with get_db_context() as db:
-            access_token: AccessToken = get_access_token()
-            user = get_mcp_authenticated_user(token=access_token.token)
+            user = get_mcp_authenticated_user(db)
             dataset = OutputPortService(db).get_visible_dataset(
                 id=UUID(output_port_id), user=user
             )
@@ -466,8 +552,7 @@ def get_marketplace_overview() -> dict[str, Any]:
     """
     try:
         with get_db_context() as db:
-            access_token: AccessToken = get_access_token()
-            user = get_mcp_authenticated_user(token=access_token.token)
+            user = get_mcp_authenticated_user(db)
             # Get counts by querying all and taking length
             all_data_products = DataProductService(db).get_data_products()
             all_output_ports = OutputPortService(db).search_output_ports(
@@ -520,8 +605,7 @@ def get_data_product_analytics(data_product_id: str) -> dict[str, Any]:
     """
     try:
         with get_db_context() as db:
-            access_token: AccessToken = get_access_token()
-            user = get_mcp_authenticated_user(token=access_token.token)
+            user = get_mcp_authenticated_user(db)
             # Get the data product using service
             data_product = DataProductService(db).get_data_product(
                 id=UUID(data_product_id),
@@ -610,8 +694,7 @@ def get_output_port_resource(output_port_id: str) -> str:
     """Get output port as a resource."""
     try:
         with get_db_context() as db:
-            access_token: AccessToken = get_access_token()
-            user = get_mcp_authenticated_user(token=access_token.token)
+            user = get_mcp_authenticated_user(db)
             dataset = OutputPortService(db).get_visible_dataset(
                 id=UUID(output_port_id), user=user
             )
@@ -722,11 +805,10 @@ def get_user_roles(
     """
     try:
         with get_db_context() as db:
-            access_token: AccessToken = get_access_token()
-            current_user = get_mcp_authenticated_user(token=access_token.token)
+            current_user = get_mcp_authenticated_user(db)
 
             # Use current user if no user_id specified
-            target_user_id = user_id or str(current_user["id"])
+            target_user_id = user_id or str(current_user.id)
 
             # Get role assignments using the different service classes
             global_roles: list[dict[str, Any]] = []

@@ -13,65 +13,65 @@ It allows you to:
 - Explore **lineage** between datasets and data products
 - Inspect the **roles** that users have on these resources
 
-The MCP server can be integrated with any MCP client and has been tested with [Claude Desktop](https://claude.ai/download) and [Cursor](https://cursor.com).
+The MCP server can be integrated with any MCP client and has been tested with [VSCode](https://code.visualstudio.com/)
+and [Jetbrains IDE github copilot plugin](https://plugins.jetbrains.com/plugin/17718-github-copilot--your-ai-pair-programmer).
 
 :::warning
 The MCP client is still experimental. Functionality may change, and it is not yet recommended for production use.
 :::
 
-### How to use the MCP client
+### How to use the MCP server
 
-Follow the steps below to get started:
+The server speaks the **Streamable-HTTP** MCP transport with built-in **OAuth 2.1** support.
+This is only supported as of Portal version 0.6.0.
 
-#### 1. Install `uv`
-The MCP client depends on [`uv`](https://github.com/astral-sh/uv).
-Make sure it is installed and available on your system:
+The Portal MCP server needs to be configured to allow for the correct redirect URI's.
 
-```bash
-pip install uv
-````
+#### Vscode redirect URI's
 
-#### 2. Download the MCP proxy script
-
-Download the MCP proxy script from the [following location](https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/heads/main/mcp/remote_proxy.py).
-For example:
-
-```
-wget https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/heads/main/mcp/remote_proxy.py
+```dotenv
+MCP_AUTH_REDIRECT_URIS='["http://127.0.0.1:33418","https://vscode.dev/redirect"]'
 ```
 
-Please note the path where you save the file.
+#### Github copilot in jetbrains IDE's:
 
-#### 3. Configure your MCP client
+```dotenv
+MCP_AUTH_REDIRECT_URIS='["http://127.0.0.1:*/callback"]'
+```
 
-Add the following JSON configuration to your MCP client setup:
+### Github copilot app:
+
+```dotenv
+MCP_AUTH_REDIRECT_URIS='["http://127.0.0.1:*"]'
+```
+
+### Cursor:
+```dotenv
+MCP_AUTH_REDIRECT_URIS='["cursor://anysphere.cursor-mcp/oauth/callback"]'
+```
+
+Add the following JSON configuration to your MCP client configuration, this example users VSCode:
 
 ```json
-"dataProductPortal": {
-  "command": "uv",
-  "args": [
-    "run",
-    "--with",
-    "fastmcp",
-    "fastmcp",
-    "run",
-    "/absolute/path/to/remote_proxy.py"
-  ],
-  "env": {
-    "ENDPOINT": "https://<your-portal-host>"
-  }
+{
+	"servers": {
+		"dataProductPortal": {
+			"url": "https://<your-portal-host>/mcp/",
+			"type": "http"
+		}
+	},
+	"inputs": []
 }
 ```
 
-* Replace `/absolute/path/to/remote_proxy.py` with the full path to the downloaded `remote_proxy.py` file.
-* Replace `https://<your-portal-host>` with the actual endpoint of your Data Product Portal or `http:localhost:5050` if you are running locally.
+* Replace `https://<your-portal-host>` with the actual endpoint of your Data Product Portal (or `http://localhost:5050` if you are running locally).
 
-Configuration for Claude Desktop is located at: `Settings > Developer > Edit config`
-For Cursor you can find it at: `Cursor Settings > MCP & Integrations > New MCP Server`
+The client will perform the OAuth flow automatically the first time it connects.
+
 
 ### Usage
 
-Once configured, you can run the MCP client to explore the portal:
+Once configured, you can use the MCP client to explore the portal:
 
 * List available **data products**
 * Inspect **datasets** and their metadata
@@ -80,19 +80,11 @@ Once configured, you can run the MCP client to explore the portal:
 
 This makes it easier to integrate portal metadata into external tools, scripts, or workflows.
 
-### Authentication
-
-The MCP server follows the same authentication flow as your backend server.
-It is possible that a reboot of your MCP client is needed after logging in to reset the MCP client.
-(This happens e.g. on Claude Desktop).
-
 ### Available tools
 
 After logging in you should see the tools that are available in the MCP Server.
-With Claude Desktop you can verify this via `Settings > Connectors > Click on Configure for AuthenticatedProxyDataProductPortal`.
-You should see the list of tools.
+With Claude Desktop you can verify this via `Settings > Connectors > Click on Configure for dataProductPortal`.
+
+In Cursor, you can check this with `Cursor Settings > MCP & Integrations > dataProductPortal > X tools enabled`.
 
 ![Claude with tools access](./img/claude-desktop.png)
-
-In Cursor, you can check this with `Cursor Settings > MCP & Integrations > AuthenticatedProxyDataProductPortal > X tools enabled`.
-![Cursor with tools access](./img/cursor-mcp.png)
