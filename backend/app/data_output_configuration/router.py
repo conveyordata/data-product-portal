@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Annotated, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.configuration.platform_service_configurations.service import (
@@ -75,7 +76,7 @@ def get_plugin_form(
 def get_plugin_url(
     plugin_name: str,
     id: UUID,
-    environment: Optional[str] = None,
+    environment: Annotated[str | SkipJsonSchema[None], Query()] = None,
     db: Session = Depends(get_db_session),
     actor: User = Depends(get_authenticated_user),
 ) -> URLResponse:

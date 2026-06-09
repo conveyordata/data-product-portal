@@ -61,10 +61,12 @@ optional = true
 
 [tool.poetry.group.test.dependencies]
 pytest = "^9.0.3"
+pytest-asyncio = "^1.4.0"
 pytest-cov = "^7.1.0"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
 freezegun = "^1.5.5"
+dpp-sdk = { path = "../sdk", develop = true }
 
 [tool.poetry.group.dev]
 optional = true

@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -17,7 +18,7 @@ router = APIRouter(tags=["Search Output ports"])
 
 @router.get("/v2/search/output_ports")
 def search_output_ports(
-    query: Annotated[str | None, Query(min_length=3)] = None,
+    query: Annotated[str | SkipJsonSchema[None], Query(min_length=3)] = None,
     limit: Annotated[int, Query(ge=1, le=1000)] = 100,
     current_user_assigned: bool = False,
     db: Session = Depends(get_db_session),

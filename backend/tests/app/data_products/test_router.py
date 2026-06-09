@@ -1,7 +1,7 @@
 import json
 import uuid
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import AsyncMock, patch
 from uuid import UUID
 
@@ -54,7 +54,7 @@ def user_with_create_data_product_rights():
 
 
 @pytest.fixture
-def payload() -> Dict[str, Any]:
+def payload() -> dict[str, Any]:
     domain = DomainFactory()
     lifecycle = LifecycleFactory()
     data_product_type = DataProductTypeFactory()

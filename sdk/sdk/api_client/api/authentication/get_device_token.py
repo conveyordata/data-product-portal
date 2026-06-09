@@ -12,7 +12,7 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
     scope: str | Unset = "openid",
 ) -> dict[str, Any]:
 
@@ -66,13 +66,13 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
     scope: str | Unset = "openid",
 ) -> Response[DeviceFlow | HTTPValidationError]:
     """Get Device Token
 
     Args:
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -98,13 +98,13 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
     scope: str | Unset = "openid",
 ) -> DeviceFlow | HTTPValidationError | None:
     """Get Device Token
 
     Args:
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -125,13 +125,13 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
     scope: str | Unset = "openid",
 ) -> Response[DeviceFlow | HTTPValidationError]:
     """Get Device Token
 
     Args:
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
         scope (str | Unset):  Default: 'openid'.
 
     Raises:
@@ -155,13 +155,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    client_id: str | Unset = UNSET,
+    client_id: str | Unset = "",
     scope: str | Unset = "openid",
 ) -> DeviceFlow | HTTPValidationError | None:
     """Get Device Token
 
     Args:
-        client_id (str | Unset):
+        client_id (str | Unset):  Default: ''.
         scope (str | Unset):  Default: 'openid'.
 
     Raises:

@@ -1,8 +1,17 @@
 from copy import deepcopy
-from typing import Optional, Sequence
+from typing import Annotated, Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+)
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product import email
@@ -103,10 +112,10 @@ def delete_data_product_role_assignment(
 
 @router.get("")
 def list_data_product_role_assignments(
-    data_product_id: Optional[UUID] = None,
-    user_id: Optional[UUID] = None,
-    role_id: Optional[UUID] = None,
-    decision: Optional[DecisionStatus] = None,
+    data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
     db: Session = Depends(get_db_session),
 ) -> ListDataProductRoleAssignmentsResponse:
     return ListDataProductRoleAssignmentsResponse(

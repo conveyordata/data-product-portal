@@ -13,8 +13,7 @@ _MISSING = object()
 
 
 async def call_v2_webhook(event_type: str, data: dict) -> None:
-    url = settings.WEBHOOK_V2_URL
-    if not url:
+    if not (url := settings.WEBHOOK_V2_URL):
         return
     body = {
         "specversion": "1.0",
@@ -33,7 +32,9 @@ async def call_v2_webhook(event_type: str, data: dict) -> None:
         logger.warning("v2 webhook failed: %s", e)
 
 
-def _emits_event(event_model: type[V2Event]) -> Callable:
+def _emits_event(
+    event_model: type[V2Event],
+) -> Callable[[Request], AsyncGenerator[None, None]]:
     """Yield-based dependency factory that emits a V2 webhook after the handler succeeds.
 
     The handler is responsible for constructing the event and storing it on

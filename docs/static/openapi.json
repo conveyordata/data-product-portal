@@ -2,6 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Data product portal",
+    "summary": "Backend API implementation for Data product portal",
     "version": "0.5.1"
   },
   "paths": {
@@ -27,9 +28,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Resource",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Resource"
             }
           },
           {
@@ -37,9 +38,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Domain",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Domain"
             }
           }
         ],
@@ -107,9 +108,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Query",
               "type": "string",
-              "minLength": 3
+              "minLength": 3,
+              "title": "Query"
             }
           },
           {
@@ -1500,9 +1501,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Filter To User With Assigment",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Filter To User With Assigment"
             }
           }
         ],
@@ -5337,9 +5338,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "User Id"
             }
           },
           {
@@ -5347,9 +5348,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Role Id"
             }
           }
         ],
@@ -5633,9 +5634,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Data Product Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Data Product Id"
             }
           },
           {
@@ -5643,9 +5644,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "User Id"
             }
           },
           {
@@ -5653,9 +5654,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Role Id"
             }
           },
           {
@@ -5663,7 +5664,6 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Decision",
               "$ref": "#/components/schemas/DecisionStatus"
             }
           }
@@ -5932,9 +5932,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Output Port Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Output Port Id"
             }
           },
           {
@@ -5942,9 +5942,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "User Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "User Id"
             }
           },
           {
@@ -5952,9 +5952,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Role Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Role Id"
             }
           },
           {
@@ -5962,7 +5962,6 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Decision",
               "$ref": "#/components/schemas/DecisionStatus"
             }
           }
@@ -6388,9 +6387,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Data Product Id",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Data Product Id"
             }
           }
         ],
@@ -6558,8 +6557,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Environment",
-              "type": "string"
+              "type": "string",
+              "title": "Environment"
             }
           }
         ],
@@ -6641,9 +6640,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "title": "Filter To User With Assigment",
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "title": "Filter To User With Assigment"
             }
           }
         ],
@@ -6916,9 +6915,10 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "deprecated": true,
-              "title": "Client Id",
-              "type": "string"
+              "default": "",
+              "title": "Client Id"
             },
             "deprecated": true
           },
@@ -6993,9 +6993,10 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "deprecated": true,
-              "title": "Client Id",
-              "type": "string"
+              "default": "",
+              "title": "Client Id"
             },
             "deprecated": true
           }
@@ -7088,6 +7089,160 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "v2_event_stream": {
+      "post": {
+        "summary": "Event Stream Webhook",
+        "description": "The primary webhook subscription target.Receives a real-time event stream wrapped in a CloudEvents 1.0 envelope.Inspect the `type` field to distinguish between payload formats.",
+        "operationId": "event_stream",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductCreatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductDeletedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductAboutUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductStatusUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductSettingChangedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductInputPortLinkedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductInputPortUnlinkedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductTeamMemberAddedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductTeamMemberRemovedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductTeamMemberUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortCreatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortDeletedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortAboutUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortStatusUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortSettingChangedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortLinkApprovedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortLinkDeniedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetCreatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetDeletedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetStatusUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetLinkedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetLinkApprovedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetLinkDeniedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetUnlinkedEvent"
+                  }
+                ],
+                "title": "Body",
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "data_product.created": "#/components/schemas/CloudEvent_DataProductCreatedEvent",
+                    "data_product.updated": "#/components/schemas/CloudEvent_DataProductUpdatedEvent",
+                    "data_product.deleted": "#/components/schemas/CloudEvent_DataProductDeletedEvent",
+                    "data_product.about_updated": "#/components/schemas/CloudEvent_DataProductAboutUpdatedEvent",
+                    "data_product.status_updated": "#/components/schemas/CloudEvent_DataProductStatusUpdatedEvent",
+                    "data_product.setting_changed": "#/components/schemas/CloudEvent_DataProductSettingChangedEvent",
+                    "data_product.input_port_linked": "#/components/schemas/CloudEvent_DataProductInputPortLinkedEvent",
+                    "data_product.input_port_unlinked": "#/components/schemas/CloudEvent_DataProductInputPortUnlinkedEvent",
+                    "data_product.team_member_added": "#/components/schemas/CloudEvent_DataProductTeamMemberAddedEvent",
+                    "data_product.team_member_removed": "#/components/schemas/CloudEvent_DataProductTeamMemberRemovedEvent",
+                    "data_product.team_member_updated": "#/components/schemas/CloudEvent_DataProductTeamMemberUpdatedEvent",
+                    "output_port.created": "#/components/schemas/CloudEvent_OutputPortCreatedEvent",
+                    "output_port.updated": "#/components/schemas/CloudEvent_OutputPortUpdatedEvent",
+                    "output_port.deleted": "#/components/schemas/CloudEvent_OutputPortDeletedEvent",
+                    "output_port.about_updated": "#/components/schemas/CloudEvent_OutputPortAboutUpdatedEvent",
+                    "output_port.status_updated": "#/components/schemas/CloudEvent_OutputPortStatusUpdatedEvent",
+                    "output_port.setting_changed": "#/components/schemas/CloudEvent_OutputPortSettingChangedEvent",
+                    "output_port.link_approved": "#/components/schemas/CloudEvent_OutputPortLinkApprovedEvent",
+                    "output_port.link_denied": "#/components/schemas/CloudEvent_OutputPortLinkDeniedEvent",
+                    "technical_asset.created": "#/components/schemas/CloudEvent_TechnicalAssetCreatedEvent",
+                    "technical_asset.updated": "#/components/schemas/CloudEvent_TechnicalAssetUpdatedEvent",
+                    "technical_asset.deleted": "#/components/schemas/CloudEvent_TechnicalAssetDeletedEvent",
+                    "technical_asset.status_updated": "#/components/schemas/CloudEvent_TechnicalAssetStatusUpdatedEvent",
+                    "technical_asset.linked": "#/components/schemas/CloudEvent_TechnicalAssetLinkedEvent",
+                    "technical_asset.link_approved": "#/components/schemas/CloudEvent_TechnicalAssetLinkApprovedEvent",
+                    "technical_asset.link_denied": "#/components/schemas/CloudEvent_TechnicalAssetLinkDeniedEvent",
+                    "technical_asset.unlinked": "#/components/schemas/CloudEvent_TechnicalAssetUnlinkedEvent"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -7456,6 +7611,1194 @@
           "can_become_admin"
         ],
         "title": "CanBecomeAdminUpdate"
+      },
+      "CloudEvent_DataProductAboutUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.about_updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.about_updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductAboutUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductAboutUpdatedEvent"
+      },
+      "CloudEvent_DataProductCreatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.created",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.created"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductCreatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductCreatedEvent"
+      },
+      "CloudEvent_DataProductDeletedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.deleted",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.deleted"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductDeletedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductDeletedEvent"
+      },
+      "CloudEvent_DataProductInputPortLinkedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.input_port_linked",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.input_port_linked"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductInputPortLinkedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductInputPortLinkedEvent"
+      },
+      "CloudEvent_DataProductInputPortUnlinkedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.input_port_unlinked",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.input_port_unlinked"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductInputPortUnlinkedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductInputPortUnlinkedEvent"
+      },
+      "CloudEvent_DataProductSettingChangedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.setting_changed",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.setting_changed"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductSettingChangedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductSettingChangedEvent"
+      },
+      "CloudEvent_DataProductStatusUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.status_updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.status_updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductStatusUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductStatusUpdatedEvent"
+      },
+      "CloudEvent_DataProductTeamMemberAddedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.team_member_added",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.team_member_added"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductTeamMemberAddedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductTeamMemberAddedEvent"
+      },
+      "CloudEvent_DataProductTeamMemberRemovedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.team_member_removed",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.team_member_removed"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductTeamMemberRemovedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductTeamMemberRemovedEvent"
+      },
+      "CloudEvent_DataProductTeamMemberUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.team_member_updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.team_member_updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductTeamMemberUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductTeamMemberUpdatedEvent"
+      },
+      "CloudEvent_DataProductUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductUpdatedEvent"
+      },
+      "CloudEvent_OutputPortAboutUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.about_updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.about_updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortAboutUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortAboutUpdatedEvent"
+      },
+      "CloudEvent_OutputPortCreatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.created",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.created"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortCreatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortCreatedEvent"
+      },
+      "CloudEvent_OutputPortDeletedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.deleted",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.deleted"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortDeletedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortDeletedEvent"
+      },
+      "CloudEvent_OutputPortLinkApprovedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.link_approved",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.link_approved"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortLinkApprovedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortLinkApprovedEvent"
+      },
+      "CloudEvent_OutputPortLinkDeniedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.link_denied",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.link_denied"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortLinkDeniedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortLinkDeniedEvent"
+      },
+      "CloudEvent_OutputPortSettingChangedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.setting_changed",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.setting_changed"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortSettingChangedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortSettingChangedEvent"
+      },
+      "CloudEvent_OutputPortStatusUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.status_updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.status_updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortStatusUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortStatusUpdatedEvent"
+      },
+      "CloudEvent_OutputPortUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortUpdatedEvent"
+      },
+      "CloudEvent_TechnicalAssetCreatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.created",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.created"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetCreatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetCreatedEvent"
+      },
+      "CloudEvent_TechnicalAssetDeletedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.deleted",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.deleted"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetDeletedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetDeletedEvent"
+      },
+      "CloudEvent_TechnicalAssetLinkApprovedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.link_approved",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.link_approved"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetLinkApprovedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetLinkApprovedEvent"
+      },
+      "CloudEvent_TechnicalAssetLinkDeniedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.link_denied",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.link_denied"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetLinkDeniedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetLinkDeniedEvent"
+      },
+      "CloudEvent_TechnicalAssetLinkedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.linked",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.linked"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetLinkedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetLinkedEvent"
+      },
+      "CloudEvent_TechnicalAssetStatusUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.status_updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.status_updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetStatusUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetStatusUpdatedEvent"
+      },
+      "CloudEvent_TechnicalAssetUnlinkedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.unlinked",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.unlinked"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetUnlinkedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetUnlinkedEvent"
+      },
+      "CloudEvent_TechnicalAssetUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetUpdatedEvent"
       },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
@@ -8019,6 +9362,18 @@
         ],
         "title": "DataProductAboutUpdate"
       },
+      "DataProductAboutUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductAboutUpdatedEvent"
+      },
       "DataProductCreate": {
         "properties": {
           "name": {
@@ -8100,6 +9455,30 @@
         ],
         "title": "DataProductCreate"
       },
+      "DataProductCreatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductCreatedEvent"
+      },
+      "DataProductDeletedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductDeletedEvent"
+      },
       "DataProductIconKey": {
         "type": "string",
         "enum": [
@@ -8112,6 +9491,30 @@
           "default"
         ],
         "title": "DataProductIconKey"
+      },
+      "DataProductInputPortLinkedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductInputPortLinkedEvent"
+      },
+      "DataProductInputPortUnlinkedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductInputPortUnlinkedEvent"
       },
       "DataProductLifeCycle": {
         "properties": {
@@ -8562,6 +9965,18 @@
         ],
         "title": "DataProductSetting"
       },
+      "DataProductSettingChangedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductSettingChangedEvent"
+      },
       "DataProductSettingCreate": {
         "properties": {
           "category": {
@@ -8795,6 +10210,54 @@
         ],
         "title": "DataProductStatusUpdate"
       },
+      "DataProductStatusUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductStatusUpdatedEvent"
+      },
+      "DataProductTeamMemberAddedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductTeamMemberAddedEvent"
+      },
+      "DataProductTeamMemberRemovedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductTeamMemberRemovedEvent"
+      },
+      "DataProductTeamMemberUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductTeamMemberUpdatedEvent"
+      },
       "DataProductType": {
         "properties": {
           "id": {
@@ -9012,6 +10475,18 @@
           "lifecycle_id"
         ],
         "title": "DataProductUpdate"
+      },
+      "DataProductUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product"
+        ],
+        "title": "DataProductUpdatedEvent"
       },
       "DataProductUsageUpdate": {
         "properties": {
@@ -9828,6 +11303,43 @@
         "title": "FieldDependency",
         "description": "Represents a field dependency for conditional visibility.\ne.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y\nIn practice this is often used with checkbox fields having value=True"
       },
+      "GetAbstractDataProductResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          },
+          "abstract_data_product_type": {
+            "$ref": "#/components/schemas/AbstractDataProductType"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain",
+          "abstract_data_product_type"
+        ],
+        "title": "GetAbstractDataProductResponse"
+      },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
           "platform_service_configurations": {
@@ -10411,121 +11923,6 @@
         ],
         "title": "GetInputPortsForOutputPortResponse"
       },
-      "GetOutputPortResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/OutputPortStatus"
-          },
-          "usage": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage"
-          },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "title": "Tags"
-          },
-          "domain": {
-            "$ref": "#/components/schemas/Domain"
-          },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "about": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "About"
-          },
-          "rolled_up_tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "uniqueItems": true,
-            "title": "Rolled Up Tags"
-          },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/OutputPortSettingValue"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "technical_asset_links": {
-            "items": {
-              "$ref": "#/components/schemas/TechnicalAssetLink"
-            },
-            "type": "array",
-            "title": "Technical Asset Links"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "namespace",
-          "name",
-          "description",
-          "status",
-          "usage",
-          "access_type",
-          "data_product_id",
-          "tags",
-          "domain",
-          "lifecycle",
-          "about",
-          "rolled_up_tags",
-          "data_product_settings",
-          "technical_asset_links"
-        ],
-        "title": "GetOutputPortResponse"
-      },
       "GetPlatformServicesResponse": {
         "properties": {
           "platform_services": {
@@ -10573,146 +11970,6 @@
           "technical_assets"
         ],
         "title": "GetTechnicalAssetsResponse"
-      },
-      "GetTechnicalAssetsResponseItem": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct"
-          },
-          "output_port_links": {
-            "items": {
-              "$ref": "#/components/schemas/OutputPortLink"
-            },
-            "type": "array",
-            "title": "Output Port Links"
-          },
-          "tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "title": "Tags"
-          },
-          "sourceAligned": {
-            "type": "boolean",
-            "title": "Sourcealigned",
-            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
-            "readOnly": true
-          },
-          "result_string": {
-            "type": "string",
-            "title": "Result String",
-            "readOnly": true
-          },
-          "technical_info": {
-            "items": {
-              "$ref": "#/components/schemas/TechnicalInfo"
-            },
-            "type": "array",
-            "title": "Technical Info",
-            "readOnly": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "namespace",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "status",
-          "technical_mapping",
-          "configuration",
-          "owner",
-          "output_port_links",
-          "tags",
-          "sourceAligned",
-          "result_string",
-          "technical_info"
-        ],
-        "title": "GetTechnicalAssetsResponseItem"
       },
       "GetUserNotificationsResponse": {
         "properties": {
@@ -11417,6 +12674,22 @@
         ],
         "title": "OutputPort"
       },
+      "OutputPortAboutUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/GetOutputPortResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "output_port"
+        ],
+        "title": "OutputPortAboutUpdatedEvent"
+      },
       "OutputPortAccessType": {
         "type": "string",
         "enum": [
@@ -11426,6 +12699,22 @@
           "unrestricted"
         ],
         "title": "OutputPortAccessType"
+      },
+      "OutputPortCreatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/GetOutputPortResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "output_port"
+        ],
+        "title": "OutputPortCreatedEvent"
       },
       "OutputPortCuratedQueries": {
         "properties": {
@@ -11684,6 +12973,22 @@
         ],
         "title": "OutputPortDataQualitySummaryResponse"
       },
+      "OutputPortDeletedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/GetOutputPortResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "output_port"
+        ],
+        "title": "OutputPortDeletedEvent"
+      },
       "OutputPortInputPort": {
         "properties": {
           "id": {
@@ -11717,39 +13022,37 @@
         ],
         "title": "OutputPortInputPort"
       },
-      "OutputPortLink": {
+      "OutputPortLinkApprovedEvent": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "technical_asset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Technical Asset Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
+          "abstract_data_product": {
+            "$ref": "#/components/schemas/GetAbstractDataProductResponse"
           },
           "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
+            "$ref": "#/components/schemas/GetOutputPortResponse"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "output_port_id",
-          "technical_asset_id",
-          "status",
+          "abstract_data_product",
           "output_port"
         ],
-        "title": "OutputPortLink"
+        "title": "OutputPortLinkApprovedEvent"
+      },
+      "OutputPortLinkDeniedEvent": {
+        "properties": {
+          "abstract_data_product": {
+            "$ref": "#/components/schemas/GetAbstractDataProductResponse"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/GetOutputPortResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "abstract_data_product",
+          "output_port"
+        ],
+        "title": "OutputPortLinkDeniedEvent"
       },
       "OutputPortQueryStatsDelete": {
         "properties": {
@@ -11953,40 +13256,21 @@
         ],
         "title": "OutputPortSchemaResponse"
       },
-      "OutputPortSettingValue": {
+      "OutputPortSettingChangedEvent": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
           },
-          "data_product_setting_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Setting Id"
-          },
-          "value": {
-            "type": "string",
-            "title": "Value"
-          },
-          "data_product_setting": {
-            "$ref": "#/components/schemas/DataProductSetting"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
+          "output_port": {
+            "$ref": "#/components/schemas/GetOutputPortResponse"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "data_product_setting_id",
-          "value",
-          "data_product_setting",
-          "output_port_id"
+          "data_product",
+          "output_port"
         ],
-        "title": "OutputPortSettingValue"
+        "title": "OutputPortSettingChangedEvent"
       },
       "OutputPortStatus": {
         "type": "string",
@@ -11996,6 +13280,38 @@
           "archived"
         ],
         "title": "OutputPortStatus"
+      },
+      "OutputPortStatusUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/GetOutputPortResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "output_port"
+        ],
+        "title": "OutputPortStatusUpdatedEvent"
+      },
+      "OutputPortUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/GetOutputPortResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "output_port"
+        ],
+        "title": "OutputPortUpdatedEvent"
       },
       "OwnedTechnicalAsset": {
         "properties": {
@@ -13588,39 +14904,85 @@
         ],
         "title": "TechnicalAsset"
       },
-      "TechnicalAssetLink": {
+      "TechnicalAssetCreatedEvent": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "technical_asset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Technical Asset Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
           },
           "technical_asset": {
-            "$ref": "#/components/schemas/TechnicalAsset"
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "output_port_id",
-          "technical_asset_id",
-          "status",
+          "data_product",
           "technical_asset"
         ],
-        "title": "TechnicalAssetLink"
+        "title": "TechnicalAssetCreatedEvent"
+      },
+      "TechnicalAssetDeletedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetDeletedEvent"
+      },
+      "TechnicalAssetLinkApprovedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetLinkApprovedEvent"
+      },
+      "TechnicalAssetLinkDeniedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetLinkDeniedEvent"
+      },
+      "TechnicalAssetLinkedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetLinkedEvent"
       },
       "TechnicalAssetOutputPortPendingAction": {
         "properties": {
@@ -13732,6 +15094,54 @@
           "archived"
         ],
         "title": "TechnicalAssetStatus"
+      },
+      "TechnicalAssetStatusUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetStatusUpdatedEvent"
+      },
+      "TechnicalAssetUnlinkedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetUnlinkedEvent"
+      },
+      "TechnicalAssetUpdatedEvent": {
+        "properties": {
+          "data_product": {
+            "$ref": "#/components/schemas/GetDataProductResponse"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetUpdatedEvent"
       },
       "TechnicalInfo": {
         "properties": {
@@ -14521,6 +15931,361 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "GetOutputPortResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OutputPortStatus"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage"
+          },
+          "access_type": {
+            "$ref": "#/components/schemas/OutputPortAccessType"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          },
+          "lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataProductLifeCycle"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "About"
+          },
+          "rolled_up_tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "uniqueItems": true,
+            "title": "Rolled Up Tags"
+          },
+          "data_product_settings": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortSettingValue"
+            },
+            "type": "array",
+            "title": "Data Product Settings"
+          },
+          "technical_asset_links": {
+            "items": {
+              "$ref": "#/components/schemas/TechnicalAssetLink"
+            },
+            "type": "array",
+            "title": "Technical Asset Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "namespace",
+          "name",
+          "description",
+          "status",
+          "usage",
+          "access_type",
+          "data_product_id",
+          "tags",
+          "domain",
+          "lifecycle",
+          "about",
+          "rolled_up_tags",
+          "data_product_settings",
+          "technical_asset_links"
+        ],
+        "title": "GetOutputPortResponse"
+      },
+      "GetTechnicalAssetsResponseItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Id"
+          },
+          "platform_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Platform Id"
+          },
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TechnicalAssetStatus"
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
+          },
+          "configuration": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+              },
+              {
+                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+              }
+            ],
+            "title": "Configuration",
+            "discriminator": {
+              "propertyName": "configuration_type",
+              "mapping": {
+                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
+                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
+                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
+                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+              }
+            }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
+          "output_port_links": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortLink"
+            },
+            "type": "array",
+            "title": "Output Port Links"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version."
+          },
+          "result_string": {
+            "type": "string",
+            "title": "Result String"
+          },
+          "technical_info": {
+            "items": {
+              "$ref": "#/components/schemas/TechnicalInfo"
+            },
+            "type": "array",
+            "title": "Technical Info"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "namespace",
+          "owner_id",
+          "platform_id",
+          "service_id",
+          "status",
+          "technical_mapping",
+          "configuration",
+          "owner",
+          "output_port_links",
+          "tags",
+          "sourceAligned",
+          "result_string",
+          "technical_info"
+        ],
+        "title": "GetTechnicalAssetsResponseItem"
+      },
+      "OutputPortLink": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "technical_asset_id",
+          "status",
+          "output_port"
+        ],
+        "title": "OutputPortLink"
+      },
+      "OutputPortSettingValue": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_setting_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Setting Id"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "data_product_setting": {
+            "$ref": "#/components/schemas/DataProductSetting"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_setting_id",
+          "value",
+          "data_product_setting",
+          "output_port_id"
+        ],
+        "title": "OutputPortSettingValue"
+      },
+      "TechnicalAssetLink": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "technical_asset": {
+            "$ref": "#/components/schemas/TechnicalAsset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "technical_asset_id",
+          "status",
+          "technical_asset"
+        ],
+        "title": "TechnicalAssetLink"
       }
     },
     "securitySchemes": {

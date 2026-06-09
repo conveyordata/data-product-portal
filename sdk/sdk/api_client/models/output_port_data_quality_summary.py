@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.data_quality_status import DataQualityStatus
 from ..types import UNSET, Unset
@@ -101,7 +100,7 @@ class OutputPortDataQualitySummary:
         )
 
         d = dict(src_dict)
-        created_at = isoparse(d.pop("created_at"))
+        created_at = datetime.datetime.fromisoformat(d.pop("created_at"))
 
         overall_status = DataQualityStatus(d.pop("overall_status"))
 

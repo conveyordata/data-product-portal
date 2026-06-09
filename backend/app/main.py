@@ -1,5 +1,6 @@
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -7,7 +8,6 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 from fastmcp.utilities.lifespan import combine_lifespans
@@ -22,7 +22,7 @@ from app.core.authz.background_tasks import check_expired_admins
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
-from app.core.webhooks.webhook import call_webhook
+from app.core.webhooks.webhook import call_webhook, register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
@@ -97,42 +97,6 @@ app = FastAPI(
     },
 )
 
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-
-    openapi_schema = get_openapi(
-        title=TITLE,
-        version=API_VERSION,
-        routes=app.routes,
-    )
-
-    # Walk through all paths and parameters
-    for path in openapi_schema.get("paths", {}).values():
-        for method in path.values():
-            parameters = method.get("parameters", [])
-            for param in parameters:
-                schema = param.get("schema", {})
-
-                # Check if 'anyOf' exists and contains a null type
-                if "anyOf" in schema:
-                    # Filter out the {'type': 'null'} entry
-                    new_any_of = [x for x in schema["anyOf"] if x.get("type") != "null"]
-
-                    if len(new_any_of) == 1:
-                        # If only one type remains, move it to the root schema
-                        schema.update(new_any_of[0])
-                        del schema["anyOf"]
-                    else:
-                        schema["anyOf"] = new_any_of
-
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi
-
 app.mount("/mcp", mcp_app)
 # We need to add the MCP well known authentication routes here.
 # The problem is we mounted the MCP under `/mcp`, but these need to be mounted without that.
@@ -148,6 +112,7 @@ app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
 
 add_exception_handlers(app)
+register_webhooks(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -166,7 +131,9 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def send_response_to_webhook(request: Request, call_next):
+async def send_response_to_webhook(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     response = await call_next(request)
     # Gets are not logged
     if (

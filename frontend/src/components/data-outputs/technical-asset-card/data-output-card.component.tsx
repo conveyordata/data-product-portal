@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
-    type GetTechnicalAssetsResponseItemRead,
+    type GetTechnicalAssetsResponseItem,
     TechnicalAssetStatus,
     useRemoveTechnicalAssetMutation,
     useUnlinkOutputPortFromTechnicalAssetMutation,
@@ -20,7 +20,7 @@ import { getDecisionStatusBadgeStatus } from '@/utils/status.helper';
 import styles from './data-output-card.module.scss';
 
 type Props = {
-    technicalAsset: GetTechnicalAssetsResponseItemRead;
+    technicalAsset: GetTechnicalAssetsResponseItem;
     dataProductId: string;
     onDragStart?: () => void;
     onDragEnd?: () => void;

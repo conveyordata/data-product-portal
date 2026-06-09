@@ -7,13 +7,13 @@ Creates the 3 SwiftGear demo data products, their output ports, and curated quer
 Run this after `docker compose up -d` and all services are healthy.
 """
 
-from pathlib import Path
-
-import requests
 import sys
 import time
 import traceback
+from pathlib import Path
 from typing import Any
+
+import requests
 
 PORTAL_URL = "http://localhost:8080"
 
