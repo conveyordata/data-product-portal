@@ -4,10 +4,10 @@
 
 Output ports expose datasets to consumers. To help consumers understand the structure of those datasets,
 Portal displays the schema information (tables/views and their columns) for each output port.
-This data model is sourced from a [BitOL data contract](https://github.com/bitol-io/open-data-contract-standard) via an ingestion API, following the same push-based
+This data model is sourced from a [Bitol data contract](https://github.com/bitol-io/open-data-contract-standard) via an ingestion API, following the same push-based
 approach used for data quality and usage metrics.
 
-The BitOL schema structure is two-level: **schema objects** (tables, topics,...) each contain **properties**
+The Bitol schema structure is two-level: **schema objects** (tables, topics,...) each contain **properties**
 (columns or fields). Properties can themselves be nested objects, representing struct types or JSON
 sub-schemas. The database model must accommodate this hierarchy without overcomplicating the service layer.
 
@@ -29,7 +29,7 @@ sub-schemas. The database model must accommodate this hierarchy without overcomp
 * **Option A: Fully normalised (two tables)** Two relational tables: one for schema objects and one for every property in the schema.
   The properties reference their parent via a nullable self-referential FK. The schema object ID is denormalised onto every property row (including nested ones) to allow flat queries without recursion.
 * **Option B: Fully normalised (two tables)** Two relational tables: one for schema objects, one for properties. The properties reference their parent via a nullable self-referential FK.
-* **Option C: JSONB blob for full schema** A single table with the full BitOL `schema:` block stored as a JSONB column on the output port or in a dedicated table.
+* **Option C: JSONB blob for full schema** A single table with the full Bitol `schema:` block stored as a JSONB column on the output port or in a dedicated table.
 * **Option D: Hybrid schema object and jsonb properties** Schema objects as normalised rows; properties stored as a JSONB array on each schema object row.
 
 ## Decision Outcome
@@ -97,7 +97,7 @@ Two tables are added:
 
 ### Option C: JSONB blob for full schema
 
-* **Good, because** ingestion is trivial as the BitOL `schema:` block is stored as-is
+* **Good, because** ingestion is trivial as the Bitol `schema:` block is stored as-is
 * **Good, because** atomic replace of the full schema in a single write
 * **Good, because** handles arbitrary nesting with zero extra modelling
 * **Bad, because** column-level search requires JSON operators and cannot use standard indexes efficiently

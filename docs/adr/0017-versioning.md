@@ -183,7 +183,7 @@ Changes that would cause existing Consumer queries or code to fail:
    - If data contracts are adopted, they could help identify breaking changes
    - Contract diff tool could flag schema changes as breaking/non-breaking
    - This is complementary to versioning, not a replacement. Major versions have different contracts
-   - See: ADR-0012 (BiToL standard supports data contracts)
+   - See: ADR-0012 (Bitol standard supports data contracts)
 
 4. **Should there be a "latest" alias?**
    - We will not support aliases
