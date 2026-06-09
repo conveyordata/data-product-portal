@@ -49,7 +49,7 @@ def custom_openapi(app: FastAPI):
     schemas = openapi_schema.get("components", {}).get("schemas", {})
 
     # 2. Identify every model that FastAPI split into -Input and -Output variants
-    split_models = [key[:-7] for key in schemas if key.endswith("-Output")]
+    split_models = sorted([key[:-7] for key in schemas if key.endswith("-Output")])
 
     # 3. Convert to a string to perform a precise pointer re-routing
     schema_json = json.dumps(openapi_schema)
