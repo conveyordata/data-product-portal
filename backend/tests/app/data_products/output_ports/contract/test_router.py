@@ -169,16 +169,16 @@ class TestContractRouter:
 
         assert response.status_code == 404
 
-    def test_get_contract_none_existing(self, client, session):
+    def test_get_contract_none_existing(self, client):
         dataset = DatasetFactory()
 
         response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract"
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 200
         data = response.json()
-        assert "No schemas found for output port" in data["detail"]
+        assert len(data["schema_objects"]) == 0
 
     def test_get_contract_after_ingest(self, client, session):
         dataset = DatasetFactory()
@@ -291,9 +291,9 @@ class TestContractRouter:
             json={"schema": []},
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 200
         data = response.json()
-        assert "No schemas found for output port" in data["detail"]
+        assert len(data["schema_objects"]) == 0
 
     def test_delete_output_port_removes_schema(self, client, session):
         dataset = DatasetFactory()
