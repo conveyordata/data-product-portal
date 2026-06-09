@@ -19,9 +19,11 @@ from app.core.auth.device_flows.background_tasks import cleanup_device_flow_tabl
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
+from app.core.context import _pending_events, pop_events
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
+from app.core.webhooks.v2 import call_v2_webhook
 from app.core.webhooks.webhook import call_webhook
 from app.database import database
 from app.mcp.mcp import mcp
@@ -191,6 +193,22 @@ async def send_response_to_webhook(request: Request, call_next):
                 status_code=response.status_code,
             )
         )
+    return response
+
+
+@app.middleware("http")
+async def dispatch_queued_events(request: Request, call_next):
+    token = _pending_events.set([])
+    try:
+        response = await call_next(request)
+    finally:
+        events = pop_events()
+        _pending_events.reset(token)
+    if response.status_code < 400:
+        for event in events:
+            asyncio.create_task(
+                call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
+            )
     return response
 
 
