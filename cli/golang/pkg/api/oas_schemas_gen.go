@@ -7570,6 +7570,69 @@ func (o OptNilRequestInputPortsForExplorationRequest) Or(d RequestInputPortsForE
 	return d
 }
 
+// NewOptNilSchemaPropertyResponseArray returns new OptNilSchemaPropertyResponseArray with value set to v.
+func NewOptNilSchemaPropertyResponseArray(v []SchemaPropertyResponse) OptNilSchemaPropertyResponseArray {
+	return OptNilSchemaPropertyResponseArray{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilSchemaPropertyResponseArray is optional nullable []SchemaPropertyResponse.
+type OptNilSchemaPropertyResponseArray struct {
+	Value []SchemaPropertyResponse
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilSchemaPropertyResponseArray was set.
+func (o OptNilSchemaPropertyResponseArray) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilSchemaPropertyResponseArray) Reset() {
+	var v []SchemaPropertyResponse
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilSchemaPropertyResponseArray) SetTo(v []SchemaPropertyResponse) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilSchemaPropertyResponseArray) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilSchemaPropertyResponseArray) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v []SchemaPropertyResponse
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilSchemaPropertyResponseArray) Get() (v []SchemaPropertyResponse, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilSchemaPropertyResponseArray) Or(d []SchemaPropertyResponse) []SchemaPropertyResponse {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilSelectOptionArray returns new OptNilSelectOptionArray with value set to v.
 func NewOptNilSelectOptionArray(v []SelectOption) OptNilSelectOptionArray {
 	return OptNilSelectOptionArray{
@@ -10948,21 +11011,21 @@ func (s *SchemaPropertyRequest) SetProperties(val []SchemaPropertyRequest) {
 
 // Ref: #/components/schemas/SchemaPropertyResponse
 type SchemaPropertyResponse struct {
-	ID                   uuid.UUID                `json:"id"`
-	Name                 string                   `json:"name"`
-	BusinessName         OptNilString             `json:"business_name"`
-	LogicalType          OptNilString             `json:"logical_type"`
-	PhysicalType         OptNilString             `json:"physical_type"`
-	Description          OptNilString             `json:"description"`
-	Examples             OptNilAnyArray           `json:"examples"`
-	PrimaryKey           OptBool                  `json:"primary_key"`
-	PrimaryKeyPosition   OptNilInt                `json:"primary_key_position"`
-	Unique               OptBool                  `json:"unique"`
-	Required             OptBool                  `json:"required"`
-	Partitioned          OptBool                  `json:"partitioned"`
-	PartitionKeyPosition OptNilInt                `json:"partition_key_position"`
-	Position             int                      `json:"position"`
-	Properties           []SchemaPropertyResponse `json:"properties"`
+	ID                   uuid.UUID                         `json:"id"`
+	Name                 string                            `json:"name"`
+	BusinessName         OptNilString                      `json:"business_name"`
+	LogicalType          OptNilString                      `json:"logical_type"`
+	PhysicalType         OptNilString                      `json:"physical_type"`
+	Description          OptNilString                      `json:"description"`
+	Examples             OptNilAnyArray                    `json:"examples"`
+	PrimaryKey           OptBool                           `json:"primary_key"`
+	PrimaryKeyPosition   OptNilInt                         `json:"primary_key_position"`
+	Unique               OptBool                           `json:"unique"`
+	Required             OptBool                           `json:"required"`
+	Partitioned          OptBool                           `json:"partitioned"`
+	PartitionKeyPosition OptNilInt                         `json:"partition_key_position"`
+	Position             int                               `json:"position"`
+	Properties           OptNilSchemaPropertyResponseArray `json:"properties"`
 }
 
 // GetID returns the value of ID.
@@ -11036,7 +11099,7 @@ func (s *SchemaPropertyResponse) GetPosition() int {
 }
 
 // GetProperties returns the value of Properties.
-func (s *SchemaPropertyResponse) GetProperties() []SchemaPropertyResponse {
+func (s *SchemaPropertyResponse) GetProperties() OptNilSchemaPropertyResponseArray {
 	return s.Properties
 }
 
@@ -11111,7 +11174,7 @@ func (s *SchemaPropertyResponse) SetPosition(val int) {
 }
 
 // SetProperties sets the value of Properties.
-func (s *SchemaPropertyResponse) SetProperties(val []SchemaPropertyResponse) {
+func (s *SchemaPropertyResponse) SetProperties(val OptNilSchemaPropertyResponseArray) {
 	s.Properties = val
 }
 

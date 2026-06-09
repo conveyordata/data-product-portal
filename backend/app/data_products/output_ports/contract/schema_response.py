@@ -19,7 +19,7 @@ class SchemaPropertyResponse(ORMModel):
     partitioned: bool = False
     partition_key_position: Optional[int] = None
     position: int
-    properties: list["SchemaPropertyResponse"] = []
+    properties: Optional[list["SchemaPropertyResponse"]] = None
 
 
 SchemaPropertyResponse.model_rebuild()

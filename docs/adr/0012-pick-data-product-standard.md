@@ -17,7 +17,7 @@ This specification must describe a full data product, not just a data contract, 
 
 * **Option 1**: [DPDS](https://dpds.opendatamesh.org/) (Open Data Mesh)
 A comprehensive, enterprise-grade specification promoted by the Open Data Mesh community.
-* **Option 2**: [BiToL Open Data Product Standard](https://bitol-io.github.io/open-data-product-standard/latest/)
+* **Option 2**: [Bitol Open Data Product Standard](https://bitol-io.github.io/open-data-product-standard/latest/)
 A developer-centric, YAML-based standard designed explicitly for defining data products as code.
 * **Option 3**: [Data Product Specification](https://dataproduct-specification.com/) created by the people of the data mesh manager
 * **Option 4**: Other standards (ProMoTe, dprod, Open Data Products)
@@ -25,13 +25,13 @@ A set of alternative specifications with narrower scope, lower adoption, or arch
 
 ## Decision Outcome
 
-**Chosen option**: *BiToL Open Data Product Standard*
+**Chosen option**: *Bitol Open Data Product Standard*
 
-BiToL was selected because it provides full data product coverage while remaining simple, human-readable, and automation-friendly.
+Bitol was selected because it provides full data product coverage while remaining simple, human-readable, and automation-friendly.
 It aligns strongly with the “data product as code” philosophy, making it the best fit for Portal’s target users and architecture.
-BiToL will be documented as the single supported standard for data product specification.
+Bitol will be documented as the single supported standard for data product specification.
 
-An example illustrating the use of the BiToL data product specification can be found:
+An example illustrating the use of the Bitol data product specification can be found:
 - [data product specification](https://github.com/conveyordata/data-product-portal/blob/main/integrations/bitol/data-product-example.yml).
 - [data contract specification](https://github.com/conveyordata/data-product-portal/blob/main/integrations/bitol/data-contract-example.yml).
 

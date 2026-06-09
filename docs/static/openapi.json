@@ -14488,12 +14488,18 @@
             "title": "Position"
           },
           "properties": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaPropertyResponse"
-            },
-            "type": "array",
-            "title": "Properties",
-            "default": []
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SchemaPropertyResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Properties"
           }
         },
         "type": "object",

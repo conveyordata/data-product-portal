@@ -5,21 +5,22 @@ import {
     QuestionCircleOutlined,
 } from '@ant-design/icons';
 import type { TFunction } from 'i18next';
+import type { ReactElement } from 'react';
 import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
 
-export const getQualityStatusIcon = (status: DataQualityStatus) => {
+export const getQualityStatusIcon = (status: DataQualityStatus): ReactElement => {
     switch (status) {
         case 'success':
-            return CheckCircleOutlined;
+            return <CheckCircleOutlined />;
         case 'failure':
         case 'error':
-            return CloseCircleOutlined;
+            return <CloseCircleOutlined />;
         case 'warning':
-            return ExclamationCircleOutlined;
+            return <ExclamationCircleOutlined />;
         case 'unknown':
-            return QuestionCircleOutlined;
+            return <QuestionCircleOutlined />;
         default:
-            return QuestionCircleOutlined;
+            return <QuestionCircleOutlined />;
     }
 };
 
