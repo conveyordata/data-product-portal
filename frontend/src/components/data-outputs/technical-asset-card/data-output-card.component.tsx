@@ -132,7 +132,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
             onDragEnd={handleDragEnd}
             size="small"
         >
-            <Flex gap={'middle'}>
+            <Flex gap="medium">
                 {isActive ? (
                     <HolderOutlined />
                 ) : (
@@ -144,9 +144,9 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                         <HolderOutlined style={{ cursor: 'not-allowed', opacity: 0.5 }} />
                     </Tooltip>
                 )}
-                <Flex vertical flex={1} gap={'middle'}>
+                <Flex vertical flex={1} gap="medium">
                     <Flex justify="space-between" align="flex-start">
-                        <Flex gap={'middle'} align="center">
+                        <Flex gap="medium" align="center">
                             <CustomSvgIconLoader
                                 iconComponent={getDataOutputIcon(
                                     technicalAsset.configuration.configuration_type,

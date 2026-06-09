@@ -46,12 +46,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
     const { data: { events: datasetHistoryData = [] } = {}, isLoading: isFetchingDatasetHistory } =
-        useGetOutputPortsEventHistoryQuery(
-            { id: datasetId, dataProductId },
-            {
-                skip: !datasetId,
-            },
-        );
+        useGetOutputPortsEventHistoryQuery({ id: datasetId, dataProductId }, { skip: !datasetId });
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
     useEffect(() => {

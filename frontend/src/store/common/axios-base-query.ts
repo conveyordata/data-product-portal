@@ -48,7 +48,7 @@ function showErrorMessageToast(err: AxiosResponse<ApiError>, api: BaseQueryApi) 
 
 function shouldShowErrorToast(status: number, url: string) {
     if (status === 404) {
-        if (url.includes('data_quality_summary') || url.includes('data_contract')) {
+        if (url.includes('data_quality_summary')) {
             return false;
         }
     }
@@ -64,7 +64,7 @@ export const axiosBaseQuery =
             method?: AxiosRequestConfig['method'];
             data?: AxiosRequestConfig['data'];
             body?: AxiosRequestConfig['data'];
-            params?: Record<string, string | boolean | number | boolean | undefined | null>;
+            params?: Record<string, string | number | boolean | undefined | null>;
             headers?: { [key: string]: string | number };
         },
         unknown,

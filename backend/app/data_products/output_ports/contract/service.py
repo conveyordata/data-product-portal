@@ -2,7 +2,6 @@ import uuid
 from collections import defaultdict
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
@@ -62,12 +61,6 @@ class OutputPortContractService:
             .all()
         )
 
-        if not schema_objects:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No schemas found for output port {output_port_id}",
-            )
-
         all_properties = (
             self.db.query(OutputPortSchemaProperty)
             .filter(
@@ -107,16 +100,15 @@ class OutputPortContractService:
             ],
         )
 
-    @staticmethod
+    @classmethod
     def _build_properties_tree(
+        cls,
         props_by_parent: dict[UUID | None, list[OutputPortSchemaProperty]],
         parent_id: UUID | None,
     ) -> list[SchemaPropertyResponse]:
         schema_properties: list[SchemaPropertyResponse] = []
         for p in props_by_parent.get(parent_id, []):
-            nested_properties = OutputPortContractService._build_properties_tree(
-                props_by_parent, p.id
-            )
+            nested_properties = cls._build_properties_tree(props_by_parent, p.id)
             schema_properties.append(
                 SchemaPropertyResponse(
                     id=p.id,
