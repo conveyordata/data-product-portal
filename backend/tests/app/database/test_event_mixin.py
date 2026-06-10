@@ -1,5 +1,4 @@
 """Unit tests for EventTrackedMixin.
-
 Uses a lightweight in-memory SQLite model so no database fixtures are needed.
 """
 
@@ -9,13 +8,13 @@ import pytest
 from pydantic import BaseModel
 from sqlalchemy import Column, String, create_engine
 from sqlalchemy.dialects.sqlite import TEXT as SQLITE_TEXT
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import DeclarativeBase, Session
 
 from app.core.context import _pending_events, pop_events
 from app.database.event_mixin import EventTrackedMixin
 
 
-class _Base:
+class _Base(DeclarativeBase):
     pass
 
 
