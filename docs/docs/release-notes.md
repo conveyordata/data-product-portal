@@ -27,6 +27,7 @@ sidebar_position: 200
 - **[UI]**: Remove audit logs page
 - **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
 - **[Events]**: v2 implementation of the webhook events, making it easier to react to changes in Portal.
+Events are automatically emitted on database creation, update and deletion events. Currently only applied on Exploration entities.
 - **[General]**: Migrated portal to run in a single container, making deployment easier.
 - **[MCP]**: Improved mcp authentication flow that works with more applications and doesn't require a locally running proxy. For more info see [Using the Portal's MCP server](./user-guide/experimental-features.md#using-the-portals-mcp-server).
 
