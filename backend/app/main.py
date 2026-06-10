@@ -204,7 +204,7 @@ async def dispatch_queued_events(request: Request, call_next):
     finally:
         events = pop_events()
         _pending_events.reset(token)
-    if response.status_code < 400:
+    if response.status_code < 400 and settings.WEBHOOK_V2_URL:
         for event in events:
             asyncio.create_task(
                 call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
