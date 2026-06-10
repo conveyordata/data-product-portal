@@ -2,7 +2,6 @@ import uuid
 from collections import defaultdict
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
@@ -62,12 +61,6 @@ class OutputPortContractService:
             .all()
         )
 
-        if not schema_objects:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No schemas found for output port {output_port_id}",
-            )
-
         all_properties = (
             self.db.query(OutputPortSchemaProperty)
             .filter(
@@ -107,32 +100,36 @@ class OutputPortContractService:
             ],
         )
 
-    @staticmethod
+    @classmethod
     def _build_properties_tree(
+        cls,
         props_by_parent: dict[UUID | None, list[OutputPortSchemaProperty]],
         parent_id: UUID | None,
     ) -> list[SchemaPropertyResponse]:
-        return [
-            SchemaPropertyResponse(
-                id=p.id,
-                name=p.name,
-                business_name=p.business_name,
-                logical_type=p.logical_type,
-                physical_type=p.physical_type,
-                description=p.description,
-                examples=p.examples,
-                position=p.position,
-                partitioned=p.partitioned,
-                partition_key_position=p.partition_key_position,
-                required=p.required,
-                primary_key=p.primary_key,
-                primary_key_position=p.primary_key_position,
-                properties=OutputPortContractService._build_properties_tree(
-                    props_by_parent, p.id
-                ),
+        schema_properties: list[SchemaPropertyResponse] = []
+        for p in props_by_parent.get(parent_id, []):
+            nested_properties = cls._build_properties_tree(props_by_parent, p.id)
+            schema_properties.append(
+                SchemaPropertyResponse(
+                    id=p.id,
+                    name=p.name,
+                    business_name=p.business_name,
+                    logical_type=p.logical_type,
+                    physical_type=p.physical_type,
+                    description=p.description,
+                    examples=p.examples,
+                    position=p.position,
+                    partitioned=p.partitioned,
+                    partition_key_position=p.partition_key_position,
+                    required=p.required,
+                    primary_key=p.primary_key,
+                    primary_key_position=p.primary_key_position,
+                    properties=nested_properties
+                    if len(nested_properties) > 0
+                    else None,
+                )
             )
-            for p in props_by_parent.get(parent_id, [])
-        ]
+        return schema_properties
 
     @staticmethod
     def _flatten_properties(

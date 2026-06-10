@@ -30,7 +30,7 @@ class SchemaPropertyResponse:
         required (bool | Unset):  Default: False.
         partitioned (bool | Unset):  Default: False.
         partition_key_position (int | None | Unset):
-        properties (list[SchemaPropertyResponse] | Unset):
+        properties (list[SchemaPropertyResponse] | None | Unset):
     """
 
     id: UUID
@@ -47,7 +47,7 @@ class SchemaPropertyResponse:
     required: bool | Unset = False
     partitioned: bool | Unset = False
     partition_key_position: int | None | Unset = UNSET
-    properties: list[SchemaPropertyResponse] | Unset = UNSET
+    properties: list[SchemaPropertyResponse] | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -110,12 +110,17 @@ class SchemaPropertyResponse:
         else:
             partition_key_position = self.partition_key_position
 
-        properties: list[dict[str, Any]] | Unset = UNSET
-        if not isinstance(self.properties, Unset):
+        properties: list[dict[str, Any]] | None | Unset
+        if isinstance(self.properties, Unset):
+            properties = UNSET
+        elif isinstance(self.properties, list):
             properties = []
-            for properties_item_data in self.properties:
-                properties_item = properties_item_data.to_dict()
-                properties.append(properties_item)
+            for properties_type_0_item_data in self.properties:
+                properties_type_0_item = properties_type_0_item_data.to_dict()
+                properties.append(properties_type_0_item)
+
+        else:
+            properties = self.properties
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -245,14 +250,31 @@ class SchemaPropertyResponse:
             d.pop("partition_key_position", UNSET)
         )
 
-        _properties = d.pop("properties", UNSET)
-        properties: list[SchemaPropertyResponse] | Unset = UNSET
-        if _properties is not UNSET:
-            properties = []
-            for properties_item_data in _properties:
-                properties_item = SchemaPropertyResponse.from_dict(properties_item_data)
+        def _parse_properties(
+            data: object,
+        ) -> list[SchemaPropertyResponse] | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                properties_type_0 = []
+                _properties_type_0 = data
+                for properties_type_0_item_data in _properties_type_0:
+                    properties_type_0_item = SchemaPropertyResponse.from_dict(
+                        properties_type_0_item_data
+                    )
 
-                properties.append(properties_item)
+                    properties_type_0.append(properties_type_0_item)
+
+                return properties_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(list[SchemaPropertyResponse] | None | Unset, data)
+
+        properties = _parse_properties(d.pop("properties", UNSET))
 
         schema_property_response = cls(
             id=id,

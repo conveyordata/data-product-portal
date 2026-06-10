@@ -124,6 +124,7 @@ class TestContractRouter:
         assert trial_id_prop["physical_type"] == "varchar"
         assert trial_id_prop["examples"] == ["CT-12345", "AX-45678"]
         assert trial_id_prop["position"] == 0
+        assert trial_id_prop["properties"] is None
 
         retention_metrics = body["schema_objects"][1]
         assert retention_metrics["name"] == "retention_metrics"
@@ -144,6 +145,7 @@ class TestContractRouter:
         assert patient_id_prop["physical_type"] == "varchar"
         assert patient_id_prop["examples"] == ["M-12345", "F-45678"]
         assert patient_id_prop["position"] == 1
+        assert patient_id_prop["properties"] is None
 
     def test_post_contract_no_permissions(self, client):
         dataset = DatasetFactory()
@@ -167,16 +169,16 @@ class TestContractRouter:
 
         assert response.status_code == 404
 
-    def test_get_contract_none_existing(self, client, session):
+    def test_get_contract_none_existing(self, client):
         dataset = DatasetFactory()
 
         response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract"
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 200
         data = response.json()
-        assert "No schemas found for output port" in data["detail"]
+        assert len(data["schema_objects"]) == 0
 
     def test_get_contract_after_ingest(self, client, session):
         dataset = DatasetFactory()
@@ -289,9 +291,9 @@ class TestContractRouter:
             json={"schema": []},
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 200
         data = response.json()
-        assert "No schemas found for output port" in data["detail"]
+        assert len(data["schema_objects"]) == 0
 
     def test_delete_output_port_removes_schema(self, client, session):
         dataset = DatasetFactory()

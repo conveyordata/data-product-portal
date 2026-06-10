@@ -7,7 +7,6 @@ from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.event_entity_type import EventEntityType
 from ..types import UNSET, Unset
@@ -190,7 +189,7 @@ class GetEventHistoryResponseItem:
 
         actor_id = UUID(d.pop("actor_id"))
 
-        created_on = isoparse(d.pop("created_on"))
+        created_on = datetime.datetime.fromisoformat(d.pop("created_on"))
 
         actor = User.from_dict(d.pop("actor"))
 

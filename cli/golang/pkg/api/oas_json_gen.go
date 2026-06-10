@@ -19211,6 +19211,67 @@ func (s *OptNilRequestInputPortsForExplorationRequest) UnmarshalJSON(data []byte
 	return s.Decode(d)
 }
 
+// Encode encodes []SchemaPropertyResponse as json.
+func (o OptNilSchemaPropertyResponseArray) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.ArrStart()
+	for _, elem := range o.Value {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes []SchemaPropertyResponse from json.
+func (o *OptNilSchemaPropertyResponseArray) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilSchemaPropertyResponseArray to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v []SchemaPropertyResponse
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	o.Value = make([]SchemaPropertyResponse, 0)
+	if err := d.Arr(func(d *jx.Decoder) error {
+		var elem SchemaPropertyResponse
+		if err := elem.Decode(d); err != nil {
+			return err
+		}
+		o.Value = append(o.Value, elem)
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilSchemaPropertyResponseArray) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilSchemaPropertyResponseArray) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes []SelectOption as json.
 func (o OptNilSelectOptionArray) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -27535,13 +27596,9 @@ func (s *SchemaPropertyResponse) encodeFields(e *jx.Encoder) {
 		e.Int(s.Position)
 	}
 	{
-		if s.Properties != nil {
+		if s.Properties.Set {
 			e.FieldStart("properties")
-			e.ArrStart()
-			for _, elem := range s.Properties {
-				elem.Encode(e)
-			}
-			e.ArrEnd()
+			s.Properties.Encode(e)
 		}
 	}
 }
@@ -27722,15 +27779,8 @@ func (s *SchemaPropertyResponse) Decode(d *jx.Decoder) error {
 			}
 		case "properties":
 			if err := func() error {
-				s.Properties = make([]SchemaPropertyResponse, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem SchemaPropertyResponse
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Properties = append(s.Properties, elem)
-					return nil
-				}); err != nil {
+				s.Properties.Reset()
+				if err := s.Properties.Decode(d); err != nil {
 					return err
 				}
 				return nil

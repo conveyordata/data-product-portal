@@ -29,7 +29,7 @@ sidebar_position: 200
 - **[Events]**: v2 implementation of the webhook events, making it easier to react to changes in Portal.
 Events are automatically emitted on database creation, update and deletion events. Currently only applied on Exploration entities.
 - **[General]**: Migrated portal to run in a single container, making deployment easier.
-- **[MCP]**: Improved mcp authentication flow that works with more applications and doesn't require a locally running proxy. For more info see [Using the Portal's MCP server](./user-guide/experimental-features.md#using-the-portals-mcp-server).
+- **[UI]**: Show schema information on an output port. It is defined using the Bitol [ODCS specification](https://bitol-io.github.io/open-data-contract-standard/v3.1.0/). For more details look [here](./developer-guide/schema-information.md).
 
 ### bugfixes
 

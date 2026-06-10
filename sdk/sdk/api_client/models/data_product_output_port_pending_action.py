@@ -13,7 +13,6 @@ from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.decision_status import DecisionStatus
 from ..types import UNSET, Unset
@@ -137,7 +136,7 @@ class DataProductOutputPortPendingAction:
 
         status = DecisionStatus(d.pop("status"))
 
-        requested_on = isoparse(d.pop("requested_on"))
+        requested_on = datetime.datetime.fromisoformat(d.pop("requested_on"))
 
         output_port = OutputPort.from_dict(d.pop("output_port"))
 

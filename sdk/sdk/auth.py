@@ -1,13 +1,15 @@
+import json
 import logging
 import os
 import time
-import json
-import httpx
 from pathlib import Path
 from typing import Optional, cast
 from urllib.parse import urlencode
-from sdk.api_client.api.authentication import get_jwt_token, get_device_token
-from sdk.api_client.client import Client
+
+import httpx
+
+from sdk.api_client.api.authentication import get_device_token, get_jwt_token
+from sdk.api_client.client import AuthenticatedClient, Client
 from sdk.api_client.models import DeviceFlow, DeviceFlowStatus
 
 logger = logging.getLogger(__name__)
@@ -92,11 +94,16 @@ class PortalAuth:
             token_body = response.json()
             self._store_token_response(token_body, persist=False)
 
-    def _device_login(self):
-        client = Client(
-            base_url=self.base_url,
-            timeout=httpx.Timeout(self.timeout),
-            httpx_args={"auth": httpx.BasicAuth(self.client_id, self.client_secret)},
+    def _device_login(self) -> None:
+        client = cast(
+            AuthenticatedClient,
+            Client(
+                base_url=self.base_url,
+                timeout=httpx.Timeout(self.timeout),
+                httpx_args={
+                    "auth": httpx.BasicAuth(self.client_id, self.client_secret)
+                },
+            ),
         )
 
         response = get_device_token.sync_detailed(client=client, scope=self.scope)
@@ -120,7 +127,7 @@ class PortalAuth:
 
             token_response = get_jwt_token.sync_detailed(
                 client=client,
-                device_code=device_code,
+                device_code=str(device_code),
                 grant_type="urn:ietf:params:oauth:grant-type:device_code",
             )
             if token_response.status_code == 200:

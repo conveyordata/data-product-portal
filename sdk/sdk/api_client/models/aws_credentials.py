@@ -6,7 +6,6 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 T = TypeVar("T", bound="AWSCredentials")
 
@@ -58,7 +57,7 @@ class AWSCredentials:
 
         session_token = d.pop("SessionToken")
 
-        expiration = isoparse(d.pop("Expiration"))
+        expiration = datetime.datetime.fromisoformat(d.pop("Expiration"))
 
         aws_credentials = cls(
             access_key_id=access_key_id,

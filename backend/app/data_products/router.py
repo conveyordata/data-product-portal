@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Annotated, Optional, Sequence
 from uuid import UUID
 
 from fastapi import (
@@ -8,6 +8,7 @@ from fastapi import (
     Query,
     Request,
 )
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.schema_response import InputPort
@@ -542,7 +543,9 @@ def request_input_ports_for_data_product(
 @router.get("")
 def get_data_products(
     db: Session = Depends(get_db_session),
-    filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
+    filter_to_user_with_assigment: Annotated[
+        UUID | SkipJsonSchema[None], Query()
+    ] = None,
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
