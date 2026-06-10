@@ -180,7 +180,7 @@ class ExplorationCreatedEvent(V2Event):
     def event_type(cls) -> str:
         return "exploration.created"
 
-    exploration: ExplorationPayload
+    after: ExplorationPayload
 
 
 class ExplorationUpdatedEvent(V2Event):
@@ -188,8 +188,8 @@ class ExplorationUpdatedEvent(V2Event):
     def event_type(cls) -> str:
         return "exploration.updated"
 
-    old: ExplorationPayload
-    new: ExplorationPayload
+    before: ExplorationPayload
+    after: ExplorationPayload
 
 
 class ExplorationDeletedEvent(V2Event):
@@ -197,7 +197,7 @@ class ExplorationDeletedEvent(V2Event):
     def event_type(cls) -> str:
         return "exploration.deleted"
 
-    exploration: ExplorationPayload
+    before: ExplorationPayload
 
 
 class OutputPortAboutUpdatedEvent(V2Event):

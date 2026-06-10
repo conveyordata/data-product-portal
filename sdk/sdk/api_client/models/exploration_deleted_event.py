@@ -17,20 +17,20 @@ T = TypeVar("T", bound="ExplorationDeletedEvent")
 class ExplorationDeletedEvent:
     """
     Attributes:
-        exploration (ExplorationPayload):
+        before (ExplorationPayload):
     """
 
-    exploration: ExplorationPayload
+    before: ExplorationPayload
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        exploration = self.exploration.to_dict()
+        before = self.before.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "exploration": exploration,
+                "before": before,
             }
         )
 
@@ -41,10 +41,10 @@ class ExplorationDeletedEvent:
         from ..models.exploration_payload import ExplorationPayload
 
         d = dict(src_dict)
-        exploration = ExplorationPayload.from_dict(d.pop("exploration"))
+        before = ExplorationPayload.from_dict(d.pop("before"))
 
         exploration_deleted_event = cls(
-            exploration=exploration,
+            before=before,
         )
 
         exploration_deleted_event.additional_properties = d

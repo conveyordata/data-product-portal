@@ -18,7 +18,13 @@ if TYPE_CHECKING:
     from app.users.model import User
 
 
-class Exploration(AbstractDataProduct, EventTrackedMixin):
+class Exploration(
+    AbstractDataProduct,
+    EventTrackedMixin,
+    create_event=ExplorationCreatedEvent,
+    update_event=ExplorationUpdatedEvent,
+    delete_event=ExplorationDeletedEvent,
+):
     __tablename__ = "explorations"
 
     id: Mapped[UUID] = mapped_column(
@@ -29,10 +35,6 @@ class Exploration(AbstractDataProduct, EventTrackedMixin):
     }
     owner_id: Mapped[UUID] = mapped_column("owner_id", ForeignKey("users.id"))
     owner: Mapped["User"] = relationship("User", foreign_keys=[owner_id], lazy="raise")
-
-    create_event_class = ExplorationCreatedEvent
-    update_event_class = ExplorationUpdatedEvent
-    delete_event_class = ExplorationDeletedEvent
 
     def to_event(self) -> ExplorationPayload:
         return ExplorationPayload(

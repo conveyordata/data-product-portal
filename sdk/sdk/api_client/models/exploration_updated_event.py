@@ -17,25 +17,25 @@ T = TypeVar("T", bound="ExplorationUpdatedEvent")
 class ExplorationUpdatedEvent:
     """
     Attributes:
-        old (ExplorationPayload):
-        new (ExplorationPayload):
+        before (ExplorationPayload):
+        after (ExplorationPayload):
     """
 
-    old: ExplorationPayload
-    new: ExplorationPayload
+    before: ExplorationPayload
+    after: ExplorationPayload
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        old = self.old.to_dict()
+        before = self.before.to_dict()
 
-        new = self.new.to_dict()
+        after = self.after.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "old": old,
-                "new": new,
+                "before": before,
+                "after": after,
             }
         )
 
@@ -46,13 +46,13 @@ class ExplorationUpdatedEvent:
         from ..models.exploration_payload import ExplorationPayload
 
         d = dict(src_dict)
-        old = ExplorationPayload.from_dict(d.pop("old"))
+        before = ExplorationPayload.from_dict(d.pop("before"))
 
-        new = ExplorationPayload.from_dict(d.pop("new"))
+        after = ExplorationPayload.from_dict(d.pop("after"))
 
         exploration_updated_event = cls(
-            old=old,
-            new=new,
+            before=before,
+            after=after,
         )
 
         exploration_updated_event.additional_properties = d

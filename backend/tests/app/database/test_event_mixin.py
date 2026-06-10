@@ -24,7 +24,7 @@ class _ItemPayload(BaseModel):
 
 
 class _ItemCreatedEvent(BaseModel):
-    item: _ItemPayload
+    after: _ItemPayload
 
     @classmethod
     def event_type(cls) -> str:
@@ -32,8 +32,8 @@ class _ItemCreatedEvent(BaseModel):
 
 
 class _ItemUpdatedEvent(BaseModel):
-    old: _ItemPayload
-    new: _ItemPayload
+    before: _ItemPayload
+    after: _ItemPayload
 
     @classmethod
     def event_type(cls) -> str:
@@ -41,22 +41,24 @@ class _ItemUpdatedEvent(BaseModel):
 
 
 class _ItemDeletedEvent(BaseModel):
-    item: _ItemPayload
+    before: _ItemPayload
 
     @classmethod
     def event_type(cls) -> str:
         return "item.deleted"
 
 
-class _Item(_Base, EventTrackedMixin):
+class _Item(
+    _Base,
+    EventTrackedMixin,
+    create_event=_ItemCreatedEvent,
+    update_event=_ItemUpdatedEvent,
+    delete_event=_ItemDeletedEvent,
+):
     __tablename__ = "items"
 
     id = Column(SQLITE_TEXT, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String)
-
-    create_event_class = _ItemCreatedEvent
-    update_event_class = _ItemUpdatedEvent
-    delete_event_class = _ItemDeletedEvent
 
     def to_event(self) -> _ItemPayload:
         return _ItemPayload(id=self.id, name=self.name)
@@ -86,14 +88,14 @@ def test_insert_queues_created_event(db):
     events = pop_events()
     assert len(events) == 1
     assert isinstance(events[0], _ItemCreatedEvent)
-    assert events[0].item.name == "hello"
+    assert events[0].after.name == "hello"
 
 
 def test_update_queues_updated_event(db):
     item = _Item(id=str(uuid.uuid4()), name="before")
     db.add(item)
     db.flush()
-    pop_events()  # discard the created event
+    _pending_events.set([])  # discard the created event
 
     item.name = "after"
     db.flush()
@@ -101,15 +103,15 @@ def test_update_queues_updated_event(db):
     events = pop_events()
     assert len(events) == 1
     assert isinstance(events[0], _ItemUpdatedEvent)
-    assert events[0].old.name == "before"
-    assert events[0].new.name == "after"
+    assert events[0].before.name == "before"
+    assert events[0].after.name == "after"
 
 
 def test_update_with_no_change_does_not_queue_event(db):
     item = _Item(id=str(uuid.uuid4()), name="same")
     db.add(item)
     db.flush()
-    pop_events()
+    _pending_events.set([])  # discard the created event
 
     item.name = "same"
     db.flush()
@@ -121,7 +123,7 @@ def test_delete_queues_deleted_event(db):
     item = _Item(id=str(uuid.uuid4()), name="bye")
     db.add(item)
     db.flush()
-    pop_events()
+    _pending_events.set([])  # discard the created event
 
     db.delete(item)
     db.flush()
@@ -129,15 +131,16 @@ def test_delete_queues_deleted_event(db):
     events = pop_events()
     assert len(events) == 1
     assert isinstance(events[0], _ItemDeletedEvent)
-    assert events[0].item.name == "bye"
+    assert events[0].before.name == "bye"
 
 
 def test_no_queue_outside_context(db):
-    """Events queued outside a request context (no ContextVar set) are silently dropped."""
+    """Events queued outside a request context log a warning and are dropped."""
     _pending_events.set(None)
 
     item = _Item(id=str(uuid.uuid4()), name="outside")
     db.add(item)
     db.flush()
 
-    assert pop_events() == []
+    with pytest.raises(RuntimeError, match="No event context is open"):
+        pop_events()

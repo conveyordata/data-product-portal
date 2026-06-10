@@ -11431,25 +11431,25 @@
       },
       "ExplorationCreatedEvent": {
         "properties": {
-          "exploration": {
+          "after": {
             "$ref": "#/components/schemas/ExplorationPayload"
           }
         },
         "type": "object",
         "required": [
-          "exploration"
+          "after"
         ],
         "title": "ExplorationCreatedEvent"
       },
       "ExplorationDeletedEvent": {
         "properties": {
-          "exploration": {
+          "before": {
             "$ref": "#/components/schemas/ExplorationPayload"
           }
         },
         "type": "object",
         "required": [
-          "exploration"
+          "before"
         ],
         "title": "ExplorationDeletedEvent"
       },
@@ -11503,17 +11503,17 @@
       },
       "ExplorationUpdatedEvent": {
         "properties": {
-          "old": {
+          "before": {
             "$ref": "#/components/schemas/ExplorationPayload"
           },
-          "new": {
+          "after": {
             "$ref": "#/components/schemas/ExplorationPayload"
           }
         },
         "type": "object",
         "required": [
-          "old",
-          "new"
+          "before",
+          "after"
         ],
         "title": "ExplorationUpdatedEvent"
       },
