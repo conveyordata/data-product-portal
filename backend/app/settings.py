@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
 
+    MCP_AUTH_REDIRECT_URIS: list[str] = []
+
     # Default username when oidc is disabled
     DEFAULT_USERNAME: str = "john.doe@pharma.com"
 
@@ -104,7 +106,7 @@ class LoggerConfig(BaseSettings):
 
     LOG_LEVEL: LogLevel = LogLevel.INFO
     LOG_CONFIG_FILE: str = "log_config.json"
-    LOGGING_DIRECTORY: str = "/var/logs"
+    LOGGING_DIRECTORY: str = "/var/log"
     SCARF_NO_ANALYTICS: bool = False
     DO_NOT_TRACK: bool = False
     SANDBOX: bool = False

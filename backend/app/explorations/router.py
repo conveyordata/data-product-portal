@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Annotated, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -33,7 +34,9 @@ router = APIRouter(tags=["Explorations"], prefix=route)
 @router.get("", response_model=GetExplorationsResponse)
 def get_explorations(
     db: Session = Depends(get_db_session),
-    filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
+    filter_to_user_with_assigment: Annotated[
+        UUID | SkipJsonSchema[None], Query()
+    ] = None,
 ):
     return {
         "explorations": ExplorationService(db).get_explorations(

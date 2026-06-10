@@ -16,7 +16,7 @@ def _get_kwargs(
     *,
     resource_name: str,
     model: ResourceNameModel,
-    data_product_id: None | Unset | UUID = UNSET,
+    data_product_id: UUID | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -26,13 +26,9 @@ def _get_kwargs(
     json_model = model.value
     params["model"] = json_model
 
-    json_data_product_id: None | str | Unset
-    if isinstance(data_product_id, Unset):
-        json_data_product_id = UNSET
-    elif isinstance(data_product_id, UUID):
+    json_data_product_id: str | Unset = UNSET
+    if not isinstance(data_product_id, Unset):
         json_data_product_id = str(data_product_id)
-    else:
-        json_data_product_id = data_product_id
     params["data_product_id"] = json_data_product_id
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -81,14 +77,14 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     resource_name: str,
     model: ResourceNameModel,
-    data_product_id: None | Unset | UUID = UNSET,
+    data_product_id: UUID | Unset = UNSET,
 ) -> Response[HTTPValidationError | ResourceNameValidation]:
     """Validate Resource Name
 
     Args:
         resource_name (str):
         model (ResourceNameModel):
-        data_product_id (None | Unset | UUID):
+        data_product_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -116,14 +112,14 @@ def sync(
     client: AuthenticatedClient | Client,
     resource_name: str,
     model: ResourceNameModel,
-    data_product_id: None | Unset | UUID = UNSET,
+    data_product_id: UUID | Unset = UNSET,
 ) -> HTTPValidationError | ResourceNameValidation | None:
     """Validate Resource Name
 
     Args:
         resource_name (str):
         model (ResourceNameModel):
-        data_product_id (None | Unset | UUID):
+        data_product_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -146,14 +142,14 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     resource_name: str,
     model: ResourceNameModel,
-    data_product_id: None | Unset | UUID = UNSET,
+    data_product_id: UUID | Unset = UNSET,
 ) -> Response[HTTPValidationError | ResourceNameValidation]:
     """Validate Resource Name
 
     Args:
         resource_name (str):
         model (ResourceNameModel):
-        data_product_id (None | Unset | UUID):
+        data_product_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -179,14 +175,14 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     resource_name: str,
     model: ResourceNameModel,
-    data_product_id: None | Unset | UUID = UNSET,
+    data_product_id: UUID | Unset = UNSET,
 ) -> HTTPValidationError | ResourceNameValidation | None:
     """Validate Resource Name
 
     Args:
         resource_name (str):
         model (ResourceNameModel):
-        data_product_id (None | Unset | UUID):
+        data_product_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

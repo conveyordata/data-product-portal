@@ -23,7 +23,7 @@ python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
 # Used to regenerate sdk/sdk/api_client/ from the OpenAPI spec
-openapi-python-client = ">=0.21"
+openapi-python-client = ">=0.29.0"
 mypy = ">=1.0"
 
 [tool.mypy]
@@ -35,6 +35,11 @@ ignore_missing_imports = true
 # correct at runtime. Suppress errors rather than patching generated files.
 module = "sdk.api_client.*"
 ignore_errors = true
+
+[tool.ruff]
+exclude = [
+    "sdk/event_handler.py"
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

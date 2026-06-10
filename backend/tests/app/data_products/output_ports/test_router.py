@@ -101,7 +101,9 @@ class TestOutputPortRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-    def test_create_output_port_type_public(self, session, dataset_payload, client):
+    def test_create_output_port_type_public(
+        self, session, dataset_payload, client
+    ) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -221,7 +223,7 @@ class TestOutputPortRouter:
 
         assert updated_dataset.status_code == 403
 
-    def test_update_dataset_type_public_renamed(self, session, client):
+    def test_update_dataset_type_public_renamed(self, session, client) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,

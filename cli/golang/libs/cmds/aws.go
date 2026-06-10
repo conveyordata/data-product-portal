@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"os"
 	"time"
 
 	"portal/libs/cliapi"
 	"portal/libs/core"
+	"portal/libs/errortranslation"
 	"portal/pkg/api"
 )
+
+const layout = "2006-01-02T15:04:05Z"
 
 type AWSCredentials struct {
 	Version         int    `json:"Version"`
@@ -26,30 +28,30 @@ func OpenAPIAws(ctx context.Context, data_product string, environment string) (*
 	if err != nil {
 		return nil, err
 	}
-	params := api.GetAwsCredentialsApiAuthAwsCredentialsGetParams{DataProductName: data_product, Environment: environment}
-	resp, err := client.GetAwsCredentialsApiAuthAwsCredentialsGet(ctx, &params)
+	resp, err := client.GetAWSCredentials(ctx, api.GetAWSCredentialsParams{
+		DataProductName: data_product,
+		Environment:     environment,
+	})
 	if err != nil {
 		return nil, err
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	switch r := resp.(type) {
+	case *api.HTTPValidationError:
+		return nil, errortranslation.TranslateHttpError(r)
+	case *api.AWSCredentials:
+		cred := &AWSCredentials{
+			Version:         0,
+			AccessKeyId:     r.GetAccessKeyId(),
+			SecretAccessKey: r.GetSecretAccessKey(),
+			SessionToken:    r.GetSessionToken(),
+			Expiration:      r.GetExpiration().Format(layout),
+		}
+		if err := WriteAWSToken(cred, data_product+environment); err != nil {
+			return nil, err
+		}
+		return cred, nil
 	}
-	var cred AWSCredentials
-	err = json.Unmarshal(body, &cred)
-	cred.Version = 1
-	if err != nil {
-		return nil, err
-	}
-
-	err = WriteAWSToken(&cred, data_product+environment)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	return &cred, nil
+	return nil, errors.New("unknown response type")
 }
 
 func GetAWSRole(ctx context.Context, data_product string, environment string) (*AWSCredentials, error) {
@@ -62,7 +64,6 @@ func GetAWSRole(ctx context.Context, data_product string, environment string) (*
 		return nil, err
 	default:
 		// Return cred if not expired else generate new creds
-		const layout = "2006-01-02T15:04:05Z"
 		expiration, err := time.Parse(layout, catched_cred.Expiration)
 
 		if err != nil {

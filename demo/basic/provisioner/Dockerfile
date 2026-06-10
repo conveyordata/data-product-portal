@@ -33,7 +33,6 @@ COPY --from=build-stage /usr/local /usr/local
 
 COPY demo/basic/provisioner/provisioner ./provisioner
 COPY demo/basic/provisioner/templates ./templates
-COPY demo/basic/provisioner/VERSION ./VERSION
 
 EXPOSE 6060
 

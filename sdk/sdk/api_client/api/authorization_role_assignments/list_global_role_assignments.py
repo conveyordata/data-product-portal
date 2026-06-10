@@ -15,28 +15,20 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    json_user_id: None | str | Unset
-    if isinstance(user_id, Unset):
-        json_user_id = UNSET
-    elif isinstance(user_id, UUID):
+    json_user_id: str | Unset = UNSET
+    if not isinstance(user_id, Unset):
         json_user_id = str(user_id)
-    else:
-        json_user_id = user_id
     params["user_id"] = json_user_id
 
-    json_role_id: None | str | Unset
-    if isinstance(role_id, Unset):
-        json_role_id = UNSET
-    elif isinstance(role_id, UUID):
+    json_role_id: str | Unset = UNSET
+    if not isinstance(role_id, Unset):
         json_role_id = str(role_id)
-    else:
-        json_role_id = role_id
     params["role_id"] = json_role_id
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -83,14 +75,14 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListGlobalRoleAssignmentsResponse]:
     """List Global Role Assignments
 
     Args:
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -115,14 +107,14 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
 ) -> HTTPValidationError | ListGlobalRoleAssignmentsResponse | None:
     """List Global Role Assignments
 
     Args:
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -142,14 +134,14 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListGlobalRoleAssignmentsResponse]:
     """List Global Role Assignments
 
     Args:
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -172,14 +164,14 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
 ) -> HTTPValidationError | ListGlobalRoleAssignmentsResponse | None:
     """List Global Role Assignments
 
     Args:
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

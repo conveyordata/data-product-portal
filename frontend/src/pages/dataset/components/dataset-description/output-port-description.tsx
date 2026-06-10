@@ -5,7 +5,6 @@ import type { GetDataProductResponse } from '@/store/api/services/generated/data
 import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { TagModel } from '@/types/tag';
-import styles from './dataset-description.module.scss';
 
 type Props = {
     lifecycle: DataProductLifeCycle | null;
@@ -29,41 +28,49 @@ export function OutputPortDescription({
     const { t } = useTranslation();
 
     return (
-        <Flex vertical className={styles.statusInfo}>
-            <Space className={styles.contentSubtitle}>
-                <Flex className={styles.statusBadge}>
+        <Flex vertical gap="medium">
+            <Flex wrap gap="12px 36px">
+                <Space>
                     <Typography.Text strong>{t('Status')}</Typography.Text>
                     <Tag color={lifecycle?.color ?? 'default'}>{lifecycle?.name || t('Unknown')}</Tag>
-                </Flex>
-                <Flex className={styles.statusBadge}>
+                </Space>
+
+                <Space>
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>
                     <Typography.Text>{namespace}</Typography.Text>
-                </Flex>
-                <Flex className={styles.statusBadge}>
+                </Space>
+
+                <Space>
                     <Typography.Text strong>{t('Data Product')}</Typography.Text>
                     <Link to={createDataProductIdPath(data_product.id)}>
                         <Typography.Text>{data_product.name}</Typography.Text>
                     </Link>
-                </Flex>
-                <Flex className={styles.statusBadge}>
+                </Space>
+
+                <Space>
                     <Typography.Text strong>{t('Domain')}</Typography.Text>
                     <Typography.Text>{domain}</Typography.Text>
-                </Flex>
-                <Flex className={styles.statusBadge}>
-                    <Typography.Text strong>{t('Access Type')}</Typography.Text>
-                    <Typography.Text>{accessType}</Typography.Text>
-                </Flex>
-            </Space>
-            <Space size={'small'}>
-                {tags.map((tag) => (
-                    <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
-                        {tag.value}
-                    </Tag>
-                ))}
-            </Space>
-            <Space>
-                <Typography.Text italic>{description}</Typography.Text>
-            </Space>
+                </Space>
+
+                {accessType && (
+                    <Space>
+                        <Typography.Text strong>{t('Access Type')}</Typography.Text>
+                        <Typography.Text>{accessType}</Typography.Text>
+                    </Space>
+                )}
+            </Flex>
+
+            {tags.length > 0 && (
+                <Space wrap>
+                    {tags.map((tag) => (
+                        <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
+                            {tag.value}
+                        </Tag>
+                    ))}
+                </Space>
+            )}
+
+            {description && <Typography.Text italic>{description}</Typography.Text>}
         </Flex>
     );
 }

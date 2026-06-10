@@ -1,13 +1,12 @@
-import logging
-import re
-import os
-from cookiecutter.main import cookiecutter
-from fastapi import FastAPI, Request
-from typing import Callable, List, Tuple, Dict, Any
 import json
+import logging
+import os
+import re
+from typing import Any, Callable, Dict, List, Tuple
 from uuid import UUID
 
-from sdk import Client
+from cookiecutter.main import cookiecutter
+from fastapi import FastAPI, Request
 from sdk.api_client.api.configuration_data_product_lifecycles import (
     get_data_products_lifecycles,
 )
@@ -20,17 +19,19 @@ from sdk.api_client.api.data_products_technical_assets import (
     update_technical_asset_status,
 )
 from sdk.api_client.models import (
-    DataProductUpdate,
     CreateTechnicalAssetRequest,
     DataOutputStatusUpdate,
+    DataProductUpdate,
     HTTPValidationError,
 )
-from sdk.api_client.models.technical_asset_status import TechnicalAssetStatus
-from sdk.api_client.models.technical_mapping import TechnicalMapping
+from sdk.api_client.models.access_granularity import AccessGranularity
 from sdk.api_client.models.postgre_sql_technical_asset_configuration import (
     PostgreSQLTechnicalAssetConfiguration,
 )
-from sdk.api_client.models.access_granularity import AccessGranularity
+from sdk.api_client.models.technical_asset_status import TechnicalAssetStatus
+from sdk.api_client.models.technical_mapping import TechnicalMapping
+
+from sdk import Client
 
 # Configure logging
 logging.basicConfig(

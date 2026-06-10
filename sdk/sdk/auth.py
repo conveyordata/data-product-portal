@@ -1,11 +1,16 @@
+import json
 import logging
 import os
 import time
-import json
-import httpx
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 from urllib.parse import urlencode
+
+import httpx
+
+from sdk.api_client.api.authentication import get_device_token, get_jwt_token
+from sdk.api_client.client import AuthenticatedClient, Client
+from sdk.api_client.models import DeviceFlow, DeviceFlowStatus
 
 logger = logging.getLogger(__name__)
 TOKEN_PATH = Path.home() / ".portal" / "token.json"
@@ -29,16 +34,21 @@ class PortalAuth:
 
     @staticmethod
     def _load_token() -> Optional[dict]:
-        if TOKEN_PATH.exists():
-            with TOKEN_PATH.open() as f:
-                return json.load(f)
-        return None
+        if not TOKEN_PATH.exists():
+            return None
+
+        with TOKEN_PATH.open() as f:
+            return json.load(f)
 
     @staticmethod
-    def _save_token(token: dict):
+    def _save_token(token: dict) -> None:
         TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
         with TOKEN_PATH.open("w") as f:
             json.dump(token, f, indent=2)
+
+    @staticmethod
+    def _clear_token() -> None:
+        TOKEN_PATH.unlink(missing_ok=True)
 
     def _is_token_valid(self) -> bool:
         if not self._token:
@@ -84,54 +94,56 @@ class PortalAuth:
             token_body = response.json()
             self._store_token_response(token_body, persist=False)
 
-    def _device_login(self):
-        params = {
-            "client_id": self.client_id,
-            "scope": self.scope,
-        }
-        response = self._do_post(params, endpoint="v2/authn/device/device_token")
+    def _device_login(self) -> None:
+        client = cast(
+            AuthenticatedClient,
+            Client(
+                base_url=self.base_url,
+                timeout=httpx.Timeout(self.timeout),
+                httpx_args={
+                    "auth": httpx.BasicAuth(self.client_id, self.client_secret)
+                },
+            ),
+        )
 
-        if not response.is_success:
-            raise RuntimeError(f"Device authorization failed: {response.text}")
+        response = get_device_token.sync_detailed(client=client, scope=self.scope)
+        if not (200 <= response.status_code < 300):
+            raise RuntimeError(f"Device authorization failed: {response.status_code}")
 
-        payload = response.json()
-
-        device_code = payload["device_code"]
-        user_code = payload["user_code"]
-        verification_uri = payload["verification_uri_complete"]
-        interval = payload.get("interval", 5)
-        expires_in = payload.get("expiration", 900)
+        payload: DeviceFlow = cast(DeviceFlow, response.parsed)
+        device_code = payload.device_code
+        user_code = payload.user_code
+        verification_uri = payload.verification_uri_complete
+        interval = payload.interval or 5
+        expires_in = payload.expiration or 900
 
         print("\n🔐 Authorization required")
         print(f"➡  Visit: {verification_uri}")
         print(f"➡  Enter code: {user_code}\n")
 
         deadline = time.time() + expires_in
-
         while time.time() < deadline:
             time.sleep(interval)
-            token_params = {
-                "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-                "client_id": self.client_id,
-                "device_code": device_code,
-            }
-            token_response = self._do_post(
-                token_params, endpoint="v2/authn/device/jwt_token"
-            )
 
+            token_response = get_jwt_token.sync_detailed(
+                client=client,
+                device_code=str(device_code),
+                grant_type="urn:ietf:params:oauth:grant-type:device_code",
+            )
             if token_response.status_code == 200:
-                token_body = token_response.json()
-                self._store_token_response(token_body, persist=True)
+                self._store_token_response(
+                    json.loads(token_response.content), persist=True
+                )
                 return
 
-            jwt_data = response.json()
-            detail = jwt_data.get("status")
-            if detail == "authorization_pending":
+            jwt_data = json.loads(token_response.content)
+            detail = jwt_data.get("detail")
+            if detail == DeviceFlowStatus.AUTHORIZATION_PENDING:
                 logger.debug("The user has not authorized the challenge.")
                 continue
-            elif detail == "denied":
+            elif detail == DeviceFlowStatus.DENIED:
                 raise RuntimeError("Verification request was denied")
-            elif detail == "expired":
+            elif detail == DeviceFlowStatus.EXPIRED:
                 logger.debug("The challenge was expired.")
                 break
             else:
@@ -139,14 +151,6 @@ class PortalAuth:
                 continue
 
         raise TimeoutError("Device authorization timed out")
-
-    def _do_post(self, params: dict[str, str], endpoint: str) -> httpx.Response:
-        query_string = urlencode(params)
-        return httpx.post(
-            f"{self.base_url}/{endpoint}?{query_string}",
-            auth=httpx.BasicAuth(self.client_id, self.client_secret),
-            timeout=self.timeout,
-        )
 
     def _refresh(self) -> bool:
         params = {
@@ -171,7 +175,7 @@ class PortalAuth:
 
     def _store_token_response(
         self, payload: dict, persist: bool, keep_refresh: bool = False
-    ):
+    ) -> None:
         expires_in = payload.get("expires_in", 3600)
 
         token = {

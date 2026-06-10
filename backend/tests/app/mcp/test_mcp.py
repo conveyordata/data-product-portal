@@ -1,8 +1,3 @@
-from contextlib import contextmanager
-from unittest.mock import Mock, patch
-
-import pytest
-
 from app.data_products.output_ports.service import OutputPortService
 from app.mcp.mcp import (
     get_data_product_details,
@@ -20,41 +15,12 @@ from tests.factories import (
 )
 
 
-@pytest.fixture
-def mcp_mocks(session):
-    mock_user = {
-        "id": "00000000-0000-0000-0000-000000000001",
-        "external_id": "test-user",
-        "first_name": "Test",
-        "last_name": "User",
-        "email": "test@example.com",
-    }
-    mock_token = Mock()
-    mock_token.token = "test-token"
-
-    @contextmanager
-    def mock_db():
-        yield session
-
-    @contextmanager
-    def apply():
-        with (
-            patch("app.mcp.mcp.get_access_token", return_value=mock_token),
-            patch("app.mcp.mcp.get_mcp_authenticated_user", return_value=mock_user),
-            patch("app.mcp.mcp.get_db_context", side_effect=lambda: mock_db()),
-        ):
-            yield
-
-    return apply
-
-
-def test_search_output_ports(session, mcp_mocks):
+def test_search_output_ports(session):
     ds1 = DatasetFactory(name="Customer Data")
     ds2 = DatasetFactory(name="Sales Data")
     OutputPortService(db=session).recalculate_search_for_all_output_ports()
 
-    with mcp_mocks():
-        result = search_output_ports(query="Data")
+    result = search_output_ports(query="Data", db=session)
 
     assert "output_ports" in result
     assert result["count"] >= 2
@@ -63,51 +29,45 @@ def test_search_output_ports(session, mcp_mocks):
     assert ds2.name in returned_names
 
 
-def test_search_output_ports_no_query(session, mcp_mocks):
+def test_search_output_ports_no_query(session):
     DatasetFactory(name="Customer Data")
     OutputPortService(db=session).recalculate_search_for_all_output_ports()
 
-    with mcp_mocks():
-        result = search_output_ports(query=None)
+    result = search_output_ports(query=None, db=session)
 
     assert "output_ports" in result
     assert result["count"] == 1
 
 
-def test_get_data_product_details(mcp_mocks):
+def test_get_data_product_details(session):
     dp = DataProductFactory()
-    with mcp_mocks():
-        result = get_data_product_details(data_product_id=str(dp.id))
+    result = get_data_product_details(data_product_id=str(dp.id), db=session)
     assert result["id"] == dp.id
 
 
-def test_get_output_port_details(mcp_mocks):
+def test_get_output_port_details(session):
     ds = DatasetFactory()
-    with mcp_mocks():
-        result = get_output_port_details(output_port_id=str(ds.id))
+    result = get_output_port_details(output_port_id=str(ds.id), db=session)
     assert result["id"] == ds.id
 
 
-def test_get_technical_asset_details(mcp_mocks):
+def test_get_technical_asset_details(session):
     ta = TechnicalAssetFactory()
-    with mcp_mocks():
-        result = get_technical_asset_details(technical_asset_id=str(ta.id))
+    result = get_technical_asset_details(technical_asset_id=str(ta.id), db=session)
     assert result["id"] == ta.id
 
 
-def test_get_domain_details(mcp_mocks):
+def test_get_domain_details(session):
     domain = DomainFactory()
-    with mcp_mocks():
-        result = get_domain_details(domain_id=str(domain.id))
+    result = get_domain_details(domain_id=str(domain.id), db=session)
     assert result["id"] == domain.id
 
 
-def test_search_data_products(mcp_mocks):
+def test_search_data_products(session):
     dp1 = DataProductFactory(name="Alpha Product", description="alpha description")
     dp2 = DataProductFactory(name="Beta Product", description="beta description")
 
-    with mcp_mocks():
-        result = search_data_products(query="Alpha")
+    result = search_data_products(query="Alpha", db=session)
 
     assert "data_products" in result
     assert result["count"] == 1
@@ -116,24 +76,22 @@ def test_search_data_products(mcp_mocks):
     assert dp2.name not in returned_names
 
 
-def test_search_data_products_no_query(mcp_mocks):
+def test_search_data_products_no_query(session):
     DataProductFactory()
     DataProductFactory()
 
-    with mcp_mocks():
-        result = search_data_products(query=None)
+    result = search_data_products(query=None, db=session)
 
     assert "data_products" in result
     assert result["count"] >= 2
 
 
-def test_search_data_products_by_domain(mcp_mocks):
+def test_search_data_products_by_domain(session):
     domain = DomainFactory()
     dp_in_domain = DataProductFactory(domain=domain)
     DataProductFactory()  # different domain
 
-    with mcp_mocks():
-        result = search_data_products(domain_id=str(domain.id))
+    result = search_data_products(domain_id=str(domain.id), db=session)
 
     assert "data_products" in result
     returned_ids = {dp["id"] for dp in result["data_products"]}
@@ -141,14 +99,13 @@ def test_search_data_products_by_domain(mcp_mocks):
     assert result["count"] == 1
 
 
-def test_search_data_products_by_status(mcp_mocks):
+def test_search_data_products_by_status(session):
     from app.data_products.status import DataProductStatus
 
     active_dp = DataProductFactory(status=DataProductStatus.ACTIVE.value)
     DataProductFactory(status=DataProductStatus.PENDING.value)
 
-    with mcp_mocks():
-        result = search_data_products(status=DataProductStatus.ACTIVE.value)
+    result = search_data_products(status=DataProductStatus.ACTIVE.value, db=session)
 
     assert "data_products" in result
     returned_ids = {dp["id"] for dp in result["data_products"]}
@@ -157,32 +114,31 @@ def test_search_data_products_by_status(mcp_mocks):
         assert dp["status"] == "active"
 
 
-def test_search_data_products_limit(mcp_mocks):
+def test_search_data_products_limit(session):
     for _ in range(5):
         DataProductFactory()
 
-    with mcp_mocks():
-        result = search_data_products(query=None, limit=2)
+    result = search_data_products(query=None, limit=2, db=session)
 
     assert result["count"] <= 2
     assert len(result["data_products"]) <= 2
 
 
-def test_search_data_products_filters_applied(mcp_mocks):
-    with mcp_mocks():
-        result = search_data_products(query="test", domain_id=None, status="active")
+def test_search_data_products_filters_applied(session):
+    result = search_data_products(
+        query="test", domain_id=None, status="active", db=session
+    )
 
     assert result["filters_applied"]["query"] == "test"
     assert result["filters_applied"]["domain_id"] is None
     assert result["filters_applied"]["status"] == "active"
 
 
-def test_search_data_products_matches_description(mcp_mocks):
+def test_search_data_products_matches_description(session):
     dp = DataProductFactory(name="IrrelevantName", description="unique_needle_xyz")
     DataProductFactory(name="OtherProduct", description="something else")
 
-    with mcp_mocks():
-        result = search_data_products(query="unique_needle_xyz")
+    result = search_data_products(query="unique_needle_xyz", db=session)
 
     assert result["count"] == 1
     assert result["data_products"][0]["id"] == dp.id

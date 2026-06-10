@@ -61,7 +61,7 @@ const injectedRtkApi = api.injectEndpoints({
 export { injectedRtkApi as api };
 export type GetExplorationsApiResponse =
   /** status 200 Successful Response */ GetExplorationsResponse;
-export type GetExplorationsApiArg = (string | null) | undefined;
+export type GetExplorationsApiArg = string | undefined;
 export type CreateExplorationApiResponse =
   /** status 200 Successful Response */ CreateExplorationResponse;
 export type CreateExplorationApiArg = CreateExplorationRequestWithInputPorts;

@@ -1,7 +1,8 @@
-from typing import Optional, Sequence
+from typing import Annotated, Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -96,10 +97,10 @@ def convert_to_role_assignment(
 
 @router.get("")
 def list_output_port_role_assignments(
-    output_port_id: Optional[UUID] = None,
-    user_id: Optional[UUID] = None,
-    role_id: Optional[UUID] = None,
-    decision: Optional[DecisionStatus] = None,
+    output_port_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
     db: Session = Depends(get_db_session),
 ) -> ListOutputPortRoleAssignmentsResponse:
     return ListOutputPortRoleAssignmentsResponse(
