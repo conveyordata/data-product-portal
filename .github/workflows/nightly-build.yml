@@ -33,3 +33,41 @@ jobs:
         run: |
           echo "Command failed with status code ${{ steps.run_command.outputs.status_code }}"
           exit 1
+
+  demo-basic:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: demo/basic
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+      - name: Start demo
+        run: docker compose up -d --build
+      - name: Wait for portal to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5050)
+            echo "Attempt $i: $STATUS"
+            [ "$STATUS" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "Portal did not become healthy in time"
+          docker compose logs
+          exit 1
+      - name: Wait for provisioner to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:6060)
+            echo "Attempt $i: $STATUS"
+            [ "$STATUS" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "Provisioner did not become healthy in time"
+          docker compose logs
+          exit 1
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
