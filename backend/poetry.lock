@@ -79,14 +79,14 @@ trio = ["trio (>=0.32.0)"]
 
 [[package]]
 name = "asgi-correlation-id"
-version = "5.0.0"
+version = "5.0.1"
 description = "Middleware correlating project logs to individual requests"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "asgi_correlation_id-5.0.0-py3-none-any.whl", hash = "sha256:68d156ecd44e9c828dc7b20f8b7edb47070751c0739ba8ff0dd35a7b62bf579e"},
-    {file = "asgi_correlation_id-5.0.0.tar.gz", hash = "sha256:31fb8e5bce229fdf01b7be83d7969957a5adc4f99c3c2bc31338d3ff3070f5fc"},
+    {file = "asgi_correlation_id-5.0.1-py3-none-any.whl", hash = "sha256:dfea97c1fc41e8eadc3e518a311427cba6e7e79d9ddb6a6c7ea8879f2408d91d"},
+    {file = "asgi_correlation_id-5.0.1.tar.gz", hash = "sha256:ad54374a300f000b8bef3b39738768842394de0a3c528a6f77ef3ca053eb89a1"},
 ]
 
 [package.dependencies]
@@ -4820,4 +4820,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "35310e6b46604a3aa7d121a0bc309c99818f3d2eadb9b74e59eec046cea8457d"
+content-hash = "76a15f81c29f5b2556a52d624a955a8d3427873b8929afc07f992dac047f83a8"
