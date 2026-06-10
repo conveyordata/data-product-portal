@@ -177,6 +177,9 @@ async def dispatch_queued_events(request: Request, call_next):
 
 
 async def _emit_all_events(events: list) -> None:
+    # This is a sequential loop.
+    # Good for keeping sequential order, bad for speed, maybe also good for not DoSing the receiver.
+    # To be checked if we ever run into issues with this.
     for event in events:
         await call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
 
