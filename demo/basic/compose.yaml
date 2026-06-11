@@ -26,6 +26,8 @@ services:
       dockerfile: demo/basic/provisioner/Dockerfile
     env_file:
       - .env.portal
+    ports:
+      - "6060:6060"
     volumes:
       - ./products/:/products
     depends_on:
