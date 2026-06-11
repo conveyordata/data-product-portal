@@ -49,7 +49,7 @@ jobs:
       - name: Wait for portal to be healthy
         run: |
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5050)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5050 || echo "000")
             echo "Attempt $i: $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 5
@@ -60,7 +60,7 @@ jobs:
       - name: Wait for provisioner to be healthy
         run: |
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:6060)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:6060 || echo "000")
             echo "Attempt $i: $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 5
