@@ -8,7 +8,7 @@ import {
     TeamOutlined,
 } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Badge, Flex, Tabs } from 'antd';
+import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Explorer } from '@/components/explorer/explorer.tsx';
@@ -70,12 +70,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 children: <DataModelTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
-                label: (
-                    <Flex className={styles.betaContainer}>
-                        {t('Usage')}
-                        <Badge className={styles.beta} count={t('BETA')} />
-                    </Flex>
-                ),
+                label: t('Usage'),
                 key: TabKeys.Usage,
                 icon: <BarChartOutlined />,
                 children: <UsageTab outputPortId={datasetId} dataProductId={dataProductId} />,
