@@ -2,6 +2,8 @@ name: Nightly Docker Compose Test
 on:
   schedule:
     - cron: '0 2 * * *'
+  pull_request:
+    branches: ['*']
 permissions:
   contents: read
 
