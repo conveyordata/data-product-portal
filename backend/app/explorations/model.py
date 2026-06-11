@@ -5,13 +5,26 @@ from sqlalchemy.dialects.postgresql.base import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
+from app.core.webhooks.events import (
+    ExplorationCreatedEvent,
+    ExplorationDeletedEvent,
+    ExplorationPayload,
+    ExplorationUpdatedEvent,
+)
 from app.database.database import ensure_exists
+from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
     from app.users.model import User
 
 
-class Exploration(AbstractDataProduct):
+class Exploration(
+    AbstractDataProduct,
+    EventTrackedMixin,
+    create_event=ExplorationCreatedEvent,
+    update_event=ExplorationUpdatedEvent,
+    delete_event=ExplorationDeletedEvent,
+):
     __tablename__ = "explorations"
 
     id: Mapped[UUID] = mapped_column(
@@ -22,6 +35,16 @@ class Exploration(AbstractDataProduct):
     }
     owner_id: Mapped[UUID] = mapped_column("owner_id", ForeignKey("users.id"))
     owner: Mapped["User"] = relationship("User", foreign_keys=[owner_id], lazy="raise")
+
+    def to_event(self) -> ExplorationPayload:
+        return ExplorationPayload(
+            id=self.id,
+            name=self.name,
+            namespace=self.namespace,
+            description=self.description,
+            domain_id=self.domain_id,
+            owner_id=self.owner_id,
+        )
 
 
 def ensure_exploration_exists(
