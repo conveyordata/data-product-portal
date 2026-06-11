@@ -13,25 +13,20 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
-      - name: Test Docker Compose
+      - name: Start Docker Compose
         run: |
             docker compose up -d
             docker compose ps
-            sleep 30
-      - name: Test Curl command
-        id: run_command
+      - name: Wait for portal to be healthy
         run: |
-            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:5050)
-            echo "Status code: $STATUS_CODE"
-            # Set the output for GitHub Actions
-            echo "::set-output name=status_code::$STATUS_CODE"
-      - name: Check command success
-        if: ${{ steps.run_command.outputs.status_code == '200' }}
-        run: echo "Command was successful (200)"
-      - name: Check command failure
-        if: ${{ steps.run_command.outputs.status_code != '200' }}
-        run: |
-          echo "Command failed with status code ${{ steps.run_command.outputs.status_code }}"
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5050 || echo "000")
+            echo "Attempt $i: $STATUS"
+            [ "$STATUS" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "Portal did not become healthy in time"
+          docker compose logs
           exit 1
 
   demo-basic:
@@ -49,7 +44,7 @@ jobs:
       - name: Wait for portal to be healthy
         run: |
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5050)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5050 || echo "000")
             echo "Attempt $i: $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 5
@@ -60,7 +55,7 @@ jobs:
       - name: Wait for provisioner to be healthy
         run: |
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:6060)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:6060 || echo "000")
             echo "Attempt $i: $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 5
