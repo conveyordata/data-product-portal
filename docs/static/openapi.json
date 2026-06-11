@@ -7150,6 +7150,15 @@
                     "$ref": "#/components/schemas/CloudEvent_OutputPortDeletedEvent"
                   },
                   {
+                    "$ref": "#/components/schemas/CloudEvent_ExplorationCreatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_ExplorationUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_ExplorationDeletedEvent"
+                  },
+                  {
                     "$ref": "#/components/schemas/CloudEvent_OutputPortAboutUpdatedEvent"
                   },
                   {
@@ -7207,6 +7216,9 @@
                     "output_port.created": "#/components/schemas/CloudEvent_OutputPortCreatedEvent",
                     "output_port.updated": "#/components/schemas/CloudEvent_OutputPortUpdatedEvent",
                     "output_port.deleted": "#/components/schemas/CloudEvent_OutputPortDeletedEvent",
+                    "exploration.created": "#/components/schemas/CloudEvent_ExplorationCreatedEvent",
+                    "exploration.updated": "#/components/schemas/CloudEvent_ExplorationUpdatedEvent",
+                    "exploration.deleted": "#/components/schemas/CloudEvent_ExplorationDeletedEvent",
                     "output_port.about_updated": "#/components/schemas/CloudEvent_OutputPortAboutUpdatedEvent",
                     "output_port.status_updated": "#/components/schemas/CloudEvent_OutputPortStatusUpdatedEvent",
                     "output_port.setting_changed": "#/components/schemas/CloudEvent_OutputPortSettingChangedEvent",
@@ -8095,6 +8107,138 @@
           "data"
         ],
         "title": "CloudEvent_DataProductUpdatedEvent"
+      },
+      "CloudEvent_ExplorationCreatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "exploration.created",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "exploration.created"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExplorationCreatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_ExplorationCreatedEvent"
+      },
+      "CloudEvent_ExplorationDeletedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "exploration.deleted",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "exploration.deleted"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExplorationDeletedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_ExplorationDeletedEvent"
+      },
+      "CloudEvent_ExplorationUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "exploration.updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "exploration.updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExplorationUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_ExplorationUpdatedEvent"
       },
       "CloudEvent_OutputPortAboutUpdatedEvent": {
         "properties": {
@@ -11284,6 +11428,94 @@
           "domain"
         ],
         "title": "Exploration"
+      },
+      "ExplorationCreatedEvent": {
+        "properties": {
+          "after": {
+            "$ref": "#/components/schemas/ExplorationPayload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "after"
+        ],
+        "title": "ExplorationCreatedEvent"
+      },
+      "ExplorationDeletedEvent": {
+        "properties": {
+          "before": {
+            "$ref": "#/components/schemas/ExplorationPayload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "before"
+        ],
+        "title": "ExplorationDeletedEvent"
+      },
+      "ExplorationPayload": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "domain_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Domain Id"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "namespace",
+          "description",
+          "domain_id",
+          "owner_id"
+        ],
+        "title": "ExplorationPayload"
+      },
+      "ExplorationUpdatedEvent": {
+        "properties": {
+          "before": {
+            "$ref": "#/components/schemas/ExplorationPayload"
+          },
+          "after": {
+            "$ref": "#/components/schemas/ExplorationPayload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "ExplorationUpdatedEvent"
       },
       "FieldDependency": {
         "properties": {

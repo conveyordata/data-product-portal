@@ -19,9 +19,11 @@ from app.core.auth.device_flows.background_tasks import cleanup_device_flow_tabl
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
+from app.core.context import close_event_context, open_event_context, pop_events
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
+from app.core.webhooks.v2 import call_v2_webhook
 from app.core.webhooks.webhook import call_webhook, register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
@@ -159,6 +161,27 @@ async def send_response_to_webhook(
             )
         )
     return response
+
+
+@app.middleware("http")
+async def dispatch_queued_events(request: Request, call_next):
+    token = open_event_context()
+    try:
+        response = await call_next(request)
+    finally:
+        events = pop_events()
+        close_event_context(token)
+    if response.status_code < 400 and settings.WEBHOOK_V2_URL and events:
+        asyncio.create_task(_emit_all_events(events))
+    return response
+
+
+async def _emit_all_events(events: list) -> None:
+    # This is a sequential loop.
+    # Good for keeping sequential order, bad for speed, maybe also good for not DoSing the receiver.
+    # To be checked if we ever run into issues with this.
+    for event in events:
+        await call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
 
 
 class VersionResponse(ORMModel):

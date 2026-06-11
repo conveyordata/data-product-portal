@@ -1,6 +1,7 @@
 """Typed Pydantic models for each v2 webhook event payload."""
 
 from typing import Any, ClassVar
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -158,6 +159,45 @@ class OutputPortDeletedEvent(V2Event):
 
     data_product: GetDataProductResponse
     output_port: GetOutputPortResponse
+
+
+# ---------------------------------------------------------------------------
+# Exploration events
+# ---------------------------------------------------------------------------
+
+
+class ExplorationPayload(BaseModel):
+    id: UUID
+    name: str
+    namespace: str
+    description: str | None
+    domain_id: UUID
+    owner_id: UUID
+
+
+class ExplorationCreatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "exploration.created"
+
+    after: ExplorationPayload
+
+
+class ExplorationUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "exploration.updated"
+
+    before: ExplorationPayload
+    after: ExplorationPayload
+
+
+class ExplorationDeletedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "exploration.deleted"
+
+    before: ExplorationPayload
 
 
 class OutputPortAboutUpdatedEvent(V2Event):
