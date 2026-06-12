@@ -85,6 +85,7 @@ async def report_consumption_metrics_task() -> None:
                         f"approved_input_ports_{adp_type}": count
                         for adp_type, count in counts_by_type.items()
                     },
+                    "Host": settings.HOST,
                 },
             )
         except Exception as e:
