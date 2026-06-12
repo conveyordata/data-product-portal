@@ -17,6 +17,7 @@ from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as OutputPortRoleAssignmentService,
 )
 from app.core.authz import Action
+from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.model import (
@@ -31,6 +32,7 @@ from app.users.model import User
 class AbstractDataProductService:
     def __init__(self, db: Session):
         self.db = db
+        self.posthog = get_posthog_client()
 
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
@@ -91,6 +93,18 @@ class AbstractDataProductService:
             if output_port.access_type != OutputPortAccessType.UNRESTRICTED
             else DecisionStatus.APPROVED
         )
+
+        if approval_status == DecisionStatus.APPROVED and self.posthog:
+            self.posthog.capture(
+                distinct_id=actor.id,
+                event="Input Port Approved",
+                properties={
+                    "data_product_id": str(output_port.data_product_id),
+                    "output_port_id": str(output_port_id),
+                    "consuming_data_product_id": str(adp.id),
+                    "type": str(adp.abstract_data_product_type.value),
+                },
+            )
 
         dataset_link = InputPortModel(
             dataset_id=output_port_id,

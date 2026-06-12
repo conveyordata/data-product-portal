@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import pytest
@@ -635,3 +636,154 @@ class TestDataProductsDatasetsRouter:
     @staticmethod
     def get_data_product_history(client, data_product_id):
         return client.get(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")
+
+
+class TestInputPortConsumptionTracking:
+    """Tests that PostHog consumption events are fired correctly.
+
+    Consumption (Input Port Approved) is a key success metric for the portal
+    — it measures how actively data products are being used by other teams.
+    """
+
+    def test_posthog_capture_called_on_unrestricted_link(self, client):
+        """Auto-approved (unrestricted) links must fire a posthog event immediately."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+
+        mock_posthog = MagicMock()
+        with patch(
+            "app.abstract_data_product.service.get_posthog_client",
+            return_value=mock_posthog,
+        ):
+            response = self.request_input_ports_for_data_product(
+                client, data_product.id, [ds.id]
+            )
+
+        assert response.status_code == 200
+        mock_posthog.capture.assert_called_once()
+        call_kwargs = mock_posthog.capture.call_args.kwargs
+        assert call_kwargs["event"] == "Input Port Approved"
+        assert call_kwargs["properties"]["output_port_id"] == str(ds.id)
+        assert call_kwargs["properties"]["consuming_data_product_id"] == str(
+            data_product.id
+        )
+
+    def test_posthog_capture_not_called_on_restricted_link_request(self, client):
+        """Restricted links are PENDING — posthog must NOT fire until approved."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+
+        mock_posthog = MagicMock()
+        with patch(
+            "app.abstract_data_product.service.get_posthog_client",
+            return_value=mock_posthog,
+        ):
+            response = self.request_input_ports_for_data_product(
+                client, data_product.id, [ds.id]
+            )
+
+        assert response.status_code == 200
+        mock_posthog.capture.assert_not_called()
+
+    def test_posthog_capture_called_on_manual_approval(self, client):
+        """Manual approval of a pending link must fire a posthog event."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
+
+        mock_posthog = MagicMock()
+        with patch(
+            "app.data_products.output_ports.input_ports.service.get_posthog_client",
+            return_value=mock_posthog,
+        ):
+            response = self.approve_output_port_as_input_port(
+                client,
+                link.dataset.data_product.id,
+                link.dataset.id,
+                link.consuming_abstract_data_product.id,
+            )
+
+        assert response.status_code == 200, response.text
+        mock_posthog.capture.assert_called_once()
+        call_kwargs = mock_posthog.capture.call_args.kwargs
+        assert call_kwargs["event"] == "Input Port Approved"
+        assert call_kwargs["properties"]["output_port_id"] == str(ds.id)
+        assert call_kwargs["properties"]["consuming_data_product_id"] == str(
+            link.consuming_abstract_data_product.id
+        )
+
+    def test_posthog_not_called_when_disabled(self, client):
+        """When posthog is disabled (None), no AttributeError and no capture."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+
+        with patch(
+            "app.abstract_data_product.service.get_posthog_client",
+            return_value=None,
+        ):
+            response = self.request_input_ports_for_data_product(
+                client, data_product.id, [ds.id]
+            )
+
+        assert response.status_code == 200
+
+    @staticmethod
+    def request_input_ports_for_data_product(
+        client: TestClient,
+        data_product_id: UUID,
+        output_port_ids: list[UUID],
+        justification: str = "Tracking test justification",
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports",
+            json={
+                "output_ports": [str(oid) for oid in output_port_ids],
+                "justification": justification,
+            },
+        )
+
+    @staticmethod
+    def approve_output_port_as_input_port(
+        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve",
+            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+        )
