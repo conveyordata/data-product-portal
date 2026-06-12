@@ -13,6 +13,7 @@ from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
 from app.core.authz import Action, Authorization
+from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products.output_ports.input_ports.model import (
     InputPort as DataProductDatasetAssociationModel,
 )
@@ -25,6 +26,7 @@ from app.users.schema import User
 class DataProductDatasetService:
     def __init__(self, db: Session):
         self.db = db
+        self.posthog = get_posthog_client()
 
     def get_link_by_id(self, id: UUID) -> DataProductDatasetAssociationModel:
         current_link = self.db.get(DataProductDatasetAssociationModel, id)
@@ -83,6 +85,21 @@ class DataProductDatasetService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
+
+        consuming_data_product = current_link.consuming_abstract_data_product
+
+        if self.posthog:
+            self.posthog.capture(
+                distinct_id=actor.id,
+                event="Input Port Approved",
+                properties={
+                    "data_product_id": str(data_product_id),
+                    "output_port_id": str(output_port_id),
+                    "consuming_data_product_id": str(consuming_data_product_id),
+                    "type": str(consuming_data_product.abstract_data_product_type),
+                },
+            )
+
         self.db.commit()
         return current_link
 
