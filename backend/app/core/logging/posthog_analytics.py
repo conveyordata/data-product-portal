@@ -6,8 +6,13 @@ import pytz
 from posthog import Posthog
 from sqlalchemy import func, select
 
-from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
+
+_ADP_TYPE_DISPLAY_NAME: dict[AbstractDataProductType, str] = {
+    AbstractDataProductType.DATA_PRODUCT: "data_product",
+    AbstractDataProductType.EXPLORATION: "exploration",
+}
 from app.core.logging import logger
 from app.data_products.output_ports.input_ports.model import InputPort as InputPortModel
 from app.database.database import SessionLocal
@@ -29,6 +34,7 @@ def _seconds_until_next_midnight_utc() -> float:
     next_midnight = (now + timedelta(days=1)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
+    next_midnight = now + timedelta(seconds=10)
     return (next_midnight - now).total_seconds()
 
 
@@ -63,7 +69,7 @@ async def report_consumption_metrics_task() -> None:
                     .group_by(AbstractDataProduct.abstract_data_product_type)
                 ).all()
 
-            counts_by_type = {str(adp_type): count for adp_type, count in rows}
+            counts_by_type = {adp_type.value: count for adp_type, count in rows}
             total = sum(counts_by_type.values())
 
             logger.info(

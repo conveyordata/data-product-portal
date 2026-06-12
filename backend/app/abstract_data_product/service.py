@@ -102,7 +102,7 @@ class AbstractDataProductService:
                     "data_product_id": str(output_port.data_product_id),
                     "output_port_id": str(output_port_id),
                     "consuming_data_product_id": str(adp.id),
-                    "type": str(adp.abstract_data_product_type),
+                    "type": str(adp.abstract_data_product_type.value),
                 },
             )
 

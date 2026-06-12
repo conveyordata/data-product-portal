@@ -96,7 +96,9 @@ class DataProductDatasetService:
                     "data_product_id": str(data_product_id),
                     "output_port_id": str(output_port_id),
                     "consuming_data_product_id": str(consuming_data_product_id),
-                    "type": str(consuming_data_product.abstract_data_product_type),
+                    "type": str(
+                        consuming_data_product.abstract_data_product_type.value
+                    ),
                 },
             )
 
