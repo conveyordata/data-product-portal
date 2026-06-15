@@ -14,8 +14,8 @@ from app.database.database import SessionLocal
 from app.settings import settings
 
 _ADP_TYPE_DISPLAY_NAME: dict[AbstractDataProductType, str] = {
-    AbstractDataProductType.DATA_PRODUCT: "data_product",
-    AbstractDataProductType.EXPLORATION: "exploration",
+    AbstractDataProductType.DATA_PRODUCT: "data_products",
+    AbstractDataProductType.EXPLORATION: "explorations",
 }
 
 
