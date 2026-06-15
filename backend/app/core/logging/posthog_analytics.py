@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Optional
 
 import pytz
 from posthog import Posthog
@@ -8,24 +8,49 @@ from sqlalchemy import func, select
 
 from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
-
-_ADP_TYPE_DISPLAY_NAME: dict[AbstractDataProductType, str] = {
-    AbstractDataProductType.DATA_PRODUCT: "data_product",
-    AbstractDataProductType.EXPLORATION: "exploration",
-}
 from app.core.logging import logger
 from app.data_products.output_ports.input_ports.model import InputPort as InputPortModel
 from app.database.database import SessionLocal
 from app.settings import settings
 
-posthog_client = None
+_ADP_TYPE_DISPLAY_NAME: dict[AbstractDataProductType, str] = {
+    AbstractDataProductType.DATA_PRODUCT: "data_product",
+    AbstractDataProductType.EXPLORATION: "exploration",
+}
+
+
+class PortalPosthog:
+    """Thin wrapper around the Posthog client that injects portal-level
+    context (e.g. Host) into every capture call automatically."""
+
+    def __init__(self, client: Posthog, host: str) -> None:
+        self._client = client
+        self._host = host
+
+    def capture(
+        self,
+        distinct_id: Any,
+        event: str,
+        properties: Optional[dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> None:
+        merged = {"host": self._host, **(properties or {})}
+        self._client.capture(
+            distinct_id=distinct_id, event=event, properties=merged, **kwargs
+        )
+
+
+posthog_client: Optional[PortalPosthog] = None
 if settings.POSTHOG_ENABLED:
-    posthog_client = Posthog(
-        project_api_key=settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST
+    posthog_client = PortalPosthog(
+        client=Posthog(
+            project_api_key=settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST
+        ),
+        host=settings.HOST,
     )
 
 
-def get_posthog_client() -> Optional[Posthog]:
+def get_posthog_client() -> Optional[PortalPosthog]:
     return posthog_client
 
 
@@ -34,7 +59,6 @@ def _seconds_until_next_midnight_utc() -> float:
     next_midnight = (now + timedelta(days=1)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
-    next_midnight = now + timedelta(seconds=10)
     return (next_midnight - now).total_seconds()
 
 
@@ -69,7 +93,10 @@ async def report_consumption_metrics_task() -> None:
                     .group_by(AbstractDataProduct.abstract_data_product_type)
                 ).all()
 
-            counts_by_type = {adp_type.value: count for adp_type, count in rows}
+            counts_by_type = {
+                _ADP_TYPE_DISPLAY_NAME.get(adp_type, adp_type.value): count
+                for adp_type, count in rows
+            }
             total = sum(counts_by_type.values())
 
             logger.info(
@@ -85,7 +112,6 @@ async def report_consumption_metrics_task() -> None:
                         f"approved_input_ports_{adp_type}": count
                         for adp_type, count in counts_by_type.items()
                     },
-                    "Host": settings.HOST,
                 },
             )
         except Exception as e:
