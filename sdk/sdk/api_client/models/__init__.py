@@ -26,78 +26,9 @@ from .azure_environment_platform_configuration import (
 from .become_admin import BecomeAdmin
 from .bitol_contract_request import BitolContractRequest
 from .can_become_admin_update import CanBecomeAdminUpdate
-from .cloud_event_data_product_about_updated_event import (
-    CloudEventDataProductAboutUpdatedEvent,
-)
-from .cloud_event_data_product_created_event import CloudEventDataProductCreatedEvent
-from .cloud_event_data_product_deleted_event import CloudEventDataProductDeletedEvent
-from .cloud_event_data_product_input_port_linked_event import (
-    CloudEventDataProductInputPortLinkedEvent,
-)
-from .cloud_event_data_product_input_port_unlinked_event import (
-    CloudEventDataProductInputPortUnlinkedEvent,
-)
-from .cloud_event_data_product_setting_changed_event import (
-    CloudEventDataProductSettingChangedEvent,
-)
-from .cloud_event_data_product_status_updated_event import (
-    CloudEventDataProductStatusUpdatedEvent,
-)
-from .cloud_event_data_product_team_member_added_event import (
-    CloudEventDataProductTeamMemberAddedEvent,
-)
-from .cloud_event_data_product_team_member_removed_event import (
-    CloudEventDataProductTeamMemberRemovedEvent,
-)
-from .cloud_event_data_product_team_member_updated_event import (
-    CloudEventDataProductTeamMemberUpdatedEvent,
-)
-from .cloud_event_data_product_updated_event import CloudEventDataProductUpdatedEvent
 from .cloud_event_exploration_created_event import CloudEventExplorationCreatedEvent
 from .cloud_event_exploration_deleted_event import CloudEventExplorationDeletedEvent
 from .cloud_event_exploration_updated_event import CloudEventExplorationUpdatedEvent
-from .cloud_event_output_port_about_updated_event import (
-    CloudEventOutputPortAboutUpdatedEvent,
-)
-from .cloud_event_output_port_created_event import CloudEventOutputPortCreatedEvent
-from .cloud_event_output_port_deleted_event import CloudEventOutputPortDeletedEvent
-from .cloud_event_output_port_link_approved_event import (
-    CloudEventOutputPortLinkApprovedEvent,
-)
-from .cloud_event_output_port_link_denied_event import (
-    CloudEventOutputPortLinkDeniedEvent,
-)
-from .cloud_event_output_port_setting_changed_event import (
-    CloudEventOutputPortSettingChangedEvent,
-)
-from .cloud_event_output_port_status_updated_event import (
-    CloudEventOutputPortStatusUpdatedEvent,
-)
-from .cloud_event_output_port_updated_event import CloudEventOutputPortUpdatedEvent
-from .cloud_event_technical_asset_created_event import (
-    CloudEventTechnicalAssetCreatedEvent,
-)
-from .cloud_event_technical_asset_deleted_event import (
-    CloudEventTechnicalAssetDeletedEvent,
-)
-from .cloud_event_technical_asset_link_approved_event import (
-    CloudEventTechnicalAssetLinkApprovedEvent,
-)
-from .cloud_event_technical_asset_link_denied_event import (
-    CloudEventTechnicalAssetLinkDeniedEvent,
-)
-from .cloud_event_technical_asset_linked_event import (
-    CloudEventTechnicalAssetLinkedEvent,
-)
-from .cloud_event_technical_asset_status_updated_event import (
-    CloudEventTechnicalAssetStatusUpdatedEvent,
-)
-from .cloud_event_technical_asset_unlinked_event import (
-    CloudEventTechnicalAssetUnlinkedEvent,
-)
-from .cloud_event_technical_asset_updated_event import (
-    CloudEventTechnicalAssetUpdatedEvent,
-)
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -120,13 +51,8 @@ from .data_output_status_update import DataOutputStatusUpdate
 from .data_output_update import DataOutputUpdate
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
-from .data_product_about_updated_event import DataProductAboutUpdatedEvent
 from .data_product_create import DataProductCreate
-from .data_product_created_event import DataProductCreatedEvent
-from .data_product_deleted_event import DataProductDeletedEvent
 from .data_product_icon_key import DataProductIconKey
-from .data_product_input_port_linked_event import DataProductInputPortLinkedEvent
-from .data_product_input_port_unlinked_event import DataProductInputPortUnlinkedEvent
 from .data_product_life_cycle import DataProductLifeCycle
 from .data_product_life_cycle_create import DataProductLifeCycleCreate
 from .data_product_life_cycle_update import DataProductLifeCycleUpdate
@@ -138,7 +64,6 @@ from .data_product_role_assignment_pending_action import (
 )
 from .data_product_role_assignment_response import DataProductRoleAssignmentResponse
 from .data_product_setting import DataProductSetting
-from .data_product_setting_changed_event import DataProductSettingChangedEvent
 from .data_product_setting_create import DataProductSettingCreate
 from .data_product_setting_scope import DataProductSettingScope
 from .data_product_setting_type import DataProductSettingType
@@ -148,10 +73,6 @@ from .data_product_settings_get import DataProductSettingsGet
 from .data_product_settings_get_item import DataProductSettingsGetItem
 from .data_product_status import DataProductStatus
 from .data_product_status_update import DataProductStatusUpdate
-from .data_product_status_updated_event import DataProductStatusUpdatedEvent
-from .data_product_team_member_added_event import DataProductTeamMemberAddedEvent
-from .data_product_team_member_removed_event import DataProductTeamMemberRemovedEvent
-from .data_product_team_member_updated_event import DataProductTeamMemberUpdatedEvent
 from .data_product_type import DataProductType
 from .data_product_type_create import DataProductTypeCreate
 from .data_product_type_get import DataProductTypeGet
@@ -159,7 +80,6 @@ from .data_product_type_update import DataProductTypeUpdate
 from .data_product_types_get import DataProductTypesGet
 from .data_product_types_get_item import DataProductTypesGetItem
 from .data_product_update import DataProductUpdate
-from .data_product_updated_event import DataProductUpdatedEvent
 from .data_product_usage_update import DataProductUsageUpdate
 from .data_quality_status import DataQualityStatus
 from .data_quality_technical_asset import DataQualityTechnicalAsset
@@ -210,7 +130,6 @@ from .exploration_deleted_event import ExplorationDeletedEvent
 from .exploration_payload import ExplorationPayload
 from .exploration_updated_event import ExplorationUpdatedEvent
 from .field_dependency import FieldDependency
-from .get_abstract_data_product_response import GetAbstractDataProductResponse
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
@@ -271,9 +190,7 @@ from .osi_semantic_model_technical_asset_configuration import (
     OSISemanticModelTechnicalAssetConfiguration,
 )
 from .output_port import OutputPort
-from .output_port_about_updated_event import OutputPortAboutUpdatedEvent
 from .output_port_access_type import OutputPortAccessType
-from .output_port_created_event import OutputPortCreatedEvent
 from .output_port_curated_queries import OutputPortCuratedQueries
 from .output_port_curated_queries_update import OutputPortCuratedQueriesUpdate
 from .output_port_curated_query import OutputPortCuratedQuery
@@ -288,22 +205,16 @@ from .output_port_data_quality_summary_response import (
 from .output_port_data_quality_summary_response_dimensions_type_0 import (
     OutputPortDataQualitySummaryResponseDimensionsType0,
 )
-from .output_port_deleted_event import OutputPortDeletedEvent
 from .output_port_input_port import OutputPortInputPort
 from .output_port_link import OutputPortLink
-from .output_port_link_approved_event import OutputPortLinkApprovedEvent
-from .output_port_link_denied_event import OutputPortLinkDeniedEvent
 from .output_port_query_stats_delete import OutputPortQueryStatsDelete
 from .output_port_query_stats_response import OutputPortQueryStatsResponse
 from .output_port_query_stats_responses import OutputPortQueryStatsResponses
 from .output_port_query_stats_update import OutputPortQueryStatsUpdate
 from .output_port_role_assignment_response import OutputPortRoleAssignmentResponse
 from .output_port_schema_response import OutputPortSchemaResponse
-from .output_port_setting_changed_event import OutputPortSettingChangedEvent
 from .output_port_setting_value import OutputPortSettingValue
 from .output_port_status import OutputPortStatus
-from .output_port_status_updated_event import OutputPortStatusUpdatedEvent
-from .output_port_updated_event import OutputPortUpdatedEvent
 from .owned_technical_asset import OwnedTechnicalAsset
 from .pending_action_response import PendingActionResponse
 from .platform import Platform
@@ -366,19 +277,11 @@ from .tag_update import TagUpdate
 from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
-from .technical_asset_created_event import TechnicalAssetCreatedEvent
-from .technical_asset_deleted_event import TechnicalAssetDeletedEvent
 from .technical_asset_link import TechnicalAssetLink
-from .technical_asset_link_approved_event import TechnicalAssetLinkApprovedEvent
-from .technical_asset_link_denied_event import TechnicalAssetLinkDeniedEvent
-from .technical_asset_linked_event import TechnicalAssetLinkedEvent
 from .technical_asset_output_port_pending_action import (
     TechnicalAssetOutputPortPendingAction,
 )
 from .technical_asset_status import TechnicalAssetStatus
-from .technical_asset_status_updated_event import TechnicalAssetStatusUpdatedEvent
-from .technical_asset_unlinked_event import TechnicalAssetUnlinkedEvent
-from .technical_asset_updated_event import TechnicalAssetUpdatedEvent
 from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
 from .theme_settings import ThemeSettings
@@ -429,36 +332,9 @@ __all__ = (
     "BecomeAdmin",
     "BitolContractRequest",
     "CanBecomeAdminUpdate",
-    "CloudEventDataProductAboutUpdatedEvent",
-    "CloudEventDataProductCreatedEvent",
-    "CloudEventDataProductDeletedEvent",
-    "CloudEventDataProductInputPortLinkedEvent",
-    "CloudEventDataProductInputPortUnlinkedEvent",
-    "CloudEventDataProductSettingChangedEvent",
-    "CloudEventDataProductStatusUpdatedEvent",
-    "CloudEventDataProductTeamMemberAddedEvent",
-    "CloudEventDataProductTeamMemberRemovedEvent",
-    "CloudEventDataProductTeamMemberUpdatedEvent",
-    "CloudEventDataProductUpdatedEvent",
     "CloudEventExplorationCreatedEvent",
     "CloudEventExplorationDeletedEvent",
     "CloudEventExplorationUpdatedEvent",
-    "CloudEventOutputPortAboutUpdatedEvent",
-    "CloudEventOutputPortCreatedEvent",
-    "CloudEventOutputPortDeletedEvent",
-    "CloudEventOutputPortLinkApprovedEvent",
-    "CloudEventOutputPortLinkDeniedEvent",
-    "CloudEventOutputPortSettingChangedEvent",
-    "CloudEventOutputPortStatusUpdatedEvent",
-    "CloudEventOutputPortUpdatedEvent",
-    "CloudEventTechnicalAssetCreatedEvent",
-    "CloudEventTechnicalAssetDeletedEvent",
-    "CloudEventTechnicalAssetLinkApprovedEvent",
-    "CloudEventTechnicalAssetLinkDeniedEvent",
-    "CloudEventTechnicalAssetLinkedEvent",
-    "CloudEventTechnicalAssetStatusUpdatedEvent",
-    "CloudEventTechnicalAssetUnlinkedEvent",
-    "CloudEventTechnicalAssetUpdatedEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -483,13 +359,8 @@ __all__ = (
     "DataOutputUpdate",
     "DataProduct",
     "DataProductAboutUpdate",
-    "DataProductAboutUpdatedEvent",
     "DataProductCreate",
-    "DataProductCreatedEvent",
-    "DataProductDeletedEvent",
     "DataProductIconKey",
-    "DataProductInputPortLinkedEvent",
-    "DataProductInputPortUnlinkedEvent",
     "DataProductLifeCycle",
     "DataProductLifeCycleCreate",
     "DataProductLifeCyclesGet",
@@ -499,7 +370,6 @@ __all__ = (
     "DataProductRoleAssignmentPendingAction",
     "DataProductRoleAssignmentResponse",
     "DataProductSetting",
-    "DataProductSettingChangedEvent",
     "DataProductSettingCreate",
     "DataProductSettingScope",
     "DataProductSettingsGet",
@@ -509,10 +379,6 @@ __all__ = (
     "DataProductSettingValue",
     "DataProductStatus",
     "DataProductStatusUpdate",
-    "DataProductStatusUpdatedEvent",
-    "DataProductTeamMemberAddedEvent",
-    "DataProductTeamMemberRemovedEvent",
-    "DataProductTeamMemberUpdatedEvent",
     "DataProductType",
     "DataProductTypeCreate",
     "DataProductTypeGet",
@@ -520,7 +386,6 @@ __all__ = (
     "DataProductTypesGetItem",
     "DataProductTypeUpdate",
     "DataProductUpdate",
-    "DataProductUpdatedEvent",
     "DataProductUsageUpdate",
     "DataQualityStatus",
     "DataQualityTechnicalAsset",
@@ -555,7 +420,6 @@ __all__ = (
     "ExplorationPayload",
     "ExplorationUpdatedEvent",
     "FieldDependency",
-    "GetAbstractDataProductResponse",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
     "GetDataProductInputPortsResponse",
@@ -604,9 +468,7 @@ __all__ = (
     "OIDCTokenResponse",
     "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
-    "OutputPortAboutUpdatedEvent",
     "OutputPortAccessType",
-    "OutputPortCreatedEvent",
     "OutputPortCuratedQueries",
     "OutputPortCuratedQueriesUpdate",
     "OutputPortCuratedQuery",
@@ -615,22 +477,16 @@ __all__ = (
     "OutputPortDataQualitySummaryDimensionsType0",
     "OutputPortDataQualitySummaryResponse",
     "OutputPortDataQualitySummaryResponseDimensionsType0",
-    "OutputPortDeletedEvent",
     "OutputPortInputPort",
     "OutputPortLink",
-    "OutputPortLinkApprovedEvent",
-    "OutputPortLinkDeniedEvent",
     "OutputPortQueryStatsDelete",
     "OutputPortQueryStatsResponse",
     "OutputPortQueryStatsResponses",
     "OutputPortQueryStatsUpdate",
     "OutputPortRoleAssignmentResponse",
     "OutputPortSchemaResponse",
-    "OutputPortSettingChangedEvent",
     "OutputPortSettingValue",
     "OutputPortStatus",
-    "OutputPortStatusUpdatedEvent",
-    "OutputPortUpdatedEvent",
     "OwnedTechnicalAsset",
     "PendingActionResponse",
     "Platform",
@@ -677,17 +533,9 @@ __all__ = (
     "TagsGetItem",
     "TagUpdate",
     "TechnicalAsset",
-    "TechnicalAssetCreatedEvent",
-    "TechnicalAssetDeletedEvent",
     "TechnicalAssetLink",
-    "TechnicalAssetLinkApprovedEvent",
-    "TechnicalAssetLinkDeniedEvent",
-    "TechnicalAssetLinkedEvent",
     "TechnicalAssetOutputPortPendingAction",
     "TechnicalAssetStatus",
-    "TechnicalAssetStatusUpdatedEvent",
-    "TechnicalAssetUnlinkedEvent",
-    "TechnicalAssetUpdatedEvent",
     "TechnicalInfo",
     "TechnicalMapping",
     "ThemeSettings",
