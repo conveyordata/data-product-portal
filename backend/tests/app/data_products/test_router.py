@@ -2,7 +2,6 @@ import json
 import uuid
 from copy import deepcopy
 from typing import Any
-from unittest.mock import AsyncMock, patch
 from uuid import UUID
 
 import pytest
@@ -81,6 +80,20 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
+
+    def test_create_data_product_emits_event(
+        self,
+        mock_webhook,
+        payload,
+        client,
+        user_with_create_data_product_rights,
+    ):
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, payload = mock_webhook.call_args.args
+        assert event_type == "data_product.created"
+        assert "after" in payload
 
     def test_create_data_product_with_input_ports(
         self, payload, client, user_with_create_data_product_rights
@@ -212,6 +225,30 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
+    def test_update_data_product_emits_event(self, mock_webhook, payload, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        payload["name"] = "Updated Data Product"
+        response = self.update_data_product(client, payload, data_product.id)
+
+        assert response.status_code == 200
+        mock_webhook.assert_awaited_once()
+        event_type, payload = mock_webhook.call_args.args
+        assert event_type == "data_product.updated"
+        assert "after" in payload
+        assert payload["after"]["name"] == "Updated Data Product"
+        assert "before" in payload
+        assert payload["before"]["name"] == data_product.name
+
     def test_update_data_product_about_no_member(self, client):
         data_product = DataProductFactory()
         response = self.update_data_product_about(client, data_product.id)
@@ -283,6 +320,27 @@ class TestDataProductsRouter:
         )
         response = self.get_data_product(client, data_product.id)
         assert response.json()["status"] == "active"
+
+    def test_update_status_emits_event(self, client, mock_webhook):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_STATUS],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = self.get_data_product(client, data_product.id)
+        assert response.json()["status"] == "pending"
+        _ = self.update_data_product_status(
+            client, {"status": "active"}, data_product.id
+        )
+        mock_webhook.assert_awaited_once()
+        event_type, payload = mock_webhook.call_args.args
+        assert event_type == "data_product.updated"
 
     def test_update_usage_not_owner(self, client):
         data_product = DataProductFactory()
@@ -601,6 +659,25 @@ class TestDataProductsRouter:
 
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history["events"]) == 1
+
+    def test_data_product_about_update_emits_events(self, client, mock_webhook):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = self.update_data_product_about(client, data_product.id)
+        assert response.status_code == 200
+
+        mock_webhook.assert_awaited_once()
+        event_type, payload = mock_webhook.call_args.args
+        assert event_type == "data_product.updated"
 
     def test_history_event_created_on_data_product_about_update(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

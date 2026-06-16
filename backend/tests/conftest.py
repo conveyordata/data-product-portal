@@ -1,6 +1,6 @@
 # ruff: noqa: S311, S105
 from typing import Any, Generator
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -19,6 +19,7 @@ from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from . import TestingSessionLocal
+from .app.core.webhooks.helpers import webhook_v2_config
 from .factories.data_product_type import DataProductTypeFactory
 from .factories.domain import DomainFactory
 from .factories.user import UserFactory
@@ -130,3 +131,10 @@ def admin() -> UserFactory:
 @pytest.fixture
 def authorizer() -> Authorization:
     return Authorization()
+
+
+@pytest.fixture
+def mock_webhook():
+    with webhook_v2_config():
+        with patch("app.main.call_v2_webhook", new_callable=AsyncMock) as mock:
+            yield mock

@@ -2,12 +2,15 @@ from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException
+from pydantic import BaseModel
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 from starlette import status
 
 from app.abstract_data_product.service import AbstractDataProductService
+from app.core.context import queue_event
 from app.core.namespace.validation import NamespaceValidator
+from app.core.webhooks.events import ExplorationCreatedEvent, ExplorationPayload
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User
 
@@ -40,6 +43,7 @@ class ExplorationService(AbstractDataProductService):
         )
         self.db.add(model)
         self.db.flush()
+        queue_event(ExplorationCreatedEvent(after=model.to_event()))
         return model
 
     def get_explorations(

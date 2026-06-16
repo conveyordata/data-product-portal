@@ -21,9 +21,15 @@ from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
 from app.core.aws.get_url import _get_data_product_role_arn
+from app.core.context import queue_event
 from app.core.namespace.validation import (
     NamespaceValidator,
     TechnicalAssetNamespaceValidator,
+)
+from app.core.webhooks.events import (
+    DataProductCreatedEvent,
+    DataProductDeletedEvent,
+    DataProductUpdatedEvent,
 )
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
@@ -183,6 +189,7 @@ class DataProductService(AbstractDataProductService):
         model = DataProductModel(**data_product_schema, tags=tags)
         self.db.add(model)
         self.db.commit()
+        queue_event(DataProductCreatedEvent(after=model.to_event()))
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -194,6 +201,7 @@ class DataProductService(AbstractDataProductService):
             )
 
         result = copy.deepcopy(data_product)
+        queue_event(DataProductDeletedEvent(before=data_product.to_event()))
         self.db.delete(data_product)
         self.db.commit()
         return result
@@ -206,6 +214,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(
             id, self.db, options=[selectinload(DataProductModel.tags)]
         )
+        before = current_data_product.to_event()
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         if (
@@ -230,6 +239,11 @@ class DataProductService(AbstractDataProductService):
                 setattr(current_data_product, k, v) if v else None
 
         self.db.commit()
+        queue_event(
+            DataProductUpdatedEvent(
+                before=before, after=current_data_product.to_event()
+            )
+        )
         return UpdateDataProductResponse(id=current_data_product.id)
 
     def update_data_product_about(
@@ -238,8 +252,14 @@ class DataProductService(AbstractDataProductService):
         data_product: DataProductAboutUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        before = current_data_product.to_event()
         current_data_product.about = data_product.about
         self.db.commit()
+        queue_event(
+            DataProductUpdatedEvent(
+                before=before, after=current_data_product.to_event()
+            )
+        )
         return current_data_product
 
     def update_data_product_status(
@@ -248,8 +268,14 @@ class DataProductService(AbstractDataProductService):
         data_product: DataProductStatusUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        before = current_data_product.to_event()
         current_data_product.status = data_product.status
         self.db.commit()
+        queue_event(
+            DataProductUpdatedEvent(
+                before=before, after=current_data_product.to_event()
+            )
+        )
         return current_data_product
 
     def update_data_product_usage(
@@ -257,6 +283,7 @@ class DataProductService(AbstractDataProductService):
         id: UUID,
         usage: DataProductUsageUpdate,
     ) -> DataProductModel:
+        # This method does not emit an event since we do not care about this in the infra
         current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.usage = usage.usage
         self.db.commit()

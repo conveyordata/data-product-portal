@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from core.webhooks.events import DataProductPayload
 from sqlalchemy import Column, Enum, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
@@ -92,6 +93,9 @@ class DataProduct(AbstractDataProduct):
     __mapper_args__ = {
         "polymorphic_identity": AbstractDataProductType.DATA_PRODUCT,
     }
+
+    def to_event(self) -> DataProductPayload:
+        return DataProductPayload.model_validate(self)
 
 
 def ensure_data_product_exists(

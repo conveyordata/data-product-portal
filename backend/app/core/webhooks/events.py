@@ -5,12 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.abstract_data_product.schema_response import GetAbstractDataProductResponse
-from app.data_products.output_ports.schema_response import GetOutputPortResponse
-from app.data_products.schema_response import GetDataProductResponse
-from app.data_products.technical_assets.schema_response import (
-    GetTechnicalAssetsResponseItem,
-)
+from app.data_products.status import DataProductStatus
+from app.shared.schema import ORMModel
 
 
 class V2Event(BaseModel):
@@ -36,13 +32,17 @@ class V2Event(BaseModel):
         raise NotImplementedError
 
 
-class ExplorationPayload(BaseModel):
+class Domain(ORMModel):
+    id: UUID
+    name: str
+
+
+class ExplorationPayload(ORMModel):
     id: UUID
     name: str
     namespace: str
     description: str | None
-    domain_id: UUID
-    owner_id: UUID
+    domain: Domain
 
 
 class ExplorationCreatedEvent(V2Event):
@@ -68,3 +68,43 @@ class ExplorationDeletedEvent(V2Event):
         return "exploration.deleted"
 
     before: ExplorationPayload
+
+
+class DataProductType(ORMModel):
+    id: UUID
+    name: str
+
+
+class DataProductPayload(ORMModel):
+    id: UUID
+    name: str
+    namespace: str
+    description: str | None
+    domain: Domain
+    type: DataProductType
+    status: DataProductStatus
+
+
+class DataProductCreatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.created"
+
+    after: DataProductPayload
+
+
+class DataProductUpdatedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.updated"
+
+    before: DataProductPayload
+    after: DataProductPayload
+
+
+class DataProductDeletedEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.deleted"
+
+    before: DataProductPayload
