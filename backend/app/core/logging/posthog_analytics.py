@@ -6,17 +6,12 @@ import pytz
 from posthog import Posthog
 from sqlalchemy import func, select
 
-from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
+from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.logging import logger
 from app.data_products.output_ports.input_ports.model import InputPort as InputPortModel
 from app.database.database import SessionLocal
 from app.settings import settings
-
-_ADP_TYPE_DISPLAY_NAME: dict[AbstractDataProductType, str] = {
-    AbstractDataProductType.DATA_PRODUCT: "data_products",
-    AbstractDataProductType.EXPLORATION: "explorations",
-}
 
 
 class PortalPosthog:
@@ -76,7 +71,7 @@ async def report_consumption_metrics_task() -> None:
         try:
             posthog = get_posthog_client()
             if not posthog:
-                continue
+                return
 
             with SessionLocal() as db:
                 rows = db.execute(
@@ -93,10 +88,7 @@ async def report_consumption_metrics_task() -> None:
                     .group_by(AbstractDataProduct.abstract_data_product_type)
                 ).all()
 
-            counts_by_type = {
-                _ADP_TYPE_DISPLAY_NAME.get(adp_type, adp_type.value): count
-                for adp_type, count in rows
-            }
+            counts_by_type = {adp_type.value: count for adp_type, count in rows}
             total = sum(counts_by_type.values())
 
             logger.info(
@@ -116,3 +108,4 @@ async def report_consumption_metrics_task() -> None:
             )
         except Exception as e:
             logger.warning(f"Failed to report daily consumption metrics: {e}")
+        await asyncio.sleep(1)
