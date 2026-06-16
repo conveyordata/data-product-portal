@@ -22,6 +22,7 @@ from app.core.authz.background_tasks import check_expired_admins
 from app.core.context import close_event_context, open_event_context, pop_events
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
+from app.core.logging.posthog_analytics import report_consumption_metrics_task
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.v2 import call_v2_webhook
 from app.core.webhooks.webhook import call_webhook, register_webhooks
@@ -77,9 +78,11 @@ async def lifespan(_: FastAPI):
     backend_analytics(API_VERSION)
     admin_task = asyncio.create_task(check_expired_admins())
     device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
+    consumption_metrics_task = asyncio.create_task(report_consumption_metrics_task())
     yield
     admin_task.cancel()
     device_flow_cleanup_task.cancel()
+    consumption_metrics_task.cancel()
 
 
 mcp.add_middleware(LoggingMiddleware())

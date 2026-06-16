@@ -14,6 +14,7 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.database.database import Base, get_db_session
 from app.main import app
 from app.settings import settings
+from tests.factories import reset_unique_fakers
 from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
@@ -115,6 +116,7 @@ def clear_db(session: scoped_session[Session]) -> None:
             session.execute(table.delete())
     session.commit()
     AuthorizationService._clear_casbin_table()
+    reset_unique_fakers()
 
 
 @pytest.fixture

@@ -30,6 +30,7 @@ sidebar_position: 200
 Events are automatically emitted on database creation, update and deletion events. Currently only applied on Exploration entities.
 - **[General]**: Migrated portal to run in a single container, making deployment easier.
 - **[UI]**: Show schema information on an output port. It is defined using the Bitol [ODCS specification](https://bitol-io.github.io/open-data-contract-standard/v3.1.0/). For more details look [here](./developer-guide/schema-information.md).
+- **[Posthog]**: Track output port consumption — daily metric reporting total approved input ports, split by consumer type (data product vs exploration).
 
 ### bugfixes
 
@@ -43,7 +44,6 @@ Events are automatically emitted on database creation, update and deletion event
 - **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view. Also fixed broken animations in the global explorer view.
 - **[Data Product]**: Fixed an issue where updating a setting would not invalidate the correct cache, resulting in a broken state
 - **[General]**: Improved the performance of several endpoints by ensuring we load less data.
-
 
 ## 0.5.1
 
