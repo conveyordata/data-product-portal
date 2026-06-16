@@ -1027,7 +1027,8 @@ func (s *CreateTechnicalAssetRequest) SetTagIds(val []uuid.UUID) {
 
 // CreateTechnicalAssetRequestConfiguration represents sum type.
 type CreateTechnicalAssetRequestConfiguration struct {
-	Type                                        CreateTechnicalAssetRequestConfigurationType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type                                        CreateTechnicalAssetRequestConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
@@ -5196,7 +5197,8 @@ func (*GetTechnicalAssetsResponseItem) getTechnicalAssetRes() {}
 
 // GetTechnicalAssetsResponseItemConfiguration represents sum type.
 type GetTechnicalAssetsResponseItemConfiguration struct {
-	Type                                        GetTechnicalAssetsResponseItemConfigurationType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type                                        GetTechnicalAssetsResponseItemConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
@@ -6732,6 +6734,11 @@ func (o *OptNilAnyArray) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilAnyArray) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilAnyArray) Get() (v []jx.Raw, ok bool) {
 	if o.Null {
@@ -6793,6 +6800,11 @@ func (o *OptNilAuthorizationActionArray) SetToNull() {
 	o.Null = true
 	var v []AuthorizationAction
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilAuthorizationActionArray) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -6858,6 +6870,11 @@ func (o *OptNilBool) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilBool) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilBool) Get() (v bool, ok bool) {
 	if o.Null {
@@ -6919,6 +6936,11 @@ func (o *OptNilDataProduct) SetToNull() {
 	o.Null = true
 	var v DataProduct
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDataProduct) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -6984,6 +7006,11 @@ func (o *OptNilDateTime) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDateTime) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilDateTime) Get() (v time.Time, ok bool) {
 	if o.Null {
@@ -7045,6 +7072,11 @@ func (o *OptNilEventEntityType) SetToNull() {
 	o.Null = true
 	var v EventEntityType
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilEventEntityType) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7110,6 +7142,11 @@ func (o *OptNilFieldDependencyArray) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilFieldDependencyArray) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilFieldDependencyArray) Get() (v []FieldDependency, ok bool) {
 	if o.Null {
@@ -7171,6 +7208,11 @@ func (o *OptNilInt) SetToNull() {
 	o.Null = true
 	var v int
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilInt) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7236,6 +7278,11 @@ func (o *OptNilOutputPort) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilOutputPort) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilOutputPort) Get() (v OutputPort, ok bool) {
 	if o.Null {
@@ -7297,6 +7344,11 @@ func (o *OptNilOutputPortDataQualitySummaryDimensions) SetToNull() {
 	o.Null = true
 	var v OutputPortDataQualitySummaryDimensions
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilOutputPortDataQualitySummaryDimensions) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7362,6 +7414,11 @@ func (o *OptNilOutputPortDataQualitySummaryResponseDimensions) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilOutputPortDataQualitySummaryResponseDimensions) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilOutputPortDataQualitySummaryResponseDimensions) Get() (v OutputPortDataQualitySummaryResponseDimensions, ok bool) {
 	if o.Null {
@@ -7423,6 +7480,11 @@ func (o *OptNilPlatformTile) SetToNull() {
 	o.Null = true
 	var v PlatformTile
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilPlatformTile) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7488,6 +7550,11 @@ func (o *OptNilRequestInputPortsForDataProductRequest) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilRequestInputPortsForDataProductRequest) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilRequestInputPortsForDataProductRequest) Get() (v RequestInputPortsForDataProductRequest, ok bool) {
 	if o.Null {
@@ -7549,6 +7616,11 @@ func (o *OptNilRequestInputPortsForExplorationRequest) SetToNull() {
 	o.Null = true
 	var v RequestInputPortsForExplorationRequest
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilRequestInputPortsForExplorationRequest) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7614,6 +7686,11 @@ func (o *OptNilSchemaPropertyResponseArray) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilSchemaPropertyResponseArray) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilSchemaPropertyResponseArray) Get() (v []SchemaPropertyResponse, ok bool) {
 	if o.Null {
@@ -7675,6 +7752,11 @@ func (o *OptNilSelectOptionArray) SetToNull() {
 	o.Null = true
 	var v []SelectOption
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilSelectOptionArray) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7740,6 +7822,11 @@ func (o *OptNilString) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilString) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilString) Get() (v string, ok bool) {
 	if o.Null {
@@ -7801,6 +7888,11 @@ func (o *OptNilTechnicalAsset) SetToNull() {
 	o.Null = true
 	var v TechnicalAsset
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilTechnicalAsset) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7866,6 +7958,11 @@ func (o *OptNilTechnicalMapping) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilTechnicalMapping) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilTechnicalMapping) Get() (v TechnicalMapping, ok bool) {
 	if o.Null {
@@ -7927,6 +8024,11 @@ func (o *OptNilUIElementCheckbox) SetToNull() {
 	o.Null = true
 	var v UIElementCheckbox
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUIElementCheckbox) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -7992,6 +8094,11 @@ func (o *OptNilUIElementRadio) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUIElementRadio) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilUIElementRadio) Get() (v UIElementRadio, ok bool) {
 	if o.Null {
@@ -8053,6 +8160,11 @@ func (o *OptNilUIElementSelect) SetToNull() {
 	o.Null = true
 	var v UIElementSelect
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUIElementSelect) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -8118,6 +8230,11 @@ func (o *OptNilUIElementString) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUIElementString) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilUIElementString) Get() (v UIElementString, ok bool) {
 	if o.Null {
@@ -8181,6 +8298,11 @@ func (o *OptNilUUID) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUUID) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilUUID) Get() (v uuid.UUID, ok bool) {
 	if o.Null {
@@ -8242,6 +8364,11 @@ func (o *OptNilUser) SetToNull() {
 	o.Null = true
 	var v User
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUser) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -9980,7 +10107,8 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetConfiguration(val RenderTechn
 
 // RenderTechnicalAssetAccessPathRequestConfiguration represents sum type.
 type RenderTechnicalAssetAccessPathRequestConfiguration struct {
-	Type                                        RenderTechnicalAssetAccessPathRequestConfigurationType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type                                        RenderTechnicalAssetAccessPathRequestConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
@@ -11449,7 +11577,8 @@ func (s *SelectOption) SetValue(val SelectOptionValue) {
 
 // SelectOptionValue represents sum type.
 type SelectOptionValue struct {
-	Type   SelectOptionValueType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type   SelectOptionValueType
 	String string
 	Bool   bool
 }
@@ -11828,7 +11957,8 @@ func (s *TechnicalAsset) SetConfiguration(val TechnicalAssetConfiguration) {
 
 // TechnicalAssetConfiguration represents sum type.
 type TechnicalAssetConfiguration struct {
-	Type                                        TechnicalAssetConfigurationType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type                                        TechnicalAssetConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
@@ -13342,7 +13472,8 @@ type ValidationErrorCtx struct{}
 
 // ValidationErrorLocItem represents sum type.
 type ValidationErrorLocItem struct {
-	Type   ValidationErrorLocItemType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type   ValidationErrorLocItemType
 	String string
 	Int    int
 }
