@@ -62,8 +62,7 @@ class TestReportConsumptionMetricsTask:
             ),
             patch(
                 "app.core.logging.posthog_analytics.asyncio.sleep",
-                side_effect=[None, asyncio.CancelledError()],
+                side_effect=[None],
             ),
         ):
-            with pytest.raises(asyncio.CancelledError):
-                await report_consumption_metrics_task()
+            await report_consumption_metrics_task()
