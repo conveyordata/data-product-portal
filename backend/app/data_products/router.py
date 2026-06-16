@@ -29,17 +29,6 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.webhooks.events import (
-    DataProductAboutUpdatedEvent,
-    DataProductCreatedEvent,
-    DataProductDeletedEvent,
-    DataProductInputPortLinkedEvent,
-    DataProductInputPortUnlinkedEvent,
-    DataProductSettingChangedEvent,
-    DataProductStatusUpdatedEvent,
-    DataProductUpdatedEvent,
-)
-from app.core.webhooks.v2 import _emits_event
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -102,11 +91,9 @@ router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
         Depends(
             Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver)
         ),
-        Depends(_emits_event(DataProductCreatedEvent)),
     ],
 )
 def create_data_product(
-    request: Request,
     data_product: DataProductCreate,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
@@ -141,15 +128,9 @@ def create_data_product(
             created_id,
             data_product.input_ports,
             background_tasks=background_tasks,
-            http_request=request,
             authenticated_user=authenticated_user,
             db=db,
         )
-    request.state.event = DataProductCreatedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(created_id)
-        )
-    )
     return CreateDataProductResponse(id=created_id)
 
 
@@ -199,19 +180,13 @@ def _assign_owner_role_assignments(
         Depends(
             Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
         ),
-        Depends(_emits_event(DataProductDeletedEvent)),
     ],
 )
 def remove_data_product(
     id: UUID,
-    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_for_event = DataProductService(db).get_data_product(id)
-    request.state.event = DataProductDeletedEvent(
-        data_product=GetDataProductResponse.model_validate(data_product_for_event)
-    )
     data_product = DataProductService(db).remove_data_product(id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
@@ -245,22 +220,15 @@ def remove_data_product(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
-        Depends(_emits_event(DataProductUpdatedEvent)),
     ],
 )
 def update_data_product(
     id: UUID,
     data_product: DataProductUpdate,
-    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateDataProductResponse:
     result = DataProductService(db).update_data_product(id, data_product)
-    request.state.event = DataProductUpdatedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(id)
-        )
-    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
@@ -290,22 +258,15 @@ def update_data_product(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
-        Depends(_emits_event(DataProductAboutUpdatedEvent)),
     ],
 )
 def update_data_product_about(
     id: UUID,
     data_product: DataProductAboutUpdate,
-    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     DataProductService(db).update_data_product_about(id, data_product)
-    request.state.event = DataProductAboutUpdatedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(id)
-        )
-    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
@@ -332,22 +293,15 @@ def update_data_product_about(
                 Action.DATA_PRODUCT__UPDATE_STATUS, DataProductResolver
             )
         ),
-        Depends(_emits_event(DataProductStatusUpdatedEvent)),
     ],
 )
 def update_data_product_status(
     id: UUID,
     data_product: DataProductStatusUpdate,
-    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     DataProductService(db).update_data_product_status(id, data_product)
-    request.state.event = DataProductStatusUpdatedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(id)
-        )
-    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
@@ -400,23 +354,16 @@ def get_data_product_graph_data(
                 Action.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
             )
         ),
-        Depends(_emits_event(DataProductSettingChangedEvent)),
     ],
 )
 def set_value_for_data_product(
     id: UUID,
     setting_id: UUID,
     value: str,
-    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     DataProductSettingService(db).set_value_for_product(setting_id, id, value)
-    request.state.event = DataProductSettingChangedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(id)
-        )
-    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_SETTING_UPDATED,
@@ -461,7 +408,6 @@ _input_ports_dependencies = [
 def link_input_ports_to_data_product(
     id: UUID,
     link_input_ports: LinkInputPortsToDataProduct,
-    request: Request,
     background_tasks: BackgroundTasks,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
@@ -474,7 +420,6 @@ def link_input_ports_to_data_product(
                 justification=link_input_ports.justification,
             ),
             background_tasks,
-            http_request=request,
             authenticated_user=authenticated_user,
             db=db,
         ).input_port_links
@@ -484,14 +429,12 @@ def link_input_ports_to_data_product(
 @router.post(
     "/{id}/input_ports",
     responses=_input_ports_responses,
-    dependencies=_input_ports_dependencies
-    + [Depends(_emits_event(DataProductInputPortLinkedEvent))],
+    dependencies=_input_ports_dependencies,
 )
 def request_input_ports_for_data_product(
     id: UUID,
     body: RequestInputPortsForDataProductRequest,
     background_tasks: BackgroundTasks,
-    http_request: Request,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> RequestInputPortsForDataProductResponse:
@@ -500,11 +443,6 @@ def request_input_ports_for_data_product(
         body.output_ports,
         body.justification,
         actor=authenticated_user,
-    )
-    http_request.state.event = DataProductInputPortLinkedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(id)
-        )
     )
 
     event_ids = EventService(db).create_events(
@@ -623,23 +561,15 @@ def get_data_product_rolled_up_tags(
                 DataProductResolver,
             )
         ),
-        Depends(_emits_event(DataProductInputPortUnlinkedEvent)),
     ],
 )
 def unlink_input_port_from_data_product(
     id: UUID,
     output_port_id: UUID,
-    request: Request,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_product_dataset = DataProductService(db).remove_input_port(id, output_port_id)
-
-    request.state.event = DataProductInputPortUnlinkedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(id)
-        )
-    )
 
     event_id = EventService(db).create_event(
         CreateEvent(

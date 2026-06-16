@@ -12,11 +12,6 @@ from app.core.authz import (
     DatasetResolver,
 )
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.webhooks.events import (
-    OutputPortLinkApprovedEvent,
-    OutputPortLinkDeniedEvent,
-)
-from app.core.webhooks.v2 import _emits_event
 from app.data_products.output_ports.input_ports.schema_request import (
     ApproveOutputPortAsInputPortRequest,
     DenyOutputPortAsInputPortRequest,
@@ -68,13 +63,11 @@ def get_input_ports_for_output_port(
                 object_id="output_port_id",
             )
         ),
-        Depends(_emits_event(OutputPortLinkApprovedEvent)),
     ],
 )
 def approve_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
-    http_request: Request,
     body: ApproveOutputPortAsInputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
@@ -84,14 +77,6 @@ def approve_output_port_as_input_port(
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
         actor=authenticated_user,
-    )
-    http_request.state.event = OutputPortLinkApprovedEvent(
-        abstract_data_product=GetAbstractDataProductResponse.model_validate(
-            data_product_link.consuming_abstract_data_product
-        ),
-        output_port=GetOutputPortResponse.model_validate(
-            OutputPortService(db).get_dataset(output_port_id, data_product_id)
-        ),
     )
 
     event_id = EventService(db).create_event(
@@ -122,13 +107,11 @@ def approve_output_port_as_input_port(
                 object_id="output_port_id",
             )
         ),
-        Depends(_emits_event(OutputPortLinkDeniedEvent)),
     ],
 )
 def deny_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
-    http_request: Request,
     body: DenyOutputPortAsInputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
@@ -138,14 +121,6 @@ def deny_output_port_as_input_port(
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
         actor=authenticated_user,
-    )
-    http_request.state.event = OutputPortLinkDeniedEvent(
-        abstract_data_product=GetAbstractDataProductResponse.model_validate(
-            data_product_link.consuming_abstract_data_product
-        ),
-        output_port=GetOutputPortResponse.model_validate(
-            OutputPortService(db).get_dataset(output_port_id, data_product_id)
-        ),
     )
 
     event_id = EventService(db).create_event(

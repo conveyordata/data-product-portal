@@ -39,12 +39,6 @@ from app.core.authz.resolvers import (
     DataProductRoleAssignmentResolver,
     EmptyResolver,
 )
-from app.core.webhooks.events import (
-    DataProductTeamMemberAddedEvent,
-    DataProductTeamMemberRemovedEvent,
-    DataProductTeamMemberUpdatedEvent,
-)
-from app.core.webhooks.v2 import _emits_event
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
@@ -66,23 +60,13 @@ router = APIRouter(prefix="/v2/authz/role_assignments/data_product")
                 resolver=DataProductRoleAssignmentResolver,
             )
         ),
-        Depends(_emits_event(DataProductTeamMemberRemovedEvent)),
     ],
 )
 def delete_data_product_role_assignment(
     id: UUID,
-    request: Request,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> DeleteDataProductRoleAssignmentResponse:
-    assignment_for_event = RoleAssignmentService(db=db).get_assignment(id)
-    request.state.event = DataProductTeamMemberRemovedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(
-                assignment_for_event.data_product_id
-            )
-        )
-    )
     assignment = RoleAssignmentService(db=db).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -185,12 +169,10 @@ def request_data_product_role_assignment(
                 object_id="data_product_id",
             )
         ),
-        Depends(_emits_event(DataProductTeamMemberAddedEvent)),
     ],
 )
 def create_data_product_role_assignment(
     body: CreateDataProductRoleAssignment,
-    request: Request,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
@@ -201,11 +183,6 @@ def create_data_product_role_assignment(
         user_id=body.user_id,
         role_id=body.role_id,
         actor=user,
-    )
-    request.state.event = DataProductTeamMemberAddedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(role_assignment.data_product_id)
-        )
     )
 
     EventService(db).create_event(
@@ -317,13 +294,11 @@ def decide_data_product_role_assignment(
                 resolver=DataProductRoleAssignmentResolver,
             )
         ),
-        Depends(_emits_event(DataProductTeamMemberUpdatedEvent)),
     ],
 )
 def modify_data_product_role_assignment(
     id: UUID,
     body: ModifyDataProductRoleAssignment,
-    http_request: Request,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
@@ -335,12 +310,6 @@ def modify_data_product_role_assignment(
     )
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
-
-    http_request.state.event = DataProductTeamMemberUpdatedEvent(
-        data_product=GetDataProductResponse.model_validate(
-            DataProductService(db).get_data_product(assignment.data_product_id)
-        )
-    )
 
     event_id = EventService(db).create_event(
         CreateEvent(
