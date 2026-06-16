@@ -4172,14 +4172,14 @@ sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
 name = "sqlalchemy-easy-softdelete"
-version = "0.9.0"
+version = "0.9.1"
 description = "Easily add soft-deletion to your SQLAlchemy Models."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "sqlalchemy_easy_softdelete-0.9.0-py3-none-any.whl", hash = "sha256:934efdfc8b558d9aa7e665940ea5789baf8bf963b4c9a70620e0319fde31faf2"},
-    {file = "sqlalchemy_easy_softdelete-0.9.0.tar.gz", hash = "sha256:c458464aaa1ac1ffa7e61e7ec98a0c9961d8fe0b365e07391a7bc17d6511a768"},
+    {file = "sqlalchemy_easy_softdelete-0.9.1-py3-none-any.whl", hash = "sha256:7672778c2ce9969296219f3e973c1f0d17736ea04f53e05fa8e112c88adae2ed"},
+    {file = "sqlalchemy_easy_softdelete-0.9.1.tar.gz", hash = "sha256:02ce5b8eedf9c6207a041391ffa3906ea61b930559498c6e475781ce7dace599"},
 ]
 
 [package.dependencies]
@@ -4817,4 +4817,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "a3b3183633decdf0a6600a2f9b1870c0b151df309de116faa4e185722cd0053f"
+content-hash = "3744ea80b6968b3511491e37ca5ed247c2065136118f4bffd27082aab3de391f"
