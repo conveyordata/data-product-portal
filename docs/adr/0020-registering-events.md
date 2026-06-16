@@ -16,7 +16,20 @@ We want to decide on event emission architecture, this is needed for our eventin
 
 ## Decision Outcome
 
-**Chosen option:** *Option 3: Listen to ORM events*.
+**Chosen option:** *Option 1: Make services responsible*.
+
+### Update 16/6/2026
+
+We have migrated from option 3 to option 1, after starting implementation on Option 3 we noticed that relationschips
+aren't loaded on insert. Since these aren't loaded on insert, we can't send out events for these relations. We first
+assumed they would available since we load them eagerly on get, but the insert is done before that.
+This is a limitation of option 3, and we have decided to go with option 1 instead.
+
+We tried to fix it by registering id's on after_insert, and sending out events on before_commit. But this makes the
+outbox pattern we want to implement harder. The resulting code was rather brittle and complex.
+
+Another option is to send out ID only events, which would work, but changes ADR 19 completely, for now we decided on
+keeping with ADR 19 and changing this one.
 
 ### Confirmation
 
