@@ -248,10 +248,10 @@ type ApproveOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
 func (*ApproveOutputPortTechnicalAssetLinkOKApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
 }
 
-// The integer values for the authorization actions are stored directly in the DB.
-// This means you can change the name of the actions, but not their integer values.
-// The values for the actions are spaced on purpose, to make it easier to extend.
-// This has no technical benefit, but it makes it easier to read for developers.
+// The integer values for the authorization actions are stored directly in the DB. This means you can
+// change the name of the actions, but not their integer values. The values for the actions are spaced
+// on purpose, to make it easier to extend. This has no technical benefit, but it makes it easier to
+// read for developers.
 // Ref: #/components/schemas/AuthorizationAction
 type AuthorizationAction int
 
@@ -407,8 +407,8 @@ type BecomeAdminOKApplicationJSON jx.Raw
 
 func (*BecomeAdminOKApplicationJSON) becomeAdminRes() {}
 
-// Accepts a BitOL data contract (https://bitol-io.github.io/open-data-contract-standard/).
-// Only the `schema` section is extracted; all other fields are ignored.
+// Accepts a BitOL data contract (https://bitol-io.github.io/open-data-contract-standard/). Only the
+// `schema` section is extracted; all other fields are ignored.
 // Ref: #/components/schemas/BitolContractRequest
 type BitolContractRequest struct {
 	Schema []SchemaObjectRequest `json:"schema"`
@@ -3950,10 +3950,9 @@ func (s *Exploration) SetDomain(val Domain) {
 	s.Domain = val
 }
 
-// Represents a field dependency for conditional visibility.
-// e.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has
-// value Y
-// In practice this is often used with checkbox fields having value=True.
+// Represents a field dependency for conditional visibility. e.g. if field A has
+// depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y In practice
+// this is often used with checkbox fields having value=True.
 // Ref: #/components/schemas/FieldDependency
 type FieldDependency struct {
 	FieldName string `json:"field_name"`
