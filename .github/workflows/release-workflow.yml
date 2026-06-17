@@ -4,7 +4,6 @@ on:
     tags:
       - 'v*.*.*'
   workflow_dispatch:
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -153,6 +152,7 @@ jobs:
 
   cli:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     permissions:
       contents: write
     needs: ["create-gh-release-notes"]
@@ -183,6 +183,7 @@ jobs:
 
   publish-sdk:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     permissions:
       id-token: write
       contents: read
@@ -213,6 +214,7 @@ jobs:
 
   release-docs:
     runs-on: ubuntu-24.04
+    if: github.event_name == 'push'
     permissions:
       id-token: write
       contents: read
@@ -249,6 +251,7 @@ jobs:
   deploy-on-portal-demo:
     name: Deploy to portal demo
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     permissions:
       contents: read
     needs: ["portal-docker"]
