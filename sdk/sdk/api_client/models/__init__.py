@@ -29,6 +29,9 @@ from .can_become_admin_update import CanBecomeAdminUpdate
 from .cloud_event_exploration_created_event import CloudEventExplorationCreatedEvent
 from .cloud_event_exploration_deleted_event import CloudEventExplorationDeletedEvent
 from .cloud_event_exploration_updated_event import CloudEventExplorationUpdatedEvent
+from .cloud_event_input_port_created_event import CloudEventInputPortCreatedEvent
+from .cloud_event_input_port_deleted_event import CloudEventInputPortDeletedEvent
+from .cloud_event_input_port_updated_event import CloudEventInputPortUpdatedEvent
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -162,6 +165,9 @@ from .glue_technical_asset_configuration import GlueTechnicalAssetConfiguration
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
 from .input_port import InputPort
+from .input_port_created_event import InputPortCreatedEvent
+from .input_port_deleted_event import InputPortDeletedEvent
+from .input_port_updated_event import InputPortUpdatedEvent
 from .is_admin_response import IsAdminResponse
 from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
 from .link_input_ports_to_data_product_post import LinkInputPortsToDataProductPost
@@ -334,6 +340,9 @@ __all__ = (
     "CloudEventExplorationCreatedEvent",
     "CloudEventExplorationDeletedEvent",
     "CloudEventExplorationUpdatedEvent",
+    "CloudEventInputPortCreatedEvent",
+    "CloudEventInputPortDeletedEvent",
+    "CloudEventInputPortUpdatedEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -449,6 +458,9 @@ __all__ = (
     "Graph",
     "HTTPValidationError",
     "InputPort",
+    "InputPortCreatedEvent",
+    "InputPortDeletedEvent",
+    "InputPortUpdatedEvent",
     "IsAdminResponse",
     "LinkInputPortsToDataProduct",
     "LinkInputPortsToDataProductPost",

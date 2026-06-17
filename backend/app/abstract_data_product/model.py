@@ -1,11 +1,11 @@
 import uuid
-from enum import Enum
 
 from sqlalchemy import Column, ForeignKey, String, func, select
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
+from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.domains.model import Domain
 from app.data_products.output_ports.model import (
@@ -13,12 +13,6 @@ from app.data_products.output_ports.model import (
 )
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
-
-
-class AbstractDataProductType(str, Enum):
-    UNKNOWN = "unknown"
-    DATA_PRODUCT = "data_products"
-    EXPLORATION = "explorations"
 
 
 class AbstractDataProduct(Base, BaseORM):

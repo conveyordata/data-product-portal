@@ -8,7 +8,7 @@ from app.authorization.role_assignments.data_product.service import (
 from app.data_products.output_port_technical_assets_link.service import (
     DataOutputDatasetService,
 )
-from app.data_products.output_ports.input_ports.service import DataProductDatasetService
+from app.data_products.output_ports.input_ports.service import InputPortService
 from app.pending_actions.schema import (
     DataProductRoleAssignmentPendingAction,
 )
@@ -23,9 +23,7 @@ class PendingActionsService:
     def get_user_pending_actions(self, user: User) -> PendingActionResponse:
         input_port_actions = [
             action.convert()
-            for action in DataProductDatasetService(self.db).get_user_pending_actions(
-                user
-            )
+            for action in InputPortService(self.db).get_user_pending_actions(user)
         ]
 
         data_output_dataset_actions = [

@@ -10,6 +10,9 @@ from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
 )
+from app.abstract_data_product.input_ports.model import (
+    InputPort as InputPortModel,
+)
 from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype
@@ -29,9 +32,6 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
-)
-from app.data_products.output_ports.input_ports.model import (
-    InputPort as InputPortModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.schema_request import (

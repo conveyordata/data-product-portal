@@ -1,10 +1,12 @@
 import uuid
+from unittest.mock import AsyncMock, patch
 
 import faker
 
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.settings import settings
+from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DatasetFactory,
     DomainFactory,
@@ -144,6 +146,25 @@ class TestExplorationRouter:
         )
         assert response.status_code == 200, response.text
         assert len(response.json()["input_port_ids"]) == 1
+
+    @patch("app.main.call_v2_webhook", new_callable=AsyncMock)
+    def test_request_input_ports_for_exploration_event(self, mock_webhook, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        with webhook_v2_config():
+            response = client.post(
+                f"{ROUTE}/{exploration.id}/input_ports",
+                json={
+                    "output_ports": [str(DatasetFactory().id)],
+                    "justification": "I am your king!",
+                },
+            )
+        assert response.status_code == 200, response.text
+        assert len(response.json()["input_port_ids"]) == 1
+        assert mock_webhook.await_count == 2
+        event_type, payload = mock_webhook.await_args_list[1].args
+        assert event_type == "input_port.created"
+        assert "id" in payload
 
     def test_request_input_ports_for_exploration_does_not_exist(self, client):
         response = client.post(

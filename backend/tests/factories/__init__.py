@@ -5,7 +5,6 @@ from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
 from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
-from .data_products_datasets import InputPortFactory
 from .dataset import DatasetFactory
 from .dataset import fake as dataset_fake
 from .dataset_query_stats_daily import DatasetQueryStatsFactory
@@ -16,6 +15,7 @@ from .environment import EnvironmentFactory
 from .event import EventFactory
 from .exploration import ExplorationFactory
 from .exploration import fake as exploration_fake
+from .input_port import InputPortFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
 from .platform import PlatformFactory

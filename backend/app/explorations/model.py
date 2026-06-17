@@ -4,7 +4,8 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql.base import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
+from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.type import AbstractDataProductType
 from app.core.webhooks.events import (
     ExplorationCreatedEvent,
     ExplorationDeletedEvent,

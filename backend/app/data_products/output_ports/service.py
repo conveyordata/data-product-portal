@@ -11,6 +11,12 @@ from sqlalchemy.sql.base import ExecutableOption
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
 )
+from app.abstract_data_product.input_ports.model import (
+    InputPort,
+)
+from app.abstract_data_product.input_ports.model import (
+    InputPort as DataProductDatasetAssociationModel,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
@@ -30,12 +36,6 @@ from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.input_ports.model import (
-    InputPort,
-)
-from app.data_products.output_ports.input_ports.model import (
-    InputPort as DataProductDatasetAssociationModel,
-)
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort

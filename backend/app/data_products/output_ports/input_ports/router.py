@@ -1,9 +1,8 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.abstract_data_product.schema_response import GetAbstractDataProductResponse
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import (
@@ -21,10 +20,7 @@ from app.data_products.output_ports.input_ports.schema_response import (
     GetInputPortsForOutputPortResponse,
     OutputPortInputPort,
 )
-from app.data_products.output_ports.input_ports.service import DataProductDatasetService
-from app.data_products.output_ports.schema_response import (
-    GetOutputPortResponse,
-)
+from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
@@ -72,7 +68,7 @@ def approve_output_port_as_input_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_link = DataProductDatasetService(db).approve_output_port_as_input_port(
+    data_product_link = InputPortService(db).approve_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
@@ -116,7 +112,7 @@ def deny_output_port_as_input_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_link = DataProductDatasetService(db).deny_output_port_as_input_port(
+    data_product_link = InputPortService(db).deny_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
@@ -159,7 +155,7 @@ def remove_output_port_as_input_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_link = DataProductDatasetService(db).remove_output_port_as_input_port(
+    data_product_link = InputPortService(db).remove_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
         consuming_data_product_id=request.consuming_data_product_id,

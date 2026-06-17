@@ -8,9 +8,13 @@ from typing import Any
 from uuid import UUID
 
 from sdk.api_client.models import (
+    AbstractDataProductType,
     ExplorationCreatedEvent,
     ExplorationDeletedEvent,
     ExplorationUpdatedEvent,
+    InputPortCreatedEvent,
+    InputPortDeletedEvent,
+    InputPortUpdatedEvent,
 )
 from sdk.provisioner.event_handler import AbstractEventHandler
 from sdk.provisioner.reconcile_queue import (
@@ -186,12 +190,32 @@ class ReconcileEventHandler(AbstractEventHandler):
     ) -> dict[str, Any]:
         return await self._enqueue(data.id)
 
-    async def on_exploration_updated(
-        self, data: ExplorationUpdatedEvent
-    ) -> dict[str, Any]:
+    async def on_exploration_updated(self, data: ExplorationUpdatedEvent) -> Any:
         return await self._enqueue(data.id)
 
-    async def on_exploration_deleted(
-        self, data: ExplorationDeletedEvent
-    ) -> dict[str, Any]:
+    async def on_exploration_deleted(self, data: ExplorationDeletedEvent) -> Any:
         return await self._enqueue(data.id)
+
+    async def on_input_port_updated(self, data: InputPortUpdatedEvent) -> Any:
+        if (
+            data.consuming_abstract_data_product_type
+            == AbstractDataProductType.EXPLORATIONS
+        ):
+            return await self._enqueue(data.consuming_abstract_data_product_id)
+        return None
+
+    async def on_input_port_created(self, data: InputPortCreatedEvent) -> Any:
+        if (
+            data.consuming_abstract_data_product_type
+            == AbstractDataProductType.EXPLORATIONS
+        ):
+            return await self._enqueue(data.consuming_abstract_data_product_id)
+        return None
+
+    async def on_input_port_deleted(self, data: InputPortDeletedEvent) -> Any:
+        if (
+            data.consuming_abstract_data_product_type
+            == AbstractDataProductType.EXPLORATIONS
+        ):
+            return await self._enqueue(data.consuming_abstract_data_product_id)
+        return None
