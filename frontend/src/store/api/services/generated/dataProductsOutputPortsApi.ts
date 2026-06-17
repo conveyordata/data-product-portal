@@ -793,6 +793,7 @@ export enum DataProductStatus {
   Pending = "pending",
   Active = "active",
   Archived = "archived",
+  Deleting = "deleting",
 }
 export enum DataProductIconKey {
   Reporting = "reporting",

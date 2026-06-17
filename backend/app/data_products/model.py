@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String, func, select
+from sqlalchemy import Column, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
 
@@ -11,7 +11,6 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.tags.model import Tag, tag_data_product_table
-from app.data_products.status import DataProductStatus
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import ensure_exists
 
@@ -30,9 +29,6 @@ class DataProduct(AbstractDataProduct):
         "id", ForeignKey("abstract_data_products.id"), primary_key=True
     )
     about = Column(String)
-    status: DataProductStatus = Column(
-        Enum(DataProductStatus), default=DataProductStatus.ACTIVE
-    )
     usage = Column(String, nullable=True)
 
     # Foreign keys

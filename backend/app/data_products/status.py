@@ -5,3 +5,4 @@ class DataProductStatus(str, Enum):
     PENDING = "pending"
     ACTIVE = "active"
     ARCHIVED = "archived"
+    DELETING = "deleting"

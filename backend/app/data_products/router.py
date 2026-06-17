@@ -11,6 +11,7 @@ from fastapi import (
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import InputPort
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
@@ -169,12 +170,16 @@ def _assign_owner_role_assignments(
 @router.delete(
     "/{id}",
     responses={
+        200: {"description": "Data Product deleted"},
+        202: {
+            "description": "Data Product marked for deletion, waiting for finalizers"
+        },
         404: {
             "description": "Data Product not found",
             "content": {
                 "application/json": {"example": {"detail": "Data Product id not found"}}
             },
-        }
+        },
     },
     dependencies=[
         Depends(
@@ -187,9 +192,20 @@ def remove_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
+    service = DataProductService(db)
+    can_delete = service.mark_for_deletion(id)
+    if not can_delete:
+        return
+    _do_delete_data_product(id, db, authenticated_user)
+
+
+def _do_delete_data_product(
+    id: UUID,
+    db: Session,
+    authenticated_user: User,
+) -> None:
     data_product = DataProductService(db).remove_data_product(id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
-
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_REMOVED,
@@ -202,6 +218,41 @@ def remove_data_product(
     NotificationService(db).create_data_product_notifications(
         data_product_id=data_product.id, event_id=event_id
     )
+
+
+@router.post(
+    "/{id}/finalizers",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
+        ),
+    ],
+)
+def add_data_product_finalizer(
+    id: UUID,
+    request: FinalizerRequest,
+    db: Session = Depends(get_db_session),
+) -> None:
+    DataProductService(db).add_finalizer(id, request.finalizer)
+
+
+@router.delete(
+    "/{id}/finalizers/{finalizer}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
+        ),
+    ],
+)
+def remove_data_product_finalizer(
+    id: UUID,
+    finalizer: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    should_delete = DataProductService(db).remove_finalizer(id, finalizer)
+    if should_delete:
+        _do_delete_data_product(id, db, authenticated_user)
 
 
 @router.put(

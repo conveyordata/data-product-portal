@@ -15,6 +15,8 @@ export function getStatusLabel(
             return t('Active');
         case DataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
             return t('Deleted');
+        case DataProductStatus.Deleting:
+            return t('Deleting');
         default:
             return t('Unknown');
     }
@@ -29,6 +31,8 @@ export function getBadgeStatus(
         case DataProductStatus.Active || TechnicalAssetStatus.Active || OutputPortStatus.Active:
             return 'success';
         case DataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
+            return 'error';
+        case DataProductStatus.Deleting:
             return 'error';
         default:
             return 'default';

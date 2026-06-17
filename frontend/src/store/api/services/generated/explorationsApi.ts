@@ -28,6 +28,15 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/v2/explorations/${queryArg}` }),
     }),
+    removeExploration: build.mutation<
+      RemoveExplorationApiResponse,
+      RemoveExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg}`,
+        method: "DELETE",
+      }),
+    }),
     getExplorationInputPorts: build.query<
       GetExplorationInputPortsApiResponse,
       GetExplorationInputPortsApiArg
@@ -55,6 +64,25 @@ const injectedRtkApi = api.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    addExplorationFinalizer: build.mutation<
+      AddExplorationFinalizerApiResponse,
+      AddExplorationFinalizerApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/finalizers`,
+        method: "POST",
+        body: queryArg.finalizerRequest,
+      }),
+    }),
+    removeExplorationFinalizer: build.mutation<
+      RemoveExplorationFinalizerApiResponse,
+      RemoveExplorationFinalizerApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/finalizers/${queryArg.finalizer}`,
+        method: "DELETE",
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -68,6 +96,9 @@ export type CreateExplorationApiArg = CreateExplorationRequestWithInputPorts;
 export type GetExplorationApiResponse =
   /** status 200 Successful Response */ GetExplorationResponse;
 export type GetExplorationApiArg = string;
+export type RemoveExplorationApiResponse =
+  /** status 200 Exploration deleted */ any;
+export type RemoveExplorationApiArg = string;
 export type GetExplorationInputPortsApiResponse =
   /** status 200 Successful Response */ GetExplorationInputPortsResponse;
 export type GetExplorationInputPortsApiArg = string;
@@ -83,6 +114,18 @@ export type RemoveInputPortFromExplorationApiArg = {
   id: string;
   outputPortId: string;
 };
+export type AddExplorationFinalizerApiResponse =
+  /** status 200 Successful Response */ any;
+export type AddExplorationFinalizerApiArg = {
+  id: string;
+  finalizerRequest: FinalizerRequest;
+};
+export type RemoveExplorationFinalizerApiResponse =
+  /** status 200 Successful Response */ any;
+export type RemoveExplorationFinalizerApiArg = {
+  id: string;
+  finalizer: string;
+};
 export type Domain = {
   id: string;
   name: string;
@@ -94,6 +137,8 @@ export type Exploration = {
   namespace: string;
   description: string;
   domain: Domain;
+  status: DataProductStatus;
+  finalizers: string[];
 };
 export type GetExplorationsResponse = {
   explorations: Exploration[];
@@ -114,6 +159,8 @@ export type CreateExplorationResponse = {
   namespace: string;
   description: string;
   domain: Domain;
+  status: DataProductStatus;
+  finalizers: string[];
 };
 export type RequestInputPortsForExplorationRequest = {
   output_ports: string[];
@@ -142,6 +189,8 @@ export type GetExplorationResponse = {
   namespace: string;
   description: string;
   domain: Domain;
+  status: DataProductStatus;
+  finalizers: string[];
   owner: User;
 };
 export type Tag = {
@@ -171,6 +220,15 @@ export type GetExplorationInputPortsResponse = {
 export type RequestInputPortsForExplorationResponse = {
   input_port_ids: string[];
 };
+export type FinalizerRequest = {
+  finalizer: string;
+};
+export enum DataProductStatus {
+  Pending = "pending",
+  Active = "active",
+  Archived = "archived",
+  Deleting = "deleting",
+}
 export enum DecisionStatus {
   Approved = "approved",
   Pending = "pending",
@@ -193,8 +251,11 @@ export const {
   useCreateExplorationMutation,
   useGetExplorationQuery,
   useLazyGetExplorationQuery,
+  useRemoveExplorationMutation,
   useGetExplorationInputPortsQuery,
   useLazyGetExplorationInputPortsQuery,
   useRequestInputPortsForExplorationMutation,
   useRemoveInputPortFromExplorationMutation,
+  useAddExplorationFinalizerMutation,
+  useRemoveExplorationFinalizerMutation,
 } = injectedRtkApi;

@@ -286,7 +286,7 @@ export type SnowflakeTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
-export type DataProductStatus = "pending" | "active" | "archived";
+export type DataProductStatus = "pending" | "active" | "archived" | "deleting";
 export type DataProductIconKey =
   | "reporting"
   | "processing"

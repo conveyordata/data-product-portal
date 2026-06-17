@@ -3,6 +3,7 @@ from uuid import UUID
 from warnings import deprecated
 
 from annotated_types import MinLen
+from pydantic import field_validator
 
 from app.data_products.status import DataProductStatus
 from app.shared.schema import ORMModel
@@ -36,6 +37,13 @@ class DataProductAboutUpdate(ORMModel):
 
 class DataProductStatusUpdate(ORMModel):
     status: DataProductStatus
+
+    @field_validator("status")
+    @classmethod
+    def status_not_deleting(cls, v: DataProductStatus) -> DataProductStatus:
+        if v == DataProductStatus.DELETING:
+            raise ValueError("Cannot manually set status to 'deleting'")
+        return v
 
 
 class DataProductUsageUpdate(ORMModel):

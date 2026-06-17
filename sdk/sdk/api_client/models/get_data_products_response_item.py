@@ -28,6 +28,7 @@ class GetDataProductsResponseItem:
         description (str):
         namespace (str):
         status (DataProductStatus):
+        finalizers (list[str]):
         tags (list[Tag]):
         usage (None | str):
         domain (Domain):
@@ -43,6 +44,7 @@ class GetDataProductsResponseItem:
     description: str
     namespace: str
     status: DataProductStatus
+    finalizers: list[str]
     tags: list[Tag]
     usage: None | str
     domain: Domain
@@ -65,6 +67,8 @@ class GetDataProductsResponseItem:
         namespace = self.namespace
 
         status = self.status.value
+
+        finalizers = self.finalizers
 
         tags = []
         for tags_item_data in self.tags:
@@ -99,6 +103,7 @@ class GetDataProductsResponseItem:
                 "description": description,
                 "namespace": namespace,
                 "status": status,
+                "finalizers": finalizers,
                 "tags": tags,
                 "usage": usage,
                 "domain": domain,
@@ -129,6 +134,8 @@ class GetDataProductsResponseItem:
         namespace = d.pop("namespace")
 
         status = DataProductStatus(d.pop("status"))
+
+        finalizers = cast(list[str], d.pop("finalizers"))
 
         tags = []
         _tags = d.pop("tags")
@@ -175,6 +182,7 @@ class GetDataProductsResponseItem:
             description=description,
             namespace=namespace,
             status=status,
+            finalizers=finalizers,
             tags=tags,
             usage=usage,
             domain=domain,

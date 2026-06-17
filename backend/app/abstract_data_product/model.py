@@ -3,7 +3,7 @@ from enum import Enum
 
 from sqlalchemy import Column, ForeignKey, String, func, select
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -11,6 +11,7 @@ from app.configuration.domains.model import Domain
 from app.data_products.output_ports.model import (
     InputPort,
 )
+from app.data_products.status import DataProductStatus
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
@@ -42,6 +43,18 @@ class AbstractDataProduct(Base, BaseORM):
         nullable=False,
     )
 
+    status: Mapped[DataProductStatus] = mapped_column(
+        SAEnum(
+            DataProductStatus,
+            values_callable=lambda enum: [e.value for e in enum],
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
+        default=DataProductStatus.ACTIVE,
+        server_default=DataProductStatus.ACTIVE.value,
+    )
+
     description = Column(String)
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
     domain: Mapped[Domain] = relationship(
@@ -60,6 +73,9 @@ class AbstractDataProduct(Base, BaseORM):
         .correlate_except(InputPort)
         .scalar_subquery(),
         raiseload=True,
+    )
+    finalizers: Mapped[list[str]] = mapped_column(
+        ARRAY(String), nullable=False, default=list, server_default="{}"
     )
 
 

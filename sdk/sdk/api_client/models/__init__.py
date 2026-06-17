@@ -130,6 +130,7 @@ from .exploration_deleted_event import ExplorationDeletedEvent
 from .exploration_payload import ExplorationPayload
 from .exploration_updated_event import ExplorationUpdatedEvent
 from .field_dependency import FieldDependency
+from .finalizer_request import FinalizerRequest
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
@@ -420,6 +421,7 @@ __all__ = (
     "ExplorationPayload",
     "ExplorationUpdatedEvent",
     "FieldDependency",
+    "FinalizerRequest",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
     "GetDataProductInputPortsResponse",

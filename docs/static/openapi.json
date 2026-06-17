@@ -1552,12 +1552,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Data Product deleted",
             "content": {
               "application/json": {
                 "schema": {}
               }
             }
+          },
+          "202": {
+            "description": "Data Product marked for deletion, waiting for finalizers"
           },
           "404": {
             "description": "Data Product not found",
@@ -1668,6 +1671,107 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetDataProductResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/finalizers": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Add Data Product Finalizer",
+        "operationId": "add_data_product_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/finalizers/{finalizer}": {
+      "delete": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Remove Data Product Finalizer",
+        "operationId": "remove_data_product_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "finalizer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finalizer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -6750,6 +6854,58 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Remove Exploration",
+        "operationId": "remove_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exploration deleted",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "202": {
+            "description": "Exploration marked for deletion, waiting for finalizers"
+          },
+          "404": {
+            "description": "Exploration not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Exploration id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/explorations/{id}/input_ports": {
@@ -6872,6 +7028,107 @@
               "type": "string",
               "format": "uuid",
               "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/finalizers": {
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Add Exploration Finalizer",
+        "operationId": "add_exploration_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/finalizers/{finalizer}": {
+      "delete": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Remove Exploration Finalizer",
+        "operationId": "remove_exploration_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "finalizer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finalizer"
             }
           }
         ],
@@ -7804,6 +8061,16 @@
           },
           "domain": {
             "$ref": "#/components/schemas/Domain"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           }
         },
         "type": "object",
@@ -7812,7 +8079,9 @@
           "name",
           "namespace",
           "description",
-          "domain"
+          "domain",
+          "status",
+          "finalizers"
         ],
         "title": "CreateExplorationResponse"
       },
@@ -8970,7 +9239,8 @@
         "enum": [
           "pending",
           "active",
-          "archived"
+          "archived",
+          "deleting"
         ],
         "title": "DataProductStatus"
       },
@@ -9989,6 +10259,16 @@
           },
           "domain": {
             "$ref": "#/components/schemas/Domain"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           }
         },
         "type": "object",
@@ -9997,7 +10277,9 @@
           "name",
           "namespace",
           "description",
-          "domain"
+          "domain",
+          "status",
+          "finalizers"
         ],
         "title": "Exploration"
       },
@@ -10107,6 +10389,19 @@
         "title": "FieldDependency",
         "description": "Represents a field dependency for conditional visibility.\ne.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y\nIn practice this is often used with checkbox fields having value=True"
       },
+      "FinalizerRequest": {
+        "properties": {
+          "finalizer": {
+            "type": "string",
+            "title": "Finalizer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "finalizer"
+        ],
+        "title": "FinalizerRequest"
+      },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
           "platform_service_configurations": {
@@ -10193,6 +10488,13 @@
           "status": {
             "$ref": "#/components/schemas/DataProductStatus"
           },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
+          },
           "tags": {
             "items": {
               "$ref": "#/components/schemas/Tag"
@@ -10246,6 +10548,7 @@
           "description",
           "namespace",
           "status",
+          "finalizers",
           "tags",
           "usage",
           "domain",
@@ -10326,6 +10629,13 @@
           "status": {
             "$ref": "#/components/schemas/DataProductStatus"
           },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
+          },
           "tags": {
             "items": {
               "$ref": "#/components/schemas/Tag"
@@ -10380,6 +10690,7 @@
           "description",
           "namespace",
           "status",
+          "finalizers",
           "tags",
           "usage",
           "domain",
@@ -10643,6 +10954,16 @@
           "domain": {
             "$ref": "#/components/schemas/Domain"
           },
+          "status": {
+            "$ref": "#/components/schemas/DataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
+          },
           "owner": {
             "$ref": "#/components/schemas/User"
           }
@@ -10654,6 +10975,8 @@
           "namespace",
           "description",
           "domain",
+          "status",
+          "finalizers",
           "owner"
         ],
         "title": "GetExplorationResponse"

@@ -26,6 +26,7 @@ class BaseDataProductGet(ORMModel):
     description: str
     namespace: str
     status: DataProductStatus
+    finalizers: list[str]
 
     # Nested schemas
     tags: list[Tag]

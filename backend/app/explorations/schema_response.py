@@ -3,6 +3,7 @@ from uuid import UUID
 
 from app.abstract_data_product.schema_response import InputPort
 from app.configuration.domains.schema import Domain
+from app.data_products.status import DataProductStatus
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -13,6 +14,8 @@ class Exploration(ORMModel):
     namespace: str
     description: str
     domain: Domain
+    status: DataProductStatus
+    finalizers: list[str]
 
 
 class CreateExplorationResponse(Exploration):

@@ -6,6 +6,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// AddDataProductFinalizerParams is parameters of add_data_product_finalizer operation.
+type AddDataProductFinalizerParams struct {
+	ID uuid.UUID
+}
+
+// AddExplorationFinalizerParams is parameters of add_exploration_finalizer operation.
+type AddExplorationFinalizerParams struct {
+	ID uuid.UUID
+}
+
 // AddOutputPortDataQualityRunParams is parameters of add_output_port_data_quality_run operation.
 type AddOutputPortDataQualityRunParams struct {
 	DataProductID uuid.UUID
@@ -342,6 +352,12 @@ type RemoveDataProductParams struct {
 	ID uuid.UUID
 }
 
+// RemoveDataProductFinalizerParams is parameters of remove_data_product_finalizer operation.
+type RemoveDataProductFinalizerParams struct {
+	ID        uuid.UUID
+	Finalizer string
+}
+
 // RemoveDataProductLifecycleParams is parameters of remove_data_product_lifecycle operation.
 type RemoveDataProductLifecycleParams struct {
 	ID uuid.UUID
@@ -360,6 +376,17 @@ type RemoveDataProductTypeParams struct {
 // RemoveDomainParams is parameters of remove_domain operation.
 type RemoveDomainParams struct {
 	ID uuid.UUID
+}
+
+// RemoveExplorationParams is parameters of remove_exploration operation.
+type RemoveExplorationParams struct {
+	ID uuid.UUID
+}
+
+// RemoveExplorationFinalizerParams is parameters of remove_exploration_finalizer operation.
+type RemoveExplorationFinalizerParams struct {
+	ID        uuid.UUID
+	Finalizer string
 }
 
 // RemoveInputPortFromExplorationParams is parameters of remove_input_port_from_exploration operation.

@@ -6,6 +6,8 @@ package api
 type OperationName = string
 
 const (
+	AddDataProductFinalizerOperation                  OperationName = "AddDataProductFinalizer"
+	AddExplorationFinalizerOperation                  OperationName = "AddExplorationFinalizer"
 	AddOutputPortDataQualityRunOperation              OperationName = "AddOutputPortDataQualityRun"
 	ApproveOutputPortAsInputPortOperation             OperationName = "ApproveOutputPortAsInputPort"
 	ApproveOutputPortTechnicalAssetLinkOperation      OperationName = "ApproveOutputPortTechnicalAssetLink"
@@ -95,10 +97,13 @@ const (
 	OverwriteOutputPortDataQualitySummaryOperation    OperationName = "OverwriteOutputPortDataQualitySummary"
 	RemoveAllUserNotificationsOperation               OperationName = "RemoveAllUserNotifications"
 	RemoveDataProductOperation                        OperationName = "RemoveDataProduct"
+	RemoveDataProductFinalizerOperation               OperationName = "RemoveDataProductFinalizer"
 	RemoveDataProductLifecycleOperation               OperationName = "RemoveDataProductLifecycle"
 	RemoveDataProductSettingOperation                 OperationName = "RemoveDataProductSetting"
 	RemoveDataProductTypeOperation                    OperationName = "RemoveDataProductType"
 	RemoveDomainOperation                             OperationName = "RemoveDomain"
+	RemoveExplorationOperation                        OperationName = "RemoveExploration"
+	RemoveExplorationFinalizerOperation               OperationName = "RemoveExplorationFinalizer"
 	RemoveInputPortFromExplorationOperation           OperationName = "RemoveInputPortFromExploration"
 	RemoveOutputPortOperation                         OperationName = "RemoveOutputPort"
 	RemoveOutputPortAsInputPortOperation              OperationName = "RemoveOutputPortAsInputPort"
