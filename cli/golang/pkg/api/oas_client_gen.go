@@ -49,8 +49,8 @@ type Invoker interface {
 	BecomeAdmin(ctx context.Context, request *BecomeAdmin) (BecomeAdminRes, error)
 	// CheckAccess invokes check_access operation.
 	//
-	// Allows the requesting user to check whether an access check will fail or succeed.
-	// Useful to conditionally disable parts of the UI that are known to be inaccessible.
+	// Allows the requesting user to check whether an access check will fail or succeed. Useful to
+	// conditionally disable parts of the UI that are known to be inaccessible.
 	//
 	// GET /api/v2/authz/access/{action}
 	CheckAccess(ctx context.Context, params CheckAccessParams) (CheckAccessRes, error)
@@ -1173,8 +1173,8 @@ func (c *Client) sendBecomeAdmin(ctx context.Context, request *BecomeAdmin) (res
 
 // CheckAccess invokes check_access operation.
 //
-// Allows the requesting user to check whether an access check will fail or succeed.
-// Useful to conditionally disable parts of the UI that are known to be inaccessible.
+// Allows the requesting user to check whether an access check will fail or succeed. Useful to
+// conditionally disable parts of the UI that are known to be inaccessible.
 //
 // GET /api/v2/authz/access/{action}
 func (c *Client) CheckAccess(ctx context.Context, params CheckAccessParams) (CheckAccessRes, error) {
