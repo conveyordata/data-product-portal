@@ -35,6 +35,13 @@ class AbstractDataProductService:
         self.db = db
         self.posthog = get_posthog_client()
 
+    def _ensure_not_deleting(self, adp: AbstractDataProduct) -> None:
+        if adp.status == DataProductStatus.DELETING:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
+            )
+
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
         return (
@@ -68,6 +75,10 @@ class AbstractDataProductService:
                 .selectinload(AbstractDataProduct.input_ports)
             ],
         )
+        # Block if the consumer is being deleted
+        self._ensure_not_deleting(adp)
+        # Block if the output port's owning data product is being deleted
+        self._ensure_not_deleting(output_port.data_product)
         if output_port.id in [
             link.dataset_id
             for link in adp.input_ports

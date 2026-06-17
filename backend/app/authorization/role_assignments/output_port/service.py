@@ -18,6 +18,8 @@ from app.authorization.role_assignments.output_port.schema import (
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype, Scope
 from app.core.authz import Action
+from app.data_products.output_ports.model import ensure_output_port_exists
+from app.data_products.status import DataProductStatus
 from app.database.database import ensure_exists
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -54,6 +56,15 @@ class RoleAssignmentService:
         self, dataset_id: UUID, role_id: UUID, user_id: UUID, *, actor: User
     ) -> RoleAssignmentOld:
         self.ensure_is_dataset_scope(role_id)
+        output_port = ensure_output_port_exists(
+            dataset_id,
+            self.db,
+        )
+        if output_port.data_product.status == DataProductStatus.DELETING:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Data product '{output_port.data_product.name}' is pending deletion and cannot be modified",
+            )
         existing_assignment = self.db.scalar(
             select(DatasetRoleAssignmentModel).where(
                 DatasetRoleAssignmentModel.user_id == user_id,

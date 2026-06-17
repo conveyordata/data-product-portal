@@ -206,6 +206,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(
             id, self.db, options=[selectinload(DataProductModel.tags)]
         )
+        self._ensure_not_deleting(current_data_product)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         if (
@@ -238,6 +239,7 @@ class DataProductService(AbstractDataProductService):
         data_product: DataProductAboutUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        self._ensure_not_deleting(current_data_product)
         current_data_product.about = data_product.about
         self.db.commit()
         return current_data_product
@@ -248,6 +250,7 @@ class DataProductService(AbstractDataProductService):
         data_product: DataProductStatusUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        self._ensure_not_deleting(current_data_product)
         current_data_product.status = data_product.status
         self.db.commit()
         return current_data_product
@@ -258,6 +261,7 @@ class DataProductService(AbstractDataProductService):
         usage: DataProductUsageUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        self._ensure_not_deleting(current_data_product)
         current_data_product.usage = usage.usage
         self.db.commit()
         return current_data_product
