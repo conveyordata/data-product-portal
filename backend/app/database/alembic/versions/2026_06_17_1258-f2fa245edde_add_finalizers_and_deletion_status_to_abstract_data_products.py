@@ -1,7 +1,7 @@
 """add finalizers and status to abstract_data_products
 
 Revision ID: f2fa245edde
-Revises: 8aa8df18d6ff
+Revises: 31b753ca1a0c
 Create Date: 2026-06-17 12:58:00.000000
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision: str = "f2fa245edde"
-down_revision: Union[str, None] = "8aa8df18d6ff"
+down_revision: Union[str, None] = "31b753ca1a0c"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
