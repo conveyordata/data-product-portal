@@ -8,8 +8,10 @@ from fastapi import (
     Query,
     Request,
 )
+from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
+from starlette import status
 
 from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import InputPort
@@ -195,7 +197,7 @@ def remove_data_product(
     service = DataProductService(db)
     can_delete = service.mark_for_deletion(id)
     if not can_delete:
-        return
+        return Response(status_code=status.HTTP_202_ACCEPTED)
     _do_delete_data_product(id, db, authenticated_user)
 
 

@@ -2,6 +2,7 @@ from typing import Annotated, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 from starlette import status
@@ -182,6 +183,8 @@ def remove_exploration(
     can_delete = service.mark_for_deletion(id)
     if can_delete:
         service.remove_exploration(id)
+    else:
+        return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
 @router.post(
