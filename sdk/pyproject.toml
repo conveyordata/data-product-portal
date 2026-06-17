@@ -1,6 +1,6 @@
 [project]
-name = "dpp-sdk"
-version = "0.1.0"
+name = "data-product-portal-sdk"
+version = "0.6.0"
 description = "SDK for Data Product Portal"
 authors = [
     {name = "Dataminded"}

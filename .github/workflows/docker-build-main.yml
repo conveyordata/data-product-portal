@@ -7,6 +7,9 @@ on:
 permissions:
   contents: read
 
+env:
+  POETRY_VERSION: '2.4.1'
+
 jobs:
   prep-version:
     runs-on: ubuntu-latest
@@ -60,6 +63,45 @@ jobs:
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG"
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+  publish-sdk-testpypi:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: ["prep-version"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          version: ${{ env.POETRY_VERSION }}
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.4.0
+        with:
+          python-version: "3.13"
+          cache: 'poetry'
+          cache-dependency-path: sdk/poetry.lock
+      - name: Set dev version
+        env:
+          COMMIT: ${{ needs.prep-version.outputs.version }}
+        working-directory: sdk
+        run: |
+          BASE=$(poetry version --short)
+          DEV_VERSION="${BASE}.dev0+${COMMIT}"
+          poetry version "${DEV_VERSION}"
+          echo "Publishing dev version: ${DEV_VERSION}"
+      - name: Build SDK
+        working-directory: sdk
+        run: poetry build
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: sdk/dist/
 
   helm:
     runs-on: ubuntu-latest
