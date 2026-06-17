@@ -318,8 +318,7 @@ jobs:
         working-directory: sdk
         run: |
           BASE=$(poetry version --short)
-          COMMIT=$(git rev-parse --short=7 HEAD)
-          DEV_VERSION="${BASE}.dev0+${COMMIT}"
+          DEV_VERSION="${BASE}.dev${{ github.run_number }}"
           poetry version "${DEV_VERSION}"
           echo "Publishing dev version: ${DEV_VERSION}"
       - name: Build SDK
