@@ -127,7 +127,7 @@ class EmptyEventHandler(AbstractEventHandler):
 {empty_methods_code}
 """
 
-    output_file = sdk_dir / "event_handler.py"
+    output_file = sdk_dir / "provisioner" / "event_handler.py"
     output_file.write_text(base_class_content)
     print(f"✅ Generated base class and empty handler successfully at: {output_file}")
 

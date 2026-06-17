@@ -8,7 +8,7 @@ import pytest
 from fastapi import Request
 from fastapi.datastructures import Headers
 from sdk.api_client.models import ExplorationCreatedEvent
-from sdk.event_handler import EmptyEventHandler
+from sdk.provisioner.event_handler import EmptyEventHandler
 
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
@@ -74,7 +74,10 @@ class WebhookSpy(EmptyEventHandler):
 
 class TestSDKWebhookIntegration:
     def test_sdk_handler_receives_and_parses_generated_cloudevent(
-        self, client, user_with_create_exploration_rights, monkeypatch
+        self,
+        client,
+        user_with_create_exploration_rights,
+        monkeypatch,
     ):
         spy = WebhookSpy()
 
@@ -127,8 +130,7 @@ class TestSDKWebhookIntegration:
         response = client.post(ENDPOINT, json=payload)
         assert response.status_code == 200
         assert spy.captured_payload is not None
-        assert spy.captured_payload.after.name == payload["name"]
-        assert spy.captured_payload.after.description == payload["description"]
+        assert response.json()["id"] == str(spy.captured_payload.id)
 
         patch.stopall()
 

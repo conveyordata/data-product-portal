@@ -25,12 +25,27 @@ class PortalAuth:
         self.client_secret = os.getenv("PORTAL_CLIENT_SECRET", "")
         self.token_url = os.getenv("PORTAL_TOKEN_URL", "")
         self.scope = os.getenv("PORTAL_SCOPE", "openid")
-        self.dev_mode = os.getenv("PORTAL_DEV_MODE", "false").lower()
 
-        if not all([self.client_id, self.client_secret, self.base_url]):
-            raise ValueError("Missing required PORTAL_* environment variables")
+        if not self.base_url:
+            raise ValueError("PORTAL_BASE_URL must be set")
+
+        if not self.client_id or not self.client_secret:
+            logger.info(
+                "No client id or secret provided running without authentication"
+            )
 
         self._token = self._load_token()
+
+    def get_client(self) -> Client | AuthenticatedClient:
+        if not self.client_id or not self.client_secret:
+            logger.info(
+                "No client id or secret provided running without authentication"
+            )
+            return Client(base_url=self.base_url)
+        else:
+            return AuthenticatedClient(
+                base_url=self.base_url, token=self._get_access_token()
+            )
 
     @staticmethod
     def _load_token() -> Optional[dict]:
@@ -55,9 +70,11 @@ class PortalAuth:
             return False
         return time.time() < self._token["expires_at"] - 30
 
-    def get_access_token(self) -> str:
-        if self.dev_mode == "true":
-            return ""
+    def _get_access_token(self) -> str:
+        if not self.client_id or not self.client_secret:
+            raise Exception(
+                "Cannot get access token in client id and secret are not provided"
+            )
         if self._is_token_valid():
             return self._token["access_token"]  # type: ignore
 

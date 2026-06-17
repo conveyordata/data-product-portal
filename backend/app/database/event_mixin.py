@@ -17,6 +17,10 @@ class EventTrackedMixin:
                 # Only access scalar columns — no relationship traversal.
                 return MyPayload(id=self.id, name=self.name, ...)
 
+    The event classes inherit their fields from the payload model
+    (e.g. ``class MyCreatedEvent(V2Event, MyPayload)``); the payload returned
+    by ``to_event`` is unpacked onto the event when it is queued.
+
     Events are flushed to the webhook after a successful HTTP response by
     the ``dispatch_queued_events`` middleware in ``app/main.py``.
     """
@@ -65,36 +69,23 @@ class EventTrackedMixin:
         raise NotImplementedError
 
     @staticmethod
+    def _build_event(event_class: type, target: "EventTrackedMixin"):
+        return event_class(**target.to_event().model_dump())
+
+    @staticmethod
     def _track_insert(mapper, connection, target) -> None:
         from app.core.context import queue_event
 
-        payload = target.to_event()
-        field_name = next(iter(target.create_event_class.model_fields))
-        queue_event(target.create_event_class(**{field_name: payload}))
+        queue_event(EventTrackedMixin._build_event(target.create_event_class, target))
 
     @staticmethod
     def _track_update(mapper, connection, target) -> None:
         from app.core.context import queue_event
 
-        new_payload = target.to_event()
-        old_data = new_payload.model_dump()
-        for attr in inspect(target).attrs:
-            if (
-                attr.history.has_changes()
-                and attr.history.deleted
-                and attr.key in old_data
-            ):
-                old_data[attr.key] = attr.history.deleted[0]
-        old_payload = type(new_payload).model_validate(old_data)
-        if old_payload != new_payload:
-            queue_event(
-                target.update_event_class(before=old_payload, after=new_payload)
-            )
+        queue_event(EventTrackedMixin._build_event(target.update_event_class, target))
 
     @staticmethod
     def _track_delete(mapper, connection, target) -> None:
         from app.core.context import queue_event
 
-        payload = target.to_event()
-        field_name = next(iter(target.delete_event_class.model_fields))
-        queue_event(target.delete_event_class(**{field_name: payload}))
+        queue_event(EventTrackedMixin._build_event(target.delete_event_class, target))

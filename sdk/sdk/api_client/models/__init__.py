@@ -127,7 +127,6 @@ from .event_entity_type import EventEntityType
 from .exploration import Exploration
 from .exploration_created_event import ExplorationCreatedEvent
 from .exploration_deleted_event import ExplorationDeletedEvent
-from .exploration_payload import ExplorationPayload
 from .exploration_updated_event import ExplorationUpdatedEvent
 from .field_dependency import FieldDependency
 from .get_all_platform_service_configurations_response import (
@@ -417,7 +416,6 @@ __all__ = (
     "Exploration",
     "ExplorationCreatedEvent",
     "ExplorationDeletedEvent",
-    "ExplorationPayload",
     "ExplorationUpdatedEvent",
     "FieldDependency",
     "GetAllPlatformServiceConfigurationsResponse",

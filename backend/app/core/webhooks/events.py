@@ -38,33 +38,21 @@ class V2Event(BaseModel):
 
 class ExplorationPayload(BaseModel):
     id: UUID
-    name: str
-    namespace: str
-    description: str | None
-    domain_id: UUID
-    owner_id: UUID
 
 
-class ExplorationCreatedEvent(V2Event):
+class ExplorationCreatedEvent(V2Event, ExplorationPayload):
     @classmethod
     def event_type(cls) -> str:
         return "exploration.created"
 
-    after: ExplorationPayload
 
-
-class ExplorationUpdatedEvent(V2Event):
+class ExplorationUpdatedEvent(V2Event, ExplorationPayload):
     @classmethod
     def event_type(cls) -> str:
         return "exploration.updated"
 
-    before: ExplorationPayload
-    after: ExplorationPayload
 
-
-class ExplorationDeletedEvent(V2Event):
+class ExplorationDeletedEvent(V2Event, ExplorationPayload):
     @classmethod
     def event_type(cls) -> str:
         return "exploration.deleted"
-
-    before: ExplorationPayload

@@ -18,31 +18,27 @@ class _Base(DeclarativeBase):
     pass
 
 
+class Event(BaseModel):
+    pass
+
+
 class _ItemPayload(BaseModel):
     id: str
-    name: str
 
 
-class _ItemCreatedEvent(BaseModel):
-    after: _ItemPayload
-
+class _ItemCreatedEvent(Event, _ItemPayload):
     @classmethod
     def event_type(cls) -> str:
         return "item.created"
 
 
-class _ItemUpdatedEvent(BaseModel):
-    before: _ItemPayload
-    after: _ItemPayload
-
+class _ItemUpdatedEvent(Event, _ItemPayload):
     @classmethod
     def event_type(cls) -> str:
         return "item.updated"
 
 
-class _ItemDeletedEvent(BaseModel):
-    before: _ItemPayload
-
+class _ItemDeletedEvent(Event, _ItemPayload):
     @classmethod
     def event_type(cls) -> str:
         return "item.deleted"
@@ -61,7 +57,7 @@ class _Item(
     name = Column(String)
 
     def to_event(self) -> _ItemPayload:
-        return _ItemPayload(id=self.id, name=self.name)
+        return _ItemPayload(id=self.id)
 
 
 @pytest.fixture
@@ -88,7 +84,7 @@ def test_insert_queues_created_event(db):
     events = pop_events()
     assert len(events) == 1
     assert isinstance(events[0], _ItemCreatedEvent)
-    assert events[0].after.name == "hello"
+    assert events[0].id == item.id
 
 
 def test_update_queues_updated_event(db):
@@ -103,20 +99,7 @@ def test_update_queues_updated_event(db):
     events = pop_events()
     assert len(events) == 1
     assert isinstance(events[0], _ItemUpdatedEvent)
-    assert events[0].before.name == "before"
-    assert events[0].after.name == "after"
-
-
-def test_update_with_no_change_does_not_queue_event(db):
-    item = _Item(id=str(uuid.uuid4()), name="same")
-    db.add(item)
-    db.flush()
-    _pending_events.set([])  # discard the created event
-
-    item.name = "same"
-    db.flush()
-
-    assert pop_events() == []
+    assert events[0].id == item.id
 
 
 def test_delete_queues_deleted_event(db):
@@ -131,7 +114,7 @@ def test_delete_queues_deleted_event(db):
     events = pop_events()
     assert len(events) == 1
     assert isinstance(events[0], _ItemDeletedEvent)
-    assert events[0].before.name == "bye"
+    assert events[0].id == item.id
 
 
 def test_no_queue_outside_context(db):
