@@ -8,10 +8,8 @@ from app.core.logging import logger
 from app.data_products.status import DataProductStatus
 from app.database.database import SessionLocal
 
-# CHECK_INTERVAL_SECONDS = 600  # run every 10 minutes
-# STUCK_THRESHOLD_SECONDS = 3600  # warn after 1 hour in DELETING
-CHECK_INTERVAL_SECONDS = 10  # run every 10 minutes
-STUCK_THRESHOLD_SECONDS = 30  # warn after 1 hour in DELETING
+CHECK_INTERVAL_SECONDS = 600  # run every 10 minutes
+STUCK_THRESHOLD_SECONDS = 3600  # warn after 1 hour in DELETING
 
 
 async def check_stuck_deletions() -> None:
@@ -35,6 +33,7 @@ async def check_stuck_deletions() -> None:
                     # updated_on is stored without timezone; treat as UTC
                     if last_updated.tzinfo is None:
                         last_updated = last_updated.replace(tzinfo=timezone.utc)
+
                     age_seconds = (now - last_updated).total_seconds()
                     if age_seconds >= STUCK_THRESHOLD_SECONDS:
                         logger.warning(
