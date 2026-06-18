@@ -1,8 +1,8 @@
 import { HttpResponse, http } from 'msw';
 import {
+    AbstractDataProductStatus,
     type DataProduct,
     DataProductIconKey,
-    DataProductStatus,
     DecisionStatus,
     type GetDataProductInputPortsResponse,
     type GetDataProductRolledUpTagsResponse,
@@ -20,7 +20,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         name: 'Sales Analytics',
         description: 'Analytics data product for sales team',
         namespace: 'sales namespace',
-        status: DataProductStatus.Active,
+        status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-1', value: 'analytics-tag' }],
         usage: null,
         domain: { id: 'domain-1', name: 'Sales-domain', description: 'Sales domain' },
@@ -42,7 +42,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         finalizers: ['finalizer-1'],
         description: 'Customer behavior and insights',
         namespace: 'marketing',
-        status: DataProductStatus.Active,
+        status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-2', value: 'insights' }],
         usage: null,
         domain: { id: 'domain-2', name: 'Marketing', description: 'Marketing domain' },

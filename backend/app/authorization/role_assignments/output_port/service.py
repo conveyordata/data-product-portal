@@ -19,7 +19,7 @@ from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype, Scope
 from app.core.authz import Action
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -60,7 +60,7 @@ class RoleAssignmentService:
             dataset_id,
             self.db,
         )
-        if output_port.data_product.status == DataProductStatus.DELETING:
+        if output_port.data_product.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Data product '{output_port.data_product.name}' is pending deletion and cannot be modified",

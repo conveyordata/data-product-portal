@@ -7,7 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.data_product_status import DataProductStatus
+from ..models.abstract_data_product_status import AbstractDataProductStatus
 
 if TYPE_CHECKING:
     from ..models.domain import Domain
@@ -26,7 +26,7 @@ class GetExplorationResponse:
         namespace (str):
         description (str):
         domain (Domain):
-        status (DataProductStatus):
+        status (AbstractDataProductStatus):
         finalizers (list[str]):
         owner (User):
     """
@@ -36,7 +36,7 @@ class GetExplorationResponse:
     namespace: str
     description: str
     domain: Domain
-    status: DataProductStatus
+    status: AbstractDataProductStatus
     finalizers: list[str]
     owner: User
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -91,7 +91,7 @@ class GetExplorationResponse:
 
         domain = Domain.from_dict(d.pop("domain"))
 
-        status = DataProductStatus(d.pop("status"))
+        status = AbstractDataProductStatus(d.pop("status"))
 
         finalizers = cast(list[str], d.pop("finalizers"))
 

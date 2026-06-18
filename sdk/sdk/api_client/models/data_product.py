@@ -7,7 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.data_product_status import DataProductStatus
+from ..models.abstract_data_product_status import AbstractDataProductStatus
 
 if TYPE_CHECKING:
     from ..models.data_product_type import DataProductType
@@ -24,7 +24,7 @@ class DataProduct:
         name (str):
         namespace (str):
         description (str):
-        status (DataProductStatus):
+        status (AbstractDataProductStatus):
         type_ (DataProductType):
     """
 
@@ -32,7 +32,7 @@ class DataProduct:
     name: str
     namespace: str
     description: str
-    status: DataProductStatus
+    status: AbstractDataProductStatus
     type_: DataProductType
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -77,7 +77,7 @@ class DataProduct:
 
         description = d.pop("description")
 
-        status = DataProductStatus(d.pop("status"))
+        status = AbstractDataProductStatus(d.pop("status"))
 
         type_ = DataProductType.from_dict(d.pop("type"))
 

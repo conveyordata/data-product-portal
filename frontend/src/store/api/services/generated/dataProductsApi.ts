@@ -331,7 +331,7 @@ export type GetDataProductsResponseItem = {
   name: string;
   description: string;
   namespace: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   finalizers: string[];
   tags: Tag[];
   usage: string | null;
@@ -363,7 +363,7 @@ export type GetDataProductResponse = {
   name: string;
   description: string;
   namespace: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   finalizers: string[];
   tags: Tag[];
   usage: string | null;
@@ -379,7 +379,7 @@ export type DataProductAboutUpdate = {
   about: string;
 };
 export type DataProductStatusUpdate = {
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
 };
 export type DataProductUsageUpdate = {
   usage: string;
@@ -456,7 +456,7 @@ export type DataProduct = {
   name: string;
   namespace: string;
   description: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   type: DataProductType;
 };
 export type AzureBlobTechnicalAssetConfiguration = {
@@ -603,7 +603,7 @@ export type DataProductSettingValue = {
 export type GetDataProductSettingsResponse = {
   data_product_settings: DataProductSettingValue[];
 };
-export enum DataProductStatus {
+export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
   Archived = "archived",

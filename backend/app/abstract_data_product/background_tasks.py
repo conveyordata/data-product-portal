@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.abstract_data_product.model import AbstractDataProduct
 from app.core.logging import logger
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.database.database import SessionLocal
 
 CHECK_INTERVAL_SECONDS = 600  # run every 10 minutes
@@ -19,7 +19,8 @@ async def check_stuck_deletions() -> None:
                 stuck = (
                     db.execute(
                         select(AbstractDataProduct).where(
-                            AbstractDataProduct.status == DataProductStatus.DELETING
+                            AbstractDataProduct.status
+                            == AbstractDataProductStatus.DELETING
                         )
                     )
                     .scalars()

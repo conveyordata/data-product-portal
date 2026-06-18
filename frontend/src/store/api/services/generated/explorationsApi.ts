@@ -137,7 +137,7 @@ export type Exploration = {
   namespace: string;
   description: string;
   domain: Domain;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   finalizers: string[];
 };
 export type GetExplorationsResponse = {
@@ -159,7 +159,7 @@ export type CreateExplorationResponse = {
   namespace: string;
   description: string;
   domain: Domain;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   finalizers: string[];
 };
 export type RequestInputPortsForExplorationRequest = {
@@ -189,7 +189,7 @@ export type GetExplorationResponse = {
   namespace: string;
   description: string;
   domain: Domain;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   finalizers: string[];
   owner: User;
 };
@@ -223,7 +223,7 @@ export type RequestInputPortsForExplorationResponse = {
 export type FinalizerRequest = {
   finalizer: string;
 };
-export enum DataProductStatus {
+export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
   Archived = "archived",

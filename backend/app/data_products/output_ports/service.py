@@ -46,7 +46,7 @@ from app.data_products.output_ports.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
@@ -83,7 +83,7 @@ class OutputPortService:
 
     def _ensure_data_product_not_deleting(self, data_product_id: UUID) -> None:
         dp = ensure_data_product_exists(data_product_id, self.db)
-        if dp.status == DataProductStatus.DELETING:
+        if dp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Data product '{dp.name}' is pending deletion and cannot be modified",

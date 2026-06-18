@@ -1,6 +1,6 @@
 import { HttpResponse, http } from 'msw';
 import {
-    DataProductStatus,
+    AbstractDataProductStatus,
     DecisionStatus,
     type Exploration,
     type GetExplorationInputPortsResponse,
@@ -19,7 +19,7 @@ export const mockExplorations: Exploration[] = [
         namespace: 'sales namespace',
         domain: { id: 'domain-1', name: 'Sales-domain', description: 'Sales domain' },
         finalizers: ['finalizer-1', 'finalizer-2'],
-        status: DataProductStatus.Active,
+        status: AbstractDataProductStatus.Active,
     },
     {
         id: 'exp-2',
@@ -28,7 +28,7 @@ export const mockExplorations: Exploration[] = [
         namespace: 'marketing',
         domain: { id: 'domain-2', name: 'Marketing', description: 'Marketing domain' },
         finalizers: [],
-        status: DataProductStatus.Active,
+        status: AbstractDataProductStatus.Active,
     },
 ];
 

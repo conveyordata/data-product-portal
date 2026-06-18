@@ -6,7 +6,7 @@ from app.abstract_data_product.model import AbstractDataProductType
 from app.configuration.domains.schema import Domain
 from app.data_products.output_ports.input_ports.schema import InputPortBase
 from app.data_products.output_ports.schema import OutputPort
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
 
 
@@ -23,7 +23,7 @@ class GetAbstractDataProductResponse(ORMModel):
     description: str
     domain: Domain
     abstract_data_product_type: AbstractDataProductType
-    status: DataProductStatus
+    status: AbstractDataProductStatus
     finalizers: list[str]
 
 

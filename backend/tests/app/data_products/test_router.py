@@ -307,12 +307,12 @@ class TestDataProductsRouter:
 
     def test_remove_finalizer_triggers_deletion(self, client):
         """Removing the last finalizer from a DELETING product deletes it."""
-        from app.data_products.status import DataProductStatus
+        from app.data_products.status import AbstractDataProductStatus
 
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory(
             finalizers=["last-one"],
-            status=DataProductStatus.DELETING.value,
+            status=AbstractDataProductStatus.DELETING.value,
         )
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -331,12 +331,12 @@ class TestDataProductsRouter:
 
     def test_remove_finalizer_not_last_does_not_delete(self, client):
         """Removing a finalizer when others remain leaves the product in DELETING."""
-        from app.data_products.status import DataProductStatus
+        from app.data_products.status import AbstractDataProductStatus
 
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory(
             finalizers=["a", "b"],
-            status=DataProductStatus.DELETING.value,
+            status=AbstractDataProductStatus.DELETING.value,
         )
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

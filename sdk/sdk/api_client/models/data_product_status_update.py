@@ -6,7 +6,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.data_product_status import DataProductStatus
+from ..models.abstract_data_product_status import AbstractDataProductStatus
 
 T = TypeVar("T", bound="DataProductStatusUpdate")
 
@@ -15,10 +15,10 @@ T = TypeVar("T", bound="DataProductStatusUpdate")
 class DataProductStatusUpdate:
     """
     Attributes:
-        status (DataProductStatus):
+        status (AbstractDataProductStatus):
     """
 
-    status: DataProductStatus
+    status: AbstractDataProductStatus
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -37,7 +37,7 @@ class DataProductStatusUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        status = DataProductStatus(d.pop("status"))
+        status = AbstractDataProductStatus(d.pop("status"))
 
         data_product_status_update = cls(
             status=status,

@@ -19,7 +19,7 @@ from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype, Scope
 from app.core.authz import Action
 from app.data_products.model import ensure_data_product_exists
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
 from app.pending_actions.schema import DataProductRoleAssignmentPendingActionOld
 from app.users.model import User as UserModel
@@ -60,7 +60,7 @@ class RoleAssignmentService:
     ) -> DataProductRoleAssignment:
         self.ensure_is_data_product_scope(role_id)
         dp = ensure_data_product_exists(data_product_id, self.db)
-        if dp.status == DataProductStatus.DELETING:
+        if dp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Data product '{dp.name}' is pending deletion and cannot be modified",

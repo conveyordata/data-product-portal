@@ -11,7 +11,7 @@ from app.configuration.domains.model import Domain
 from app.data_products.output_ports.model import (
     InputPort,
 )
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
@@ -43,16 +43,16 @@ class AbstractDataProduct(Base, BaseORM):
         nullable=False,
     )
 
-    status: Mapped[DataProductStatus] = mapped_column(
+    status: Mapped[AbstractDataProductStatus] = mapped_column(
         SAEnum(
-            DataProductStatus,
+            AbstractDataProductStatus,
             values_callable=lambda enum: [e.value for e in enum],
             native_enum=False,
             validate_strings=True,
         ),
         nullable=False,
-        default=DataProductStatus.ACTIVE,
-        server_default=DataProductStatus.ACTIVE.value,
+        default=AbstractDataProductStatus.ACTIVE,
+        server_default=AbstractDataProductStatus.ACTIVE.value,
     )
 
     description = Column(String)

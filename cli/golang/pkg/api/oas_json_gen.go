@@ -289,6 +289,50 @@ func (s *AbstractDataProductInfo) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes AbstractDataProductStatus as json.
+func (s AbstractDataProductStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes AbstractDataProductStatus from json.
+func (s *AbstractDataProductStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AbstractDataProductStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch AbstractDataProductStatus(v) {
+	case AbstractDataProductStatusPending:
+		*s = AbstractDataProductStatusPending
+	case AbstractDataProductStatusActive:
+		*s = AbstractDataProductStatusActive
+	case AbstractDataProductStatusArchived:
+		*s = AbstractDataProductStatusArchived
+	case AbstractDataProductStatusDeleting:
+		*s = AbstractDataProductStatusDeleting
+	default:
+		*s = AbstractDataProductStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s AbstractDataProductStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AbstractDataProductStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes AbstractDataProductType as json.
 func (s AbstractDataProductType) Encode(e *jx.Encoder) {
 	e.Str(string(s))
@@ -6972,50 +7016,6 @@ func (s *DataProductSettingsGetItem) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DataProductSettingsGetItem) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes DataProductStatus as json.
-func (s DataProductStatus) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes DataProductStatus from json.
-func (s *DataProductStatus) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DataProductStatus to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch DataProductStatus(v) {
-	case DataProductStatusPending:
-		*s = DataProductStatusPending
-	case DataProductStatusActive:
-		*s = DataProductStatusActive
-	case DataProductStatusArchived:
-		*s = DataProductStatusArchived
-	case DataProductStatusDeleting:
-		*s = DataProductStatusDeleting
-	default:
-		*s = DataProductStatus(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s DataProductStatus) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DataProductStatus) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

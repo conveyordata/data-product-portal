@@ -1,21 +1,21 @@
 import type { BadgeProps } from 'antd';
 import type { TFunction } from 'i18next';
-import { DataProductStatus, TechnicalAssetStatus } from '@/store/api/services/generated/dataProductsApi.ts';
+import { AbstractDataProductStatus, TechnicalAssetStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { OutputPortStatus } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { DecisionStatus } from '@/types/roles';
 
 export function getStatusLabel(
     t: TFunction,
-    status: TechnicalAssetStatus | DataProductStatus | OutputPortStatus,
+    status: TechnicalAssetStatus | AbstractDataProductStatus | OutputPortStatus,
 ): string {
     switch (status) {
-        case DataProductStatus.Pending || TechnicalAssetStatus.Pending || OutputPortStatus.Pending:
+        case AbstractDataProductStatus.Pending || TechnicalAssetStatus.Pending || OutputPortStatus.Pending:
             return t('Pending');
-        case DataProductStatus.Active || TechnicalAssetStatus.Active || OutputPortStatus.Active:
+        case AbstractDataProductStatus.Active || TechnicalAssetStatus.Active || OutputPortStatus.Active:
             return t('Active');
-        case DataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
+        case AbstractDataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
             return t('Deleted');
-        case DataProductStatus.Deleting:
+        case AbstractDataProductStatus.Deleting:
             return t('Deleting');
         default:
             return t('Unknown');
@@ -23,16 +23,16 @@ export function getStatusLabel(
 }
 
 export function getBadgeStatus(
-    status: TechnicalAssetStatus | DataProductStatus | OutputPortStatus,
+    status: TechnicalAssetStatus | AbstractDataProductStatus | OutputPortStatus,
 ): BadgeProps['status'] {
     switch (status) {
-        case DataProductStatus.Pending || TechnicalAssetStatus.Pending || OutputPortStatus.Pending:
+        case AbstractDataProductStatus.Pending || TechnicalAssetStatus.Pending || OutputPortStatus.Pending:
             return 'processing';
-        case DataProductStatus.Active || TechnicalAssetStatus.Active || OutputPortStatus.Active:
+        case AbstractDataProductStatus.Active || TechnicalAssetStatus.Active || OutputPortStatus.Active:
             return 'success';
-        case DataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
+        case AbstractDataProductStatus.Archived || TechnicalAssetStatus.Archived || OutputPortStatus.Archived:
             return 'error';
-        case DataProductStatus.Deleting:
+        case AbstractDataProductStatus.Deleting:
             return 'error';
         default:
             return 'default';

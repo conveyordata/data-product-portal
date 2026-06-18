@@ -32,6 +32,21 @@ func (s *AbstractDataProductInfo) Validate() error {
 	return nil
 }
 
+func (s AbstractDataProductStatus) Validate() error {
+	switch s {
+	case "pending":
+		return nil
+	case "active":
+		return nil
+	case "archived":
+		return nil
+	case "deleting":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s AbstractDataProductType) Validate() error {
 	switch s {
 	case "unknown":
@@ -927,21 +942,6 @@ func (s *DataProductSettingsGetItem) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
-}
-
-func (s DataProductStatus) Validate() error {
-	switch s {
-	case "pending":
-		return nil
-	case "active":
-		return nil
-	case "archived":
-		return nil
-	case "deleting":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
 }
 
 func (s *DataProductStatusUpdate) Validate() error {

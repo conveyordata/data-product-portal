@@ -248,13 +248,13 @@ class TestExplorationRouter:
 
     def test_remove_finalizer_from_exploration_triggers_deletion(self, client):
         """Removing the last finalizer from a DELETING exploration deletes it."""
-        from app.data_products.status import DataProductStatus
+        from app.data_products.status import AbstractDataProductStatus
 
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(
             owner=user,
             finalizers=["last-one"],
-            status=DataProductStatus.DELETING.value,
+            status=AbstractDataProductStatus.DELETING.value,
         )
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -267,13 +267,13 @@ class TestExplorationRouter:
 
     def test_remove_finalizer_from_exploration_not_last(self, client):
         """Removing a non-last finalizer keeps the exploration alive."""
-        from app.data_products.status import DataProductStatus
+        from app.data_products.status import AbstractDataProductStatus
 
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(
             owner=user,
             finalizers=["a", "b"],
-            status=DataProductStatus.DELETING.value,
+            status=AbstractDataProductStatus.DELETING.value,
         )
         role = RoleFactory(
             scope=Scope.GLOBAL,

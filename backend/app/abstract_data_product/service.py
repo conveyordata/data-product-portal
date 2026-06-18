@@ -26,7 +26,7 @@ from app.data_products.output_ports.input_ports.model import (
 from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.users.model import User
 
 
@@ -36,7 +36,7 @@ class AbstractDataProductService:
         self.posthog = get_posthog_client()
 
     def _ensure_not_deleting(self, adp: AbstractDataProduct) -> None:
-        if adp.status == DataProductStatus.DELETING:
+        if adp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
@@ -213,11 +213,13 @@ class AbstractDataProductService:
         Finalizers block deletion until they are all removed.
         """
         adp = ensure_abstract_data_product_exists(id, self.db)
-        if finalizer in (adp.finalizers or []):
+        if adp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Finalizer '{finalizer}' already exists",
+                detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is already pending deletion",
             )
+        if finalizer in (adp.finalizers or []):
+            return adp
         adp.finalizers = list(adp.finalizers or []) + [finalizer]
         self.db.commit()
         return adp
@@ -231,7 +233,7 @@ class AbstractDataProductService:
         adp = ensure_abstract_data_product_exists(id, self.db)
         if not adp.finalizers:
             return True
-        adp.status = DataProductStatus.DELETING
+        adp.status = AbstractDataProductStatus.DELETING
         self.db.commit()
         return False
 
@@ -251,4 +253,4 @@ class AbstractDataProductService:
         current.remove(finalizer)
         adp.finalizers = current
         self.db.commit()
-        return adp.status == DataProductStatus.DELETING and not current
+        return adp.status == AbstractDataProductStatus.DELETING and not current

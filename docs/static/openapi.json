@@ -7551,6 +7551,16 @@
         ],
         "title": "AbstractDataProductInfo"
       },
+      "AbstractDataProductStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "active",
+          "archived",
+          "deleting"
+        ],
+        "title": "AbstractDataProductStatus"
+      },
       "AbstractDataProductType": {
         "type": "string",
         "enum": [
@@ -8063,7 +8073,7 @@
             "$ref": "#/components/schemas/Domain"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           },
           "finalizers": {
             "items": {
@@ -8449,7 +8459,7 @@
             "title": "Description"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           },
           "type": {
             "$ref": "#/components/schemas/DataProductType"
@@ -9234,20 +9244,10 @@
         ],
         "title": "DataProductSettingsGetItem"
       },
-      "DataProductStatus": {
-        "type": "string",
-        "enum": [
-          "pending",
-          "active",
-          "archived",
-          "deleting"
-        ],
-        "title": "DataProductStatus"
-      },
       "DataProductStatusUpdate": {
         "properties": {
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           }
         },
         "type": "object",
@@ -10261,7 +10261,7 @@
             "$ref": "#/components/schemas/Domain"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           },
           "finalizers": {
             "items": {
@@ -10486,7 +10486,7 @@
             "title": "Namespace"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           },
           "finalizers": {
             "items": {
@@ -10627,7 +10627,7 @@
             "title": "Namespace"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           },
           "finalizers": {
             "items": {
@@ -10955,7 +10955,7 @@
             "$ref": "#/components/schemas/Domain"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           },
           "finalizers": {
             "items": {

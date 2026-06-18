@@ -2,7 +2,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.abstract_data_product.service import AbstractDataProductService
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from tests.factories import (
     DataProductFactory,
     DatasetFactory,
@@ -21,7 +21,7 @@ class TestMarkForDeletion:
 
         assert can_delete is True
         # Status should not change — caller is responsible for actual deletion
-        assert dp.status != DataProductStatus.DELETING
+        assert dp.status != AbstractDataProductStatus.DELETING
 
     def test_returns_false_and_marks_deleting_when_finalizers_present(self, session):
         """Deletion is blocked and status becomes DELETING when finalizers exist."""
@@ -32,7 +32,7 @@ class TestMarkForDeletion:
 
         assert can_delete is False
         session.refresh(dp)
-        assert dp.status == DataProductStatus.DELETING
+        assert dp.status == AbstractDataProductStatus.DELETING
 
     def test_works_for_explorations_too(self, session):
         """Finalizer logic applies to explorations via abstract base."""
@@ -43,7 +43,7 @@ class TestMarkForDeletion:
 
         assert can_delete is False
         session.refresh(exploration)
-        assert exploration.status == DataProductStatus.DELETING
+        assert exploration.status == AbstractDataProductStatus.DELETING
 
     def test_raises_for_unknown_id(self, session):
         import uuid
@@ -78,15 +78,24 @@ class TestAddFinalizer:
         assert "system-b" in dp.finalizers
         assert len(dp.finalizers) == 2
 
-    def test_duplicate_finalizer_raises_409(self, session):
+    def test_duplicate_finalizer_is_idempotent(self, session):
         service = AbstractDataProductService(db=session)
         dp = DataProductFactory(finalizers=["existing"])
 
+        result = service.add_finalizer(dp.id, "existing")
+
+        session.refresh(dp)
+        assert dp.finalizers == ["existing"]
+        assert result.id == dp.id
+
+    def test_add_finalizer_blocked_when_already_deleting(self, session):
+        service = AbstractDataProductService(db=session)
+        dp = DataProductFactory(finalizers=[], status=DataProductStatus.DELETING.value)
+
         with pytest.raises(HTTPException) as exc_info:
-            service.add_finalizer(dp.id, "existing")
+            service.add_finalizer(dp.id, "new-system")
 
         assert exc_info.value.status_code == 409
-        assert "existing" in exc_info.value.detail
 
 
 class TestRemoveFinalizer:
@@ -105,7 +114,7 @@ class TestRemoveFinalizer:
         """Removing the last finalizer from a DELETING product signals the caller to delete."""
         service = AbstractDataProductService(db=session)
         dp = DataProductFactory(
-            finalizers=["last-one"], status=DataProductStatus.DELETING.value
+            finalizers=["last-one"], status=AbstractDataProductStatus.DELETING.value
         )
 
         should_delete = service.remove_finalizer(dp.id, "last-one")
@@ -118,7 +127,7 @@ class TestRemoveFinalizer:
         """Still has remaining finalizers — do not delete yet."""
         service = AbstractDataProductService(db=session)
         dp = DataProductFactory(
-            finalizers=["a", "b"], status=DataProductStatus.DELETING.value
+            finalizers=["a", "b"], status=AbstractDataProductStatus.DELETING.value
         )
 
         should_delete = service.remove_finalizer(dp.id, "a")
@@ -154,7 +163,7 @@ class TestFullDeletionLifecycle:
 
         assert can_delete is False
         session.refresh(dp)
-        assert dp.status == DataProductStatus.DELETING
+        assert dp.status == AbstractDataProductStatus.DELETING
         assert "my-cleanup-job" in dp.finalizers
 
         should_delete = service.remove_finalizer(dp.id, "my-cleanup-job")
@@ -170,7 +179,7 @@ class TestFullDeletionLifecycle:
 
         assert can_delete is True
         session.refresh(dp)
-        assert dp.status != DataProductStatus.DELETING
+        assert dp.status != AbstractDataProductStatus.DELETING
 
 
 class TestEnsureNotDeleting:
@@ -178,7 +187,7 @@ class TestEnsureNotDeleting:
         """A data product in DELETING state cannot consume new output ports."""
         service = AbstractDataProductService(db=session)
         actor = UserFactory()
-        consumer = DataProductFactory(status=DataProductStatus.DELETING.value)
+        consumer = DataProductFactory(status=AbstractDataProductStatus.DELETING.value)
         output_port = DatasetFactory()
 
         with pytest.raises(HTTPException) as exc_info:
@@ -196,8 +205,8 @@ class TestEnsureNotDeleting:
         """Cannot consume an output port whose owning data product is DELETING."""
         service = AbstractDataProductService(db=session)
         actor = UserFactory()
-        consumer = DataProductFactory(status=DataProductStatus.ACTIVE.value)
-        provider = DataProductFactory(status=DataProductStatus.DELETING.value)
+        consumer = DataProductFactory(status=AbstractDataProductStatus.ACTIVE.value)
+        provider = DataProductFactory(status=AbstractDataProductStatus.DELETING.value)
         output_port = DatasetFactory(data_product=provider)
 
         with pytest.raises(HTTPException) as exc_info:
