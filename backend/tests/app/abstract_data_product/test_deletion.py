@@ -90,7 +90,9 @@ class TestAddFinalizer:
 
     def test_add_finalizer_blocked_when_already_deleting(self, session):
         service = AbstractDataProductService(db=session)
-        dp = DataProductFactory(finalizers=[], status=DataProductStatus.DELETING.value)
+        dp = DataProductFactory(
+            finalizers=[], status=AbstractDataProductStatus.DELETING.value
+        )
 
         with pytest.raises(HTTPException) as exc_info:
             service.add_finalizer(dp.id, "new-system")

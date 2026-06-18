@@ -104,7 +104,7 @@ def upgrade() -> None:
         sa.Column("about", sa.String),
         sa.Column(
             "status",
-            sa.Enum(AbstractDataProductStatus),
+            sa.Enum(AbstractDataProductStatus, name="dataproductstatus"),
             default=AbstractDataProductStatus.PENDING,
         ),
         sa.Column("type_id", UUID, sa.ForeignKey("data_product_types.id")),
@@ -253,11 +253,11 @@ def downgrade() -> None:
     op.drop_table("business_areas")
     op.drop_table("users")
 
-    op.execute("DROP TYPE dataproducticonkey;")
-    op.execute("DROP TYPE dataproductstatus;")
-    op.execute("DROP TYPE DataProductUserRole;")
-    op.execute("DROP TYPE OutputPortStatus;")
-    op.execute("DROP TYPE OutputPortAccessType;")
-    op.execute("DROP TYPE DataProductMembershipStatus;")
-    op.execute("DROP TYPE DataProductDatasetLinkStatus;")
-    op.execute("DROP TYPE DeviceFlowStatus;")
+    op.execute("DROP TYPE IF EXISTS dataproducticonkey;")
+    op.execute("DROP TYPE IF EXISTS dataproductstatus;")
+    op.execute("DROP TYPE IF EXISTS DataProductUserRole;")
+    op.execute("DROP TYPE IF EXISTS OutputPortStatus;")
+    op.execute("DROP TYPE IF EXISTS OutputPortAccessType;")
+    op.execute("DROP TYPE IF EXISTS DataProductMembershipStatus;")
+    op.execute("DROP TYPE IF EXISTS DataProductDatasetLinkStatus;")
+    op.execute("DROP TYPE IF EXISTS DeviceFlowStatus;")
