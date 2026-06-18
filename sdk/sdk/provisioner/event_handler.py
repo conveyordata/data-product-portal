@@ -5,12 +5,18 @@ from typing import Any
 from fastapi import HTTPException, Request
 
 from sdk.api_client.models import (
+    CloudEventDataProductCreatedEvent,
+    CloudEventDataProductDeletedEvent,
+    CloudEventDataProductUpdatedEvent,
     CloudEventExplorationCreatedEvent,
     CloudEventExplorationDeletedEvent,
     CloudEventExplorationUpdatedEvent,
     CloudEventInputPortCreatedEvent,
     CloudEventInputPortDeletedEvent,
     CloudEventInputPortUpdatedEvent,
+    DataProductCreatedEvent,
+    DataProductDeletedEvent,
+    DataProductUpdatedEvent,
     ExplorationCreatedEvent,
     ExplorationDeletedEvent,
     ExplorationUpdatedEvent,
@@ -49,6 +55,12 @@ class AbstractEventHandler(ABC):
         elif event_type == "exploration.deleted":
             parsed_event = CloudEventExplorationDeletedEvent.from_dict(payload)
             return await self.on_exploration_deleted(parsed_event.data)
+        elif event_type == "data_product.deleted":
+            parsed_event = CloudEventDataProductDeletedEvent.from_dict(payload)
+            return await self.on_data_product_deleted(parsed_event.data)
+        elif event_type == "data_product.created":
+            parsed_event = CloudEventDataProductCreatedEvent.from_dict(payload)
+            return await self.on_data_product_created(parsed_event.data)
         elif event_type == "input_port.deleted":
             parsed_event = CloudEventInputPortDeletedEvent.from_dict(payload)
             return await self.on_input_port_deleted(parsed_event.data)
@@ -58,6 +70,9 @@ class AbstractEventHandler(ABC):
         elif event_type == "exploration.updated":
             parsed_event = CloudEventExplorationUpdatedEvent.from_dict(payload)
             return await self.on_exploration_updated(parsed_event.data)
+        elif event_type == "data_product.updated":
+            parsed_event = CloudEventDataProductUpdatedEvent.from_dict(payload)
+            return await self.on_data_product_updated(parsed_event.data)
         else:
             # Standard practice is to accept unhandled hooks with a 202/success to avoid webhook retries
             return {
@@ -81,6 +96,16 @@ class AbstractEventHandler(ABC):
         pass
 
     @abstractmethod
+    async def on_data_product_deleted(self, data: DataProductDeletedEvent) -> Any:
+        """Handler for the parsed payload of 'data_product.deleted'"""
+        pass
+
+    @abstractmethod
+    async def on_data_product_created(self, data: DataProductCreatedEvent) -> Any:
+        """Handler for the parsed payload of 'data_product.created'"""
+        pass
+
+    @abstractmethod
     async def on_input_port_deleted(self, data: InputPortDeletedEvent) -> Any:
         """Handler for the parsed payload of 'input_port.deleted'"""
         pass
@@ -93,6 +118,11 @@ class AbstractEventHandler(ABC):
     @abstractmethod
     async def on_exploration_updated(self, data: ExplorationUpdatedEvent) -> Any:
         """Handler for the parsed payload of 'exploration.updated'"""
+        pass
+
+    @abstractmethod
+    async def on_data_product_updated(self, data: DataProductUpdatedEvent) -> Any:
+        """Handler for the parsed payload of 'data_product.updated'"""
         pass
 
 
@@ -111,6 +141,12 @@ class EmptyEventHandler(AbstractEventHandler):
     async def on_exploration_deleted(self, data: ExplorationDeletedEvent) -> Any:
         pass
 
+    async def on_data_product_deleted(self, data: DataProductDeletedEvent) -> Any:
+        pass
+
+    async def on_data_product_created(self, data: DataProductCreatedEvent) -> Any:
+        pass
+
     async def on_input_port_deleted(self, data: InputPortDeletedEvent) -> Any:
         pass
 
@@ -118,4 +154,7 @@ class EmptyEventHandler(AbstractEventHandler):
         pass
 
     async def on_exploration_updated(self, data: ExplorationUpdatedEvent) -> Any:
+        pass
+
+    async def on_data_product_updated(self, data: DataProductUpdatedEvent) -> Any:
         pass
