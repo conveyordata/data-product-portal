@@ -26,7 +26,7 @@ DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/v2/data_products/{}/output_ports/{}/inpu
 DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 
 
-class TestDataProductsDatasetsRouter:
+class TestInputPortsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_request_input_ports_for_data_product(self, client):

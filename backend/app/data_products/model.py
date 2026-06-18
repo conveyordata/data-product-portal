@@ -4,7 +4,8 @@ from sqlalchemy import Column, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
 
-from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
+from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )

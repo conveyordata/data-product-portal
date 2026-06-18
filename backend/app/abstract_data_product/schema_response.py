@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.abstract_data_product.model import AbstractDataProductType
+from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.domains.schema import Domain
 from app.data_products.output_ports.input_ports.schema import InputPortBase
 from app.data_products.output_ports.schema import OutputPort

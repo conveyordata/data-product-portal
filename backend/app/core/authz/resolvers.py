@@ -5,6 +5,9 @@ from fastapi import Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.input_ports.model import (
+    InputPort,
+)
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
@@ -14,9 +17,6 @@ from app.authorization.role_assignments.output_port.model import (
 from app.data_products.model import DataProduct
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
-)
-from app.data_products.output_ports.input_ports.model import (
-    InputPort,
 )
 from app.data_products.output_ports.model import Dataset
 from app.data_products.technical_assets.model import TechnicalAsset

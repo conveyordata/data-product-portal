@@ -11,7 +11,14 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.core.webhooks.events import (
+    InputPortCreatedEvent,
+    InputPortDeletedEvent,
+    InputPortPayload,
+    InputPortUpdatedEvent,
+)
 from app.database.database import Base
+from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
@@ -23,7 +30,14 @@ import uuid
 from app.shared.model import BaseORM, utcnow
 
 
-class InputPort(Base, BaseORM):
+class InputPort(
+    Base,
+    BaseORM,
+    EventTrackedMixin,
+    create_event=InputPortCreatedEvent,
+    update_event=InputPortUpdatedEvent,
+    delete_event=InputPortDeletedEvent,
+):
     __tablename__ = "input_ports"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -75,3 +89,10 @@ class InputPort(Base, BaseORM):
         back_populates="denied_input_ports",
         lazy="joined",
     )
+
+    def to_event(self) -> InputPortPayload:
+        return InputPortPayload(
+            id=self.id,
+            consuming_abstract_data_product_id=self.consuming_abstract_data_product_id,
+            consuming_abstract_data_product_type=self.consuming_abstract_data_product.abstract_data_product_type,
+        )

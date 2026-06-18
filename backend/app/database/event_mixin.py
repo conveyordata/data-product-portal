@@ -63,7 +63,7 @@ class EventTrackedMixin:
 
         sql_event.listen(cls, "after_insert", cls._track_insert)
         sql_event.listen(cls, "after_update", cls._track_update)
-        sql_event.listen(cls, "after_delete", cls._track_delete)
+        sql_event.listen(cls, "before_delete", cls._track_delete)
 
     def to_event(self) -> BaseModel:
         raise NotImplementedError

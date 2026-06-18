@@ -1,9 +1,9 @@
 import factory
 
-from app.authorization.role_assignments.enums import DecisionStatus
-from app.data_products.output_ports.input_ports.model import (
+from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
+from app.authorization.role_assignments.enums import DecisionStatus
 
 from .data_product import DataProductFactory
 from .dataset import DatasetFactory

@@ -5,12 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.abstract_data_product.schema_response import GetAbstractDataProductResponse
-from app.data_products.output_ports.schema_response import GetOutputPortResponse
-from app.data_products.schema_response import GetDataProductResponse
-from app.data_products.technical_assets.schema_response import (
-    GetTechnicalAssetsResponseItem,
-)
+from app.abstract_data_product.type import AbstractDataProductType
 
 
 class V2Event(BaseModel):
@@ -56,3 +51,27 @@ class ExplorationDeletedEvent(V2Event, ExplorationPayload):
     @classmethod
     def event_type(cls) -> str:
         return "exploration.deleted"
+
+
+class InputPortPayload(BaseModel):
+    id: UUID
+    consuming_abstract_data_product_id: UUID
+    consuming_abstract_data_product_type: AbstractDataProductType
+
+
+class InputPortCreatedEvent(V2Event, InputPortPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "input_port.created"
+
+
+class InputPortUpdatedEvent(V2Event, InputPortPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "input_port.updated"
+
+
+class InputPortDeletedEvent(V2Event, InputPortPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "input_port.deleted"

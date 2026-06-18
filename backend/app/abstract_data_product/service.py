@@ -8,6 +8,9 @@ from sqlalchemy import UUID, select
 from sqlalchemy.orm import Session, selectinload
 from starlette import status
 
+from app.abstract_data_product.input_ports.model import (
+    InputPort as InputPortModel,
+)
 from app.abstract_data_product.model import (
     AbstractDataProduct,
     ensure_abstract_data_product_exists,
@@ -20,9 +23,6 @@ from app.core.authz import Action
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.input_ports.model import (
-    InputPort as InputPortModel,
-)
 from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
@@ -118,15 +118,16 @@ class AbstractDataProductService:
                 },
             )
 
-        dataset_link = InputPortModel(
+        input_port = InputPortModel(
             dataset_id=output_port_id,
             status=approval_status,
             justification=justification,
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
+            consuming_abstract_data_product_id=adp.id,
         )
-        adp.input_ports.append(dataset_link)
-        return dataset_link
+        adp.input_ports.append(input_port)
+        return input_port
 
     def request_input_ports(
         self,
@@ -157,32 +158,31 @@ class AbstractDataProductService:
     def remove_input_port(
         self,
         id: UUID,
-        dataset_id: UUID,
+        output_port_id: UUID,
     ) -> InputPortModel:
-        ensure_output_port_exists(dataset_id, self.db)
+        ensure_output_port_exists(output_port_id, self.db)
         adp = ensure_abstract_data_product_exists(
             id,
             self.db,
             options=[selectinload(AbstractDataProduct.input_ports)],
             populate_existing=True,
         )
-        data_product_dataset = next(
+        input_port = next(
             (
                 dataset
                 for dataset in adp.input_ports
-                if dataset.dataset_id == dataset_id
+                if dataset.dataset_id == output_port_id
             ),
             None,
         )
-        if not data_product_dataset:
+        if not input_port:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data product {id} not found",
             )
 
-        adp.input_ports.remove(data_product_dataset)
-        self.db.commit()
-        return data_product_dataset
+        self.db.delete(input_port)
+        return input_port
 
     def send_input_port_requested_emails_to_output_port_owners(
         self,

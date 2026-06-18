@@ -8,9 +8,15 @@ from sdk.api_client.models import (
     CloudEventExplorationCreatedEvent,
     CloudEventExplorationDeletedEvent,
     CloudEventExplorationUpdatedEvent,
+    CloudEventInputPortCreatedEvent,
+    CloudEventInputPortDeletedEvent,
+    CloudEventInputPortUpdatedEvent,
     ExplorationCreatedEvent,
     ExplorationDeletedEvent,
     ExplorationUpdatedEvent,
+    InputPortCreatedEvent,
+    InputPortDeletedEvent,
+    InputPortUpdatedEvent,
 )
 
 
@@ -34,9 +40,18 @@ class AbstractEventHandler(ABC):
             )
 
         parsed_event: Any
-        if event_type == "exploration.deleted":
+        if event_type == "input_port.updated":
+            parsed_event = CloudEventInputPortUpdatedEvent.from_dict(payload)
+            return await self.on_input_port_updated(parsed_event.data)
+        elif event_type == "input_port.created":
+            parsed_event = CloudEventInputPortCreatedEvent.from_dict(payload)
+            return await self.on_input_port_created(parsed_event.data)
+        elif event_type == "exploration.deleted":
             parsed_event = CloudEventExplorationDeletedEvent.from_dict(payload)
             return await self.on_exploration_deleted(parsed_event.data)
+        elif event_type == "input_port.deleted":
+            parsed_event = CloudEventInputPortDeletedEvent.from_dict(payload)
+            return await self.on_input_port_deleted(parsed_event.data)
         elif event_type == "exploration.created":
             parsed_event = CloudEventExplorationCreatedEvent.from_dict(payload)
             return await self.on_exploration_created(parsed_event.data)
@@ -51,8 +66,23 @@ class AbstractEventHandler(ABC):
             }
 
     @abstractmethod
+    async def on_input_port_updated(self, data: InputPortUpdatedEvent) -> Any:
+        """Handler for the parsed payload of 'input_port.updated'"""
+        pass
+
+    @abstractmethod
+    async def on_input_port_created(self, data: InputPortCreatedEvent) -> Any:
+        """Handler for the parsed payload of 'input_port.created'"""
+        pass
+
+    @abstractmethod
     async def on_exploration_deleted(self, data: ExplorationDeletedEvent) -> Any:
         """Handler for the parsed payload of 'exploration.deleted'"""
+        pass
+
+    @abstractmethod
+    async def on_input_port_deleted(self, data: InputPortDeletedEvent) -> Any:
+        """Handler for the parsed payload of 'input_port.deleted'"""
         pass
 
     @abstractmethod
@@ -72,7 +102,16 @@ class EmptyEventHandler(AbstractEventHandler):
     Inherit from this in your tests to avoid implementing every single abstract method.
     """
 
+    async def on_input_port_updated(self, data: InputPortUpdatedEvent) -> Any:
+        pass
+
+    async def on_input_port_created(self, data: InputPortCreatedEvent) -> Any:
+        pass
+
     async def on_exploration_deleted(self, data: ExplorationDeletedEvent) -> Any:
+        pass
+
+    async def on_input_port_deleted(self, data: InputPortDeletedEvent) -> Any:
         pass
 
     async def on_exploration_created(self, data: ExplorationCreatedEvent) -> Any:
