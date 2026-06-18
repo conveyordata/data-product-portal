@@ -127,7 +127,6 @@ from .event_entity_type import EventEntityType
 from .exploration import Exploration
 from .exploration_created_event import ExplorationCreatedEvent
 from .exploration_deleted_event import ExplorationDeletedEvent
-from .exploration_payload import ExplorationPayload
 from .exploration_updated_event import ExplorationUpdatedEvent
 from .field_dependency import FieldDependency
 from .finalizer_request import FinalizerRequest
@@ -418,7 +417,6 @@ __all__ = (
     "Exploration",
     "ExplorationCreatedEvent",
     "ExplorationDeletedEvent",
-    "ExplorationPayload",
     "ExplorationUpdatedEvent",
     "FieldDependency",
     "FinalizerRequest",

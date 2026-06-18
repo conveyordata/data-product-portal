@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-if TYPE_CHECKING:
-    from ..models.exploration_payload import ExplorationPayload
-
 
 T = TypeVar("T", bound="ExplorationCreatedEvent")
 
@@ -17,20 +14,20 @@ T = TypeVar("T", bound="ExplorationCreatedEvent")
 class ExplorationCreatedEvent:
     """
     Attributes:
-        after (ExplorationPayload):
+        id (UUID):
     """
 
-    after: ExplorationPayload
+    id: UUID
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        after = self.after.to_dict()
+        id = str(self.id)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "after": after,
+                "id": id,
             }
         )
 
@@ -38,13 +35,11 @@ class ExplorationCreatedEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.exploration_payload import ExplorationPayload
-
         d = dict(src_dict)
-        after = ExplorationPayload.from_dict(d.pop("after"))
+        id = UUID(d.pop("id"))
 
         exploration_created_event = cls(
-            after=after,
+            id=id,
         )
 
         exploration_created_event.additional_properties = d

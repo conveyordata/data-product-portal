@@ -3,7 +3,7 @@
   "info": {
     "title": "Data product portal",
     "summary": "Backend API implementation for Data product portal",
-    "version": "0.5.1"
+    "version": "0.6.0"
   },
   "paths": {
     "/api/v2/authz/access/{action}": {
@@ -10285,89 +10285,43 @@
       },
       "ExplorationCreatedEvent": {
         "properties": {
-          "after": {
-            "$ref": "#/components/schemas/ExplorationPayload"
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
           }
         },
         "type": "object",
         "required": [
-          "after"
+          "id"
         ],
         "title": "ExplorationCreatedEvent"
       },
       "ExplorationDeletedEvent": {
         "properties": {
-          "before": {
-            "$ref": "#/components/schemas/ExplorationPayload"
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
           }
         },
         "type": "object",
         "required": [
-          "before"
+          "id"
         ],
         "title": "ExplorationDeletedEvent"
       },
-      "ExplorationPayload": {
+      "ExplorationUpdatedEvent": {
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
             "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "domain_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Domain Id"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "domain_id",
-          "owner_id"
-        ],
-        "title": "ExplorationPayload"
-      },
-      "ExplorationUpdatedEvent": {
-        "properties": {
-          "before": {
-            "$ref": "#/components/schemas/ExplorationPayload"
-          },
-          "after": {
-            "$ref": "#/components/schemas/ExplorationPayload"
-          }
-        },
-        "type": "object",
-        "required": [
-          "before",
-          "after"
+          "id"
         ],
         "title": "ExplorationUpdatedEvent"
       },

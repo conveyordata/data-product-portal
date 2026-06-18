@@ -29,7 +29,9 @@ class AbstractEventHandler(ABC):
 
         event_type = payload.get("type")
         if not event_type:
-            raise HTTPException(status_code=400, detail="Missing 'type' field in payload")
+            raise HTTPException(
+                status_code=400, detail="Missing 'type' field in payload"
+            )
 
         parsed_event: Any
         if event_type == "exploration.deleted":
@@ -43,7 +45,10 @@ class AbstractEventHandler(ABC):
             return await self.on_exploration_updated(parsed_event.data)
         else:
             # Standard practice is to accept unhandled hooks with a 202/success to avoid webhook retries
-            return {"status": "ignored", "reason": f"No handler implemented for '{event_type}'"}
+            return {
+                "status": "ignored",
+                "reason": f"No handler implemented for '{event_type}'",
+            }
 
     @abstractmethod
     async def on_exploration_deleted(self, data: ExplorationDeletedEvent) -> Any:

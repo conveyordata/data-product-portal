@@ -1,6 +1,6 @@
 [project]
-name = "dpp-sdk"
-version = "0.1.0"
+name = "data-product-portal-sdk"
+version = "0.6.0"
 description = "SDK for Data Product Portal"
 authors = [
     {name = "Dataminded"}
@@ -13,6 +13,7 @@ dependencies = [
     "attrs>=22.2.0",
     # Used by generated api_client models for datetime parsing
     "python-dateutil>=2.8.0",
+    "fastapi>=0.137.1",
 ]
 
 [tool.poetry]
@@ -25,6 +26,12 @@ python = "^3.13"
 # Used to regenerate sdk/sdk/api_client/ from the OpenAPI spec
 openapi-python-client = ">=0.29.0"
 mypy = ">=1.0"
+pytest = ">=8.0"
+pytest-asyncio = ">=0.24"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "-p no:warnings --import-mode=importlib --durations=0 --durations-min=1.0"
 
 [tool.mypy]
 ignore_missing_imports = true

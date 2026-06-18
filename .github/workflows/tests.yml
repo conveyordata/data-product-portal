@@ -74,6 +74,32 @@ jobs:
         working-directory: ./scripts
         run: ./check_coverage.sh
 
+  test-sdk:
+    name: Run SDK tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          cache: 'poetry'
+          cache-dependency-path: 'sdk/poetry.lock'
+          python-version-file: 'sdk/.python-version'
+      - name: Install dependencies
+        working-directory: ./sdk
+        run: poetry install --all-groups
+      - name: Run the automated tests
+        working-directory: ./sdk
+        id: run-test
+        run: poetry run pytest -v
+
   test-frontend:
     name: Run frontend tests
     runs-on: ubuntu-latest
