@@ -31,69 +31,27 @@ class V2Event(BaseModel):
         raise NotImplementedError
 
 
-class ExplorationEventPayload(BaseModel):
+class ExplorationEvent(V2Event):
+    @classmethod
+    def event_type(cls) -> str:
+        return "exploration.event"
+
     id: UUID
 
 
-class ExplorationCreatedEvent(V2Event, ExplorationEventPayload):
+class DataProductEvent(V2Event):
+    id: UUID
+
     @classmethod
     def event_type(cls) -> str:
-        return "exploration.created"
+        return "data_product.event"
 
 
-class ExplorationUpdatedEvent(V2Event, ExplorationEventPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "exploration.updated"
-
-
-class ExplorationDeletedEvent(V2Event, ExplorationEventPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "exploration.deleted"
-
-
-class InputPortPayload(BaseModel):
+class InputPortEvent(V2Event):
     id: UUID
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product_type: AbstractDataProductType
 
-
-class InputPortCreatedEvent(V2Event, InputPortPayload):
     @classmethod
     def event_type(cls) -> str:
-        return "input_port.created"
-
-
-class InputPortUpdatedEvent(V2Event, InputPortPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "input_port.updated"
-
-
-class InputPortDeletedEvent(V2Event, InputPortPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "input_port.deleted"
-
-
-class DataProductEventPayload(BaseModel):
-    id: UUID
-
-
-class DataProductCreatedEvent(V2Event, DataProductEventPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "data_product.created"
-
-
-class DataProductUpdatedEvent(V2Event, DataProductEventPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "data_product.updated"
-
-
-class DataProductDeletedEvent(V2Event, DataProductEventPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "data_product.deleted"
+        return "input_port.event"

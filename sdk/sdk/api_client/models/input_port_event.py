@@ -9,11 +9,11 @@ from attrs import field as _attrs_field
 
 from ..models.abstract_data_product_type import AbstractDataProductType
 
-T = TypeVar("T", bound="InputPortUpdatedEvent")
+T = TypeVar("T", bound="InputPortEvent")
 
 
 @_attrs_define
-class InputPortUpdatedEvent:
+class InputPortEvent:
     """
     Attributes:
         id (UUID):
@@ -62,14 +62,14 @@ class InputPortUpdatedEvent:
             d.pop("consuming_abstract_data_product_type")
         )
 
-        input_port_updated_event = cls(
+        input_port_event = cls(
             id=id,
             consuming_abstract_data_product_id=consuming_abstract_data_product_id,
             consuming_abstract_data_product_type=consuming_abstract_data_product_type,
         )
 
-        input_port_updated_event.additional_properties = d
-        return input_port_updated_event
+        input_port_event.additional_properties = d
+        return input_port_event
 
     @property
     def additional_keys(self) -> list[str]:

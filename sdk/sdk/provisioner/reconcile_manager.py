@@ -10,15 +10,9 @@ from uuid import UUID
 
 from sdk.api_client.models import (
     AbstractDataProductType,
-    DataProductCreatedEvent,
-    DataProductDeletedEvent,
-    DataProductUpdatedEvent,
-    ExplorationCreatedEvent,
-    ExplorationDeletedEvent,
-    ExplorationUpdatedEvent,
-    InputPortCreatedEvent,
-    InputPortDeletedEvent,
-    InputPortUpdatedEvent,
+    DataProductEvent,
+    ExplorationEvent,
+    InputPortEvent,
 )
 from sdk.provisioner.event_handler import AbstractEventHandler
 from sdk.provisioner.reconcile_queue import (
@@ -230,25 +224,13 @@ class ReconcileEventHandler(AbstractEventHandler):
             return
         await self._manager.enqueue(resource_type, resource_id)
 
-    async def on_exploration_created(self, data: ExplorationCreatedEvent):
+    async def on_data_product_event(self, data: DataProductEvent):
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.id)
+
+    async def on_exploration_event(self, data: ExplorationEvent):
         await self._enqueue(ResourceType.EXPLORATION, data.id)
 
-    async def on_exploration_updated(self, data: ExplorationUpdatedEvent):
-        await self._enqueue(ResourceType.EXPLORATION, data.id)
-
-    async def on_exploration_deleted(self, data: ExplorationDeletedEvent):
-        return await self._enqueue(ResourceType.EXPLORATION, data.id)
-
-    async def on_data_product_created(self, data: DataProductCreatedEvent):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.id)
-
-    async def on_data_product_updated(self, data: DataProductUpdatedEvent):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.id)
-
-    async def on_data_product_deleted(self, data: DataProductDeletedEvent):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.id)
-
-    async def on_input_port_updated(self, data: InputPortUpdatedEvent):
+    async def on_input_port_event(self, data: InputPortEvent):
         match data.consuming_abstract_data_product_type:
             case AbstractDataProductType.EXPLORATIONS:
                 return await self._enqueue(
@@ -258,29 +240,4 @@ class ReconcileEventHandler(AbstractEventHandler):
                 return await self._enqueue(
                     ResourceType.DATA_PRODUCT, data.consuming_abstract_data_product_id
                 )
-        return None
-
-    async def on_input_port_created(self, data: InputPortCreatedEvent):
-        match data.consuming_abstract_data_product_type:
-            case AbstractDataProductType.EXPLORATIONS:
-                return await self._enqueue(
-                    ResourceType.EXPLORATION, data.consuming_abstract_data_product_id
-                )
-            case AbstractDataProductType.DATA_PRODUCTS:
-                return await self._enqueue(
-                    ResourceType.DATA_PRODUCT, data.consuming_abstract_data_product_id
-                )
-        return None
-
-    async def on_input_port_deleted(self, data: InputPortDeletedEvent):
-        match data.consuming_abstract_data_product_type:
-            case AbstractDataProductType.EXPLORATIONS:
-                return await self._enqueue(
-                    ResourceType.EXPLORATION, data.consuming_abstract_data_product_id
-                )
-            case AbstractDataProductType.DATA_PRODUCTS:
-                return await self._enqueue(
-                    ResourceType.DATA_PRODUCT, data.consuming_abstract_data_product_id
-                )
-
         return None

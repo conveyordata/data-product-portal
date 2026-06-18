@@ -163,7 +163,7 @@ class TestExplorationRouter:
         assert len(response.json()["input_port_ids"]) == 1
         assert mock_webhook.await_count == 2
         event_type, payload = mock_webhook.await_args_list[1].args
-        assert event_type == "input_port.created"
+        assert event_type == "input_port.event"
         assert "id" in payload
 
     def test_request_input_ports_for_exploration_does_not_exist(self, client):

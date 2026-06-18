@@ -22,42 +22,25 @@ class Event(BaseModel):
     pass
 
 
-class _ItemPayload(BaseModel):
+class _ItemEvent(Event):
     id: str
 
-
-class _ItemCreatedEvent(Event, _ItemPayload):
     @classmethod
     def event_type(cls) -> str:
-        return "item.created"
-
-
-class _ItemUpdatedEvent(Event, _ItemPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "item.updated"
-
-
-class _ItemDeletedEvent(Event, _ItemPayload):
-    @classmethod
-    def event_type(cls) -> str:
-        return "item.deleted"
+        return "item.evnet"
 
 
 class _Item(
     _Base,
     EventTrackedMixin,
-    create_event=_ItemCreatedEvent,
-    update_event=_ItemUpdatedEvent,
-    delete_event=_ItemDeletedEvent,
 ):
     __tablename__ = "items"
 
     id = Column(SQLITE_TEXT, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String)
 
-    def to_event(self) -> _ItemPayload:
-        return _ItemPayload(id=self.id)
+    def to_event(self) -> _ItemEvent:
+        return _ItemEvent(id=self.id)
 
 
 @pytest.fixture
@@ -76,18 +59,18 @@ def event_context():
     _pending_events.reset(token)
 
 
-def test_insert_queues_created_event(db):
+def test_insert_queues_event(db):
     item = _Item(id=str(uuid.uuid4()), name="hello")
     db.add(item)
     db.flush()
 
     events = pop_events()
     assert len(events) == 1
-    assert isinstance(events[0], _ItemCreatedEvent)
+    assert isinstance(events[0], _ItemEvent)
     assert events[0].id == item.id
 
 
-def test_update_queues_updated_event(db):
+def test_update_queues_event(db):
     item = _Item(id=str(uuid.uuid4()), name="before")
     db.add(item)
     db.flush()
@@ -98,11 +81,11 @@ def test_update_queues_updated_event(db):
 
     events = pop_events()
     assert len(events) == 1
-    assert isinstance(events[0], _ItemUpdatedEvent)
+    assert isinstance(events[0], _ItemEvent)
     assert events[0].id == item.id
 
 
-def test_delete_queues_deleted_event(db):
+def test_delete_queues_event(db):
     item = _Item(id=str(uuid.uuid4()), name="bye")
     db.add(item)
     db.flush()
@@ -113,7 +96,7 @@ def test_delete_queues_deleted_event(db):
 
     events = pop_events()
     assert len(events) == 1
-    assert isinstance(events[0], _ItemDeletedEvent)
+    assert isinstance(events[0], _ItemEvent)
     assert events[0].id == item.id
 
 

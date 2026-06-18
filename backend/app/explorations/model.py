@@ -7,10 +7,7 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
 from app.core.webhooks.events import (
-    ExplorationCreatedEvent,
-    ExplorationDeletedEvent,
-    ExplorationEventPayload,
-    ExplorationUpdatedEvent,
+    ExplorationEvent,
 )
 from app.database.database import ensure_exists
 from app.database.event_mixin import EventTrackedMixin
@@ -22,9 +19,6 @@ if TYPE_CHECKING:
 class Exploration(
     AbstractDataProduct,
     EventTrackedMixin,
-    create_event=ExplorationCreatedEvent,
-    update_event=ExplorationUpdatedEvent,
-    delete_event=ExplorationDeletedEvent,
 ):
     __tablename__ = "explorations"
 
@@ -37,8 +31,8 @@ class Exploration(
     owner_id: Mapped[UUID] = mapped_column("owner_id", ForeignKey("users.id"))
     owner: Mapped["User"] = relationship("User", foreign_keys=[owner_id], lazy="raise")
 
-    def to_event(self) -> ExplorationEventPayload:
-        return ExplorationEventPayload(
+    def to_event(self) -> ExplorationEvent:
+        return ExplorationEvent(
             id=self.id,
         )
 

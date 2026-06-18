@@ -13,10 +13,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.tags.model import Tag, tag_data_product_table
 from app.core.webhooks.events import (
-    DataProductCreatedEvent,
-    DataProductDeletedEvent,
-    DataProductEventPayload,
-    DataProductUpdatedEvent,
+    DataProductEvent,
 )
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import ensure_exists
@@ -33,9 +30,6 @@ if TYPE_CHECKING:
 class DataProduct(
     AbstractDataProduct,
     EventTrackedMixin,
-    create_event=DataProductCreatedEvent,
-    update_event=DataProductUpdatedEvent,
-    delete_event=DataProductDeletedEvent,
 ):
     __tablename__ = "data_products"
 
@@ -103,8 +97,8 @@ class DataProduct(
         "polymorphic_identity": AbstractDataProductType.DATA_PRODUCT,
     }
 
-    def to_event(self) -> DataProductEventPayload:
-        return DataProductEventPayload(
+    def to_event(self) -> DataProductEvent:
+        return DataProductEvent(
             id=self.id,
         )
 

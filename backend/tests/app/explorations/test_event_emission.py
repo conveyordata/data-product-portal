@@ -49,7 +49,7 @@ class TestExplorationEventEmission:
         assert response.status_code == 200
         mock_webhook.assert_awaited_once()
         event_type, payload = mock_webhook.call_args.args
-        assert event_type == "exploration.created"
+        assert event_type == "exploration.event"
         assert "id" in payload
 
     @patch("app.main.call_v2_webhook", new_callable=AsyncMock)

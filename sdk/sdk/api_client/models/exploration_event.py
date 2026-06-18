@@ -7,11 +7,11 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="DataProductCreatedEvent")
+T = TypeVar("T", bound="ExplorationEvent")
 
 
 @_attrs_define
-class DataProductCreatedEvent:
+class ExplorationEvent:
     """
     Attributes:
         id (UUID):
@@ -38,12 +38,12 @@ class DataProductCreatedEvent:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-        data_product_created_event = cls(
+        exploration_event = cls(
             id=id,
         )
 
-        data_product_created_event.additional_properties = d
-        return data_product_created_event
+        exploration_event.additional_properties = d
+        return exploration_event
 
     @property
     def additional_keys(self) -> list[str]:

@@ -12,10 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.webhooks.events import (
-    InputPortCreatedEvent,
-    InputPortDeletedEvent,
-    InputPortPayload,
-    InputPortUpdatedEvent,
+    InputPortEvent,
 )
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
@@ -34,9 +31,6 @@ class InputPort(
     Base,
     BaseORM,
     EventTrackedMixin,
-    create_event=InputPortCreatedEvent,
-    update_event=InputPortUpdatedEvent,
-    delete_event=InputPortDeletedEvent,
 ):
     __tablename__ = "input_ports"
 
@@ -90,8 +84,8 @@ class InputPort(
         lazy="joined",
     )
 
-    def to_event(self) -> InputPortPayload:
-        return InputPortPayload(
+    def to_event(self) -> InputPortEvent:
+        return InputPortEvent(
             id=self.id,
             consuming_abstract_data_product_id=self.consuming_abstract_data_product_id,
             consuming_abstract_data_product_type=self.consuming_abstract_data_product.abstract_data_product_type,
