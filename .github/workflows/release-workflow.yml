@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
-  workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -17,7 +17,6 @@ env:
 jobs:
   prep-version:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       contents: read
     steps:
@@ -152,7 +151,6 @@ jobs:
 
   cli:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       contents: write
     needs: ["create-gh-release-notes"]
@@ -183,7 +181,6 @@ jobs:
 
   publish-sdk:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       id-token: write
       contents: read
@@ -214,7 +211,6 @@ jobs:
 
   release-docs:
     runs-on: ubuntu-24.04
-    if: github.event_name == 'push'
     permissions:
       id-token: write
       contents: read
@@ -251,7 +247,6 @@ jobs:
   deploy-on-portal-demo:
     name: Deploy to portal demo
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       contents: read
     needs: ["portal-docker"]
@@ -292,40 +287,3 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${repo_owner}/${repo_name}/dispatches" \
             -d "{\"event_type\": \"${event_type}\", \"client_payload\": {\"tag\": \"${version}\", \"chart_version\": \"${chart}\", \"env\": \"demo_prd\", \"integration\": true}}"
-
-  publish-sdk-testpypi:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          fetch-depth: 0
-      - name: Install Poetry
-        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
-        with:
-          version: ${{ env.POETRY_VERSION }}
-      - name: Set up Python
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.4.0
-        with:
-          python-version: "3.13"
-          cache: 'poetry'
-          cache-dependency-path: sdk/poetry.lock
-      - name: Set dev version
-        working-directory: sdk
-        run: |
-          BASE=$(poetry version --short)
-          DEV_VERSION="${BASE}.dev${{ github.run_number }}"
-          poetry version "${DEV_VERSION}"
-          echo "Publishing dev version: ${DEV_VERSION}"
-      - name: Build SDK
-        working-directory: sdk
-        run: poetry build
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: sdk/dist/
