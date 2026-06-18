@@ -40,7 +40,7 @@ tasks:
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
-      - cd docs && npm run docusaurus docs:version {{.CLI_ARGS}}
+      - cd docs && npx docusaurus docs:version {{.CLI_ARGS}}
 
   docusaurus:update-config:
     desc: "Update docusaurus.config.ts with new version"
