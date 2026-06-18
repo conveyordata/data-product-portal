@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.6.0
+
 ### breaking changes **[API]**:
 - All v1 endpoints have been removed. Migrate to API v2 if not yet done so.
 - The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.

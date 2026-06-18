@@ -15,8 +15,8 @@ tasks:
         echo "New version: {{.CLI_ARGS}}"
         echo "{{.CLI_ARGS}}" > {{.VERSION_FILE}}
         cp {{.VERSION_FILE}} {{.BACKEND_VERSION_FILE}}
-        sed -i '' "s/^version:.*/version: {{.CLI_ARGS}}/" {{.HELM_CHART}}
-        sed -i '' "s/^  tag:.*/  tag: {{.CLI_ARGS}}/" {{.HELM_VALUES}}
+        sed -i "s/^version:.*/version: {{.CLI_ARGS}}/" {{.HELM_CHART}}
+        sed -i "s/^  tag:.*/  tag: {{.CLI_ARGS}}/" {{.HELM_VALUES}}
         cd sdk && poetry version {{.CLI_ARGS}}
 
   bump:release-notes:
