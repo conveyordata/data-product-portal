@@ -115,7 +115,7 @@ async def test_reconcile_provisions_manifest(
         "domain": "my-domain",
         "owner": "owner@example.com",
     }
-    # Finalizer must be registered after provisioning.
+    # Finalizer must be registered before provisioning.
     assert patch_add_finalizer == [{"id": eid, "finalizer": FINALIZER_NAME}]
     assert patch_remove_finalizer == []
 
@@ -266,6 +266,30 @@ async def test_reconcile_deleting_already_absent_releases_finalizer(
     assert result is None
     assert not (tmp_path / str(eid)).exists()
     assert patch_remove_finalizer == [{"id": eid, "finalizer": FINALIZER_NAME}]
+    assert patch_add_finalizer == []
+
+
+async def test_reconcile_deleting_without_our_finalizer_is_noop(
+    tmp_path: Path,
+    fake_client,
+    patch_get_exploration,
+    patch_add_finalizer,
+    patch_remove_finalizer,
+):
+    """If our finalizer is absent when DELETING, we have already cleaned up — skip."""
+    eid = uuid.uuid4()
+    patch_get_exploration(
+        eid,
+        _fake_exploration(
+            eid, status=AbstractDataProductStatus.DELETING, finalizers=[]
+        ),
+    )
+    provisioner = ExplorationProvisioner(client=fake_client, workspace=tmp_path)
+
+    result = await provisioner.reconcile(eid)
+
+    assert result is None
+    assert patch_remove_finalizer == []
     assert patch_add_finalizer == []
 
 
