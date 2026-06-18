@@ -295,7 +295,7 @@ export type DataProduct = {
   name: string;
   namespace: string;
   description: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   type: DataProductType;
 };
 export type Tag = {
@@ -526,10 +526,11 @@ export enum AccessGranularity {
   Schema = "schema",
   Table = "table",
 }
-export enum DataProductStatus {
+export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
   Archived = "archived",
+  Deleting = "deleting",
 }
 export enum DataProductIconKey {
   Reporting = "reporting",

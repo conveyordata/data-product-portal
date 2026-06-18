@@ -1,6 +1,7 @@
 """Contains all the data models used in inputs/outputs"""
 
 from .abstract_data_product_info import AbstractDataProductInfo
+from .abstract_data_product_status import AbstractDataProductStatus
 from .abstract_data_product_type import AbstractDataProductType
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
@@ -71,7 +72,6 @@ from .data_product_setting_update import DataProductSettingUpdate
 from .data_product_setting_value import DataProductSettingValue
 from .data_product_settings_get import DataProductSettingsGet
 from .data_product_settings_get_item import DataProductSettingsGetItem
-from .data_product_status import DataProductStatus
 from .data_product_status_update import DataProductStatusUpdate
 from .data_product_type import DataProductType
 from .data_product_type_create import DataProductTypeCreate
@@ -129,6 +129,7 @@ from .exploration_created_event import ExplorationCreatedEvent
 from .exploration_deleted_event import ExplorationDeletedEvent
 from .exploration_updated_event import ExplorationUpdatedEvent
 from .field_dependency import FieldDependency
+from .finalizer_request import FinalizerRequest
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
@@ -314,6 +315,7 @@ from .validation_error_context import ValidationErrorContext
 
 __all__ = (
     "AbstractDataProductInfo",
+    "AbstractDataProductStatus",
     "AbstractDataProductType",
     "AccessGranularity",
     "AccessResponse",
@@ -376,7 +378,6 @@ __all__ = (
     "DataProductSettingType",
     "DataProductSettingUpdate",
     "DataProductSettingValue",
-    "DataProductStatus",
     "DataProductStatusUpdate",
     "DataProductType",
     "DataProductTypeCreate",
@@ -418,6 +419,7 @@ __all__ = (
     "ExplorationDeletedEvent",
     "ExplorationUpdatedEvent",
     "FieldDependency",
+    "FinalizerRequest",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
     "GetDataProductInputPortsResponse",

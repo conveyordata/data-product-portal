@@ -2,10 +2,12 @@ from typing import Annotated, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 from starlette import status
 
+from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import InputPort
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
@@ -148,3 +150,83 @@ def remove_input_port_from_exploration(
         )
     exploration_service.remove_input_port(id, output_port_id)
     RefreshInfrastructureLambda().trigger()
+
+
+@router.delete(
+    "/{id}",
+    responses={
+        200: {"description": "Exploration deleted"},
+        202: {"description": "Exploration marked for deletion, waiting for finalizers"},
+        404: {
+            "description": "Exploration not found",
+            "content": {
+                "application/json": {"example": {"detail": "Exploration id not found"}}
+            },
+        },
+    },
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_EXPLORATION, EmptyResolver))
+    ],
+)
+def remove_exploration(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    service = ExplorationService(db)
+    exp = service.get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+    can_delete = service.mark_for_deletion(id)
+    if can_delete:
+        service.remove_exploration(id)
+    else:
+        return Response(status_code=status.HTTP_202_ACCEPTED)
+
+
+@router.post(
+    "/{id}/finalizers",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_EXPLORATION, EmptyResolver))
+    ],
+)
+def add_exploration_finalizer(
+    id: UUID,
+    request: FinalizerRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    exp = ExplorationService(db).get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+    ExplorationService(db).add_finalizer(id, request.finalizer)
+
+
+@router.delete(
+    "/{id}/finalizers/{finalizer}",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_EXPLORATION, EmptyResolver))
+    ],
+)
+def remove_exploration_finalizer(
+    id: UUID,
+    finalizer: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    service = ExplorationService(db)
+    exp = service.get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+    should_delete = service.remove_finalizer(id, finalizer)
+    if should_delete:
+        service.remove_exploration(id)

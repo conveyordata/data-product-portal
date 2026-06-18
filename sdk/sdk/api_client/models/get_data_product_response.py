@@ -7,7 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.data_product_status import DataProductStatus
+from ..models.abstract_data_product_status import AbstractDataProductStatus
 
 if TYPE_CHECKING:
     from ..models.data_product_life_cycle import DataProductLifeCycle
@@ -27,7 +27,8 @@ class GetDataProductResponse:
         name (str):
         description (str):
         namespace (str):
-        status (DataProductStatus):
+        status (AbstractDataProductStatus):
+        finalizers (list[str]):
         tags (list[Tag]):
         usage (None | str):
         domain (Domain):
@@ -40,7 +41,8 @@ class GetDataProductResponse:
     name: str
     description: str
     namespace: str
-    status: DataProductStatus
+    status: AbstractDataProductStatus
+    finalizers: list[str]
     tags: list[Tag]
     usage: None | str
     domain: Domain
@@ -61,6 +63,8 @@ class GetDataProductResponse:
         namespace = self.namespace
 
         status = self.status.value
+
+        finalizers = self.finalizers
 
         tags = []
         for tags_item_data in self.tags:
@@ -92,6 +96,7 @@ class GetDataProductResponse:
                 "description": description,
                 "namespace": namespace,
                 "status": status,
+                "finalizers": finalizers,
                 "tags": tags,
                 "usage": usage,
                 "domain": domain,
@@ -119,7 +124,9 @@ class GetDataProductResponse:
 
         namespace = d.pop("namespace")
 
-        status = DataProductStatus(d.pop("status"))
+        status = AbstractDataProductStatus(d.pop("status"))
+
+        finalizers = cast(list[str], d.pop("finalizers"))
 
         tags = []
         _tags = d.pop("tags")
@@ -167,6 +174,7 @@ class GetDataProductResponse:
             description=description,
             namespace=namespace,
             status=status,
+            finalizers=finalizers,
             tags=tags,
             usage=usage,
             domain=domain,

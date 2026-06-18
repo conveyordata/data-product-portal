@@ -23,6 +23,18 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// AddDataProductFinalizer invokes add_data_product_finalizer operation.
+	//
+	// Add Data Product Finalizer.
+	//
+	// POST /api/v2/data_products/{id}/finalizers
+	AddDataProductFinalizer(ctx context.Context, request *FinalizerRequest, params AddDataProductFinalizerParams) (AddDataProductFinalizerRes, error)
+	// AddExplorationFinalizer invokes add_exploration_finalizer operation.
+	//
+	// Add Exploration Finalizer.
+	//
+	// POST /api/v2/explorations/{id}/finalizers
+	AddExplorationFinalizer(ctx context.Context, request *FinalizerRequest, params AddExplorationFinalizerParams) (AddExplorationFinalizerRes, error)
 	// AddOutputPortDataQualityRun invokes add_output_port_data_quality_run operation.
 	//
 	// Add Output Port Data Quality Run.
@@ -560,6 +572,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/data_products/{id}
 	RemoveDataProduct(ctx context.Context, params RemoveDataProductParams) (RemoveDataProductRes, error)
+	// RemoveDataProductFinalizer invokes remove_data_product_finalizer operation.
+	//
+	// Remove Data Product Finalizer.
+	//
+	// DELETE /api/v2/data_products/{id}/finalizers/{finalizer}
+	RemoveDataProductFinalizer(ctx context.Context, params RemoveDataProductFinalizerParams) (RemoveDataProductFinalizerRes, error)
 	// RemoveDataProductLifecycle invokes remove_data_product_lifecycle operation.
 	//
 	// Remove Data Product Lifecycle.
@@ -584,6 +602,18 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/configuration/domains/{id}
 	RemoveDomain(ctx context.Context, params RemoveDomainParams) (RemoveDomainRes, error)
+	// RemoveExploration invokes remove_exploration operation.
+	//
+	// Remove Exploration.
+	//
+	// DELETE /api/v2/explorations/{id}
+	RemoveExploration(ctx context.Context, params RemoveExplorationParams) (RemoveExplorationRes, error)
+	// RemoveExplorationFinalizer invokes remove_exploration_finalizer operation.
+	//
+	// Remove Exploration Finalizer.
+	//
+	// DELETE /api/v2/explorations/{id}/finalizers/{finalizer}
+	RemoveExplorationFinalizer(ctx context.Context, params RemoveExplorationFinalizerParams) (RemoveExplorationFinalizerRes, error)
 	// RemoveInputPortFromExploration invokes remove_input_port_from_exploration operation.
 	//
 	// Remove Input Port From Exploration.
@@ -871,6 +901,136 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
+}
+
+// AddDataProductFinalizer invokes add_data_product_finalizer operation.
+//
+// Add Data Product Finalizer.
+//
+// POST /api/v2/data_products/{id}/finalizers
+func (c *Client) AddDataProductFinalizer(ctx context.Context, request *FinalizerRequest, params AddDataProductFinalizerParams) (AddDataProductFinalizerRes, error) {
+	res, err := c.sendAddDataProductFinalizer(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAddDataProductFinalizer(ctx context.Context, request *FinalizerRequest, params AddDataProductFinalizerParams) (res AddDataProductFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAddDataProductFinalizerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeAddDataProductFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AddExplorationFinalizer invokes add_exploration_finalizer operation.
+//
+// Add Exploration Finalizer.
+//
+// POST /api/v2/explorations/{id}/finalizers
+func (c *Client) AddExplorationFinalizer(ctx context.Context, request *FinalizerRequest, params AddExplorationFinalizerParams) (AddExplorationFinalizerRes, error) {
+	res, err := c.sendAddExplorationFinalizer(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAddExplorationFinalizer(ctx context.Context, request *FinalizerRequest, params AddExplorationFinalizerParams) (res AddExplorationFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAddExplorationFinalizerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeAddExplorationFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
 }
 
 // AddOutputPortDataQualityRun invokes add_output_port_data_quality_run operation.
@@ -6666,6 +6826,86 @@ func (c *Client) sendRemoveDataProduct(ctx context.Context, params RemoveDataPro
 	return result, nil
 }
 
+// RemoveDataProductFinalizer invokes remove_data_product_finalizer operation.
+//
+// Remove Data Product Finalizer.
+//
+// DELETE /api/v2/data_products/{id}/finalizers/{finalizer}
+func (c *Client) RemoveDataProductFinalizer(ctx context.Context, params RemoveDataProductFinalizerParams) (RemoveDataProductFinalizerRes, error) {
+	res, err := c.sendRemoveDataProductFinalizer(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveDataProductFinalizer(ctx context.Context, params RemoveDataProductFinalizerParams) (res RemoveDataProductFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers/"
+	{
+		// Encode "finalizer" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "finalizer",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Finalizer))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveDataProductFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RemoveDataProductLifecycle invokes remove_data_product_lifecycle operation.
 //
 // Remove Data Product Lifecycle.
@@ -6903,6 +7143,147 @@ func (c *Client) sendRemoveDomain(ctx context.Context, params RemoveDomainParams
 	}()
 
 	result, err := decodeRemoveDomainResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RemoveExploration invokes remove_exploration operation.
+//
+// Remove Exploration.
+//
+// DELETE /api/v2/explorations/{id}
+func (c *Client) RemoveExploration(ctx context.Context, params RemoveExplorationParams) (RemoveExplorationRes, error) {
+	res, err := c.sendRemoveExploration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveExploration(ctx context.Context, params RemoveExplorationParams) (res RemoveExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveExplorationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RemoveExplorationFinalizer invokes remove_exploration_finalizer operation.
+//
+// Remove Exploration Finalizer.
+//
+// DELETE /api/v2/explorations/{id}/finalizers/{finalizer}
+func (c *Client) RemoveExplorationFinalizer(ctx context.Context, params RemoveExplorationFinalizerParams) (RemoveExplorationFinalizerRes, error) {
+	res, err := c.sendRemoveExplorationFinalizer(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveExplorationFinalizer(ctx context.Context, params RemoveExplorationFinalizerParams) (res RemoveExplorationFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers/"
+	{
+		// Encode "finalizer" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "finalizer",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Finalizer))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveExplorationFinalizerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

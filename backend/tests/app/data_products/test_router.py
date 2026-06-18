@@ -257,6 +257,102 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
+    def test_remove_data_product_with_finalizers_returns_202(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory(finalizers=["some-system"])
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = self.delete_data_product(client, data_product.id)
+        assert response.status_code == 202
+
+    def test_add_finalizer_no_permission(self, client):
+        data_product = DataProductFactory()
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/finalizers",
+            json={"finalizer": "my-system"},
+        )
+        assert response.status_code == 403
+
+    def test_add_finalizer(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/finalizers",
+            json={"finalizer": "my-system"},
+        )
+        assert response.status_code == 200
+
+    def test_remove_finalizer_no_permission(self, client):
+        data_product = DataProductFactory(finalizers=["my-system"])
+        response = client.delete(
+            f"{ENDPOINT}/{data_product.id}/finalizers/my-system",
+        )
+        assert response.status_code == 403
+
+    def test_remove_finalizer_triggers_deletion(self, client):
+        """Removing the last finalizer from a DELETING product deletes it."""
+        from app.data_products.status import AbstractDataProductStatus
+
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory(
+            finalizers=["last-one"],
+            status=AbstractDataProductStatus.DELETING.value,
+        )
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = client.delete(
+            f"{ENDPOINT}/{data_product.id}/finalizers/last-one",
+        )
+        assert response.status_code == 200
+        assert self.get_data_product(client, data_product.id).status_code == 404
+
+    def test_remove_finalizer_not_last_does_not_delete(self, client):
+        """Removing a finalizer when others remain leaves the product in DELETING."""
+        from app.data_products.status import AbstractDataProductStatus
+
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory(
+            finalizers=["a", "b"],
+            status=AbstractDataProductStatus.DELETING.value,
+        )
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = client.delete(
+            f"{ENDPOINT}/{data_product.id}/finalizers/a",
+        )
+        assert response.status_code == 200
+        assert self.get_data_product(client, data_product.id).status_code == 200
+
     def test_update_status_not_owner(self, client):
         data_product = DataProductFactory()
         response = self.update_data_product_status(

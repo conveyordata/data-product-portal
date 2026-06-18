@@ -47,6 +47,25 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/v2/data_products/${queryArg}` }),
     }),
+    addDataProductFinalizer: build.mutation<
+      AddDataProductFinalizerApiResponse,
+      AddDataProductFinalizerApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/finalizers`,
+        method: "POST",
+        body: queryArg.finalizerRequest,
+      }),
+    }),
+    removeDataProductFinalizer: build.mutation<
+      RemoveDataProductFinalizerApiResponse,
+      RemoveDataProductFinalizerApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/finalizers/${queryArg.finalizer}`,
+        method: "DELETE",
+      }),
+    }),
     updateDataProductAbout: build.mutation<
       UpdateDataProductAboutApiResponse,
       UpdateDataProductAboutApiArg
@@ -172,7 +191,7 @@ export type GetDataProductsApiResponse =
   /** status 200 Successful Response */ GetDataProductsResponse;
 export type GetDataProductsApiArg = string | undefined;
 export type RemoveDataProductApiResponse =
-  /** status 200 Successful Response */ any;
+  /** status 200 Data Product deleted */ any;
 export type RemoveDataProductApiArg = string;
 export type UpdateDataProductApiResponse =
   /** status 200 Successful Response */ UpdateDataProductResponse;
@@ -183,6 +202,18 @@ export type UpdateDataProductApiArg = {
 export type GetDataProductApiResponse =
   /** status 200 Successful Response */ GetDataProductResponse;
 export type GetDataProductApiArg = string;
+export type AddDataProductFinalizerApiResponse =
+  /** status 200 Successful Response */ any;
+export type AddDataProductFinalizerApiArg = {
+  id: string;
+  finalizerRequest: FinalizerRequest;
+};
+export type RemoveDataProductFinalizerApiResponse =
+  /** status 200 Successful Response */ any;
+export type RemoveDataProductFinalizerApiArg = {
+  id: string;
+  finalizer: string;
+};
 export type UpdateDataProductAboutApiResponse =
   /** status 200 Successful Response */ any;
 export type UpdateDataProductAboutApiArg = {
@@ -300,7 +331,8 @@ export type GetDataProductsResponseItem = {
   name: string;
   description: string;
   namespace: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
   tags: Tag[];
   usage: string | null;
   domain: Domain;
@@ -331,7 +363,8 @@ export type GetDataProductResponse = {
   name: string;
   description: string;
   namespace: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
   tags: Tag[];
   usage: string | null;
   domain: Domain;
@@ -339,11 +372,14 @@ export type GetDataProductResponse = {
   lifecycle: DataProductLifeCycle | null;
   about: string | null;
 };
+export type FinalizerRequest = {
+  finalizer: string;
+};
 export type DataProductAboutUpdate = {
   about: string;
 };
 export type DataProductStatusUpdate = {
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
 };
 export type DataProductUsageUpdate = {
   usage: string;
@@ -420,7 +456,7 @@ export type DataProduct = {
   name: string;
   namespace: string;
   description: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   type: DataProductType;
 };
 export type AzureBlobTechnicalAssetConfiguration = {
@@ -567,10 +603,11 @@ export type DataProductSettingValue = {
 export type GetDataProductSettingsResponse = {
   data_product_settings: DataProductSettingValue[];
 };
-export enum DataProductStatus {
+export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
   Archived = "archived",
+  Deleting = "deleting",
 }
 export enum DataProductIconKey {
   Reporting = "reporting",
@@ -639,6 +676,8 @@ export const {
   useUpdateDataProductMutation,
   useGetDataProductQuery,
   useLazyGetDataProductQuery,
+  useAddDataProductFinalizerMutation,
+  useRemoveDataProductFinalizerMutation,
   useUpdateDataProductAboutMutation,
   useUpdateDataProductStatusMutation,
   useUpdateDataProductUsageMutation,

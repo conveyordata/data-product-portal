@@ -4,8 +4,8 @@ import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type {
+    AbstractDataProductStatus,
     DataProductLifeCycle,
-    DataProductStatus,
     DataProductType,
     Domain,
     GetDataProductsResponseItem,
@@ -36,7 +36,7 @@ export const getDataProductTableColumns = ({
             title: undefined,
             dataIndex: 'status',
             width: iconColumnWidth,
-            render: (status: DataProductStatus) => {
+            render: (status: AbstractDataProductStatus) => {
                 return (
                     <Popover content={getStatusLabel(t, status)} placement={'top'}>
                         <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />

@@ -97,6 +97,62 @@ func (s *AbstractDataProductInfo) SetAbstractDataProductType(val AbstractDataPro
 	s.AbstractDataProductType = val
 }
 
+// Ref: #/components/schemas/AbstractDataProductStatus
+type AbstractDataProductStatus string
+
+const (
+	AbstractDataProductStatusPending  AbstractDataProductStatus = "pending"
+	AbstractDataProductStatusActive   AbstractDataProductStatus = "active"
+	AbstractDataProductStatusArchived AbstractDataProductStatus = "archived"
+	AbstractDataProductStatusDeleting AbstractDataProductStatus = "deleting"
+)
+
+// AllValues returns all AbstractDataProductStatus values.
+func (AbstractDataProductStatus) AllValues() []AbstractDataProductStatus {
+	return []AbstractDataProductStatus{
+		AbstractDataProductStatusPending,
+		AbstractDataProductStatusActive,
+		AbstractDataProductStatusArchived,
+		AbstractDataProductStatusDeleting,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AbstractDataProductStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case AbstractDataProductStatusPending:
+		return []byte(s), nil
+	case AbstractDataProductStatusActive:
+		return []byte(s), nil
+	case AbstractDataProductStatusArchived:
+		return []byte(s), nil
+	case AbstractDataProductStatusDeleting:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AbstractDataProductStatus) UnmarshalText(data []byte) error {
+	switch AbstractDataProductStatus(data) {
+	case AbstractDataProductStatusPending:
+		*s = AbstractDataProductStatusPending
+		return nil
+	case AbstractDataProductStatusActive:
+		*s = AbstractDataProductStatusActive
+		return nil
+	case AbstractDataProductStatusArchived:
+		*s = AbstractDataProductStatusArchived
+		return nil
+	case AbstractDataProductStatusDeleting:
+		*s = AbstractDataProductStatusDeleting
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/AbstractDataProductType
 type AbstractDataProductType string
 
@@ -204,6 +260,14 @@ func (s *AccessResponse) SetAllowed(val bool) {
 }
 
 func (*AccessResponse) checkAccessRes() {}
+
+type AddDataProductFinalizerOKApplicationJSON jx.Raw
+
+func (*AddDataProductFinalizerOKApplicationJSON) addDataProductFinalizerRes() {}
+
+type AddExplorationFinalizerOKApplicationJSON jx.Raw
+
+func (*AddExplorationFinalizerOKApplicationJSON) addExplorationFinalizerRes() {}
 
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
@@ -645,11 +709,13 @@ func (s *CreateExplorationRequestWithInputPorts) SetInputPorts(val OptNilRequest
 
 // Ref: #/components/schemas/CreateExplorationResponse
 type CreateExplorationResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Namespace   string    `json:"namespace"`
-	Description string    `json:"description"`
-	Domain      Domain    `json:"domain"`
+	ID          uuid.UUID                 `json:"id"`
+	Name        string                    `json:"name"`
+	Namespace   string                    `json:"namespace"`
+	Description string                    `json:"description"`
+	Domain      Domain                    `json:"domain"`
+	Status      AbstractDataProductStatus `json:"status"`
+	Finalizers  []string                  `json:"finalizers"`
 }
 
 // GetID returns the value of ID.
@@ -677,6 +743,16 @@ func (s *CreateExplorationResponse) GetDomain() Domain {
 	return s.Domain
 }
 
+// GetStatus returns the value of Status.
+func (s *CreateExplorationResponse) GetStatus() AbstractDataProductStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *CreateExplorationResponse) GetFinalizers() []string {
+	return s.Finalizers
+}
+
 // SetID sets the value of ID.
 func (s *CreateExplorationResponse) SetID(val uuid.UUID) {
 	s.ID = val
@@ -700,6 +776,16 @@ func (s *CreateExplorationResponse) SetDescription(val string) {
 // SetDomain sets the value of Domain.
 func (s *CreateExplorationResponse) SetDomain(val Domain) {
 	s.Domain = val
+}
+
+// SetStatus sets the value of Status.
+func (s *CreateExplorationResponse) SetStatus(val AbstractDataProductStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *CreateExplorationResponse) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 func (*CreateExplorationResponse) createExplorationRes() {}
@@ -1333,12 +1419,12 @@ func (s *DataOutputUpdate) SetTagIds(val []uuid.UUID) {
 
 // Ref: #/components/schemas/DataProduct
 type DataProduct struct {
-	ID          uuid.UUID         `json:"id"`
-	Name        string            `json:"name"`
-	Namespace   string            `json:"namespace"`
-	Description string            `json:"description"`
-	Status      DataProductStatus `json:"status"`
-	Type        DataProductType   `json:"type"`
+	ID          uuid.UUID                 `json:"id"`
+	Name        string                    `json:"name"`
+	Namespace   string                    `json:"namespace"`
+	Description string                    `json:"description"`
+	Status      AbstractDataProductStatus `json:"status"`
+	Type        DataProductType           `json:"type"`
 }
 
 // GetID returns the value of ID.
@@ -1362,7 +1448,7 @@ func (s *DataProduct) GetDescription() string {
 }
 
 // GetStatus returns the value of Status.
-func (s *DataProduct) GetStatus() DataProductStatus {
+func (s *DataProduct) GetStatus() AbstractDataProductStatus {
 	return s.Status
 }
 
@@ -1392,7 +1478,7 @@ func (s *DataProduct) SetDescription(val string) {
 }
 
 // SetStatus sets the value of Status.
-func (s *DataProduct) SetStatus(val DataProductStatus) {
+func (s *DataProduct) SetStatus(val AbstractDataProductStatus) {
 	s.Status = val
 }
 
@@ -2499,67 +2585,18 @@ func (s *DataProductSettingsGetItem) SetScope(val DataProductSettingScope) {
 	s.Scope = val
 }
 
-// Ref: #/components/schemas/DataProductStatus
-type DataProductStatus string
-
-const (
-	DataProductStatusPending  DataProductStatus = "pending"
-	DataProductStatusActive   DataProductStatus = "active"
-	DataProductStatusArchived DataProductStatus = "archived"
-)
-
-// AllValues returns all DataProductStatus values.
-func (DataProductStatus) AllValues() []DataProductStatus {
-	return []DataProductStatus{
-		DataProductStatusPending,
-		DataProductStatusActive,
-		DataProductStatusArchived,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s DataProductStatus) MarshalText() ([]byte, error) {
-	switch s {
-	case DataProductStatusPending:
-		return []byte(s), nil
-	case DataProductStatusActive:
-		return []byte(s), nil
-	case DataProductStatusArchived:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *DataProductStatus) UnmarshalText(data []byte) error {
-	switch DataProductStatus(data) {
-	case DataProductStatusPending:
-		*s = DataProductStatusPending
-		return nil
-	case DataProductStatusActive:
-		*s = DataProductStatusActive
-		return nil
-	case DataProductStatusArchived:
-		*s = DataProductStatusArchived
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 // Ref: #/components/schemas/DataProductStatusUpdate
 type DataProductStatusUpdate struct {
-	Status DataProductStatus `json:"status"`
+	Status AbstractDataProductStatus `json:"status"`
 }
 
 // GetStatus returns the value of Status.
-func (s *DataProductStatusUpdate) GetStatus() DataProductStatus {
+func (s *DataProductStatusUpdate) GetStatus() AbstractDataProductStatus {
 	return s.Status
 }
 
 // SetStatus sets the value of Status.
-func (s *DataProductStatusUpdate) SetStatus(val DataProductStatus) {
+func (s *DataProductStatusUpdate) SetStatus(val AbstractDataProductStatus) {
 	s.Status = val
 }
 
@@ -3893,11 +3930,13 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/Exploration
 type Exploration struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Namespace   string    `json:"namespace"`
-	Description string    `json:"description"`
-	Domain      Domain    `json:"domain"`
+	ID          uuid.UUID                 `json:"id"`
+	Name        string                    `json:"name"`
+	Namespace   string                    `json:"namespace"`
+	Description string                    `json:"description"`
+	Domain      Domain                    `json:"domain"`
+	Status      AbstractDataProductStatus `json:"status"`
+	Finalizers  []string                  `json:"finalizers"`
 }
 
 // GetID returns the value of ID.
@@ -3925,6 +3964,16 @@ func (s *Exploration) GetDomain() Domain {
 	return s.Domain
 }
 
+// GetStatus returns the value of Status.
+func (s *Exploration) GetStatus() AbstractDataProductStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *Exploration) GetFinalizers() []string {
+	return s.Finalizers
+}
+
 // SetID sets the value of ID.
 func (s *Exploration) SetID(val uuid.UUID) {
 	s.ID = val
@@ -3948,6 +3997,16 @@ func (s *Exploration) SetDescription(val string) {
 // SetDomain sets the value of Domain.
 func (s *Exploration) SetDomain(val Domain) {
 	s.Domain = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Exploration) SetStatus(val AbstractDataProductStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *Exploration) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 // Represents a field dependency for conditional visibility. e.g. if field A has
@@ -3977,6 +4036,21 @@ func (s *FieldDependency) SetFieldName(val string) {
 // SetValue sets the value of Value.
 func (s *FieldDependency) SetValue(val jx.Raw) {
 	s.Value = val
+}
+
+// Ref: #/components/schemas/FinalizerRequest
+type FinalizerRequest struct {
+	Finalizer string `json:"finalizer"`
+}
+
+// GetFinalizer returns the value of Finalizer.
+func (s *FinalizerRequest) GetFinalizer() string {
+	return s.Finalizer
+}
+
+// SetFinalizer sets the value of Finalizer.
+func (s *FinalizerRequest) SetFinalizer(val string) {
+	s.Finalizer = val
 }
 
 // Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
@@ -4045,17 +4119,18 @@ func (*GetDataProductOutputPortsResponse) getDataProductOutputPortsRes() {}
 
 // Ref: #/components/schemas/GetDataProductResponse
 type GetDataProductResponse struct {
-	ID          uuid.UUID               `json:"id"`
-	Name        string                  `json:"name"`
-	Description string                  `json:"description"`
-	Namespace   string                  `json:"namespace"`
-	Status      DataProductStatus       `json:"status"`
-	Tags        []Tag                   `json:"tags"`
-	Usage       NilString               `json:"usage"`
-	Domain      Domain                  `json:"domain"`
-	Type        DataProductType         `json:"type"`
-	Lifecycle   NilDataProductLifeCycle `json:"lifecycle"`
-	About       NilString               `json:"about"`
+	ID          uuid.UUID                 `json:"id"`
+	Name        string                    `json:"name"`
+	Description string                    `json:"description"`
+	Namespace   string                    `json:"namespace"`
+	Status      AbstractDataProductStatus `json:"status"`
+	Finalizers  []string                  `json:"finalizers"`
+	Tags        []Tag                     `json:"tags"`
+	Usage       NilString                 `json:"usage"`
+	Domain      Domain                    `json:"domain"`
+	Type        DataProductType           `json:"type"`
+	Lifecycle   NilDataProductLifeCycle   `json:"lifecycle"`
+	About       NilString                 `json:"about"`
 }
 
 // GetID returns the value of ID.
@@ -4079,8 +4154,13 @@ func (s *GetDataProductResponse) GetNamespace() string {
 }
 
 // GetStatus returns the value of Status.
-func (s *GetDataProductResponse) GetStatus() DataProductStatus {
+func (s *GetDataProductResponse) GetStatus() AbstractDataProductStatus {
 	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDataProductResponse) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // GetTags returns the value of Tags.
@@ -4134,8 +4214,13 @@ func (s *GetDataProductResponse) SetNamespace(val string) {
 }
 
 // SetStatus sets the value of Status.
-func (s *GetDataProductResponse) SetStatus(val DataProductStatus) {
+func (s *GetDataProductResponse) SetStatus(val AbstractDataProductStatus) {
 	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDataProductResponse) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 // SetTags sets the value of Tags.
@@ -4223,19 +4308,20 @@ func (*GetDataProductsResponse) getDataProductsRes() {}
 
 // Ref: #/components/schemas/GetDataProductsResponseItem
 type GetDataProductsResponseItem struct {
-	ID                  uuid.UUID               `json:"id"`
-	Name                string                  `json:"name"`
-	Description         string                  `json:"description"`
-	Namespace           string                  `json:"namespace"`
-	Status              DataProductStatus       `json:"status"`
-	Tags                []Tag                   `json:"tags"`
-	Usage               NilString               `json:"usage"`
-	Domain              Domain                  `json:"domain"`
-	Type                DataProductType         `json:"type"`
-	Lifecycle           NilDataProductLifeCycle `json:"lifecycle"`
-	UserCount           int                     `json:"user_count"`
-	InputPortCount      int                     `json:"input_port_count"`
-	TechnicalAssetCount int                     `json:"technical_asset_count"`
+	ID                  uuid.UUID                 `json:"id"`
+	Name                string                    `json:"name"`
+	Description         string                    `json:"description"`
+	Namespace           string                    `json:"namespace"`
+	Status              AbstractDataProductStatus `json:"status"`
+	Finalizers          []string                  `json:"finalizers"`
+	Tags                []Tag                     `json:"tags"`
+	Usage               NilString                 `json:"usage"`
+	Domain              Domain                    `json:"domain"`
+	Type                DataProductType           `json:"type"`
+	Lifecycle           NilDataProductLifeCycle   `json:"lifecycle"`
+	UserCount           int                       `json:"user_count"`
+	InputPortCount      int                       `json:"input_port_count"`
+	TechnicalAssetCount int                       `json:"technical_asset_count"`
 }
 
 // GetID returns the value of ID.
@@ -4259,8 +4345,13 @@ func (s *GetDataProductsResponseItem) GetNamespace() string {
 }
 
 // GetStatus returns the value of Status.
-func (s *GetDataProductsResponseItem) GetStatus() DataProductStatus {
+func (s *GetDataProductsResponseItem) GetStatus() AbstractDataProductStatus {
 	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDataProductsResponseItem) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // GetTags returns the value of Tags.
@@ -4324,8 +4415,13 @@ func (s *GetDataProductsResponseItem) SetNamespace(val string) {
 }
 
 // SetStatus sets the value of Status.
-func (s *GetDataProductsResponseItem) SetStatus(val DataProductStatus) {
+func (s *GetDataProductsResponseItem) SetStatus(val AbstractDataProductStatus) {
 	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDataProductsResponseItem) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 // SetTags sets the value of Tags.
@@ -4677,12 +4773,14 @@ func (*GetExplorationInputPortsResponse) getExplorationInputPortsRes() {}
 
 // Ref: #/components/schemas/GetExplorationResponse
 type GetExplorationResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Namespace   string    `json:"namespace"`
-	Description string    `json:"description"`
-	Domain      Domain    `json:"domain"`
-	Owner       User      `json:"owner"`
+	ID          uuid.UUID                 `json:"id"`
+	Name        string                    `json:"name"`
+	Namespace   string                    `json:"namespace"`
+	Description string                    `json:"description"`
+	Domain      Domain                    `json:"domain"`
+	Status      AbstractDataProductStatus `json:"status"`
+	Finalizers  []string                  `json:"finalizers"`
+	Owner       User                      `json:"owner"`
 }
 
 // GetID returns the value of ID.
@@ -4708,6 +4806,16 @@ func (s *GetExplorationResponse) GetDescription() string {
 // GetDomain returns the value of Domain.
 func (s *GetExplorationResponse) GetDomain() Domain {
 	return s.Domain
+}
+
+// GetStatus returns the value of Status.
+func (s *GetExplorationResponse) GetStatus() AbstractDataProductStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetExplorationResponse) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // GetOwner returns the value of Owner.
@@ -4738,6 +4846,16 @@ func (s *GetExplorationResponse) SetDescription(val string) {
 // SetDomain sets the value of Domain.
 func (s *GetExplorationResponse) SetDomain(val Domain) {
 	s.Domain = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetExplorationResponse) SetStatus(val AbstractDataProductStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetExplorationResponse) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 // SetOwner sets the value of Owner.
@@ -5757,6 +5875,8 @@ func (s *HTTPValidationError) SetDetail(val []ValidationError) {
 	s.Detail = val
 }
 
+func (*HTTPValidationError) addDataProductFinalizerRes()                  {}
+func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
 func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
 func (*HTTPValidationError) approveOutputPortAsInputPortRes()             {}
 func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()      {}
@@ -5827,11 +5947,14 @@ func (*HTTPValidationError) migrateDomainRes()                            {}
 func (*HTTPValidationError) modifyDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) modifyOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) overwriteOutputPortDataQualitySummaryRes()    {}
+func (*HTTPValidationError) removeDataProductFinalizerRes()               {}
 func (*HTTPValidationError) removeDataProductLifecycleRes()               {}
 func (*HTTPValidationError) removeDataProductRes()                        {}
 func (*HTTPValidationError) removeDataProductSettingRes()                 {}
 func (*HTTPValidationError) removeDataProductTypeRes()                    {}
 func (*HTTPValidationError) removeDomainRes()                             {}
+func (*HTTPValidationError) removeExplorationFinalizerRes()               {}
+func (*HTTPValidationError) removeExplorationRes()                        {}
 func (*HTTPValidationError) removeInputPortFromExplorationRes()           {}
 func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) removeOutputPortRes()                         {}
@@ -9980,6 +10103,15 @@ func (s *RedshiftTechnicalAssetConfiguration) SetAccessGranularity(val AccessGra
 	s.AccessGranularity = val
 }
 
+// RemoveDataProductAccepted is response for RemoveDataProduct operation.
+type RemoveDataProductAccepted struct{}
+
+func (*RemoveDataProductAccepted) removeDataProductRes() {}
+
+type RemoveDataProductFinalizerOKApplicationJSON jx.Raw
+
+func (*RemoveDataProductFinalizerOKApplicationJSON) removeDataProductFinalizerRes() {}
+
 type RemoveDataProductLifecycleOKApplicationJSON jx.Raw
 
 func (*RemoveDataProductLifecycleOKApplicationJSON) removeDataProductLifecycleRes() {}
@@ -10003,6 +10135,23 @@ func (*RemoveDataProductTypeOKApplicationJSON) removeDataProductTypeRes() {}
 type RemoveDomainOKApplicationJSON jx.Raw
 
 func (*RemoveDomainOKApplicationJSON) removeDomainRes() {}
+
+// RemoveExplorationAccepted is response for RemoveExploration operation.
+type RemoveExplorationAccepted struct{}
+
+func (*RemoveExplorationAccepted) removeExplorationRes() {}
+
+type RemoveExplorationFinalizerOKApplicationJSON jx.Raw
+
+func (*RemoveExplorationFinalizerOKApplicationJSON) removeExplorationFinalizerRes() {}
+
+type RemoveExplorationNotFoundApplicationJSON jx.Raw
+
+func (*RemoveExplorationNotFoundApplicationJSON) removeExplorationRes() {}
+
+type RemoveExplorationOKApplicationJSON jx.Raw
+
+func (*RemoveExplorationOKApplicationJSON) removeExplorationRes() {}
 
 type RemoveInputPortFromExplorationOKApplicationJSON jx.Raw
 

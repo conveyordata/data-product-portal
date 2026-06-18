@@ -46,6 +46,7 @@ from app.data_products.output_ports.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
+from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
@@ -79,6 +80,14 @@ class OutputPortService:
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
         self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
+
+    def _ensure_data_product_not_deleting(self, data_product_id: UUID) -> None:
+        dp = ensure_data_product_exists(data_product_id, self.db)
+        if dp.status == AbstractDataProductStatus.DELETING:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Data product '{dp.name}' is pending deletion and cannot be modified",
+            )
 
     def get_dataset(
         self, id: UUID, data_product_id: Optional[UUID] = None
@@ -275,6 +284,7 @@ class OutputPortService:
     def create_dataset(
         self, data_product_id: UUID, dataset: CreateOutputPortRequest
     ) -> DatasetModel:
+        self._ensure_data_product_not_deleting(data_product_id)
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, self.db
@@ -298,6 +308,7 @@ class OutputPortService:
         return model
 
     def remove_dataset(self, id: UUID, data_product_id: UUID) -> DatasetModel:
+        self._ensure_data_product_not_deleting(data_product_id)
         dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
@@ -312,6 +323,7 @@ class OutputPortService:
     def update_dataset(
         self, id: UUID, data_product_id: UUID, dataset: DatasetUpdate
     ) -> UUID:
+        self._ensure_data_product_not_deleting(data_product_id)
         current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
@@ -348,6 +360,7 @@ class OutputPortService:
         data_product_id: UUID,
         dataset: DatasetAboutUpdate,
     ) -> None:
+        self._ensure_data_product_not_deleting(data_product_id)
         current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
@@ -360,6 +373,7 @@ class OutputPortService:
         data_product_id: UUID,
         dataset: DatasetStatusUpdate,
     ) -> None:
+        self._ensure_data_product_not_deleting(data_product_id)
         current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
@@ -372,6 +386,7 @@ class OutputPortService:
         usage: DatasetUsageUpdate,
     ) -> DatasetModel:
         current_dataset = ensure_output_port_exists(id, self.db)
+        self._ensure_data_product_not_deleting(current_dataset.data_product_id)
         current_dataset.usage = usage.usage
         self.db.commit()
         return current_dataset

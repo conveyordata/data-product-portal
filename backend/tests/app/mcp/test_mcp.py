@@ -100,12 +100,14 @@ def test_search_data_products_by_domain(session):
 
 
 def test_search_data_products_by_status(session):
-    from app.data_products.status import DataProductStatus
+    from app.data_products.status import AbstractDataProductStatus
 
-    active_dp = DataProductFactory(status=DataProductStatus.ACTIVE.value)
-    DataProductFactory(status=DataProductStatus.PENDING.value)
+    active_dp = DataProductFactory(status=AbstractDataProductStatus.ACTIVE.value)
+    DataProductFactory(status=AbstractDataProductStatus.PENDING.value)
 
-    result = search_data_products(status=DataProductStatus.ACTIVE.value, db=session)
+    result = search_data_products(
+        status=AbstractDataProductStatus.ACTIVE.value, db=session
+    )
 
     assert "data_products" in result
     returned_ids = {dp["id"] for dp in result["data_products"]}

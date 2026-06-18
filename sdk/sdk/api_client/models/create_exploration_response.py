@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
+from ..models.abstract_data_product_status import AbstractDataProductStatus
 
 if TYPE_CHECKING:
     from ..models.domain import Domain
@@ -23,6 +25,8 @@ class CreateExplorationResponse:
         namespace (str):
         description (str):
         domain (Domain):
+        status (AbstractDataProductStatus):
+        finalizers (list[str]):
     """
 
     id: UUID
@@ -30,6 +34,8 @@ class CreateExplorationResponse:
     namespace: str
     description: str
     domain: Domain
+    status: AbstractDataProductStatus
+    finalizers: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -43,6 +49,10 @@ class CreateExplorationResponse:
 
         domain = self.domain.to_dict()
 
+        status = self.status.value
+
+        finalizers = self.finalizers
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -52,6 +62,8 @@ class CreateExplorationResponse:
                 "namespace": namespace,
                 "description": description,
                 "domain": domain,
+                "status": status,
+                "finalizers": finalizers,
             }
         )
 
@@ -72,12 +84,18 @@ class CreateExplorationResponse:
 
         domain = Domain.from_dict(d.pop("domain"))
 
+        status = AbstractDataProductStatus(d.pop("status"))
+
+        finalizers = cast(list[str], d.pop("finalizers"))
+
         create_exploration_response = cls(
             id=id,
             name=name,
             namespace=namespace,
             description=description,
             domain=domain,
+            status=status,
+            finalizers=finalizers,
         )
 
         create_exploration_response.additional_properties = d

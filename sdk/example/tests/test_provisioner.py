@@ -14,6 +14,7 @@ from sdk.api_client.models import (
     GetExplorationsResponse,
     User,
 )
+from sdk.api_client.models.abstract_data_product_status import AbstractDataProductStatus
 
 
 def _fake_exploration(exploration_id: uuid.UUID) -> GetExplorationResponse:
@@ -32,6 +33,8 @@ def _fake_exploration(exploration_id: uuid.UUID) -> GetExplorationResponse:
             has_seen_tour=False,
             can_become_admin=False,
         ),
+        status=AbstractDataProductStatus.ACTIVE,
+        finalizers=[],
     )
 
 

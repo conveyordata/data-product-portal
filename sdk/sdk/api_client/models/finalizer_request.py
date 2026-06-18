@@ -6,29 +6,27 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.abstract_data_product_status import AbstractDataProductStatus
-
-T = TypeVar("T", bound="DataProductStatusUpdate")
+T = TypeVar("T", bound="FinalizerRequest")
 
 
 @_attrs_define
-class DataProductStatusUpdate:
+class FinalizerRequest:
     """
     Attributes:
-        status (AbstractDataProductStatus):
+        finalizer (str):
     """
 
-    status: AbstractDataProductStatus
+    finalizer: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        status = self.status.value
+        finalizer = self.finalizer
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "status": status,
+                "finalizer": finalizer,
             }
         )
 
@@ -37,14 +35,14 @@ class DataProductStatusUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        status = AbstractDataProductStatus(d.pop("status"))
+        finalizer = d.pop("finalizer")
 
-        data_product_status_update = cls(
-            status=status,
+        finalizer_request = cls(
+            finalizer=finalizer,
         )
 
-        data_product_status_update.additional_properties = d
-        return data_product_status_update
+        finalizer_request.additional_properties = d
+        return finalizer_request
 
     @property
     def additional_keys(self) -> list[str]:

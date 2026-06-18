@@ -17,7 +17,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "delete",
-        "url": "/api/v2/data_products/{id}".format(
+        "url": "/api/v2/explorations/{id}".format(
             id=quote(str(id), safe=""),
         ),
     }
@@ -67,7 +67,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
-    """Remove Data Product
+    """Remove Exploration
 
     Args:
         id (UUID):
@@ -96,7 +96,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
-    """Remove Data Product
+    """Remove Exploration
 
     Args:
         id (UUID):
@@ -120,7 +120,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
-    """Remove Data Product
+    """Remove Exploration
 
     Args:
         id (UUID):
@@ -147,7 +147,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
-    """Remove Data Product
+    """Remove Exploration
 
     Args:
         id (UUID):

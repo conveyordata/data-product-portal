@@ -388,7 +388,11 @@ export type DeleteDataProductRoleAssignmentResponse = {
   id: string;
   data_product_id: string;
 };
-export type DataProductStatus = "pending" | "active" | "archived";
+export type AbstractDataProductStatus =
+  | "pending"
+  | "active"
+  | "archived"
+  | "deleting";
 export type DataProductIconKey =
   | "reporting"
   | "processing"
@@ -408,7 +412,7 @@ export type DataProduct = {
   name: string;
   namespace: string;
   description: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   type: DataProductType;
 };
 export type DataProductRoleAssignmentResponse = {
