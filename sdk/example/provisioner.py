@@ -102,7 +102,9 @@ class ExplorationProvisioner(Reconciler):
 
         response = await get_exploration.asyncio(id=exploration_id, client=self._client)
         if response is None:
-            # Exploration is fully gone from the portal — clean up locally.
+            # Exploration is fully gone from the portal. Because we always register
+            # our finalizer before provisioning, the portal will only hard-delete
+            # after we have already deprovisioned via the DELETING path. Nothing to do.
             return
         if isinstance(response, HTTPValidationError):
             raise Exception(response.detail)

@@ -160,29 +160,43 @@ async def test_reconcile_reflects_updated_state(
     assert json.loads(manifest.read_text())["name"] == "renamed-exploration"
 
 
-async def test_reconcile_deprovisions_when_deleted(
+async def test_reconcile_404_after_deleting_is_noop(
     tmp_path: Path,
     fake_client,
     patch_get_exploration,
     patch_add_finalizer,
     patch_remove_finalizer,
 ):
+    """A 404 after the DELETING path has already cleaned up is a no-op.
+
+    Because we register the finalizer before provisioning, the portal can only
+    hard-delete after we have deprovisioned and released our finalizer via the
+    DELETING path. By the time we see a 404 the manifest is already gone.
+    """
     eid = uuid.uuid4()
+    # First provision.
     patch_get_exploration(eid, _fake_exploration(eid))
     provisioner = ExplorationProvisioner(client=fake_client, workspace=tmp_path)
-
     await provisioner.reconcile(eid)
     manifest = tmp_path / str(eid) / "manifest.json"
     assert manifest.exists()
 
-    # Portal now reports the exploration is fully gone (hard-deleted / 404).
+    # Simulate DELETING path: we deprovision and release the finalizer.
+    patch_get_exploration(
+        eid,
+        _fake_exploration(
+            eid, status=AbstractDataProductStatus.DELETING, finalizers=[FINALIZER_NAME]
+        ),
+    )
+    await provisioner.reconcile(eid)
+    assert not manifest.exists()
+
+    # Now the portal hard-deletes (404). Must be a no-op — nothing left to clean up.
     patch_get_exploration(eid, None)
     await provisioner.reconcile(eid)
 
-    assert not manifest.exists()
-    assert not manifest.parent.exists()
-    # No finalizer removal for the hard-delete path — exploration is already gone.
-    assert patch_remove_finalizer == []
+    assert not (tmp_path / str(eid)).exists()
+    assert patch_remove_finalizer == [{"id": eid, "finalizer": FINALIZER_NAME}]
 
 
 async def test_reconcile_deprovision_when_already_absent(
