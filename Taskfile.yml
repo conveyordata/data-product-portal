@@ -43,7 +43,7 @@ tasks:
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
-      - cd docs && npm run docusaurus docs:version {{.CLI_ARGS}}
+      - cd docs && npx docusaurus docs:version {{.CLI_ARGS}}
 
   docusaurus:update-config:
     desc: "Update docusaurus.config.ts with new version"
@@ -81,6 +81,18 @@ tasks:
     cmds:
       - gh pr create --fill --title "Release {{.CLI_ARGS}}" --body "Automated release for {{.CLI_ARGS}}"
 
+  docs:commit:
+    desc: "Commit and push the version bump"
+    cmds:
+      - git add .
+      - 'git commit -m "chore: version docs {{.CLI_ARGS}}"'
+      - git push origin HEAD
+
+  docs:pr:
+    desc: "Open PR (requires gh CLI)"
+    cmds:
+      - gh pr create --fill --title "Version docs {{.CLI_ARGS}}" --body "Automated version update for {{.CLI_ARGS}}"
+
   release:post:
     desc: "Tag and deploy docs after merge"
     cmds:
@@ -94,8 +106,8 @@ tasks:
       - task: docusaurus:version
       - task: docusaurus:update-config
       - task: docusaurus:build
-      - task: release:commit
-      - task: release:pr
+      - task: docs:commit
+      - task: docs:pr
 
   bump-version:
     desc: "Generic version bump without docs, execute on all releases, e.g. bump-version 0.2.0"

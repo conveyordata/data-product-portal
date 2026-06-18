@@ -61,6 +61,10 @@ const config: Config = {
           editUrl:
             'https://github.com/conveyordata/data-product-portal/tree/main/docs/',
             versions: {
+							"0.5.x": {
+								label: "0.5.x",
+							path: "0.5.x"
+							},
               "0.4.x": {
                 label: "0.4.x",
                 path: "0.4.x"
