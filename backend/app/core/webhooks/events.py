@@ -5,12 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.abstract_data_product.schema_response import GetAbstractDataProductResponse
-from app.data_products.output_ports.schema_response import GetOutputPortResponse
-from app.data_products.schema_response import GetDataProductResponse
-from app.data_products.technical_assets.schema_response import (
-    GetTechnicalAssetsResponseItem,
-)
+from app.abstract_data_product.type import AbstractDataProductType
 
 
 class V2Event(BaseModel):
@@ -36,23 +31,69 @@ class V2Event(BaseModel):
         raise NotImplementedError
 
 
-class ExplorationPayload(BaseModel):
+class ExplorationEventPayload(BaseModel):
     id: UUID
 
 
-class ExplorationCreatedEvent(V2Event, ExplorationPayload):
+class ExplorationCreatedEvent(V2Event, ExplorationEventPayload):
     @classmethod
     def event_type(cls) -> str:
         return "exploration.created"
 
 
-class ExplorationUpdatedEvent(V2Event, ExplorationPayload):
+class ExplorationUpdatedEvent(V2Event, ExplorationEventPayload):
     @classmethod
     def event_type(cls) -> str:
         return "exploration.updated"
 
 
-class ExplorationDeletedEvent(V2Event, ExplorationPayload):
+class ExplorationDeletedEvent(V2Event, ExplorationEventPayload):
     @classmethod
     def event_type(cls) -> str:
         return "exploration.deleted"
+
+
+class InputPortPayload(BaseModel):
+    id: UUID
+    consuming_abstract_data_product_id: UUID
+    consuming_abstract_data_product_type: AbstractDataProductType
+
+
+class InputPortCreatedEvent(V2Event, InputPortPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "input_port.created"
+
+
+class InputPortUpdatedEvent(V2Event, InputPortPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "input_port.updated"
+
+
+class InputPortDeletedEvent(V2Event, InputPortPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "input_port.deleted"
+
+
+class DataProductEventPayload(BaseModel):
+    id: UUID
+
+
+class DataProductCreatedEvent(V2Event, DataProductEventPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.created"
+
+
+class DataProductUpdatedEvent(V2Event, DataProductEventPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.updated"
+
+
+class DataProductDeletedEvent(V2Event, DataProductEventPayload):
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.deleted"

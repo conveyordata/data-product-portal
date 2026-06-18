@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import bindparam, text
 from sqlalchemy.orm import Session
 
-from app.abstract_data_product.model import AbstractDataProductType
+from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.logging import logger
 from app.graph.edge import Edge

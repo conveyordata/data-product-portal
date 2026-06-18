@@ -6,10 +6,10 @@ import pytz
 from posthog import Posthog
 from sqlalchemy import func, select
 
+from app.abstract_data_product.input_ports.model import InputPort as InputPortModel
 from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.logging import logger
-from app.data_products.output_ports.input_ports.model import InputPort as InputPortModel
 from app.database.database import SessionLocal
 from app.settings import settings
 

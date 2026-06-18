@@ -14,6 +14,9 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from app.abstract_data_product.input_ports.model import (
+    InputPort,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
 from app.data_products.output_port_technical_assets_link.model import (
@@ -23,9 +26,6 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.input_ports.model import (
-    InputPort,
-)
 from app.data_products.output_ports.status import OutputPortStatus
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM

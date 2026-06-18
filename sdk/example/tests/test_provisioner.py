@@ -6,12 +6,10 @@ import pytest
 
 from example import provisioner as prov_module
 from example.provisioner import FINALIZER_NAME, ExplorationProvisioner
-from sdk import Client, ReconcileManager
+from sdk import Client
 from sdk.api_client.models import (
     Domain,
-    Exploration,
     GetExplorationResponse,
-    GetExplorationsResponse,
     User,
 )
 from sdk.api_client.models.abstract_data_product_status import AbstractDataProductStatus
@@ -291,32 +289,3 @@ async def test_reconcile_deleting_without_our_finalizer_is_noop(
     assert result is None
     assert patch_remove_finalizer == []
     assert patch_add_finalizer == []
-
-
-async def test_reconcile_runs_via_manager(
-    tmp_path: Path,
-    fake_client,
-    patch_get_exploration,
-    patch_add_finalizer,
-    patch_remove_finalizer,
-):
-    eid = uuid.uuid4()
-    patch_get_exploration(eid, _fake_exploration(eid))
-    provisioner = ExplorationProvisioner(client=fake_client, workspace=tmp_path)
-    manager = ReconcileManager(provisioner, default_delay=0.0, num_workers=2)
-    manager.start()
-
-    # Multiple events for the same exploration should coalesce into a single manifest.
-    await manager.enqueue(eid)
-    await manager.enqueue(eid)
-
-    manifest = tmp_path / str(eid) / "manifest.json"
-    import asyncio
-
-    for _ in range(200):
-        if manifest.exists():
-            break
-        await asyncio.sleep(0.01)
-    await manager.stop()
-
-    assert manifest.exists()

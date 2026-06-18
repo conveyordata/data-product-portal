@@ -27,9 +27,15 @@ from .azure_environment_platform_configuration import (
 from .become_admin import BecomeAdmin
 from .bitol_contract_request import BitolContractRequest
 from .can_become_admin_update import CanBecomeAdminUpdate
+from .cloud_event_data_product_created_event import CloudEventDataProductCreatedEvent
+from .cloud_event_data_product_deleted_event import CloudEventDataProductDeletedEvent
+from .cloud_event_data_product_updated_event import CloudEventDataProductUpdatedEvent
 from .cloud_event_exploration_created_event import CloudEventExplorationCreatedEvent
 from .cloud_event_exploration_deleted_event import CloudEventExplorationDeletedEvent
 from .cloud_event_exploration_updated_event import CloudEventExplorationUpdatedEvent
+from .cloud_event_input_port_created_event import CloudEventInputPortCreatedEvent
+from .cloud_event_input_port_deleted_event import CloudEventInputPortDeletedEvent
+from .cloud_event_input_port_updated_event import CloudEventInputPortUpdatedEvent
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -53,6 +59,8 @@ from .data_output_update import DataOutputUpdate
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
+from .data_product_created_event import DataProductCreatedEvent
+from .data_product_deleted_event import DataProductDeletedEvent
 from .data_product_icon_key import DataProductIconKey
 from .data_product_life_cycle import DataProductLifeCycle
 from .data_product_life_cycle_create import DataProductLifeCycleCreate
@@ -80,6 +88,7 @@ from .data_product_type_update import DataProductTypeUpdate
 from .data_product_types_get import DataProductTypesGet
 from .data_product_types_get_item import DataProductTypesGetItem
 from .data_product_update import DataProductUpdate
+from .data_product_updated_event import DataProductUpdatedEvent
 from .data_product_usage_update import DataProductUsageUpdate
 from .data_quality_status import DataQualityStatus
 from .data_quality_technical_asset import DataQualityTechnicalAsset
@@ -163,6 +172,9 @@ from .glue_technical_asset_configuration import GlueTechnicalAssetConfiguration
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
 from .input_port import InputPort
+from .input_port_created_event import InputPortCreatedEvent
+from .input_port_deleted_event import InputPortDeletedEvent
+from .input_port_updated_event import InputPortUpdatedEvent
 from .is_admin_response import IsAdminResponse
 from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
 from .link_input_ports_to_data_product_post import LinkInputPortsToDataProductPost
@@ -333,9 +345,15 @@ __all__ = (
     "BecomeAdmin",
     "BitolContractRequest",
     "CanBecomeAdminUpdate",
+    "CloudEventDataProductCreatedEvent",
+    "CloudEventDataProductDeletedEvent",
+    "CloudEventDataProductUpdatedEvent",
     "CloudEventExplorationCreatedEvent",
     "CloudEventExplorationDeletedEvent",
     "CloudEventExplorationUpdatedEvent",
+    "CloudEventInputPortCreatedEvent",
+    "CloudEventInputPortDeletedEvent",
+    "CloudEventInputPortUpdatedEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -361,6 +379,8 @@ __all__ = (
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
+    "DataProductCreatedEvent",
+    "DataProductDeletedEvent",
     "DataProductIconKey",
     "DataProductLifeCycle",
     "DataProductLifeCycleCreate",
@@ -386,6 +406,7 @@ __all__ = (
     "DataProductTypesGetItem",
     "DataProductTypeUpdate",
     "DataProductUpdate",
+    "DataProductUpdatedEvent",
     "DataProductUsageUpdate",
     "DataQualityStatus",
     "DataQualityTechnicalAsset",
@@ -451,6 +472,9 @@ __all__ = (
     "Graph",
     "HTTPValidationError",
     "InputPort",
+    "InputPortCreatedEvent",
+    "InputPortDeletedEvent",
+    "InputPortUpdatedEvent",
     "IsAdminResponse",
     "LinkInputPortsToDataProduct",
     "LinkInputPortsToDataProductPost",

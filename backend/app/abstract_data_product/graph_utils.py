@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, cast
 
-from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
+from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.type import AbstractDataProductType
 from app.graph.node import Node, NodeData, NodeType
 
 if TYPE_CHECKING:
