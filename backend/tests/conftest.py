@@ -1,6 +1,8 @@
 # ruff: noqa: S311, S105
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any, Generator
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -130,3 +132,20 @@ def admin() -> UserFactory:
 @pytest.fixture
 def authorizer() -> Authorization:
     return Authorization()
+
+
+@contextmanager
+def webhook_v2_config(url: str | None = "http://test-v2.example.com/hook"):
+    original = settings.WEBHOOK_V2_URL
+    settings.WEBHOOK_V2_URL = url
+    try:
+        yield
+    finally:
+        settings.WEBHOOK_V2_URL = original
+
+
+@pytest.fixture
+def mock_webhook() -> Iterator[AsyncMock]:
+    with patch("app.main.call_v2_webhook", new_callable=AsyncMock) as mock:
+        with webhook_v2_config():
+            yield mock

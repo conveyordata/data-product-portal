@@ -1,9 +1,7 @@
 from copy import deepcopy
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -13,7 +11,6 @@ from app.events.service import EventService
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests import test_session
-from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
@@ -29,6 +26,7 @@ from tests.factories import (
     TechnicalAssetFactory,
     UserFactory,
 )
+from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
@@ -828,6 +826,12 @@ class TestOutputPortRouter:
         )
         assert len(events) == 1
         assert events[0].deleted_subject_identifier == dataset_name
+
+    def test_create_generates_webhook_v2_event(
+        self, mock_webhook, dataset_payload, client
+    ):
+        self.test_create_dataset(dataset_payload, client)
+        assert_event_in_queue("output_port.event", mock_webhook)
 
     @staticmethod
     def create_output_port(client, data_product_id, output_port_payload):

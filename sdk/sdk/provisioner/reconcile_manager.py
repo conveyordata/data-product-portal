@@ -13,6 +13,9 @@ from sdk.api_client.models import (
     DataProductEvent,
     ExplorationEvent,
     InputPortEvent,
+    OutputPortEvent,
+    OutputPortTechnicalAssetLinkEvent,
+    TechnicalAssetEvent,
 )
 from sdk.provisioner.event_handler import AbstractEventHandler
 from sdk.provisioner.reconcile_queue import (
@@ -241,3 +244,14 @@ class ReconcileEventHandler(AbstractEventHandler):
                     ResourceType.DATA_PRODUCT, data.consuming_abstract_data_product_id
                 )
         return None
+
+    async def on_output_port_event(self, data: OutputPortEvent):
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+
+    async def on_technical_asset_event(self, data: TechnicalAssetEvent):
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+
+    async def on_output_port_technical_asset_link_event(
+        self, data: OutputPortTechnicalAssetLinkEvent
+    ):
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)

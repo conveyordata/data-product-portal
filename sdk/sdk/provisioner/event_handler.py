@@ -8,9 +8,15 @@ from sdk.api_client.models import (
     CloudEventDataProductEvent,
     CloudEventExplorationEvent,
     CloudEventInputPortEvent,
+    CloudEventOutputPortEvent,
+    CloudEventOutputPortTechnicalAssetLinkEvent,
+    CloudEventTechnicalAssetEvent,
     DataProductEvent,
     ExplorationEvent,
     InputPortEvent,
+    OutputPortEvent,
+    OutputPortTechnicalAssetLinkEvent,
+    TechnicalAssetEvent,
 )
 
 
@@ -34,9 +40,22 @@ class AbstractEventHandler(ABC):
             )
 
         parsed_event: Any
-        if event_type == "data_product.event":
+        if event_type == "output_port.event":
+            parsed_event = CloudEventOutputPortEvent.from_dict(payload)
+            return await self.on_output_port_event(parsed_event.data)
+        elif event_type == "data_product.event":
             parsed_event = CloudEventDataProductEvent.from_dict(payload)
             return await self.on_data_product_event(parsed_event.data)
+        elif event_type == "technical_asset.event":
+            parsed_event = CloudEventTechnicalAssetEvent.from_dict(payload)
+            return await self.on_technical_asset_event(parsed_event.data)
+        elif event_type == "output_port_technical_asset_link.event":
+            parsed_event = CloudEventOutputPortTechnicalAssetLinkEvent.from_dict(
+                payload
+            )
+            return await self.on_output_port_technical_asset_link_event(
+                parsed_event.data
+            )
         elif event_type == "exploration.event":
             parsed_event = CloudEventExplorationEvent.from_dict(payload)
             return await self.on_exploration_event(parsed_event.data)
@@ -51,8 +70,25 @@ class AbstractEventHandler(ABC):
             }
 
     @abstractmethod
+    async def on_output_port_event(self, data: OutputPortEvent) -> Any:
+        """Handler for the parsed payload of 'output_port.event'"""
+        pass
+
+    @abstractmethod
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
         """Handler for the parsed payload of 'data_product.event'"""
+        pass
+
+    @abstractmethod
+    async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
+        """Handler for the parsed payload of 'technical_asset.event'"""
+        pass
+
+    @abstractmethod
+    async def on_output_port_technical_asset_link_event(
+        self, data: OutputPortTechnicalAssetLinkEvent
+    ) -> Any:
+        """Handler for the parsed payload of 'output_port_technical_asset_link.event'"""
         pass
 
     @abstractmethod
@@ -72,7 +108,18 @@ class EmptyEventHandler(AbstractEventHandler):
     Inherit from this in your tests to avoid implementing every single abstract method.
     """
 
+    async def on_output_port_event(self, data: OutputPortEvent) -> Any:
+        pass
+
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
+        pass
+
+    async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
+        pass
+
+    async def on_output_port_technical_asset_link_event(
+        self, data: OutputPortTechnicalAssetLinkEvent
+    ) -> Any:
         pass
 
     async def on_exploration_event(self, data: ExplorationEvent) -> Any:

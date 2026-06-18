@@ -2,7 +2,6 @@ import json
 import uuid
 from copy import deepcopy
 from typing import Any
-from unittest.mock import AsyncMock, patch
 from uuid import UUID
 
 import pytest
@@ -12,7 +11,6 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
-from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
@@ -35,6 +33,7 @@ from tests.factories import (
 )
 from tests.factories.data_product_setting_value import DataProductSettingValueFactory
 from tests.factories.platform_service import PlatformServiceFactory
+from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products"
 
@@ -81,6 +80,18 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
+
+    def test_create_data_product_generate_webhook_v2_event(
+        self,
+        payload,
+        client,
+        user_with_create_data_product_rights,
+        mock_webhook,
+    ):
+        self.test_create_data_product(
+            payload, client, user_with_create_data_product_rights
+        )
+        assert_event_in_queue("data_product.event", mock_webhook)
 
     def test_create_data_product_with_input_ports(
         self, payload, client, user_with_create_data_product_rights

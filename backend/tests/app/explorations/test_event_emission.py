@@ -8,7 +8,7 @@ import faker
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.settings import settings
-from tests.app.core.webhooks.helpers import webhook_v2_config
+from tests.conftest import webhook_v2_config
 from tests.factories import (
     DomainFactory,
     GlobalRoleAssignmentFactory,
@@ -38,13 +38,11 @@ def _authorized_user():
 
 
 class TestExplorationEventEmission:
-    @patch("app.main.call_v2_webhook", new_callable=AsyncMock)
     def test_create_exploration_emits_created_event(self, mock_webhook, client):
         d = DomainFactory()
         _authorized_user()
 
-        with webhook_v2_config():
-            response = client.post(ROUTE, json=_create_payload(str(d.id)))
+        response = client.post(ROUTE, json=_create_payload(str(d.id)))
 
         assert response.status_code == 200
         mock_webhook.assert_awaited_once()
@@ -63,14 +61,12 @@ class TestExplorationEventEmission:
         assert response.status_code == 200
         mock_webhook.assert_not_awaited()
 
-    @patch("app.main.call_v2_webhook", new_callable=AsyncMock)
     def test_no_event_emitted_on_failed_request(self, mock_webhook, client):
         """A 4xx response must not emit any event."""
         d = DomainFactory()
         # no authorized user → 403
 
-        with webhook_v2_config():
-            response = client.post(ROUTE, json=_create_payload(str(d.id)))
+        response = client.post(ROUTE, json=_create_payload(str(d.id)))
 
         assert response.status_code >= 400
         mock_webhook.assert_not_awaited()
