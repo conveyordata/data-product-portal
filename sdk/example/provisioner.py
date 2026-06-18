@@ -1,11 +1,12 @@
 """A worked example provisioner built on the SDK reconcile loop.
 
-This shows how to turn exploration webhook events into an operator-style control
-loop. The :class:`ExplorationProvisioner` is a level-based reconciler: on every event
-it (re-)fetches the current state of the exploration from the portal and converges an
-external resource towards it. Here the "external resource" is a directory on disk
-containing a small manifest, which stands in for whatever real infrastructure a
-provisioner would manage (an S3 prefix, a database schema, a Terraform workspace, ...).
+This shows how to turn portal webhook events into an operator-style control loop.
+The :class:`ExplorationProvisioner` is an implementation of such a reconciler.
+On every event it (re-)fetches the current state of the
+resource from the portal and converge an external resource towards it. Here the
+"external resource" is a directory on disk containing a small manifest, which stands
+in for whatever real infrastructure a provisioner would manage (an S3 prefix, a
+database schema, a Terraform workspace, ...).
 
 Run it with::
 
@@ -40,6 +41,7 @@ from sdk import (
     ReconcileEventHandler,
     ReconcileManager,
     Reconciler,
+    ResourceType,
 )
 from sdk.api_client.api.explorations import get_exploration, get_explorations
 from sdk.api_client.models import (
@@ -143,8 +145,10 @@ class ExplorationProvisioner(Reconciler):
 async def lifespan(app: FastAPI):
     client = _build_client()
     manager = ReconcileManager(
-        ExplorationProvisioner(client),
-        default_delay=30.0,  # debounce: wait 30s before picking an exploration up
+        {
+            ResourceType.EXPLORATION: ExplorationProvisioner(client),
+        },
+        default_delay=30.0,  # debounce: wait 30s before picking a resource up
         num_workers=4,
     )
     manager.start()
@@ -162,7 +166,6 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/webhook")
 async def webhook(request: Request) -> dict[str, Any]:
-    """Receive portal CloudEvents and enqueue a reconcile for the exploration."""
     return await request.app.state.handler.dispatch_routing(request)
 
 

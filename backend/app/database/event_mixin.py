@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from sqlalchemy import event as sql_event
-from sqlalchemy import inspect
 
 
 class EventTrackedMixin:

@@ -12,8 +12,15 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.tags.model import Tag, tag_data_product_table
+from app.core.webhooks.events import (
+    DataProductCreatedEvent,
+    DataProductDeletedEvent,
+    DataProductEventPayload,
+    DataProductUpdatedEvent,
+)
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import ensure_exists
+from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
@@ -23,7 +30,13 @@ if TYPE_CHECKING:
     )
 
 
-class DataProduct(AbstractDataProduct):
+class DataProduct(
+    AbstractDataProduct,
+    EventTrackedMixin,
+    create_event=DataProductCreatedEvent,
+    update_event=DataProductUpdatedEvent,
+    delete_event=DataProductDeletedEvent,
+):
     __tablename__ = "data_products"
 
     id: Mapped[UUID] = mapped_column(
@@ -89,6 +102,11 @@ class DataProduct(AbstractDataProduct):
     __mapper_args__ = {
         "polymorphic_identity": AbstractDataProductType.DATA_PRODUCT,
     }
+
+    def to_event(self) -> DataProductEventPayload:
+        return DataProductEventPayload(
+            id=self.id,
+        )
 
 
 def ensure_data_product_exists(

@@ -7381,6 +7381,15 @@
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_InputPortDeletedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductCreatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductUpdatedEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductDeletedEvent"
                   }
                 ],
                 "title": "Body",
@@ -7392,7 +7401,10 @@
                     "exploration.deleted": "#/components/schemas/CloudEvent_ExplorationDeletedEvent",
                     "input_port.created": "#/components/schemas/CloudEvent_InputPortCreatedEvent",
                     "input_port.updated": "#/components/schemas/CloudEvent_InputPortUpdatedEvent",
-                    "input_port.deleted": "#/components/schemas/CloudEvent_InputPortDeletedEvent"
+                    "input_port.deleted": "#/components/schemas/CloudEvent_InputPortDeletedEvent",
+                    "data_product.created": "#/components/schemas/CloudEvent_DataProductCreatedEvent",
+                    "data_product.updated": "#/components/schemas/CloudEvent_DataProductUpdatedEvent",
+                    "data_product.deleted": "#/components/schemas/CloudEvent_DataProductDeletedEvent"
                   }
                 }
               }
@@ -7794,6 +7806,138 @@
           "can_become_admin"
         ],
         "title": "CanBecomeAdminUpdate"
+      },
+      "CloudEvent_DataProductCreatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.created",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.created"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductCreatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductCreatedEvent"
+      },
+      "CloudEvent_DataProductDeletedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.deleted",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.deleted"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductDeletedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductDeletedEvent"
+      },
+      "CloudEvent_DataProductUpdatedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.updated",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.updated"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductUpdatedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductUpdatedEvent"
       },
       "CloudEvent_ExplorationCreatedEvent": {
         "properties": {
@@ -8714,6 +8858,34 @@
         ],
         "title": "DataProductCreate"
       },
+      "DataProductCreatedEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DataProductCreatedEvent"
+      },
+      "DataProductDeletedEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DataProductDeletedEvent"
+      },
       "DataProductIconKey": {
         "type": "string",
         "enum": [
@@ -9617,6 +9789,20 @@
           "lifecycle_id"
         ],
         "title": "DataProductUpdate"
+      },
+      "DataProductUpdatedEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DataProductUpdatedEvent"
       },
       "DataProductUsageUpdate": {
         "properties": {

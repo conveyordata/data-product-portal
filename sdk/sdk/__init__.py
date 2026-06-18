@@ -6,6 +6,7 @@ from sdk.provisioner.reconcile_manager import (
     ReconcileEventHandler,
     ReconcileManager,
     Reconciler,
+    ResourceType,
 )
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "Reconciler",
     "ReconcileEventHandler",
     "ReconcileManager",
+    "ResourceType",
 ]

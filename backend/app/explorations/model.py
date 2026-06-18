@@ -9,7 +9,7 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.core.webhooks.events import (
     ExplorationCreatedEvent,
     ExplorationDeletedEvent,
-    ExplorationPayload,
+    ExplorationEventPayload,
     ExplorationUpdatedEvent,
 )
 from app.database.database import ensure_exists
@@ -37,8 +37,8 @@ class Exploration(
     owner_id: Mapped[UUID] = mapped_column("owner_id", ForeignKey("users.id"))
     owner: Mapped["User"] = relationship("User", foreign_keys=[owner_id], lazy="raise")
 
-    def to_event(self) -> ExplorationPayload:
-        return ExplorationPayload(
+    def to_event(self) -> ExplorationEventPayload:
+        return ExplorationEventPayload(
             id=self.id,
         )
 
