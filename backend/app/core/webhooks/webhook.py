@@ -105,8 +105,8 @@ def register_webhooks(app: FastAPI) -> None:
         return
 
     # Programmatically construct a Discriminated Union across all event shapes
-    # Union.__getitem__ is used to pass a dynamic list of classes into a Union type block
-    V2EventUnion = Union.__getitem__(tuple(event_models))
+    # Subscripting Union with a tuple builds a dynamic Union over all classes
+    V2EventUnion = Union[tuple(event_models)]  # type: ignore[valid-type]
     UnifiedWebhookPayload = Annotated[V2EventUnion, Field(discriminator="type")]  # type: ignore[valid-type]
 
     # Define a single handler for the event stream

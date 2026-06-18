@@ -6,6 +6,11 @@ tasks:
     cmds:
       - poetry install --all-groups
 
+  test:
+    desc: "Run the SDK tests"
+    cmds:
+      - poetry run pytest
+
   generate:client:
     desc: "Regenerate the portal API client from the OpenAPI spec"
     cmds:

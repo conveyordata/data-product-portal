@@ -39,11 +39,6 @@ class Exploration(
     def to_event(self) -> ExplorationPayload:
         return ExplorationPayload(
             id=self.id,
-            name=self.name,
-            namespace=self.namespace,
-            description=self.description,
-            domain_id=self.domain_id,
-            owner_id=self.owner_id,
         )
 
 
