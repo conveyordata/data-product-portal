@@ -237,7 +237,7 @@ jobs:
           cache-dependency-path: docs/package-lock.json
       - name: Install npm dependencies
         working-directory: docs
-        run: npm ci --ignore-scripts --legacy-peer-deps
+        run: npm ci --ignore-scripts
       - name: Release portal docs
         working-directory: docs
         run: |
