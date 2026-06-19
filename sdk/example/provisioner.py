@@ -43,12 +43,19 @@ from sdk import (
     Reconciler,
     ResourceType,
 )
-from sdk.api_client.api.explorations import get_exploration, get_explorations
+from sdk.api_client.api.explorations import (
+    add_exploration_finalizer,
+    get_exploration,
+    get_explorations,
+    remove_exploration_finalizer,
+)
 from sdk.api_client.models import (
     GetExplorationResponse,
     GetExplorationsResponse,
     HTTPValidationError,
 )
+from sdk.api_client.models.abstract_data_product_status import AbstractDataProductStatus
+from sdk.api_client.models.finalizer_request import FinalizerRequest
 
 _LOG_FORMAT = "%(asctime)s %(levelname)s:%(name)s:%(message)s"
 logging.basicConfig(level=logging.INFO, format=_LOG_FORMAT)
@@ -59,6 +66,10 @@ for _name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
         _handler.setFormatter(_formatter)
 
 WORKSPACE = Path(os.getenv("PROVISIONER_WORKSPACE", ".workspace"))
+
+# Identifier this provisioner registers on every exploration it manages.
+# Must be unique across all provisioners that use finalizers.
+FINALIZER_NAME = "example-provisioner"
 
 
 def _build_client() -> Client | AuthenticatedClient:
@@ -91,15 +102,38 @@ class ExplorationProvisioner(Reconciler):
 
         response = await get_exploration.asyncio(id=exploration_id, client=self._client)
         if response is None:
-            self._deprovision(exploration_id)
-            return
-        if isinstance(response, GetExplorationResponse):
-            self._provision(exploration_id, response)
+            # Exploration is fully gone from the portal. Because we always register
+            # our finalizer before provisioning, the portal will only hard-delete
+            # after we have already deprovisioned via the DELETING path. Nothing to do.
             return
         if isinstance(response, HTTPValidationError):
             raise Exception(response.detail)
+        if not isinstance(response, GetExplorationResponse):
+            raise Exception("Unexpected response")
 
-        raise Exception("Unexpected response")
+        if response.status == AbstractDataProductStatus.DELETING:
+            # Portal is waiting for us to finish clean-up before hard-deleting.
+            # Only act if we are still registered — another reconcile may have
+            # already deprovisioned and released our finalizer.
+            if FINALIZER_NAME not in (response.finalizers or []):
+                return
+            self._deprovision(exploration_id)
+            await remove_exploration_finalizer.asyncio(
+                id=exploration_id,
+                finalizer=FINALIZER_NAME,
+                client=self._client,
+            )
+            return
+
+        # Exploration is live (ACTIVE / PENDING / ARCHIVED).
+        # Register the finalizer *before* provisioning so that even a partial
+        # provision is cleaned up when the exploration is later deleted.
+        await add_exploration_finalizer.asyncio(
+            id=exploration_id,
+            client=self._client,
+            body=FinalizerRequest(finalizer=FINALIZER_NAME),
+        )
+        self._provision(exploration_id, response)
 
     async def list_ids(self) -> Iterable[UUID]:
         """List every exploration in the portal so each is reconciled on startup."""
