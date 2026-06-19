@@ -9,7 +9,6 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
-from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,

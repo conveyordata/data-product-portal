@@ -7378,6 +7378,15 @@
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent"
                   }
                 ],
                 "title": "Body",
@@ -7388,7 +7397,10 @@
                     "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
                     "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
                     "data_product.role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
-                    "output_port.role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent"
+                    "output_port.role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
+                    "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
+                    "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
+                    "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent"
                   }
                 }
               }
@@ -7967,6 +7979,50 @@
         ],
         "title": "CloudEvent_InputPortEvent"
       },
+      "CloudEvent_OutputPortEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortEvent"
+      },
       "CloudEvent_OutputPortRoleAssignmentEvent": {
         "properties": {
           "specversion": {
@@ -8010,6 +8066,94 @@
           "data"
         ],
         "title": "CloudEvent_OutputPortRoleAssignmentEvent"
+      },
+      "CloudEvent_OutputPortTechnicalAssetLinkEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port_technical_asset_link.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port_technical_asset_link.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortTechnicalAssetLinkEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortTechnicalAssetLinkEvent"
+      },
+      "CloudEvent_TechnicalAssetEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetEvent"
       },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
@@ -12370,6 +12514,26 @@
         ],
         "title": "OutputPortDataQualitySummaryResponse"
       },
+      "OutputPortEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id"
+        ],
+        "title": "OutputPortEvent"
+      },
       "OutputPortInputPort": {
         "properties": {
           "id": {
@@ -12715,6 +12879,38 @@
           "archived"
         ],
         "title": "OutputPortStatus"
+      },
+      "OutputPortTechnicalAssetLinkEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id",
+          "output_port_id",
+          "technical_asset_id"
+        ],
+        "title": "OutputPortTechnicalAssetLinkEvent"
       },
       "OwnedTechnicalAsset": {
         "properties": {
@@ -14312,6 +14508,26 @@
           "configuration"
         ],
         "title": "TechnicalAsset"
+      },
+      "TechnicalAssetEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id"
+        ],
+        "title": "TechnicalAssetEvent"
       },
       "TechnicalAssetLink": {
         "properties": {

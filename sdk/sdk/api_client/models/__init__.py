@@ -33,9 +33,14 @@ from .cloud_event_data_product_role_assignment_event import (
 )
 from .cloud_event_exploration_event import CloudEventExplorationEvent
 from .cloud_event_input_port_event import CloudEventInputPortEvent
+from .cloud_event_output_port_event import CloudEventOutputPortEvent
 from .cloud_event_output_port_role_assignment_event import (
     CloudEventOutputPortRoleAssignmentEvent,
 )
+from .cloud_event_output_port_technical_asset_link_event import (
+    CloudEventOutputPortTechnicalAssetLinkEvent,
+)
+from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -212,6 +217,7 @@ from .output_port_data_quality_summary_response import (
 from .output_port_data_quality_summary_response_dimensions_type_0 import (
     OutputPortDataQualitySummaryResponseDimensionsType0,
 )
+from .output_port_event import OutputPortEvent
 from .output_port_input_port import OutputPortInputPort
 from .output_port_link import OutputPortLink
 from .output_port_query_stats_delete import OutputPortQueryStatsDelete
@@ -223,6 +229,7 @@ from .output_port_role_assignment_response import OutputPortRoleAssignmentRespon
 from .output_port_schema_response import OutputPortSchemaResponse
 from .output_port_setting_value import OutputPortSettingValue
 from .output_port_status import OutputPortStatus
+from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .owned_technical_asset import OwnedTechnicalAsset
 from .pending_action_response import PendingActionResponse
 from .platform import Platform
@@ -285,6 +292,7 @@ from .tag_update import TagUpdate
 from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
+from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_pending_action import (
     TechnicalAssetOutputPortPendingAction,
@@ -345,7 +353,10 @@ __all__ = (
     "CloudEventDataProductRoleAssignmentEvent",
     "CloudEventExplorationEvent",
     "CloudEventInputPortEvent",
+    "CloudEventOutputPortEvent",
     "CloudEventOutputPortRoleAssignmentEvent",
+    "CloudEventOutputPortTechnicalAssetLinkEvent",
+    "CloudEventTechnicalAssetEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -488,6 +499,7 @@ __all__ = (
     "OutputPortDataQualitySummaryDimensionsType0",
     "OutputPortDataQualitySummaryResponse",
     "OutputPortDataQualitySummaryResponseDimensionsType0",
+    "OutputPortEvent",
     "OutputPortInputPort",
     "OutputPortLink",
     "OutputPortQueryStatsDelete",
@@ -499,6 +511,7 @@ __all__ = (
     "OutputPortSchemaResponse",
     "OutputPortSettingValue",
     "OutputPortStatus",
+    "OutputPortTechnicalAssetLinkEvent",
     "OwnedTechnicalAsset",
     "PendingActionResponse",
     "Platform",
@@ -545,6 +558,7 @@ __all__ = (
     "TagsGetItem",
     "TagUpdate",
     "TechnicalAsset",
+    "TechnicalAssetEvent",
     "TechnicalAssetLink",
     "TechnicalAssetOutputPortPendingAction",
     "TechnicalAssetStatus",

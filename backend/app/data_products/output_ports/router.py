@@ -60,7 +60,7 @@ from app.users.notifications.service import NotificationService
 
 
 def _assign_owner_role_assignments(
-    dataset_id: UUID, owners: Sequence[UUID], db: Session, actor: User
+    output_port_id: UUID, owners: Sequence[UUID], db: Session, actor: User
 ) -> None:
     owner_role = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
 
@@ -68,7 +68,7 @@ def _assign_owner_role_assignments(
     event_service = EventService(db)
     for owner_id in owners:
         assignment = assignment_service.create_assignment(
-            dataset_id,
+            output_port_id,
             user_id=owner_id,
             role_id=owner_role.id,
             actor=actor,
@@ -154,32 +154,34 @@ def get_output_ports_event_history(
 )
 def create_output_port(
     data_product_id: UUID,
-    output_port: CreateOutputPortRequest,
+    output_port_request: CreateOutputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateOutputPortResponse:
     # Temporarily convert public to unrestricted.
-    if output_port.access_type == OutputPortAccessType.PUBLIC:
-        output_port.access_type = OutputPortAccessType.UNRESTRICTED
+    if output_port_request.access_type == OutputPortAccessType.PUBLIC:
+        output_port_request.access_type = OutputPortAccessType.UNRESTRICTED
 
-    new_dataset = OutputPortService(db).create_dataset(data_product_id, output_port)
+    output_port = OutputPortService(db).create_output_port(
+        data_product_id, output_port_request
+    )
     _assign_owner_role_assignments(
-        new_dataset.id, output_port.owners, db=db, actor=authenticated_user
+        output_port.id, output_port_request.owners, db=db, actor=authenticated_user
     )
 
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_CREATED,
-            subject_id=new_dataset.id,
+            subject_id=output_port.id,
             subject_type=EventReferenceEntity.DATASET,
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=new_dataset.id, event_id=event_id
+        dataset_id=output_port.id, event_id=event_id
     )
     RefreshInfrastructureLambda().trigger()
-    return CreateOutputPortResponse(id=new_dataset.id)
+    return CreateOutputPortResponse(id=output_port.id)
 
 
 @router.delete(

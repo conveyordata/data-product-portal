@@ -80,3 +80,32 @@ class OutputPortRoleAssignmentEvent(V2Event):
     @classmethod
     def event_type(cls) -> str:
         return "output_port.role_assignment.event"
+
+
+class TechnicalAssetEvent(V2Event):
+    id: UUID
+    data_product_id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.event"
+
+
+class OutputPortEvent(V2Event):
+    id: UUID
+    data_product_id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port.event"
+
+
+class OutputPortTechnicalAssetLinkEvent(V2Event):
+    id: UUID
+    data_product_id: UUID
+    output_port_id: UUID
+    technical_asset_id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port_technical_asset_link.event"
