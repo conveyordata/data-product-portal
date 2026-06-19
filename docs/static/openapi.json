@@ -7372,6 +7372,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_InputPortEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent"
                   }
                 ],
                 "title": "Body",
@@ -7380,7 +7386,9 @@
                   "mapping": {
                     "exploration.event": "#/components/schemas/CloudEvent_ExplorationEvent",
                     "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
-                    "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent"
+                    "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
+                    "data_product.role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
+                    "output_port.role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent"
                   }
                 }
               }
@@ -7827,6 +7835,50 @@
         ],
         "title": "CloudEvent_DataProductEvent"
       },
+      "CloudEvent_DataProductRoleAssignmentEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.role_assignment.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.role_assignment.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductRoleAssignmentEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductRoleAssignmentEvent"
+      },
       "CloudEvent_ExplorationEvent": {
         "properties": {
           "specversion": {
@@ -7914,6 +7966,50 @@
           "data"
         ],
         "title": "CloudEvent_InputPortEvent"
+      },
+      "CloudEvent_OutputPortRoleAssignmentEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.role_assignment.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.role_assignment.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortRoleAssignmentEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortRoleAssignmentEvent"
       },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
@@ -8817,6 +8913,33 @@
           "approved_by"
         ],
         "title": "DataProductOutputPortPendingAction"
+      },
+      "DataProductRoleAssignmentEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id",
+          "user_id"
+        ],
+        "title": "DataProductRoleAssignmentEvent",
+        "description": "Fired on insert, update, and delete of a data-product role assignment."
       },
       "DataProductRoleAssignmentPendingAction": {
         "properties": {
@@ -12408,6 +12531,39 @@
           "query_count"
         ],
         "title": "OutputPortQueryStatsUpdate"
+      },
+      "OutputPortRoleAssignmentEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "data_product_id",
+          "user_id"
+        ],
+        "title": "OutputPortRoleAssignmentEvent",
+        "description": "Fired on insert, update, and delete of an output-port role assignment."
       },
       "OutputPortRoleAssignmentResponse": {
         "properties": {

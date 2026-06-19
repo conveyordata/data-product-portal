@@ -28,8 +28,14 @@ from .become_admin import BecomeAdmin
 from .bitol_contract_request import BitolContractRequest
 from .can_become_admin_update import CanBecomeAdminUpdate
 from .cloud_event_data_product_event import CloudEventDataProductEvent
+from .cloud_event_data_product_role_assignment_event import (
+    CloudEventDataProductRoleAssignmentEvent,
+)
 from .cloud_event_exploration_event import CloudEventExplorationEvent
 from .cloud_event_input_port_event import CloudEventInputPortEvent
+from .cloud_event_output_port_role_assignment_event import (
+    CloudEventOutputPortRoleAssignmentEvent,
+)
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -61,6 +67,7 @@ from .data_product_life_cycle_update import DataProductLifeCycleUpdate
 from .data_product_life_cycles_get import DataProductLifeCyclesGet
 from .data_product_life_cycles_get_item import DataProductLifeCyclesGetItem
 from .data_product_output_port_pending_action import DataProductOutputPortPendingAction
+from .data_product_role_assignment_event import DataProductRoleAssignmentEvent
 from .data_product_role_assignment_pending_action import (
     DataProductRoleAssignmentPendingAction,
 )
@@ -211,6 +218,7 @@ from .output_port_query_stats_delete import OutputPortQueryStatsDelete
 from .output_port_query_stats_response import OutputPortQueryStatsResponse
 from .output_port_query_stats_responses import OutputPortQueryStatsResponses
 from .output_port_query_stats_update import OutputPortQueryStatsUpdate
+from .output_port_role_assignment_event import OutputPortRoleAssignmentEvent
 from .output_port_role_assignment_response import OutputPortRoleAssignmentResponse
 from .output_port_schema_response import OutputPortSchemaResponse
 from .output_port_setting_value import OutputPortSettingValue
@@ -334,8 +342,10 @@ __all__ = (
     "BitolContractRequest",
     "CanBecomeAdminUpdate",
     "CloudEventDataProductEvent",
+    "CloudEventDataProductRoleAssignmentEvent",
     "CloudEventExplorationEvent",
     "CloudEventInputPortEvent",
+    "CloudEventOutputPortRoleAssignmentEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -369,6 +379,7 @@ __all__ = (
     "DataProductLifeCyclesGetItem",
     "DataProductLifeCycleUpdate",
     "DataProductOutputPortPendingAction",
+    "DataProductRoleAssignmentEvent",
     "DataProductRoleAssignmentPendingAction",
     "DataProductRoleAssignmentResponse",
     "DataProductSetting",
@@ -483,6 +494,7 @@ __all__ = (
     "OutputPortQueryStatsResponse",
     "OutputPortQueryStatsResponses",
     "OutputPortQueryStatsUpdate",
+    "OutputPortRoleAssignmentEvent",
     "OutputPortRoleAssignmentResponse",
     "OutputPortSchemaResponse",
     "OutputPortSettingValue",
