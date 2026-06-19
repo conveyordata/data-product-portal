@@ -1,8 +1,7 @@
-import uuid
 from copy import deepcopy
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.output_port.service import RoleAssignmentService
@@ -25,12 +24,7 @@ from app.data_products.output_port_technical_assets_link.schema_response import 
 from app.data_products.output_port_technical_assets_link.service import (
     DataOutputDatasetService,
 )
-from app.data_products.schema_response import GetDataProductResponse
-from app.data_products.service import DataProductService
 from app.data_products.technical_assets import email
-from app.data_products.technical_assets.schema_response import (
-    GetTechnicalAssetsResponseItem,
-)
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType

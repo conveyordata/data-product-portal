@@ -35,9 +35,9 @@ class TestReportConsumptionMetricsTask:
                 "app.core.logging.posthog_analytics.asyncio.sleep",
                 side_effect=[None, asyncio.CancelledError()],
             ),
+            pytest.raises(asyncio.CancelledError),
         ):
-            with pytest.raises(asyncio.CancelledError):
-                await report_consumption_metrics_task()
+            await report_consumption_metrics_task()
 
         mock_posthog.capture.assert_called_once()
         call_kwargs = mock_posthog.capture.call_args.kwargs

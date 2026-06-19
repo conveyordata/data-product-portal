@@ -1,4 +1,4 @@
-from typing import Annotated, Optional, Sequence
+from typing import Annotated, Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
