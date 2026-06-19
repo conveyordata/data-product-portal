@@ -7396,8 +7396,8 @@
                     "exploration.event": "#/components/schemas/CloudEvent_ExplorationEvent",
                     "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
                     "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
-                    "data_product.role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
-                    "output_port.role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
+                    "data_product_role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
+                    "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
                     "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
                     "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
                     "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent"
@@ -7868,10 +7868,10 @@
           },
           "type": {
             "type": "string",
-            "const": "data_product.role_assignment.event",
+            "const": "data_product_role_assignment.event",
             "title": "Type",
             "description": "The unique type string belonging to this event.",
-            "default": "data_product.role_assignment.event"
+            "default": "data_product_role_assignment.event"
           },
           "time": {
             "type": "string",
@@ -8044,10 +8044,10 @@
           },
           "type": {
             "type": "string",
-            "const": "output_port.role_assignment.event",
+            "const": "output_port_role_assignment.event",
             "title": "Type",
             "description": "The unique type string belonging to this event.",
-            "default": "output_port.role_assignment.event"
+            "default": "output_port_role_assignment.event"
           },
           "time": {
             "type": "string",

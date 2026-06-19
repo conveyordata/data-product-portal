@@ -32,8 +32,8 @@ class CloudEventDataProductRoleAssignmentEvent:
         data (DataProductRoleAssignmentEvent): Fired on insert, update, and delete of a data-product role assignment.
         specversion (str | Unset): The CloudEvents specification version. Default: '1.0'.
         source (str | Unset): Identifies the context in which an event happened. Default: 'data-product-portal'.
-        type_ (Literal['data_product.role_assignment.event'] | Unset): The unique type string belonging to this event.
-            Default: 'data_product.role_assignment.event'.
+        type_ (Literal['data_product_role_assignment.event'] | Unset): The unique type string belonging to this event.
+            Default: 'data_product_role_assignment.event'.
     """
 
     id: str
@@ -41,8 +41,8 @@ class CloudEventDataProductRoleAssignmentEvent:
     data: DataProductRoleAssignmentEvent
     specversion: str | Unset = "1.0"
     source: str | Unset = "data-product-portal"
-    type_: Literal["data_product.role_assignment.event"] | Unset = (
-        "data_product.role_assignment.event"
+    type_: Literal["data_product_role_assignment.event"] | Unset = (
+        "data_product_role_assignment.event"
     )
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -95,13 +95,13 @@ class CloudEventDataProductRoleAssignmentEvent:
         source = d.pop("source", UNSET)
 
         type_ = cast(
-            Literal["data_product.role_assignment.event"] | Unset, d.pop("type", UNSET)
+            Literal["data_product_role_assignment.event"] | Unset, d.pop("type", UNSET)
         )
-        if type_ != "data_product.role_assignment.event" and not isinstance(
+        if type_ != "data_product_role_assignment.event" and not isinstance(
             type_, Unset
         ):
             raise ValueError(
-                f"type must match const 'data_product.role_assignment.event', got '{type_}'"
+                f"type must match const 'data_product_role_assignment.event', got '{type_}'"
             )
 
         cloud_event_data_product_role_assignment_event = cls(

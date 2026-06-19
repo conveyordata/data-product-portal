@@ -30,8 +30,8 @@ class CloudEventOutputPortRoleAssignmentEvent:
         data (OutputPortRoleAssignmentEvent): Fired on insert, update, and delete of an output-port role assignment.
         specversion (str | Unset): The CloudEvents specification version. Default: '1.0'.
         source (str | Unset): Identifies the context in which an event happened. Default: 'data-product-portal'.
-        type_ (Literal['output_port.role_assignment.event'] | Unset): The unique type string belonging to this event.
-            Default: 'output_port.role_assignment.event'.
+        type_ (Literal['output_port_role_assignment.event'] | Unset): The unique type string belonging to this event.
+            Default: 'output_port_role_assignment.event'.
     """
 
     id: str
@@ -39,8 +39,8 @@ class CloudEventOutputPortRoleAssignmentEvent:
     data: OutputPortRoleAssignmentEvent
     specversion: str | Unset = "1.0"
     source: str | Unset = "data-product-portal"
-    type_: Literal["output_port.role_assignment.event"] | Unset = (
-        "output_port.role_assignment.event"
+    type_: Literal["output_port_role_assignment.event"] | Unset = (
+        "output_port_role_assignment.event"
     )
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -93,13 +93,13 @@ class CloudEventOutputPortRoleAssignmentEvent:
         source = d.pop("source", UNSET)
 
         type_ = cast(
-            Literal["output_port.role_assignment.event"] | Unset, d.pop("type", UNSET)
+            Literal["output_port_role_assignment.event"] | Unset, d.pop("type", UNSET)
         )
-        if type_ != "output_port.role_assignment.event" and not isinstance(
+        if type_ != "output_port_role_assignment.event" and not isinstance(
             type_, Unset
         ):
             raise ValueError(
-                f"type must match const 'output_port.role_assignment.event', got '{type_}'"
+                f"type must match const 'output_port_role_assignment.event', got '{type_}'"
             )
 
         cloud_event_output_port_role_assignment_event = cls(

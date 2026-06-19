@@ -66,7 +66,7 @@ class DataProductRoleAssignmentEvent(V2Event):
 
     @classmethod
     def event_type(cls) -> str:
-        return "data_product.role_assignment.event"
+        return "data_product_role_assignment.event"
 
 
 class OutputPortRoleAssignmentEvent(V2Event):
@@ -79,7 +79,7 @@ class OutputPortRoleAssignmentEvent(V2Event):
 
     @classmethod
     def event_type(cls) -> str:
-        return "output_port.role_assignment.event"
+        return "output_port_role_assignment.event"
 
 
 class TechnicalAssetEvent(V2Event):
