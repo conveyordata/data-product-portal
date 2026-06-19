@@ -8,17 +8,17 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi (>=0.124.4,<0.125.0)",
+    "fastapi (>=0.137.1,<0.138.0)",
     "uvicorn (>=0.38.0,<0.39.0)",
     "cookiecutter (>=2.6.0,<3.0.0)",
-    "dpp-sdk"
+    "data-product-portal-sdk"
 ]
 
 [tool.mypy]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-# demo/basic/provisioner imports from dpp-sdk's auto-generated api_client.
+# demo/basic/provisioner imports from data-product-portal-sdk's auto-generated api_client.
 # It uses a T TypeVar variable-reuse pattern that mypy cannot follow but is
 # correct at runtime. Suppress errors rather than patching generated files.
 module = "sdk.api_client.*"
@@ -29,7 +29,7 @@ packages = [{include = "provisioner", from = "."}]
 
 [tool.poetry.dependencies]
 python = "^3.13"
-dpp-sdk = {path = "../../../sdk", develop = false}
+data-product-portal-sdk = {path = "../../../sdk", develop = false}
 
 [tool.poetry.group.dev.dependencies]
 mypy = ">=1.0"

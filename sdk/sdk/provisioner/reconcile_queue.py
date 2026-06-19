@@ -9,7 +9,7 @@ from typing import Generic, TypeVar
 logger = logging.getLogger(__name__)
 
 # Default debounce applied before an enqueued key becomes eligible for processing.
-DEFAULT_DELAY: float = 15.0
+DEFAULT_DELAY: float = 5.0
 
 KeyT = TypeVar("KeyT", bound=Hashable)
 
