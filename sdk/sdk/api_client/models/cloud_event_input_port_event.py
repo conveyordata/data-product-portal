@@ -15,31 +15,31 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.input_port_created_event import InputPortCreatedEvent
+    from ..models.input_port_event import InputPortEvent
 
 
-T = TypeVar("T", bound="CloudEventInputPortCreatedEvent")
+T = TypeVar("T", bound="CloudEventInputPortEvent")
 
 
 @_attrs_define
-class CloudEventInputPortCreatedEvent:
+class CloudEventInputPortEvent:
     """
     Attributes:
         id (str): A unique UUID identifier for this specific event instance.
         time (str): Timestamp of when the event occurred in ISO 8601 UTC format.
-        data (InputPortCreatedEvent):
+        data (InputPortEvent):
         specversion (str | Unset): The CloudEvents specification version. Default: '1.0'.
         source (str | Unset): Identifies the context in which an event happened. Default: 'data-product-portal'.
-        type_ (Literal['input_port.created'] | Unset): The unique type string belonging to this event. Default:
-            'input_port.created'.
+        type_ (Literal['input_port.event'] | Unset): The unique type string belonging to this event. Default:
+            'input_port.event'.
     """
 
     id: str
     time: str
-    data: InputPortCreatedEvent
+    data: InputPortEvent
     specversion: str | Unset = "1.0"
     source: str | Unset = "data-product-portal"
-    type_: Literal["input_port.created"] | Unset = "input_port.created"
+    type_: Literal["input_port.event"] | Unset = "input_port.event"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -75,26 +75,24 @@ class CloudEventInputPortCreatedEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.input_port_created_event import InputPortCreatedEvent
+        from ..models.input_port_event import InputPortEvent
 
         d = dict(src_dict)
         id = d.pop("id")
 
         time = d.pop("time")
 
-        data = InputPortCreatedEvent.from_dict(d.pop("data"))
+        data = InputPortEvent.from_dict(d.pop("data"))
 
         specversion = d.pop("specversion", UNSET)
 
         source = d.pop("source", UNSET)
 
-        type_ = cast(Literal["input_port.created"] | Unset, d.pop("type", UNSET))
-        if type_ != "input_port.created" and not isinstance(type_, Unset):
-            raise ValueError(
-                f"type must match const 'input_port.created', got '{type_}'"
-            )
+        type_ = cast(Literal["input_port.event"] | Unset, d.pop("type", UNSET))
+        if type_ != "input_port.event" and not isinstance(type_, Unset):
+            raise ValueError(f"type must match const 'input_port.event', got '{type_}'")
 
-        cloud_event_input_port_created_event = cls(
+        cloud_event_input_port_event = cls(
             id=id,
             time=time,
             data=data,
@@ -103,8 +101,8 @@ class CloudEventInputPortCreatedEvent:
             type_=type_,
         )
 
-        cloud_event_input_port_created_event.additional_properties = d
-        return cloud_event_input_port_created_event
+        cloud_event_input_port_event.additional_properties = d
+        return cloud_event_input_port_event
 
     @property
     def additional_keys(self) -> list[str]:

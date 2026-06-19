@@ -15,31 +15,31 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.data_product_created_event import DataProductCreatedEvent
+    from ..models.data_product_event import DataProductEvent
 
 
-T = TypeVar("T", bound="CloudEventDataProductCreatedEvent")
+T = TypeVar("T", bound="CloudEventDataProductEvent")
 
 
 @_attrs_define
-class CloudEventDataProductCreatedEvent:
+class CloudEventDataProductEvent:
     """
     Attributes:
         id (str): A unique UUID identifier for this specific event instance.
         time (str): Timestamp of when the event occurred in ISO 8601 UTC format.
-        data (DataProductCreatedEvent):
+        data (DataProductEvent):
         specversion (str | Unset): The CloudEvents specification version. Default: '1.0'.
         source (str | Unset): Identifies the context in which an event happened. Default: 'data-product-portal'.
-        type_ (Literal['data_product.created'] | Unset): The unique type string belonging to this event. Default:
-            'data_product.created'.
+        type_ (Literal['data_product.event'] | Unset): The unique type string belonging to this event. Default:
+            'data_product.event'.
     """
 
     id: str
     time: str
-    data: DataProductCreatedEvent
+    data: DataProductEvent
     specversion: str | Unset = "1.0"
     source: str | Unset = "data-product-portal"
-    type_: Literal["data_product.created"] | Unset = "data_product.created"
+    type_: Literal["data_product.event"] | Unset = "data_product.event"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -75,26 +75,26 @@ class CloudEventDataProductCreatedEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_created_event import DataProductCreatedEvent
+        from ..models.data_product_event import DataProductEvent
 
         d = dict(src_dict)
         id = d.pop("id")
 
         time = d.pop("time")
 
-        data = DataProductCreatedEvent.from_dict(d.pop("data"))
+        data = DataProductEvent.from_dict(d.pop("data"))
 
         specversion = d.pop("specversion", UNSET)
 
         source = d.pop("source", UNSET)
 
-        type_ = cast(Literal["data_product.created"] | Unset, d.pop("type", UNSET))
-        if type_ != "data_product.created" and not isinstance(type_, Unset):
+        type_ = cast(Literal["data_product.event"] | Unset, d.pop("type", UNSET))
+        if type_ != "data_product.event" and not isinstance(type_, Unset):
             raise ValueError(
-                f"type must match const 'data_product.created', got '{type_}'"
+                f"type must match const 'data_product.event', got '{type_}'"
             )
 
-        cloud_event_data_product_created_event = cls(
+        cloud_event_data_product_event = cls(
             id=id,
             time=time,
             data=data,
@@ -103,8 +103,8 @@ class CloudEventDataProductCreatedEvent:
             type_=type_,
         )
 
-        cloud_event_data_product_created_event.additional_properties = d
-        return cloud_event_data_product_created_event
+        cloud_event_data_product_event.additional_properties = d
+        return cloud_event_data_product_event
 
     @property
     def additional_keys(self) -> list[str]:

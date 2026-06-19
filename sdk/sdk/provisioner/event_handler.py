@@ -5,24 +5,12 @@ from typing import Any
 from fastapi import HTTPException, Request
 
 from sdk.api_client.models import (
-    CloudEventDataProductCreatedEvent,
-    CloudEventDataProductDeletedEvent,
-    CloudEventDataProductUpdatedEvent,
-    CloudEventExplorationCreatedEvent,
-    CloudEventExplorationDeletedEvent,
-    CloudEventExplorationUpdatedEvent,
-    CloudEventInputPortCreatedEvent,
-    CloudEventInputPortDeletedEvent,
-    CloudEventInputPortUpdatedEvent,
-    DataProductCreatedEvent,
-    DataProductDeletedEvent,
-    DataProductUpdatedEvent,
-    ExplorationCreatedEvent,
-    ExplorationDeletedEvent,
-    ExplorationUpdatedEvent,
-    InputPortCreatedEvent,
-    InputPortDeletedEvent,
-    InputPortUpdatedEvent,
+    CloudEventDataProductEvent,
+    CloudEventExplorationEvent,
+    CloudEventInputPortEvent,
+    DataProductEvent,
+    ExplorationEvent,
+    InputPortEvent,
 )
 
 
@@ -46,33 +34,15 @@ class AbstractEventHandler(ABC):
             )
 
         parsed_event: Any
-        if event_type == "input_port.updated":
-            parsed_event = CloudEventInputPortUpdatedEvent.from_dict(payload)
-            return await self.on_input_port_updated(parsed_event.data)
-        elif event_type == "input_port.created":
-            parsed_event = CloudEventInputPortCreatedEvent.from_dict(payload)
-            return await self.on_input_port_created(parsed_event.data)
-        elif event_type == "exploration.deleted":
-            parsed_event = CloudEventExplorationDeletedEvent.from_dict(payload)
-            return await self.on_exploration_deleted(parsed_event.data)
-        elif event_type == "data_product.deleted":
-            parsed_event = CloudEventDataProductDeletedEvent.from_dict(payload)
-            return await self.on_data_product_deleted(parsed_event.data)
-        elif event_type == "data_product.created":
-            parsed_event = CloudEventDataProductCreatedEvent.from_dict(payload)
-            return await self.on_data_product_created(parsed_event.data)
-        elif event_type == "input_port.deleted":
-            parsed_event = CloudEventInputPortDeletedEvent.from_dict(payload)
-            return await self.on_input_port_deleted(parsed_event.data)
-        elif event_type == "exploration.created":
-            parsed_event = CloudEventExplorationCreatedEvent.from_dict(payload)
-            return await self.on_exploration_created(parsed_event.data)
-        elif event_type == "exploration.updated":
-            parsed_event = CloudEventExplorationUpdatedEvent.from_dict(payload)
-            return await self.on_exploration_updated(parsed_event.data)
-        elif event_type == "data_product.updated":
-            parsed_event = CloudEventDataProductUpdatedEvent.from_dict(payload)
-            return await self.on_data_product_updated(parsed_event.data)
+        if event_type == "data_product.event":
+            parsed_event = CloudEventDataProductEvent.from_dict(payload)
+            return await self.on_data_product_event(parsed_event.data)
+        elif event_type == "exploration.event":
+            parsed_event = CloudEventExplorationEvent.from_dict(payload)
+            return await self.on_exploration_event(parsed_event.data)
+        elif event_type == "input_port.event":
+            parsed_event = CloudEventInputPortEvent.from_dict(payload)
+            return await self.on_input_port_event(parsed_event.data)
         else:
             # Standard practice is to accept unhandled hooks with a 202/success to avoid webhook retries
             return {
@@ -81,48 +51,18 @@ class AbstractEventHandler(ABC):
             }
 
     @abstractmethod
-    async def on_input_port_updated(self, data: InputPortUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'input_port.updated'"""
+    async def on_data_product_event(self, data: DataProductEvent) -> Any:
+        """Handler for the parsed payload of 'data_product.event'"""
         pass
 
     @abstractmethod
-    async def on_input_port_created(self, data: InputPortCreatedEvent) -> Any:
-        """Handler for the parsed payload of 'input_port.created'"""
+    async def on_exploration_event(self, data: ExplorationEvent) -> Any:
+        """Handler for the parsed payload of 'exploration.event'"""
         pass
 
     @abstractmethod
-    async def on_exploration_deleted(self, data: ExplorationDeletedEvent) -> Any:
-        """Handler for the parsed payload of 'exploration.deleted'"""
-        pass
-
-    @abstractmethod
-    async def on_data_product_deleted(self, data: DataProductDeletedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.deleted'"""
-        pass
-
-    @abstractmethod
-    async def on_data_product_created(self, data: DataProductCreatedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.created'"""
-        pass
-
-    @abstractmethod
-    async def on_input_port_deleted(self, data: InputPortDeletedEvent) -> Any:
-        """Handler for the parsed payload of 'input_port.deleted'"""
-        pass
-
-    @abstractmethod
-    async def on_exploration_created(self, data: ExplorationCreatedEvent) -> Any:
-        """Handler for the parsed payload of 'exploration.created'"""
-        pass
-
-    @abstractmethod
-    async def on_exploration_updated(self, data: ExplorationUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'exploration.updated'"""
-        pass
-
-    @abstractmethod
-    async def on_data_product_updated(self, data: DataProductUpdatedEvent) -> Any:
-        """Handler for the parsed payload of 'data_product.updated'"""
+    async def on_input_port_event(self, data: InputPortEvent) -> Any:
+        """Handler for the parsed payload of 'input_port.event'"""
         pass
 
 
@@ -132,29 +72,11 @@ class EmptyEventHandler(AbstractEventHandler):
     Inherit from this in your tests to avoid implementing every single abstract method.
     """
 
-    async def on_input_port_updated(self, data: InputPortUpdatedEvent) -> Any:
+    async def on_data_product_event(self, data: DataProductEvent) -> Any:
         pass
 
-    async def on_input_port_created(self, data: InputPortCreatedEvent) -> Any:
+    async def on_exploration_event(self, data: ExplorationEvent) -> Any:
         pass
 
-    async def on_exploration_deleted(self, data: ExplorationDeletedEvent) -> Any:
-        pass
-
-    async def on_data_product_deleted(self, data: DataProductDeletedEvent) -> Any:
-        pass
-
-    async def on_data_product_created(self, data: DataProductCreatedEvent) -> Any:
-        pass
-
-    async def on_input_port_deleted(self, data: InputPortDeletedEvent) -> Any:
-        pass
-
-    async def on_exploration_created(self, data: ExplorationCreatedEvent) -> Any:
-        pass
-
-    async def on_exploration_updated(self, data: ExplorationUpdatedEvent) -> Any:
-        pass
-
-    async def on_data_product_updated(self, data: DataProductUpdatedEvent) -> Any:
+    async def on_input_port_event(self, data: InputPortEvent) -> Any:
         pass

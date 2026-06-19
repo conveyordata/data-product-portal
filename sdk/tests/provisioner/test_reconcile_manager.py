@@ -314,15 +314,7 @@ def _envelope(event_type: str, resource_id: uuid.UUID) -> dict[str, Any]:
     }
 
 
-@pytest.mark.parametrize(
-    "event_type",
-    [
-        "exploration.created",
-        "exploration.updated",
-        "exploration.deleted",
-    ],
-)
-async def test_event_handler_enqueues_exploration(event_type):
+async def test_event_handler_enqueues_exploration():
     reconciler = RecordingReconciler()
     manager = _manager(reconciler, default_delay=0.0, num_workers=1)
     manager.start()
@@ -330,7 +322,7 @@ async def test_event_handler_enqueues_exploration(event_type):
     exploration_id = uuid.uuid4()
 
     await handler.dispatch_routing(
-        _build_request(_envelope(event_type, exploration_id))
+        _build_request(_envelope("exploration.event", exploration_id))
     )
 
     await _drain(reconciler, expected=1)
@@ -338,15 +330,7 @@ async def test_event_handler_enqueues_exploration(event_type):
     assert reconciler.calls == [exploration_id]
 
 
-@pytest.mark.parametrize(
-    "event_type",
-    [
-        "data_product.created",
-        "data_product.updated",
-        "data_product.deleted",
-    ],
-)
-async def test_event_handler_enqueues_data_product(event_type):
+async def test_event_handler_enqueues_data_product():
     reconciler = RecordingReconciler()
     manager = ReconcileManager(
         {ResourceType.DATA_PRODUCT: reconciler}, default_delay=0.0, num_workers=1
@@ -356,7 +340,7 @@ async def test_event_handler_enqueues_data_product(event_type):
     data_product_id = uuid.uuid4()
 
     await handler.dispatch_routing(
-        _build_request(_envelope(event_type, data_product_id))
+        _build_request(_envelope("data_product.event", data_product_id))
     )
 
     await _drain(reconciler, expected=1)
