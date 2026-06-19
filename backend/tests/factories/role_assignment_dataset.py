@@ -1,3 +1,5 @@
+import uuid
+
 import factory
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -18,11 +20,7 @@ class DatasetRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     # Works whether callers pass dataset_id= directly or leave it random.
     _dataset = factory.LazyAttribute(lambda o: test_session.get(Dataset, o.dataset_id))
     data_product_id = factory.LazyAttribute(
-        lambda o: (
-            o._dataset.data_product_id
-            if o._dataset is not None
-            else factory.Faker("uuid4").generate()
-        )
+        lambda o: o._dataset.data_product_id if o._dataset is not None else uuid.uuid4()
     )
     user_id = factory.Faker("uuid4")
     role_id = factory.Faker("uuid4")

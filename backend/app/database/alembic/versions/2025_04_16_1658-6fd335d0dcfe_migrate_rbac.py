@@ -23,7 +23,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Prototype, Scope
-from app.core.authz import Action, Authorization
+from app.core.authz import Action
 
 # revision identifiers, used by Alembic.
 revision: str = "6fd335d0dcfe"
@@ -343,7 +343,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     session = Session(bind=op.get_bind())
-    session.execute(sa.delete("role_assignments_data_product"))
-    session.execute(sa.delete("role_assignments_dataset"))
-    session.execute(sa.delete("global_role_assignments"))
+    session.execute(sa.sql.text("DELETE FROM role_assignments_data_product"))
+    session.execute(sa.sql.text("DELETE FROM role_assignments_dataset"))
+    session.execute(sa.sql.text("DELETE FROM global_role_assignments"))
     session.commit()
