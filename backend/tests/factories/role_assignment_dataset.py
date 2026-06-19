@@ -12,15 +12,29 @@ from tests import test_session
 class DatasetRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = DatasetRoleAssignment
-        exclude = ["_dataset"]
+        # Exclude `dataset` so it is consumed here and NOT forwarded to the model
+        # constructor (the model uses dataset_id / data_product_id scalar columns).
+        exclude = ["dataset"]
 
     id = factory.Faker("uuid4")
-    dataset_id = factory.Faker("uuid4")
-    # Resolve data_product_id by looking up the dataset from the session.
-    # Works whether callers pass dataset_id= directly or leave it random.
-    _dataset = factory.LazyAttribute(lambda o: test_session.get(Dataset, o.dataset_id))
+
+    # Callers may pass either:
+    #   dataset=<Dataset object>  — derive dataset_id & data_product_id from it
+    #   dataset_id=<UUID>         — look up the dataset from the session for data_product_id
+    dataset = None
+    dataset_id = factory.LazyAttribute(
+        lambda o: o.dataset.id if o.dataset is not None else uuid.uuid4()
+    )
     data_product_id = factory.LazyAttribute(
-        lambda o: o._dataset.data_product_id if o._dataset is not None else uuid.uuid4()
+        lambda o: (
+            o.dataset.data_product_id
+            if o.dataset is not None
+            else (
+                _ds.data_product_id
+                if (_ds := test_session.get(Dataset, o.dataset_id)) is not None
+                else uuid.uuid4()
+            )
+        )
     )
     user_id = factory.Faker("uuid4")
     role_id = factory.Faker("uuid4")
