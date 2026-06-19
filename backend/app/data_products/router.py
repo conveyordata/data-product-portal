@@ -1,9 +1,18 @@
-from typing import Optional, Sequence
+from typing import Annotated, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Query,
+)
+from fastapi.responses import Response
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
+from starlette import status
 
+from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import InputPort
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
@@ -30,6 +39,7 @@ from app.data_products.schema_request import (
     DataProductUpdate,
     DataProductUsageUpdate,
     LinkInputPortsToDataProduct,
+    RequestInputPortsForDataProductRequest,
 )
 from app.data_products.schema_response import (
     CreateDataProductResponse,
@@ -40,6 +50,7 @@ from app.data_products.schema_response import (
     GetDataProductsResponse,
     GetDataProductsResponseItem,
     LinkInputPortsToDataProductPost,
+    RequestInputPortsForDataProductResponse,
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
@@ -55,7 +66,7 @@ from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter()
+router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
 
 
 @router.post(
@@ -79,18 +90,22 @@ router = APIRouter()
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver))
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver)
+        ),
     ],
 )
 def create_data_product(
     data_product: DataProductCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateDataProductResponse:
     created_data_product = DataProductService(db).create_data_product(data_product)
+    created_id = created_data_product.id
     owners = data_product.owners
     _assign_owner_role_assignments(
-        created_data_product.id,
+        created_id,
         owners=owners,
         db=db,
         actor=authenticated_user,
@@ -99,21 +114,26 @@ def create_data_product(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_CREATED,
-            subject_id=created_data_product.id,
+            subject_id=created_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_data_product_notifications(
-        data_product_id=created_data_product.id,
+        data_product_id=created_id,
         event_id=event_id,
         extra_receiver_ids=owners,
     )
     RefreshInfrastructureLambda().trigger()
-    OutputPortService(db).recalculate_search_for_output_ports_of_product(
-        created_data_product.id
-    )
-    return CreateDataProductResponse(id=created_data_product.id)
+    if data_product.input_ports is not None:
+        request_input_ports_for_data_product(
+            created_id,
+            data_product.input_ports,
+            background_tasks=background_tasks,
+            authenticated_user=authenticated_user,
+            db=db,
+        )
+    return CreateDataProductResponse(id=created_id)
 
 
 def _assign_owner_role_assignments(
@@ -151,12 +171,16 @@ def _assign_owner_role_assignments(
 @router.delete(
     "/{id}",
     responses={
+        200: {"description": "Data Product deleted"},
+        202: {
+            "description": "Data Product marked for deletion, waiting for finalizers"
+        },
         404: {
             "description": "Data Product not found",
             "content": {
                 "application/json": {"example": {"detail": "Data Product id not found"}}
             },
-        }
+        },
     },
     dependencies=[
         Depends(
@@ -169,9 +193,20 @@ def remove_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
+    service = DataProductService(db)
+    can_delete = service.mark_for_deletion(id)
+    if not can_delete:
+        return Response(status_code=status.HTTP_202_ACCEPTED)
+    _do_delete_data_product(id, db, authenticated_user)
+
+
+def _do_delete_data_product(
+    id: UUID,
+    db: Session,
+    authenticated_user: User,
+) -> None:
     data_product = DataProductService(db).remove_data_product(id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
-
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_REMOVED,
@@ -184,6 +219,41 @@ def remove_data_product(
     NotificationService(db).create_data_product_notifications(
         data_product_id=data_product.id, event_id=event_id
     )
+
+
+@router.post(
+    "/{id}/finalizers",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
+        ),
+    ],
+)
+def add_data_product_finalizer(
+    id: UUID,
+    request: FinalizerRequest,
+    db: Session = Depends(get_db_session),
+) -> None:
+    DataProductService(db).add_finalizer(id, request.finalizer)
+
+
+@router.delete(
+    "/{id}/finalizers/{finalizer}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
+        ),
+    ],
+)
+def remove_data_product_finalizer(
+    id: UUID,
+    finalizer: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    should_delete = DataProductService(db).remove_finalizer(id, finalizer)
+    if should_delete:
+        _do_delete_data_product(id, db, authenticated_user)
 
 
 @router.put(
@@ -248,11 +318,11 @@ def update_data_product_about(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product = DataProductService(db).update_data_product_about(id, data_product)
+    DataProductService(db).update_data_product_about(id, data_product)
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
-            subject_id=data_product.id,
+            subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
@@ -283,11 +353,11 @@ def update_data_product_status(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product = DataProductService(db).update_data_product_status(id, data_product)
+    DataProductService(db).update_data_product_status(id, data_product)
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
-            subject_id=data_product.id,
+            subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
@@ -357,37 +427,35 @@ def set_value_for_data_product(
     RefreshInfrastructureLambda().trigger()
 
 
-_router = router
-router = APIRouter(tags=["Data Products"])
-route = "/v2/data_products"
-
-router.include_router(_router, prefix=route)
+_input_ports_responses = {
+    400: {
+        "description": "Output port not found",
+        "content": {
+            "application/json": {"example": {"detail": "Output port not found"}}
+        },
+    },
+    404: {
+        "description": "Data Product not found",
+        "content": {
+            "application/json": {"example": {"detail": "Data Product id not found"}}
+        },
+    },
+}
+_input_ports_dependencies = [
+    Depends(
+        Authorization.enforce(
+            Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+            DataProductResolver,
+        )
+    ),
+]
 
 
 @router.post(
-    f"{route}/{{id}}/link_input_ports",
-    responses={
-        400: {
-            "description": "Output port not found",
-            "content": {
-                "application/json": {"example": {"detail": "Output port not found"}}
-            },
-        },
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
-                DataProductResolver,
-            )
-        ),
-    ],
+    "/{id}/link_input_ports",
+    responses=_input_ports_responses,
+    dependencies=_input_ports_dependencies,
+    deprecated=True,
 )
 def link_input_ports_to_data_product(
     id: UUID,
@@ -396,10 +464,36 @@ def link_input_ports_to_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> LinkInputPortsToDataProductPost:
+    return LinkInputPortsToDataProductPost(
+        input_port_links=request_input_ports_for_data_product(
+            id,
+            RequestInputPortsForDataProductRequest(
+                output_ports=link_input_ports.input_ports,
+                justification=link_input_ports.justification,
+            ),
+            background_tasks,
+            authenticated_user=authenticated_user,
+            db=db,
+        ).input_port_links
+    )
+
+
+@router.post(
+    "/{id}/input_ports",
+    responses=_input_ports_responses,
+    dependencies=_input_ports_dependencies,
+)
+def request_input_ports_for_data_product(
+    id: UUID,
+    body: RequestInputPortsForDataProductRequest,
+    background_tasks: BackgroundTasks,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> RequestInputPortsForDataProductResponse:
     input_ports = DataProductService(db).request_input_ports(
         id,
-        link_input_ports.input_ports,
-        link_input_ports.justification,
+        body.output_ports,
+        body.justification,
         actor=authenticated_user,
     )
 
@@ -431,15 +525,17 @@ def link_input_ports_to_data_product(
         input_ports, background_tasks, authenticated_user
     )
     RefreshInfrastructureLambda().trigger()
-    return LinkInputPortsToDataProductPost(
+    return RequestInputPortsForDataProductResponse(
         input_port_links=[dataset_link.id for dataset_link in input_ports]
     )
 
 
-@router.get(route)
+@router.get("")
 def get_data_products(
     db: Session = Depends(get_db_session),
-    filter_to_user_with_assigment: Optional[UUID] = Query(default=None),
+    filter_to_user_with_assigment: Annotated[
+        UUID | SkipJsonSchema[None], Query()
+    ] = None,
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
@@ -451,7 +547,7 @@ def get_data_products(
     )
 
 
-@router.get(f"{route}/{{id}}/history")
+@router.get("/{id}/history")
 def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
@@ -465,14 +561,14 @@ def get_data_product_event_history(
     )
 
 
-@router.get(f"{route}/{{id}}")
+@router.get("/{id}")
 def get_data_product(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductResponse:
     return DataProductService(db).get_data_product(id)
 
 
-@router.get(f"{route}/{{id}}/input_ports")
+@router.get("/{id}/input_ports")
 def get_data_product_input_ports(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -485,7 +581,7 @@ def get_data_product_input_ports(
     )
 
 
-@router.get(f"{route}/{{id}}/rolled_up_tags")
+@router.get("/{id}/rolled_up_tags")
 def get_data_product_rolled_up_tags(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductRolledUpTagsResponse:
@@ -495,7 +591,7 @@ def get_data_product_rolled_up_tags(
 
 
 @router.delete(
-    f"{route}/{{id}}/input_ports/{{input_port_id}}",
+    "/{id}/input_ports/{output_port_id}",
     responses={
         400: {
             "description": "Output port not found",
@@ -521,11 +617,11 @@ def get_data_product_rolled_up_tags(
 )
 def unlink_input_port_from_data_product(
     id: UUID,
-    input_port_id: UUID,
+    output_port_id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_dataset = DataProductService(db).remove_input_port(id, input_port_id)
+    data_product_dataset = DataProductService(db).remove_input_port(id, output_port_id)
 
     event_id = EventService(db).create_event(
         CreateEvent(
@@ -548,7 +644,7 @@ def unlink_input_port_from_data_product(
     RefreshInfrastructureLambda().trigger()
 
 
-@router.get(f"{route}/{{id}}/settings")
+@router.get("/{id}/settings")
 def get_data_product_settings(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductSettingsResponse:

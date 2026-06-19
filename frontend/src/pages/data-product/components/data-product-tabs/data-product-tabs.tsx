@@ -1,22 +1,13 @@
-import Icon, {
-    BarChartOutlined,
-    CompassOutlined,
-    HistoryOutlined,
-    InfoCircleOutlined,
-    SettingOutlined,
-    TeamOutlined,
-} from '@ant-design/icons';
+import { CompassOutlined, HistoryOutlined, InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { TourProps } from 'antd';
-import { Badge, Flex, Tabs, Tour, Typography } from 'antd';
+import { Tabs, Tour, Typography } from 'antd';
 import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
-import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
+import { OutputPortOutlined, TechnicalAssetOutlined } from '@/components/icons';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
@@ -92,26 +83,15 @@ export function DataProductTabs({ dataProductId }: Props) {
                 children: <AboutTab dataProductId={dataProductId} />,
             },
             {
-                label: (
-                    <Flex className={styles.betaContainer}>
-                        {t('Usage')}
-                        <Badge className={styles.beta} count={t('BETA')} />
-                    </Flex>
-                ),
-                key: TabKeys.Usage,
-                icon: <BarChartOutlined />,
-                children: <UsageTab dataProductId={dataProductId} />,
-            },
-            {
                 label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
                 key: TabKeys.InputPorts,
-                icon: <Icon component={datasetOutlineIcon} />,
+                icon: <OutputPortOutlined />,
                 children: <DataProductInputPorts dataProductId={dataProductId} />,
             },
             {
                 label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
                 key: TabKeys.OutputPorts,
-                icon: <Icon component={dataOutputOutlineIcon} />,
+                icon: <TechnicalAssetOutlined />,
                 children: <DataOutputTab dataProductId={dataProductId} />,
             },
             {

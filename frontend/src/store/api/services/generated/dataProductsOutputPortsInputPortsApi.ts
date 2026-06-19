@@ -75,7 +75,7 @@ export type AbstractDataProductInfo = {
   namespace: string;
   abstract_data_product_type: AbstractDataProductType;
 };
-export type InputPort = {
+export type OutputPortInputPort = {
   id: string;
   justification: string;
   status: DecisionStatus;
@@ -83,7 +83,7 @@ export type InputPort = {
   consuming_abstract_data_product: AbstractDataProductInfo;
 };
 export type GetInputPortsForOutputPortResponse = {
-  input_ports: InputPort[];
+  input_ports: OutputPortInputPort[];
 };
 export type ValidationError = {
   loc: (string | number)[];

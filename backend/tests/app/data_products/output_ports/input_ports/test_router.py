@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import pytest
@@ -15,6 +16,7 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
+    ExplorationFactory,
     InputPortFactory,
     RoleFactory,
     UserFactory,
@@ -24,10 +26,10 @@ DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/v2/data_products/{}/output_ports/{}/inpu
 DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 
 
-class TestDataProductsDatasetsRouter:
+class TestInputPortsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_request_data_product_link(self, client):
+    def test_request_input_ports_for_data_product(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -41,15 +43,15 @@ class TestDataProductsDatasetsRouter:
         )
         ds = DatasetFactory()
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
         history_response = self.get_data_product_history(client, data_product.id)
         assert history_response.status_code == 200, history_response.text
         assert len(history_response.json()) == 1
 
-    def test_request_data_product_multiple_link_old(self, client):
+    def test_request_input_ports_for_data_product_deprecated(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -61,15 +63,15 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds1 = DatasetFactory()
-        ds2 = DatasetFactory()
+        ds = DatasetFactory()
 
-        response = self.request_data_product_datasets_link(
-            client, data_product.id, [ds1.id, ds2.id]
+        response = self.request_input_ports_for_data_product_deprecated(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
-        history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history["events"]) == 2
+        history_response = self.get_data_product_history(client, data_product.id)
+        assert history_response.status_code == 200, history_response.text
+        assert len(history_response.json()) == 1
 
     def test_request_data_product_multiple_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -86,14 +88,14 @@ class TestDataProductsDatasetsRouter:
         ds1 = DatasetFactory()
         ds2 = DatasetFactory()
 
-        response = self.request_link_input_ports(
+        response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds1.id, ds2.id]
         )
         assert response.status_code == 200, response.text
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history["events"]) == 2
 
-    def test_request_already_exists(self, client):
+    def test_request_input_ports_for_data_product_already_exists(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -107,25 +109,27 @@ class TestDataProductsDatasetsRouter:
         )
         ds = DatasetFactory()
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 400
 
-    def test_request_data_product_link_private_dataset_no_access(self, client):
+    def test_request_input_ports_for_data_product_private_dataset_no_access(
+        self, client
+    ):
         data_product = DataProductFactory()
         ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 403
 
-    def test_request_data_product_link_private_dataset(self, client):
+    def test_request_input_ports_for_data_product_private_dataset(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -141,8 +145,8 @@ class TestDataProductsDatasetsRouter:
         role = RoleFactory(scope=Scope.DATASET)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
         assert response.status_code == 200
 
@@ -195,7 +199,9 @@ class TestDataProductsDatasetsRouter:
         data_product = DataProductFactory()
         ds = DatasetFactory()
 
-        link = self.request_data_product_dataset_link(client, data_product.id, ds.id)
+        link = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
+        )
         assert link.status_code == 200
 
     def test_approve_data_product_link(self, client):
@@ -346,8 +352,8 @@ class TestDataProductsDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, self.invalid_id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [self.invalid_id]
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -443,6 +449,54 @@ class TestDataProductsDatasetsRouter:
         ).json()
         assert len(history["events"]) == 1
 
+    def test_approve_output_port_as_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        exploration = ExplorationFactory()
+        link = InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = self.approve_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            exploration.id,
+        )
+        assert response.status_code == 200, response.text
+
+    def test_deny_output_port_as_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        exploration = ExplorationFactory()
+        link = InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = self.deny_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            exploration.id,
+        )
+        assert response.status_code == 200, response.text
+
     def test_get_input_ports_for_output_port(self, client):
         # Create a dataset (output port) with a data product
         ds = DatasetFactory()
@@ -496,8 +550,8 @@ class TestDataProductsDatasetsRouter:
             data_product_id=data_product.id,
         )
         ds = DatasetFactory()
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+        response = self.request_input_ports_for_data_product(
+            client, data_product.id, [ds.id]
         )
 
         assert response.status_code == 200
@@ -511,32 +565,24 @@ class TestDataProductsDatasetsRouter:
         assert len(history["events"]) == 2
 
     @staticmethod
-    def request_data_product_dataset_link(
+    def request_input_ports_for_data_product(
         client: TestClient,
         data_product_id: UUID,
-        dataset_id: UUID,
+        output_port_ids: list[UUID],
         justification: str = "This is my birth right!",
     ) -> Response:
-        return TestDataProductsDatasetsRouter.request_data_product_datasets_link(
-            client,
-            data_product_id,
-            [dataset_id],
-            justification,
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports",
+            json={
+                "output_ports": [
+                    str(output_port_id) for output_port_id in output_port_ids
+                ],
+                "justification": justification,
+            },
         )
 
     @staticmethod
-    def request_data_product_datasets_link(
-        client: TestClient,
-        data_product_id: UUID,
-        dataset_ids: list[UUID],
-        justification: str = "This is my birth right!",
-    ) -> Response:
-        return TestDataProductsDatasetsRouter.request_link_input_ports(
-            client, data_product_id, dataset_ids, justification
-        )
-
-    @staticmethod
-    def request_link_input_ports(
+    def request_input_ports_for_data_product_deprecated(
         client: TestClient,
         data_product_id: UUID,
         output_port_ids: list[UUID],
@@ -590,3 +636,154 @@ class TestDataProductsDatasetsRouter:
     @staticmethod
     def get_data_product_history(client, data_product_id):
         return client.get(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")
+
+
+class TestInputPortConsumptionTracking:
+    """Tests that PostHog consumption events are fired correctly.
+
+    Consumption (Input Port Approved) is a key success metric for the portal
+    — it measures how actively data products are being used by other teams.
+    """
+
+    def test_posthog_capture_called_on_unrestricted_link(self, client):
+        """Auto-approved (unrestricted) links must fire a posthog event immediately."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+
+        mock_posthog = MagicMock()
+        with patch(
+            "app.abstract_data_product.service.get_posthog_client",
+            return_value=mock_posthog,
+        ):
+            response = self.request_input_ports_for_data_product(
+                client, data_product.id, [ds.id]
+            )
+
+        assert response.status_code == 200
+        mock_posthog.capture.assert_called_once()
+        call_kwargs = mock_posthog.capture.call_args.kwargs
+        assert call_kwargs["event"] == "Input Port Approved"
+        assert call_kwargs["properties"]["output_port_id"] == str(ds.id)
+        assert call_kwargs["properties"]["consuming_data_product_id"] == str(
+            data_product.id
+        )
+
+    def test_posthog_capture_not_called_on_restricted_link_request(self, client):
+        """Restricted links are PENDING — posthog must NOT fire until approved."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+
+        mock_posthog = MagicMock()
+        with patch(
+            "app.abstract_data_product.service.get_posthog_client",
+            return_value=mock_posthog,
+        ):
+            response = self.request_input_ports_for_data_product(
+                client, data_product.id, [ds.id]
+            )
+
+        assert response.status_code == 200
+        mock_posthog.capture.assert_not_called()
+
+    def test_posthog_capture_called_on_manual_approval(self, client):
+        """Manual approval of a pending link must fire a posthog event."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
+
+        mock_posthog = MagicMock()
+        with patch(
+            "app.data_products.output_ports.input_ports.service.get_posthog_client",
+            return_value=mock_posthog,
+        ):
+            response = self.approve_output_port_as_input_port(
+                client,
+                link.dataset.data_product.id,
+                link.dataset.id,
+                link.consuming_abstract_data_product.id,
+            )
+
+        assert response.status_code == 200, response.text
+        mock_posthog.capture.assert_called_once()
+        call_kwargs = mock_posthog.capture.call_args.kwargs
+        assert call_kwargs["event"] == "Input Port Approved"
+        assert call_kwargs["properties"]["output_port_id"] == str(ds.id)
+        assert call_kwargs["properties"]["consuming_data_product_id"] == str(
+            link.consuming_abstract_data_product.id
+        )
+
+    def test_posthog_not_called_when_disabled(self, client):
+        """When posthog is disabled (None), no AttributeError and no capture."""
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+
+        with patch(
+            "app.abstract_data_product.service.get_posthog_client",
+            return_value=None,
+        ):
+            response = self.request_input_ports_for_data_product(
+                client, data_product.id, [ds.id]
+            )
+
+        assert response.status_code == 200
+
+    @staticmethod
+    def request_input_ports_for_data_product(
+        client: TestClient,
+        data_product_id: UUID,
+        output_port_ids: list[UUID],
+        justification: str = "Tracking test justification",
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports",
+            json={
+                "output_ports": [str(oid) for oid in output_port_ids],
+                "justification": justification,
+            },
+        )
+
+    @staticmethod
+    def approve_output_port_as_input_port(
+        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve",
+            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+        )

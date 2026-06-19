@@ -19,12 +19,14 @@ from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
+    ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     UserFactory,
 )
+from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
@@ -48,7 +50,20 @@ def dataset_payload():
     }
 
 
-class TestDatasetsRouter:
+@pytest.fixture
+def output_port_event_payload():
+    user = UserFactory()
+    return {
+        "name": "Test Output Port",
+        "description": "Test Description",
+        "namespace": "test-op-event-ns",
+        "tag_ids": [],
+        "owners": [str(user.id)],
+        "access_type": "restricted",
+    }
+
+
+class TestOutputPortRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_create_dataset(self, dataset_payload, client):
@@ -84,7 +99,9 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-    def test_create_output_port_type_public(self, session, dataset_payload, client):
+    def test_create_output_port_type_public(
+        self, session, dataset_payload, client
+    ) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -204,7 +221,7 @@ class TestDatasetsRouter:
 
         assert updated_dataset.status_code == 403
 
-    def test_update_dataset_type_public_renamed(self, session, client):
+    def test_update_dataset_type_public_renamed(self, session, client) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -445,7 +462,7 @@ class TestDatasetsRouter:
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.json()["status"] == "pending"
 
-    def test_get_graph_data(self, client):
+    def test_get_output_port_graph_data(self, client):
         dp = DataProductFactory()
         ds = DatasetFactory(data_product=dp)
         response = client.get(f"{ENDPOINT.format(dp.id)}/{ds.id}/graph")
@@ -461,7 +478,7 @@ class TestDatasetsRouter:
         ]
         nodes = response.json()["nodes"]
         dp_node = [node for node in nodes if node["type"] == "dataProductNode"][0]
-        ds_node = [node for node in nodes if node["type"] == "datasetNode"][0]
+        ds_node = [node for node in nodes if node["type"] == "outputPortNode"][0]
         assert dp_node == {
             "data": {
                 "id": f"{str(dp.id)}",
@@ -488,8 +505,20 @@ class TestDatasetsRouter:
             },
             "id": str(ds.id),
             "isMain": True,
-            "type": "datasetNode",
+            "type": "outputPortNode",
         }
+
+    def test_get_output_port_graph_data_exploration(self, client):
+        ds = DatasetFactory()
+        exp = ExplorationFactory()
+        InputPortFactory(
+            dataset=ds,
+            consuming_abstract_data_product=exp,
+        )
+        response = client.get(
+            f"{ENDPOINT.format(ds.data_product.id)}/{ds.id}/graph", params={"level": 3}
+        )
+        assert response.status_code == 200, response.text
 
     def test_dataset_set_custom_setting_no_role(self, client):
         ds = DatasetFactory()
@@ -798,6 +827,12 @@ class TestDatasetsRouter:
         assert len(events) == 1
         assert events[0].deleted_subject_identifier == dataset_name
 
+    def test_create_generates_webhook_v2_event(
+        self, mock_webhook, dataset_payload, client
+    ):
+        self.test_create_dataset(dataset_payload, client)
+        assert_event_in_queue("output_port.event", mock_webhook)
+
     @staticmethod
     def create_output_port(client, data_product_id, output_port_payload):
         return client.post(ENDPOINT.format(data_product_id), json=output_port_payload)
@@ -842,3 +877,7 @@ class TestDatasetsRouter:
         return client.get(
             f"{ENDPOINT.format(data_product_id)}/{output_port_id}/history"
         )
+
+    @staticmethod
+    def _op_endpoint(dp_id):
+        return ENDPOINT.format(dp_id)

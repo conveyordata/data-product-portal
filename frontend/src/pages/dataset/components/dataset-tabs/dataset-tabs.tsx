@@ -1,23 +1,25 @@
 import {
     BarChartOutlined,
     CompassOutlined,
+    FileTextOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Badge, Flex, Tabs } from 'antd';
+import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
-import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
+import { ConsumersIcon, TechnicalAssetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
+import { ConsumersTab } from '@/pages/dataset/components/dataset-tabs/consumers-tab/consumers-tab';
+import { DataModelTab } from '@/pages/dataset/components/dataset-tabs/data-model-tab/data-model-tab';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
-import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { UsageTab } from '@/pages/dataset/components/dataset-tabs/usage-tab/usage-tab.tsx';
 import { useGetOutputPortsEventHistoryQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -44,12 +46,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
     const { data: { events: datasetHistoryData = [] } = {}, isLoading: isFetchingDatasetHistory } =
-        useGetOutputPortsEventHistoryQuery(
-            { id: datasetId, dataProductId },
-            {
-                skip: !datasetId,
-            },
-        );
+        useGetOutputPortsEventHistoryQuery({ id: datasetId, dataProductId }, { skip: !datasetId });
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
     useEffect(() => {
@@ -67,12 +64,13 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
             {
-                label: (
-                    <Flex className={styles.betaContainer}>
-                        {t('Usage')}
-                        <Badge className={styles.beta} count={t('BETA')} />
-                    </Flex>
-                ),
+                label: t('Data Model'),
+                key: TabKeys.DataModel,
+                icon: <FileTextOutlined />,
+                children: <DataModelTab datasetId={datasetId} dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Usage'),
                 key: TabKeys.Usage,
                 icon: <BarChartOutlined />,
                 children: <UsageTab outputPortId={datasetId} dataProductId={dataProductId} />,
@@ -80,14 +78,15 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
             {
                 label: t('Technical Assets'),
                 key: TabKeys.Producers,
-                icon: <DataOutputOutlined />,
+                icon: <TechnicalAssetOutlined />,
                 children: <DataOutputTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
+
             {
-                label: t('Consuming Data Products'),
+                label: t('Consumers'),
                 key: TabKeys.Consumers,
-                icon: <DataProductOutlined />,
-                children: <DataProductTab outputPortId={datasetId} dataProductId={dataProductId} />,
+                icon: <ConsumersIcon />,
+                children: <ConsumersTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('Explorer'),

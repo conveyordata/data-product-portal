@@ -48,7 +48,7 @@ export function DataProductSettingsTable({ scope }: Props) {
     const handleRemove = useCallback(
         async (setting: DataProductSettingsGetItem) => {
             try {
-                await onRemoveDataProductSetting(setting.id);
+                await onRemoveDataProductSetting(setting.id).unwrap();
                 dispatchMessage({ content: t('Data Product lifecycle removed successfully'), type: 'success' });
             } catch (_) {
                 dispatchMessage({ content: t('Could not remove Data Product lifecycle'), type: 'error' });

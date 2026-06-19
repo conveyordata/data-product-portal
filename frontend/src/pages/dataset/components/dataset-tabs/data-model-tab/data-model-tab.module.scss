@@ -1,0 +1,16 @@
+@use '@/styles/colors';
+
+.primary-key-flag {
+    color: colors.$blue-6;
+    font-weight: 500;
+}
+
+.unique-flag {
+    color: colors.$purple-6;
+    font-weight: 500;
+}
+
+.partitioned-flag {
+    color: colors.$cyan-6;
+    font-weight: 500;
+}

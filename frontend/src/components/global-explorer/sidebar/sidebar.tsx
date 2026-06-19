@@ -1,16 +1,16 @@
 import { type Node, useReactFlow } from '@xyflow/react';
-import { Flex, Segmented, Select, Switch } from 'antd';
+import { Flex, Select, Switch, Tooltip } from 'antd';
 import { type MouseEvent, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ExplorerNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import type { GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
-import { CustomNodeTypes } from '../../charts/node-editor/node-types';
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
 
 export type SidebarFilters = {
-    dataProductsEnabled: boolean;
-    datasetsEnabled: boolean;
+    explorationsEnabled: boolean;
+    outputPortsEnabled: boolean;
     domainsEnabled: boolean;
 };
 
@@ -66,10 +66,11 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
 
     const groupedNodes = useMemo(() => {
         const groups = {
-            Domains: nodes.filter((node) => node.type === CustomNodeTypes.DomainNode),
-            'Data Products': nodes.filter((node) => node.type === CustomNodeTypes.DataProductNode),
-            'Output Ports': nodes.filter((node) => node.type === CustomNodeTypes.DatasetNode),
-            'Technical Assets': nodes.filter((node) => node.type === CustomNodeTypes.DataOutputNode),
+            Domains: nodes.filter((node) => node.type === ExplorerNodeTypes.DomainNode),
+            'Data Products': nodes.filter((node) => node.type === ExplorerNodeTypes.DataProductNode),
+            'Output Ports': nodes.filter((node) => node.type === ExplorerNodeTypes.OutputPortNode),
+            'Technical Assets': nodes.filter((node) => node.type === ExplorerNodeTypes.TechnicalAssetNode),
+            Explorations: nodes.filter((node) => node.type === ExplorerNodeTypes.ExplorationNode),
         };
 
         // Sort each group by name
@@ -91,6 +92,8 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
                     return t('Output Ports');
                 case 'Technical Assets':
                     return t('Technical Assets');
+                case 'Explorations':
+                    return t('Explorations');
                 default:
                     return t('Undefined group');
             }
@@ -115,52 +118,40 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
 
     return (
         <Flex className={styles.sidebarContainer} vertical gap={'small'}>
-            <Segmented
-                className={styles.checkableTag}
-                options={[
-                    {
-                        label: t('All'),
-                        value: 'all',
-                    },
-                    {
-                        label: t('Data Products'),
-                        value: 'dataProducts',
-                    },
-                    {
-                        label: t('Output Ports'),
-                        value: 'outputPorts',
-                    },
-                ]}
-                onChange={(value) => {
-                    if (value === 'outputPorts') {
-                        onFilterChange({
-                            ...sidebarFilters,
-                            dataProductsEnabled: false,
-                            datasetsEnabled: true,
-                        });
-                    } else if (value === 'dataProducts') {
-                        onFilterChange({
-                            ...sidebarFilters,
-                            dataProductsEnabled: true,
-                            datasetsEnabled: false,
-                        });
-                    } else if (value === 'all') {
-                        onFilterChange({
-                            ...sidebarFilters,
-                            dataProductsEnabled: true,
-                            datasetsEnabled: true,
-                        });
-                    }
-                }}
-            />
-            <Flex align="center" gap="small">
-                <Switch
-                    checked={sidebarFilters.domainsEnabled}
-                    onChange={(checked) => onFilterChange({ ...sidebarFilters, domainsEnabled: checked })}
-                    size="small"
-                />
-                <span>{t('Show Domains')}</span>
-            </Flex>
+            <Tooltip title={t('Group all nodes in their own domain')}>
+                <Flex align="center" gap="small">
+                    <Switch
+                        checked={sidebarFilters.domainsEnabled}
+                        onChange={(checked) => onFilterChange({ ...sidebarFilters, domainsEnabled: checked })}
+                        size="small"
+                    />
+                    {t('Group by Domain')}
+                </Flex>
+            </Tooltip>
+            <Tooltip title={t('Show Explorations in the explorer')}>
+                <Flex align="center" gap="small">
+                    <Switch
+                        checked={sidebarFilters.explorationsEnabled}
+                        onChange={(checked) => onFilterChange({ ...sidebarFilters, explorationsEnabled: checked })}
+                        size="small"
+                    />
+                    {t('Show Explorations')}
+                </Flex>
+            </Tooltip>
+            <Tooltip
+                title={t(
+                    'Shows Output Ports in the explorer, when this is disabled Output Ports are abstracted as direct connections between Data Products and/or Explorations',
+                )}
+            >
+                <Flex align="center" gap="small">
+                    <Switch
+                        checked={sidebarFilters.outputPortsEnabled}
+                        onChange={(checked) => onFilterChange({ ...sidebarFilters, outputPortsEnabled: checked })}
+                        size="small"
+                    />
+                    {t('Show Output Ports')}
+                </Flex>
+            </Tooltip>
             <Select
                 placeholder={t('Select a node')}
                 value={nodeId}

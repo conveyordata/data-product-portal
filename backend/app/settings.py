@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
 
+    MCP_AUTH_REDIRECT_URIS: list[str] = []
+
     # Default username when oidc is disabled
     DEFAULT_USERNAME: str = "john.doe@pharma.com"
 
@@ -45,6 +47,7 @@ class Settings(BaseSettings):
     WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
     WEBHOOK_SECRET: Optional[str] = None
+    WEBHOOK_V2_URL: Optional[str] = None
 
     # Email templating and SMTP settings
     PORTAL_NAME: str = "Data Product Portal"
@@ -88,6 +91,10 @@ class Settings(BaseSettings):
 
     AWS_SESSION_DURATION: int = 900
 
+    # Frontend hosting
+    SERVE_FRONTEND: bool = False
+    FRONTEND_DIST_DIR: str = ""
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"
@@ -102,7 +109,7 @@ class LoggerConfig(BaseSettings):
 
     LOG_LEVEL: LogLevel = LogLevel.INFO
     LOG_CONFIG_FILE: str = "log_config.json"
-    LOGGING_DIRECTORY: str = "/var/logs"
+    LOGGING_DIRECTORY: str = "/var/log"
     SCARF_NO_ANALYTICS: bool = False
     DO_NOT_TRACK: bool = False
     SANDBOX: bool = False

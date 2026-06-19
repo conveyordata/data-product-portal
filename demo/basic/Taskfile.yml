@@ -1,6 +1,17 @@
 version: '3'
 
 tasks:
+  poetry:sync:
+    desc: Sync poetry requirements
+    cmds:
+      - cp ../../backend/requirements-poetry.txt provisioner/requirements-poetry.txt
+
+  poetry:update:
+    desc: Update dependencies
+    cmds:
+      - cd products && poetry update
+      - cd provisioner && poetry update
+
   install:products:
     desc: Install products poetry dependencies
     dir: products

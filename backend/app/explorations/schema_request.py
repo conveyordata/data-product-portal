@@ -4,7 +4,7 @@ from uuid import UUID
 from app.shared.schema import ORMModel
 
 
-class CreateInputPortsForExplorationRequest(ORMModel):
+class RequestInputPortsForExplorationRequest(ORMModel):
     output_ports: list[UUID]
     justification: str
 
@@ -17,4 +17,4 @@ class CreateExplorationRequest(ORMModel):
 
 
 class CreateExplorationRequestWithInputPorts(CreateExplorationRequest):
-    input_ports: Optional[CreateInputPortsForExplorationRequest] = None
+    input_ports: Optional[RequestInputPortsForExplorationRequest] = None

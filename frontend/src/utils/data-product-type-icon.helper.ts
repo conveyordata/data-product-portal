@@ -1,9 +1,9 @@
-import chartAnalytics from '@/assets/icons/chart-analytics-icon.svg?react';
-import chartPieIcon from '@/assets/icons/chart-pie-icon.svg?react';
-import chipIcon from '@/assets/icons/chip-icon.svg?react';
-import explorationIcon from '@/assets/icons/exploration-icon.svg?react';
-import ingestionIcon from '@/assets/icons/ingestion-icon.svg?react';
-import robotIcon from '@/assets/icons/robot-icon.svg?react';
+import chartAnalytics from '@/assets/icons/data-product-types/chart-analytics-icon.svg?react';
+import chartPieIcon from '@/assets/icons/data-product-types/chart-pie-icon.svg?react';
+import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
+import explorationIcon from '@/assets/icons/data-product-types/exploration-icon.svg?react';
+import ingestionIcon from '@/assets/icons/data-product-types/ingestion-icon.svg?react';
+import robotIcon from '@/assets/icons/data-product-types/robot-icon.svg?react';
 import { DataProductIconKey } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 
 export function getDataProductTypeIcon(dataProductIcon?: DataProductIconKey) {

@@ -69,7 +69,7 @@ export type GetDomainsItem = {
   id: string;
   name: string;
   description: string;
-  data_product_count: number;
+  abstract_data_product_count: number;
 };
 export type GetDomainsResponse = {
   domains: GetDomainsItem[];

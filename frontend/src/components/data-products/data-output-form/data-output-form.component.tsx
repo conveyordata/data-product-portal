@@ -244,7 +244,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             onFinishFailed={onSubmitFailed}
             onValuesChange={onValuesChange}
             autoComplete={'off'}
-            requiredMark={'optional'}
             labelWrap
             disabled={isLoading}
         >

@@ -41,13 +41,13 @@ export function InputPortTab({
         <Flex vertical gap={'middle'}>
             <Flex gap={'small'}>
                 <Input.Search
-                    placeholder={t('Search existing Output Ports by name')}
+                    placeholder={t('Filter by name')}
                     allowClear
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <Link to={ApplicationPaths.Marketplace}>
                     <Button disabled={!canRequestAccess} type={'primary'}>
-                        {t('Shop for new Output Ports')}
+                        {t('Shop for new data')}
                     </Button>
                 </Link>
             </Flex>

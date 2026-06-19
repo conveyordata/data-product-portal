@@ -1,10 +1,9 @@
-import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
-import { DataProductOutlined } from '@/components/icons';
+import { ConsumersIcon } from '@/components/icons';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
-import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
+import { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
@@ -87,29 +86,21 @@ export const getOutputPortTableColumns = ({
         },
         {
             title: t('Consumers'),
-            dataIndex: 'data_product_count',
+            dataIndex: 'abstract_data_product_count',
             render: (count: number) => {
                 if (count === 0) {
                     return <TableCellItem text={t('No consumers yet')} />;
                 }
-
-                return <TableCellItem icon={<DataProductOutlined />} text={t('{{count}} products', { count })} />;
+                return <TableCellItem icon={<ConsumersIcon />} text={t('{{count}} consumers', { count })} />;
             },
-            sorter: sorter.numberSorter((op) => op.data_product_count),
+            sorter: sorter.numberSorter((op) => op.abstract_data_product_count),
         },
         {
             title: t('Quality'),
             dataIndex: 'quality_status',
-            render: (quality_status?: DataQualityStatus) => {
-                if (!quality_status) {
-                    return (
-                        <Tag color="default" icon={<QuestionCircleOutlined />}>
-                            {t('Unknown')}
-                        </Tag>
-                    );
-                }
-                return <QualityBadge quality_status={quality_status} />;
-            },
+            render: (quality_status?: DataQualityStatus) => (
+                <QualityBadge quality_status={quality_status ?? DataQualityStatus.Unknown} />
+            ),
             width: '10%',
         },
     ];

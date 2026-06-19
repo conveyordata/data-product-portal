@@ -37,6 +37,7 @@ from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
 route = "/v2/data_products/{data_product_id}/technical_assets"
+
 router = APIRouter(tags=["Data Products - Technical assets"])
 
 
@@ -233,7 +234,7 @@ def get_technical_asset_graph_data(
                 DataProductResolver,
                 object_id="data_product_id",
             )
-        )
+        ),
     ],
 )
 def create_technical_asset(

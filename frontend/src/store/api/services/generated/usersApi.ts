@@ -127,7 +127,8 @@ export type AuthorizationAction =
   | 411
   | 412
   | 413
-  | 414;
+  | 414
+  | 415;
 export type Prototype = 0 | 1 | 2 | 3;
 export type Role = {
   name: string;
@@ -285,7 +286,11 @@ export type SnowflakeTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
-export type DataProductStatus = "pending" | "active" | "archived";
+export type AbstractDataProductStatus =
+  | "pending"
+  | "active"
+  | "archived"
+  | "deleting";
 export type DataProductIconKey =
   | "reporting"
   | "processing"
@@ -305,7 +310,7 @@ export type DataProduct = {
   name: string;
   namespace: string;
   description: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   type: DataProductType;
 };
 export type OwnedTechnicalAsset = {

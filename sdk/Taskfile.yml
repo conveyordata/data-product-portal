@@ -6,6 +6,11 @@ tasks:
     cmds:
       - poetry install --all-groups
 
+  test:
+    desc: "Run the SDK tests"
+    cmds:
+      - poetry run pytest
+
   generate:client:
     desc: "Regenerate the portal API client from the OpenAPI spec"
     cmds:
@@ -14,5 +19,7 @@ tasks:
           --output-path ./sdk/api_client
           --meta none
           --overwrite
+      - poetry run python generation/build_event_handler.py
     generates:
       - sdk/api_client/**
+      - sdk/event_handler.py

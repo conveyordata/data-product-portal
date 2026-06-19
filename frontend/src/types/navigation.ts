@@ -36,7 +36,7 @@ export function createDataProductIdPath(
 
 export function createExplorationIdPath(
     explorationId: string,
-    tabKey: ExplorationTabKeys = ExplorationTabKeys.InputPorts,
+    tabKey: ExplorationTabKeys = ExplorationTabKeys.Start,
 ): string {
     return `${ApplicationPaths.Exploration.replace(':explorationId', encodeURIComponent(explorationId))}?tab=${tabKey}`;
 }

@@ -1,0 +1,15 @@
+*/__pycache__/
+cli
+docs
+helm
+images
+integrations
+mcp
+scripts
+frontend/node_modules
+frontend/dist
+.idea
+Dockerfile
+backend/tests
+backend/tmp
+.github

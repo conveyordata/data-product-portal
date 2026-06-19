@@ -13,7 +13,7 @@ from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema_response import (
     BaseTechnicalAssetOutputPortAssociationGet,
 )
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.schema_response import (
     BaseTechnicalAssetGet,
 )
@@ -25,7 +25,8 @@ class BaseDataProductGet(ORMModel):
     name: str
     description: str
     namespace: str
-    status: DataProductStatus
+    status: AbstractDataProductStatus
+    finalizers: list[str]
 
     # Nested schemas
     tags: list[Tag]
@@ -68,6 +69,10 @@ class LinkDatasetsToDataProductPost(ORMModel):
 
 
 class LinkInputPortsToDataProductPost(ORMModel):
+    input_port_links: list[UUID]
+
+
+class RequestInputPortsForDataProductResponse(ORMModel):
     input_port_links: list[UUID]
 
 

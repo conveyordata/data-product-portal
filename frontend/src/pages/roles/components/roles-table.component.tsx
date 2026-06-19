@@ -14,7 +14,6 @@ import type { TFunction } from 'i18next';
 import { type ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
-import { AppConfig } from '@/config/app-config';
 import { RoleDetailsMenu } from '@/pages/roles/components/role-details-menu.component';
 import {
     type Role,
@@ -249,16 +248,12 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     name: 'Create Data Product',
                     description: t('Allows the creation of a Data Product'),
                 },
-                ...(AppConfig.ExplorationsEnabled()
-                    ? [
-                          {
-                              type: 'Instance' as const,
-                              id: AuthorizationAction.GLOBAL__CREATE_EXPLORATION,
-                              name: 'Create Exploration',
-                              description: t('Allows the creation of an Exploration'),
-                          },
-                      ]
-                    : []),
+                {
+                    type: 'Instance' as const,
+                    id: AuthorizationAction.GLOBAL__CREATE_EXPLORATION,
+                    name: 'Create Exploration',
+                    description: t('Allows the creation of an Exploration'),
+                },
                 {
                     type: 'Instance',
                     id: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,

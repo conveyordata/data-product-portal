@@ -6,16 +6,24 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+
+- **[MCP]**: Extended the MCP server with tools to fetch AWS credentials and use those credentials to query Glue and Athena. This allows the MCP server to fully execute "Talk to your data" requests if configured correctly.
+
+
+## 0.6.0
+
 ### breaking changes **[API]**:
 - All v1 endpoints have been removed. Migrate to API v2 if not yet done so.
 - The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.
 - Because of the removal of the v1 endpoints, the callback endpoint of the device flow has also changed.
   Please migrate your OIDC provider to allow for the endpoint `<HOST>/api/v2/authn/device/callback` instead of the previous `<HOST>/api/auth/device/callback/` **The trailing slash is removed, this is important depending on the provider you use**
 - The get data products endpoint (GET /api/v2/data_products) now returns `input_port_count` instead of `output_port_count`, the variable `output_port_count` was incorrectly named
-- The input ports endpoint for data products (GET /api/v2/data_products/{id}/input_ports) now does not return the data_product anymore, the data product was the same one you where already querying via the id path parameter.
-- The Get Input Ports For Output Port (GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports) now does not return the output port anymore in every of the input ports, as that is the one from the path parameter `output_port_id`. It also returns `consuming_abstract_data_product` instead in preparation of adding explorations to input ports
+- The input ports endpoint for data products (`GET /api/v2/data_products/{id}/input_ports`) now does not return the data_product anymore, the data product was the same one you where already querying via the id path parameter.
+- The Get Input Ports For Output Port (`GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports`) now does not return the output port anymore in every of the input ports, as that is the one from the path parameter `output_port_id`. It also returns `consuming_abstract_data_product` instead in preparation of adding explorations to input ports
 - The Get User Pending Actions endpoint (GET /api/v2/users/current/pending_actions) now returns for input ports the consuming_abstract_data_product instead of the data_product. Also the pending action type `DataProductOutputPort` is renamed to `InputPort` In preparation of adding explorations to input ports.
 - The output port links in technical assets endpoints now returns the output port under `output_port` instead of `output`
+- MCP: The MCP authentication has been improved to work with more applications, however for this to work the callback  `<HOST>/mcp/auth/callback` needs to be added to the callback url of the OIDC provider.
 
 ### features
 
@@ -25,7 +33,11 @@ sidebar_position: 200
 - **[Docs]**: Adding an architecture overview
 - **[UI]**: Remove audit logs page
 - **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
-- **[MCP]**: Extended the MCP server with tools to fetch AWS credentials and use those credentials to query Glue and Athena. This allows the MCP server to fully execute "Talk to your data" requests if configured correctly.
+- **[Events]**: v2 implementation of the webhook events, making it easier to react to changes in Portal.
+Events are automatically emitted on database creation, update and deletion events. Currently only applied on Exploration entities.
+- **[General]**: Migrated portal to run in a single container, making deployment easier.
+- **[UI]**: Show schema information on an output port. It is defined using the Bitol [ODCS specification](https://bitol-io.github.io/open-data-contract-standard/v3.1.0/). For more details look [here](./developer-guide/schema-information.md).
+- **[Posthog]**: Track output port consumption — daily metric reporting total approved input ports, split by consumer type (data product vs exploration).
 
 ### bugfixes
 
@@ -39,7 +51,6 @@ sidebar_position: 200
 - **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view. Also fixed broken animations in the global explorer view.
 - **[Data Product]**: Fixed an issue where updating a setting would not invalidate the correct cache, resulting in a broken state
 - **[General]**: Improved the performance of several endpoints by ensuring we load less data.
-
 
 ## 0.5.1
 
@@ -118,7 +129,7 @@ This avoids the pitfall where you permanently are allowed to do everything and n
 - **[MCP]**: Fixed OAuth issues with MCP server.
 
 ### deprecations
-- **[API]**: Deprecated `/api/data_products/{id}/dataset/{dataset_id}` POST endpoint, use `/api/data_products/{id}/link_datasets` instead.
+- **[API]**: Deprecated `POST /api/data_products/{id}/dataset/{dataset_id}` endpoint, use `/api/data_products/{id}/link_datasets` instead.
 
 ## 0.4.0
 

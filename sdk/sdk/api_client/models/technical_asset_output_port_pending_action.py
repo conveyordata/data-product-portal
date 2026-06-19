@@ -13,7 +13,6 @@ from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.decision_status import DecisionStatus
 from ..types import UNSET, Unset
@@ -150,7 +149,7 @@ class TechnicalAssetOutputPortPendingAction:
 
         status = DecisionStatus(d.pop("status"))
 
-        requested_on = isoparse(d.pop("requested_on"))
+        requested_on = datetime.datetime.fromisoformat(d.pop("requested_on"))
 
         def _parse_denied_on(data: object) -> datetime.datetime | None:
             if data is None:
@@ -158,7 +157,7 @@ class TechnicalAssetOutputPortPendingAction:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                denied_on_type_0 = isoparse(data)
+                denied_on_type_0 = datetime.datetime.fromisoformat(data)
 
                 return denied_on_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
@@ -173,7 +172,7 @@ class TechnicalAssetOutputPortPendingAction:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                approved_on_type_0 = isoparse(data)
+                approved_on_type_0 = datetime.datetime.fromisoformat(data)
 
                 return approved_on_type_0
             except (TypeError, ValueError, AttributeError, KeyError):

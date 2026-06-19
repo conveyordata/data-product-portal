@@ -1,3 +1,4 @@
+import copy
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -59,3 +60,15 @@ class ExplorationService(AbstractDataProductService):
             authenticated_user,
             options=[joinedload(ExplorationModel.owner)],
         )
+
+    def remove_exploration(self, id: UUID) -> ExplorationModel:
+        exploration = self.db.get(ExplorationModel, id)
+        if not exploration:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Exploration {id} not found",
+            )
+        result = copy.deepcopy(exploration)
+        self.db.delete(exploration)
+        self.db.commit()
+        return result

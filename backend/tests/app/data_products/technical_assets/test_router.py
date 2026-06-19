@@ -23,6 +23,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
+from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/technical_assets"
 
@@ -95,6 +96,15 @@ class TestTechnicalAssetsRouter:
         created_data_output = self.create_technical_asset(client, data_output_payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
+
+    def test_create_technical_assert_generates_webhook_v2_event(
+        self,
+        data_output_payload,
+        client: TestClient,
+        mock_webhook,
+    ):
+        self.test_create_data_output_source_aligned(data_output_payload, client)
+        assert_event_in_queue("technical_asset.event", mock_webhook)
 
     def test_create_data_output_product_aligned(
         self, data_output_payload, client: TestClient
@@ -332,7 +342,7 @@ class TestTechnicalAssetsRouter:
             }
         ]
         for node in response.json()["nodes"]:
-            if node["type"] == "dataOutputNode":
+            if node["type"] == "technicalAssetNode":
                 assert node == {
                     "data": {
                         "icon_key": "S3TechnicalAssetConfiguration",
@@ -345,7 +355,7 @@ class TestTechnicalAssetsRouter:
                     },
                     "id": str(data_output.id),
                     "isMain": True,
-                    "type": "dataOutputNode",
+                    "type": "technicalAssetNode",
                 }
             else:
                 assert node == {
@@ -727,3 +737,33 @@ class TestTechnicalAssetsRouter:
     @staticmethod
     def get_data_product_history(client, data_product_id):
         return client.get(f"/api/v2/data_products/{data_product_id}/history")
+
+
+@pytest.fixture
+def ta_event_payload():
+    service = PlatformServiceFactory()
+    tag = TagFactory()
+    return {
+        "name": "Test Asset",
+        "description": "desc",
+        "namespace": "test-ta-event-ns",
+        "technical_mapping": "default",
+        "configuration": {
+            "bucket": "test",
+            "path": "test",
+            "configuration_type": "S3TechnicalAssetConfiguration",
+        },
+        "platform_id": str(service.platform.id),
+        "service_id": str(service.id),
+        "tag_ids": [str(tag.id)],
+    }
+
+
+class TestTechnicalAssetsRouterV2Events:
+    @staticmethod
+    def _ta_endpoint(dp_id):
+        return ENDPOINT.format(dp_id)
+
+    @staticmethod
+    def _link_endpoint(dp_id, op_id):
+        return f"/api/v2/data_products/{dp_id}/output_ports/{op_id}/technical_assets"

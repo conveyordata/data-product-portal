@@ -24,3 +24,13 @@ class DeviceFlow(ORMModel):
     authz_state: Optional[str]
     authz_verif: Optional[str]
     verification_uri_complete: str
+
+
+class OIDCTokenResponse(ORMModel):
+    """OIDC token endpoint response."""
+
+    access_token: str
+    token_type: str
+    expires_in: int
+    id_token: str | None = None
+    refresh_token: str | None = None

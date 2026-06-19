@@ -86,7 +86,6 @@ func isCompletionCommand(cmd *cobra.Command) bool {
 }
 
 func EnsureValidConfig(cmd *cobra.Command, _ []string) {
-	println(cmd.Parent().Use)
 	if cmd.Name() != "configure" && !isCompletionCommand(cmd) && !CurrentConfigValid() {
 		logger.Errorf("Please set up a default configuration with at least a single OIDC host, run portal auth configure -h for extra information")
 		os.Exit(1)

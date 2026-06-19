@@ -3,11 +3,7 @@
   "info": {
     "title": "Data product portal",
     "summary": "Backend API implementation for Data product portal",
-    "contact": {
-      "name": "Stijn Janssens",
-      "email": "stijn.janssens@dataminded.com"
-    },
-    "version": "0.5.1"
+    "version": "0.6.0"
   },
   "paths": {
     "/api/v2/authz/access/{action}": {
@@ -32,15 +28,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Resource"
             }
           },
@@ -49,15 +38,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Domain"
             }
           }
@@ -126,15 +108,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "minLength": 3
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "minLength": 3,
               "title": "Query"
             }
           },
@@ -693,6 +668,142 @@
               "application/json": {
                 "example": {
                   "detail": "Not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Contract"
+        ],
+        "summary": "Get Output Port Schema",
+        "operationId": "get_output_port_schema",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortSchemaResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Output Port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output Port ID not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Contract"
+        ],
+        "summary": "Ingest Output Port Contract",
+        "operationId": "ingest_output_port_contract",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BitolContractRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortSchemaResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Output Port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output Port ID not found"
                 }
               }
             }
@@ -1390,15 +1501,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Filter To User With Assigment"
             }
           }
@@ -1448,12 +1552,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Data Product deleted",
             "content": {
               "application/json": {
                 "schema": {}
               }
             }
+          },
+          "202": {
+            "description": "Data Product marked for deletion, waiting for finalizers"
           },
           "404": {
             "description": "Data Product not found",
@@ -1564,6 +1671,107 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetDataProductResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/finalizers": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Add Data Product Finalizer",
+        "operationId": "add_data_product_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{id}/finalizers/{finalizer}": {
+      "delete": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Remove Data Product Finalizer",
+        "operationId": "remove_data_product_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "finalizer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finalizer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -1873,6 +2081,7 @@
         ],
         "summary": "Link Input Ports To Data Product",
         "operationId": "link_input_ports_to_data_product",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -1939,6 +2148,120 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/input_ports": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Request Input Ports For Data Product",
+        "operationId": "request_input_ports_for_data_product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestInputPortsForDataProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestInputPortsForDataProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Output port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output port not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Get Data Product Input Ports",
+        "operationId": "get_data_product_input_ports",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataProductInputPortsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{id}/history": {
       "get": {
         "tags": [
@@ -1965,49 +2288,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetEventHistoryResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/data_products/{id}/input_ports": {
-      "get": {
-        "tags": [
-          "Data Products"
-        ],
-        "summary": "Get Data Product Input Ports",
-        "operationId": "get_data_product_input_ports",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDataProductInputPortsResponse"
                 }
               }
             }
@@ -2068,7 +2348,7 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/input_ports/{input_port_id}": {
+    "/api/v2/data_products/{id}/input_ports/{output_port_id}": {
       "delete": {
         "tags": [
           "Data Products"
@@ -2087,13 +2367,13 @@
             }
           },
           {
-            "name": "input_port_id",
+            "name": "output_port_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "Input Port Id"
+              "title": "Output Port Id"
             }
           }
         ],
@@ -5162,15 +5442,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "User Id"
             }
           },
@@ -5179,15 +5452,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Role Id"
             }
           }
@@ -5472,15 +5738,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Data Product Id"
             }
           },
@@ -5489,15 +5748,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "User Id"
             }
           },
@@ -5506,15 +5758,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Role Id"
             }
           },
@@ -5523,15 +5768,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/DecisionStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Decision"
+              "$ref": "#/components/schemas/DecisionStatus"
             }
           }
         ],
@@ -5799,15 +6036,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Output Port Id"
             }
           },
@@ -5816,15 +6046,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "User Id"
             }
           },
@@ -5833,15 +6056,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Role Id"
             }
           },
@@ -5850,15 +6066,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/DecisionStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Decision"
+              "$ref": "#/components/schemas/DecisionStatus"
             }
           }
         ],
@@ -6086,23 +6294,23 @@
         "operationId": "get_graph_data",
         "parameters": [
           {
-            "name": "data_product_nodes_enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true,
-              "title": "Data Product Nodes Enabled"
-            }
-          },
-          {
             "name": "output_port_nodes_enabled",
             "in": "query",
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "Output Port Nodes Enabled"
+            }
+          },
+          {
+            "name": "exploration_nodes_enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Exploration Nodes Enabled"
             }
           }
         ],
@@ -6283,15 +6491,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Data Product Id"
             }
           }
@@ -6460,14 +6661,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
               "title": "Environment"
             }
           }
@@ -6550,15 +6744,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "string",
+              "format": "uuid",
               "title": "Filter To User With Assigment"
             }
           }
@@ -6667,6 +6854,58 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Remove Exploration",
+        "operationId": "remove_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exploration deleted",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "202": {
+            "description": "Exploration marked for deletion, waiting for finalizers"
+          },
+          "404": {
+            "description": "Exploration not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Exploration id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/explorations/{id}/input_ports": {
@@ -6710,6 +6949,209 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Request Input Ports For Exploration",
+        "operationId": "request_input_ports_for_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestInputPortsForExplorationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestInputPortsForExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/input_ports/{output_port_id}": {
+      "delete": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Remove Input Port From Exploration",
+        "operationId": "remove_input_port_from_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/finalizers": {
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Add Exploration Finalizer",
+        "operationId": "add_exploration_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/finalizers/{finalizer}": {
+      "delete": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Remove Exploration Finalizer",
+        "operationId": "remove_exploration_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "finalizer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finalizer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/authn/device/device_token": {
@@ -6728,11 +7170,14 @@
           {
             "name": "client_id",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string",
+              "deprecated": true,
+              "default": "",
               "title": "Client Id"
-            }
+            },
+            "deprecated": true
           },
           {
             "name": "scope",
@@ -6750,7 +7195,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceFlow"
+                }
               }
             }
           },
@@ -6781,15 +7228,6 @@
         ],
         "parameters": [
           {
-            "name": "client_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
-          },
-          {
             "name": "device_code",
             "in": "query",
             "required": true,
@@ -6806,6 +7244,18 @@
               "type": "string",
               "title": "Grant Type"
             }
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "deprecated": true,
+              "default": "",
+              "title": "Client Id"
+            },
+            "deprecated": true
           }
         ],
         "responses": {
@@ -6813,7 +7263,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/OIDCTokenResponse"
+                }
               }
             }
           },
@@ -6894,6 +7346,84 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "v2_event_stream": {
+      "post": {
+        "summary": "Event Stream Webhook",
+        "description": "The primary webhook subscription target.Receives a real-time event stream wrapped in a CloudEvents 1.0 envelope.Inspect the `type` field to distinguish between payload formats.",
+        "operationId": "event_stream",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_ExplorationEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_InputPortEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent"
+                  }
+                ],
+                "title": "Body",
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "exploration.event": "#/components/schemas/CloudEvent_ExplorationEvent",
+                    "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
+                    "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
+                    "data_product_role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
+                    "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
+                    "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
+                    "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
+                    "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -7041,6 +7571,16 @@
         ],
         "title": "AbstractDataProductInfo"
       },
+      "AbstractDataProductStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "active",
+          "archived",
+          "deleting"
+        ],
+        "title": "AbstractDataProductStatus"
+      },
       "AbstractDataProductType": {
         "type": "string",
         "enum": [
@@ -7138,7 +7678,8 @@
           411,
           412,
           413,
-          414
+          414,
+          415
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
@@ -7229,6 +7770,21 @@
         ],
         "title": "BecomeAdmin"
       },
+      "BitolContractRequest": {
+        "properties": {
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaObjectRequest"
+            },
+            "type": "array",
+            "title": "Schema",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "BitolContractRequest",
+        "description": "Accepts a BitOL data contract (https://bitol-io.github.io/open-data-contract-standard/).\nOnly the `schema` section is extracted; all other fields are ignored."
+      },
       "CanBecomeAdminUpdate": {
         "properties": {
           "user_id": {
@@ -7246,6 +7802,358 @@
           "can_become_admin"
         ],
         "title": "CanBecomeAdminUpdate"
+      },
+      "CloudEvent_DataProductEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductEvent"
+      },
+      "CloudEvent_DataProductRoleAssignmentEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product_role_assignment.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product_role_assignment.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductRoleAssignmentEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductRoleAssignmentEvent"
+      },
+      "CloudEvent_ExplorationEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "exploration.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "exploration.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/ExplorationEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_ExplorationEvent"
+      },
+      "CloudEvent_InputPortEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "input_port.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "input_port.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/InputPortEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_InputPortEvent"
+      },
+      "CloudEvent_OutputPortEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortEvent"
+      },
+      "CloudEvent_OutputPortRoleAssignmentEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port_role_assignment.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port_role_assignment.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortRoleAssignmentEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortRoleAssignmentEvent"
+      },
+      "CloudEvent_OutputPortTechnicalAssetLinkEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "output_port_technical_asset_link.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "output_port_technical_asset_link.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OutputPortTechnicalAssetLinkEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_OutputPortTechnicalAssetLinkEvent"
+      },
+      "CloudEvent_TechnicalAssetEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "technical_asset.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "technical_asset.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnicalAssetEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_TechnicalAssetEvent"
       },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
@@ -7365,7 +8273,7 @@
           "input_ports": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CreateInputPortsForExplorationRequest"
+                "$ref": "#/components/schemas/RequestInputPortsForExplorationRequest"
               },
               {
                 "type": "null"
@@ -7403,6 +8311,16 @@
           },
           "domain": {
             "$ref": "#/components/schemas/Domain"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           }
         },
         "type": "object",
@@ -7411,7 +8329,9 @@
           "name",
           "namespace",
           "description",
-          "domain"
+          "domain",
+          "status",
+          "finalizers"
         ],
         "title": "CreateExplorationResponse"
       },
@@ -7442,28 +8362,6 @@
           "role_id"
         ],
         "title": "CreateGlobalRoleAssignment"
-      },
-      "CreateInputPortsForExplorationRequest": {
-        "properties": {
-          "output_ports": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Output Ports"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          }
-        },
-        "type": "object",
-        "required": [
-          "output_ports",
-          "justification"
-        ],
-        "title": "CreateInputPortsForExplorationRequest"
       },
       "CreateOutputPortRequest": {
         "properties": {
@@ -7801,7 +8699,7 @@
             "title": "Description"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           },
           "type": {
             "$ref": "#/components/schemas/DataProductType"
@@ -7888,6 +8786,16 @@
             "type": "array",
             "minItems": 1,
             "title": "Owners"
+          },
+          "input_ports": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestInputPortsForDataProductRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -7901,6 +8809,20 @@
           "owners"
         ],
         "title": "DataProductCreate"
+      },
+      "DataProductEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DataProductEvent"
       },
       "DataProductIconKey": {
         "type": "string",
@@ -8135,6 +9057,33 @@
           "approved_by"
         ],
         "title": "DataProductOutputPortPendingAction"
+      },
+      "DataProductRoleAssignmentEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id",
+          "user_id"
+        ],
+        "title": "DataProductRoleAssignmentEvent",
+        "description": "Fired on insert, update, and delete of a data-product role assignment."
       },
       "DataProductRoleAssignmentPendingAction": {
         "properties": {
@@ -8576,19 +9525,10 @@
         ],
         "title": "DataProductSettingsGetItem"
       },
-      "DataProductStatus": {
-        "type": "string",
-        "enum": [
-          "pending",
-          "active",
-          "archived"
-        ],
-        "title": "DataProductStatus"
-      },
       "DataProductStatusUpdate": {
         "properties": {
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
           }
         },
         "type": "object",
@@ -9160,6 +10100,100 @@
         ],
         "title": "DenyOutputPortAsInputPortRequest"
       },
+      "DeviceFlow": {
+        "properties": {
+          "device_code": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Device Code"
+          },
+          "user_code": {
+            "type": "string",
+            "title": "User Code"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope"
+          },
+          "interval": {
+            "type": "integer",
+            "title": "Interval"
+          },
+          "expiration": {
+            "type": "integer",
+            "title": "Expiration"
+          },
+          "oidc_redirect_uri": {
+            "type": "string",
+            "title": "Oidc Redirect Uri"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeviceFlowStatus"
+          },
+          "authz_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz Code"
+          },
+          "authz_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz State"
+          },
+          "authz_verif": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authz Verif"
+          },
+          "verification_uri_complete": {
+            "type": "string",
+            "title": "Verification Uri Complete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_code",
+          "user_code",
+          "scope",
+          "interval",
+          "expiration",
+          "oidc_redirect_uri",
+          "status",
+          "authz_code",
+          "authz_state",
+          "authz_verif",
+          "verification_uri_complete"
+        ],
+        "title": "DeviceFlow"
+      },
+      "DeviceFlowStatus": {
+        "type": "string",
+        "enum": [
+          "authorization_pending",
+          "expired",
+          "denied",
+          "authorized"
+        ],
+        "title": "DeviceFlowStatus"
+      },
       "Domain": {
         "properties": {
           "id": {
@@ -9506,6 +10540,16 @@
           },
           "domain": {
             "$ref": "#/components/schemas/Domain"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           }
         },
         "type": "object",
@@ -9514,9 +10558,25 @@
           "name",
           "namespace",
           "description",
-          "domain"
+          "domain",
+          "status",
+          "finalizers"
         ],
         "title": "Exploration"
+      },
+      "ExplorationEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "ExplorationEvent"
       },
       "FieldDependency": {
         "properties": {
@@ -9535,6 +10595,19 @@
         ],
         "title": "FieldDependency",
         "description": "Represents a field dependency for conditional visibility.\ne.g. if field A has depends_on(field_name=B, value=Y), then field A is only shown when field B has value Y\nIn practice this is often used with checkbox fields having value=True"
+      },
+      "FinalizerRequest": {
+        "properties": {
+          "finalizer": {
+            "type": "string",
+            "title": "Finalizer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "finalizer"
+        ],
+        "title": "FinalizerRequest"
       },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
@@ -9572,7 +10645,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/app__abstract_data_product__schema_response__InputPort"
+              "$ref": "#/components/schemas/InputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -9620,7 +10693,14 @@
             "title": "Namespace"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           },
           "tags": {
             "items": {
@@ -9675,6 +10755,7 @@
           "description",
           "namespace",
           "status",
+          "finalizers",
           "tags",
           "usage",
           "domain",
@@ -9753,7 +10834,14 @@
             "title": "Namespace"
           },
           "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           },
           "tags": {
             "items": {
@@ -9809,6 +10897,7 @@
           "description",
           "namespace",
           "status",
+          "finalizers",
           "tags",
           "usage",
           "domain",
@@ -9859,9 +10948,9 @@
             "type": "string",
             "title": "Description"
           },
-          "data_product_count": {
+          "abstract_data_product_count": {
             "type": "integer",
-            "title": "Data Product Count"
+            "title": "Abstract Data Product Count"
           }
         },
         "type": "object",
@@ -9869,7 +10958,7 @@
           "id",
           "name",
           "description",
-          "data_product_count"
+          "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"
       },
@@ -10038,7 +11127,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/app__abstract_data_product__schema_response__InputPort"
+              "$ref": "#/components/schemas/InputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -10072,6 +11161,16 @@
           "domain": {
             "$ref": "#/components/schemas/Domain"
           },
+          "status": {
+            "$ref": "#/components/schemas/AbstractDataProductStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
+          },
           "owner": {
             "$ref": "#/components/schemas/User"
           }
@@ -10083,6 +11182,8 @@
           "namespace",
           "description",
           "domain",
+          "status",
+          "finalizers",
           "owner"
         ],
         "title": "GetExplorationResponse"
@@ -10107,7 +11208,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/app__data_products__output_ports__input_ports__schema_response__InputPort"
+              "$ref": "#/components/schemas/OutputPortInputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -10384,21 +11485,18 @@
           "sourceAligned": {
             "type": "boolean",
             "title": "Sourcealigned",
-            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.",
-            "readOnly": true
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version."
           },
           "result_string": {
             "type": "string",
-            "title": "Result String",
-            "readOnly": true
+            "title": "Result String"
           },
           "technical_info": {
             "items": {
               "$ref": "#/components/schemas/TechnicalInfo"
             },
             "type": "array",
-            "title": "Technical Info",
-            "readOnly": true
+            "title": "Technical Info"
           }
         },
         "type": "object",
@@ -10648,6 +11746,63 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "InputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "status",
+          "output_port_id",
+          "output_port"
+        ],
+        "title": "InputPort"
+      },
+      "InputPortEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "consuming_abstract_data_product_type": {
+            "$ref": "#/components/schemas/AbstractDataProductType"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "consuming_abstract_data_product_id",
+          "consuming_abstract_data_product_type"
+        ],
+        "title": "InputPortEvent"
       },
       "IsAdminResponse": {
         "properties": {
@@ -10965,11 +12120,57 @@
         "type": "string",
         "enum": [
           "dataProductNode",
-          "dataOutputNode",
-          "datasetNode",
-          "domainNode"
+          "explorationNode",
+          "technicalAssetNode",
+          "outputPortNode"
         ],
         "title": "NodeType"
+      },
+      "OIDCTokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          },
+          "id_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Token"
+          },
+          "refresh_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in"
+        ],
+        "title": "OIDCTokenResponse",
+        "description": "OIDC token endpoint response."
       },
       "OSISemanticModelTechnicalAssetConfiguration": {
         "properties": {
@@ -11313,6 +12514,59 @@
         ],
         "title": "OutputPortDataQualitySummaryResponse"
       },
+      "OutputPortEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id"
+        ],
+        "title": "OutputPortEvent"
+      },
+      "OutputPortInputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "consuming_abstract_data_product": {
+            "$ref": "#/components/schemas/AbstractDataProductInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "status",
+          "consuming_abstract_data_product_id",
+          "consuming_abstract_data_product"
+        ],
+        "title": "OutputPortInputPort"
+      },
       "OutputPortLink": {
         "properties": {
           "id": {
@@ -11442,6 +12696,39 @@
         ],
         "title": "OutputPortQueryStatsUpdate"
       },
+      "OutputPortRoleAssignmentEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "data_product_id",
+          "user_id"
+        ],
+        "title": "OutputPortRoleAssignmentEvent",
+        "description": "Fired on insert, update, and delete of an output-port role assignment."
+      },
       "OutputPortRoleAssignmentResponse": {
         "properties": {
           "id": {
@@ -11527,6 +12814,28 @@
         ],
         "title": "OutputPortRoleAssignmentResponse"
       },
+      "OutputPortSchemaResponse": {
+        "properties": {
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "schema_objects": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaObjectResponse"
+            },
+            "type": "array",
+            "title": "Schema Objects",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_id"
+        ],
+        "title": "OutputPortSchemaResponse"
+      },
       "OutputPortSettingValue": {
         "properties": {
           "id": {
@@ -11570,6 +12879,38 @@
           "archived"
         ],
         "title": "OutputPortStatus"
+      },
+      "OutputPortTechnicalAssetLinkEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "technical_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Technical Asset Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id",
+          "output_port_id",
+          "technical_asset_id"
+        ],
+        "title": "OutputPortTechnicalAssetLinkEvent"
       },
       "OwnedTechnicalAsset": {
         "properties": {
@@ -12139,6 +13480,84 @@
         ],
         "title": "RequestDataProductRoleAssignment"
       },
+      "RequestInputPortsForDataProductRequest": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports",
+          "justification"
+        ],
+        "title": "RequestInputPortsForDataProductRequest"
+      },
+      "RequestInputPortsForDataProductResponse": {
+        "properties": {
+          "input_port_links": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Input Port Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_links"
+        ],
+        "title": "RequestInputPortsForDataProductResponse"
+      },
+      "RequestInputPortsForExplorationRequest": {
+        "properties": {
+          "output_ports": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_ports",
+          "justification"
+        ],
+        "title": "RequestInputPortsForExplorationRequest"
+      },
+      "RequestInputPortsForExplorationResponse": {
+        "properties": {
+          "input_port_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Input Port Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_ids"
+        ],
+        "title": "RequestInputPortsForExplorationResponse"
+      },
       "RequestOutputPortRoleAssignment": {
         "properties": {
           "user_id": {
@@ -12294,6 +13713,402 @@
         ],
         "title": "S3TechnicalAssetConfiguration"
       },
+      "SchemaObjectRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "logicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logicaltype"
+          },
+          "physicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physicaltype"
+          },
+          "physicalName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physicalname"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaPropertyRequest"
+            },
+            "type": "array",
+            "title": "Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SchemaObjectRequest"
+      },
+      "SchemaObjectResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "logical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logical Type"
+          },
+          "physical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Type"
+          },
+          "physical_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaPropertyResponse"
+            },
+            "type": "array",
+            "title": "Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "position"
+        ],
+        "title": "SchemaObjectResponse"
+      },
+      "SchemaPropertyRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "businessName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Businessname"
+          },
+          "logicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logicaltype"
+          },
+          "physicalType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physicaltype"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "examples": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Examples"
+          },
+          "primaryKey": {
+            "type": "boolean",
+            "title": "Primarykey",
+            "default": false
+          },
+          "primaryKeyPosition": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primarykeyposition"
+          },
+          "unique": {
+            "type": "boolean",
+            "title": "Unique",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": false
+          },
+          "partitioned": {
+            "type": "boolean",
+            "title": "Partitioned",
+            "default": false
+          },
+          "partitionKeyPosition": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partitionkeyposition"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaPropertyRequest"
+            },
+            "type": "array",
+            "title": "Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SchemaPropertyRequest"
+      },
+      "SchemaPropertyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "business_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Name"
+          },
+          "logical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logical Type"
+          },
+          "physical_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Type"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "examples": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Examples"
+          },
+          "primary_key": {
+            "type": "boolean",
+            "title": "Primary Key",
+            "default": false
+          },
+          "primary_key_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Key Position"
+          },
+          "unique": {
+            "type": "boolean",
+            "title": "Unique",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": false
+          },
+          "partitioned": {
+            "type": "boolean",
+            "title": "Partitioned",
+            "default": false
+          },
+          "partition_key_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partition Key Position"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "properties": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SchemaPropertyResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Properties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "position"
+        ],
+        "title": "SchemaPropertyResponse"
+      },
       "Scope": {
         "type": "string",
         "enum": [
@@ -12381,9 +14196,9 @@
               }
             ]
           },
-          "data_product_count": {
+          "abstract_data_product_count": {
             "type": "integer",
-            "title": "Data Product Count"
+            "title": "Abstract Data Product Count"
           },
           "technical_assets_count": {
             "type": "integer",
@@ -12417,7 +14232,7 @@
           "tags",
           "domain",
           "lifecycle",
-          "data_product_count",
+          "abstract_data_product_count",
           "technical_assets_count",
           "data_product_name",
           "quality_status"
@@ -12693,6 +14508,26 @@
           "configuration"
         ],
         "title": "TechnicalAsset"
+      },
+      "TechnicalAssetEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id"
+        ],
+        "title": "TechnicalAssetEvent"
       },
       "TechnicalAssetLink": {
         "properties": {
@@ -13627,72 +15462,6 @@
           "type"
         ],
         "title": "ValidationError"
-      },
-      "app__abstract_data_product__schema_response__InputPort": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "justification",
-          "status",
-          "output_port_id",
-          "output_port"
-        ],
-        "title": "InputPort"
-      },
-      "app__data_products__output_ports__input_ports__schema_response__InputPort": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "consuming_abstract_data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Consuming Abstract Data Product Id"
-          },
-          "consuming_abstract_data_product": {
-            "$ref": "#/components/schemas/AbstractDataProductInfo"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "justification",
-          "status",
-          "consuming_abstract_data_product_id",
-          "consuming_abstract_data_product"
-        ],
-        "title": "InputPort"
       }
     },
     "securitySchemes": {

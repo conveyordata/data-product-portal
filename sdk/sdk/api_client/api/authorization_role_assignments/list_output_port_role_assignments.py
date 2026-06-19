@@ -16,48 +16,33 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    output_port_id: None | Unset | UUID = UNSET,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
-    decision: DecisionStatus | None | Unset = UNSET,
+    output_port_id: UUID | Unset = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
+    decision: DecisionStatus | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    json_output_port_id: None | str | Unset
-    if isinstance(output_port_id, Unset):
-        json_output_port_id = UNSET
-    elif isinstance(output_port_id, UUID):
+    json_output_port_id: str | Unset = UNSET
+    if not isinstance(output_port_id, Unset):
         json_output_port_id = str(output_port_id)
-    else:
-        json_output_port_id = output_port_id
     params["output_port_id"] = json_output_port_id
 
-    json_user_id: None | str | Unset
-    if isinstance(user_id, Unset):
-        json_user_id = UNSET
-    elif isinstance(user_id, UUID):
+    json_user_id: str | Unset = UNSET
+    if not isinstance(user_id, Unset):
         json_user_id = str(user_id)
-    else:
-        json_user_id = user_id
     params["user_id"] = json_user_id
 
-    json_role_id: None | str | Unset
-    if isinstance(role_id, Unset):
-        json_role_id = UNSET
-    elif isinstance(role_id, UUID):
+    json_role_id: str | Unset = UNSET
+    if not isinstance(role_id, Unset):
         json_role_id = str(role_id)
-    else:
-        json_role_id = role_id
     params["role_id"] = json_role_id
 
-    json_decision: None | str | Unset
-    if isinstance(decision, Unset):
-        json_decision = UNSET
-    elif isinstance(decision, DecisionStatus):
+    json_decision: str | Unset = UNSET
+    if not isinstance(decision, Unset):
         json_decision = decision.value
-    else:
-        json_decision = decision
+
     params["decision"] = json_decision
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -104,18 +89,18 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    output_port_id: None | Unset | UUID = UNSET,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
-    decision: DecisionStatus | None | Unset = UNSET,
+    output_port_id: UUID | Unset = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
+    decision: DecisionStatus | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListOutputPortRoleAssignmentsResponse]:
     """List Output Port Role Assignments
 
     Args:
-        output_port_id (None | Unset | UUID):
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
-        decision (DecisionStatus | None | Unset):
+        output_port_id (UUID | Unset):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
+        decision (DecisionStatus | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -142,18 +127,18 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    output_port_id: None | Unset | UUID = UNSET,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
-    decision: DecisionStatus | None | Unset = UNSET,
+    output_port_id: UUID | Unset = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
+    decision: DecisionStatus | Unset = UNSET,
 ) -> HTTPValidationError | ListOutputPortRoleAssignmentsResponse | None:
     """List Output Port Role Assignments
 
     Args:
-        output_port_id (None | Unset | UUID):
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
-        decision (DecisionStatus | None | Unset):
+        output_port_id (UUID | Unset):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
+        decision (DecisionStatus | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -175,18 +160,18 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    output_port_id: None | Unset | UUID = UNSET,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
-    decision: DecisionStatus | None | Unset = UNSET,
+    output_port_id: UUID | Unset = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
+    decision: DecisionStatus | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListOutputPortRoleAssignmentsResponse]:
     """List Output Port Role Assignments
 
     Args:
-        output_port_id (None | Unset | UUID):
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
-        decision (DecisionStatus | None | Unset):
+        output_port_id (UUID | Unset):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
+        decision (DecisionStatus | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -211,18 +196,18 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    output_port_id: None | Unset | UUID = UNSET,
-    user_id: None | Unset | UUID = UNSET,
-    role_id: None | Unset | UUID = UNSET,
-    decision: DecisionStatus | None | Unset = UNSET,
+    output_port_id: UUID | Unset = UNSET,
+    user_id: UUID | Unset = UNSET,
+    role_id: UUID | Unset = UNSET,
+    decision: DecisionStatus | Unset = UNSET,
 ) -> HTTPValidationError | ListOutputPortRoleAssignmentsResponse | None:
     """List Output Port Role Assignments
 
     Args:
-        output_port_id (None | Unset | UUID):
-        user_id (None | Unset | UUID):
-        role_id (None | Unset | UUID):
-        decision (DecisionStatus | None | Unset):
+        output_port_id (UUID | Unset):
+        user_id (UUID | Unset):
+        role_id (UUID | Unset):
+        decision (DecisionStatus | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

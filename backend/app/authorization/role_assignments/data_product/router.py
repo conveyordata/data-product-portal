@@ -1,8 +1,16 @@
 from copy import deepcopy
-from typing import Optional, Sequence
+from typing import Annotated, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    status,
+)
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product import email
@@ -48,7 +56,7 @@ router = APIRouter(prefix="/v2/authz/role_assignments/data_product")
                 Action.DATA_PRODUCT__DELETE_USER,
                 resolver=DataProductRoleAssignmentResolver,
             )
-        )
+        ),
     ],
 )
 def delete_data_product_role_assignment(
@@ -85,10 +93,10 @@ def delete_data_product_role_assignment(
 
 @router.get("")
 def list_data_product_role_assignments(
-    data_product_id: Optional[UUID] = None,
-    user_id: Optional[UUID] = None,
-    role_id: Optional[UUID] = None,
-    decision: Optional[DecisionStatus] = None,
+    data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
     db: Session = Depends(get_db_session),
 ) -> ListDataProductRoleAssignmentsResponse:
     return ListDataProductRoleAssignmentsResponse(
@@ -157,20 +165,20 @@ def request_data_product_role_assignment(
                 resolver=DataProductResolver,
                 object_id="data_product_id",
             )
-        )
+        ),
     ],
 )
 def create_data_product_role_assignment(
-    request: CreateDataProductRoleAssignment,
+    body: CreateDataProductRoleAssignment,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(
-        data_product_id=request.data_product_id,
-        user_id=request.user_id,
-        role_id=request.role_id,
+        data_product_id=body.data_product_id,
+        user_id=body.user_id,
+        role_id=body.role_id,
         actor=user,
     )
 
@@ -282,12 +290,12 @@ def decide_data_product_role_assignment(
                 Action.DATA_PRODUCT__UPDATE_USER,
                 resolver=DataProductRoleAssignmentResolver,
             )
-        )
+        ),
     ],
 )
 def modify_data_product_role_assignment(
     id: UUID,
-    request: ModifyDataProductRoleAssignment,
+    body: ModifyDataProductRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
@@ -295,7 +303,7 @@ def modify_data_product_role_assignment(
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateDataProductRoleAssignment(id=id, role_id=request.role_id), actor=user
+        UpdateDataProductRoleAssignment(id=id, role_id=body.role_id), actor=user
     )
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()

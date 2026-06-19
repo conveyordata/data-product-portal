@@ -1,21 +1,26 @@
 # Provisioner
 
+The provisioner is a level-based reconciler. On startup it resyncs every existing
+data product, and the webhook endpoint (`POST /`) reconciles a data product again
+whenever the portal emits a CloudEvent for it. Reconciliation is idempotent, so the
+same event can safely be delivered multiple times.
+
 ## Running locally
 
 `poetry run fastapi dev ./provisioner/main.py`
 
+Send a data product CloudEvent to trigger a reconcile:
+
 ```
 curl --header "Content-Type: application/json" \
   --request POST \
-  --data '{ "method": "POST", "url": "/api/data_products", "query": "", "response": "{\"id\":\"97a3bf4c-12b9-4f03-aff5-8917aef0b0e7\"}", "status_code": 200 }' \
-  http://localhost:8000/
-```
-
-
-```
-curl --header "Content-Type: application/json" \
-  --request PUT \
-  --data '{"lifecycle_id":"40cdce63-6acd-4812-9f82-0af9fd902411"}' \
-  http://localhost:8080/api/data_products/97a3bf4c-12b9-4f03-aff5-8917aef0b0e7
-
+  --data '{
+    "specversion": "1.0",
+    "type": "data_product.event",
+    "source": "data-product-portal",
+    "id": "evt-1",
+    "time": "2024-01-01T00:00:00Z",
+    "data": { "id": "97a3bf4c-12b9-4f03-aff5-8917aef0b0e7" }
+  }' \
+  http://localhost:8080/
 ```

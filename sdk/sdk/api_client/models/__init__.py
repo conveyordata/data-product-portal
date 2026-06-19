@@ -1,6 +1,7 @@
 """Contains all the data models used in inputs/outputs"""
 
 from .abstract_data_product_info import AbstractDataProductInfo
+from .abstract_data_product_status import AbstractDataProductStatus
 from .abstract_data_product_type import AbstractDataProductType
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
@@ -24,7 +25,22 @@ from .azure_environment_platform_configuration import (
     AzureEnvironmentPlatformConfiguration,
 )
 from .become_admin import BecomeAdmin
+from .bitol_contract_request import BitolContractRequest
 from .can_become_admin_update import CanBecomeAdminUpdate
+from .cloud_event_data_product_event import CloudEventDataProductEvent
+from .cloud_event_data_product_role_assignment_event import (
+    CloudEventDataProductRoleAssignmentEvent,
+)
+from .cloud_event_exploration_event import CloudEventExplorationEvent
+from .cloud_event_input_port_event import CloudEventInputPortEvent
+from .cloud_event_output_port_event import CloudEventOutputPortEvent
+from .cloud_event_output_port_role_assignment_event import (
+    CloudEventOutputPortRoleAssignmentEvent,
+)
+from .cloud_event_output_port_technical_asset_link_event import (
+    CloudEventOutputPortTechnicalAssetLinkEvent,
+)
+from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -36,9 +52,6 @@ from .create_exploration_request_with_input_ports import (
 )
 from .create_exploration_response import CreateExplorationResponse
 from .create_global_role_assignment import CreateGlobalRoleAssignment
-from .create_input_ports_for_exploration_request import (
-    CreateInputPortsForExplorationRequest,
-)
 from .create_output_port_request import CreateOutputPortRequest
 from .create_output_port_response import CreateOutputPortResponse
 from .create_output_port_role_assignment import CreateOutputPortRoleAssignment
@@ -51,6 +64,7 @@ from .data_output_update import DataOutputUpdate
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
+from .data_product_event import DataProductEvent
 from .data_product_icon_key import DataProductIconKey
 from .data_product_life_cycle import DataProductLifeCycle
 from .data_product_life_cycle_create import DataProductLifeCycleCreate
@@ -58,6 +72,7 @@ from .data_product_life_cycle_update import DataProductLifeCycleUpdate
 from .data_product_life_cycles_get import DataProductLifeCyclesGet
 from .data_product_life_cycles_get_item import DataProductLifeCyclesGetItem
 from .data_product_output_port_pending_action import DataProductOutputPortPendingAction
+from .data_product_role_assignment_event import DataProductRoleAssignmentEvent
 from .data_product_role_assignment_pending_action import (
     DataProductRoleAssignmentPendingAction,
 )
@@ -70,7 +85,6 @@ from .data_product_setting_update import DataProductSettingUpdate
 from .data_product_setting_value import DataProductSettingValue
 from .data_product_settings_get import DataProductSettingsGet
 from .data_product_settings_get_item import DataProductSettingsGetItem
-from .data_product_status import DataProductStatus
 from .data_product_status_update import DataProductStatusUpdate
 from .data_product_type import DataProductType
 from .data_product_type_create import DataProductTypeCreate
@@ -110,6 +124,8 @@ from .deny_link_between_technical_asset_and_output_port_request import (
     DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
 )
 from .deny_output_port_as_input_port_request import DenyOutputPortAsInputPortRequest
+from .device_flow import DeviceFlow
+from .device_flow_status import DeviceFlowStatus
 from .domain import Domain
 from .domain_create import DomainCreate
 from .domain_update import DomainUpdate
@@ -122,7 +138,9 @@ from .environment_platform_config_get import EnvironmentPlatformConfigGet
 from .environments_get import EnvironmentsGet
 from .event_entity_type import EventEntityType
 from .exploration import Exploration
+from .exploration_event import ExplorationEvent
 from .field_dependency import FieldDependency
+from .finalizer_request import FinalizerRequest
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
@@ -142,6 +160,7 @@ from .get_event_history_response_item import GetEventHistoryResponseItem
 from .get_exploration_input_ports_response import GetExplorationInputPortsResponse
 from .get_exploration_response import GetExplorationResponse
 from .get_explorations_response import GetExplorationsResponse
+from .get_input_ports_for_output_port_response import GetInputPortsForOutputPortResponse
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
@@ -155,6 +174,7 @@ from .glue_technical_asset_configuration import GlueTechnicalAssetConfiguration
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
 from .input_port import InputPort
+from .input_port_event import InputPortEvent
 from .is_admin_response import IsAdminResponse
 from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
 from .link_input_ports_to_data_product_post import LinkInputPortsToDataProductPost
@@ -177,6 +197,7 @@ from .modify_output_port_role_assignment import ModifyOutputPortRoleAssignment
 from .node import Node
 from .node_data import NodeData
 from .node_type import NodeType
+from .oidc_token_response import OIDCTokenResponse
 from .osi_semantic_model_technical_asset_configuration import (
     OSISemanticModelTechnicalAssetConfiguration,
 )
@@ -196,14 +217,19 @@ from .output_port_data_quality_summary_response import (
 from .output_port_data_quality_summary_response_dimensions_type_0 import (
     OutputPortDataQualitySummaryResponseDimensionsType0,
 )
+from .output_port_event import OutputPortEvent
+from .output_port_input_port import OutputPortInputPort
 from .output_port_link import OutputPortLink
 from .output_port_query_stats_delete import OutputPortQueryStatsDelete
 from .output_port_query_stats_response import OutputPortQueryStatsResponse
 from .output_port_query_stats_responses import OutputPortQueryStatsResponses
 from .output_port_query_stats_update import OutputPortQueryStatsUpdate
+from .output_port_role_assignment_event import OutputPortRoleAssignmentEvent
 from .output_port_role_assignment_response import OutputPortRoleAssignmentResponse
+from .output_port_schema_response import OutputPortSchemaResponse
 from .output_port_setting_value import OutputPortSettingValue
 from .output_port_status import OutputPortStatus
+from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .owned_technical_asset import OwnedTechnicalAsset
 from .pending_action_response import PendingActionResponse
 from .platform import Platform
@@ -228,6 +254,18 @@ from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
 )
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
+from .request_input_ports_for_data_product_request import (
+    RequestInputPortsForDataProductRequest,
+)
+from .request_input_ports_for_data_product_response import (
+    RequestInputPortsForDataProductResponse,
+)
+from .request_input_ports_for_exploration_request import (
+    RequestInputPortsForExplorationRequest,
+)
+from .request_input_ports_for_exploration_response import (
+    RequestInputPortsForExplorationResponse,
+)
 from .request_output_port_role_assignment import RequestOutputPortRoleAssignment
 from .resource_name_length_limits import ResourceNameLengthLimits
 from .resource_name_model import ResourceNameModel
@@ -236,6 +274,10 @@ from .resource_name_validation import ResourceNameValidation
 from .resource_name_validity_type import ResourceNameValidityType
 from .role import Role
 from .s3_technical_asset_configuration import S3TechnicalAssetConfiguration
+from .schema_object_request import SchemaObjectRequest
+from .schema_object_response import SchemaObjectResponse
+from .schema_property_request import SchemaPropertyRequest
+from .schema_property_response import SchemaPropertyResponse
 from .scope import Scope
 from .search_output_ports_response import SearchOutputPortsResponse
 from .search_output_ports_response_item import SearchOutputPortsResponseItem
@@ -250,6 +292,7 @@ from .tag_update import TagUpdate
 from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
+from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_pending_action import (
     TechnicalAssetOutputPortPendingAction,
@@ -288,6 +331,7 @@ from .validation_error_context import ValidationErrorContext
 
 __all__ = (
     "AbstractDataProductInfo",
+    "AbstractDataProductStatus",
     "AbstractDataProductType",
     "AccessGranularity",
     "AccessResponse",
@@ -303,7 +347,16 @@ __all__ = (
     "AzureBlobTechnicalAssetConfiguration",
     "AzureEnvironmentPlatformConfiguration",
     "BecomeAdmin",
+    "BitolContractRequest",
     "CanBecomeAdminUpdate",
+    "CloudEventDataProductEvent",
+    "CloudEventDataProductRoleAssignmentEvent",
+    "CloudEventExplorationEvent",
+    "CloudEventInputPortEvent",
+    "CloudEventOutputPortEvent",
+    "CloudEventOutputPortRoleAssignmentEvent",
+    "CloudEventOutputPortTechnicalAssetLinkEvent",
+    "CloudEventTechnicalAssetEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -313,7 +366,6 @@ __all__ = (
     "CreateExplorationRequestWithInputPorts",
     "CreateExplorationResponse",
     "CreateGlobalRoleAssignment",
-    "CreateInputPortsForExplorationRequest",
     "CreateOutputPortRequest",
     "CreateOutputPortResponse",
     "CreateOutputPortRoleAssignment",
@@ -330,6 +382,7 @@ __all__ = (
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
+    "DataProductEvent",
     "DataProductIconKey",
     "DataProductLifeCycle",
     "DataProductLifeCycleCreate",
@@ -337,6 +390,7 @@ __all__ = (
     "DataProductLifeCyclesGetItem",
     "DataProductLifeCycleUpdate",
     "DataProductOutputPortPendingAction",
+    "DataProductRoleAssignmentEvent",
     "DataProductRoleAssignmentPendingAction",
     "DataProductRoleAssignmentResponse",
     "DataProductSetting",
@@ -347,7 +401,6 @@ __all__ = (
     "DataProductSettingType",
     "DataProductSettingUpdate",
     "DataProductSettingValue",
-    "DataProductStatus",
     "DataProductStatusUpdate",
     "DataProductType",
     "DataProductTypeCreate",
@@ -371,6 +424,8 @@ __all__ = (
     "DeleteOutputPortRoleAssignmentResponse",
     "DenyLinkBetweenTechnicalAssetAndOutputPortRequest",
     "DenyOutputPortAsInputPortRequest",
+    "DeviceFlow",
+    "DeviceFlowStatus",
     "Domain",
     "DomainCreate",
     "DomainUpdate",
@@ -383,7 +438,9 @@ __all__ = (
     "EnvironmentsGet",
     "EventEntityType",
     "Exploration",
+    "ExplorationEvent",
     "FieldDependency",
+    "FinalizerRequest",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
     "GetDataProductInputPortsResponse",
@@ -401,6 +458,7 @@ __all__ = (
     "GetExplorationInputPortsResponse",
     "GetExplorationResponse",
     "GetExplorationsResponse",
+    "GetInputPortsForOutputPortResponse",
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",
@@ -414,6 +472,7 @@ __all__ = (
     "Graph",
     "HTTPValidationError",
     "InputPort",
+    "InputPortEvent",
     "IsAdminResponse",
     "LinkInputPortsToDataProduct",
     "LinkInputPortsToDataProductPost",
@@ -428,6 +487,7 @@ __all__ = (
     "Node",
     "NodeData",
     "NodeType",
+    "OIDCTokenResponse",
     "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
     "OutputPortAccessType",
@@ -439,14 +499,19 @@ __all__ = (
     "OutputPortDataQualitySummaryDimensionsType0",
     "OutputPortDataQualitySummaryResponse",
     "OutputPortDataQualitySummaryResponseDimensionsType0",
+    "OutputPortEvent",
+    "OutputPortInputPort",
     "OutputPortLink",
     "OutputPortQueryStatsDelete",
     "OutputPortQueryStatsResponse",
     "OutputPortQueryStatsResponses",
     "OutputPortQueryStatsUpdate",
+    "OutputPortRoleAssignmentEvent",
     "OutputPortRoleAssignmentResponse",
+    "OutputPortSchemaResponse",
     "OutputPortSettingValue",
     "OutputPortStatus",
+    "OutputPortTechnicalAssetLinkEvent",
     "OwnedTechnicalAsset",
     "PendingActionResponse",
     "Platform",
@@ -465,6 +530,10 @@ __all__ = (
     "RenderTechnicalAssetAccessPathRequest",
     "RenderTechnicalAssetAccessPathResponse",
     "RequestDataProductRoleAssignment",
+    "RequestInputPortsForDataProductRequest",
+    "RequestInputPortsForDataProductResponse",
+    "RequestInputPortsForExplorationRequest",
+    "RequestInputPortsForExplorationResponse",
     "RequestOutputPortRoleAssignment",
     "ResourceNameLengthLimits",
     "ResourceNameModel",
@@ -473,6 +542,10 @@ __all__ = (
     "ResourceNameValidityType",
     "Role",
     "S3TechnicalAssetConfiguration",
+    "SchemaObjectRequest",
+    "SchemaObjectResponse",
+    "SchemaPropertyRequest",
+    "SchemaPropertyResponse",
     "Scope",
     "SearchOutputPortsResponse",
     "SearchOutputPortsResponseItem",
@@ -485,6 +558,7 @@ __all__ = (
     "TagsGetItem",
     "TagUpdate",
     "TechnicalAsset",
+    "TechnicalAssetEvent",
     "TechnicalAssetLink",
     "TechnicalAssetOutputPortPendingAction",
     "TechnicalAssetStatus",

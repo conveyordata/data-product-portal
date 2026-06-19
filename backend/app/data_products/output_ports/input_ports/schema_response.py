@@ -64,10 +64,10 @@ class DataProductOutputPortAssociationsGet(BaseDataProductOutputPortAssociationG
     pass
 
 
-class InputPort(InputPortBase):
+class OutputPortInputPort(InputPortBase):
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo
 
 
 class GetInputPortsForOutputPortResponse(ORMModel):
-    input_ports: Sequence[InputPort]
+    input_ports: Sequence[OutputPortInputPort]

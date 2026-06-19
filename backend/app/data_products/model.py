@@ -1,19 +1,23 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String, func, select
+from sqlalchemy import Column, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
 
-from app.abstract_data_product.model import AbstractDataProduct, AbstractDataProductType
+from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.tags.model import Tag, tag_data_product_table
-from app.data_products.status import DataProductStatus
+from app.core.webhooks.events import (
+    DataProductEvent,
+)
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import ensure_exists
+from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
@@ -23,16 +27,16 @@ if TYPE_CHECKING:
     )
 
 
-class DataProduct(AbstractDataProduct):
+class DataProduct(
+    AbstractDataProduct,
+    EventTrackedMixin,
+):
     __tablename__ = "data_products"
 
     id: Mapped[UUID] = mapped_column(
         "id", ForeignKey("abstract_data_products.id"), primary_key=True
     )
     about = Column(String)
-    status: DataProductStatus = Column(
-        Enum(DataProductStatus), default=DataProductStatus.ACTIVE
-    )
     usage = Column(String, nullable=True)
 
     # Foreign keys
@@ -92,6 +96,11 @@ class DataProduct(AbstractDataProduct):
     __mapper_args__ = {
         "polymorphic_identity": AbstractDataProductType.DATA_PRODUCT,
     }
+
+    def to_event(self) -> DataProductEvent:
+        return DataProductEvent(
+            id=self.id,
+        )
 
 
 def ensure_data_product_exists(

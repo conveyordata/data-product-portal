@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from pydantic.json_schema import SkipJsonSchema
 
 from app.authorization.schema_response import AccessResponse, IsAdminResponse
 from app.core.auth.auth import get_authenticated_user
@@ -29,8 +30,8 @@ router = APIRouter(tags=["Authorization"], prefix="/v2/authz")
 )
 def check_access(
     action: Action,
-    resource: Optional[UUID] = None,
-    domain: Optional[UUID] = None,
+    resource: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    domain: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     user: User = Depends(get_authenticated_user),
 ) -> AccessResponse:
     """Allows the requesting user to check whether an access check will fail or succeed.

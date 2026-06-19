@@ -1,5 +1,8 @@
 import { HttpResponse, http } from 'msw';
-import { ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
+import {
+    ResourceNameValidityType,
+    type ValidateResourceNameApiResponse,
+} from '@/store/api/services/generated/resourceNamesApi.ts';
 import { server } from '@/tests/mocks/server.ts';
 
 export const mockGetResourceNamesConstraints = () => {
@@ -20,10 +23,10 @@ export const mockResourceNamesSanitize = () => {
     );
 };
 
-export const mockResourceNamesValidate = () => {
+export const mockResourceNamesValidate = (validity: ResourceNameValidityType = ResourceNameValidityType.Valid) => {
     server.use(
         http.get('*/api/v2/resource_names/validate', () => {
-            return HttpResponse.json({ validity: ResourceNameValidityType.Valid });
+            return HttpResponse.json({ validity } as ValidateResourceNameApiResponse);
         }),
     );
 };

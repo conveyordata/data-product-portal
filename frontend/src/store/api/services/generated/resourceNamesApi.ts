@@ -43,7 +43,7 @@ export type ValidateResourceNameApiResponse =
 export type ValidateResourceNameApiArg = {
   resourceName: string;
   model: ResourceNameModel;
-  dataProductId?: string | null;
+  dataProductId?: string;
 };
 export type ResourceNameConstraintsApiResponse =
   /** status 200 Successful Response */ ResourceNameLengthLimits;

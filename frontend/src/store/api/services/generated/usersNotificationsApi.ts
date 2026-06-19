@@ -69,7 +69,7 @@ export type DataProduct = {
   name: string;
   namespace: string;
   description: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   type: DataProductType;
 };
 export type Tag = {
@@ -219,10 +219,11 @@ export enum EventEntityType {
   TechnicalAsset = "technical_asset",
   User = "user",
 }
-export enum DataProductStatus {
+export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
   Archived = "archived",
+  Deleting = "deleting",
 }
 export enum DataProductIconKey {
   Reporting = "reporting",

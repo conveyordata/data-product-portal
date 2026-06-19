@@ -5,7 +5,7 @@ on:
 permissions:
   contents: read
 env:
-  POETRY_VERSION: '2.3.1'
+  POETRY_VERSION: '2.4.1'
 
 jobs:
   environment:
@@ -19,7 +19,7 @@ jobs:
       POSTGRES_SERVER: ${{ steps.out.outputs.POSTGRES_SERVER }}
     steps:
       - name: Checkout github repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Set test environment variables as outputs
         id: out
         working-directory: ./backend
@@ -46,11 +46,10 @@ jobs:
         ports:
           - ${{ needs.environment.outputs.POSTGRES_PORT }}:5432
     steps:
-      - name: Checkout github repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Install Poetry
-        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
         with:
           version: ${{ env.POETRY_VERSION }}
           virtualenvs-create: true
@@ -64,7 +63,6 @@ jobs:
       - name: Install dependencies
         working-directory: ./backend
         run: poetry install --no-interaction --with test
-
       - name: Run the automated tests
         working-directory: ./backend
         id: run-test
@@ -76,12 +74,38 @@ jobs:
         working-directory: ./scripts
         run: ./check_coverage.sh
 
+  test-sdk:
+    name: Run SDK tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          cache: 'poetry'
+          cache-dependency-path: 'sdk/poetry.lock'
+          python-version-file: 'sdk/.python-version'
+      - name: Install dependencies
+        working-directory: ./sdk
+        run: poetry install --all-groups
+      - name: Run the automated tests
+        working-directory: ./sdk
+        id: run-test
+        run: poetry run pytest -v
+
   test-frontend:
     name: Run frontend tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout github repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Set up Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -107,27 +131,37 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Set up Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: cli/golang/go.mod
           cache-dependency-path: cli/golang/go.sum
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9.2.1
         with:
           args: --timeout 15m0s
           working-directory: cli/golang
+
+  validate-helm:
+    name: Validate Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Install Task
+        uses: go-task/setup-task@01a4adf9db2d14c1de7a560f09170b6e0df736aa # v2.1.0
+      - name: Validate Helm chart
+        run: task test:helm
 
   pre-commit:
     name: Run pre-commit hooks
     runs-on: ubuntu-latest
     steps:
-    - name: Git checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
+    - name: Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Poetry
-      uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
+      uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
@@ -141,7 +175,6 @@ jobs:
     - name: Install Python dependencies
       working-directory: backend
       run: poetry install --no-interaction
-
     - name: Setup Node.js
       uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
@@ -151,6 +184,5 @@ jobs:
     - name: Install npm dependencies
       working-directory: frontend
       run: npm ci --legacy-peer-deps
-
     - name: Run pre-commit
       uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1

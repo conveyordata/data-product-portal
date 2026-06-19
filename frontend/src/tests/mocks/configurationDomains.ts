@@ -6,7 +6,7 @@ export const mock_domains: GetDomainsItem[] = [
         id: 'id-1',
         name: 'Finance',
         description: 'My beautiful domain',
-        data_product_count: 31,
+        abstract_data_product_count: 31,
     },
 ];
 export const mockGetDomains = (domains: GetDomainsItem[] = mock_domains) => {

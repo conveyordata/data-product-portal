@@ -1,5 +1,6 @@
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -8,21 +9,27 @@ from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
+from fastapi.staticfiles import StaticFiles
+from fastmcp.utilities.lifespan import combine_lifespans
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.abstract_data_product.background_tasks import check_stuck_deletions
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
-from app.core.auth.jwt import oidc
+from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
+from app.core.context import close_event_context, open_event_context, pop_events
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
+from app.core.logging.posthog_analytics import report_consumption_metrics_task
 from app.core.logging.scarf_analytics import backend_analytics
-from app.core.webhooks.webhook import call_webhook
+from app.core.webhooks.v2 import call_v2_webhook
+from app.core.webhooks.webhook import call_webhook, register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
-from app.mcp.router import router as mcp_router
 from app.settings import settings
 from app.shared.router import router
 from app.shared.schema import ORMModel
@@ -35,12 +42,12 @@ TITLE = "Data product portal"
 oidc_kwargs = (
     {
         "swagger_ui_init_oauth": {
-            "clientId": oidc.client_id,
+            "clientId": get_oidc().client_id,
             "appName": TITLE,
             "usePkceWithAuthorizationCodeGrant": True,
             "scopes": "openid email profile",
         },
-        "swagger_ui_oauth2_redirect_url": "/",
+        "swagger_ui_oauth2_redirect_url": "/api/oauth2-redirect",
     }
     if settings.OIDC_ENABLED
     else {}
@@ -72,27 +79,25 @@ async def lifespan(_: FastAPI):
     backend_analytics(API_VERSION)
     admin_task = asyncio.create_task(check_expired_admins())
     device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
+    consumption_metrics_task = asyncio.create_task(report_consumption_metrics_task())
+    stuck_deletion_task = asyncio.create_task(check_stuck_deletions())
     yield
     admin_task.cancel()
     device_flow_cleanup_task.cancel()
+    consumption_metrics_task.cancel()
+    stuck_deletion_task.cancel()
 
 
-# Combine both lifespans
-@asynccontextmanager
-async def combined_lifespan(app: FastAPI):
-    # Run both lifespans
-    async with lifespan(app), mcp_app.lifespan(app):
-        yield
-
+mcp.add_middleware(LoggingMiddleware())
+mcp_app = mcp.http_app("/")
 
 app = FastAPI(
     title=TITLE,
     summary="Backend API implementation for Data product portal",
     version=API_VERSION,
-    contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
-    lifespan=combined_lifespan,
+    lifespan=combine_lifespans(lifespan, mcp_app.lifespan),
     **oidc_kwargs,
     swagger_ui_parameters={
         "docExpansion": "none",
@@ -100,14 +105,22 @@ app = FastAPI(
     },
 )
 
-mcp_app = mcp.http_app(path="/mcp")
-mcp.add_middleware(LoggingMiddleware())
+app.mount("/mcp", mcp_app)
+# We need to add the MCP well known authentication routes here.
+# The problem is we mounted the MCP under `/mcp`, but these need to be mounted without that.
+# So we add the well_known routes properly
+if mcp_auth := mcp.auth:
+    for route in mcp_auth.get_well_known_routes("/"):
+        logger.debug(f"Adding route {route.path} for MCP authentication")
+        app.add_route(
+            route.path, route.endpoint, methods=route.methods, include_in_schema=False
+        )
 
 app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
-app.include_router(mcp_router)
 
 add_exception_handlers(app)
+register_webhooks(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -123,11 +136,12 @@ app.add_middleware(
     header_name="X-Request-ID",
     update_request_header=True,
 )
-app.mount("/mcp", mcp_app)
 
 
 @app.middleware("http")
-async def send_response_to_webhook(request: Request, call_next):
+async def send_response_to_webhook(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     response = await call_next(request)
     # Gets are not logged
     if (
@@ -155,10 +169,25 @@ async def send_response_to_webhook(request: Request, call_next):
     return response
 
 
-# K8S health and liveness check
-@app.get("/", include_in_schema=False)
-def root():
-    return {"message": "Hello World"}
+@app.middleware("http")
+async def dispatch_queued_events(request: Request, call_next):
+    token = open_event_context()
+    try:
+        response = await call_next(request)
+    finally:
+        events = pop_events()
+        close_event_context(token)
+    if response.status_code < 400 and settings.WEBHOOK_V2_URL and events:
+        asyncio.create_task(_emit_all_events(events))
+    return response
+
+
+async def _emit_all_events(events: list) -> None:
+    # This is a sequential loop.
+    # Good for keeping sequential order, bad for speed, maybe also good for not DoSing the receiver.
+    # To be checked if we ever run into issues with this.
+    for event in events:
+        await call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
 
 
 class VersionResponse(ORMModel):
@@ -181,6 +210,33 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
 
 
 use_route_names_as_operation_ids(app)
+
+
+class SPAStaticFiles(StaticFiles):
+    """StaticFiles subclass that falls back to index.html for unknown paths.
+    Which is required for SPAs (single page applications).
+    """
+
+    async def get_response(self, path: str, scope):  # type: ignore[override]
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code == 404:
+                return await super().get_response("index.html", scope)
+            raise
+
+
+if settings.SERVE_FRONTEND:
+    _frontend_dir = Path(settings.FRONTEND_DIST_DIR)
+    if _frontend_dir.exists():
+        app.mount(
+            "/",
+            SPAStaticFiles(directory=str(_frontend_dir), html=True),
+            name="frontend",
+        )
+    else:
+        raise Exception("Frontend dist directory not found")
+
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     logger.info(
         f"Tracing enabled setting it up with service name: ${settings.OPENTELEMETRY_TRACES_SERVICE_NAME}"

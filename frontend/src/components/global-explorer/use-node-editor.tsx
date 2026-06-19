@@ -2,7 +2,7 @@ import type { Connection, Edge, Node, OnConnect } from '@xyflow/react';
 import { addEdge, useEdgesState, useNodesState } from '@xyflow/react';
 import ELK from 'elkjs';
 import { useCallback } from 'react';
-import { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
+import { ExplorerNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 
 // gets node width and height from base-node.module.scss
 const getNodeDimensions = () => {
@@ -127,7 +127,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
     const parentNodes = nodes.filter((node) => !node.parentId);
     const childNodes = nodes.filter((node) => node.parentId);
     const graphChildren = parentNodes.map((parentNode) => {
-        if (parentNode.type === CustomNodeTypes.DomainNode) {
+        if (parentNode.type === ExplorerNodeTypes.DomainNode) {
             // If this is a domain node, include its children
             const children = childNodes
                 .filter((child) => child.parentId === parentNode.id)
@@ -176,7 +176,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
         const node = nodes.find((n) => n.id === layoutNode.id);
         if (!node) return; // happens for children of domain nodes (not top level)
 
-        if (node.type === CustomNodeTypes.DomainNode) {
+        if (node.type === ExplorerNodeTypes.DomainNode) {
             // domain node itself
             elkedNodes.push({
                 ...node,

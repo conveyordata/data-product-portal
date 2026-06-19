@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
@@ -31,7 +32,7 @@ def sanitize_resource_name(name: str) -> ResourceNameSuggestion:
 def validate_resource_name(
     resource_name: str,
     model: ResourceNameModel,
-    data_product_id: Optional[UUID] = Query(None),
+    data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     db: Session = Depends(get_db_session),
 ) -> ResourceNameValidation:
     match model:

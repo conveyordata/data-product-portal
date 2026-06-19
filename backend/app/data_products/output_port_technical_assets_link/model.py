@@ -4,7 +4,9 @@ from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstrain
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.core.webhooks.events import OutputPortTechnicalAssetLinkEvent
 from app.database.database import Base
+from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
     from app.data_products.output_ports.model import Dataset
@@ -16,7 +18,7 @@ import uuid
 from app.shared.model import BaseORM, utcnow
 
 
-class DataOutputDatasetAssociation(Base, BaseORM):
+class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "data_outputs_datasets"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -65,3 +67,13 @@ class DataOutputDatasetAssociation(Base, BaseORM):
             "data_output_id", "dataset_id", name="unique_data_output_dataset"
         ),
     )
+
+    def to_event(self) -> OutputPortTechnicalAssetLinkEvent:
+        return OutputPortTechnicalAssetLinkEvent(
+            id=self.id,
+            data_product_id=self.dataset.data_product_id
+            if self.data_output is None
+            else self.data_output.owner_id,
+            output_port_id=self.dataset_id,
+            technical_asset_id=self.data_output_id,
+        )

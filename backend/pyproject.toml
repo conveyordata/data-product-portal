@@ -14,40 +14,40 @@ authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-dpp-sdk = { path = "../sdk" }
+data-product-portal-sdk = { path = "../sdk" }
 python = "^3.13"
 python-dotenv = "^1.2.2"
-fastapi = "0.136.1"
-gunicorn = "^25.3.0"
-uvicorn = "^0.46.0"
-pydantic = { version = "^2.13.3", extras = ['email'] }
-pydantic-settings = "^2.14.0"
-typer = "^0.25.0"
-requests = "^2.33.0"
+fastapi = "0.136.3"
+gunicorn = "^26.0.0"
+uvicorn = "^0.49.0"
+pydantic = { version = "^2.13.4", extras = ['email'] }
+pydantic-settings = "^2.14.1"
+typer = "^0.26.7"
+requests = "^2.34.2"
 httpx = "^0.28.1"
 alembic = "^1.18.4"
-sqlalchemy = { version = "^2.0.49", extras = ['asyncio'] }
+sqlalchemy = { version = "^2.0.51", extras = ['asyncio'] }
 sqlalchemy-utils = "^0.42.1"
-sqlalchemy-easy-softdelete = "^0.9.0"
+sqlalchemy-easy-softdelete = "^0.9.1"
 psycopg2-binary = "^2.9.12"
 pyyaml = "^6.0.3"
-pyjwt = "^2.12.1"
+pyjwt = "^2.13.0"
 shortuuid = "^1.0.13"
-pytz = "^2026.1"
-boto3 = "^1.42.97"
+pytz = "^2026.2"
+boto3 = "^1.43.33"
 jinja2 = "^3.1.6"
-asgi-correlation-id = "^4.3.4"
-cryptography = "^47.0.0"
+asgi-correlation-id = "^5.0.1"
+cryptography = "^49.0.0"
 emailgen = "^0.1.1"
 casbin = "^1.43.0"
 casbin_sqlalchemy_adapter = "^1.4.0"
 asyncpg = "^0.31.0"
-cachetools = "^7.0.6"
-greenlet = "^3.5.0"
+cachetools = "^7.1.4"
+greenlet = "^3.5.2"
 h11 = "^0.16.0"
-fastmcp = "3.2.4"
-posthog = "^7.13.1"
-authlib = "1.7.0"
+fastmcp = "3.4.2"
+posthog = "^7.19.2"
+authlib = "1.7.2"
 fastembed = "^0.8.0"
 pgvector = "^0.4.2"
 opentelemetry-api = "^1.39.1"
@@ -61,17 +61,19 @@ opentelemetry-distro = "^0.60b1"
 optional = true
 
 [tool.poetry.group.test.dependencies]
-pytest = "^9.0.3"
+pytest = "^9.1.0"
+pytest-asyncio = "^1.4.0"
 pytest-cov = "^7.1.0"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
 freezegun = "^1.5.5"
+data-product-portal-sdk = { path = "../sdk", develop = true }
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.44.0"
+poethepoet = "^0.46.0"
 mypy = ">=1.20.2"
 types-cachetools = "*"
 types-requests = "*"

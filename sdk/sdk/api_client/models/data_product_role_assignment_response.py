@@ -7,7 +7,6 @@ from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.decision_status import DecisionStatus
 
@@ -142,7 +141,7 @@ class DataProductRoleAssignmentResponse:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                requested_on_type_0 = isoparse(data)
+                requested_on_type_0 = datetime.datetime.fromisoformat(data)
 
                 return requested_on_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
@@ -172,7 +171,7 @@ class DataProductRoleAssignmentResponse:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                decided_on_type_0 = isoparse(data)
+                decided_on_type_0 = datetime.datetime.fromisoformat(data)
 
                 return decided_on_type_0
             except (TypeError, ValueError, AttributeError, KeyError):

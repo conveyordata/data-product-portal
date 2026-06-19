@@ -9,7 +9,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { SearchSuggestions } from '@/pages/marketplace/search-suggestions.tsx';
 import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
+import { OutputPortMarketplaceCard } from './output-port-marketplace-card/output-port-marketplace-card.component';
 
 export function Marketplace() {
     const { t } = useTranslation();
@@ -20,7 +20,6 @@ export function Marketplace() {
             {
                 title: (
                     <>
-                        {' '}
                         <ShopOutlined /> {t('Marketplace')}
                     </>
                 ),
@@ -52,7 +51,7 @@ export function Marketplace() {
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
 
     const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
-        query: searchTerm?.length >= 3 ? searchTerm : null,
+        query: searchTerm?.length >= 3 ? searchTerm : undefined,
     });
 
     const paginatedOutputPorts = useMemo(() => {
@@ -108,7 +107,7 @@ export function Marketplace() {
                 ) : paginatedOutputPorts?.length > 0 ? (
                     <Flex wrap="wrap" gap={'small'}>
                         {paginatedOutputPorts.map((outputPort) => (
-                            <DatasetMarketplaceCard key={outputPort.id} dataset={outputPort} />
+                            <OutputPortMarketplaceCard key={outputPort.id} dataset={outputPort} />
                         ))}
                     </Flex>
                 ) : (

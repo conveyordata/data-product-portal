@@ -49,23 +49,22 @@ route = (
                 DatasetResolver,
                 object_id="output_port_id",
             )
-        )
+        ),
     ],
 )
 def approve_output_port_technical_asset_link(
     data_product_id: UUID,
     output_port_id: UUID,
-    request: ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
+    link_request: ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     output_link = DataOutputDatasetService(db).approve_data_output_link(
         data_product_id=data_product_id,
-        technical_asset_id=request.technical_asset_id,
+        technical_asset_id=link_request.technical_asset_id,
         output_port_id=output_port_id,
         actor=authenticated_user,
     )
-
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
@@ -93,19 +92,19 @@ def approve_output_port_technical_asset_link(
                 DatasetResolver,
                 object_id="output_port_id",
             )
-        )
+        ),
     ],
 )
 def deny_output_port_technical_asset_link(
     data_product_id: UUID,
     output_port_id: UUID,
-    request: DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
+    link_request: DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     output_link = DataOutputDatasetService(db).deny_data_output_link(
         data_product_id=data_product_id,
-        technical_asset_id=request.technical_asset_id,
+        technical_asset_id=link_request.technical_asset_id,
         output_port_id=output_port_id,
         actor=authenticated_user,
     )
@@ -150,14 +149,14 @@ def deny_output_port_technical_asset_link(
 def link_output_port_to_technical_asset(
     data_product_id: UUID,
     output_port_id: UUID,
-    request: LinkTechnicalAssetToOutputPortRequest,
+    link_request: LinkTechnicalAssetToOutputPortRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> LinkTechnicalAssetsToOutputPortResponse:
     dataset_link = DataOutputService(db).link_dataset_to_data_output(
         data_product_id,
-        request.technical_asset_id,
+        link_request.technical_asset_id,
         output_port_id,
         actor=authenticated_user,
     )
@@ -165,7 +164,7 @@ def link_output_port_to_technical_asset(
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED,
-            subject_id=request.technical_asset_id,
+            subject_id=link_request.technical_asset_id,
             subject_type=EventReferenceEntity.DATA_OUTPUT,
             target_id=output_port_id,
             target_type=EventReferenceEntity.DATASET,
@@ -213,20 +212,20 @@ def link_output_port_to_technical_asset(
 def unlink_output_port_from_technical_asset(
     data_product_id: UUID,
     output_port_id: UUID,
-    request: UnLinkTechnicalAssetToOutputPortRequest,
+    link_request: UnLinkTechnicalAssetToOutputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_output = DataOutputService(db).unlink_dataset_from_data_output(
         data_product_id=data_product_id,
-        id=request.technical_asset_id,
+        id=link_request.technical_asset_id,
         dataset_id=output_port_id,
     )
 
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
-            subject_id=request.technical_asset_id,
+            subject_id=link_request.technical_asset_id,
             subject_type=EventReferenceEntity.DATA_OUTPUT,
             target_id=output_port_id,
             target_type=EventReferenceEntity.DATASET,

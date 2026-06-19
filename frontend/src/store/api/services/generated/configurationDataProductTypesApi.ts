@@ -92,7 +92,7 @@ export type DataProduct = {
   name: string;
   namespace: string;
   description: string;
-  status: DataProductStatus;
+  status: AbstractDataProductStatus;
   type: DataProductType;
 };
 export type DataProductTypeGet = {
@@ -147,10 +147,11 @@ export enum DataProductIconKey {
   Analytics = "analytics",
   Default = "default",
 }
-export enum DataProductStatus {
+export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
   Archived = "archived",
+  Deleting = "deleting",
 }
 export const {
   useGetDataProductTypeQuery,

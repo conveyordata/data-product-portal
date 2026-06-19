@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   VERSION_FILE: VERSION
@@ -15,8 +15,9 @@ tasks:
         echo "New version: {{.CLI_ARGS}}"
         echo "{{.CLI_ARGS}}" > {{.VERSION_FILE}}
         cp {{.VERSION_FILE}} {{.BACKEND_VERSION_FILE}}
-        sed -i '' "s/^version:.*/version: {{.CLI_ARGS}}/" {{.HELM_CHART}}
-        sed -i '' "s/^  tag:.*/  tag: {{.CLI_ARGS}}/" {{.HELM_VALUES}}
+        sed -i "s/^version:.*/version: {{.CLI_ARGS}}/" {{.HELM_CHART}}
+        sed -i "s/^  tag:.*/  tag: {{.CLI_ARGS}}/" {{.HELM_VALUES}}
+        cd sdk && poetry version {{.CLI_ARGS}}
 
   bump:release-notes:
     desc: "Update release notes with new version and date"
@@ -31,16 +32,19 @@ tasks:
         fs.writeFileSync(file, updated);
         '
 
-  update:open-api-spec:
-    desc: "Update OpenAPI spec with new version"
+  openapi-spec:generate:
+    desc: "Generate OpenAPI spec from backend pydantic models"
+    generates:
+      - docs/static/openapi.json
+    dir: backend
+    dotenv: [.test.env]
     cmds:
-      - cd backend && poetry run python -m app.open_api_export
-      - mv backend/openapi.json docs/static/openapi.json
+      - poetry run python -m app.open_api_export ../docs/static/openapi.json
 
   docusaurus:version:
     desc: "Run Docusaurus versioning"
     cmds:
-      - cd docs && npm run docusaurus docs:version {{.CLI_ARGS}}
+      - cd docs && npx docusaurus docs:version {{.CLI_ARGS}}
 
   docusaurus:update-config:
     desc: "Update docusaurus.config.ts with new version"
@@ -78,6 +82,18 @@ tasks:
     cmds:
       - gh pr create --fill --title "Release {{.CLI_ARGS}}" --body "Automated release for {{.CLI_ARGS}}"
 
+  docs:commit:
+    desc: "Commit and push the version bump"
+    cmds:
+      - git add .
+      - 'git commit -m "chore: version docs {{.CLI_ARGS}}"'
+      - git push origin HEAD
+
+  docs:pr:
+    desc: "Open PR (requires gh CLI)"
+    cmds:
+      - gh pr create --fill --title "Version docs {{.CLI_ARGS}}" --body "Automated version update for {{.CLI_ARGS}}"
+
   release:post:
     desc: "Tag and deploy docs after merge"
     cmds:
@@ -91,15 +107,15 @@ tasks:
       - task: docusaurus:version
       - task: docusaurus:update-config
       - task: docusaurus:build
-      - task: release:commit
-      - task: release:pr
+      - task: docs:commit
+      - task: docs:pr
 
   bump-version:
     desc: "Generic version bump without docs, execute on all releases, e.g. bump-version 0.2.0"
     cmds:
       - task: bump:version-file
       - task: bump:release-notes
-      - task: update:open-api-spec
+      - task: openapi-spec:generate
       - task: release:commit
       - task: release:pr
 
@@ -118,3 +134,15 @@ tasks:
     cmds:
       - npm install
       - npm test run
+
+  test:helm:
+    desc: "Validate the Helm chart (lint + dry-run template rendering)"
+    cmds:
+      - helm lint helm/
+      - helm template data-product-portal helm/ > /dev/null
+
+  poetry:setup:
+    desc: "Install the backend python project so the precommit does not fail"
+    dir: backend
+    cmds:
+      - poetry install

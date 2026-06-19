@@ -32,6 +32,10 @@ def _parse_response(
         response_200 = response.json()
         return response_200
 
+    if response.status_code == 202:
+        response_202 = cast(Any, None)
+        return response_202
+
     if response.status_code == 404:
         response_404 = cast(Any, None)
         return response_404

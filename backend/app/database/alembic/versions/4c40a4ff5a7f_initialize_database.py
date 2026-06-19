@@ -17,7 +17,7 @@ from app.configuration.data_product_types.enums import DataProductIconKey
 from app.core.auth.device_flows.schema import DeviceFlowStatus
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
-from app.data_products.status import DataProductStatus
+from app.data_products.status import AbstractDataProductStatus
 from app.shared.model import utcnow
 
 
@@ -103,7 +103,9 @@ def upgrade() -> None:
         sa.Column("description", sa.String),
         sa.Column("about", sa.String),
         sa.Column(
-            "status", sa.Enum(DataProductStatus), default=DataProductStatus.PENDING
+            "status",
+            sa.Enum(AbstractDataProductStatus, name="dataproductstatus"),
+            default=AbstractDataProductStatus.PENDING,
         ),
         sa.Column("type_id", UUID, sa.ForeignKey("data_product_types.id")),
         sa.Column("business_area_id", UUID, sa.ForeignKey("business_areas.id")),
@@ -251,11 +253,11 @@ def downgrade() -> None:
     op.drop_table("business_areas")
     op.drop_table("users")
 
-    op.execute("DROP TYPE dataproducticonkey;")
-    op.execute("DROP TYPE dataproductstatus;")
-    op.execute("DROP TYPE DataProductUserRole;")
-    op.execute("DROP TYPE OutputPortStatus;")
-    op.execute("DROP TYPE OutputPortAccessType;")
-    op.execute("DROP TYPE DataProductMembershipStatus;")
-    op.execute("DROP TYPE DataProductDatasetLinkStatus;")
-    op.execute("DROP TYPE DeviceFlowStatus;")
+    op.execute("DROP TYPE IF EXISTS dataproducticonkey;")
+    op.execute("DROP TYPE IF EXISTS dataproductstatus;")
+    op.execute("DROP TYPE IF EXISTS DataProductUserRole;")
+    op.execute("DROP TYPE IF EXISTS OutputPortStatus;")
+    op.execute("DROP TYPE IF EXISTS OutputPortAccessType;")
+    op.execute("DROP TYPE IF EXISTS DataProductMembershipStatus;")
+    op.execute("DROP TYPE IF EXISTS DataProductDatasetLinkStatus;")
+    op.execute("DROP TYPE IF EXISTS DeviceFlowStatus;")

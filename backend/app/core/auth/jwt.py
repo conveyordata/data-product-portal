@@ -22,7 +22,7 @@ class JWTToken(BaseModel):
 
 class JWTTokenValid:
     def __init__(self, token: str):
-        self.oidc = oidc
+        self.oidc = get_oidc()
         self.logger = logger
         self.token = token
         self.valid_jwt_token: dict[str, str] = {}

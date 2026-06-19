@@ -1,0 +1,165 @@
+---
+sidebar_position: 200
+---
+
+# Release Notes
+
+## Unreleased
+
+### breaking changes **[API]**:
+- All v1 endpoints have been removed. Migrate to API v2 if not yet done so.
+- The API v2 for getting a data product does not return the data product settings anymore, there is a seperate endpoint for that.
+- Because of the removal of the v1 endpoints, the callback endpoint of the device flow has also changed.
+  Please migrate your OIDC provider to allow for the endpoint `<HOST>/api/v2/authn/device/callback` instead of the previous `<HOST>/api/auth/device/callback/` **The trailing slash is removed, this is important depending on the provider you use**
+- The get data products endpoint (GET /api/v2/data_products) now returns `input_port_count` instead of `output_port_count`, the variable `output_port_count` was incorrectly named
+- The input ports endpoint for data products (`GET /api/v2/data_products/{id}/input_ports`) now does not return the data_product anymore, the data product was the same one you where already querying via the id path parameter.
+- The Get Input Ports For Output Port (`GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports`) now does not return the output port anymore in every of the input ports, as that is the one from the path parameter `output_port_id`. It also returns `consuming_abstract_data_product` instead in preparation of adding explorations to input ports
+- The Get User Pending Actions endpoint (GET /api/v2/users/current/pending_actions) now returns for input ports the consuming_abstract_data_product instead of the data_product. Also the pending action type `DataProductOutputPort` is renamed to `InputPort` In preparation of adding explorations to input ports.
+- The output port links in technical assets endpoints now returns the output port under `output_port` instead of `output`
+- MCP: The MCP authentication has been improved to work with more applications, however for this to work the callback  `<HOST>/mcp/auth/callback` needs to be added to the callback url of the OIDC provider.
+
+### features
+
+- **[SDK]**: We ship a full python client SDK which mirrors the openapi spec for easier integration.
+- **[Explorer]**: Domain container nodes are now visible in the global graph explorer, grouping data products by domain with distinct colours
+- **[Postgresql]**: Postgresql plugin defining technical assets
+- **[Docs]**: Adding an architecture overview
+- **[UI]**: Remove audit logs page
+- **[Output ports]**: Rename the `access_type` value `public` to `unrestricted` for output ports.
+- **[Events]**: v2 implementation of the webhook events, making it easier to react to changes in Portal.
+Events are automatically emitted on database creation, update and deletion events. Currently only applied on Exploration entities.
+- **[General]**: Migrated portal to run in a single container, making deployment easier.
+- **[UI]**: Show schema information on an output port. It is defined using the Bitol [ODCS specification](https://bitol-io.github.io/open-data-contract-standard/v3.1.0/). For more details look [here](./developer-guide/schema-information.md).
+- **[Posthog]**: Track output port consumption — daily metric reporting total approved input ports, split by consumer type (data product vs exploration).
+
+### bugfixes
+
+- **[Output ports]**: In output port card, the remove button to unlink an asset from an output port was not grayed out when missing permissions.
+- **[Output ports]**: Deleting output ports with a quality summary caused errors.
+- **[Output ports]**: Linking and unlinking technical assets to output ports was denied.
+- **[Technical Asset Creation]**: Broken technical asset creation flow is fixed.
+- **[Add user to Data Product]**: Bad authorization resolves caused issues with this specific action.
+- **[Output ports]**: Technical asset tab missed icons
+- **[Technical Asset]**: Radio button is selected but not captured causing validation issues
+- **[Explorer]**: Fixed reversed arrow direction in the "Data Products" only view. Arrows now point from Producer to Consumer, consistent with the "All" view. Also fixed broken animations in the global explorer view.
+- **[Data Product]**: Fixed an issue where updating a setting would not invalidate the correct cache, resulting in a broken state
+- **[General]**: Improved the performance of several endpoints by ensuring we load less data.
+
+## 0.5.1
+
+### features
+
+- **[Explorer]**: Improved the explorer loading times, on our sample data the call went from 10s to 50ms, a 95% reduction
+
+### bugfixes
+
+- **[Product Studio]**: Missing counts for "produces" and "consumes" columns
+- **[Marketplace]**: The existence of *private* output ports caused server errors for non-owning users.
+- **[Posthog]**: Platform access tiles were not tracked if environments were not present.
+
+## 0.5.0
+
+This migration can take some time, depending on the amount of output ports present, as embeddings are calculated for every output port.
+
+### features
+- **[API Migration]**: Added the [API v2 migration](./technical-reference/api-v2.md) to the docs. The old API is now deprecated and in the 0.6.0 the old API will be removed.
+- **[Data quality]**: Support ingesting data quality summary data and showing the overall status on output ports.
+  For more details look at the [data quality documentation](./developer-guide/data-quality-information.md)
+- **[Technical Mapping]**: Reworked source aligned concepts to [technical mapping ](./concepts/technical-assets.md#%EF%B8%8F-technical-mapping)
+- **[Search]**: Improved search functionality in the marketplace, the search now understands the context of the search term.
+- **[Product Studio]**: The product studio is the new location to manage your data products and output ports. You can view and edit all your data assets in one convenient location.
+- **[Technical Asset Configuration]**: We have migrated away from a single table for configurations. Each plugin type now has it's own table. Make sure to write a migration script for your own technologies as well.
+- **[Technical Integration Plugins]**: Technical integrations are now provided from the backend, including the behavior of the access tiles and form generation. They can be enabled or disabled via environment variables.
+- **[Docs]**: Added a FAQ section to the docs about Data Product thinking.
+
+### bugfixes
+
+- **[Marketplace]**: Fixed an issue where long domains could result in inconsistent sizing of the cards
+- **[Team]**: Fixed an issue where added members did not get the correct rights assigned.
+
+### deprecations
+
+- **[API]**: Full v1 version of the API is deprecated and will be removed in 0.6.0
+
+## 0.4.2
+
+### features
+- **[Usage]**: Added usage tabs with curated queries and query statistics on data products. This feature is still in Beta.
+
+- **[Explorer]**: Removed technical assets from full explorer view for clarity. Improved performance of graph fetching.
+
+- **[Admin rights]**: It is no longer allowed to have permanent admin rights. Users who were admins before will now get the option to temporarily elevate themselves to super user rights.
+This avoids the pitfall where you permanently are allowed to do everything and no longer have a view on how the normal user flow looks.
+
+- **[API]**: We are working on a v2 version of the API, we have already migrated the endpoints:
+  - `/api/data_product_lifecycles` -> `/api/v2/configuration/data_product_lifecycles`
+  - `/api/data_product_settings` -> `/api/v2/configuration/data_product_settings`
+  - `/api/data_product_types` -> `/api/v2/configuration/data_product_types`
+  - `/api/domains` -> `/api/v2/configuration/domains`
+  - `/api/environments` -> `/api/v2/configuration/environments`
+  - `/api/platforms` -> `/api/v2/configuration/platforms`
+  - `/api/tags` -> `/api/v2/configuration/tags`
+  - `/api/theme_settings` -> `/api/v2/configuration/theme_settings`
+  - `/api/authz` -> `/api/v2/authz`
+  - `/api/role_assignments/dataset` -> `/api/v2/authz/role_assignments/output_port`
+  - `/api/role_assignments/data_product` -> `/api/v2/authz/role_assignments/data_product`
+  - `/api/role_assignments/global` -> `/api/v2/authz/role_assignments/global`
+  - `/api/roles` -> `/api/v2/authz/roles`
+
+### bugfixes
+- **[Explorer]**: Removed dangling pointers when disabling certain types. Show datasets in view if they don't have technical assets added yet.
+
+## 0.4.1
+
+### features
+- **[Shopping experience]**: We have added a new shopping experience, which allows you to add output ports to your cart,
+  and request access to multiple output ports at once. We also added the required field, business justification to the
+  access requests. This will help the reviewer of your access request understand why access is needed.
+- **[Product Tour]**: Shows a small tutorial upon creation of your first data product.
+- **[Marketplace search]**: Support searching for data outputs using name and description as well as its technical assets.
+
+### bugfixes
+- **[MCP]**: Fixed OAuth issues with MCP server.
+
+### deprecations
+- **[API]**: Deprecated `/api/data_products/{id}/dataset/{dataset_id}` POST endpoint, use `/api/data_products/{id}/link_datasets` instead.
+
+## 0.4.0
+
+- Rename data outputs to technical assets
+- Rename datasets to output ports
+
+### features
+
+- **[Output Ports]**: Breaking change: Output ports are now tightly coupled to exactly one Data Product.
+- **[Technical Assets]**: Added drag and drop flow.
+- **[Marketplace]**: Reworked marketplace UX.
+
+### bugfixes
+
+- **[UX]**: Various UX bugs, pagination, ...
+
+## 0.3.7
+
+### features
+
+- **[Products]**: Added filtering on roles.
+- **[Docs]**: Proper URL.
+
+### bugfixes
+
+- **[History]**: Deletes caused not found errors in frontend.
+- **[Backend]**: Fix detached instance errors, also fixes mails.
+
+## 0.3.6
+
+### features
+
+- **[Explorer]**: Introduce domain nodes and new layout algorithm
+- **[Backend]**: Performance optimization for queries.
+- **[Helm]**: Add default MCP paths to ingress default values
+- **[MCP]**: Extend tools with roles functionality, more visibility for experiment, rollback OAuth lib update
+
+### bugfixes
+
+- **[Posthog]**: Correct disabling of analytics

@@ -1,6 +1,12 @@
 import { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import { InputPortTab } from '@/components/abstract-data-products/input-port-tab/input-port-tab.tsx';
-import { useGetExplorationInputPortsQuery } from '@/store/api/services/generated/explorationsApi.ts';
+import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import {
+    useGetExplorationInputPortsQuery,
+    useGetExplorationQuery,
+    useRemoveInputPortFromExplorationMutation,
+} from '@/store/api/services/generated/explorationsApi.ts';
 
 type Props = {
     explorationId: string;
@@ -8,16 +14,28 @@ type Props = {
 export const ExplorationInputPorts = ({ explorationId }: Props) => {
     const { data: { input_ports: inputPorts = [] } = {}, isFetching: loadingInputPorts } =
         useGetExplorationInputPortsQuery(explorationId);
+    const currentUser = useSelector(selectCurrentUser);
+    const { data: exploration } = useGetExplorationQuery(explorationId);
 
-    const handleRemove = useCallback(async (_: string) => {
-        return;
-    }, []);
+    const [removeInputPortFromExploration] = useRemoveInputPortFromExplorationMutation();
+    const handleRemove = useCallback(
+        async (outputPortId: string) => {
+            await removeInputPortFromExploration({ outputPortId, id: explorationId }).unwrap();
+        },
+        [removeInputPortFromExploration, explorationId],
+    );
+
+    const isOwner: boolean =
+        exploration !== undefined &&
+        exploration?.owner !== undefined &&
+        currentUser !== undefined &&
+        exploration?.owner?.id === currentUser?.id;
 
     return (
         <InputPortTab
             loadingInputPorts={loadingInputPorts}
-            canRequestAccess={true}
-            canRemoveAccess={false}
+            canRequestAccess={isOwner}
+            canRemoveAccess={isOwner}
             inputPorts={inputPorts}
             handleRemove={handleRemove}
         />

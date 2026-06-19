@@ -7,6 +7,12 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
+from app.abstract_data_product.graph_utils import (
+    get_graph_data_from_abstract_data_product,
+)
+from app.abstract_data_product.input_ports.model import (
+    InputPort as InputPortModel,
+)
 from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype
@@ -26,9 +32,6 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
-)
-from app.data_products.output_ports.input_ports.model import (
-    InputPort as InputPortModel,
 )
 from app.data_products.output_ports.model import Dataset as DatasetModel
 from app.data_products.schema_request import (
@@ -90,10 +93,12 @@ class DataProductService(AbstractDataProductService):
         return rolled_up_tags
 
     def get_data_product(self, id: UUID) -> GetDataProductResponse:
-        data_product = self.db.get(
-            DataProductModel,
-            id,
-            options=[selectinload(DataProductModel.tags)],
+        # db.scalar instead of db.get: db.get uses the identity map and may return a
+        # cached object without tags loaded, silently ignoring the selectinload option.
+        data_product = self.db.scalar(
+            select(DataProductModel)
+            .where(DataProductModel.id == id)
+            .options(selectinload(DataProductModel.tags))
         )
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -172,7 +177,7 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        data_product_schema = data_product.parse_pydantic_schema()
+        data_product_schema = data_product.model_dump(exclude={"input_ports"})
         tags = self._get_tags(data_product_schema.pop("tag_ids", []))
         _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)
@@ -201,6 +206,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(
             id, self.db, options=[selectinload(DataProductModel.tags)]
         )
+        self._ensure_not_deleting(current_data_product)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         if (
@@ -233,6 +239,7 @@ class DataProductService(AbstractDataProductService):
         data_product: DataProductAboutUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        self._ensure_not_deleting(current_data_product)
         current_data_product.about = data_product.about
         self.db.commit()
         return current_data_product
@@ -243,6 +250,7 @@ class DataProductService(AbstractDataProductService):
         data_product: DataProductStatusUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        self._ensure_not_deleting(current_data_product)
         current_data_product.status = data_product.status
         self.db.commit()
         return current_data_product
@@ -253,6 +261,7 @@ class DataProductService(AbstractDataProductService):
         usage: DataProductUsageUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
+        self._ensure_not_deleting(current_data_product)
         current_data_product.usage = usage.usage
         self.db.commit()
         return current_data_product
@@ -309,7 +318,7 @@ class DataProductService(AbstractDataProductService):
                         name=upstream_datasets.dataset.name,
                         link_to_id=upstream_datasets.dataset.data_product_id,
                     ),
-                    type=NodeType.datasetNode,
+                    type=NodeType.outputPortNode,
                 )
             )
             edges.append(
@@ -331,7 +340,7 @@ class DataProductService(AbstractDataProductService):
                         name=data_output.name,
                         link_to_id=data_output.owner_id,
                     ),
-                    type=NodeType.dataOutputNode,
+                    type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
@@ -352,7 +361,7 @@ class DataProductService(AbstractDataProductService):
                                 name=downstream_datasets.dataset.name,
                                 link_to_id=downstream_datasets.dataset.data_product_id,
                             ),
-                            type=NodeType.datasetNode,
+                            type=NodeType.outputPortNode,
                         )
                     )
                     edges.append(
@@ -368,16 +377,11 @@ class DataProductService(AbstractDataProductService):
                         for (
                             downstream_dps
                         ) in downstream_datasets.dataset.data_product_links:
-                            icon = downstream_dps.consuming_abstract_data_product.type.icon_key
+                            node_id = f"{downstream_dps.id}_3"
                             nodes.append(
-                                Node(
-                                    id=f"{downstream_dps.id}_3",
-                                    data=NodeData(
-                                        id=f"{downstream_dps.consuming_abstract_data_product_id}",
-                                        icon_key=icon,
-                                        name=downstream_dps.consuming_abstract_data_product.name,
-                                    ),
-                                    type=NodeType.dataProductNode,
+                                get_graph_data_from_abstract_data_product(
+                                    node_id,
+                                    downstream_dps.consuming_abstract_data_product,
                                 )
                             )
                             edges.append(
@@ -386,7 +390,7 @@ class DataProductService(AbstractDataProductService):
                                         f"{downstream_dps.id}-"
                                         f"{downstream_datasets.dataset.id}-3"
                                     ),
-                                    target=f"{downstream_dps.id}_3",
+                                    target=node_id,
                                     source=f"{downstream_datasets.dataset.id}_2",
                                     animated=downstream_dps.status
                                     == DecisionStatus.APPROVED,
@@ -404,7 +408,7 @@ class DataProductService(AbstractDataProductService):
                             name=downstream_dataset.name,
                             link_to_id=downstream_dataset.data_product_id,
                         ),
-                        type=NodeType.datasetNode,
+                        type=NodeType.outputPortNode,
                     )
                 )
                 edges.append(

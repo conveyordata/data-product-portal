@@ -3,27 +3,30 @@ import type { EdgeTypes, NodeTypes } from '@xyflow/react';
 import { DefaultEdge } from '@/components/charts/custom-edges/default-edge';
 import { StraightEdge } from '@/components/charts/custom-edges/straight-edge';
 import { DataProductNode } from '@/components/charts/custom-nodes/data-product-node/data-product-node.tsx';
-import { DataOutputNode } from '@/components/charts/custom-nodes/dataoutput-node/dataoutput-node';
-import { DatasetNode } from '@/components/charts/custom-nodes/dataset-node/dataset-node.tsx';
 import { DomainNode } from '@/components/charts/custom-nodes/domain-node/domain-node.tsx';
-
-export enum CustomNodeTypes {
-    DataProductNode = 'dataProductNode',
-    DatasetNode = 'datasetNode',
-    DataOutputNode = 'dataOutputNode',
-    DomainNode = 'domainNode',
-}
+import { ExplorationNode } from '@/components/charts/custom-nodes/exploration-node/exploration-node.tsx';
+import { OutputPortNode } from '@/components/charts/custom-nodes/output-port-node/output-port-node.tsx';
+import { TechnicalAssetNode } from '../custom-nodes/technical-asset-node/technical-asset-node';
 
 export enum CustomEdgeTypes {
     DefaultEdge = 'defaultEdge',
     StraightEdge = 'straightEdge',
 }
 
+export enum ExplorerNodeTypes {
+    DataProductNode = 'dataProductNode',
+    OutputPortNode = 'outputPortNode',
+    TechnicalAssetNode = 'technicalAssetNode',
+    DomainNode = 'domainNode',
+    ExplorationNode = 'explorationNode',
+}
+
 export const nodeTypes: NodeTypes = {
-    [CustomNodeTypes.DataProductNode]: DataProductNode,
-    [CustomNodeTypes.DatasetNode]: DatasetNode,
-    [CustomNodeTypes.DataOutputNode]: DataOutputNode,
-    [CustomNodeTypes.DomainNode]: DomainNode,
+    [ExplorerNodeTypes.DataProductNode]: DataProductNode,
+    [ExplorerNodeTypes.OutputPortNode]: OutputPortNode,
+    [ExplorerNodeTypes.TechnicalAssetNode]: TechnicalAssetNode,
+    [ExplorerNodeTypes.DomainNode]: DomainNode,
+    [ExplorerNodeTypes.ExplorationNode]: ExplorationNode,
 };
 
 export const edgeTypes: EdgeTypes = {

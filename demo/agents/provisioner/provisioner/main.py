@@ -1,13 +1,14 @@
+import json
 import logging
-import re
 import os
+import re
 import threading
-import requests
+from typing import Any, Callable, Dict, List, Tuple
+
 import psycopg2
+import requests
 import yaml
 from fastapi import FastAPI, Request
-from typing import Callable, List, Tuple, Dict, Any
-import json
 
 # Configure logging
 logging.basicConfig(

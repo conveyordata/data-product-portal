@@ -32,7 +32,7 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
     const [removeDatasetFromDataProduct] = useUnlinkInputPortFromDataProductMutation();
     const handleRemove = useCallback(
         async (outputPortId: string) => {
-            await removeDatasetFromDataProduct({ inputPortId: outputPortId, id: dataProductId }).unwrap();
+            await removeDatasetFromDataProduct({ outputPortId, id: dataProductId }).unwrap();
         },
         [removeDatasetFromDataProduct, dataProductId],
     );
