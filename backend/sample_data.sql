@@ -382,8 +382,8 @@ begin
 
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(),
     feature_usage_metrics, john_id, product_owner_id, 'APPROVED', john_id, '2025-10-28 16:32:57.902449', john_id, '2025-10-28 16:32:57.910346', '2025-10-28 16:32:57.89898', '2025-10-28 16:32:57.908607', NULL);
-    INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(),
-    feature_usage_metrics_daily, john_id, dataset_owner_id, 'APPROVED', john_id, '2025-10-28 16:32:57.902449', john_id, '2025-10-28 16:32:57.910346', '2025-10-28 16:32:57.89898', '2025-10-28 16:32:57.908607', NULL);
+    INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(),
+    feature_usage_metrics_daily, (SELECT data_product_id FROM public.datasets WHERE id = feature_usage_metrics_daily), john_id, dataset_owner_id, 'APPROVED', john_id, '2025-10-28 16:32:57.902449', john_id, '2025-10-28 16:32:57.910346', '2025-10-28 16:32:57.89898', '2025-10-28 16:32:57.908607', NULL);
 
 
 
