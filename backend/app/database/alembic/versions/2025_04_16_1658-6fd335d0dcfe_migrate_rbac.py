@@ -345,5 +345,5 @@ def downgrade() -> None:
     session = Session(bind=op.get_bind())
     session.execute(sa.sql.text("DELETE FROM role_assignments_data_product"))
     session.execute(sa.sql.text("DELETE FROM role_assignments_dataset"))
-    session.execute(sa.sql.text("DELETE FROM global_role_assignments"))
+    session.execute(sa.sql.text("DELETE FROM role_assignments_global"))
     session.commit()
