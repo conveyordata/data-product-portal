@@ -86,6 +86,7 @@ class RoleAssignmentService:
             role_id=role_id,
             user_id=user_id,
             dataset_id=dataset_id,
+            data_product_id=output_port.data_product_id,
             requested_on=datetime.now(),
             requested_by_id=actor.id,
         )

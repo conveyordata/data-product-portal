@@ -57,6 +57,31 @@ class InputPortEvent(V2Event):
         return "input_port.event"
 
 
+class DataProductRoleAssignmentEvent(V2Event):
+    """Fired on insert, update, and delete of a data-product role assignment."""
+
+    id: UUID
+    data_product_id: UUID
+    user_id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product_role_assignment.event"
+
+
+class OutputPortRoleAssignmentEvent(V2Event):
+    """Fired on insert, update, and delete of an output-port role assignment."""
+
+    id: UUID
+    output_port_id: UUID
+    data_product_id: UUID
+    user_id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "output_port_role_assignment.event"
+
+
 class TechnicalAssetEvent(V2Event):
     id: UUID
     data_product_id: UUID

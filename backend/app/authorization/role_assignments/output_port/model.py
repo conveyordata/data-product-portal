@@ -4,7 +4,9 @@ from uuid import uuid4
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.webhooks.events import OutputPortRoleAssignmentEvent
 from app.database.database import Base
+from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM, utcnow
 
 from ..enums import DecisionStatus
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from app.users.model import User
 
 
-class DatasetRoleAssignment(Base, BaseORM):
+class DatasetRoleAssignment(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "role_assignments_dataset"
     __table_args__ = (
         UniqueConstraint("dataset_id", "user_id", name="unique_dataset_assignment"),
@@ -24,6 +26,7 @@ class DatasetRoleAssignment(Base, BaseORM):
     id = Column(UUID, primary_key=True, default=uuid4)
     dataset_id: Mapped[UUID] = mapped_column("dataset_id", ForeignKey("datasets.id"))
     dataset: Mapped["Dataset"] = relationship("Dataset", foreign_keys=[dataset_id])
+    data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
     user_id: Mapped[UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
     role_id: Mapped[UUID] = mapped_column("role_id", ForeignKey("roles.id"))
@@ -38,3 +41,11 @@ class DatasetRoleAssignment(Base, BaseORM):
     decided_on = Column(DateTime(timezone=False))
     decided_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     decided_by: Mapped["User"] = relationship(foreign_keys=[decided_by_id])
+
+    def to_event(self) -> OutputPortRoleAssignmentEvent:
+        return OutputPortRoleAssignmentEvent(
+            id=self.id,
+            output_port_id=self.dataset_id,
+            data_product_id=self.data_product_id,
+            user_id=self.user_id,
+        )

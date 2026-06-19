@@ -11,9 +11,11 @@ from uuid import UUID
 from sdk.api_client.models import (
     AbstractDataProductType,
     DataProductEvent,
+    DataProductRoleAssignmentEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
+    OutputPortRoleAssignmentEvent,
     OutputPortTechnicalAssetLinkEvent,
     TechnicalAssetEvent,
 )
@@ -244,6 +246,20 @@ class ReconcileEventHandler(AbstractEventHandler):
                     ResourceType.DATA_PRODUCT, data.consuming_abstract_data_product_id
                 )
         return None
+
+    async def on_data_product_role_assignment_event(
+        self, data: DataProductRoleAssignmentEvent
+    ):
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+
+    async def on_output_port_role_assignment_event(
+        self, data: OutputPortRoleAssignmentEvent
+    ):
+        # Enqueue the output port's parent data product for reconciliation.
+        # The provisioner fetches current state of the data product (including
+        # its output ports and their members) on every reconcile, so triggering
+        # a data-product reconcile is the correct level of granularity here.
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_output_port_event(self, data: OutputPortEvent):
         await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
