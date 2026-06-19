@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Annotated, Optional, Sequence
+from typing import Annotated, Sequence
 from uuid import UUID
 
 from fastapi import (
@@ -8,7 +8,6 @@ from fastapi import (
     Depends,
     HTTPException,
     Query,
-    Request,
     status,
 )
 from pydantic.json_schema import SkipJsonSchema
@@ -39,8 +38,6 @@ from app.core.authz.resolvers import (
     DataProductRoleAssignmentResolver,
     EmptyResolver,
 )
-from app.data_products.schema_response import GetDataProductResponse
-from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent

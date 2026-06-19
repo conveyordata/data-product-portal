@@ -1,4 +1,4 @@
-from typing import Annotated, Optional, Sequence
+from typing import Annotated, Sequence
 from uuid import UUID
 
 from fastapi import (
@@ -6,7 +6,6 @@ from fastapi import (
     BackgroundTasks,
     Depends,
     Query,
-    Request,
 )
 from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema

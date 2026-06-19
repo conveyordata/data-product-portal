@@ -3,7 +3,6 @@ import json
 import uuid
 from typing import Any
 
-import pytest
 from fastapi import Request
 from fastapi.datastructures import Headers
 
