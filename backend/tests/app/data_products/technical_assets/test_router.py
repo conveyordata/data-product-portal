@@ -1,21 +1,18 @@
 import uuid
 from copy import deepcopy
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.settings import settings
-from tests.app.core.webhooks.helpers import webhook_v2_config
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
@@ -26,6 +23,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
+from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/technical_assets"
 
@@ -98,6 +96,15 @@ class TestTechnicalAssetsRouter:
         created_data_output = self.create_technical_asset(client, data_output_payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
+
+    def test_create_technical_assert_generates_webhook_v2_event(
+        self,
+        data_output_payload,
+        client: TestClient,
+        mock_webhook,
+    ):
+        self.test_create_data_output_source_aligned(data_output_payload, client)
+        assert_event_in_queue("technical_asset.event", mock_webhook)
 
     def test_create_data_output_product_aligned(
         self, data_output_payload, client: TestClient

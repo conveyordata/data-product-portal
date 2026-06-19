@@ -90,7 +90,7 @@ class RoleAssignmentService:
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
-        self.db.commit()
+        self.db.flush()
         return role_assignment
 
     def delete_assignment(self, id_: UUID) -> RoleAssignmentOld:
@@ -143,9 +143,14 @@ class RoleAssignmentService:
         )
         return self.db.scalar(query)
 
-    def ensure_is_dataset_scope(self, role_id: UUID) -> None:
+    def ensure_is_dataset_scope(self, role_id: UUID):
         role = self.db.get(Role, role_id)
-        if role and role.scope != Scope.DATASET:
+        if not role:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Role not found",
+            )
+        if role.scope != Scope.DATASET:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Role not found for this scope",

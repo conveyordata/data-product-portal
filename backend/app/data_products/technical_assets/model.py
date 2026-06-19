@@ -9,7 +9,9 @@ from sqlalchemy.orm import Mapped, Session, foreign, relationship
 from app.configuration.environments.platform_service_configurations.model import (
     EnvironmentPlatformServiceConfiguration,
 )
+from app.core.webhooks.events import TechnicalAssetEvent
 from app.data_products.technical_assets.status import TechnicalAssetStatus
+from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
     from app.configuration.platforms.model import Platform
@@ -25,7 +27,7 @@ from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 
-class TechnicalAsset(Base, BaseORM):
+class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "data_outputs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -70,6 +72,12 @@ class TechnicalAsset(Base, BaseORM):
         lazy="raise",
         viewonly=True,
     )
+
+    def to_event(self) -> TechnicalAssetEvent:
+        return TechnicalAssetEvent(
+            id=self.id,
+            data_product_id=self.owner_id,
+        )
 
 
 def ensure_technical_asset_exists(

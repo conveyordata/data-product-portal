@@ -15,6 +15,7 @@ from tests.factories import (
     TechnicalAssetFactory,
     UserFactory,
 )
+from tests.webhook_util import assert_event_in_queue
 
 DATA_OUTPUTS_DATASETS_ENDPOINT = (
     "api/v2/data_products/{}/output_ports/{}/technical_assets"
@@ -42,6 +43,12 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             client, data_product.id, data_output.id, ds.id
         )
         assert response.status_code == 200
+
+    def test_request_data_output_link_generates_webhook_v2_event(
+        self, client, mock_webhook
+    ):
+        self.test_request_data_output_link(client)
+        assert_event_in_queue("output_port_technical_asset_link.event", mock_webhook)
 
     def test_request_data_output_new(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

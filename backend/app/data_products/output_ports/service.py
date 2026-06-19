@@ -281,7 +281,7 @@ class OutputPortService:
 
         return tags
 
-    def create_dataset(
+    def create_output_port(
         self, data_product_id: UUID, dataset: CreateOutputPortRequest
     ) -> DatasetModel:
         self._ensure_data_product_not_deleting(data_product_id)
@@ -304,7 +304,6 @@ class OutputPortService:
         self.db.add(model)
         self.db.flush()
         self.recalculate_search(model.id)
-        self.db.commit()
         return model
 
     def remove_dataset(self, id: UUID, data_product_id: UUID) -> DatasetModel:

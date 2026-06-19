@@ -1,6 +1,6 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from tests.app.core.webhooks.helpers import webhook_v2_config
+from tests.conftest import webhook_v2_config
 
 
 class TestCallV2Webhook:

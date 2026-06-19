@@ -19,6 +19,7 @@ from app.abstract_data_product.input_ports.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
+from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
@@ -28,6 +29,7 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
 from app.database.database import Base, ensure_exists
+from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -39,7 +41,7 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
 
 
-class Dataset(Base, BaseORM):
+class Dataset(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "datasets"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -135,6 +137,12 @@ class Dataset(Base, BaseORM):
         ),
         raiseload=True,
     )
+
+    def to_event(self) -> OutputPortEvent:
+        return OutputPortEvent(
+            id=self.id,
+            data_product_id=self.data_product_id,
+        )
 
 
 def ensure_output_port_exists(
