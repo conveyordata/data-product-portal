@@ -27,7 +27,7 @@ class _ItemEvent(Event):
 
     @classmethod
     def event_type(cls) -> str:
-        return "item.evnet"
+        return "item.event"
 
 
 class _Item(
