@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -44,8 +44,6 @@ from app.data_products.output_ports.schema_response import (
     UpdateOutputPortResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
-from app.data_products.schema_response import GetDataProductResponse
-from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent

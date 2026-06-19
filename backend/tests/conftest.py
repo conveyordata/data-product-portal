@@ -146,6 +146,8 @@ def webhook_v2_config(url: str | None = "http://test-v2.example.com/hook"):
 
 @pytest.fixture
 def mock_webhook() -> Iterator[AsyncMock]:
-    with patch("app.main.call_v2_webhook", new_callable=AsyncMock) as mock:
-        with webhook_v2_config():
-            yield mock
+    with (
+        patch("app.main.call_v2_webhook", new_callable=AsyncMock) as mock,
+        webhook_v2_config(),
+    ):
+        yield mock
