@@ -21,12 +21,8 @@ from app.authorization.role_assignments.data_product.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
-from app.authorization.role_assignments.output_port.model import (
-    DatasetRoleAssignment,
-)
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Prototype, Scope
-from app.authorization.service import AuthorizationService
 from app.core.authz import Action, Authorization
 
 # revision identifiers, used by Alembic.
@@ -96,9 +92,6 @@ class RoleMigrationService:
         self._transfer_product_memberships()
         self._transfer_dataset_memberships()
         self._transfer_global_memberships()
-
-        AuthorizationService(self.db).reload_enforcer()
-        Authorization.deregister()
 
     def _transfer_product_memberships(self):
         memberships = self.db.execute(
@@ -193,15 +186,23 @@ class RoleMigrationService:
 
         for dataset in datasets:
             for owner in dataset.owners:
-                self.db.add(
-                    DatasetRoleAssignment(
-                        dataset_id=dataset.id,
-                        user_id=owner.id,
-                        role_id=owner_role_id,
-                        decision=DecisionStatus.APPROVED,
-                        requested_on=dataset.updated_on,
-                        decided_on=dataset.updated_on,
-                    )
+                self.db.execute(
+                    sa.sql.text(
+                        """
+                        INSERT INTO role_assignments_dataset
+                            (id, dataset_id, user_id, role_id, decision, requested_on, decided_on)
+                        VALUES
+                            (gen_random_uuid(), :dataset_id, :user_id, :role_id, :decision, :requested_on, :decided_on)
+                        """
+                    ),
+                    {
+                        "dataset_id": dataset.id,
+                        "user_id": owner.id,
+                        "role_id": owner_role_id,
+                        "decision": DecisionStatus.APPROVED.value,
+                        "requested_on": dataset.updated_on,
+                        "decided_on": dataset.updated_on,
+                    },
                 )
         self.db.commit()
 
@@ -342,7 +343,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     session = Session(bind=op.get_bind())
-    session.execute(sa.delete(DataProductRoleAssignment))
-    session.execute(sa.delete(DatasetRoleAssignment))
-    session.execute(sa.delete(GlobalRoleAssignment))
+    session.execute(sa.delete("role_assignments_data_product"))
+    session.execute(sa.delete("role_assignments_dataset"))
+    session.execute(sa.delete("global_role_assignments"))
     session.commit()

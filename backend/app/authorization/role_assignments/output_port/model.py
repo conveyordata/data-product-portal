@@ -26,6 +26,7 @@ class DatasetRoleAssignment(Base, BaseORM, EventTrackedMixin):
     id = Column(UUID, primary_key=True, default=uuid4)
     dataset_id: Mapped[UUID] = mapped_column("dataset_id", ForeignKey("datasets.id"))
     dataset: Mapped["Dataset"] = relationship("Dataset", foreign_keys=[dataset_id])
+    data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
     user_id: Mapped[UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
     role_id: Mapped[UUID] = mapped_column("role_id", ForeignKey("roles.id"))
@@ -45,6 +46,6 @@ class DatasetRoleAssignment(Base, BaseORM, EventTrackedMixin):
         return OutputPortRoleAssignmentEvent(
             id=self.id,
             output_port_id=self.dataset_id,
-            data_product_id=self.dataset.data_product_id,
+            data_product_id=self.data_product_id,
             user_id=self.user_id,
         )
