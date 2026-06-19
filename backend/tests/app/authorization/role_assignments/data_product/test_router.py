@@ -16,6 +16,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.webhook_util import assert_event_in_queue
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.data_product.schema import (
@@ -95,6 +96,35 @@ class TestDataProductRoleAssignmentsRouter:
         else:
             mock_data_product_auth_assignment.assert_not_called()
 
+    @patch(
+        "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
+    )
+    def test_create_assignment_generates_webhook_v2_event(
+        self, mock_auth, client, mock_webhook
+    ):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}",
+            json={
+                "data_product_id": str(data_product.id),
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
+
     def test_request_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -120,6 +150,10 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["data_product"]["id"] == str(data_product.id)
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
+
+    def test_request_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+        self.test_request_assignment(client)
+        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
 
     def test_request_assignment_no_right(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
@@ -166,6 +200,10 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()["role_assignments"]) == 1
+
+    def test_delete_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+        self.test_delete_assignment(client)
+        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
 
     def test_delete_last_owner_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
@@ -221,6 +259,10 @@ class TestDataProductRoleAssignmentsRouter:
         data = response.json()
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
+
+    def test_decide_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+        self.test_decide_assignment(client)
+        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
