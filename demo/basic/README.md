@@ -126,7 +126,8 @@ Our first goal is to make the raw operational data available as trusted, documen
 
 ### 2. Create a Consumer-Aligned Data Product
 
-The Marketing team wants to run a campaign for our most loyal customers. To do this, they need a single view of customer, order, and shipment information. They don't want to deal with joining tables from three different systems. We'll create a new data product tailored to their needs.
+The Marketing team wants to run a campaign for our most loyal customers. To do this, they need a single view of customer, order, and shipment information.
+They don't want to deal with joining tables from three different systems. We'll create a new data product tailored to their needs.
 
 #### Data Product 4: `Marketing Customer 360`
 
