@@ -27,17 +27,22 @@ This section describes how to integrate the portal with your platform of choice.
 
 ### Currently Supported Integrations
 
-- **AWS**: S3, Glue, Athena *(Redshift Serverless coming soon)*
-- **Conveyor**: A self-service workflow manager for data products
-
-### Upcoming Integrations
-
-- **Cloud Platforms**: Databricks, Snowflake, Azure
-- **Data Catalogs**: Amundsen, DataHub, Collibra
+- **AWS**: S3, Glue, Athena, Redshift
+- **Conveyor**: A [self-service workflow manager](https://conveyor.dataminded.com/) for Data Products
+- **Agno**: [An agent platform](https://www.agno.com/)
+- **Azure**: Blob Storage
+- **Databricks**: We support registering elements from the catalog
+- **PostgreSQL**: The [open source object-relational database system](https://www.postgresql.org/). You can register schemas, databases, tables etc.
+- **OSI**: [Open Semantic Interchange](https://open-semantic-interchange.org/) which registers your semantic layers
+- **Snowflake**: You can register schemas, databases, tables etc
 
 If there's a platform you want us to support, let us know — or better yet, open a PR!
 
----
+## Automatically provisioning infra when Portal changes
+
+To update your infrastructure automatically when portal changes we support provisioning via our SDK, you can find more
+details in the[`How to use the provisioner SDK`](./provisioner.md)
+
 
 ## AWS Mapping
 
@@ -51,7 +56,6 @@ Here's how the core concepts of the Data Product Portal map to AWS resources:
 | **Data Outputs**      | Shareable outputs: S3 paths, Glue tables, Athena queries               |
 | **Users**             | Access is managed via IAM roles and policies provisioned by the portal |
 
----
 
 ## Conveyor Mapping
 
@@ -62,20 +66,3 @@ Here's how the core concepts of the Data Product Portal map to AWS resources:
 | **Users**             | Portal-managed access to Conveyor projects and datasets |
 
 The portal manages the mapping of users to Conveyor roles through its UI and API.
-
----
-
-## Terraform Integration
-
-Infrastructure configuration and provisioning are handled via **Terraform**.
-
-### Integration Flow
-
-1. **Configure Terraform**: Set up your provider and initial variables.
-2. **Run Terraform**: Use the sample config files to provision resources.
-3. **Pull Configs from Portal**: Retrieve generated config files from the Data Product Portal.
-4. **Update Terraform**: Feed those configs back into your Terraform setup.
-
-📄 More details in the [`terraform/README.md`](https://www.github.com/conveyordata/data-product-portal/tree/main/integrations/terraform/README.md)
-
----
