@@ -26,7 +26,7 @@
         "@ant-design/icons": "^6.2.5",
         "@dagrejs/dagre": "^2.0.4",
         "@fontsource/inter": "^5.2.8",
-        "@posthog/react": "^1.10.2",
+        "@posthog/react": "^1.10.3",
         "@reduxjs/toolkit": "^2.12.0",
         "@tiptap/extension-heading": "^3.27.1",
         "@tiptap/extension-table": "^3.27.1",
