@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     ENVIRONMENT_CONTEXT: Optional[str] = None
     WEBHOOK_SECRET: Optional[str] = None
     WEBHOOK_V2_URL: Optional[str] = None
+    # This setting enables extra events to be triggered when a Technical Asset is added or removed from an Output Port
+    # This can be used when migrating infra, or when roles are not properly supported by your infrastructure
+    WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS: bool = False
 
     # Email templating and SMTP settings
     PORTAL_NAME: str = "Data Product Portal"

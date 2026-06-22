@@ -1,5 +1,9 @@
-from pydantic import BaseModel
+from typing import Sequence
+
 from sqlalchemy import event as sql_event
+
+from app.core.context import queue_events
+from app.core.webhooks.events import V2Event
 
 
 class EventTrackedMixin:
@@ -28,11 +32,16 @@ class EventTrackedMixin:
         sql_event.listen(cls, "after_update", cls._track)
         sql_event.listen(cls, "after_delete", cls._track)
 
-    def to_event(self) -> BaseModel:
+    def to_event(self) -> V2Event:
         raise NotImplementedError
+
+    def generate_extra_events(self, connection) -> Sequence[V2Event]:
+        return []
 
     @staticmethod
     def _track(mapper, connection, target) -> None:
         from app.core.context import queue_event
 
         queue_event(target.to_event())
+        if events := target.generate_extra_events(connection):
+            queue_events(events)
