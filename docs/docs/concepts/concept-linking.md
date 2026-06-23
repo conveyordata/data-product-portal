@@ -50,13 +50,13 @@ They are grouped into two Output Ports: one port providing access to the Realtim
 
 ### Data Product: Maintenance Planning
 
-This has access to the Realtime Equipment Metrics Output Port. Such an access request is called an input port.
+This product has access to the Realtime Equipment Metrics Output Port. This governed connection is called an Input Port.
 It itself has a single Output Port: Maintenance Schedule that is exposed but currently unused by others.
 
 ### Exploration: CEO Question
 
-The Exploration CEO question has only one Input Port: Daily Aggregated Metrics. An exploration itself cannot
-share any data, so it has no technical assets or Output Ports.
+The Exploration CEO question has only one Input Port: Daily Aggregated Metrics.
+An Exploration itself cannot share any data, so it has no Technical Assets or Output Ports.
 
 
 ## Representation

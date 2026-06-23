@@ -25,7 +25,7 @@ These technical aspects are also governed by the Data Product concept.
 ## What They Can Do
 
 - Produce [Technical Assets](./technical-assets) (e.g. tables, APIs, files) that are exposed through **[Output Ports](./output-ports)**
-- Register **[Input Ports](./input-ports)** by requesting access to the **[Output Ports](./output-ports)** of other Data products
+- Register **[Input Ports](./input-ports)** by requesting access to the **[Output Ports](./output-ports)** of other Data Products
 - Implement fine-grained access control, observability, and versioning on **[Output Ports](./output-ports)**
 
 ## Example
@@ -36,7 +36,7 @@ A "Sales Transactions" Data Product may expose:
 - A REST API endpoint
 
 These are all **[Technical Assets](./technical-assets)** managed by the Data Product.
-By default, all technical assets are private to the Data Product that manages them.
+By default, all Technical Assets are private to the Data Product that manages them.
 In order to share these assets with the outside world, they need to be exposed via an **[Output Port](./output-ports)**.
 
 ## Representation
