@@ -14,8 +14,8 @@ class ExplorationFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Exploration
 
     id = factory.Faker("uuid4")
-    name = factory.LazyFunction(fake.unique.word)
-    namespace = factory.LazyFunction(fake.unique.word)
+    name = factory.Sequence(lambda _: fake.unique.word())
+    namespace = factory.Sequence(lambda _: fake.unique.word())
     description = factory.Faker("text", max_nb_chars=20)
     domain = factory.SubFactory(DomainFactory)
     owner = factory.SubFactory(UserFactory)
