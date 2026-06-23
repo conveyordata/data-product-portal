@@ -15,7 +15,7 @@ from typing import Any
 
 import requests
 
-PORTAL_URL = "http://localhost:8080"
+PORTAL_URL = "http://localhost:5050"
 
 # john.scientist is the admin user seeded in portal_seed.sql
 OWNER_ID = "b72fca38-17ff-4259-a075-5aaa5973343c"
