@@ -168,13 +168,7 @@ def test_routes_not_v2_are_deprecated():
     """
     # Add paths or route names here to skip this check
     EXCEPTIONS = {
-        # MCP Routes
-        "oauth_metadata",
-        "openid_config",
-        "oauth_protected_resource",
-        "register",
-        # Root route is hidden
-        "root",
+        "/mcp",
     }
 
     non_deprecated_old_routes = []
