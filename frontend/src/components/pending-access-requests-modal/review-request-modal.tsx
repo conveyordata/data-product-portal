@@ -6,24 +6,30 @@ import {
     InfoCircleOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
+import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
-import type { PendingAction } from '@/types/pending-actions/pending-request-types';
 import {
-    PendingRequestType_DataProductRoleAssignment,
-    PendingRequestType_InputPort,
-    PendingRequestType_TechnicalAssetOutputPort,
-} from '@/types/pending-actions/pending-request-types';
-import { formatDate } from '@/utils/date.helper';
-import { AbstractProductIcon, DataProductOutlined, OutputPortOutlined, TechnicalAssetOutlined } from '../icons';
+    AbstractProductIcon,
+    DataProductOutlined,
+    OutputPortOutlined,
+    TechnicalAssetOutlined,
+} from '@/components/icons';
+import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
+import {
+    type Request,
+    RequestType_DataProductRoleAssignment,
+    RequestType_InputPort,
+    RequestType_TechnicalAssetOutputPort,
+} from '@/types/request-types/request-types.tsx';
+import { formatDate } from '@/utils/date.helper.ts';
 
 type Props = {
-    action: PendingAction | null;
+    action?: Request | null;
     open: boolean;
     onClose: () => void;
-    onAccept: (action: PendingAction) => void;
-    onReject: (action: PendingAction) => void;
+    onAccept: (action: Request, decisionNote?: string) => void;
+    onReject: (action: Request, decisionNote?: string) => void;
 };
 
 type RequestDetails = {
@@ -61,10 +67,10 @@ const abstractDataProductTypeName = (type: AbstractDataProductType) => {
 };
 
 function getRequestDetails(
-    action: PendingAction,
+    action: Request,
     t: (key: string, params?: Record<string, string>) => string,
 ): RequestDetails | undefined {
-    if (action.pending_action_type === PendingRequestType_InputPort) {
+    if (action.request_type === RequestType_InputPort) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
@@ -88,7 +94,7 @@ function getRequestDetails(
         };
     }
 
-    if (action.pending_action_type === PendingRequestType_TechnicalAssetOutputPort) {
+    if (action.request_type === RequestType_TechnicalAssetOutputPort) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
@@ -112,7 +118,7 @@ function getRequestDetails(
         };
     }
 
-    if (action.pending_action_type === PendingRequestType_DataProductRoleAssignment) {
+    if (action.request_type === RequestType_DataProductRoleAssignment) {
         const roleName = action.role ? action.role.name : t('a role');
         return {
             requesterName: `${action.requested_by?.first_name} ${action.requested_by?.last_name}`,
@@ -142,23 +148,33 @@ function getRequestDetails(
 
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }: Props) {
     const { t } = useTranslation();
+    const [form] = Form.useForm<{ decisionNote: string }>();
+    const [isAccepting, setIsAccepting] = useState(false);
 
     if (!action) {
-        // throw exception
         return null;
-        // throw new Error('ReviewRequestModal opened without a pending action');
     }
 
     const details = getRequestDetails(action, t);
 
     const handleAccept = () => {
-        onAccept(action);
+        const { decisionNote } = form.getFieldsValue();
+        onAccept(action, decisionNote);
         onClose();
+        form.resetFields();
     };
 
     const handleReject = () => {
-        onReject(action);
+        const { decisionNote } = form.getFieldsValue();
+        if (action.request_type === RequestType_InputPort && !decisionNote?.trim()) {
+            form.setFields([{ name: 'decisionNote', errors: [t('A decision note is required when declining')] }]);
+            return;
+        }
+        setIsAccepting(true);
+        onReject(action, decisionNote);
         onClose();
+        form.resetFields();
+        setIsAccepting(false);
     };
 
     if (!details) return null;
@@ -171,7 +187,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             width={800}
             footer={
                 <Space>
-                    <Button danger icon={<CloseOutlined />} onClick={handleReject}>
+                    <Button danger icon={<CloseOutlined />} loading={isAccepting} onClick={handleReject}>
                         {t('Decline')}
                     </Button>
                     <Button type="primary" icon={<CheckOutlined />} onClick={handleAccept}>
@@ -292,6 +308,22 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                         </Flex>
                     </Card>
                 </Col>
+                {action.request_type === RequestType_InputPort && (
+                    <Col span={24}>
+                        <Form form={form} layout="vertical">
+                            <Form.Item
+                                name="decisionNote"
+                                label={t('Decision note')}
+                                extra={t('Required when declining, optional when accepting')}
+                            >
+                                <Input.TextArea
+                                    rows={3}
+                                    onChange={() => form.setFields([{ name: 'decisionNote', errors: [] }])}
+                                />
+                            </Form.Item>
+                        </Form>
+                    </Col>
+                )}
             </Row>
         </Modal>
     );

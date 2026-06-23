@@ -7,14 +7,12 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.data_product_output_port_pending_action import (
-        DataProductOutputPortPendingAction,
+    from ..models.data_product_role_assignment_request import (
+        DataProductRoleAssignmentRequest,
     )
-    from ..models.data_product_role_assignment_pending_action import (
-        DataProductRoleAssignmentPendingAction,
-    )
-    from ..models.technical_asset_output_port_pending_action import (
-        TechnicalAssetOutputPortPendingAction,
+    from ..models.input_port_request import InputPortRequest
+    from ..models.technical_asset_output_port_request import (
+        TechnicalAssetOutputPortRequest,
     )
 
 
@@ -25,35 +23,28 @@ T = TypeVar("T", bound="PendingActionResponse")
 class PendingActionResponse:
     """
     Attributes:
-        pending_actions (list[DataProductOutputPortPendingAction | DataProductRoleAssignmentPendingAction |
-            TechnicalAssetOutputPortPendingAction]):
+        pending_actions (list[DataProductRoleAssignmentRequest | InputPortRequest | TechnicalAssetOutputPortRequest]):
     """
 
     pending_actions: list[
-        DataProductOutputPortPendingAction
-        | DataProductRoleAssignmentPendingAction
-        | TechnicalAssetOutputPortPendingAction
+        DataProductRoleAssignmentRequest
+        | InputPortRequest
+        | TechnicalAssetOutputPortRequest
     ]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_output_port_pending_action import (
-            DataProductOutputPortPendingAction,
-        )
-        from ..models.technical_asset_output_port_pending_action import (
-            TechnicalAssetOutputPortPendingAction,
+        from ..models.input_port_request import InputPortRequest
+        from ..models.technical_asset_output_port_request import (
+            TechnicalAssetOutputPortRequest,
         )
 
         pending_actions = []
         for pending_actions_item_data in self.pending_actions:
             pending_actions_item: dict[str, Any]
-            if isinstance(
-                pending_actions_item_data, DataProductOutputPortPendingAction
-            ):
+            if isinstance(pending_actions_item_data, InputPortRequest):
                 pending_actions_item = pending_actions_item_data.to_dict()
-            elif isinstance(
-                pending_actions_item_data, TechnicalAssetOutputPortPendingAction
-            ):
+            elif isinstance(pending_actions_item_data, TechnicalAssetOutputPortRequest):
                 pending_actions_item = pending_actions_item_data.to_dict()
             else:
                 pending_actions_item = pending_actions_item_data.to_dict()
@@ -72,14 +63,12 @@ class PendingActionResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_output_port_pending_action import (
-            DataProductOutputPortPendingAction,
+        from ..models.data_product_role_assignment_request import (
+            DataProductRoleAssignmentRequest,
         )
-        from ..models.data_product_role_assignment_pending_action import (
-            DataProductRoleAssignmentPendingAction,
-        )
-        from ..models.technical_asset_output_port_pending_action import (
-            TechnicalAssetOutputPortPendingAction,
+        from ..models.input_port_request import InputPortRequest
+        from ..models.technical_asset_output_port_request import (
+            TechnicalAssetOutputPortRequest,
         )
 
         d = dict(src_dict)
@@ -90,16 +79,14 @@ class PendingActionResponse:
             def _parse_pending_actions_item(
                 data: object,
             ) -> (
-                DataProductOutputPortPendingAction
-                | DataProductRoleAssignmentPendingAction
-                | TechnicalAssetOutputPortPendingAction
+                DataProductRoleAssignmentRequest
+                | InputPortRequest
+                | TechnicalAssetOutputPortRequest
             ):
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
-                    pending_actions_item_type_0 = (
-                        DataProductOutputPortPendingAction.from_dict(data)
-                    )
+                    pending_actions_item_type_0 = InputPortRequest.from_dict(data)
 
                     return pending_actions_item_type_0
                 except (TypeError, ValueError, AttributeError, KeyError):
@@ -108,7 +95,7 @@ class PendingActionResponse:
                     if not isinstance(data, dict):
                         raise TypeError()
                     pending_actions_item_type_1 = (
-                        TechnicalAssetOutputPortPendingAction.from_dict(data)
+                        TechnicalAssetOutputPortRequest.from_dict(data)
                     )
 
                     return pending_actions_item_type_1
@@ -117,7 +104,7 @@ class PendingActionResponse:
                 if not isinstance(data, dict):
                     raise TypeError()
                 pending_actions_item_type_2 = (
-                    DataProductRoleAssignmentPendingAction.from_dict(data)
+                    DataProductRoleAssignmentRequest.from_dict(data)
                 )
 
                 return pending_actions_item_type_2

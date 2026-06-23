@@ -23,11 +23,11 @@ if TYPE_CHECKING:
     from ..models.user import User
 
 
-T = TypeVar("T", bound="DataProductRoleAssignmentPendingAction")
+T = TypeVar("T", bound="DataProductRoleAssignmentRequest")
 
 
 @_attrs_define
-class DataProductRoleAssignmentPendingAction:
+class DataProductRoleAssignmentRequest:
     """
     Attributes:
         id (UUID):
@@ -39,7 +39,7 @@ class DataProductRoleAssignmentPendingAction:
         requested_by (None | User):
         decided_on (datetime.datetime | None):
         decided_by (None | User):
-        pending_action_type (Literal['DataProductRoleAssignment'] | Unset):  Default: 'DataProductRoleAssignment'.
+        request_type (Literal['DataProductRoleAssignment'] | Unset):  Default: 'DataProductRoleAssignment'.
     """
 
     id: UUID
@@ -51,7 +51,7 @@ class DataProductRoleAssignmentPendingAction:
     requested_by: None | User
     decided_on: datetime.datetime | None
     decided_by: None | User
-    pending_action_type: Literal["DataProductRoleAssignment"] | Unset = (
+    request_type: Literal["DataProductRoleAssignment"] | Unset = (
         "DataProductRoleAssignment"
     )
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -98,7 +98,7 @@ class DataProductRoleAssignmentPendingAction:
         else:
             decided_by = self.decided_by
 
-        pending_action_type = self.pending_action_type
+        request_type = self.request_type
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -115,8 +115,8 @@ class DataProductRoleAssignmentPendingAction:
                 "decided_by": decided_by,
             }
         )
-        if pending_action_type is not UNSET:
-            field_dict["pending_action_type"] = pending_action_type
+        if request_type is not UNSET:
+            field_dict["request_type"] = request_type
 
         return field_dict
 
@@ -210,18 +210,17 @@ class DataProductRoleAssignmentPendingAction:
 
         decided_by = _parse_decided_by(d.pop("decided_by"))
 
-        pending_action_type = cast(
-            Literal["DataProductRoleAssignment"] | Unset,
-            d.pop("pending_action_type", UNSET),
+        request_type = cast(
+            Literal["DataProductRoleAssignment"] | Unset, d.pop("request_type", UNSET)
         )
-        if pending_action_type != "DataProductRoleAssignment" and not isinstance(
-            pending_action_type, Unset
+        if request_type != "DataProductRoleAssignment" and not isinstance(
+            request_type, Unset
         ):
             raise ValueError(
-                f"pending_action_type must match const 'DataProductRoleAssignment', got '{pending_action_type}'"
+                f"request_type must match const 'DataProductRoleAssignment', got '{request_type}'"
             )
 
-        data_product_role_assignment_pending_action = cls(
+        data_product_role_assignment_request = cls(
             id=id,
             data_product=data_product,
             user=user,
@@ -231,11 +230,11 @@ class DataProductRoleAssignmentPendingAction:
             requested_by=requested_by,
             decided_on=decided_on,
             decided_by=decided_by,
-            pending_action_type=pending_action_type,
+            request_type=request_type,
         )
 
-        data_product_role_assignment_pending_action.additional_properties = d
-        return data_product_role_assignment_pending_action
+        data_product_role_assignment_request.additional_properties = d
+        return data_product_role_assignment_request
 
     @property
     def additional_keys(self) -> list[str]:

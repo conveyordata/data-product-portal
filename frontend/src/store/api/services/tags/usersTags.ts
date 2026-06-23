@@ -25,4 +25,7 @@ export const usersTags = {
     getUserPendingActions: {
         providesTags: [{ type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST }],
     },
+    getUserRequests: {
+        providesTags: [{ type: TagTypes.MyRequests, id: STATIC_TAG_ID.LIST }],
+    },
 } satisfies EndpointDefinitions;

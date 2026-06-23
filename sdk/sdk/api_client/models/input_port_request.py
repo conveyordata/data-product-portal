@@ -18,48 +18,46 @@ from ..models.decision_status import DecisionStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.abstract_data_product_info import AbstractDataProductInfo
     from ..models.output_port import OutputPort
-    from ..models.owned_technical_asset import OwnedTechnicalAsset
     from ..models.user import User
 
 
-T = TypeVar("T", bound="TechnicalAssetOutputPortPendingAction")
+T = TypeVar("T", bound="InputPortRequest")
 
 
 @_attrs_define
-class TechnicalAssetOutputPortPendingAction:
+class InputPortRequest:
     """
     Attributes:
         id (UUID):
+        justification (str):
+        consuming_abstract_data_product_id (UUID):
         output_port_id (UUID):
-        output_port (OutputPort):
-        technical_asset_id (UUID):
-        technical_asset (OwnedTechnicalAsset):
+        decision_note (None | str):
         status (DecisionStatus):
         requested_on (datetime.datetime):
-        denied_on (datetime.datetime | None):
-        approved_on (datetime.datetime | None):
+        output_port (OutputPort):
+        consuming_abstract_data_product (AbstractDataProductInfo):
         requested_by (User):
         denied_by (None | User):
         approved_by (None | User):
-        pending_action_type (Literal['TechnicalAssetOutputPort'] | Unset):  Default: 'TechnicalAssetOutputPort'.
+        request_type (Literal['InputPort'] | Unset):  Default: 'InputPort'.
     """
 
     id: UUID
+    justification: str
+    consuming_abstract_data_product_id: UUID
     output_port_id: UUID
-    output_port: OutputPort
-    technical_asset_id: UUID
-    technical_asset: OwnedTechnicalAsset
+    decision_note: None | str
     status: DecisionStatus
     requested_on: datetime.datetime
-    denied_on: datetime.datetime | None
-    approved_on: datetime.datetime | None
+    output_port: OutputPort
+    consuming_abstract_data_product: AbstractDataProductInfo
     requested_by: User
     denied_by: None | User
     approved_by: None | User
-    pending_action_type: Literal["TechnicalAssetOutputPort"] | Unset = (
-        "TechnicalAssetOutputPort"
-    )
+    request_type: Literal["InputPort"] | Unset = "InputPort"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -67,29 +65,24 @@ class TechnicalAssetOutputPortPendingAction:
 
         id = str(self.id)
 
+        justification = self.justification
+
+        consuming_abstract_data_product_id = str(
+            self.consuming_abstract_data_product_id
+        )
+
         output_port_id = str(self.output_port_id)
 
-        output_port = self.output_port.to_dict()
-
-        technical_asset_id = str(self.technical_asset_id)
-
-        technical_asset = self.technical_asset.to_dict()
+        decision_note: None | str
+        decision_note = self.decision_note
 
         status = self.status.value
 
         requested_on = self.requested_on.isoformat()
 
-        denied_on: None | str
-        if isinstance(self.denied_on, datetime.datetime):
-            denied_on = self.denied_on.isoformat()
-        else:
-            denied_on = self.denied_on
+        output_port = self.output_port.to_dict()
 
-        approved_on: None | str
-        if isinstance(self.approved_on, datetime.datetime):
-            approved_on = self.approved_on.isoformat()
-        else:
-            approved_on = self.approved_on
+        consuming_abstract_data_product = self.consuming_abstract_data_product.to_dict()
 
         requested_by = self.requested_by.to_dict()
 
@@ -105,81 +98,64 @@ class TechnicalAssetOutputPortPendingAction:
         else:
             approved_by = self.approved_by
 
-        pending_action_type = self.pending_action_type
+        request_type = self.request_type
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "id": id,
+                "justification": justification,
+                "consuming_abstract_data_product_id": consuming_abstract_data_product_id,
                 "output_port_id": output_port_id,
-                "output_port": output_port,
-                "technical_asset_id": technical_asset_id,
-                "technical_asset": technical_asset,
+                "decision_note": decision_note,
                 "status": status,
                 "requested_on": requested_on,
-                "denied_on": denied_on,
-                "approved_on": approved_on,
+                "output_port": output_port,
+                "consuming_abstract_data_product": consuming_abstract_data_product,
                 "requested_by": requested_by,
                 "denied_by": denied_by,
                 "approved_by": approved_by,
             }
         )
-        if pending_action_type is not UNSET:
-            field_dict["pending_action_type"] = pending_action_type
+        if request_type is not UNSET:
+            field_dict["request_type"] = request_type
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.abstract_data_product_info import AbstractDataProductInfo
         from ..models.output_port import OutputPort
-        from ..models.owned_technical_asset import OwnedTechnicalAsset
         from ..models.user import User
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
+        justification = d.pop("justification")
+
+        consuming_abstract_data_product_id = UUID(
+            d.pop("consuming_abstract_data_product_id")
+        )
+
         output_port_id = UUID(d.pop("output_port_id"))
 
-        output_port = OutputPort.from_dict(d.pop("output_port"))
+        def _parse_decision_note(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
 
-        technical_asset_id = UUID(d.pop("technical_asset_id"))
-
-        technical_asset = OwnedTechnicalAsset.from_dict(d.pop("technical_asset"))
+        decision_note = _parse_decision_note(d.pop("decision_note"))
 
         status = DecisionStatus(d.pop("status"))
 
         requested_on = datetime.datetime.fromisoformat(d.pop("requested_on"))
 
-        def _parse_denied_on(data: object) -> datetime.datetime | None:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                denied_on_type_0 = datetime.datetime.fromisoformat(data)
+        output_port = OutputPort.from_dict(d.pop("output_port"))
 
-                return denied_on_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(datetime.datetime | None, data)
-
-        denied_on = _parse_denied_on(d.pop("denied_on"))
-
-        def _parse_approved_on(data: object) -> datetime.datetime | None:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                approved_on_type_0 = datetime.datetime.fromisoformat(data)
-
-                return approved_on_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(datetime.datetime | None, data)
-
-        approved_on = _parse_approved_on(d.pop("approved_on"))
+        consuming_abstract_data_product = AbstractDataProductInfo.from_dict(
+            d.pop("consuming_abstract_data_product")
+        )
 
         requested_by = User.from_dict(d.pop("requested_by"))
 
@@ -213,35 +189,30 @@ class TechnicalAssetOutputPortPendingAction:
 
         approved_by = _parse_approved_by(d.pop("approved_by"))
 
-        pending_action_type = cast(
-            Literal["TechnicalAssetOutputPort"] | Unset,
-            d.pop("pending_action_type", UNSET),
-        )
-        if pending_action_type != "TechnicalAssetOutputPort" and not isinstance(
-            pending_action_type, Unset
-        ):
+        request_type = cast(Literal["InputPort"] | Unset, d.pop("request_type", UNSET))
+        if request_type != "InputPort" and not isinstance(request_type, Unset):
             raise ValueError(
-                f"pending_action_type must match const 'TechnicalAssetOutputPort', got '{pending_action_type}'"
+                f"request_type must match const 'InputPort', got '{request_type}'"
             )
 
-        technical_asset_output_port_pending_action = cls(
+        input_port_request = cls(
             id=id,
+            justification=justification,
+            consuming_abstract_data_product_id=consuming_abstract_data_product_id,
             output_port_id=output_port_id,
-            output_port=output_port,
-            technical_asset_id=technical_asset_id,
-            technical_asset=technical_asset,
+            decision_note=decision_note,
             status=status,
             requested_on=requested_on,
-            denied_on=denied_on,
-            approved_on=approved_on,
+            output_port=output_port,
+            consuming_abstract_data_product=consuming_abstract_data_product,
             requested_by=requested_by,
             denied_by=denied_by,
             approved_by=approved_by,
-            pending_action_type=pending_action_type,
+            request_type=request_type,
         )
 
-        technical_asset_output_port_pending_action.additional_properties = d
-        return technical_asset_output_port_pending_action
+        input_port_request.additional_properties = d
+        return input_port_request
 
     @property
     def additional_keys(self) -> list[str]:

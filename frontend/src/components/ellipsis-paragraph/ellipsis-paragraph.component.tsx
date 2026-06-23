@@ -2,9 +2,9 @@ import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 type Props = {
-    justification: string;
+    text?: string | null;
 };
-export default function Justification({ justification }: Props) {
+export default function EllipsisParagraph({ text }: Props) {
     const { t } = useTranslation();
     return (
         <Typography.Paragraph
@@ -16,7 +16,7 @@ export default function Justification({ justification }: Props) {
                 onExpand: (e) => e.stopPropagation(),
             }}
         >
-            {justification}
+            {text}
         </Typography.Paragraph>
     );
 }

@@ -445,7 +445,8 @@ func (*ApproveOutputPortAsInputPortOKApplicationJSON) approveOutputPortAsInputPo
 
 // Ref: #/components/schemas/ApproveOutputPortAsInputPortRequest
 type ApproveOutputPortAsInputPortRequest struct {
-	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+	ConsumingDataProductID uuid.UUID    `json:"consuming_data_product_id"`
+	DecisionNote           OptNilString `json:"decision_note"`
 }
 
 // GetConsumingDataProductID returns the value of ConsumingDataProductID.
@@ -453,9 +454,19 @@ func (s *ApproveOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.U
 	return s.ConsumingDataProductID
 }
 
+// GetDecisionNote returns the value of DecisionNote.
+func (s *ApproveOutputPortAsInputPortRequest) GetDecisionNote() OptNilString {
+	return s.DecisionNote
+}
+
 // SetConsumingDataProductID sets the value of ConsumingDataProductID.
 func (s *ApproveOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
 	s.ConsumingDataProductID = val
+}
+
+// SetDecisionNote sets the value of DecisionNote.
+func (s *ApproveOutputPortAsInputPortRequest) SetDecisionNote(val OptNilString) {
+	s.DecisionNote = val
 }
 
 type ApproveOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
@@ -3644,6 +3655,7 @@ func (*DenyOutputPortAsInputPortOKApplicationJSON) denyOutputPortAsInputPortRes(
 // Ref: #/components/schemas/DenyOutputPortAsInputPortRequest
 type DenyOutputPortAsInputPortRequest struct {
 	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+	DecisionNote           string    `json:"decision_note"`
 }
 
 // GetConsumingDataProductID returns the value of ConsumingDataProductID.
@@ -3651,9 +3663,19 @@ func (s *DenyOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID
 	return s.ConsumingDataProductID
 }
 
+// GetDecisionNote returns the value of DecisionNote.
+func (s *DenyOutputPortAsInputPortRequest) GetDecisionNote() string {
+	return s.DecisionNote
+}
+
 // SetConsumingDataProductID sets the value of ConsumingDataProductID.
 func (s *DenyOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
 	s.ConsumingDataProductID = val
+}
+
+// SetDecisionNote sets the value of DecisionNote.
+func (s *DenyOutputPortAsInputPortRequest) SetDecisionNote(val string) {
+	s.DecisionNote = val
 }
 
 type DenyOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
@@ -6263,6 +6285,7 @@ type InputPort struct {
 	ID            uuid.UUID      `json:"id"`
 	Justification string         `json:"justification"`
 	Status        DecisionStatus `json:"status"`
+	DecisionNote  OptNilString   `json:"decision_note"`
 	OutputPortID  uuid.UUID      `json:"output_port_id"`
 	OutputPort    OutputPort     `json:"output_port"`
 }
@@ -6280,6 +6303,11 @@ func (s *InputPort) GetJustification() string {
 // GetStatus returns the value of Status.
 func (s *InputPort) GetStatus() DecisionStatus {
 	return s.Status
+}
+
+// GetDecisionNote returns the value of DecisionNote.
+func (s *InputPort) GetDecisionNote() OptNilString {
+	return s.DecisionNote
 }
 
 // GetOutputPortID returns the value of OutputPortID.
@@ -6305,6 +6333,11 @@ func (s *InputPort) SetJustification(val string) {
 // SetStatus sets the value of Status.
 func (s *InputPort) SetStatus(val DecisionStatus) {
 	s.Status = val
+}
+
+// SetDecisionNote sets the value of DecisionNote.
+func (s *InputPort) SetDecisionNote(val OptNilString) {
+	s.DecisionNote = val
 }
 
 // SetOutputPortID sets the value of OutputPortID.
@@ -9472,6 +9505,7 @@ type OutputPortInputPort struct {
 	ID                             uuid.UUID               `json:"id"`
 	Justification                  string                  `json:"justification"`
 	Status                         DecisionStatus          `json:"status"`
+	DecisionNote                   OptNilString            `json:"decision_note"`
 	ConsumingAbstractDataProductID uuid.UUID               `json:"consuming_abstract_data_product_id"`
 	ConsumingAbstractDataProduct   AbstractDataProductInfo `json:"consuming_abstract_data_product"`
 }
@@ -9489,6 +9523,11 @@ func (s *OutputPortInputPort) GetJustification() string {
 // GetStatus returns the value of Status.
 func (s *OutputPortInputPort) GetStatus() DecisionStatus {
 	return s.Status
+}
+
+// GetDecisionNote returns the value of DecisionNote.
+func (s *OutputPortInputPort) GetDecisionNote() OptNilString {
+	return s.DecisionNote
 }
 
 // GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
@@ -9514,6 +9553,11 @@ func (s *OutputPortInputPort) SetJustification(val string) {
 // SetStatus sets the value of Status.
 func (s *OutputPortInputPort) SetStatus(val DecisionStatus) {
 	s.Status = val
+}
+
+// SetDecisionNote sets the value of DecisionNote.
+func (s *OutputPortInputPort) SetDecisionNote(val OptNilString) {
+	s.DecisionNote = val
 }
 
 // SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.

@@ -19,6 +19,7 @@ export const dataProductTags = {
                 id,
             })) ?? []),
             ...(arg.input_ports?.output_ports?.map((id) => ({ type: TagTypes.History, id })) ?? []),
+            { type: TagTypes.MyRequests },
         ],
     },
     removeDataProduct: {
@@ -78,6 +79,7 @@ export const dataProductTags = {
             ...arg.requestInputPortsForDataProductRequest.output_ports.map((id) => ({ type: TagTypes.History, id })),
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
+            { type: TagTypes.MyRequests },
         ],
     },
     unlinkInputPortFromDataProduct: {

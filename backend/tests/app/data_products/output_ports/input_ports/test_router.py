@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
@@ -204,16 +205,6 @@ class TestInputPortsRouter:
         )
         assert link.status_code == 200
 
-    def test_approve_data_product_link(self, client):
-        link = self.create_link_with_status()
-        response = self.approve_output_port_as_input_port(
-            client,
-            link.dataset.data_product.id,
-            link.dataset.id,
-            link.consuming_abstract_data_product.id,
-        )
-        assert response.status_code == 200
-
     def test_approve_output_port_as_input_port(self, client):
         link = self.create_link_with_status()
         response = self.approve_output_port_as_input_port(
@@ -223,6 +214,17 @@ class TestInputPortsRouter:
             link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200, response.text
+
+    def test_approve_output_port_as_input_port_reasoning(self, client):
+        link = self.create_link_with_status()
+        response = self.approve_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
+            decisionNote="I think this is a great use case!",
+        )
+        assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
     def test_approve_data_product_link_by_admin(self, client):
@@ -270,16 +272,6 @@ class TestInputPortsRouter:
             status=status,
         )
 
-    def test_deny_data_product_link(self, client):
-        link = self.create_link_with_status()
-        response = self.deny_output_port_as_input_port(
-            client,
-            link.dataset.data_product.id,
-            link.dataset.id,
-            link.consuming_abstract_data_product.id,
-        )
-        assert response.status_code == 200
-
     def test_deny_output_port_as_input_port(self, client):
         link = self.create_link_with_status()
         response = self.deny_output_port_as_input_port(
@@ -289,6 +281,16 @@ class TestInputPortsRouter:
             link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200, response.text
+
+    def test_deny_output_port_as_input_port_reasoning_required(self, client):
+        link = self.create_link_with_status()
+        response = client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(link.dataset.data_product.id, link.dataset.id)}/deny",
+            json={
+                "consuming_data_product_id": f"{link.consuming_abstract_data_product.id}"
+            },
+        )
+        assert response.status_code == 422, response.text
 
     @pytest.mark.usefixtures("admin")
     def test_deny_data_product_link_by_admin(self, client):
@@ -600,20 +602,34 @@ class TestInputPortsRouter:
 
     @staticmethod
     def approve_output_port_as_input_port(
-        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+        client: TestClient,
+        data_product_id,
+        output_port_id,
+        consuming_data_product_id,
+        decisionNote: Optional[str] = None,
     ) -> Response:
+        body = {"consuming_data_product_id": f"{consuming_data_product_id}"}
+        if decisionNote:
+            body["decision_note"] = decisionNote
         return client.post(
             f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve",
-            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+            json=body,
         )
 
     @staticmethod
     def deny_output_port_as_input_port(
-        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+        client: TestClient,
+        data_product_id,
+        output_port_id,
+        consuming_data_product_id,
+        decisionNote: str = "Denied?!",
     ) -> Response:
         return client.post(
             f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/deny",
-            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+            json={
+                "consuming_data_product_id": f"{consuming_data_product_id}",
+                "decision_note": decisionNote,
+            },
         )
 
     @staticmethod

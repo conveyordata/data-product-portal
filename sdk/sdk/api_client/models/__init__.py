@@ -74,11 +74,8 @@ from .data_product_life_cycle_create import DataProductLifeCycleCreate
 from .data_product_life_cycle_update import DataProductLifeCycleUpdate
 from .data_product_life_cycles_get import DataProductLifeCyclesGet
 from .data_product_life_cycles_get_item import DataProductLifeCyclesGetItem
-from .data_product_output_port_pending_action import DataProductOutputPortPendingAction
 from .data_product_role_assignment_event import DataProductRoleAssignmentEvent
-from .data_product_role_assignment_pending_action import (
-    DataProductRoleAssignmentPendingAction,
-)
+from .data_product_role_assignment_request import DataProductRoleAssignmentRequest
 from .data_product_role_assignment_response import DataProductRoleAssignmentResponse
 from .data_product_setting import DataProductSetting
 from .data_product_setting_create import DataProductSettingCreate
@@ -181,6 +178,7 @@ from .graph import Graph
 from .http_validation_error import HTTPValidationError
 from .input_port import InputPort
 from .input_port_event import InputPortEvent
+from .input_port_request import InputPortRequest
 from .is_admin_response import IsAdminResponse
 from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
 from .link_input_ports_to_data_product_post import LinkInputPortsToDataProductPost
@@ -200,6 +198,7 @@ from .list_output_port_role_assignments_response import (
 from .modify_data_product_role_assignment import ModifyDataProductRoleAssignment
 from .modify_global_role_assignment import ModifyGlobalRoleAssignment
 from .modify_output_port_role_assignment import ModifyOutputPortRoleAssignment
+from .my_requests_response import MyRequestsResponse
 from .node import Node
 from .node_data import NodeData
 from .node_type import NodeType
@@ -301,9 +300,7 @@ from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
 from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
-from .technical_asset_output_port_pending_action import (
-    TechnicalAssetOutputPortPendingAction,
-)
+from .technical_asset_output_port_request import TechnicalAssetOutputPortRequest
 from .technical_asset_status import TechnicalAssetStatus
 from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
@@ -400,9 +397,8 @@ __all__ = (
     "DataProductLifeCyclesGet",
     "DataProductLifeCyclesGetItem",
     "DataProductLifeCycleUpdate",
-    "DataProductOutputPortPendingAction",
     "DataProductRoleAssignmentEvent",
-    "DataProductRoleAssignmentPendingAction",
+    "DataProductRoleAssignmentRequest",
     "DataProductRoleAssignmentResponse",
     "DataProductSetting",
     "DataProductSettingCreate",
@@ -485,6 +481,7 @@ __all__ = (
     "HTTPValidationError",
     "InputPort",
     "InputPortEvent",
+    "InputPortRequest",
     "IsAdminResponse",
     "LinkInputPortsToDataProduct",
     "LinkInputPortsToDataProductPost",
@@ -496,6 +493,7 @@ __all__ = (
     "ModifyDataProductRoleAssignment",
     "ModifyGlobalRoleAssignment",
     "ModifyOutputPortRoleAssignment",
+    "MyRequestsResponse",
     "Node",
     "NodeData",
     "NodeType",
@@ -573,7 +571,7 @@ __all__ = (
     "TechnicalAsset",
     "TechnicalAssetEvent",
     "TechnicalAssetLink",
-    "TechnicalAssetOutputPortPendingAction",
+    "TechnicalAssetOutputPortRequest",
     "TechnicalAssetStatus",
     "TechnicalInfo",
     "TechnicalMapping",

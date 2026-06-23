@@ -21,50 +21,34 @@ export function InputPortActionButton({ output_port, canRemoveAccess, handleRemo
                 setLoading(true);
                 await handleRemove(datasetId);
                 dispatchMessage({
-                    content: t('Output Port {{name}} has been removed', { name }),
+                    content:
+                        status === DecisionStatus.Pending
+                            ? t('Request to link Output Port {{name}} has been cancelled', { name })
+                            : t('Output Port {{name}} has been removed', { name }),
                     type: 'success',
                 });
             } catch (error) {
-                console.error('Failed to remove Output port', error);
+                status === DecisionStatus.Pending
+                    ? console.error('Failed to cancel Output port link request', error)
+                    : console.error('Failed to remove Output port', error);
             }
         },
-        [handleRemove, t],
+        [handleRemove, t, status],
     );
-
-    const handleCancelDatasetLinkRequest = useCallback(
-        async (datasetId: string, name: string) => {
-            try {
-                setLoading(true);
-                await handleRemove(datasetId);
-                dispatchMessage({
-                    content: t('Request to link Output Port {{name}} has been cancelled', { name }),
-                    type: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to cancel Output port link request', error);
-            }
-        },
-        [handleRemove, t],
-    );
-
-    const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');
-    const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Output Port');
-    const popupDescription =
-        status === DecisionStatus.Pending
-            ? t('Are you sure you want to cancel the request to link {{name}}?', {
-                  name: output_port.name,
-              })
-            : t('Are you sure you want to remove {{name}}?', {
-                  name: output_port.name,
-              });
-    const onConfirm =
-        status === DecisionStatus.Pending ? handleCancelDatasetLinkRequest : handleRemoveDatasetFromDataProduct;
 
     return (
         <Popconfirm
-            title={popupTitle}
-            description={popupDescription}
-            onConfirm={() => onConfirm(output_port.id, output_port.name)}
+            title={status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Output Port')}
+            description={
+                status === DecisionStatus.Pending
+                    ? t('Are you sure you want to cancel the request to link {{name}}?', {
+                          name: output_port.name,
+                      })
+                    : t('Are you sure you want to remove {{name}}?', {
+                          name: output_port.name,
+                      })
+            }
+            onConfirm={() => handleRemoveDatasetFromDataProduct(output_port.id, output_port.name)}
             placement={'leftTop'}
             okText={t('Confirm')}
             cancelText={t('Cancel')}
@@ -72,7 +56,7 @@ export function InputPortActionButton({ output_port, canRemoveAccess, handleRemo
             autoAdjustOverflow={true}
         >
             <Button loading={loading} disabled={!canRemoveAccess} type={'link'}>
-                {buttonText}
+                {status === DecisionStatus.Pending ? t('Cancel') : t('Remove')}
             </Button>
         </Popconfirm>
     );

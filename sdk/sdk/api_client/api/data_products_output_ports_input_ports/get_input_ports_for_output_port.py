@@ -21,7 +21,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports".format(
+        "url": "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/".format(
             data_product_id=quote(str(data_product_id), safe=""),
             output_port_id=quote(str(output_port_id), safe=""),
         ),

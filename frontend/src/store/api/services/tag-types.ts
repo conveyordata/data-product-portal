@@ -35,6 +35,7 @@ export enum TagTypes {
     History = 'History',
     Notifications = 'Notifications',
     PendingAction = 'PendingAction',
+    MyRequests = 'MyRequests',
     AccessDuration = 'AccessDuration',
 }
 

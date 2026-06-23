@@ -2,14 +2,14 @@ import { Space, theme } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PendingAction } from '@/types/pending-actions/pending-request-types';
-import { formatDate } from '@/utils/date.helper';
-import { UserAvatarWithEmail } from '../user-avatar/user-avatar-with-email.component';
-import type { TableRow } from './request-utils';
-import { ReviewButton } from './review-button';
+import { ReviewButton } from '@/components/pending-access-requests-modal/review-button.tsx';
+import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component.tsx';
+import type { TableRow } from '@/pages/product-studio/components/requests/request-utils.ts';
+import type { Request } from '@/types/request-types/request-types.tsx';
+import { formatDate } from '@/utils/date.helper.ts';
 
 type UseTableColumnsParams = {
-    onReview: (action: PendingAction) => void;
+    onReview: (action: Request) => void;
 };
 
 export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsType<TableRow> {

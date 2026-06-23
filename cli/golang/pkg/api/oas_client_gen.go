@@ -358,7 +358,7 @@ type Invoker interface {
 	//
 	// Get Input Ports For Output Port.
 	//
-	// GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports
+	// GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/
 	GetInputPortsForOutputPort(ctx context.Context, params GetInputPortsForOutputPortParams) (GetInputPortsForOutputPortRes, error)
 	// GetJwtToken invokes get_jwt_token operation.
 	//
@@ -4231,7 +4231,7 @@ func (c *Client) sendGetExplorations(ctx context.Context, params GetExplorations
 //
 // Get Input Ports For Output Port.
 //
-// GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports
+// GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/
 func (c *Client) GetInputPortsForOutputPort(ctx context.Context, params GetInputPortsForOutputPortParams) (GetInputPortsForOutputPortRes, error) {
 	res, err := c.sendGetInputPortsForOutputPort(ctx, params)
 	return res, err
@@ -4279,7 +4279,7 @@ func (c *Client) sendGetInputPortsForOutputPort(ctx context.Context, params GetI
 		}
 		pathParts[3] = encoded
 	}
-	pathParts[4] = "/input_ports"
+	pathParts[4] = "/input_ports/"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)

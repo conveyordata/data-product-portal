@@ -3,8 +3,10 @@ from typing import Optional
 from uuid import UUID
 from warnings import deprecated
 
+from pydantic import Field
+
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.data_products.output_ports.schema import Dataset, OutputPort
+from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import (
     TechnicalAsset as TechnicalAssetBaseSchema,
@@ -28,10 +30,10 @@ class DataOutput(TechnicalAssetBaseSchema):
 
 class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
     id: UUID
-    output_port_id: UUID
-    output_port: OutputPort
-    technical_asset_id: UUID
-    technical_asset: OwnedTechnicalAsset
+    output_port_id: UUID = Field(validation_alias="dataset_id")
+    output_port: OutputPort = Field(validation_alias="dataset")
+    technical_asset_id: UUID = Field(validation_alias="data_output_id")
+    technical_asset: OwnedTechnicalAsset = Field(validation_alias="data_output")
     status: DecisionStatus
     requested_on: datetime
     denied_on: Optional[datetime]
@@ -41,43 +43,6 @@ class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
     requested_by: User
     denied_by: Optional[User]
     approved_by: Optional[User]
-
-
-class BaseDataOutputDatasetAssociationGet(ORMModel):
-    id: UUID
-    dataset_id: UUID
-    data_output_id: UUID
-    status: DecisionStatus
-    requested_on: datetime
-    denied_on: Optional[datetime]
-    approved_on: Optional[datetime]
-
-    # Nested schemas
-    dataset: Dataset
-    data_output: DataOutput
-    requested_by: User
-    denied_by: Optional[User]
-    approved_by: Optional[User]
-
-    def convert(self) -> BaseTechnicalAssetOutputPortAssociationGet:
-        base = self.model_dump(
-            exclude={"dataset_id", "data_output_id", "dataset", "data_output"}
-        )
-        return BaseTechnicalAssetOutputPortAssociationGet(
-            **base,
-            output_port_id=self.dataset_id,
-            technical_asset_id=self.data_output_id,
-            output_port=self.dataset.convert(),
-            technical_asset=self.data_output.convert(),
-        )
-
-
-class DataOutputDatasetAssociationGet(BaseDataOutputDatasetAssociationGet):
-    pass
-
-
-class DataOutputDatasetAssociationsGet(BaseDataOutputDatasetAssociationGet):
-    pass
 
 
 class TechnicalAssetOutputPortAssociationsGet(
