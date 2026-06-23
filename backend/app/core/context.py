@@ -1,4 +1,5 @@
 from contextvars import ContextVar, Token
+from typing import Sequence
 
 from pydantic import BaseModel
 
@@ -17,15 +18,19 @@ def close_event_context(token: Token) -> None:
     _pending_events.reset(token)
 
 
-def queue_event(event: BaseModel) -> None:
+def queue_events(events: Sequence[BaseModel]) -> None:
     lst = _pending_events.get()
     if lst is None:
         logger.warning(
-            "Event queued outside of a request context and will be dropped: %s",
-            type(event).__name__,
+            "Events queued outside of a request context and will be dropped: %s",
+            [type(event).__name__ for event in events],
         )
         return
-    lst.append(event)
+    lst.extend(events)
+
+
+def queue_event(event: BaseModel) -> None:
+    queue_events([event])
 
 
 def pop_events() -> list[BaseModel]:

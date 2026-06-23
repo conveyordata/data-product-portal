@@ -322,3 +322,16 @@ We generally recommend the following pattern:
 - **Input Port created / approved** — assign that role to the consumer's principal.
 - **Input Port removed / rejected** — revoke the role assignment from the consumer's
   principal.
+
+
+### When a technical assets is added or removed from an output port, I want every consumer to be reconciled.
+
+We generally recommend against this pattern, see the recommended pattern in the [FAQ above](#how-should-i-handle-input-port-and-technical-asset-changes).
+However sometimes it's necessary, or you need it during a migration. In this case you can add the following setting to your Portal installation:
+
+```
+WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS=True
+```
+
+This will trigger a reconcile for every consumer when a Technical Asset is added or removed from an Output Port.
+However this results in a lot of reconciles and can be slow, we generally recommend against this pattern.

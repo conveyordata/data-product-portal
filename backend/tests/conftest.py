@@ -144,6 +144,22 @@ def webhook_v2_config(url: str | None = "http://test-v2.example.com/hook"):
         settings.WEBHOOK_V2_URL = original
 
 
+@contextmanager
+def webhook_v2_input_port_events_from_technical_asset_output_port_link(
+    enabled: bool = True,
+):
+    original = (
+        settings.WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS
+    )
+    settings.WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS = (
+        enabled
+    )
+    try:
+        yield
+    finally:
+        settings.WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS = original
+
+
 @pytest.fixture
 def mock_webhook() -> Iterator[AsyncMock]:
     with (

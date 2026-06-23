@@ -1,12 +1,13 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.core.webhooks.events import OutputPortTechnicalAssetLinkEvent
+from app.core.webhooks.events import OutputPortTechnicalAssetLinkEvent, V2Event
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
+from app.settings import settings
 
 if TYPE_CHECKING:
     from app.data_products.output_ports.model import Dataset
@@ -67,6 +68,23 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
             "data_output_id", "dataset_id", name="unique_data_output_dataset"
         ),
     )
+
+    def generate_extra_events(self, connection) -> Sequence[V2Event]:
+        if settings.WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS:
+            from sqlalchemy.orm import object_session
+
+            from app.abstract_data_product.input_ports.model import InputPort
+
+            db = object_session(self)
+            if db is None:
+                return []
+            input_ports = (
+                db.query(InputPort)
+                .filter(InputPort.dataset_id == self.dataset_id)
+                .all()
+            )
+            return [ip.to_event() for ip in input_ports]
+        return []
 
     def to_event(self) -> OutputPortTechnicalAssetLinkEvent:
         return OutputPortTechnicalAssetLinkEvent(
