@@ -6,10 +6,10 @@ import { DataProductOutlined, ExplorationOutlined, OutputPortOutlined } from '@/
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { ExplorationsTab } from '@/pages/product-studio/components/explorations-tab/explorations-tab.component';
+import { PendingAccessRequestsView } from '@/pages/product-studio/components/requests-panel/pending-access-requests-view.tsx';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { DataProductsTab } from './components/data-products-tab/data-products-tab.component';
 import { OutputPortsTab } from './components/output-ports-tab/output-ports-tab.component';
-import { PendingAccessRequestsView } from './components/requests-panel/pending-access-requests-view';
 import { TabKeys } from './product-studio-tabkeys';
 
 export function ProductStudio() {

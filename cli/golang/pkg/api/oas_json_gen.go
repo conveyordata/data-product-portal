@@ -788,10 +788,17 @@ func (s *ApproveOutputPortAsInputPortRequest) encodeFields(e *jx.Encoder) {
 		e.FieldStart("consuming_data_product_id")
 		json.EncodeUUID(e, s.ConsumingDataProductID)
 	}
+	{
+		if s.Reasoning.Set {
+			e.FieldStart("reasoning")
+			s.Reasoning.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfApproveOutputPortAsInputPortRequest = [1]string{
+var jsonFieldsNameOfApproveOutputPortAsInputPortRequest = [2]string{
 	0: "consuming_data_product_id",
+	1: "reasoning",
 }
 
 // Decode decodes ApproveOutputPortAsInputPortRequest from json.
@@ -814,6 +821,16 @@ func (s *ApproveOutputPortAsInputPortRequest) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"consuming_data_product_id\"")
+			}
+		case "reasoning":
+			if err := func() error {
+				s.Reasoning.Reset()
+				if err := s.Reasoning.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reasoning\"")
 			}
 		default:
 			return d.Skip()
@@ -9887,10 +9904,15 @@ func (s *DenyOutputPortAsInputPortRequest) encodeFields(e *jx.Encoder) {
 		e.FieldStart("consuming_data_product_id")
 		json.EncodeUUID(e, s.ConsumingDataProductID)
 	}
+	{
+		e.FieldStart("reasoning")
+		e.Str(s.Reasoning)
+	}
 }
 
-var jsonFieldsNameOfDenyOutputPortAsInputPortRequest = [1]string{
+var jsonFieldsNameOfDenyOutputPortAsInputPortRequest = [2]string{
 	0: "consuming_data_product_id",
+	1: "reasoning",
 }
 
 // Decode decodes DenyOutputPortAsInputPortRequest from json.
@@ -9914,6 +9936,18 @@ func (s *DenyOutputPortAsInputPortRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"consuming_data_product_id\"")
 			}
+		case "reasoning":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Reasoning = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reasoning\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -9924,7 +9958,7 @@ func (s *DenyOutputPortAsInputPortRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -16743,6 +16777,12 @@ func (s *InputPort) encodeFields(e *jx.Encoder) {
 		s.Status.Encode(e)
 	}
 	{
+		if s.Reasoning.Set {
+			e.FieldStart("reasoning")
+			s.Reasoning.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("output_port_id")
 		json.EncodeUUID(e, s.OutputPortID)
 	}
@@ -16752,12 +16792,13 @@ func (s *InputPort) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfInputPort = [5]string{
+var jsonFieldsNameOfInputPort = [6]string{
 	0: "id",
 	1: "justification",
 	2: "status",
-	3: "output_port_id",
-	4: "output_port",
+	3: "reasoning",
+	4: "output_port_id",
+	5: "output_port",
 }
 
 // Decode decodes InputPort from json.
@@ -16803,8 +16844,18 @@ func (s *InputPort) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"status\"")
 			}
+		case "reasoning":
+			if err := func() error {
+				s.Reasoning.Reset()
+				if err := s.Reasoning.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reasoning\"")
+			}
 		case "output_port_id":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
 				s.OutputPortID = v
@@ -16816,7 +16867,7 @@ func (s *InputPort) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"output_port_id\"")
 			}
 		case "output_port":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.OutputPort.Decode(d); err != nil {
 					return err
@@ -16835,7 +16886,7 @@ func (s *InputPort) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00110111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -21528,6 +21579,12 @@ func (s *OutputPortInputPort) encodeFields(e *jx.Encoder) {
 		s.Status.Encode(e)
 	}
 	{
+		if s.Reasoning.Set {
+			e.FieldStart("reasoning")
+			s.Reasoning.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("consuming_abstract_data_product_id")
 		json.EncodeUUID(e, s.ConsumingAbstractDataProductID)
 	}
@@ -21537,12 +21594,13 @@ func (s *OutputPortInputPort) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOutputPortInputPort = [5]string{
+var jsonFieldsNameOfOutputPortInputPort = [6]string{
 	0: "id",
 	1: "justification",
 	2: "status",
-	3: "consuming_abstract_data_product_id",
-	4: "consuming_abstract_data_product",
+	3: "reasoning",
+	4: "consuming_abstract_data_product_id",
+	5: "consuming_abstract_data_product",
 }
 
 // Decode decodes OutputPortInputPort from json.
@@ -21588,8 +21646,18 @@ func (s *OutputPortInputPort) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"status\"")
 			}
+		case "reasoning":
+			if err := func() error {
+				s.Reasoning.Reset()
+				if err := s.Reasoning.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reasoning\"")
+			}
 		case "consuming_abstract_data_product_id":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
 				s.ConsumingAbstractDataProductID = v
@@ -21601,7 +21669,7 @@ func (s *OutputPortInputPort) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"consuming_abstract_data_product_id\"")
 			}
 		case "consuming_abstract_data_product":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.ConsumingAbstractDataProduct.Decode(d); err != nil {
 					return err
@@ -21620,7 +21688,7 @@ func (s *OutputPortInputPort) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00110111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

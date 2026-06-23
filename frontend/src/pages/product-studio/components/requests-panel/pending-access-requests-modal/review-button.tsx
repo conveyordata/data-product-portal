@@ -1,7 +1,7 @@
 import { EyeOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { PendingAction } from '@/types/pending-actions/pending-request-types';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 
 type Props = {
     action: PendingAction;

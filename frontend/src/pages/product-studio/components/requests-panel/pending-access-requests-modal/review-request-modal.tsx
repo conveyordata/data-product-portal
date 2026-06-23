@@ -6,24 +6,30 @@ import {
     InfoCircleOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
+import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
-import type { PendingAction } from '@/types/pending-actions/pending-request-types';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 import {
     PendingRequestType_DataProductRoleAssignment,
     PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
-} from '@/types/pending-actions/pending-request-types';
-import { formatDate } from '@/utils/date.helper';
-import { AbstractProductIcon, DataProductOutlined, OutputPortOutlined, TechnicalAssetOutlined } from '../icons';
+} from '@/types/pending-actions/pending-request-types.tsx';
+import { formatDate } from '@/utils/date.helper.ts';
+import {
+    AbstractProductIcon,
+    DataProductOutlined,
+    OutputPortOutlined,
+    TechnicalAssetOutlined,
+} from '../../../../../components/icons';
 
 type Props = {
     action: PendingAction | null;
     open: boolean;
     onClose: () => void;
-    onAccept: (action: PendingAction) => void;
-    onReject: (action: PendingAction) => void;
+    onAccept: (action: PendingAction, reasoning?: string) => void;
+    onReject: (action: PendingAction, reasoning?: string) => void;
 };
 
 type RequestDetails = {
@@ -142,23 +148,34 @@ function getRequestDetails(
 
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }: Props) {
     const { t } = useTranslation();
+    const [form] = Form.useForm<{ reasoning: string }>();
+    const [isAccepting, setIsAccepting] = useState(false);
 
     if (!action) {
-        // throw exception
         return null;
-        // throw new Error('ReviewRequestModal opened without a pending action');
     }
 
     const details = getRequestDetails(action, t);
 
     const handleAccept = () => {
-        onAccept(action);
+        const { reasoning } = form.getFieldsValue();
+        onAccept(action, reasoning);
         onClose();
+        form.resetFields();
     };
 
     const handleReject = () => {
-        onReject(action);
-        onClose();
+        setIsAccepting(true);
+        form.validateFields()
+            .then(({ reasoning }) => {
+                onReject(action, reasoning);
+                onClose();
+                form.resetFields();
+            })
+            .catch(() => {
+                // validation failed — keep modal open
+            })
+            .finally(() => setIsAccepting(false));
     };
 
     if (!details) return null;
@@ -171,7 +188,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             width={800}
             footer={
                 <Space>
-                    <Button danger icon={<CloseOutlined />} onClick={handleReject}>
+                    <Button danger icon={<CloseOutlined />} loading={isAccepting} onClick={handleReject}>
                         {t('Decline')}
                     </Button>
                     <Button type="primary" icon={<CheckOutlined />} onClick={handleAccept}>
@@ -292,6 +309,20 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                         </Flex>
                     </Card>
                 </Col>
+                {action.pending_action_type === PendingRequestType_InputPort && (
+                    <Col span={24}>
+                        <Form form={form} layout="vertical">
+                            <Form.Item
+                                name="reasoning"
+                                label={t('Reasoning')}
+                                rules={[{ required: true, message: t('A reasoning is required when declining') }]}
+                                extra={t('Required when declining, optional when accepting')}
+                            >
+                                <Input.TextArea rows={3} />
+                            </Form.Item>
+                        </Form>
+                    </Col>
+                )}
             </Row>
         </Modal>
     );

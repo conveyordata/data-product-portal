@@ -1,6 +1,6 @@
 import copy
 from datetime import datetime
-from typing import Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
 import pytz
@@ -72,6 +72,7 @@ class InputPortService:
         output_port_id: UUID,
         consuming_data_product_id: UUID,
         actor: User,
+        reasoning: Optional[str] = None,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -85,6 +86,7 @@ class InputPortService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
+        current_link.reasoning = reasoning
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
@@ -111,6 +113,7 @@ class InputPortService:
         output_port_id: UUID,
         consuming_data_product_id: UUID,
         actor: User,
+        reasoning: str,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -124,6 +127,7 @@ class InputPortService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
+        current_link.reasoning = reasoning
         return current_link
 
     def remove_output_port_as_input_port(

@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from app.abstract_data_product.input_ports.model import (
@@ -21,10 +22,12 @@ class DataProductDatasetAssociationUpdate(DataProductDatasetAssociationCreate):
 
 class ApproveOutputPortAsInputPortRequest(ORMModel):
     consuming_data_product_id: UUID
+    reasoning: Optional[str] = None
 
 
 class DenyOutputPortAsInputPortRequest(ORMModel):
     consuming_data_product_id: UUID
+    reasoning: str
 
 
 class RemoveOutputPortAsInputPortRequest(ORMModel):

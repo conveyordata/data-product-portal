@@ -1,18 +1,18 @@
 import type {
     ApproveOutputPortAsInputPortApiArg,
     DenyOutputPortAsInputPortApiArg,
-} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi';
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import type {
     ApproveOutputPortTechnicalAssetLinkApiArg,
     DenyOutputPortTechnicalAssetLinkApiArg,
-} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi';
-import type { PendingAction } from '@/types/pending-actions/pending-request-types';
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 import {
     PendingRequestType_DataProductRoleAssignment,
     PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
-} from '@/types/pending-actions/pending-request-types';
-import type { DataProductRoleRequest } from '../../utils/pending-request.helper';
+} from '@/types/pending-actions/pending-request-types.tsx';
+import type { DataProductRoleRequest } from '@/utils/pending-request.helper.ts';
 
 type ActionHandlers = {
     handleAcceptDataProductDatasetLink: (req: ApproveOutputPortAsInputPortApiArg) => Promise<void>;
@@ -23,7 +23,11 @@ type ActionHandlers = {
     handleDenyAccessToDataProduct: (req: DataProductRoleRequest) => Promise<void>;
 };
 
-export async function acceptRequest(action: PendingAction, handlers: ActionHandlers): Promise<void> {
+export async function acceptRequest(
+    action: PendingAction,
+    handlers: ActionHandlers,
+    reasoning?: string,
+): Promise<void> {
     switch (action.pending_action_type) {
         case PendingRequestType_InputPort:
             return handlers.handleAcceptDataProductDatasetLink({
@@ -31,6 +35,7 @@ export async function acceptRequest(action: PendingAction, handlers: ActionHandl
                 outputPortId: action.output_port_id,
                 approveOutputPortAsInputPortRequest: {
                     consuming_data_product_id: action.consuming_abstract_data_product_id,
+                    reasoning: reasoning,
                 },
             });
         case PendingRequestType_TechnicalAssetOutputPort:
@@ -49,7 +54,11 @@ export async function acceptRequest(action: PendingAction, handlers: ActionHandl
     }
 }
 
-export async function rejectRequest(action: PendingAction, handlers: ActionHandlers): Promise<void> {
+export async function rejectRequest(
+    action: PendingAction,
+    handlers: ActionHandlers,
+    reasoning?: string,
+): Promise<void> {
     switch (action.pending_action_type) {
         case PendingRequestType_InputPort:
             return handlers.handleRejectDataProductDatasetLink({
@@ -57,6 +66,7 @@ export async function rejectRequest(action: PendingAction, handlers: ActionHandl
                 outputPortId: action.output_port_id,
                 denyOutputPortAsInputPortRequest: {
                     consuming_data_product_id: action.consuming_abstract_data_product_id,
+                    reasoning: reasoning!,
                 },
             });
         case PendingRequestType_TechnicalAssetOutputPort:

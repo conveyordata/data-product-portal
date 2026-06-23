@@ -3049,7 +3049,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports": {
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/": {
       "get": {
         "tags": [
           "Data Products - Output ports - Input ports"
@@ -7631,6 +7631,17 @@
             "type": "string",
             "format": "uuid",
             "title": "Consuming Data Product Id"
+          },
+          "reasoning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reasoning"
           }
         },
         "type": "object",
@@ -10092,11 +10103,16 @@
             "type": "string",
             "format": "uuid",
             "title": "Consuming Data Product Id"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
           }
         },
         "type": "object",
         "required": [
-          "consuming_data_product_id"
+          "consuming_data_product_id",
+          "reasoning"
         ],
         "title": "DenyOutputPortAsInputPortRequest"
       },
@@ -11761,6 +11777,17 @@
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
           },
+          "reasoning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reasoning"
+          },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
@@ -12547,6 +12574,17 @@
           },
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "reasoning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reasoning"
           },
           "consuming_abstract_data_product_id": {
             "type": "string",

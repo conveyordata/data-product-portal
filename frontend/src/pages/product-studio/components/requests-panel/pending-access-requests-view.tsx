@@ -1,19 +1,25 @@
 import { Flex, Input, Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ReviewRequestModal } from '@/components/requests/review-request-modal';
-import { useTablePagination } from '@/hooks/use-table-pagination';
-import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
-import type { PendingAction } from '@/types/pending-actions/pending-request-types';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import {
+    acceptRequest,
+    rejectRequest,
+} from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/request-handlers.ts';
+import {
+    type TableRow,
+    transformToTableRow,
+} from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/request-utils.ts';
+import { ReviewRequestModal } from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/review-request-modal.tsx';
+import { useTableColumns } from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/use-table-columns.tsx';
+import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 import {
     PendingRequestType_DataProductRoleAssignment,
     PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
-} from '@/types/pending-actions/pending-request-types';
-import { usePendingActionHandlers } from '@/utils/pending-request.helper';
-import { acceptRequest, rejectRequest } from '../../../../components/requests/request-handlers';
-import { type TableRow, transformToTableRow } from '../../../../components/requests/request-utils';
-import { useTableColumns } from '../../../../components/requests/use-table-columns';
+} from '@/types/pending-actions/pending-request-types.tsx';
+import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
 function filterBySearch(requests: PendingAction[], searchTerm: string): PendingAction[] {
     if (!searchTerm) return requests;
@@ -68,8 +74,8 @@ export function PendingAccessRequestsView() {
         return filteredData.map(transformToTableRow);
     }, [filteredData]);
 
-    const handleAccept = (action: PendingAction) => acceptRequest(action, handlers);
-    const handleReject = (action: PendingAction) => rejectRequest(action, handlers);
+    const handleAccept = (action: PendingAction, reasoning?: string) => acceptRequest(action, handlers, reasoning);
+    const handleReject = (action: PendingAction, reasoning?: string) => rejectRequest(action, handlers, reasoning);
     const handleReview = (action: PendingAction) => setReviewingAction(action);
 
     const columns = useTableColumns({

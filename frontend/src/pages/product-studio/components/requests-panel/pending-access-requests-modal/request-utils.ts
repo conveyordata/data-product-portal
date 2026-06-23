@@ -1,10 +1,10 @@
 import type { User } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import type { PendingAction } from '@/types/pending-actions/pending-request-types';
+import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 import {
     PendingRequestType_DataProductRoleAssignment,
     PendingRequestType_InputPort,
     PendingRequestType_TechnicalAssetOutputPort,
-} from '@/types/pending-actions/pending-request-types';
+} from '@/types/pending-actions/pending-request-types.tsx';
 
 export interface TableRow {
     key: string;

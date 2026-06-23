@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.decision_status import DecisionStatus
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.abstract_data_product_info import AbstractDataProductInfo
@@ -25,6 +26,7 @@ class OutputPortInputPort:
         status (DecisionStatus):
         consuming_abstract_data_product_id (UUID):
         consuming_abstract_data_product (AbstractDataProductInfo):
+        reasoning (None | str | Unset):
     """
 
     id: UUID
@@ -32,6 +34,7 @@ class OutputPortInputPort:
     status: DecisionStatus
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo
+    reasoning: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -47,6 +50,12 @@ class OutputPortInputPort:
 
         consuming_abstract_data_product = self.consuming_abstract_data_product.to_dict()
 
+        reasoning: None | str | Unset
+        if isinstance(self.reasoning, Unset):
+            reasoning = UNSET
+        else:
+            reasoning = self.reasoning
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -58,6 +67,8 @@ class OutputPortInputPort:
                 "consuming_abstract_data_product": consuming_abstract_data_product,
             }
         )
+        if reasoning is not UNSET:
+            field_dict["reasoning"] = reasoning
 
         return field_dict
 
@@ -80,12 +91,22 @@ class OutputPortInputPort:
             d.pop("consuming_abstract_data_product")
         )
 
+        def _parse_reasoning(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        reasoning = _parse_reasoning(d.pop("reasoning", UNSET))
+
         output_port_input_port = cls(
             id=id,
             justification=justification,
             status=status,
             consuming_abstract_data_product_id=consuming_abstract_data_product_id,
             consuming_abstract_data_product=consuming_abstract_data_product,
+            reasoning=reasoning,
         )
 
         output_port_input_port.additional_properties = d
