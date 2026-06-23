@@ -1,9 +1,11 @@
+import { usePostHog } from '@posthog/react';
 import { Card, Space, Table, Tag, Typography } from 'antd';
 import type { TFunction } from 'i18next';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import type { SchemaPropertyResponse } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetOutputPortSchemaQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import styles from './data-model-tab.module.scss';
@@ -78,10 +80,19 @@ function getPropertyColumns(t: TFunction) {
 
 export function DataModelTab({ datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const { data, isLoading } = useGetOutputPortSchemaQuery({ id: datasetId, dataProductId });
     const schemaObjects = data?.schema_objects ?? [];
 
     const [activeTab, setActiveTab] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        if (!isLoading && data !== undefined) {
+            posthog.capture(PosthogEvents.OUTPUT_PORT_DATA_MODEL_LOADED, {
+                data_model_defined: data?.schema_objects?.length !== 0,
+            });
+        }
+    }, [isLoading, data, posthog]);
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -130,7 +141,14 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
     };
 
     return (
-        <Card size="small" tabList={tabList} onTabChange={setActiveTab}>
+        <Card
+            size="small"
+            tabList={tabList}
+            onTabChange={(key: string) => {
+                posthog.capture(PosthogEvents.OUTPUT_PORT_DATA_MODEL_TABLE, { tab: key });
+                setActiveTab(key);
+            }}
+        >
             {renderSchema(activeTab)}
         </Card>
     );
