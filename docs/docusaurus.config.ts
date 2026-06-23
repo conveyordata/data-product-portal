@@ -178,6 +178,9 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
       additionalLanguages: ["bash", "csharp", "java", "php", "ruby", "scala"],
     },
+    mermaid: {
+      theme: { light: 'neutral', dark: 'dark' },
+    },
   } satisfies Preset.ThemeConfig,
 };
 
