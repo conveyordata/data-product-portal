@@ -1,4 +1,5 @@
 @use "@/styles/colors";
+@use "@/styles/globals";
 
 .primary-key-flag {
     color: colors.$blue-6;
@@ -13,4 +14,14 @@
 .partitioned-flag {
     color: colors.$cyan-6;
     font-weight: 500;
+}
+
+.empty-container {
+    width: 100%;
+    padding-top: globals.$spacing-l;
+}
+
+.empty-icon {
+    color: colors.$info-color;
+    font-size: 64px;
 }
