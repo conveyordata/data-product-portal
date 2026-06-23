@@ -77,6 +77,8 @@ podLabels: {}
 
 podSecurityContext: {}
 
+extraConfigMapValues:
+
 securityContext:
   readOnlyRootFilesystem: true
   runAsNonRoot: true

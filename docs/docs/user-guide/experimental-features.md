@@ -50,6 +50,11 @@ MCP_AUTH_REDIRECT_URIS='["http://127.0.0.1:*"]'
 MCP_AUTH_REDIRECT_URIS='["cursor://anysphere.cursor-mcp/oauth/callback"]'
 ```
 
+### Claude desktop
+```dotenv
+MCP_AUTH_REDIRECT_URIS='["https://claude.ai/api/mcp/auth_callback"]'
+```
+
 Add the following JSON configuration to your MCP client configuration, this example users VSCode:
 
 ```json

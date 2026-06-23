@@ -8,6 +8,7 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 from fastmcp.utilities.lifespan import combine_lifespans
@@ -106,6 +107,17 @@ app = FastAPI(
 )
 
 app.mount("/mcp", mcp_app)
+
+
+@app.api_route(
+    "/mcp",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+    include_in_schema=False,
+)
+async def redirect_mcp_to_slash(request: Request):
+    return RedirectResponse(url="/mcp/", status_code=307)
+
+
 # We need to add the MCP well known authentication routes here.
 # The problem is we mounted the MCP under `/mcp`, but these need to be mounted without that.
 # So we add the well_known routes properly
