@@ -1,6 +1,10 @@
 {
-    "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-    "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+    "$schema": "https://biomejs.dev/schemas/2.5.1/schema.json",
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true
+    },
     "files": {
         "ignoreUnknown": false,
         "includes": ["**", "!**/*.svg", "!**/config.docker.js", "!**/*.d.ts", "!src/store/api/services/generated"]
@@ -16,7 +20,13 @@
         "attributePosition": "auto",
         "bracketSpacing": true
     },
-    "assist": { "actions": { "source": { "organizeImports": "on" } } },
+    "assist": {
+        "actions": {
+            "source": {
+                "organizeImports": "on"
+            }
+        }
+    },
     "linter": {
         "enabled": true,
         "rules": {
@@ -29,7 +39,8 @@
                 "noUselessCatch": "error",
                 "noUselessThisAlias": "error",
                 "noUselessTypeConstraint": "error",
-                "noAdjacentSpacesInRegex": "error"
+                "noAdjacentSpacesInRegex": "error",
+                "noImportantStyles": "off"
             },
             "correctness": {
                 "noConstAssign": "error",
@@ -57,7 +68,13 @@
                 "useValidForDirection": "error",
                 "useYield": "error",
                 "noInvalidBuiltinInstantiation": "error",
-                "useValidTypeof": "error"
+                "useValidTypeof": "error",
+                "noUnknownPseudoClass": {
+                    "level": "on",
+                    "options": {
+                        "ignore": ["global"]
+                    }
+                }
             },
             "style": {
                 "noRestrictedImports": {
