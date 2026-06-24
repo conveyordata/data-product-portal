@@ -29,12 +29,17 @@ export enum PosthogEvents {
     DATA_PRODUCT_TOUR_FINISHED = 'data_product_tour_finished',
     DATA_PRODUCT_TOUR_CLOSED = 'data_product_tour_closed',
 
-    CART_CHECKOUT_COMPLETED = 'cart_checkout_completed',
+    CART_DATA_PRODUCT_OR_EXPLORATION_CHOICE = 'cart_data_product_or_exploration_choice',
+    CART_EXISTING_OR_NEW_CHOICE = 'cart_existing_or_new_choice',
+
     CART_CHECKOUT_COMPLETED_EXISTING_DATA_PRODUCT = 'cart_checkout_completed_existing_data_product',
     CART_CHECKOUT_COMPLETED_NEW_DATA_PRODUCT = 'cart_checkout_completed_new_data_product',
     CART_CHECKOUT_COMPLETED_EXISTING_EXPLORATION = 'cart_checkout_completed_existing_exploration',
     CART_CHECKOUT_COMPLETED_NEW_EXPLORATION = 'cart_checkout_completed_new_exploration',
-    CART_CREATE_DATA_PRODUCT = 'cart_create_data_product',
+
+    OUTPUT_PORT_TAB = 'output_port_tab',
+    OUTPUT_PORT_DATA_MODEL_TABLE = 'output_port_data_model_table',
+    OUTPUT_PORT_DATA_MODEL_LOADED = 'output_port_data_model_loaded',
 
     ADMIN_PRIVILEGES_GRANTED = 'admin_privileges_granted',
     ADMIN_PRIVILEGES_REVOKED = 'admin_privileges_revoked',
