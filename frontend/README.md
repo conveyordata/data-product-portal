@@ -89,10 +89,10 @@ If you want manual linting/formatting, you can always execute the commands below
 
 ```bash
 # To detect issues
-npm run check
+npm run biome
 
 # To detect issues and fix them automatically where possible
-npm run check:fix
+npm run biome:fix
 ```
 
 ## Translations

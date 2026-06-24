@@ -10,8 +10,9 @@
         "preview": "npm run copy-config && npm run build && vite preview",
         "test": "vitest",
         "test:run": "vitest run",
-        "check": "biome check --error-on-warnings && npm run typecheck && npm run validate-translations",
-        "check:fix": "biome check --write --error-on-warnings && npm run typecheck && npm run validate-translations",
+        "biome": "biome check --error-on-warnings && npm run typecheck && npm run validate-translations",
+        "biome:fix": "biome check --write --error-on-warnings && npm run typecheck && npm run validate-translations",
+        "biome:migrate": "biome migrate --write",
         "typecheck": "tsc --strict --noEmit",
         "extract-translations": "npx i18next-cli extract",
         "validate-translations": "npx i18next-cli extract --ci --dry-run",
@@ -64,7 +65,7 @@
         "web-worker": "^1.5.0"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.5.0",
+        "@biomejs/biome": "2.5.1",
         "@rtk-query/codegen-openapi": "^2.0.0",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.2",

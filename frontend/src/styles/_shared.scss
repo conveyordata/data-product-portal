@@ -1,10 +1,15 @@
-@use 'colors';
-@use 'variables';
+@use "colors";
+@use "variables";
 
 .default-icon {
     width: variables.$icon-size-default;
     height: variables.$icon-size-default;
     color: colors.$primary-color;
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
 
     &.primary {
         color: colors.$primary-color;
@@ -59,15 +64,6 @@
         height: variables.$icon-size-extra-large;
     }
 
-    &.inverted:not(.square-border) {
-        color: colors.$color-white;
-        background: colors.$primary-color;
-
-        svg {
-            fill: colors.$color-white;
-        }
-    }
-
     &.icon-border {
         padding: variables.$spacing-s;
         border: 2px solid colors.$primary-color;
@@ -118,9 +114,13 @@
         }
     }
 
-    svg {
-        width: 100%;
-        height: 100%;
+    &.inverted:not(.square-border) {
+        color: colors.$color-white;
+        background: colors.$primary-color;
+
+        svg {
+            fill: colors.$color-white;
+        }
     }
 }
 
