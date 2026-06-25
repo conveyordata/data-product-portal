@@ -843,49 +843,48 @@ def search_data_products(
     limit: int = 20,
     db: Session = Depends(get_db_session),
 ) -> dict[str, Any]:
+    def _execute(db: Session) -> dict[str, Any]:
+        all_data_products = DataProductService(db).get_data_products()
+        filtered_data_products = []
+
+        for dp in all_data_products:
+            if (
+                query
+                and query.lower() not in dp.name.lower()
+                and (not dp.description or query.lower() not in dp.description.lower())
+            ):
+                continue
+            if domain_id and str(dp.domain_id) != domain_id:
+                continue
+            if status and dp.status != status:
+                continue
+
+            filtered_data_products.append(
+                GetDataProductsResponseItem.model_validate(dp)
+            )
+            if len(filtered_data_products) >= limit:
+                break
+        return {
+            "data_products": [
+                GetDataProductsResponseItem.model_validate(dp).model_dump()
+                for dp in filtered_data_products
+            ],
+            "count": len(filtered_data_products),
+            "filters_applied": {
+                "query": query,
+                "domain_id": domain_id,
+                "status": status,
+            },
+        }
+
     try:
-        db = SessionLocal()
+        if db is not None:
+            return _execute(db)
+        session = SessionLocal()
         try:
-            # Get all data products and filter manually
-            all_data_products = DataProductService(db).get_data_products()
-            filtered_data_products = []
-
-            for dp in all_data_products:
-                # Apply filters manually
-                if (
-                    query
-                    and query.lower() not in dp.name.lower()
-                    and (
-                        not dp.description
-                        or query.lower() not in dp.description.lower()
-                    )
-                ):
-                    continue
-                if domain_id and str(dp.domain_id) != domain_id:
-                    continue
-                if status and str(dp.status) != status:
-                    continue
-
-                filtered_data_products.append(
-                    GetDataProductsResponseItem.model_validate(dp)
-                )
-                if len(filtered_data_products) >= limit:
-                    break
-            return {
-                "data_products": [
-                    GetDataProductsResponseItem.model_validate(dp).model_dump()
-                    for dp in filtered_data_products
-                ],
-                "count": len(filtered_data_products),
-                "filters_applied": {
-                    "query": query,
-                    "domain_id": domain_id,
-                    "status": status,
-                },
-            }
+            return _execute(session)
         finally:
-            db.close()
-
+            session.close()
     except Exception as e:
         return {"error": f"Failed to search data products: {str(e)}"}
 
