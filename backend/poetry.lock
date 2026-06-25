@@ -851,7 +851,7 @@ optional = false
 python-versions = "^3.13"
 groups = ["main", "test"]
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 attrs = ">=22.2.0"
@@ -4818,4 +4818,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "ce1e8df2f7cbaac242be3b7846e92738f36dc9141263c64ab59eb1928c35d824"
+content-hash = "1e5d9cf26a6031732308212b809e0d695652da0966a3e76fe03c86764ac9ddb4"
