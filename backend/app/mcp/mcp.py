@@ -129,7 +129,7 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
             config_url=f"{oidc.authority}/.well-known/openid-configuration",
             client_id=oidc.client_id,
             client_secret=oidc.client_secret,
-            base_url=f"{settings.HOST.rstrip('/')}/mcp",
+            base_url=f"{(settings.MCP_BASE_URL or settings.HOST).rstrip('/')}/mcp",
             require_authorization_consent="external",
             allowed_client_redirect_uris=settings.MCP_AUTH_REDIRECT_URIS,
         )
