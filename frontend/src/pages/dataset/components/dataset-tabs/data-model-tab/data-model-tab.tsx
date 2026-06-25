@@ -1,5 +1,5 @@
-import { usePostHog } from '@posthog/react';
 import { BookOutlined, DatabaseOutlined, SafetyOutlined } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import { Alert, Button, Card, Empty, Flex, Space, Table, Tag, Typography } from 'antd';
 import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
