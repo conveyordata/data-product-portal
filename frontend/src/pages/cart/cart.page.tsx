@@ -1,5 +1,6 @@
 import { PlusOutlined, ShopOutlined, ShoppingCartOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Button, Col, Empty, Flex, Row, Typography } from 'antd';
+import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -7,6 +8,7 @@ import { Link } from 'react-router';
 import ExplorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CardSelection } from '@/pages/cart/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { ExistingDataProductForm } from '@/pages/cart/components/existing-data-product-form.tsx';
@@ -34,12 +36,14 @@ function ExplorationsCart() {
 
     const setDataProductTypeChoice = useCallback(
         (choice: DataProductChoiceOptions | null) => {
+            posthog.capture(PosthogEvents.CART_DATA_PRODUCT_OR_EXPLORATION_CHOICE, { choice });
             dispatch(setCartExplorationChoices({ dataProductTypeChoice: choice, existingOrNewChoice: null }));
         },
         [dispatch],
     );
     const setExistingOrNewChoice = useCallback(
         (choice: ExistingOrNew | null) => {
+            posthog.capture(PosthogEvents.CART_EXISTING_OR_NEW_CHOICE, { choice });
             dispatch(setCartExplorationChoices({ dataProductTypeChoice, existingOrNewChoice: choice }));
         },
         [dispatch, dataProductTypeChoice],

@@ -1,11 +1,11 @@
-@forward 'fonts';
-@use 'variables';
-@use 'fonts';
-@use 'mixins';
-@forward 'variables';
-@forward 'colors';
-@forward 'mixins';
-@forward 'shared';
+@forward "fonts";
+@use "variables";
+@use "fonts";
+@use "mixins";
+@forward "variables";
+@forward "colors";
+@forward "mixins";
+@forward "shared";
 
 * {
     @include mixins.border-box-sizing();

@@ -5,17 +5,21 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
+from tests.conftest import (
+    webhook_v2_input_port_events_from_technical_asset_output_port_link,
+)
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
+    InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     UserFactory,
 )
-from tests.webhook_util import assert_event_in_queue
+from tests.webhook_util import assert_event_in_queue, assert_event_not_in_queue
 
 DATA_OUTPUTS_DATASETS_ENDPOINT = (
     "api/v2/data_products/{}/output_ports/{}/technical_assets"
@@ -49,6 +53,37 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     ):
         self.test_request_data_output_link(client)
         assert_event_in_queue("output_port_technical_asset_link.event", mock_webhook)
+
+    @pytest.mark.parametrize("enabled", [True, False])
+    def test_request_data_output_link_with_consumers_and_event_sending_active_generates_webhook_v2_event(
+        self, client, mock_webhook, enabled: bool
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+        data_output = TechnicalAssetFactory(owner=data_product)
+        ds = DatasetFactory(data_product=data_product)
+        InputPortFactory(dataset=ds)
+
+        with webhook_v2_input_port_events_from_technical_asset_output_port_link(
+            enabled=enabled
+        ):
+            response = self.request_data_output_dataset_link_new(
+                client, data_product.id, data_output.id, ds.id
+            )
+        assert response.status_code == 200
+        assert_event_in_queue("output_port_technical_asset_link.event", mock_webhook)
+        if enabled:
+            assert_event_in_queue("input_port.event", mock_webhook)
+        else:
+            assert_event_not_in_queue("input_port.event", mock_webhook)
 
     def test_request_data_output_new(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

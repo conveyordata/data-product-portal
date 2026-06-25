@@ -5,14 +5,15 @@ export type Props = {
     defaultValue: string;
     acceptedValues?: string[];
 };
-export function useTabParam(defaultValue: string, acceptedValues?: string[]) {
+export function useTabParam(defaultValue: string, acceptedValues?: string[], capturePosthog?: (value: string) => void) {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const onTabChange = useCallback(
         (key: string) => {
+            capturePosthog?.(key);
             setSearchParams({ tab: key });
         },
-        [setSearchParams],
+        [setSearchParams, capturePosthog],
     );
 
     const resolveTab = useCallback(() => {

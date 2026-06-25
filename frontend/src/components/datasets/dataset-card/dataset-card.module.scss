@@ -1,4 +1,4 @@
-@use '@/styles/globals';
+@use "@/styles/globals";
 
 //This is all for drag and drop
 .card {
@@ -32,7 +32,7 @@
 
         // Remove transform to prevent overflow issues
         &::before {
-            content: '';
+            content: "";
             position: absolute;
             top: -2px;
             left: -2px;
@@ -50,7 +50,7 @@
         cursor: not-allowed;
 
         &::before {
-            content: '';
+            content: "";
             position: absolute;
             top: -2px;
             left: -2px;

@@ -46,3 +46,6 @@ data:
   AWS_SESSION_DURATION: {{ .Values.aws_session_duration }}
   FASTMCP_HOME: /tmp/fastmcp
   SERVE_FRONTEND: "true"
+  {{- with .Values.extraConfigMapValues }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}

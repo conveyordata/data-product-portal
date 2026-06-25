@@ -47,7 +47,9 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
     const posthog = usePostHog();
     const { data: { events: datasetHistoryData = [] } = {}, isLoading: isFetchingDatasetHistory } =
         useGetOutputPortsEventHistoryQuery({ id: datasetId, dataProductId }, { skip: !datasetId });
-    const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
+    const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys), (tab) =>
+        posthog.capture(PosthogEvents.OUTPUT_PORT_TAB, { tab }),
+    );
 
     useEffect(() => {
         posthog.capture(PosthogEvents.MARKETPLACE_DATASET_TAB_CLICKED, {

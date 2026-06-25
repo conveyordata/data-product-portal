@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/app/node_modules npm ci && npm run build:prd
 # Vite outputs to /frontend/dist
 
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} python:3.13.14-slim-bookworm@sha256:05b95397cac02b060ff1251afaa78087d92d7034369afbc8eb765631cada8257 AS python-base-image
+FROM --platform=${PLATFORM} python:3.13.14-slim-bookworm@sha256:fcbd8dfc2605ba7c2eca646846c5e892b2931e41f6227985154a596f26ab8ed7 AS python-base-image
 
 # ---------------------------------------------------------------------------
 # Stage 2 – install Python dependencies (Poetry)

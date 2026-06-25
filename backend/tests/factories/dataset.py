@@ -17,8 +17,8 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Dataset
 
     id = factory.Faker("uuid4")
-    namespace = factory.LazyFunction(fake.unique.word)
-    name = factory.LazyFunction(fake.unique.word)
+    namespace = factory.Sequence(lambda _: fake.unique.word())
+    name = factory.Sequence(lambda _: fake.unique.word())
     description = factory.Faker("text", max_nb_chars=20)
     about = factory.Faker("text", max_nb_chars=20)
     status = OutputPortStatus.ACTIVE.value

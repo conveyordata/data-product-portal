@@ -125,7 +125,7 @@ class PortalOIDCProxy(OIDCProxy):
 def get_auth_provider() -> Optional[PortalOIDCProxy]:
     if settings.OIDC_ENABLED:
         oidc = get_oidc()
-        p = PortalOIDCProxy(
+        return PortalOIDCProxy(
             config_url=f"{oidc.authority}/.well-known/openid-configuration",
             client_id=oidc.client_id,
             client_secret=oidc.client_secret,
@@ -133,9 +133,6 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
             require_authorization_consent="external",
             allowed_client_redirect_uris=settings.MCP_AUTH_REDIRECT_URIS,
         )
-        logger.info("Routes")
-        logger.info(p.get_routes("/mcp"))
-        return p
     logger.debug("[MCP] OIDC disabled — MCP server will run without authentication")
     return None
 
