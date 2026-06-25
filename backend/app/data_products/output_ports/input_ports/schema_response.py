@@ -52,18 +52,6 @@ class BaseDataProductDatasetAssociationGet(ORMModel):
         )
 
 
-class DataProductDatasetAssociationGet(BaseDataProductDatasetAssociationGet):
-    pass
-
-
-class DataProductDatasetAssociationsGet(BaseDataProductDatasetAssociationGet):
-    pass
-
-
-class DataProductOutputPortAssociationsGet(BaseDataProductOutputPortAssociationGet):
-    pass
-
-
 class OutputPortInputPort(InputPortBase):
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo

@@ -4,13 +4,12 @@ import { useTranslation } from 'react-i18next';
 import explorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { InputPortReasoningButton } from '@/components/input-port-reasoning-modal/input-port-reasoning-button.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type AbstractDataProductInfo,
     AbstractDataProductType,
-    type ApproveOutputPortAsInputPortApiArg,
-    type DenyOutputPortAsInputPortApiArg,
     type OutputPortInputPort,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createAbstractDataProductIdPath } from '@/types/navigation.ts';
@@ -25,12 +24,11 @@ type Props = {
     dataProductId: string;
     outputPortId: string;
     dataProductLinks: OutputPortInputPort[];
-    onAcceptDataProductDatasetLink: (request: ApproveOutputPortAsInputPortApiArg) => void;
-    onRejectDataProductDatasetLink: (request: DenyOutputPortAsInputPortApiArg) => void;
     onRemoveDataProductDatasetLink: (data_productId: string, name: string, consumingDataProductId: string) => void;
     isLoading?: boolean;
     canApprove?: boolean;
     canRevoke?: boolean;
+    setReviewingOutputPortInputPortId: (id: string) => void;
 };
 type NameColumnProps = {
     status: DecisionStatus;
@@ -79,14 +77,12 @@ const NameColumn = ({ status, consumingAbstractDataProductId, consumingAbstractD
 export const getConsumerColumns = ({
     t,
     dataProductId,
-    outputPortId,
     dataProductLinks,
     onRemoveDataProductDatasetLink,
-    onRejectDataProductDatasetLink,
-    onAcceptDataProductDatasetLink,
-    isLoading,
     canApprove,
     canRevoke,
+    setReviewingOutputPortInputPortId,
+    isLoading,
 }: Props): TableColumnsType<OutputPortInputPort> => {
     const sorter = new Sorter<OutputPortInputPort>();
     return [
@@ -120,7 +116,7 @@ export const getConsumerColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            hidden: !canApprove && !canRevoke,
+            // hidden: !canApprove && !canRevoke,
             fixed: 'right',
             width: 1,
             render: (
@@ -129,105 +125,91 @@ export const getConsumerColumns = ({
                     consuming_abstract_data_product: consuming_data_product,
                     consuming_abstract_data_product_id: consuming_data_product_id,
                     status,
+                    id,
+                    reasoning,
                 },
             ) => {
-                if (status === DecisionStatus.Pending) {
+                if (status === DecisionStatus.Pending && (canApprove || canRevoke)) {
                     return (
-                        <Flex>
-                            <Popconfirm
-                                title={t('Allow Data Product Access')}
-                                description={t('Are you sure you want to allow access to Data Product {{name}}?', {
-                                    name: consuming_data_product.name,
-                                })}
-                                onConfirm={() =>
-                                    onAcceptDataProductDatasetLink({
-                                        outputPortId,
-                                        dataProductId,
-                                        approveOutputPortAsInputPortRequest: {
-                                            consuming_data_product_id: consuming_data_product_id,
-                                        },
-                                    })
-                                }
-                                placement={'leftTop'}
-                                okText={t('Confirm')}
-                                cancelText={t('Cancel')}
-                                okButtonProps={{ loading: isLoading }}
-                                autoAdjustOverflow={true}
-                            >
-                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
-                                    {t('Accept')}
-                                </Button>
-                            </Popconfirm>
-                            <Popconfirm
-                                title={t('Deny Data Product Access')}
-                                description={t('Are you sure you want to deny access to Data Product {{name}}?', {
-                                    name: consuming_data_product.name,
-                                })}
-                                onConfirm={() =>
-                                    onRejectDataProductDatasetLink({
-                                        outputPortId,
-                                        dataProductId,
-                                        denyOutputPortAsInputPortRequest: {
-                                            consuming_data_product_id: consuming_data_product_id,
-                                        },
-                                    })
-                                }
-                                placement={'leftTop'}
-                                okText={t('Confirm')}
-                                cancelText={t('Cancel')}
-                                okButtonProps={{ loading: isLoading }}
-                                autoAdjustOverflow={true}
-                            >
-                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
-                                    {t('Reject')}
-                                </Button>
-                            </Popconfirm>
-                        </Flex>
+                        <Button onClick={() => setReviewingOutputPortInputPortId(id)}>
+                            {t('Review Data Product Access')}
+                        </Button>
                     );
                 }
+
                 if (status === DecisionStatus.Approved) {
                     return (
-                        <Popconfirm
-                            title={t('Revoke Data Product Access')}
-                            description={t('Are you sure you want to revoke access from Data Product {{name}}?', {
-                                name: consuming_data_product.name,
-                            })}
-                            onConfirm={() =>
-                                onRejectDataProductDatasetLink({
-                                    outputPortId,
-                                    dataProductId,
-                                    denyOutputPortAsInputPortRequest: {
-                                        consuming_data_product_id: consuming_data_product_id,
-                                    },
-                                })
-                            }
-                            placement={'leftTop'}
-                            okText={t('Confirm')}
-                            cancelText={t('Cancel')}
-                            okButtonProps={{ loading: isLoading }}
-                            autoAdjustOverflow={true}
-                        >
-                            <Button loading={isLoading} disabled={isLoading || !canRevoke} type={'link'}>
-                                {t('Revoke Access')}
-                            </Button>
-                        </Popconfirm>
+                        <Flex>
+                            <InputPortReasoningButton reasoning={reasoning} />
+                            {/*//TODO This should open a simple modal asking for reasoning*/}
+                            {/*{canRevoke &&<Popconfirm*/}
+                            {/*    title={t('Revoke Data Product Access')}*/}
+                            {/*    description={t('Are you sure you want to revoke access from Data Product {{name}}?', {*/}
+                            {/*        name: consuming_data_product.name,*/}
+                            {/*    })}*/}
+                            {/*    onConfirm={() =>*/}
+                            {/*        onRejectDataProductDatasetLink({*/}
+                            {/*            outputPortId,*/}
+                            {/*            dataProductId,*/}
+                            {/*            denyOutputPortAsInputPortRequest: {*/}
+                            {/*                consuming_data_product_id: consuming_data_product_id,*/}
+                            {/*            },*/}
+                            {/*        })*/}
+                            {/*    }*/}
+                            {/*    placement={'leftTop'}*/}
+                            {/*    okText={t('Confirm')}*/}
+                            {/*    cancelText={t('Cancel')}*/}
+                            {/*    okButtonProps={{ loading: isLoading }}*/}
+                            {/*    autoAdjustOverflow={true}*/}
+                            {/*>*/}
+                            {/*    <Button loading={isLoading} disabled={isLoading || !canRevoke} type={'link'}>*/}
+                            {/*        {t('Revoke Access')}*/}
+                            {/*    </Button>*/}
+                            {/*</Popconfirm>}*/}
+                        </Flex>
                     );
                 }
 
                 if (status === DecisionStatus.Denied) {
                     return (
-                        <Button
-                            type={'link'}
-                            onClick={() =>
-                                onRemoveDataProductDatasetLink(
-                                    dataProductId,
-                                    consuming_data_product.name,
-                                    consuming_data_product_id,
-                                )
-                            }
-                        >
-                            {t('Remove')}
-                        </Button>
+                        <Flex gap={'small'}>
+                            <InputPortReasoningButton reasoning={reasoning} />
+
+                            <Popconfirm
+                                title={t('Remove the access request')}
+                                description={t(
+                                    'Are you sure you want to remove the access request from Data product {{name}}?',
+                                    {
+                                        name: consuming_data_product.name,
+                                    },
+                                )}
+                                onConfirm={() =>
+                                    onRemoveDataProductDatasetLink(
+                                        dataProductId,
+                                        consuming_data_product.name,
+                                        consuming_data_product_id,
+                                    )
+                                }
+                                placement={'leftTop'}
+                                okText={t('Confirm')}
+                                cancelText={t('Cancel')}
+                                okButtonProps={{ loading: isLoading }}
+                                autoAdjustOverflow={true}
+                            >
+                                <Button
+                                    danger
+                                    onClick={() =>
+                                        onRemoveDataProductDatasetLink(
+                                            dataProductId,
+                                            consuming_data_product.name,
+                                            consuming_data_product_id,
+                                        )
+                                    }
+                                >
+                                    {t('Remove')}
+                                </Button>
+                            </Popconfirm>
+                        </Flex>
                     );
                 }
             },

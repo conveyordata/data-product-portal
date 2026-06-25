@@ -2,11 +2,11 @@ import { Space, theme } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TableRow } from '@/components/pending-access-requests-modal/request-utils.ts';
+import { ReviewButton } from '@/components/pending-access-requests-modal/review-button.tsx';
+import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component.tsx';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 import { formatDate } from '@/utils/date.helper.ts';
-import { UserAvatarWithEmail } from '../../../../../components/user-avatar/user-avatar-with-email.component.tsx';
-import type { TableRow } from './request-utils.ts';
-import { ReviewButton } from './review-button.tsx';
 
 type UseTableColumnsParams = {
     onReview: (action: PendingAction) => void;

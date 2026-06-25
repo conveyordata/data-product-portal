@@ -74,10 +74,11 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { output_port, status }) => {
+            render: (_, { output_port, reasoning, status }) => {
                 return (
                     <InputPortActionButton
                         output_port={output_port}
+                        reasoning={reasoning ?? undefined}
                         canRemoveAccess={canRemoveAccess}
                         handleRemove={handleRemove}
                         status={status}

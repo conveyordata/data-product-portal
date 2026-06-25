@@ -1,17 +1,11 @@
 import { Flex, Input, Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
+import { type TableRow, transformToTableRow } from '@/components/pending-access-requests-modal/request-utils.ts';
+import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import {
-    acceptRequest,
-    rejectRequest,
-} from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/request-handlers.ts';
-import {
-    type TableRow,
-    transformToTableRow,
-} from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/request-utils.ts';
-import { ReviewRequestModal } from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/review-request-modal.tsx';
-import { useTableColumns } from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/use-table-columns.tsx';
+import { useTableColumns } from '@/pages/product-studio/components/requests-panel/use-table-columns.tsx';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 import {

@@ -9,6 +9,12 @@ import {
 import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+    AbstractProductIcon,
+    DataProductOutlined,
+    OutputPortOutlined,
+    TechnicalAssetOutlined,
+} from '@/components/icons';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import type { PendingAction } from '@/types/pending-actions/pending-request-types.tsx';
 import {
@@ -17,15 +23,9 @@ import {
     PendingRequestType_TechnicalAssetOutputPort,
 } from '@/types/pending-actions/pending-request-types.tsx';
 import { formatDate } from '@/utils/date.helper.ts';
-import {
-    AbstractProductIcon,
-    DataProductOutlined,
-    OutputPortOutlined,
-    TechnicalAssetOutlined,
-} from '../../../../../components/icons';
 
 type Props = {
-    action: PendingAction | null;
+    action?: PendingAction | null;
     open: boolean;
     onClose: () => void;
     onAccept: (action: PendingAction, reasoning?: string) => void;

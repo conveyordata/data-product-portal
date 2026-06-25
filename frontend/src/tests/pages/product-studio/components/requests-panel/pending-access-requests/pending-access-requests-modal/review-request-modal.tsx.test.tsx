@@ -1,6 +1,6 @@
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { ReviewRequestModal } from '@/pages/product-studio/components/requests-panel/pending-access-requests-modal/review-request-modal.tsx';
+import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import type { DataProductOutputPortPendingAction } from '@/store/api/services/generated/usersApi.ts';
 import { fireEvent, renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
 
