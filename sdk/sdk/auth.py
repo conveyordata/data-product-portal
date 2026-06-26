@@ -21,6 +21,7 @@ class PortalAuth:
         self.timeout = timeout
         self.auth_mode = os.getenv("PORTAL_AUTH_MODE", "")
         self.base_url = os.getenv("PORTAL_BASE_URL", "").rstrip("/")
+        self.api_key = os.getenv("PORTAL_API_KEY", "")
         self.client_id = os.getenv("PORTAL_CLIENT_ID", "")
         self.client_secret = os.getenv("PORTAL_CLIENT_SECRET", "")
         self.token_url = os.getenv("PORTAL_TOKEN_URL", "")
@@ -29,7 +30,7 @@ class PortalAuth:
         if not self.base_url:
             raise ValueError("PORTAL_BASE_URL must be set")
 
-        if not self.client_id or not self.client_secret:
+        if not self.api_key and (not self.client_id or not self.client_secret):
             logger.info(
                 "No client id or secret provided running without authentication"
             )
@@ -37,7 +38,13 @@ class PortalAuth:
         self._token = self._load_token()
 
     def get_client(self) -> Client | AuthenticatedClient:
-        if not self.client_id or not self.client_secret:
+        if self.api_key:
+            logger.info("Using API key authentication")
+            return Client(
+                base_url=self.base_url,
+                headers={"x-key": self.api_key},
+            )
+        elif not self.client_id or not self.client_secret:
             logger.info(
                 "No client id or secret provided running without authentication"
             )
