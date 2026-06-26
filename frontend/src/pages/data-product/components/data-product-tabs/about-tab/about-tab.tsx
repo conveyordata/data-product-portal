@@ -1,7 +1,6 @@
+import { Empty } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-
-import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -36,7 +35,7 @@ export function AboutTab({ dataProductId }: Props) {
         return <LoadingSpinner />;
     }
     if (!dataProduct || !currentUser) {
-        return <EmptyList />;
+        return <Empty />;
     }
 
     async function handleSubmit(content: string) {

@@ -17,14 +17,14 @@ caio = ">=0.9.0,<0.10.0"
 
 [[package]]
 name = "alembic"
-version = "1.18.4"
+version = "1.18.5"
 description = "A database migration tool for SQLAlchemy."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "alembic-1.18.4-py3-none-any.whl", hash = "sha256:a5ed4adcf6d8a4cb575f3d759f071b03cd6e5c7618eb796cb52497be25bfe19a"},
-    {file = "alembic-1.18.4.tar.gz", hash = "sha256:cb6e1fd84b6174ab8dbb2329f86d631ba9559dd78df550b57804d607672cedbc"},
+    {file = "alembic-1.18.5-py3-none-any.whl", hash = "sha256:06d8ba9d04558022f5395e9317de03d270f3dced49cee01f89fe7a13c26f14bc"},
+    {file = "alembic-1.18.5.tar.gz", hash = "sha256:1554982221dd17e9a749b53902407578eb305e453f71999e8c7f0a48389fff8e"},
 ]
 
 [package.dependencies]
@@ -4818,4 +4818,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "1e5d9cf26a6031732308212b809e0d695652da0966a3e76fe03c86764ac9ddb4"
+content-hash = "e4ad9d8cf5a99db48d9bf11ea313e6caed9108117b5c93cf4fcfb3c152f6ce75"
