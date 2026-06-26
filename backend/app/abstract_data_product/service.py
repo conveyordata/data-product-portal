@@ -198,14 +198,18 @@ class AbstractDataProductService:
                     dataset_link.dataset_id,
                     Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 )
-                background_tasks.add_task(
-                    email.send_dataset_link_email(
-                        dataset_link.consuming_abstract_data_product,
-                        dataset_link.dataset,
-                        requester=deepcopy(actor),
-                        approvers=[deepcopy(approver) for approver in approvers],
+                other_approvers = [a for a in approvers if a != actor]
+                if other_approvers:
+                    background_tasks.add_task(
+                        email.send_dataset_link_email(
+                            dataset_link.consuming_abstract_data_product,
+                            dataset_link.dataset,
+                            requester=deepcopy(actor),
+                            approvers=[
+                                deepcopy(approver) for approver in other_approvers
+                            ],
+                        )
                     )
-                )
 
     def add_finalizer(self, id: UUID, finalizer: str) -> AbstractDataProduct:
         """Add a finalizer to the abstract data product.
