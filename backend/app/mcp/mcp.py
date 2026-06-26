@@ -1,12 +1,17 @@
 from contextlib import asynccontextmanager
-from typing import Any, Optional, Sequence
+from typing import Any, Dict, Optional, Sequence
 from uuid import UUID
 
+import boto3
 import jwt as pyjwt
 from fastmcp import FastMCP
 from fastmcp.dependencies import Depends
 from fastmcp.server.auth.oidc_proxy import OIDCProxy
-from fastmcp.server.dependencies import get_access_token
+from fastmcp.server.dependencies import AccessToken, get_access_token
+from sdk.api_client.api.authentication import (
+    get_aws_credentials as sdk_get_aws_credentials,
+)
+from sdk.api_client.client import AuthenticatedClient
 from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session, configure_mappers
 
@@ -30,8 +35,18 @@ from app.authorization.role_assignments.output_port.service import (
 )
 from app.configuration.domains.schema_response import GetDomainResponse, GetDomainsItem
 from app.configuration.domains.service import DomainService
+from app.configuration.environments.platform_service_configurations.model import (
+    EnvironmentPlatformServiceConfiguration as EnvPlatformServiceConfigurationModel,
+)
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    EnvironmentConfigsGetItem,
+)
+from app.configuration.environments.schema_response import EnvironmentGetItem
+from app.configuration.environments.service import EnvironmentService
+from app.configuration.platforms.model import Platform
+from app.configuration.platforms.platform_services.model import PlatformService
 from app.core.auth.auth import get_authenticated_user
-from app.core.auth.jwt import get_oidc
+from app.core.auth.jwt import JWTToken, get_oidc
 from app.core.logging import logger
 from app.data_products.output_ports.schema_response import (
     GetOutputPortResponse,
@@ -114,7 +129,7 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
             config_url=f"{oidc.authority}/.well-known/openid-configuration",
             client_id=oidc.client_id,
             client_secret=oidc.client_secret,
-            base_url=f"{settings.HOST.rstrip('/')}/mcp",
+            base_url=f"{(settings.MCP_BASE_URL or settings.HOST).rstrip('/')}/mcp",
             require_authorization_consent="external",
             allowed_client_redirect_uris=settings.MCP_AUTH_REDIRECT_URIS,
         )
@@ -127,14 +142,207 @@ mcp = FastMCP(
     instructions="""
     Portal for discovering and exploring data products and output ports.
 
-    Recommended discovery flow:
-    1. get_marketplace_overview: understand what's available and get domain IDs
-    2. search_output_ports: find specific output ports (preferred for most searches)
-       Use search_data_products only when the user explicitly asks to find a data product.
-    3. get_*_details: drill into a specific result by UUID
+    CORE CONCEPTS:
+    - Output ports (datasets) = published, queryable datasets
+    - Data products = containers grouping related output ports and infrastructure
+    - Technical assets = underlying infrastructure (e.g., Glue databases)
+    - Environments = deployment stages (prod, staging, dev)
 
-    Output ports (datasets) are the primary way data is shared in the portal.
-    Data products are containers owned by teams that group related output ports and technical assets.
+    ═══════════════════════════════════════════════════════════════════════
+    TWO DISTINCT MODES OF OPERATION
+    ═══════════════════════════════════════════════════════════════════════
+
+    MODE 1: DISCOVERY (Metadata Only - Fast, No Credentials Required)
+    ──────────────────────────────────────────────────────────────────────
+    Use this when the user wants to:
+    - Find what data exists: "What sales datasets are available?"
+    - Get metadata: "Who owns the customer data?", "What's in the sales_db?"
+    - Explore the catalog: "Show me all data products in the finance domain"
+    - Check ownership/descriptions: "What does the revenue_monthly table contain?"
+
+    Tools for Discovery (no credentials needed):
+    - search_output_ports(query) - find datasets
+    - search_data_products(query) - find data products
+    - get_output_port_details(id) - metadata about a dataset
+    - get_data_product_details(id) - details about a data product
+    - get_data_product_analytics(id) - what output ports a data product has
+    - get_marketplace_overview() - high-level statistics
+    - get_environments() - available environments
+
+    MODE 2: DATA QUERIES (Actual Data - Requires AWS Credentials)
+    ──────────────────────────────────────────────────────────────────────
+    Use this when the user wants to:
+    - See actual data: "Show me sales from last month"
+    - Run analytics: "What are the top 10 customers by revenue?"
+    - Query tables: "SELECT * FROM sales_db.transactions WHERE date > '2026-01-01'"
+    - Get row-level data: "How many orders were placed yesterday?"
+    - Find records in data: "Which users are in the sales data?"
+
+    ═══════════════════════════════════════════════════════════════════════
+    DATA QUERY FLOW (Step-by-Step)
+    ═══════════════════════════════════════════════════════════════════════
+
+    🔑 CRITICAL: Most data access happens through CONSUMING data products, not
+    direct ownership. Always check data_product_links in output port details!
+
+    Step 1: DISCOVER THE DATA
+    ──────────────────────────
+    search_output_ports("user's query")
+    → Returns: output ports with IDs, names, descriptions, data_product_id
+    → Action: Pick the most relevant output port
+
+    Step 2: GET METADATA & CONSUMING DATA PRODUCTS 🔑
+    ────────────────────────────────────────────────────
+    get_output_port_details(output_port_id)
+    → Returns: namespace, database name, technical_asset_links, data_product_links
+    → IMPORTANT: data_product_links contains consuming data products that can access this data
+    → Action: Extract BOTH:
+      1. The owner data_product_id (for direct access attempt)
+      2. ALL data_product_links[].data_product.namespace (for fallback access)
+
+    If you don't have the consuming products there is a specific tool for that as well:
+    get_consuming_products(output_port_id, data_product_id) where data_product_id is the owner data product of the output port. This will return a list of consuming products with their namespaces and descriptions.
+
+    Step 3: DETERMINE ENVIRONMENT
+    ──────────────────────────────
+    If user didn't specify environment:
+    • get_environments()
+    • Use default or ask user
+    → Action: Decide which environment to query
+
+    Step 4: CHECK ACCESS - TRY CONSUMING DATA PRODUCTS FIRST 🔑
+    ────────────────────────────────────────────────────────────
+    IMPORTANT: Users typically access data through CONSUMING data products,
+    not by owning the source data product. Always try consuming products first!
+
+    From Step 2, you have data_product_links[] from the output port.
+
+    WORKFLOW:
+    A. For EACH data_product in data_product_links:
+       1. Extract: namespace = data_product.namespace
+       2. Try: get_aws_credentials(namespace, environment)
+       3. If SUCCESS → Use this namespace for ALL subsequent queries (Step 5+)
+       4. If FAILED → Try next consuming product
+
+    B. If ALL consuming products fail, try the owner data product:
+       get_aws_credentials(owner_namespace, environment)
+
+    C. If EVERYTHING fails → Tell user:
+       "No access to this data. Request access from [owner] or these
+        consuming data products: [list names from data_product_links]"
+
+    ⚠️  REMEMBER: Once you find working credentials, use that SAME namespace
+        for query_athena in the following steps!
+
+    Step 5: FIND DATABASE
+    ──────────────────────────────
+    Defer the database name from the technical asset or query athena to find it.
+    Use get_glue_database(environment, technical_asset_id) tool
+
+    Step 6: LIST AVAILABLE TABLES
+     ──────────────────────────────
+    list_glue_tables(data_product_namespace, environment, database_name)
+    → Use the SAME data_product_namespace that worked in Step 4!
+    → database_name may need environment prefix (e.g., 'datalake_experimentation_')
+    → database may need suffixes found in technical asset links (e.g., __sales)
+    → Returns: list of table names in the database
+    → Action: Identify which table(s) to query
+
+    Step 7: CONSTRUCT & EXECUTE QUERY
+    ──────────────────────────────────
+    query_athena(
+        data_product_namespace,  # SAME namespace from Step 4!
+        environment,
+        "SELECT * FROM database_name.table_name WHERE ..."
+    )
+    → Returns: query_execution_id
+    → CRITICAL: Use fully qualified names with quotes for hyphens:
+      ✓ CORRECT: SELECT * FROM "datalake_experimentation_sales-data__sales"."users"
+      ✗ WRONG:   SELECT * FROM users (missing database)
+      ✗ WRONG:   SELECT * FROM datalake_experimentation_sales-data__sales.users (no quotes)
+
+    Step 8: GET RESULTS
+    ───────────────────
+    get_athena_query_results(query_execution_id, data_product_namespace, environment)
+    → If status = 'RUNNING': Wait 3-5 seconds, retry
+    → If status = 'SUCCEEDED': Return formatted results to user
+    → If status = 'FAILED': Show error message
+
+    ═══════════════════════════════════════════════════════════════════════
+    EXAMPLES
+    ═══════════════════════════════════════════════════════════════════════
+
+    EXAMPLE 1: Discovery (Metadata)
+    ───────────────────────────────
+    User: "What sales datasets do we have?"
+
+    1. search_output_ports("sales")
+       → Returns: [sales_monthly, sales_transactions, sales_regions]
+    2. Present to user:
+       "We have 3 sales datasets:
+        • sales_monthly - Monthly aggregated sales data
+        • sales_transactions - Raw transaction data
+        • sales_regions - Sales by geographic region"
+
+    EXAMPLE 2: Data Query (Success)
+    ────────────────────────────────
+    User: "Show me top 10 customers by revenue"
+
+    1. search_output_ports("customer revenue")
+       → Found: output_port_id=abc-123, data_product_id=xyz-789
+    2. get_output_port_details("abc-123")
+       → namespace="sales_data", database="sales_db"
+    3. get_environments() → ['prod', 'staging', 'dev']
+       → Use: 'prod' (default)
+    4. get_aws_credentials("sales_data", "prod")
+       → ✓ Success: got credentials
+    6. query_athena("sales_data", "prod",
+         "SELECT customer_name, revenue FROM sales_db.customer_revenue
+          ORDER BY revenue DESC LIMIT 10")
+       → execution_id="qry-456"
+    7. get_athena_query_results("qry-456", "sales_data", "prod")
+       → Returns: [{customer_name: "Acme Corp", revenue: 1000000}, ...]
+
+    EXAMPLE 3: Data Query via Consuming Product (MOST COMMON CASE)
+    ────────────────────────────────────────────────────────────────
+    User: "Which users are in the sales data?"
+
+    1. search_output_ports("sales") → Found: output_port_id=abc-123
+    2. get_output_port_details("abc-123")
+       → owner namespace="mcp-athena-query-test"
+       → database="mcp-athena-query-test"
+       → data_product_links: [{data_product: {namespace: "mcp-test-sales-overview"}}]
+    3. get_environments() → Use 'dev'
+    4. Try consuming product FIRST:
+       get_aws_credentials("mcp-test-sales-overview", "dev")
+       → ✓ Success! Use this namespace for all queries
+    6. query_athena("mcp-test-sales-overview", "dev",
+         'SELECT * FROM "datalake_experimentation_mcp-athena-query-test__sales"."users" LIMIT 100')
+       → Note: Quotes around database/table names with hyphens!
+    7. get_athena_query_results(...) → Returns user data
+
+    ═══════════════════════════════════════════════════════════════════════
+    IMPORTANT RULES
+    ═══════════════════════════════════════════════════════════════════════
+
+    ✓ DO:
+    - Route to Discovery mode for metadata questions (no credentials needed)
+    - Route to Query mode for actual data questions (credentials required)
+    - ALWAYS extract data_product_links from output port details
+    - TRY CONSUMING DATA PRODUCTS FIRST - this is the most common access pattern
+    - Use the SAME namespace for query_athena that worked in get_aws_credentials
+    - Use fully qualified table names with quotes: "database"."table_name"
+    - Be aware of environment prefixes in database names (e.g., 'datalake_experimentation_')
+    - Wait and retry if query is still running
+    - Default to 'dev' environment unless specified
+
+    ✗ DON'T:
+    - Don't try owner access first - consuming products are the primary access pattern
+    - Don't request credentials for pure metadata questions
+    - Don't skip extracting data_product_links from output port details
+    - Don't skip the get_prefix step - you need actual table names with prefixes
+    - Don't use unqualified table names (missing database prefix)
+    - Don't forget quotes around database/table names with hyphens or underscores
     """,
     auth=get_auth_provider(),
 )
@@ -210,13 +418,305 @@ async def get_current_user(
     }
 
 
+@mcp.tool
+def get_aws_credentials(data_product_namespace: str, env: str) -> Dict[str, str]:
+    """Get temporary AWS credentials for a specific data product and environment.
+    This validates that the authenticated user has access to the data product.
+    If the user doesn't have access, the CLI command will fail.
+
+    WORKFLOW: When querying data from an output port, try credentials in this order:
+    1. FIRST: Try each consuming data product namespace from data_product_links[]
+    2. LAST: Try the owner data product namespace (fallback only)
+
+    ALWAYS use full names for environments. Never abbreviations
+
+    The namespace that successfully returns credentials should be used for ALL
+    subsequent operations (query_athena, get_athena_query_results).
+
+    Args:
+        data_product_namespace: The namespace to try (consuming product or owner).
+        env: The environment to run on.
+
+    Returns:
+        AWS credentials including AccessKeyId, SecretAccessKey, and SessionToken.
+        Returns error if access is denied or credentials cannot be retrieved.
+    """
+    db = SessionLocal()
+    try:
+        access_token: AccessToken = get_access_token()
+        get_authenticated_user(
+            token=JWTToken(sub="", token=f"Bearer {access_token.token}"),
+            db=db,
+        )
+        envs = EnvironmentService(db).get_environments()
+        if env not in [e.name for e in envs]:
+            return {
+                "error": f"Environment '{env}' not found. Available environments: {[e.name for e in envs]}"
+            }
+        client = AuthenticatedClient(base_url=settings.HOST, token=access_token.token)
+        result = sdk_get_aws_credentials.sync(
+            client=client, data_product_name=data_product_namespace, environment=env
+        )
+        if not result:
+            return {
+                "error": "You don't have access to this data product or it doesn't exist."
+            }
+        return {
+            "AccessKeyId": result.access_key_id,
+            "SecretAccessKey": result.secret_access_key,
+            "SessionToken": result.session_token,
+        }
+    finally:
+        db.close()
+
+
+@mcp.tool
+def get_database_prefix(environment: str) -> str:
+    prefix = settings.AWS_ATHENA_PREFIX
+    return f"{prefix}_{environment}_"
+
+
+@mcp.tool
+def get_glue_database(
+    environment: str,
+    technical_asset_id: str,
+    db: Session = Depends(get_db_session),
+) -> str:
+    """Get the Glue database name associated with a technical asset.
+    This is used to find the database to query in Athena.
+    Args:
+        environment: The name of the environment to run the query in
+        technical_asset_id: The ID of the technical asset to query
+    Returns:
+        The name of the Glue database to query in Athena.
+    """
+    technical_asset_uuid = UUID(technical_asset_id)
+    do = ensure_technical_asset_exists(technical_asset_uuid, db=db)
+    data_output = DataOutputService(db).get_data_output(
+        do.owner_id,
+        id=technical_asset_uuid,
+    )
+    technical_asset = GetTechnicalAssetsResponseItem.model_validate(
+        data_output
+    ).model_dump()
+    prefix = settings.AWS_ATHENA_PREFIX
+    database = technical_asset.get("configuration", {}).get("database")
+    suffix = technical_asset.get("configuration", {}).get("database_suffix")
+    return f"{prefix}_{environment}_{database}__{suffix}"
+
+
+@mcp.tool
+def query_athena(
+    data_product_namespace: str,
+    env: str,
+    query: str,
+    prefix: str,
+    bucket: str,
+) -> Dict[str, Any]:
+    """Run an Athena query using temporary credentials for a specific data product and environment.
+    The prefix and bucket are typically configured at the company level, but can be overridden if needed.
+    This tool will automatically check user access by retrieving credentials.
+
+    CRITICAL: Use the SAME data_product_namespace that worked in get_aws_credentials().
+    This is typically a CONSUMING data product namespace, not the data owner.
+
+    SQL SYNTAX NOTES:
+    - Always use fully qualified names: database.table
+    - Use double quotes for names with hyphens or special chars:
+      ✓ SELECT * FROM "datalake_experimentation_sales-data__sales"."users"
+      ✗ SELECT * FROM datalake_experimentation_sales-data__sales.users (syntax error)
+    - Database names often have environment prefixes (<PREFIX>, <PREFIX>)
+    e.g. datalake_prd. The prefixes can be found with get_prefix
+    - Database names are often suffixed. These suffixes can be found in the technical asset links of the output port details.
+    The suffix is always attached with a DOUBLE __ (underscore) e.g. datalake_experimentation_sales-data__sales
+    The workgroup must be filled in and is the same namespace as you requested access for.
+    Make sure the database exists and is correct before assuming access rights issues are the issue.
+    Args:
+        data_product_namespace: The namespace that has access (from consuming data product).
+        env: The environment.
+        query: The SQL query to execute (use quotes for database/table names with hyphens).
+        prefix: use get_prefix tool to get database prefixes. Use these in your query.
+        bucket: use get_bucket tool to get the correct bucket for the data product and environment, or provide an override.
+
+    Returns:
+        Query execution details including QueryExecutionId, or error if query failed.
+    """
+
+    # Use company-wide settings as defaults
+    results_bucket = bucket
+
+    # Buckets are fetchable from the database I guess?
+    # db = next(get_db_session())
+    # EnvironmentPlatformServiceConfigurationService(db).get_environment_platform_service_config()
+
+    # Validate that prefix and bucket are available
+    if not settings.AWS_ATHENA_PREFIX:
+        return {
+            "error": "AWS Athena prefix not configured. Please set AWS_ATHENA_PREFIX in settings or provide as parameter."
+        }
+
+    if not prefix:
+        return {
+            "error": "Database prefix not provided. Use get_prefix tool to retrieve the correct prefix for the environment and data product."
+        }
+
+    if not results_bucket:
+        return {
+            "error": "AWS Athena results bucket not configured. Please set AWS_ATHENA_RESULTS_BUCKET in settings or provide as parameter."
+        }
+
+    # Get credentials (this also checks access)
+    creds = get_aws_credentials(data_product_namespace, env)
+
+    # Check if credential retrieval failed
+    if "error" in creds:
+        return creds  # Return the error from get_aws_credentials
+
+    try:
+        # Create Athena client with temporary credentials
+        client = boto3.client(
+            "athena",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds["AccessKeyId"],
+            aws_secret_access_key=creds["SecretAccessKey"],
+            aws_session_token=creds["SessionToken"],
+        )
+
+        # Execute the query
+        response = client.start_query_execution(
+            QueryString=query,
+            WorkGroup=f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-{env}",
+            ResultConfiguration={
+                "OutputLocation": f"s3://{results_bucket}/athena/{data_product_namespace}"
+            },
+        )
+        return {
+            "query_execution_id": response["QueryExecutionId"],
+            "data_product_namespace": data_product_namespace,
+            "environment": env,
+            "workgroup": f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-{env}",
+            "output_location": f"s3://{results_bucket}/athena/{data_product_namespace}",
+            "query": query,
+            "status": "Query submitted successfully. Use get_athena_query_results to check status and get results.",
+        }
+
+    except client.exceptions.InvalidRequestException as e:
+        return {"error": f"Invalid Athena query request: {str(e)}", "query": query}
+    except Exception as e:
+        return {"error": f"Failed to execute Athena query: {str(e)}", "query": query}
+
+
+@mcp.tool
+def get_athena_query_results(
+    query_execution_id: str,
+    data_product_namespace: str,
+    env: str,
+    max_results: int = 100,
+) -> Dict[str, Any]:
+    """Get the status and results of an Athena query.
+    Use this after query_athena to check if the query completed and retrieve results.
+
+    Args:
+        query_execution_id: The query execution ID returned from query_athena.
+        data_product_namespace: The namespace of the data product.
+        env: The environment (e.g., 'prod', 'staging').
+        max_results: Maximum number of result rows to return (default 100).
+
+    Returns:
+        Query status and results if completed, or status information if still running.
+    """
+    # Get credentials
+    creds = get_aws_credentials(data_product_namespace, env)
+
+    if "error" in creds:
+        return creds
+
+    try:
+        client = boto3.client(
+            "athena",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds["AccessKeyId"],
+            aws_secret_access_key=creds["SecretAccessKey"],
+            aws_session_token=creds["SessionToken"],
+        )
+
+        # Get query execution status
+        execution = client.get_query_execution(QueryExecutionId=query_execution_id)
+        status = execution["QueryExecution"]["Status"]["State"]
+
+        result = {
+            "query_execution_id": query_execution_id,
+            "status": status,
+            "data_scanned_bytes": execution["QueryExecution"]["Statistics"].get(
+                "DataScannedInBytes", 0
+            ),
+            "execution_time_ms": execution["QueryExecution"]["Statistics"].get(
+                "EngineExecutionTimeInMillis", 0
+            ),
+        }
+
+        # If query failed, include error details
+        if status == "FAILED":
+            result["error"] = execution["QueryExecution"]["Status"].get(
+                "StateChangeReason", "Query failed"
+            )
+            return result
+
+        # If query is still running
+        if status in ["QUEUED", "RUNNING"]:
+            result["message"] = (
+                f"Query is {status.lower()}. Please try again in a moment."
+            )
+            return result
+
+        # If query succeeded, get results
+        if status == "SUCCEEDED":
+            results_response = client.get_query_results(
+                QueryExecutionId=query_execution_id, MaxResults=max_results
+            )
+
+            # Parse results into a more readable format
+            rows = results_response["ResultSet"]["Rows"]
+            if not rows:
+                result["rows"] = []
+                result["row_count"] = 0
+                return result
+
+            # First row is headers
+            headers = [col.get("VarCharValue", "") for col in rows[0]["Data"]]
+
+            # Remaining rows are data
+            data_rows = []
+            for row in rows[1:]:
+                row_data = {}
+                for i, col in enumerate(row["Data"]):
+                    row_data[headers[i]] = col.get("VarCharValue", None)
+                data_rows.append(row_data)
+
+            result["columns"] = headers
+            result["rows"] = data_rows
+            result["row_count"] = len(data_rows)
+            result["truncated"] = len(data_rows) >= max_results
+
+            return result
+
+        # Unknown status
+        result["message"] = f"Unexpected query status: {status}"
+        return result
+
+    except Exception as e:
+        return {
+            "error": f"Failed to get query results: {str(e)}",
+            "query_execution_id": query_execution_id,
+        }
+
+
 @mcp.tool(
     description="""
 Search across data products, output ports, technical assets, and domains in a single call.
 Use this only when the user hasn't specified what type of entity they're looking for.
 For output ports specifically, always prefer search_output_ports — it uses semantic search and returns richer metadata.
 To get the data product details for output ports, you can use the get_data_product_details function with the data_product_id.
-
 Args:
     query: Search query string
     entity_types: Filter to specific types. Valid values: 'data_products', 'output_ports',
@@ -354,38 +854,90 @@ def search_data_products(
     limit: int = 20,
     db: Session = Depends(get_db_session),
 ) -> dict[str, Any]:
-    # Get all data products and filter manually
-    all_data_products = DataProductService(db).get_data_products()
-    filtered_data_products = []
+    def _execute(db: Session) -> dict[str, Any]:
+        all_data_products = DataProductService(db).get_data_products()
+        filtered_data_products = []
 
-    for dp in all_data_products:
-        # Apply filters manually
-        if (
-            query
-            and query.lower() not in dp.name.lower()
-            and (not dp.description or query.lower() not in dp.description.lower())
-        ):
-            continue
-        if domain_id and str(dp.domain_id) != domain_id:
-            continue
-        if status and dp.status != status:
-            continue
+        for dp in all_data_products:
+            if (
+                query
+                and query.lower() not in dp.name.lower()
+                and (not dp.description or query.lower() not in dp.description.lower())
+            ):
+                continue
+            if domain_id and str(dp.domain_id) != domain_id:
+                continue
+            if status and dp.status != status:
+                continue
 
-        filtered_data_products.append(GetDataProductsResponseItem.model_validate(dp))
-        if len(filtered_data_products) >= limit:
-            break
-    return {
-        "data_products": [
-            GetDataProductsResponseItem.model_validate(dp).model_dump()
-            for dp in filtered_data_products
-        ],
-        "count": len(filtered_data_products),
-        "filters_applied": {
-            "query": query,
-            "domain_id": domain_id,
-            "status": status,
-        },
-    }
+            filtered_data_products.append(
+                GetDataProductsResponseItem.model_validate(dp)
+            )
+            if len(filtered_data_products) >= limit:
+                break
+        return {
+            "data_products": [
+                GetDataProductsResponseItem.model_validate(dp).model_dump()
+                for dp in filtered_data_products
+            ],
+            "count": len(filtered_data_products),
+            "filters_applied": {
+                "query": query,
+                "domain_id": domain_id,
+                "status": status,
+            },
+        }
+
+    try:
+        if db is not None:
+            return _execute(db)
+        session = SessionLocal()
+        try:
+            return _execute(session)
+        finally:
+            session.close()
+    except Exception as e:
+        return {"error": f"Failed to search data products: {str(e)}"}
+
+
+# Get input port for output ports to figure out consumers
+@mcp.tool
+def get_consuming_products(output_port_id: str, data_product_id: str) -> Dict[str, Any]:
+    """
+    Get consuming data products for a specific output port. This is essential for understanding who has access to the data and how users typically access it.
+
+    Args:
+        output_port_id: UUID of the output port (dataset) to check.
+        data_product_id: UUID of the owning data product of the output port.
+    returns:
+        List of consuming data products that have access to this output port, including their namespaces and descriptions.
+    """
+    try:
+        db = SessionLocal()
+        get_access_token()
+        get_mcp_authenticated_user(db=db)
+        try:
+            consuming_products = OutputPortService(db).get_consuming_data_products(
+                UUID(output_port_id), UUID(data_product_id)
+            )
+            consuming_products_data = [
+                {
+                    "id": str(input_port.consuming_abstract_data_product.id),
+                    "name": input_port.consuming_abstract_data_product.name,
+                    "namespace": input_port.consuming_abstract_data_product.namespace,
+                    "description": input_port.consuming_abstract_data_product.description,
+                }
+                for input_port in consuming_products
+            ]
+            return {
+                "output_port_id": output_port_id,
+                "consuming_data_products": consuming_products_data,
+            }
+        finally:
+            db.close()
+
+    except Exception as e:
+        return {"error": f"Failed to get consuming products: {str(e)}"}
 
 
 @mcp.tool(
@@ -395,6 +947,9 @@ def search_data_products(
 
     An output port is a published, consumable dataset exposed by a data product.
     Returns the name, description, access type, owner, and parent data product for each result.
+
+    NEXT STEP: After finding relevant output ports, use get_output_port_details() to get the full details
+    including data_product_links (consuming data products) which are essential for querying the data.
 
     Args:
         query: Natural language or keyword search. Leave empty to list all accessible output ports.
@@ -454,8 +1009,20 @@ def get_data_product_details(
     the data product it belongs to, and owner contact information.
     Use after search_output_ports to get complete information about a specific dataset.
 
+    CRITICAL FOR DATA QUERIES: This returns data_product_links[], which contains the consuming
+    data products that have access to this output port. These are typically YOUR access path to
+    query the data. Extract the namespace from each data_product_links[].data_product.namespace
+    and try those FIRST when getting credentials.
+
+    Also returns data_output_links[] with technical_asset configuration including the database name.
+
     Args:
         output_port_id: UUID obtained from search_output_ports or universal_search.
+
+    Returns:
+        - data_product_links: List of consuming data products (YOUR access path!)
+        - data_output_links: Technical assets with database configuration
+        - namespace: Owner data product namespace (try as fallback only)
     """
 )
 def get_output_port_details(
@@ -507,6 +1074,216 @@ def get_domain_details(
     )
 
     return GetDomainResponse.model_validate(domain).model_dump()
+
+
+@mcp.tool
+def get_bucket(environment_id: str) -> Dict[str, Any]:
+    """Get the S3 bucket name configured for Athena query results.
+    This is typically set at the company level in settings, but can be useful to confirm before running queries.
+
+    Args:
+        environment_id: The environment UUID for which to get the platform service config
+    Returns:
+        The S3 bucket name for Athena results, or an error if not configured.
+    """
+
+    db = SessionLocal()
+    try:
+        logger.info(f"Getting bucket for environment_id: {environment_id}")
+
+        # Query for AWS S3 configuration by joining with Platform and PlatformService
+        stmt = (
+            sa_select(EnvPlatformServiceConfigurationModel, Platform, PlatformService)
+            .join(
+                Platform,
+                EnvPlatformServiceConfigurationModel.platform_id == Platform.id,
+            )
+            .join(
+                PlatformService,
+                EnvPlatformServiceConfigurationModel.service_id == PlatformService.id,
+            )
+            .where(
+                EnvPlatformServiceConfigurationModel.environment_id
+                == UUID(environment_id)
+            )
+        )
+
+        results = db.execute(stmt).all()
+        logger.info(f"Found {len(results)} platform service configs for environment")
+
+        for config_model, platform, service in results:
+            logger.info(f"Platform: {platform.name}, Service: {service.name}")
+            if platform.name.lower() == "aws" and service.name.lower() == "s3":
+                logger.info("Found matching AWS S3 config")
+
+                # Parse the config using the schema
+                config_data = EnvironmentConfigsGetItem.model_validate(config_model)
+                logger.info(
+                    f"Config data parsed, has {len(config_data.config) if config_data.config else 0} configs"
+                )
+
+                # Find the default S3 config or use the first one
+                s3_config = None
+                if config_data.config:
+                    s3_config = next(
+                        (
+                            c
+                            for c in config_data.config
+                            if hasattr(c, "is_default") and c.is_default
+                        ),
+                        None,
+                    )
+                    if not s3_config:
+                        s3_config = config_data.config[0]
+                    logger.info(f"Selected S3 config: {s3_config}")
+
+                if not s3_config or not hasattr(s3_config, "bucket_name"):
+                    logger.error(
+                        f"No S3 bucket configured for environment '{environment_id}'."
+                    )
+                    return {
+                        "error": f"No S3 bucket configured for environment '{environment_id}'."
+                    }
+
+                logger.info(f"Returning bucket: {s3_config.bucket_name}")
+                return {"athena_results_bucket": s3_config.bucket_name}
+
+        return {
+            "error": f"AWS S3 configuration not found for environment '{environment_id}'."
+        }
+    except Exception as e:
+        logger.error(f"Error getting bucket: {str(e)}", exc_info=True)
+        return {"error": f"Failed to get bucket: {str(e)}"}
+    finally:
+        db.close()
+
+
+@mcp.tool
+def get_environments() -> Dict[str, Any]:
+    """Get the list of available environments (e.g., prod, staging, dev).
+    Use this when querying data to determine which environment to access.
+    The default environment is typically marked with is_default=True.
+
+    Returns:
+        List of environments with their IDs, names, acronyms, and default status.
+    """
+    try:
+        db = SessionLocal()
+        try:
+            environments = EnvironmentService(db).get_environments()
+            serialized_environments = [
+                EnvironmentGetItem.model_validate(env).model_dump()
+                for env in environments
+            ]
+
+            default_env = next((env for env in environments if env.is_default), None)
+
+            return {
+                "environments": serialized_environments,
+                "count": len(serialized_environments),
+                "default_environment": EnvironmentGetItem.model_validate(
+                    default_env
+                ).model_dump()
+                if default_env
+                else None,
+            }
+        finally:
+            db.close()
+
+    except Exception as e:
+        return {"error": f"Failed to get environments: {str(e)}"}
+
+
+@mcp.tool
+def list_glue_tables(
+    data_product_namespace: str, env: str, database_name: str
+) -> Dict[str, Any]:
+    """List all tables in a Glue database for a specific data product and environment.
+    Use this after getting output port details to discover what tables are available to query.
+    You must have access to the data product (verify with get_aws_credentials first).
+
+    IMPORTANT: Use the SAME data_product_namespace that successfully returned credentials
+    in get_aws_credentials(). This is typically a CONSUMING data product namespace from
+    the output port's data_product_links[], NOT the owner namespace.
+
+    NOTE: The database_name often has an environment prefix added by the platform.
+    If you get "Database not found", try prefixing or list the available databases.
+
+    Args:
+        data_product_namespace: The namespace that has access (from consuming data product).
+        env: The environment (e.g., 'prod', 'staging', 'dev').
+        database_name: The Glue database name, possibly with environment prefix.
+
+    Returns:
+        List of table names in the database, or error if access denied or database not found.
+    """
+    # Get credentials first to validate access
+    creds = get_aws_credentials(data_product_namespace, env)
+    if "error" in creds:
+        return creds
+
+    try:
+        # Create Glue client with temporary credentials
+        client = boto3.client(
+            "glue",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds["AccessKeyId"],
+            aws_secret_access_key=creds["SecretAccessKey"],
+            aws_session_token=creds["SessionToken"],
+        )
+
+        # List tables in the database
+        tables: list[dict] = []
+        next_token = None
+
+        while True:
+            params = {"DatabaseName": database_name}
+            if next_token:
+                params["NextToken"] = next_token
+
+            response = client.get_tables(**params)
+
+            # Replace for loop with list.extend
+            tables.extend(
+                {
+                    "name": table["Name"],
+                    "database": database_name,
+                    "full_name": f"{database_name}.{table['Name']}",
+                    "description": table.get("Description", ""),
+                    "table_type": table.get("TableType", ""),
+                    "created_at": str(table.get("CreateTime", "")),
+                    "updated_at": str(table.get("UpdateTime", "")),
+                }
+                for table in response.get("TableList", [])
+            )
+
+            next_token = response.get("NextToken")
+            if not next_token:
+                break
+
+        return {
+            "database": database_name,
+            "data_product_namespace": data_product_namespace,
+            "environment": env,
+            "tables": tables,
+            "table_count": len(tables),
+            "table_names": [t["name"] for t in tables],
+        }
+
+    except client.exceptions.EntityNotFoundException:
+        return {
+            "error": f"Database '{database_name}' not found in Glue catalog",
+            "database": database_name,
+            "data_product_namespace": data_product_namespace,
+            "environment": env,
+        }
+    except Exception as e:
+        return {
+            "error": f"Failed to list Glue tables: {str(e)}",
+            "database": database_name,
+            "data_product_namespace": data_product_namespace,
+            "environment": env,
+        }
 
 
 # ==============================================================================

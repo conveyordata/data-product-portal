@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     AWS_DEFAULT_PROFILE: Optional[str] = None
     PORTAL_API_KEY: Optional[str] = None
 
+    # AWS Athena Configuration (company-wide settings)
+    AWS_ATHENA_PREFIX: Optional[str] = None  # e.g., 'dpp' - platform name prefix
+
     # OIDC Configuration
     OIDC_ENABLED: bool = False
     OIDC_CLIENT_ID: Optional[str] = None
@@ -30,6 +33,7 @@ class Settings(BaseSettings):
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
 
+    MCP_BASE_URL: Optional[str] = None
     MCP_AUTH_REDIRECT_URIS: list[str] = []
 
     # Default username when oidc is disabled

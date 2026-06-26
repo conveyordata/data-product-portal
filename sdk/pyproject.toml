@@ -13,7 +13,7 @@ dependencies = [
     "attrs>=22.2.0",
     # Used by generated api_client models for datetime parsing
     "python-dateutil>=2.8.0",
-    "fastapi>=0.137.1",
+    "fastapi>=0.136.3",
 ]
 
 [tool.poetry]

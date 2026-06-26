@@ -8,6 +8,7 @@ sidebar_position: 200
 
 ### features
 
+- **[MCP]**: Extended the MCP server with tools to fetch AWS credentials and use those credentials to query Glue and Athena. This allows the MCP server to fully execute "Talk to your data" requests if configured correctly.
 - **[SDK]**: Added support for [Infra provisioners](./developer-guide/provisioner) to the SDK. This allows for a robust way to provision infra based on changes in Portal.
 
 ## 0.6.0
