@@ -477,7 +477,11 @@ def get_database_prefix(environment: str) -> str:
 
 
 @mcp.tool
-def get_glue_database(environment: str, technical_asset_id: str) -> str:
+def get_glue_database(
+    environment: str,
+    technical_asset_id: str,
+    db: Session = Depends(get_db_session),
+) -> str:
     """Get the Glue database name associated with a technical asset.
     This is used to find the database to query in Athena.
     Args:
@@ -486,12 +490,19 @@ def get_glue_database(environment: str, technical_asset_id: str) -> str:
     Returns:
         The name of the Glue database to query in Athena.
     """
-
-    technical_asset = get_technical_asset_details(technical_asset_id)
-    prefix = get_database_prefix(environment)
-    db = technical_asset.get("configuration").get("database")
-    suffix = technical_asset.get("configuration").get("database_suffix")
-    return f"{prefix}_{db}__{suffix}"
+    technical_asset_uuid = UUID(technical_asset_id)
+    do = ensure_technical_asset_exists(technical_asset_uuid, db=db)
+    data_output = DataOutputService(db).get_data_output(
+        do.owner_id,
+        id=technical_asset_uuid,
+    )
+    technical_asset = GetTechnicalAssetsResponseItem.model_validate(
+        data_output
+    ).model_dump()
+    prefix = settings.AWS_ATHENA_PREFIX
+    database = technical_asset.get("configuration", {}).get("database")
+    suffix = technical_asset.get("configuration", {}).get("database_suffix")
+    return f"{prefix}_{environment}_{database}__{suffix}"
 
 
 @mcp.tool
