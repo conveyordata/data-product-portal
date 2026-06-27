@@ -646,6 +646,7 @@ class TestTechnicalAssetsRouter:
     ):
         """Test that email is sent when dataset link request requires manual approval"""
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        other_approver = UserFactory()
         data_product = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product)  # Different owner
         data_output = TechnicalAssetFactory(owner=data_product)
@@ -657,6 +658,15 @@ class TestTechnicalAssetsRouter:
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        approver_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=other_approver.id,
+            role_id=approver_role.id,
+            dataset_id=dataset.id,
         )
 
         # Mock manual approval scenario (different data product owner)
