@@ -1,4 +1,5 @@
 import asyncio
+import re
 import time
 from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
@@ -10,9 +11,7 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.routing import APIRoute
-from fastapi.staticfiles import StaticFiles
 from fastmcp.utilities.lifespan import combine_lifespans
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.abstract_data_product.background_tasks import check_stuck_deletions
@@ -92,6 +91,11 @@ async def lifespan(_: FastAPI):
 mcp.add_middleware(LoggingMiddleware())
 mcp_app = mcp.http_app("/")
 
+
+def route_as_operation_id(route: APIRoute) -> str:
+    return re.sub(r"\W", "_", route.name.lower())
+
+
 app = FastAPI(
     title=TITLE,
     summary="Backend API implementation for Data product portal",
@@ -99,11 +103,12 @@ app = FastAPI(
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
     lifespan=combine_lifespans(lifespan, mcp_app.lifespan),
-    **oidc_kwargs,
+    generate_unique_id_function=route_as_operation_id,
     swagger_ui_parameters={
         "docExpansion": "none",
         "tagsSorter": "alpha",
     },
+    **oidc_kwargs,
 )
 
 app.mount("/mcp", mcp_app)
@@ -134,19 +139,20 @@ app.include_router(auth, prefix="/api")
 add_exception_handlers(app)
 register_webhooks(app)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ALLOWED_ORIGINS.split(","),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
-
 app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Request-ID",
     update_request_header=True,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        origin.strip() for origin in settings.CORS_ALLOWED_ORIGINS.split(",")
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -211,43 +217,8 @@ def get_version():
     return VersionResponse(version=app.version)
 
 
-def use_route_names_as_operation_ids(app: FastAPI) -> None:
-    """
-    Simplify operation IDs so that generated API clients have simpler function names.
-    Should be called only after all routes have been added.
-    """
-    for route in app.routes:
-        if isinstance(route, APIRoute) and route.path.startswith("/api/v2"):
-            route.operation_id = route.name
-
-
-use_route_names_as_operation_ids(app)
-
-
-class SPAStaticFiles(StaticFiles):
-    """StaticFiles subclass that falls back to index.html for unknown paths.
-    Which is required for SPAs (single page applications).
-    """
-
-    async def get_response(self, path: str, scope):  # type: ignore[override]
-        try:
-            return await super().get_response(path, scope)
-        except StarletteHTTPException as exc:
-            if exc.status_code == 404:
-                return await super().get_response("index.html", scope)
-            raise
-
-
 if settings.SERVE_FRONTEND:
-    _frontend_dir = Path(settings.FRONTEND_DIST_DIR)
-    if _frontend_dir.exists():
-        app.mount(
-            "/",
-            SPAStaticFiles(directory=str(_frontend_dir), html=True),
-            name="frontend",
-        )
-    else:
-        raise Exception("Frontend dist directory not found")
+    app.frontend("/", directory=Path(settings.FRONTEND_DIST_DIR), fallback="index.html")
 
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     logger.info(
