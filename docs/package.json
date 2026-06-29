@@ -22,7 +22,7 @@
     "clsx": "^2.0.0",
     "posthog-docusaurus": "^2.0.5",
     "prism-react-renderer": "^2.3.0",
-    "redocusaurus": "^2.5.0"
+    "redocusaurus": "^2.5.2"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.10.1",
