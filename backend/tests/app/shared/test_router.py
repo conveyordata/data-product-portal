@@ -1,8 +1,7 @@
-from typing import Any, Sequence, get_args, get_origin
+from typing import Sequence, get_origin
 
 from fastapi.dependencies.models import Dependant
 from fastapi.routing import APIRoute
-from pydantic import BaseModel
 
 from app.main import app
 
@@ -49,54 +48,70 @@ def test_endpoints_return_object_or_none():
 
 def test_no_old_names_in_request_or_response_schemas():
     """
-    Scans all FastAPI application routes to ensure that no key in the request
-    or response body contains the key 'dataset' or `data_output`
+    Scans all FastAPI application routes via the OpenAPI spec to ensure that no
+    key in the request or response body contains 'dataset' or 'data_output'.
     """
+    openapi_schema = app.openapi()
+    paths = openapi_schema.get("paths", {})
+    schemas = openapi_schema.get("components", {}).get("schemas", {})
+
     invalid_keys = []
-    visited_types = set()
-
     old_names = ["data_output", "dataset"]
+    visited_schemas = set()
 
-    def check_type(type_: Any, context: str):
-        if type_ in visited_types:
+    def check_schema(schema_dict: dict, context: str):
+        if not isinstance(schema_dict, dict):
             return
 
-        visited_types.add(type_)
+        if "$ref" in schema_dict:
+            ref_name = schema_dict["$ref"].split("/")[-1]
+            if ref_name in visited_schemas:
+                return
+            visited_schemas.add(ref_name)
+            schema_dict = schemas.get(ref_name, {})
 
-        # Check if the current type is something like typing.List[T], or typing.Optional[T].
-        # We need to check the inner type
-        origin = get_origin(type_)
-        if origin:
-            for arg in get_args(type_):
-                check_type(arg, context)
-            return
+        properties = schema_dict.get("properties", {})
+        for prop_name, prop_val in properties.items():
+            if any(old_name in prop_name.lower() for old_name in old_names):
+                invalid_keys.append(f"{context} -> field '{prop_name}'")
 
-        # Check if type is a Pydantic model, that we can check
-        if isinstance(type_, type) and issubclass(type_, BaseModel):
-            for name, field in type_.model_fields.items():  # type: ignore[attr-defined]
-                for old_name in old_names:
-                    if old_name in name.lower():
-                        invalid_keys.append(f"{context} -> field '{name}'")
-                    check_type(field.annotation, f"{context}.{name}")
+            check_schema(prop_val, f"{context}.{prop_name}")
 
-    for route in app.routes:
-        if not route.path.startswith("/api/v2/"):
-            # We only want to check routes under /api/v2/
+        if schema_dict.get("type") == "array" and "items" in schema_dict:
+            check_schema(schema_dict["items"], context)
+
+        for combiner in ["anyOf", "allOf", "oneOf"]:
+            if combiner in schema_dict:
+                for sub_schema in schema_dict[combiner]:
+                    check_schema(sub_schema, context)
+
+    for path, path_item in paths.items():
+        if not path.startswith("/api/v2/"):
             continue
-        if isinstance(route, APIRoute):
-            # Check Response
-            if route.response_model:
-                check_type(
-                    route.response_model,
-                    f"Route '{route.name}'/'{route.path}' [Response]",
-                )
 
-            # Check Request Body
-            if route.body_field:
-                check_type(
-                    route.body_field.field_info.annotation,
-                    f"Route '{route.name}'/'{route.path}' [Request Body]",
-                )
+        for method, operation in path_item.items():
+            if method.lower() not in ["get", "post", "put", "delete", "patch"]:
+                continue
+
+            context_prefix = f"Route '{method.upper()} {path}'"
+
+            request_body = operation.get("requestBody", {})
+            content = request_body.get("content", {})
+            for media_type_obj in content.values():
+                if "schema" in media_type_obj:
+                    check_schema(
+                        media_type_obj["schema"], f"{context_prefix} [Request Body]"
+                    )
+
+            responses = operation.get("responses", {})
+            for status_code, response_obj in responses.items():
+                resp_content = response_obj.get("content", {})
+                for media_type_obj in resp_content.values():
+                    if "schema" in media_type_obj:
+                        check_schema(
+                            media_type_obj["schema"],
+                            f"{context_prefix} [Response {status_code}]",
+                        )
 
     error_msg = "The following routes contain 'dataset' or 'data_output' in request or response keys:\n"
     error_msg += "\n".join(invalid_keys)
@@ -113,13 +128,13 @@ def test_no_old_names_in_url():
     old_names = ["data_output", "dataset"]
 
     def route_path_contains_old_name(path: str):
-        return any(old_name in path for old_name in old_names)
+        return any(old_name in path.lower() for old_name in old_names)
 
+    paths = app.openapi().get("paths", {})
     invalid_routes = [
-        f"- '{route.name}'/'{route.path}'"
-        for route in app.routes
-        if route.path.startswith("/api/v2/")
-        and route_path_contains_old_name(route.path)
+        path
+        for path in paths
+        if path.startswith("/api/v2/") and route_path_contains_old_name(path)
     ]
 
     error_msg = "The following routes contain 'dataset' or 'data_output' in the URL:\n"
