@@ -6,16 +6,21 @@ authors = [
     {name = "Pascal Knapen",email = "pascal.knapen@dataminded.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
-    "fastapi (>=0.124.4,<0.125.0)",
+    "fastapi (>=0.137.1,<0.138.0)",
     "uvicorn (>=0.38.0,<0.39.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "pyyaml (>=6.0.2,<7.0.0)"
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "data-product-portal-sdk",
 ]
 
 [tool.poetry]
 packages = [{include = "provisioner", from = "."}]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+data-product-portal-sdk = {path = "../../../sdk", develop = false}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

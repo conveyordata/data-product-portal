@@ -12,15 +12,16 @@ ENV POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_HOME='/usr/local'
 
-RUN --mount=type=bind,src=./requirements-poetry.txt,dst=/requirements-poetry.txt \
+RUN --mount=type=bind,src=./demo/agents/provisioner/requirements-poetry.txt,dst=/requirements-poetry.txt \
     apt-get update && apt-get upgrade -y && apt-get install -y curl && \
     pip install -r requirements-poetry.txt --require-hashes
 
-COPY pyproject.toml ./
-RUN poetry install --no-root
+COPY sdk ./sdk
+COPY demo/agents/provisioner ./demo/agents/provisioner/
 
-COPY ./provisioner ./provisioner
+WORKDIR ./demo/agents/provisioner
+RUN poetry install --no-root
 
 EXPOSE 6060
 
-CMD ["uvicorn", "provisioner.main:app", "--host", "0.0.0.0", "--port", "6060"]
+CMD ["python", "-m", "uvicorn", "provisioner.main:app", "--host", "0.0.0.0", "--port", "6060"]

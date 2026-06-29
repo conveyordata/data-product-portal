@@ -1,7 +1,7 @@
 import logging
 import os
 import shutil
-from typing import Any, Iterable, List, Optional
+from typing import Any, Iterable, Optional
 from uuid import UUID
 
 from cookiecutter.main import cookiecutter
@@ -45,7 +45,7 @@ from sdk.api_client.models.technical_mapping import TechnicalMapping
 
 import sdk
 
-# Calculate base directories relative to this script
+# Calculate base directories relative to this script.
 # Script is at demo/basic/provisioner/provisioner/reconciler.py
 script_dir = os.path.dirname(os.path.abspath(__file__))
 provisioner_dir = os.path.dirname(script_dir)  # demo/basic/provisioner
@@ -77,7 +77,7 @@ class DataProductReconciler(sdk.Reconciler):
             raise Exception(response.detail)
         raise Exception("Unexpected response")
 
-    async def _get_lifecycles(self) -> List[DataProductLifeCyclesGetItem]:
+    async def _get_lifecycles(self) -> list[DataProductLifeCyclesGetItem]:
         logging.info("Fetching lifecycles from portal API")
         result = await get_data_products_lifecycles.asyncio(client=self._client)
         if result is None or isinstance(result, HTTPValidationError):
@@ -87,7 +87,7 @@ class DataProductReconciler(sdk.Reconciler):
 
     async def _get_platform_service_configurations(
         self,
-    ) -> List[PlatformServiceConfiguration]:
+    ) -> list[PlatformServiceConfiguration]:
         logging.info("Fetching platform service configurations from portal API")
         result = await get_all_platform_service_configurations.asyncio(
             client=self._client
