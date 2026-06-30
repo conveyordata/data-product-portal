@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -103,6 +105,83 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             client, data_product.id, data_output.id, ds.id
         )
         assert response.status_code == 200
+
+    @patch(
+        "app.data_products.output_port_technical_assets_link.router.email.send_link_dataset_email"
+    )
+    def test_request_data_output_link_email_not_sent_when_requester_is_only_approver(
+        self, mock_send_email, client
+    ):
+        requester = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        request_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=requester.id,
+            role_id=request_role.id,
+            data_product_id=data_product.id,
+        )
+        output_port = DatasetFactory(data_product=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        approver_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=requester.id,
+            role_id=approver_role.id,
+            dataset=output_port,
+        )
+
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, technical_asset.id, output_port.id
+        )
+
+        assert response.status_code == 200
+        mock_send_email.assert_not_called()
+
+    @patch(
+        "app.data_products.output_port_technical_assets_link.router.email.send_link_dataset_email"
+    )
+    def test_request_data_output_link_email_excludes_requester_from_approvers(
+        self, mock_send_email, client
+    ):
+        requester = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        other_approver = UserFactory()
+        data_product = DataProductFactory()
+        request_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=requester.id,
+            role_id=request_role.id,
+            data_product_id=data_product.id,
+        )
+        output_port = DatasetFactory(data_product=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        approver_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
+        )
+        for user in [requester, other_approver]:
+            DatasetRoleAssignmentFactory(
+                user_id=user.id,
+                role_id=approver_role.id,
+                dataset=output_port,
+            )
+
+        response = self.request_data_output_dataset_link_new(
+            client, data_product.id, technical_asset.id, output_port.id
+        )
+
+        assert response.status_code == 200
+        mock_send_email.assert_called_once()
+        approvers = mock_send_email.call_args.kwargs["approvers"]
+        assert {approver.id for approver in approvers} == {other_approver.id}
+        assert requester.id not in {approver.id for approver in approvers}
 
     def test_request_data_output_link_on_dataset_with_diff_parent(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

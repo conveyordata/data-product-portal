@@ -155,6 +155,85 @@ class TestDataProductRoleAssignmentsRouter:
         self.test_request_assignment(client)
         assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
 
+    @patch(
+        "app.authorization.role_assignments.data_product.router.email.send_role_assignment_request_email"
+    )
+    def test_request_assignment_email_not_sent_when_requester_is_only_approver(
+        self, mock_send_email, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        requester = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        request_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(user_id=requester.id, role_id=request_role.id)
+        approver_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=requester.id,
+            role_id=approver_role.id,
+            data_product_id=data_product.id,
+        )
+        requested_user: User = UserFactory()
+        requested_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}/request",
+            json={
+                "user_id": str(requested_user.id),
+                "role_id": str(requested_role.id),
+                "data_product_id": str(data_product.id),
+            },
+        )
+
+        assert response.status_code == 200
+        mock_send_email.assert_not_called()
+
+    @patch(
+        "app.authorization.role_assignments.data_product.router.email.send_role_assignment_request_email"
+    )
+    def test_request_assignment_email_excludes_requester_from_approvers(
+        self, mock_send_email, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        requester = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        other_approver = UserFactory()
+        request_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(user_id=requester.id, role_id=request_role.id)
+        approver_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+        )
+        for user in [requester, other_approver]:
+            DataProductRoleAssignmentFactory(
+                user_id=user.id,
+                role_id=approver_role.id,
+                data_product_id=data_product.id,
+            )
+        requested_user: User = UserFactory()
+        requested_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}/request",
+            json={
+                "user_id": str(requested_user.id),
+                "role_id": str(requested_role.id),
+                "data_product_id": str(data_product.id),
+            },
+        )
+
+        assert response.status_code == 200
+        mock_send_email.assert_called_once()
+        approvers = mock_send_email.call_args.args[2]
+        assert {approver.id for approver in approvers} == {other_approver.id}
+        assert requester.id not in {approver.id for approver in approvers}
+
     def test_request_assignment_no_right(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         UserFactory(external_id=settings.DEFAULT_USERNAME)
