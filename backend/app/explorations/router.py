@@ -165,21 +165,18 @@ def remove_input_port_from_exploration(
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_EXPLORATION, EmptyResolver))
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__CREATE_EXPLORATION, ExplorationResolver
+            )
+        )
     ],
 )
 def remove_exploration(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     service = ExplorationService(db)
-    exp = service.get_exploration(id, authenticated_user)
-    if exp.owner_id != authenticated_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not the owner of this exploration",
-        )
     can_delete = service.mark_for_deletion(id)
     if can_delete:
         service.remove_exploration(id)
