@@ -150,6 +150,11 @@ type GetDataProductsParams struct {
 	FilterToUserWithAssigment OptUUID `json:",omitempty,omitzero"`
 }
 
+// GetDefaultAccessDurationParams is parameters of get_default_access_duration operation.
+type GetDefaultAccessDurationParams struct {
+	AbstractDataProductType string
+}
+
 // GetDeviceTokenParams is parameters of get_device_token operation.
 type GetDeviceTokenParams struct {
 	// Deprecated: schema marks this parameter as deprecated.

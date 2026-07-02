@@ -157,6 +157,10 @@ type GetDataProductsRes interface {
 	getDataProductsRes()
 }
 
+type GetDefaultAccessDurationRes interface {
+	getDefaultAccessDurationRes()
+}
+
 type GetDeviceTokenRes interface {
 	getDeviceTokenRes()
 }

@@ -7154,6 +7154,73 @@
         }
       }
     },
+    "/api/v2/access_durations/{abstract_data_product_type}/default": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Get Default Access Duration",
+        "operationId": "get_default_access_duration",
+        "parameters": [
+          {
+            "name": "abstract_data_product_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Abstract Data Product Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessDuration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/access_durations": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Get All Access Durations",
+        "operationId": "get_all_access_durations",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AccessDuration"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Access Durations"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
@@ -7589,6 +7656,47 @@
           "explorations"
         ],
         "title": "AbstractDataProductType"
+      },
+      "AccessDuration": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "abstract_data_product_type": {
+            "type": "string",
+            "title": "Abstract Data Product Type"
+          },
+          "access_duration_type": {
+            "type": "string",
+            "title": "Access Duration Type"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "abstract_data_product_type",
+          "access_duration_type",
+          "days",
+          "is_default"
+        ],
+        "title": "AccessDuration"
       },
       "AccessGranularity": {
         "type": "string",

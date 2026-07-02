@@ -202,6 +202,67 @@ func (s *AbstractDataProductType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/AccessDuration
+type AccessDuration struct {
+	ID                      uuid.UUID `json:"id"`
+	AbstractDataProductType string    `json:"abstract_data_product_type"`
+	AccessDurationType      string    `json:"access_duration_type"`
+	Days                    NilInt    `json:"days"`
+	IsDefault               bool      `json:"is_default"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessDuration) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetAbstractDataProductType returns the value of AbstractDataProductType.
+func (s *AccessDuration) GetAbstractDataProductType() string {
+	return s.AbstractDataProductType
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDuration) GetAccessDurationType() string {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDuration) GetDays() NilInt {
+	return s.Days
+}
+
+// GetIsDefault returns the value of IsDefault.
+func (s *AccessDuration) GetIsDefault() bool {
+	return s.IsDefault
+}
+
+// SetID sets the value of ID.
+func (s *AccessDuration) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetAbstractDataProductType sets the value of AbstractDataProductType.
+func (s *AccessDuration) SetAbstractDataProductType(val string) {
+	s.AbstractDataProductType = val
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDuration) SetAccessDurationType(val string) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDuration) SetDays(val NilInt) {
+	s.Days = val
+}
+
+// SetIsDefault sets the value of IsDefault.
+func (s *AccessDuration) SetIsDefault(val bool) {
+	s.IsDefault = val
+}
+
+func (*AccessDuration) getDefaultAccessDurationRes() {}
+
 // Ref: #/components/schemas/AccessGranularity
 type AccessGranularity string
 
@@ -5914,6 +5975,7 @@ func (*HTTPValidationError) getDataProductSettingsRes()                   {}
 func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
 func (*HTTPValidationError) getDataProductTypeRes()                       {}
 func (*HTTPValidationError) getDataProductsRes()                          {}
+func (*HTTPValidationError) getDefaultAccessDurationRes()                 {}
 func (*HTTPValidationError) getDeviceTokenRes()                           {}
 func (*HTTPValidationError) getDomainRes()                                {}
 func (*HTTPValidationError) getEnvironmentRes()                           {}
@@ -6434,6 +6496,51 @@ func (o NilGlobalRoleAssignmentResponse) Get() (v GlobalRoleAssignmentResponse, 
 
 // Or returns value if set, or given parameter if does not.
 func (o NilGlobalRoleAssignmentResponse) Or(d GlobalRoleAssignmentResponse) GlobalRoleAssignmentResponse {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilInt returns new NilInt with value set to v.
+func NewNilInt(v int) NilInt {
+	return NilInt{
+		Value: v,
+	}
+}
+
+// NilInt is nullable int.
+type NilInt struct {
+	Value int
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilInt) SetTo(v int) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilInt) SetToNull() {
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
