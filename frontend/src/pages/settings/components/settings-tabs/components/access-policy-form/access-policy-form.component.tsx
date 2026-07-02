@@ -1,9 +1,8 @@
-import { InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Flex, InputNumber, Select, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, ExplorationOutlined } from '@/components/icons/index.tsx';
-import styles from './access-policy-form.module.scss';
 
 type DurationType = 'permanent' | 'time_bound';
 
@@ -83,7 +82,6 @@ export function AccessPolicyForm() {
                             { label: t('Permanent'), value: 'permanent' },
                             { label: t('Time-bound'), value: 'time_bound' },
                         ]}
-                        className={styles.durationSelect}
                     />
                     {record.durationType === 'time_bound' && (
                         <InputNumber
@@ -91,7 +89,6 @@ export function AccessPolicyForm() {
                             value={record.defaultDays}
                             onChange={(val) => updatePolicy(record.key, { defaultDays: val ?? 1 })}
                             addonAfter={t('days')}
-                            className={styles.daysInput}
                         />
                     )}
                 </Flex>
@@ -129,7 +126,6 @@ export function AccessPolicyForm() {
                                 value={record.alternativeDays}
                                 onChange={(val) => updatePolicy(record.key, { alternativeDays: val ?? 1 })}
                                 addonAfter={t('days')}
-                                className={styles.daysInput}
                             />
                         )}
                     </Flex>
@@ -139,7 +135,7 @@ export function AccessPolicyForm() {
     ];
 
     return (
-        <Flex vertical className={styles.container}>
+        <Flex vertical gap={10}>
             <Flex vertical gap={4}>
                 <Typography.Title level={3}>{t('Access Duration Settings')}</Typography.Title>
                 <Typography.Text type="secondary">
@@ -154,7 +150,7 @@ export function AccessPolicyForm() {
                 tableLayout="fixed"
             />
             <div>
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
+                <Button type="primary" onClick={handleSave}>
                     {t('Save')}
                 </Button>
             </div>
