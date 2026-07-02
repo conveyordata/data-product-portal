@@ -38,6 +38,7 @@ class TestTracing:
         with (
             patch.object(OTLPSpanExporter, "__init__", return_value=None),
             patch.object(BatchSpanProcessor, "__init__", return_value=None),
+            patch("opentelemetry.trace.set_tracer_provider"),
             patch.object(FastAPIInstrumentor, "instrument_app") as mock_instrument,
         ):
             from opentelemetry import trace
