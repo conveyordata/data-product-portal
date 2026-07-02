@@ -1,11 +1,10 @@
 import copy
-import re
 from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from fastembed import TextEmbedding
-from sqlalchemy import func, select
+from sqlalchemy import String, case, func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
 from sqlalchemy.sql.base import ExecutableOption
 
@@ -58,7 +57,8 @@ from app.resource_names.service import ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
 
-TSQUERY_TOKEN_PATTERN = re.compile(r"[A-Za-z0-9]+")
+TSQUERY_POSITIVE_LEXEME_PATTERN = r"(^|[^!])'([^']+)'"
+TSQUERY_POSITIVE_LEXEME_PREFIX_REPLACEMENT = r"\1'\2':*"
 
 
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
@@ -160,15 +160,22 @@ class OutputPortService:
         no filtering is applied other than the limit.
         """
         ordered_by = DatasetModel.name.asc()
-        ts_query_text = self._build_prefix_ts_query(query) if query else None
-        if ts_query_text:
-            query_embedding = self.embedding_model.embed(query)
+        normalized_query = query.strip() if query else None
+        if normalized_query:
+            query_embedding = self.embedding_model.embed(normalized_query)
             semantic_score = (
                 1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
             ).label("semantic_score")
-            ts_query = func.to_tsquery("english", ts_query_text)
+            ts_query = self._build_search_ts_query(normalized_query)
             keyword_score = func.coalesce(
-                func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32), 0
+                case(
+                    (
+                        DatasetModel.search_vector.bool_op("@@")(ts_query),
+                        func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32),
+                    ),
+                    else_=0,
+                ),
+                0,
             ).label("keyword_score")
 
             semantic_weight = 2.0 / 3.0
@@ -181,7 +188,7 @@ class OutputPortService:
 
         stmt = (
             select(DatasetModel)
-            .order_by(ordered_by)
+            .order_by(ordered_by, DatasetModel.name.asc())
             # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .limit(limit * 2)
         )
@@ -205,12 +212,17 @@ class OutputPortService:
         return visible_candidates
 
     @staticmethod
-    def _build_prefix_ts_query(query: str) -> Optional[str]:
-        tokens = TSQUERY_TOKEN_PATTERN.findall(query.casefold())
-        if not tokens:
-            return None
+    def _build_search_ts_query(query: str):
+        websearch_ts_query = func.websearch_to_tsquery("english", query)
+        prefix_ts_query_text = func.regexp_replace(
+            websearch_ts_query.cast(String),
+            TSQUERY_POSITIVE_LEXEME_PATTERN,
+            TSQUERY_POSITIVE_LEXEME_PREFIX_REPLACEMENT,
+            "g",
+        )
+        prefix_ts_query = func.to_tsquery("english", prefix_ts_query_text)
 
-        return " & ".join(f"{token}:*" for token in tokens)
+        return websearch_ts_query.op("||")(prefix_ts_query)
 
     @staticmethod
     def recalculate_embeddings_load_options():

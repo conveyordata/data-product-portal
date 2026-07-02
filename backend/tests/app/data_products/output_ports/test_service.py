@@ -202,6 +202,73 @@ class TestDatasetsService:
 
         assert [result.id for result in results] == [clinical_dataset.id]
 
+    def test_search_output_ports_preserves_or_operator(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        finance_dataset = DatasetFactory(
+            name="Finance Ledger", description="Accounting metrics"
+        )
+        budget_dataset = DatasetFactory(
+            name="Budget Forecast", description="Planning metrics"
+        )
+        unrelated_dataset = DatasetFactory(
+            name="Telemetry Events", description="Device metrics"
+        )
+        self.set_search_state(finance_dataset, budget_dataset, unrelated_dataset)
+
+        results = self.search_with_static_embeddings(
+            "finance OR budget", user, limit=2
+        )
+
+        assert {result.id for result in results} == {
+            finance_dataset.id,
+            budget_dataset.id,
+        }
+
+    def test_search_output_ports_preserves_exclusion_operator(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        excluded_dataset = DatasetFactory(
+            name="Finance Budget", description="Restricted budget planning"
+        )
+        matching_dataset = DatasetFactory(
+            name="Finance Forecast", description="Revenue planning"
+        )
+        unrelated_dataset = DatasetFactory(
+            name="Marketing Leads", description="Pipeline metrics"
+        )
+        self.set_search_state(excluded_dataset, matching_dataset, unrelated_dataset)
+
+        results = self.search_with_static_embeddings("finance -budget", user, limit=1)
+
+        assert [result.id for result in results] == [matching_dataset.id]
+
+    def test_search_output_ports_preserves_quoted_phrase_operator(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        reversed_dataset = DatasetFactory(
+            name="Alpha Data Customer", description="Reversed word order"
+        )
+        phrase_dataset = DatasetFactory(
+            name="Zulu Customer Data", description="Customer data mart"
+        )
+        self.set_search_state(reversed_dataset, phrase_dataset)
+
+        results = self.search_with_static_embeddings('"customer data"', user, limit=1)
+
+        assert [result.id for result in results] == [phrase_dataset.id]
+
+    def test_search_output_ports_preserves_accented_unicode_terms(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        unrelated_dataset = DatasetFactory(
+            name="Aachen Mobility", description="Regional transport metrics"
+        )
+        unicode_dataset = DatasetFactory(
+            name="München Mobility", description="Regional transport metrics"
+        )
+        self.set_search_state(unrelated_dataset, unicode_dataset)
+
+        results = self.search_with_static_embeddings("München", user, limit=1)
+
+        assert [result.id for result in results] == [unicode_dataset.id]
+
     def test_search_output_ports_handles_empty_punctuation_and_stop_word_queries(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         alpha_dataset = DatasetFactory(name="Alpha Dataset")
