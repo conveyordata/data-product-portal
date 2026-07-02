@@ -1,4 +1,5 @@
 import copy
+import re
 from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
@@ -56,6 +57,8 @@ from app.graph.node import Node, NodeData, NodeType
 from app.resource_names.service import ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
+
+TSQUERY_TOKEN_PATTERN = re.compile(r"[A-Za-z0-9]+")
 
 
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
@@ -157,12 +160,13 @@ class OutputPortService:
         no filtering is applied other than the limit.
         """
         ordered_by = DatasetModel.name.asc()
-        if query:
+        ts_query_text = self._build_prefix_ts_query(query) if query else None
+        if ts_query_text:
             query_embedding = self.embedding_model.embed(query)
             semantic_score = (
                 1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
             ).label("semantic_score")
-            ts_query = func.websearch_to_tsquery("english", query)
+            ts_query = func.to_tsquery("english", ts_query_text)
             keyword_score = func.coalesce(
                 func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32), 0
             ).label("keyword_score")
@@ -199,6 +203,14 @@ class OutputPortService:
                     return visible_candidates
 
         return visible_candidates
+
+    @staticmethod
+    def _build_prefix_ts_query(query: str) -> Optional[str]:
+        tokens = TSQUERY_TOKEN_PATTERN.findall(query.casefold())
+        if not tokens:
+            return None
+
+        return " & ".join(f"{token}:*" for token in tokens)
 
     @staticmethod
     def recalculate_embeddings_load_options():
