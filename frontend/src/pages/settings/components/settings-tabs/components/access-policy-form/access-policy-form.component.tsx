@@ -186,7 +186,7 @@ export function AccessPolicyForm() {
             <Flex vertical gap={4}>
                 <Typography.Title level={3}>{t('Access Duration Settings')}</Typography.Title>
                 <Typography.Text type="secondary">
-                    {t('Configure default access durations for explorations and data products.')}
+                    {t('Configure default access durations for Explorations and Data Products.')}
                 </Typography.Text>
             </Flex>
             <Table<ConsumerPolicy>
