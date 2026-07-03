@@ -3663,7 +3663,7 @@ func (c *Client) sendGetDefaultAccessDuration(ctx context.Context, params GetDef
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.AbstractDataProductType))
+			return e.EncodeValue(conv.StringToString(string(params.AbstractDataProductType)))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}

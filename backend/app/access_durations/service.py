@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.type import AbstractDataProductType
+from app.access_durations.enums import AccessDurationType
 from app.access_durations.model import AccessDuration as AccessDurationModel
 from app.access_durations.schema_response import AccessDuration
 
@@ -9,7 +11,7 @@ class AccessDurationService:
         self.db = db
 
     def get_default_access_duration(
-        self, abstract_data_product_type: str
+        self, abstract_data_product_type: AbstractDataProductType
     ) -> AccessDuration | None:
         return (
             self.db.query(AccessDurationModel)
@@ -22,7 +24,7 @@ class AccessDurationService:
         )
 
     def get_access_durations_by_type(
-        self, abstract_data_product_type: str
+        self, abstract_data_product_type: AbstractDataProductType
     ) -> list[AccessDuration]:
         return (
             self.db.query(AccessDurationModel)
@@ -34,7 +36,9 @@ class AccessDurationService:
         )
 
     def get_access_duration(
-        self, abstract_data_product_type: str, access_duration_type: str
+        self,
+        abstract_data_product_type: AbstractDataProductType,
+        access_duration_type: AccessDurationType,
     ) -> AccessDuration | None:
         return (
             self.db.query(AccessDurationModel)

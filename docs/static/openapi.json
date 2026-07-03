@@ -7167,8 +7167,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "title": "Abstract Data Product Type"
+              "$ref": "#/components/schemas/AbstractDataProductType"
             }
           }
         ],
@@ -7665,12 +7664,10 @@
             "title": "Id"
           },
           "abstract_data_product_type": {
-            "type": "string",
-            "title": "Abstract Data Product Type"
+            "$ref": "#/components/schemas/AbstractDataProductType"
           },
           "access_duration_type": {
-            "type": "string",
-            "title": "Access Duration Type"
+            "$ref": "#/components/schemas/AccessDurationType"
           },
           "days": {
             "anyOf": [
@@ -7697,6 +7694,14 @@
           "is_default"
         ],
         "title": "AccessDuration"
+      },
+      "AccessDurationType": {
+        "type": "string",
+        "enum": [
+          "permanent",
+          "time_bound"
+        ],
+        "title": "AccessDurationType"
       },
       "AccessGranularity": {
         "type": "string",

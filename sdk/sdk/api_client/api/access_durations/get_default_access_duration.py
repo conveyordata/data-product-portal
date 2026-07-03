@@ -6,13 +6,14 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.abstract_data_product_type import AbstractDataProductType
 from ...models.access_duration import AccessDuration
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
 def _get_kwargs(
-    abstract_data_product_type: str,
+    abstract_data_product_type: AbstractDataProductType,
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
@@ -56,14 +57,14 @@ def _build_response(
 
 
 def sync_detailed(
-    abstract_data_product_type: str,
+    abstract_data_product_type: AbstractDataProductType,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[AccessDuration | HTTPValidationError]:
     """Get Default Access Duration
 
     Args:
-        abstract_data_product_type (str):
+        abstract_data_product_type (AbstractDataProductType):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -85,14 +86,14 @@ def sync_detailed(
 
 
 def sync(
-    abstract_data_product_type: str,
+    abstract_data_product_type: AbstractDataProductType,
     *,
     client: AuthenticatedClient | Client,
 ) -> AccessDuration | HTTPValidationError | None:
     """Get Default Access Duration
 
     Args:
-        abstract_data_product_type (str):
+        abstract_data_product_type (AbstractDataProductType):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -109,14 +110,14 @@ def sync(
 
 
 async def asyncio_detailed(
-    abstract_data_product_type: str,
+    abstract_data_product_type: AbstractDataProductType,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[AccessDuration | HTTPValidationError]:
     """Get Default Access Duration
 
     Args:
-        abstract_data_product_type (str):
+        abstract_data_product_type (AbstractDataProductType):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -136,14 +137,14 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    abstract_data_product_type: str,
+    abstract_data_product_type: AbstractDataProductType,
     *,
     client: AuthenticatedClient | Client,
 ) -> AccessDuration | HTTPValidationError | None:
     """Get Default Access Duration
 
     Args:
-        abstract_data_product_type (str):
+        abstract_data_product_type (AbstractDataProductType):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

@@ -7,6 +7,9 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.abstract_data_product_type import AbstractDataProductType
+from ..models.access_duration_type import AccessDurationType
+
 T = TypeVar("T", bound="AccessDuration")
 
 
@@ -15,15 +18,15 @@ class AccessDuration:
     """
     Attributes:
         id (UUID):
-        abstract_data_product_type (str):
-        access_duration_type (str):
+        abstract_data_product_type (AbstractDataProductType):
+        access_duration_type (AccessDurationType):
         days (int | None):
         is_default (bool):
     """
 
     id: UUID
-    abstract_data_product_type: str
-    access_duration_type: str
+    abstract_data_product_type: AbstractDataProductType
+    access_duration_type: AccessDurationType
     days: int | None
     is_default: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -31,9 +34,9 @@ class AccessDuration:
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
 
-        abstract_data_product_type = self.abstract_data_product_type
+        abstract_data_product_type = self.abstract_data_product_type.value
 
-        access_duration_type = self.access_duration_type
+        access_duration_type = self.access_duration_type.value
 
         days: int | None
         days = self.days
@@ -59,9 +62,11 @@ class AccessDuration:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-        abstract_data_product_type = d.pop("abstract_data_product_type")
+        abstract_data_product_type = AbstractDataProductType(
+            d.pop("abstract_data_product_type")
+        )
 
-        access_duration_type = d.pop("access_duration_type")
+        access_duration_type = AccessDurationType(d.pop("access_duration_type"))
 
         def _parse_days(data: object) -> int | None:
             if data is None:

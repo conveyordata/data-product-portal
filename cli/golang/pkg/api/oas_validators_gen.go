@@ -60,6 +60,51 @@ func (s AbstractDataProductType) Validate() error {
 	}
 }
 
+func (s *AccessDuration) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AbstractDataProductType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "abstract_data_product_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.AccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_duration_type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s AccessDurationType) Validate() error {
+	switch s {
+	case "permanent":
+		return nil
+	case "time_bound":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s AccessGranularity) Validate() error {
 	switch s {
 	case "schema":

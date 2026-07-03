@@ -390,11 +390,11 @@ func (s *AccessDuration) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("abstract_data_product_type")
-		e.Str(s.AbstractDataProductType)
+		s.AbstractDataProductType.Encode(e)
 	}
 	{
 		e.FieldStart("access_duration_type")
-		e.Str(s.AccessDurationType)
+		s.AccessDurationType.Encode(e)
 	}
 	{
 		e.FieldStart("days")
@@ -438,9 +438,7 @@ func (s *AccessDuration) Decode(d *jx.Decoder) error {
 		case "abstract_data_product_type":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.AbstractDataProductType = string(v)
-				if err != nil {
+				if err := s.AbstractDataProductType.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -450,9 +448,7 @@ func (s *AccessDuration) Decode(d *jx.Decoder) error {
 		case "access_duration_type":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.AccessDurationType = string(v)
-				if err != nil {
+				if err := s.AccessDurationType.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -533,6 +529,46 @@ func (s *AccessDuration) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *AccessDuration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes AccessDurationType as json.
+func (s AccessDurationType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes AccessDurationType from json.
+func (s *AccessDurationType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AccessDurationType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch AccessDurationType(v) {
+	case AccessDurationTypePermanent:
+		*s = AccessDurationTypePermanent
+	case AccessDurationTypeTimeBound:
+		*s = AccessDurationTypeTimeBound
+	default:
+		*s = AccessDurationType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s AccessDurationType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AccessDurationType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

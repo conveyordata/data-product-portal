@@ -204,11 +204,11 @@ func (s *AbstractDataProductType) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/AccessDuration
 type AccessDuration struct {
-	ID                      uuid.UUID `json:"id"`
-	AbstractDataProductType string    `json:"abstract_data_product_type"`
-	AccessDurationType      string    `json:"access_duration_type"`
-	Days                    NilInt    `json:"days"`
-	IsDefault               bool      `json:"is_default"`
+	ID                      uuid.UUID               `json:"id"`
+	AbstractDataProductType AbstractDataProductType `json:"abstract_data_product_type"`
+	AccessDurationType      AccessDurationType      `json:"access_duration_type"`
+	Days                    NilInt                  `json:"days"`
+	IsDefault               bool                    `json:"is_default"`
 }
 
 // GetID returns the value of ID.
@@ -217,12 +217,12 @@ func (s *AccessDuration) GetID() uuid.UUID {
 }
 
 // GetAbstractDataProductType returns the value of AbstractDataProductType.
-func (s *AccessDuration) GetAbstractDataProductType() string {
+func (s *AccessDuration) GetAbstractDataProductType() AbstractDataProductType {
 	return s.AbstractDataProductType
 }
 
 // GetAccessDurationType returns the value of AccessDurationType.
-func (s *AccessDuration) GetAccessDurationType() string {
+func (s *AccessDuration) GetAccessDurationType() AccessDurationType {
 	return s.AccessDurationType
 }
 
@@ -242,12 +242,12 @@ func (s *AccessDuration) SetID(val uuid.UUID) {
 }
 
 // SetAbstractDataProductType sets the value of AbstractDataProductType.
-func (s *AccessDuration) SetAbstractDataProductType(val string) {
+func (s *AccessDuration) SetAbstractDataProductType(val AbstractDataProductType) {
 	s.AbstractDataProductType = val
 }
 
 // SetAccessDurationType sets the value of AccessDurationType.
-func (s *AccessDuration) SetAccessDurationType(val string) {
+func (s *AccessDuration) SetAccessDurationType(val AccessDurationType) {
 	s.AccessDurationType = val
 }
 
@@ -262,6 +262,48 @@ func (s *AccessDuration) SetIsDefault(val bool) {
 }
 
 func (*AccessDuration) getDefaultAccessDurationRes() {}
+
+// Ref: #/components/schemas/AccessDurationType
+type AccessDurationType string
+
+const (
+	AccessDurationTypePermanent AccessDurationType = "permanent"
+	AccessDurationTypeTimeBound AccessDurationType = "time_bound"
+)
+
+// AllValues returns all AccessDurationType values.
+func (AccessDurationType) AllValues() []AccessDurationType {
+	return []AccessDurationType{
+		AccessDurationTypePermanent,
+		AccessDurationTypeTimeBound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AccessDurationType) MarshalText() ([]byte, error) {
+	switch s {
+	case AccessDurationTypePermanent:
+		return []byte(s), nil
+	case AccessDurationTypeTimeBound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AccessDurationType) UnmarshalText(data []byte) error {
+	switch AccessDurationType(data) {
+	case AccessDurationTypePermanent:
+		*s = AccessDurationTypePermanent
+		return nil
+	case AccessDurationTypeTimeBound:
+		*s = AccessDurationTypeTimeBound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #/components/schemas/AccessGranularity
 type AccessGranularity string

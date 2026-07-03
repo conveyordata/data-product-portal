@@ -152,7 +152,7 @@ type GetDataProductsParams struct {
 
 // GetDefaultAccessDurationParams is parameters of get_default_access_duration operation.
 type GetDefaultAccessDurationParams struct {
-	AbstractDataProductType string
+	AbstractDataProductType AbstractDataProductType
 }
 
 // GetDeviceTokenParams is parameters of get_device_token operation.
