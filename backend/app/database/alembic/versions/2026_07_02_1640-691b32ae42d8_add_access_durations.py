@@ -35,6 +35,14 @@ def upgrade() -> None:
             name="uq_access_duration_type",
         ),
     )
+    op.execute(
+        """
+        INSERT INTO access_durations (id, abstract_data_product_type, access_duration_type, days, is_default, created_on)
+        VALUES
+            ('00000000-0000-0000-0001-000000000001', 'data_products', 'permanent', null, true, NOW()),
+            ('00000000-0000-0000-0001-000000000002', 'explorations', 'time_bound', 30, true, NOW())
+        """
+    )
 
 
 def downgrade() -> None:
