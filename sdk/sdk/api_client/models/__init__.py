@@ -304,6 +304,7 @@ from .technical_asset_status import TechnicalAssetStatus
 from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
 from .theme_settings import ThemeSettings
+from .time_bound_access_enabled_response import TimeBoundAccessEnabledResponse
 from .ui_element_checkbox import UIElementCheckbox
 from .ui_element_metadata import UIElementMetadata
 from .ui_element_metadata_response import UIElementMetadataResponse
@@ -571,6 +572,7 @@ __all__ = (
     "TechnicalInfo",
     "TechnicalMapping",
     "ThemeSettings",
+    "TimeBoundAccessEnabledResponse",
     "UIElementCheckbox",
     "UIElementMetadata",
     "UIElementMetadataResponse",

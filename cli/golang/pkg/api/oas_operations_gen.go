@@ -86,6 +86,7 @@ const (
 	GetVersionOperation                               OperationName = "GetVersion"
 	IngestOutputPortContractOperation                 OperationName = "IngestOutputPortContract"
 	IsAdminOperation                                  OperationName = "IsAdmin"
+	IsTimeBoundAccessEnabledOperation                 OperationName = "IsTimeBoundAccessEnabled"
 	LinkInputPortsToDataProductOperation              OperationName = "LinkInputPortsToDataProduct"
 	LinkOutputPortToTechnicalAssetOperation           OperationName = "LinkOutputPortToTechnicalAsset"
 	ListDataProductRoleAssignmentsOperation           OperationName = "ListDataProductRoleAssignments"

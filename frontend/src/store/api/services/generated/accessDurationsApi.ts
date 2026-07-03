@@ -1,6 +1,12 @@
 import { api } from "@/store/api/services/baseApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    isTimeBoundAccessEnabled: build.query<
+      IsTimeBoundAccessEnabledApiResponse,
+      IsTimeBoundAccessEnabledApiArg
+    >({
+      query: () => ({ url: `/api/v2/access_durations/enabled` }),
+    }),
     getDefaultAccessDuration: build.query<
       GetDefaultAccessDurationApiResponse,
       GetDefaultAccessDurationApiArg
@@ -29,6 +35,9 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
+export type IsTimeBoundAccessEnabledApiResponse =
+  /** status 200 Successful Response */ TimeBoundAccessEnabledResponse;
+export type IsTimeBoundAccessEnabledApiArg = void;
 export type GetDefaultAccessDurationApiResponse =
   /** status 200 Successful Response */ AccessDuration;
 export type GetDefaultAccessDurationApiArg = AbstractDataProductType;
@@ -40,6 +49,9 @@ export type UpdateAccessDurationApiResponse =
 export type UpdateAccessDurationApiArg = {
   abstractDataProductType: AbstractDataProductType;
   accessDurationUpdate: AccessDurationUpdate;
+};
+export type TimeBoundAccessEnabledResponse = {
+  enabled: boolean;
 };
 export type AccessDuration = {
   id: string;
@@ -74,6 +86,8 @@ export enum AccessDurationType {
   TimeBound = "time_bound",
 }
 export const {
+  useIsTimeBoundAccessEnabledQuery,
+  useLazyIsTimeBoundAccessEnabledQuery,
   useGetDefaultAccessDurationQuery,
   useLazyGetDefaultAccessDurationQuery,
   useGetAllAccessDurationsQuery,

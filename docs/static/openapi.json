@@ -7154,6 +7154,27 @@
         }
       }
     },
+    "/api/v2/access_durations/enabled": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Is Time Bound Access Enabled",
+        "operationId": "is_time_bound_access_enabled",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeBoundAccessEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/access_durations/{abstract_data_product_type}/default": {
       "get": {
         "tags": [
@@ -14932,6 +14953,19 @@
           "portal_name"
         ],
         "title": "ThemeSettings"
+      },
+      "TimeBoundAccessEnabledResponse": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "title": "TimeBoundAccessEnabledResponse"
       },
       "UIElementCheckbox": {
         "properties": {

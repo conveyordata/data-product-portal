@@ -959,11 +959,4 @@ begin
         ('weekly_feature_summary', 'top_platform',    'Top Platform',     'string',  'VARCHAR(20)',  false, false, false, false, null, null,'Platform with most usage: web/ios/android','["web"]',             8)
     ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
     ON o.output_port_id = feature_usage_metrics_weekly AND o.name = p.schema_name;
-
--- INSERT ACCESS DURATIONS
-INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, days, is_default, created_on)
-VALUES
-    (gen_random_uuid(), 'explorations', 'permanent', null, true, timezone('utc'::text, CURRENT_TIMESTAMP)),
-    (gen_random_uuid(), 'data_products', 'permanent', null, false, timezone('utc'::text, CURRENT_TIMESTAMP)),
-    (gen_random_uuid(), 'data_products', 'time_bound', 30, true, timezone('utc'::text, CURRENT_TIMESTAMP));
 end $$;

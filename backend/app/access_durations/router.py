@@ -3,13 +3,22 @@ from sqlalchemy.orm import Session
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.schema_request import AccessDurationUpdate
-from app.access_durations.schema_response import AccessDuration
+from app.access_durations.schema_response import (
+    AccessDuration,
+    TimeBoundAccessEnabledResponse,
+)
 from app.access_durations.service import AccessDurationService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
+from app.settings import settings
 
 router = APIRouter(tags=["Access Durations"], prefix="/v2/access_durations")
+
+
+@router.get("/enabled", response_model=TimeBoundAccessEnabledResponse)
+def is_time_bound_access_enabled():
+    return TimeBoundAccessEnabledResponse(enabled=settings.TIME_BOUND_ACCESS_ENABLED)
 
 
 @router.get("/{abstract_data_product_type}/default", response_model=AccessDuration)

@@ -504,6 +504,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/authz/admin
 	IsAdmin(ctx context.Context) (*IsAdminResponse, error)
+	// IsTimeBoundAccessEnabled invokes is_time_bound_access_enabled operation.
+	//
+	// Is Time Bound Access Enabled.
+	//
+	// GET /api/v2/access_durations/enabled
+	IsTimeBoundAccessEnabled(ctx context.Context) (*TimeBoundAccessEnabledResponse, error)
 	// LinkInputPortsToDataProduct invokes link_input_ports_to_data_product operation.
 	//
 	// Link Input Ports To Data Product.
@@ -5946,6 +5952,49 @@ func (c *Client) sendIsAdmin(ctx context.Context) (res *IsAdminResponse, err err
 	}()
 
 	result, err := decodeIsAdminResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IsTimeBoundAccessEnabled invokes is_time_bound_access_enabled operation.
+//
+// Is Time Bound Access Enabled.
+//
+// GET /api/v2/access_durations/enabled
+func (c *Client) IsTimeBoundAccessEnabled(ctx context.Context) (*TimeBoundAccessEnabledResponse, error) {
+	res, err := c.sendIsTimeBoundAccessEnabled(ctx)
+	return res, err
+}
+
+func (c *Client) sendIsTimeBoundAccessEnabled(ctx context.Context) (res *TimeBoundAccessEnabledResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/access_durations/enabled"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeIsTimeBoundAccessEnabledResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

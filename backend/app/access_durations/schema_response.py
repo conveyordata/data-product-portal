@@ -11,3 +11,7 @@ class AccessDuration(ORMModel):
     access_duration_type: AccessDurationType
     days: int | None
     is_default: bool
+
+
+class TimeBoundAccessEnabledResponse(ORMModel):
+    enabled: bool

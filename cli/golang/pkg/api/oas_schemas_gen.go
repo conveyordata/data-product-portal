@@ -12740,6 +12740,21 @@ func (s *ThemeSettings) SetPortalName(val string) {
 	s.PortalName = val
 }
 
+// Ref: #/components/schemas/TimeBoundAccessEnabledResponse
+type TimeBoundAccessEnabledResponse struct {
+	Enabled bool `json:"enabled"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) GetEnabled() bool {
+	return s.Enabled
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
 // Ref: #/components/schemas/UIElementCheckbox
 type UIElementCheckbox struct {
 	InitialValue OptNilBool `json:"initial_value"`

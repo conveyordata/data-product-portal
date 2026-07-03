@@ -230,3 +230,10 @@ class TestAccessDurationsRouter:
         response = client.get(f"{ENDPOINT}/explorations/default")
         assert response.status_code == 200
         assert response.json()["access_duration_type"] == "permanent"
+
+    def test_is_time_bound_access_enabled_endpoint(self, client):
+        response = client.get(f"{ENDPOINT}/enabled")
+        assert response.status_code == 200
+        data = response.json()
+        assert "enabled" in data
+        assert isinstance(data["enabled"], bool)
