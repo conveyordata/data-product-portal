@@ -409,6 +409,10 @@ type UnlinkOutputPortFromTechnicalAssetRes interface {
 	unlinkOutputPortFromTechnicalAssetRes()
 }
 
+type UpdateAccessDurationRes interface {
+	updateAccessDurationRes()
+}
+
 type UpdateDataProductAboutRes interface {
 	updateDataProductAboutRes()
 }

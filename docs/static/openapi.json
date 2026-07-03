@@ -7220,6 +7220,61 @@
         }
       }
     },
+    "/api/v2/access_durations/{abstract_data_product_type}": {
+      "put": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Update Access Duration",
+        "operationId": "update_access_duration",
+        "parameters": [
+          {
+            "name": "abstract_data_product_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AbstractDataProductType"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessDurationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessDuration"
+                  },
+                  "title": "Response Update Access Duration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
@@ -7702,6 +7757,45 @@
           "time_bound"
         ],
         "title": "AccessDurationType"
+      },
+      "AccessDurationUpdate": {
+        "properties": {
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days"
+          },
+          "alternative_allowed": {
+            "type": "boolean",
+            "title": "Alternative Allowed"
+          },
+          "alternative_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alternative Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_duration_type",
+          "alternative_allowed"
+        ],
+        "title": "AccessDurationUpdate"
       },
       "AccessGranularity": {
         "type": "string",

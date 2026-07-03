@@ -5,6 +5,7 @@ from .abstract_data_product_status import AbstractDataProductStatus
 from .abstract_data_product_type import AbstractDataProductType
 from .access_duration import AccessDuration
 from .access_duration_type import AccessDurationType
+from .access_duration_update import AccessDurationUpdate
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
 from .approve_link_between_technical_asset_and_output_port_request import (
@@ -337,6 +338,7 @@ __all__ = (
     "AbstractDataProductType",
     "AccessDuration",
     "AccessDurationType",
+    "AccessDurationUpdate",
     "AccessGranularity",
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",

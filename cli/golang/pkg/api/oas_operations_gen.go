@@ -129,6 +129,7 @@ const (
 	SetValueForOutputPortOperation                    OperationName = "SetValueForOutputPort"
 	UnlinkInputPortFromDataProductOperation           OperationName = "UnlinkInputPortFromDataProduct"
 	UnlinkOutputPortFromTechnicalAssetOperation       OperationName = "UnlinkOutputPortFromTechnicalAsset"
+	UpdateAccessDurationOperation                     OperationName = "UpdateAccessDuration"
 	UpdateDataProductOperation                        OperationName = "UpdateDataProduct"
 	UpdateDataProductAboutOperation                   OperationName = "UpdateDataProductAbout"
 	UpdateDataProductLifecycleOperation               OperationName = "UpdateDataProductLifecycle"

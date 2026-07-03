@@ -305,6 +305,54 @@ func (s *AccessDurationType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/AccessDurationUpdate
+type AccessDurationUpdate struct {
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               OptNilInt          `json:"days"`
+	AlternativeAllowed bool               `json:"alternative_allowed"`
+	AlternativeDays    OptNilInt          `json:"alternative_days"`
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDurationUpdate) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDurationUpdate) GetDays() OptNilInt {
+	return s.Days
+}
+
+// GetAlternativeAllowed returns the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) GetAlternativeAllowed() bool {
+	return s.AlternativeAllowed
+}
+
+// GetAlternativeDays returns the value of AlternativeDays.
+func (s *AccessDurationUpdate) GetAlternativeDays() OptNilInt {
+	return s.AlternativeDays
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDurationUpdate) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDurationUpdate) SetDays(val OptNilInt) {
+	s.Days = val
+}
+
+// SetAlternativeAllowed sets the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) SetAlternativeAllowed(val bool) {
+	s.AlternativeAllowed = val
+}
+
+// SetAlternativeDays sets the value of AlternativeDays.
+func (s *AccessDurationUpdate) SetAlternativeDays(val OptNilInt) {
+	s.AlternativeDays = val
+}
+
 // Ref: #/components/schemas/AccessGranularity
 type AccessGranularity string
 
@@ -6080,6 +6128,7 @@ func (*HTTPValidationError) setValueForDataProductRes()                   {}
 func (*HTTPValidationError) setValueForOutputPortRes()                    {}
 func (*HTTPValidationError) unlinkInputPortFromDataProductRes()           {}
 func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
+func (*HTTPValidationError) updateAccessDurationRes()                     {}
 func (*HTTPValidationError) updateDataProductAboutRes()                   {}
 func (*HTTPValidationError) updateDataProductLifecycleRes()               {}
 func (*HTTPValidationError) updateDataProductRes()                        {}
@@ -13189,6 +13238,10 @@ func (*UnlinkOutputPortFromTechnicalAssetNotFoundApplicationJSON) unlinkOutputPo
 type UnlinkOutputPortFromTechnicalAssetOKApplicationJSON jx.Raw
 
 func (*UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) unlinkOutputPortFromTechnicalAssetRes() {}
+
+type UpdateAccessDurationOKApplicationJSON []AccessDuration
+
+func (*UpdateAccessDurationOKApplicationJSON) updateAccessDurationRes() {}
 
 type UpdateDataProductAboutNotFoundApplicationJSON jx.Raw
 

@@ -764,6 +764,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets/remove
 	UnlinkOutputPortFromTechnicalAsset(ctx context.Context, request *UnLinkTechnicalAssetToOutputPortRequest, params UnlinkOutputPortFromTechnicalAssetParams) (UnlinkOutputPortFromTechnicalAssetRes, error)
+	// UpdateAccessDuration invokes update_access_duration operation.
+	//
+	// Update Access Duration.
+	//
+	// PUT /api/v2/access_durations/{abstract_data_product_type}
+	UpdateAccessDuration(ctx context.Context, request *AccessDurationUpdate, params UpdateAccessDurationParams) (UpdateAccessDurationRes, error)
 	// UpdateDataProduct invokes update_data_product operation.
 	//
 	// Update Data Product.
@@ -8987,6 +8993,70 @@ func (c *Client) sendUnlinkOutputPortFromTechnicalAsset(ctx context.Context, req
 	}()
 
 	result, err := decodeUnlinkOutputPortFromTechnicalAssetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateAccessDuration invokes update_access_duration operation.
+//
+// Update Access Duration.
+//
+// PUT /api/v2/access_durations/{abstract_data_product_type}
+func (c *Client) UpdateAccessDuration(ctx context.Context, request *AccessDurationUpdate, params UpdateAccessDurationParams) (UpdateAccessDurationRes, error) {
+	res, err := c.sendUpdateAccessDuration(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateAccessDuration(ctx context.Context, request *AccessDurationUpdate, params UpdateAccessDurationParams) (res UpdateAccessDurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/access_durations/"
+	{
+		// Encode "abstract_data_product_type" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "abstract_data_product_type",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(string(params.AbstractDataProductType)))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateAccessDurationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateAccessDurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

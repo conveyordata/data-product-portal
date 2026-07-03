@@ -15,6 +15,16 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/v2/access_durations` }),
     }),
+    updateAccessDuration: build.mutation<
+      UpdateAccessDurationApiResponse,
+      UpdateAccessDurationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/access_durations/${queryArg.abstractDataProductType}`,
+        method: "PUT",
+        body: queryArg.accessDurationUpdate,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -25,6 +35,12 @@ export type GetDefaultAccessDurationApiArg = AbstractDataProductType;
 export type GetAllAccessDurationsApiResponse =
   /** status 200 Successful Response */ AccessDuration[];
 export type GetAllAccessDurationsApiArg = void;
+export type UpdateAccessDurationApiResponse =
+  /** status 200 Successful Response */ AccessDuration[];
+export type UpdateAccessDurationApiArg = {
+  abstractDataProductType: AbstractDataProductType;
+  accessDurationUpdate: AccessDurationUpdate;
+};
 export type AccessDuration = {
   id: string;
   abstract_data_product_type: AbstractDataProductType;
@@ -42,6 +58,12 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
+export type AccessDurationUpdate = {
+  access_duration_type: AccessDurationType;
+  days?: number | null;
+  alternative_allowed: boolean;
+  alternative_days?: number | null;
+};
 export enum AbstractDataProductType {
   Unknown = "unknown",
   DataProducts = "data_products",
@@ -56,4 +78,5 @@ export const {
   useLazyGetDefaultAccessDurationQuery,
   useGetAllAccessDurationsQuery,
   useLazyGetAllAccessDurationsQuery,
+  useUpdateAccessDurationMutation,
 } = injectedRtkApi;

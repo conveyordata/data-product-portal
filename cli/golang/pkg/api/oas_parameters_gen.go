@@ -493,6 +493,11 @@ type UnlinkOutputPortFromTechnicalAssetParams struct {
 	OutputPortID  uuid.UUID
 }
 
+// UpdateAccessDurationParams is parameters of update_access_duration operation.
+type UpdateAccessDurationParams struct {
+	AbstractDataProductType AbstractDataProductType
+}
+
 // UpdateDataProductParams is parameters of update_data_product operation.
 type UpdateDataProductParams struct {
 	ID uuid.UUID

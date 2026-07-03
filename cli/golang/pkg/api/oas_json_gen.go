@@ -573,6 +573,151 @@ func (s *AccessDurationType) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *AccessDurationUpdate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AccessDurationUpdate) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("access_duration_type")
+		s.AccessDurationType.Encode(e)
+	}
+	{
+		if s.Days.Set {
+			e.FieldStart("days")
+			s.Days.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("alternative_allowed")
+		e.Bool(s.AlternativeAllowed)
+	}
+	{
+		if s.AlternativeDays.Set {
+			e.FieldStart("alternative_days")
+			s.AlternativeDays.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfAccessDurationUpdate = [4]string{
+	0: "access_duration_type",
+	1: "days",
+	2: "alternative_allowed",
+	3: "alternative_days",
+}
+
+// Decode decodes AccessDurationUpdate from json.
+func (s *AccessDurationUpdate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AccessDurationUpdate to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "access_duration_type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.AccessDurationType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_duration_type\"")
+			}
+		case "days":
+			if err := func() error {
+				s.Days.Reset()
+				if err := s.Days.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"days\"")
+			}
+		case "alternative_allowed":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Bool()
+				s.AlternativeAllowed = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"alternative_allowed\"")
+			}
+		case "alternative_days":
+			if err := func() error {
+				s.AlternativeDays.Reset()
+				if err := s.AlternativeDays.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"alternative_days\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AccessDurationUpdate")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000101,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAccessDurationUpdate) {
+					name = jsonFieldsNameOfAccessDurationUpdate[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AccessDurationUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AccessDurationUpdate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes AccessGranularity as json.
 func (s AccessGranularity) Encode(e *jx.Encoder) {
 	e.Str(string(s))
@@ -32590,6 +32735,56 @@ func (s UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) MarshalJSON() ([]by
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdateAccessDurationOKApplicationJSON as json.
+func (s UpdateAccessDurationOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []AccessDuration(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes UpdateAccessDurationOKApplicationJSON from json.
+func (s *UpdateAccessDurationOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateAccessDurationOKApplicationJSON to nil")
+	}
+	var unwrapped []AccessDuration
+	if err := func() error {
+		unwrapped = make([]AccessDuration, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem AccessDuration
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdateAccessDurationOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdateAccessDurationOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateAccessDurationOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

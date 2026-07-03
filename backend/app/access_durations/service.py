@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.enums import AccessDurationType
 from app.access_durations.model import AccessDuration as AccessDurationModel
+from app.access_durations.schema_request import AccessDurationUpdate
 from app.access_durations.schema_response import AccessDuration
 
 
@@ -58,3 +59,39 @@ class AccessDurationService:
         self.db.commit()
         self.db.refresh(access_duration)
         return access_duration
+
+    def upsert_access_duration(
+        self,
+        abstract_data_product_type: AbstractDataProductType,
+        update: AccessDurationUpdate,
+    ) -> list[AccessDurationModel]:
+        self.db.query(AccessDurationModel).filter(
+            AccessDurationModel.abstract_data_product_type == abstract_data_product_type
+        ).delete()
+
+        self.db.add(
+            AccessDurationModel(
+                abstract_data_product_type=abstract_data_product_type,
+                access_duration_type=update.access_duration_type,
+                days=update.days,
+                is_default=True,
+            )
+        )
+
+        if update.alternative_allowed:
+            alternative_type = (
+                AccessDurationType.PERMANENT
+                if update.access_duration_type == AccessDurationType.TIME_BOUND
+                else AccessDurationType.TIME_BOUND
+            )
+            self.db.add(
+                AccessDurationModel(
+                    abstract_data_product_type=abstract_data_product_type,
+                    access_duration_type=alternative_type,
+                    days=update.alternative_days,
+                    is_default=False,
+                )
+            )
+
+        self.db.commit()
+        return self.get_access_durations_by_type(abstract_data_product_type)

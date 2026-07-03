@@ -2,8 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.type import AbstractDataProductType
+from app.access_durations.schema_request import AccessDurationUpdate
 from app.access_durations.schema_response import AccessDuration
 from app.access_durations.service import AccessDurationService
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
 router = APIRouter(tags=["Access Durations"], prefix="/v2/access_durations")
@@ -27,5 +30,22 @@ def get_default_access_duration(
 
 @router.get("", response_model=list[AccessDuration])
 def get_all_access_durations(db: Session = Depends(get_db_session)):
-    access_durations = AccessDurationService(db).get_access_durations()
-    return access_durations
+    return AccessDurationService(db).get_access_durations()
+
+
+@router.put(
+    "/{abstract_data_product_type}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
+)
+def update_access_duration(
+    abstract_data_product_type: AbstractDataProductType,
+    update: AccessDurationUpdate,
+    db: Session = Depends(get_db_session),
+) -> list[AccessDuration]:
+    return AccessDurationService(db).upsert_access_duration(
+        abstract_data_product_type, update
+    )

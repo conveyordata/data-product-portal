@@ -8,7 +8,9 @@ import {
     type AccessDuration,
     AccessDurationType,
     useGetAllAccessDurationsQuery,
+    useUpdateAccessDurationMutation,
 } from '@/store/api/services/generated/accessDurationsApi';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 
 type ConsumerPolicy = {
     key: AbstractDataProductType;
@@ -51,7 +53,7 @@ export function AccessPolicyForm() {
     const { t } = useTranslation();
     const { data: accessDurations } = useGetAllAccessDurationsQuery();
     const [policies, setPolicies] = useState<ConsumerPolicy[]>([]);
-    // const [updateAccessDuration] = useUpdateAccessDurationMutation();
+    const [updateAccessDuration] = useUpdateAccessDurationMutation();
 
     useEffect(() => {
         if (accessDurations) setPolicies(toPolicies(accessDurations));
@@ -61,8 +63,25 @@ export function AccessPolicyForm() {
         setPolicies((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
     };
 
-    const handleSave = () => {
-        // TODO: persist via API
+    const handleSave = async () => {
+        try {
+            await Promise.all(
+                policies.map((policy) =>
+                    updateAccessDuration({
+                        abstractDataProductType: policy.key,
+                        accessDurationUpdate: {
+                            access_duration_type: policy.durationType,
+                            days: policy.defaultDays,
+                            alternative_allowed: policy.alternativeAllowed,
+                            alternative_days: policy.alternativeDays,
+                        },
+                    }).unwrap(),
+                ),
+            );
+            dispatchMessage({ content: t('Access duration settings saved successfully'), type: 'success' });
+        } catch (_e) {
+            dispatchMessage({ content: t('Failed to save access duration settings'), type: 'error' });
+        }
     };
 
     const columns: TableColumnsType<ConsumerPolicy> = [
@@ -92,7 +111,12 @@ export function AccessPolicyForm() {
                 <Flex align="center" gap={12}>
                     <Select
                         value={record.durationType}
-                        onChange={(val: AccessDurationType) => updatePolicy(record.key, { durationType: val })}
+                        onChange={(val: AccessDurationType) =>
+                            updatePolicy(record.key, {
+                                durationType: val,
+                                defaultDays: val === AccessDurationType.TimeBound ? (record.defaultDays ?? 30) : null,
+                            })
+                        }
                         options={[
                             { label: t('Permanent'), value: AccessDurationType.Permanent },
                             { label: t('Time-bound'), value: AccessDurationType.TimeBound },
@@ -132,7 +156,15 @@ export function AccessPolicyForm() {
                     <Flex align="center" gap={12}>
                         <Checkbox
                             checked={record.alternativeAllowed}
-                            onChange={(e) => updatePolicy(record.key, { alternativeAllowed: e.target.checked })}
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                const alternativeIsTimeBound = record.durationType === AccessDurationType.Permanent;
+                                updatePolicy(record.key, {
+                                    alternativeAllowed: checked,
+                                    alternativeDays:
+                                        checked && alternativeIsTimeBound ? (record.alternativeDays ?? 30) : null,
+                                });
+                            }}
                         />
                         <Typography.Text>{label}</Typography.Text>
                         {!isTimeBound && record.alternativeAllowed && (
