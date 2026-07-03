@@ -1,7 +1,10 @@
 import {
+    Alert,
     Button,
+    Card,
     type CheckboxOptionType,
     Col,
+    Flex,
     Form,
     type FormInstance,
     type FormProps,
@@ -13,6 +16,7 @@ import {
     Skeleton,
     Space,
     Tooltip,
+    Typography,
 } from 'antd';
 import type { TFunction } from 'i18next';
 import { type Ref, useCallback, useEffect, useMemo, useState } from 'react';
@@ -22,6 +26,13 @@ import { useDebouncedCallback } from 'use-debounce';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import {
+    AbstractDataProductType,
+    type AccessDuration,
+    AccessDurationType,
+    useGetAllAccessDurationsQuery,
+    useIsTimeBoundAccessEnabledQuery,
+} from '@/store/api/services/generated/accessDurationsApi.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
@@ -56,6 +67,120 @@ import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import styles from './dataset-form.module.scss';
+
+const PRODUCT_TYPE_LABELS: Record<string, string> = {
+    [AbstractDataProductType.DataProducts]: 'Data Products',
+    [AbstractDataProductType.Explorations]: 'Explorations',
+};
+
+function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; rows: AccessDuration[] }) {
+    const { t } = useTranslation();
+    const defaultRow = rows.find((r) => r.is_default);
+    const [selected, setSelected] = useState<AccessDurationType>(
+        defaultRow?.access_duration_type ?? AccessDurationType.Permanent,
+    );
+
+    const hasTimeBound = rows.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
+    const hasPermanent = rows.some((r) => r.access_duration_type === AccessDurationType.Permanent);
+    const canToggle = hasTimeBound && hasPermanent;
+    const timeBoundDays = rows.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
+
+    const options = [
+        {
+            label: !hasTimeBound ? (
+                <Tooltip title={t('Not allowed by admin')}>
+                    <span>{t('Time Bound')}</span>
+                </Tooltip>
+            ) : (
+                t('Time Bound')
+            ),
+            value: AccessDurationType.TimeBound,
+            disabled: !hasTimeBound,
+        },
+        {
+            label: !hasPermanent ? (
+                <Tooltip title={t('Not allowed by admin')}>
+                    <span>{t('Permanent')}</span>
+                </Tooltip>
+            ) : (
+                t('Permanent')
+            ),
+            value: AccessDurationType.Permanent,
+            disabled: !hasPermanent,
+        },
+    ];
+
+    return (
+        <Card
+            size="small"
+            title={
+                <Typography.Text strong>
+                    {t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[type] })}
+                </Typography.Text>
+            }
+        >
+            <Flex vertical gap={12}>
+                <Radio.Group
+                    value={selected}
+                    onChange={canToggle ? (e) => setSelected(e.target.value) : undefined}
+                    options={options}
+                    optionType="button"
+                />
+                {selected === AccessDurationType.TimeBound && timeBoundDays != null && (
+                    <Alert
+                        type="info"
+                        showIcon={false}
+                        message={
+                            <Flex vertical gap={4}>
+                                <Typography.Text strong>{t('{{days}} days', { days: timeBoundDays })}</Typography.Text>
+                                <Typography.Text type="secondary">
+                                    {t('Admin-configured duration policy.')}
+                                </Typography.Text>
+                                <Typography.Text type="secondary">
+                                    {t('Access expires after configured duration.')}
+                                </Typography.Text>
+                            </Flex>
+                        }
+                    />
+                )}
+            </Flex>
+        </Card>
+    );
+}
+
+function AccessDurationInfo() {
+    const { t } = useTranslation();
+    const { data: allDurations = [] } = useGetAllAccessDurationsQuery();
+    const { data: enabledState } = useIsTimeBoundAccessEnabledQuery();
+    const enabled = enabledState?.enabled ?? true;
+
+    const productTypes = [AbstractDataProductType.DataProducts, AbstractDataProductType.Explorations] as const;
+
+    const sections = productTypes
+        .map((type) => ({
+            type,
+            rows: allDurations.filter((d) => d.abstract_data_product_type === type),
+        }))
+        .filter(({ rows }) => rows.length > 0);
+
+    if (!enabled) {
+        return (
+            <Alert
+                type="warning"
+                showIcon
+                message={t('Access duration enforcement is currently disabled by the administrator.')}
+            />
+        );
+    }
+
+    return (
+        <Flex vertical gap={8}>
+            {sections.map(({ type, rows }) => (
+                <AccessDurationSection key={type} type={type} rows={rows} />
+            ))}
+        </Flex>
+    );
+}
 
 type Props = {
     mode: 'create' | 'edit';
@@ -400,6 +525,14 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 ]}
             >
                 <Radio.Group options={accessTypeOptions} />
+            </Form.Item>
+            <Form.Item
+                label={t('Access Duration')}
+                tooltip={t(
+                    'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
+                )}
+            >
+                <AccessDurationInfo />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest> name={'tag_ids'} label={t('Tags')}>
                 <Select
