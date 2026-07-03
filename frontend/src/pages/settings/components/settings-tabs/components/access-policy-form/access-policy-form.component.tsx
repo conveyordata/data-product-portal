@@ -10,68 +10,99 @@ import {
     useGetAllAccessDurationsQuery,
 } from '@/store/api/services/generated/accessDurationsApi';
 
+type ConsumerPolicy = {
+    key: AbstractDataProductType;
+    durationType: AccessDurationType;
+    defaultDays: number | null;
+    alternativeAllowed: boolean;
+    alternativeDays: number | null;
+    defaultId: string;
+    alternativeId?: string;
+};
+
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
     [AbstractDataProductType.DataProducts]: 'Data Products',
     [AbstractDataProductType.Explorations]: 'Explorations',
 };
 
+function toPolicies(durations: AccessDuration[]): ConsumerPolicy[] {
+    const byType = durations.reduce<Partial<Record<AbstractDataProductType, AccessDuration[]>>>((acc, d) => {
+        const existing = acc[d.abstract_data_product_type];
+        acc[d.abstract_data_product_type] = existing ? [...existing, d] : [d];
+        return acc;
+    }, {});
+
+    return (Object.entries(byType) as [AbstractDataProductType, AccessDuration[]][]).map(([type, rows]) => {
+        const defaultRow = rows.find((r) => r.is_default) ?? rows[0];
+        const alternativeRow = rows.find((r) => !r.is_default);
+        return {
+            key: type,
+            durationType: defaultRow.access_duration_type,
+            defaultDays: defaultRow.days,
+            alternativeAllowed: !!alternativeRow,
+            alternativeDays: alternativeRow?.days ?? null,
+            defaultId: defaultRow.id,
+            alternativeId: alternativeRow?.id,
+        };
+    });
+}
+
 export function AccessPolicyForm() {
     const { t } = useTranslation();
     const { data: accessDurations } = useGetAllAccessDurationsQuery();
-    const [policies, setPolicies] = useState<AccessDuration[]>([]);
+    const [policies, setPolicies] = useState<ConsumerPolicy[]>([]);
+    // const [updateAccessDuration] = useUpdateAccessDurationMutation();
 
     useEffect(() => {
-        if (accessDurations) setPolicies(accessDurations);
+        if (accessDurations) setPolicies(toPolicies(accessDurations));
     }, [accessDurations]);
 
-    const updatePolicy = (id: string, patch: Partial<AccessDuration>) => {
-        setPolicies((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+    const updatePolicy = (key: AbstractDataProductType, patch: Partial<ConsumerPolicy>) => {
+        setPolicies((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
     };
 
     const handleSave = () => {
         // TODO: persist via API
     };
 
-    const columns: TableColumnsType<AccessDuration> = [
+    const columns: TableColumnsType<ConsumerPolicy> = [
         {
             title: t('Consumer type'),
-            dataIndex: 'abstract_data_product_type',
-            key: 'abstract_data_product_type',
+            key: 'consumer_type',
             width: 200,
-            render: (type: AbstractDataProductType) => (
+            render: (_, record) => (
                 <Flex align="center" gap={8}>
-                    <AbstractProductIcon type={type} />
-                    <Typography.Text strong>{t(PRODUCT_TYPE_LABELS[type] ?? type)}</Typography.Text>
+                    <AbstractProductIcon type={record.key} />
+                    <Typography.Text strong>{t(PRODUCT_TYPE_LABELS[record.key] ?? record.key)}</Typography.Text>
                 </Flex>
             ),
         },
         {
             title: (
                 <Flex align="center" gap={6}>
-                    {t('Duration type')}
-                    <Tooltip title={t('The access duration assigned when a request is approved.')}>
+                    {t('Default duration')}
+                    <Tooltip title={t('The default access duration assigned when a request is approved.')}>
                         <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
                     </Tooltip>
                 </Flex>
             ),
             key: 'duration',
-            dataIndex: 'access_duration_type',
             width: 320,
             render: (_, record) => (
                 <Flex align="center" gap={12}>
                     <Select
-                        value={record.access_duration_type}
-                        onChange={(val) => updatePolicy(record.id, { access_duration_type: val })}
+                        value={record.durationType}
+                        onChange={(val: AccessDurationType) => updatePolicy(record.key, { durationType: val })}
                         options={[
                             { label: t('Permanent'), value: AccessDurationType.Permanent },
                             { label: t('Time-bound'), value: AccessDurationType.TimeBound },
                         ]}
                     />
-                    {record.access_duration_type === AccessDurationType.TimeBound && (
+                    {record.durationType === AccessDurationType.TimeBound && (
                         <InputNumber
                             min={1}
-                            value={record.days ?? undefined}
-                            onChange={(val) => updatePolicy(record.id, { days: val ?? 1 })}
+                            value={record.defaultDays ?? undefined}
+                            onChange={(val) => updatePolicy(record.key, { defaultDays: val ?? 1 })}
                             addonAfter={t('days')}
                         />
                     )}
@@ -81,20 +112,40 @@ export function AccessPolicyForm() {
         {
             title: (
                 <Flex align="center" gap={6}>
-                    {t('Is default')}
-                    <Tooltip title={t('Whether this is the default duration type for the consumer type.')}>
+                    {t('Alternative allowed')}
+                    <Tooltip
+                        title={t(
+                            'Whether requesters can ask for an alternative duration (e.g. permanent when default is time-bound, or vice versa).',
+                        )}
+                    >
                         <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
                     </Tooltip>
                 </Flex>
             ),
-            key: 'is_default',
-            width: 200,
-            render: (_, record) => (
-                <Checkbox
-                    checked={record.is_default}
-                    onChange={(e) => updatePolicy(record.id, { is_default: e.target.checked })}
-                />
-            ),
+            key: 'alternative',
+            width: 360,
+            render: (_, record) => {
+                const isTimeBound = record.durationType === AccessDurationType.TimeBound;
+                const label = isTimeBound ? t('Permanent allowed') : t('Time-bound allowed');
+
+                return (
+                    <Flex align="center" gap={12}>
+                        <Checkbox
+                            checked={record.alternativeAllowed}
+                            onChange={(e) => updatePolicy(record.key, { alternativeAllowed: e.target.checked })}
+                        />
+                        <Typography.Text>{label}</Typography.Text>
+                        {!isTimeBound && record.alternativeAllowed && (
+                            <InputNumber
+                                min={1}
+                                value={record.alternativeDays ?? undefined}
+                                onChange={(val) => updatePolicy(record.key, { alternativeDays: val ?? 1 })}
+                                addonAfter={t('days')}
+                            />
+                        )}
+                    </Flex>
+                );
+            },
         },
     ];
 
@@ -106,10 +157,10 @@ export function AccessPolicyForm() {
                     {t('Configure default access durations for explorations and data products.')}
                 </Typography.Text>
             </Flex>
-            <Table<AccessDuration>
+            <Table<ConsumerPolicy>
                 columns={columns}
                 dataSource={policies}
-                rowKey="id"
+                rowKey="key"
                 pagination={false}
                 tableLayout="fixed"
             />
