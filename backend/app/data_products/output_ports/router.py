@@ -40,6 +40,7 @@ from app.data_products.output_ports.schema_request import (
 from app.data_products.output_ports.schema_response import (
     CreateOutputPortResponse,
     GetDataProductOutputPortsResponse,
+    GetOutputPortAccessDurationsResponse,
     GetOutputPortResponse,
     UpdateOutputPortResponse,
 )
@@ -374,3 +375,16 @@ def set_value_for_output_port(
         )
     )
     RefreshInfrastructureLambda().trigger()
+
+
+@router.get(
+    f"{route}/{{id}}/access_durations",
+    response_model=GetOutputPortAccessDurationsResponse,
+)
+def get_output_port_access_durations(
+    data_product_id: UUID,
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+):
+    return OutputPortService(db).get_access_durations(id, user, data_product_id)

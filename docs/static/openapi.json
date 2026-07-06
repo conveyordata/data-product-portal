@@ -1436,6 +1436,59 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/access_durations": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Get Output Port Access Durations",
+        "operationId": "get_output_port_access_durations",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOutputPortAccessDurationsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products": {
       "post": {
         "tags": [
@@ -11464,6 +11517,28 @@
         ],
         "title": "GetInputPortsForOutputPortResponse"
       },
+      "GetOutputPortAccessDurationsResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_access_duration": {
+            "$ref": "#/components/schemas/OutputPortAccessDuration"
+          },
+          "exploration_access_duration": {
+            "$ref": "#/components/schemas/OutputPortAccessDuration"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_access_duration",
+          "exploration_access_duration"
+        ],
+        "title": "GetOutputPortAccessDurationsResponse"
+      },
       "GetOutputPortResponse": {
         "properties": {
           "id": {
@@ -12498,6 +12573,24 @@
           "tags"
         ],
         "title": "OutputPort"
+      },
+      "OutputPortAccessDuration": {
+        "properties": {
+          "is_permanent": {
+            "type": "boolean",
+            "title": "Is Permanent"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_permanent",
+          "days"
+        ],
+        "title": "OutputPortAccessDuration"
       },
       "OutputPortAccessType": {
         "type": "string",

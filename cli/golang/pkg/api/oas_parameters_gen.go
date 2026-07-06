@@ -213,6 +213,12 @@ type GetOutputPortParams struct {
 	ID            uuid.UUID
 }
 
+// GetOutputPortAccessDurationsParams is parameters of get_output_port_access_durations operation.
+type GetOutputPortAccessDurationsParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
 // GetOutputPortCuratedQueriesParams is parameters of get_output_port_curated_queries operation.
 type GetOutputPortCuratedQueriesParams struct {
 	DataProductID uuid.UUID

@@ -1,0 +1,47 @@
+import { Typography } from 'antd';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { useGetOutputPortAccessDurationsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
+import { DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
+
+type Props = {
+    outputPort: SearchOutputPortsResponseItem;
+    dataProductTypeChoice: DataProductChoiceOptions;
+};
+
+export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: Props) {
+    const { data: accessDurations, isLoading } = useGetOutputPortAccessDurationsQuery({
+        id: outputPort.id,
+        dataProductId: outputPort.data_product_id,
+    });
+    const { t } = useTranslation();
+
+    const accessDurationString = useMemo(() => {
+        if (!accessDurations) {
+            return '';
+        }
+        const abstractTypeAccessDuration =
+            dataProductTypeChoice === DataProductChoiceOptions.data_product
+                ? accessDurations?.data_product_access_duration
+                : accessDurations?.exploration_access_duration;
+        return abstractTypeAccessDuration.is_permanent
+            ? t('permanent')
+            : t('{{count}} days, access will expire on {{expiryDate}}', {
+                  count: abstractTypeAccessDuration.days,
+                  expiryDate: Date.now() + abstractTypeAccessDuration.days,
+              });
+    }, [accessDurations, dataProductTypeChoice, t]);
+
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
+
+    return (
+        <Typography.Text>
+            {' '}
+            {t(`${outputPort.name}:`)} {accessDurationString}
+        </Typography.Text>
+    );
+}

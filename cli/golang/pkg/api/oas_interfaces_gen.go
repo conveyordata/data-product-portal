@@ -197,6 +197,10 @@ type GetLatestDataQualitySummaryForOutputPortRes interface {
 	getLatestDataQualitySummaryForOutputPortRes()
 }
 
+type GetOutputPortAccessDurationsRes interface {
+	getOutputPortAccessDurationsRes()
+}
+
 type GetOutputPortCuratedQueriesRes interface {
 	getOutputPortCuratedQueriesRes()
 }

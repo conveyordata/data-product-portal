@@ -9,6 +9,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import styles from '@/components/data-products/data-product-form/data-product-form.module.scss';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
+import { FormItemAccessDuration } from '@/pages/cart/components/form-item-access-duration.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -22,7 +23,7 @@ import {
     useLazySanitizeResourceNameQuery,
     useLazyValidateResourceNameQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
+import { clearCart, DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { createExplorationIdPath } from '@/types/navigation.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
@@ -180,6 +181,10 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                 />
             </Form.Item>
             <JustificationFormItem />
+            <FormItemAccessDuration
+                cartOutputPorts={cartOutputPorts}
+                dataProductTypeChoice={DataProductChoiceOptions.exploration}
+            />
             <Form.Item>
                 <Flex justify="end">
                     <Button
