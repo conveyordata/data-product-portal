@@ -157,6 +157,10 @@ type GetDataProductsRes interface {
 	getDataProductsRes()
 }
 
+type GetDefaultAccessDurationRes interface {
+	getDefaultAccessDurationRes()
+}
+
 type GetDeviceTokenRes interface {
 	getDeviceTokenRes()
 }
@@ -403,6 +407,10 @@ type UnlinkInputPortFromDataProductRes interface {
 
 type UnlinkOutputPortFromTechnicalAssetRes interface {
 	unlinkOutputPortFromTechnicalAssetRes()
+}
+
+type UpdateAccessDurationRes interface {
+	updateAccessDurationRes()
 }
 
 type UpdateDataProductAboutRes interface {

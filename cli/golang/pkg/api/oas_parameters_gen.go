@@ -150,6 +150,11 @@ type GetDataProductsParams struct {
 	FilterToUserWithAssigment OptUUID `json:",omitempty,omitzero"`
 }
 
+// GetDefaultAccessDurationParams is parameters of get_default_access_duration operation.
+type GetDefaultAccessDurationParams struct {
+	AbstractDataProductType AbstractDataProductType
+}
+
 // GetDeviceTokenParams is parameters of get_device_token operation.
 type GetDeviceTokenParams struct {
 	// Deprecated: schema marks this parameter as deprecated.
@@ -486,6 +491,11 @@ type UnlinkInputPortFromDataProductParams struct {
 type UnlinkOutputPortFromTechnicalAssetParams struct {
 	DataProductID uuid.UUID
 	OutputPortID  uuid.UUID
+}
+
+// UpdateAccessDurationParams is parameters of update_access_duration operation.
+type UpdateAccessDurationParams struct {
+	AbstractDataProductType AbstractDataProductType
 }
 
 // UpdateDataProductParams is parameters of update_data_product operation.

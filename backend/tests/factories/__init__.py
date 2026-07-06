@@ -1,4 +1,5 @@
 from .. import test_session
+from .access_duration import AccessDurationFactory
 from .data_outputs_datasets import DataOutputDatasetAssociationFactory
 from .data_product import DataProductFactory
 from .data_product import fake as data_product_fake
@@ -45,6 +46,7 @@ def reset_unique_fakers() -> None:
 
 
 factories = [
+    AccessDurationFactory,
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductSettingFactory,
