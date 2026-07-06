@@ -125,7 +125,7 @@ function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; 
                     <Alert
                         type="info"
                         showIcon={false}
-                        message={
+                        title={
                             <Flex vertical gap={4}>
                                 <Typography.Text strong>{t('{{days}} days', { days: timeBoundDays })}</Typography.Text>
                                 <Typography.Text type="secondary">
@@ -143,7 +143,7 @@ function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; 
     );
 }
 
-function AccessDurationInfo() {
+function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
     const { t } = useTranslation();
     const { data: allDurations = [] } = useGetAllAccessDurationsQuery();
     const { data: enabledState } = useIsTimeBoundAccessEnabledQuery();
@@ -163,13 +163,33 @@ function AccessDurationInfo() {
             <Alert
                 type="warning"
                 showIcon
-                message={t('Access duration enforcement is currently disabled by the administrator.')}
+                title={t('Access duration enforcement is currently disabled by the administrator.')}
             />
         );
     }
 
     return (
         <Flex vertical gap={8}>
+            {mode === 'edit' && (
+                <Alert
+                    type="warning"
+                    showIcon
+                    title={
+                        <Flex vertical gap={4}>
+                            <Typography.Text>
+                                {t(
+                                    'Only future approved access requests will be affected by changes to the access duration policy.',
+                                )}
+                            </Typography.Text>
+                            <Typography.Text>
+                                {t(
+                                    'Currently active grants continue under their original terms and are not affected by policy changes.',
+                                )}
+                            </Typography.Text>
+                        </Flex>
+                    }
+                />
+            )}
             {sections.map(({ type, rows }) => (
                 <AccessDurationSection key={type} type={type} rows={rows} />
             ))}
@@ -528,7 +548,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 )}
                 required
             >
-                <AccessDurationInfo />
+                <AccessDurationInfo mode={mode} />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest> name={'tag_ids'} label={t('Tags')}>
                 <Select
