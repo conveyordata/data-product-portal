@@ -1,7 +1,6 @@
 import {
     Alert,
     Button,
-    Card,
     type CheckboxOptionType,
     Col,
     Flex,
@@ -111,14 +110,10 @@ function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; 
     ];
 
     return (
-        <Card
-            size="small"
-            title={
-                <Typography.Text strong>
-                    {t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[type] })}
-                </Typography.Text>
-            }
-        >
+        <Flex vertical gap={8} style={{ marginLeft: 20 }}>
+            <Typography.Text type="secondary">
+                {t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[type] })}
+            </Typography.Text>
             <Flex vertical gap={12}>
                 <Radio.Group
                     value={selected}
@@ -144,7 +139,7 @@ function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; 
                     />
                 )}
             </Flex>
-        </Card>
+        </Flex>
     );
 }
 
@@ -531,6 +526,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 tooltip={t(
                     'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
                 )}
+                required
             >
                 <AccessDurationInfo />
             </Form.Item>
