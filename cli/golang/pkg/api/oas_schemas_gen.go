@@ -947,14 +947,16 @@ func (*CreateOutputPortNotFoundApplicationJSON) createOutputPortRes() {}
 
 // Ref: #/components/schemas/CreateOutputPortRequest
 type CreateOutputPortRequest struct {
-	Name        string               `json:"name"`
-	Namespace   string               `json:"namespace"`
-	Description string               `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
-	About       OptNilString         `json:"about"`
-	LifecycleID OptNilUUID           `json:"lifecycle_id"`
-	TagIds      []uuid.UUID          `json:"tag_ids"`
-	Owners      []uuid.UUID          `json:"owners"`
+	Name                          string               `json:"name"`
+	Namespace                     string               `json:"namespace"`
+	Description                   string               `json:"description"`
+	AccessType                    OutputPortAccessType `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
+	About                         OptNilString         `json:"about"`
+	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID          `json:"tag_ids"`
+	Owners                        []uuid.UUID          `json:"owners"`
 }
 
 // GetName returns the value of Name.
@@ -975,6 +977,16 @@ func (s *CreateOutputPortRequest) GetDescription() string {
 // GetAccessType returns the value of AccessType.
 func (s *CreateOutputPortRequest) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *CreateOutputPortRequest) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *CreateOutputPortRequest) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetAbout returns the value of About.
@@ -1015,6 +1027,16 @@ func (s *CreateOutputPortRequest) SetDescription(val string) {
 // SetAccessType sets the value of AccessType.
 func (s *CreateOutputPortRequest) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *CreateOutputPortRequest) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *CreateOutputPortRequest) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetAbout sets the value of About.
@@ -3328,13 +3350,15 @@ func (s *DatasetStatusUpdate) SetStatus(val OutputPortStatus) {
 
 // Ref: #/components/schemas/DatasetUpdate
 type DatasetUpdate struct {
-	Name        string               `json:"name"`
-	Namespace   string               `json:"namespace"`
-	Description string               `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
-	About       OptNilString         `json:"about"`
-	LifecycleID OptNilUUID           `json:"lifecycle_id"`
-	TagIds      []uuid.UUID          `json:"tag_ids"`
+	Name                          string               `json:"name"`
+	Namespace                     string               `json:"namespace"`
+	Description                   string               `json:"description"`
+	AccessType                    OutputPortAccessType `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
+	About                         OptNilString         `json:"about"`
+	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID          `json:"tag_ids"`
 }
 
 // GetName returns the value of Name.
@@ -3355,6 +3379,16 @@ func (s *DatasetUpdate) GetDescription() string {
 // GetAccessType returns the value of AccessType.
 func (s *DatasetUpdate) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *DatasetUpdate) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *DatasetUpdate) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetAbout returns the value of About.
@@ -3390,6 +3424,16 @@ func (s *DatasetUpdate) SetDescription(val string) {
 // SetAccessType sets the value of AccessType.
 func (s *DatasetUpdate) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *DatasetUpdate) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *DatasetUpdate) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetAbout sets the value of About.
@@ -5052,21 +5096,23 @@ func (*GetInputPortsForOutputPortResponse) getInputPortsForOutputPortRes() {}
 
 // Ref: #/components/schemas/GetOutputPortResponse
 type GetOutputPortResponse struct {
-	ID                  uuid.UUID                `json:"id"`
-	Namespace           string                   `json:"namespace"`
-	Name                string                   `json:"name"`
-	Description         string                   `json:"description"`
-	Status              OutputPortStatus         `json:"status"`
-	Usage               NilString                `json:"usage"`
-	AccessType          OutputPortAccessType     `json:"access_type"`
-	DataProductID       uuid.UUID                `json:"data_product_id"`
-	Tags                []Tag                    `json:"tags"`
-	Domain              Domain                   `json:"domain"`
-	Lifecycle           NilDataProductLifeCycle  `json:"lifecycle"`
-	About               NilString                `json:"about"`
-	RolledUpTags        []Tag                    `json:"rolled_up_tags"`
-	DataProductSettings []OutputPortSettingValue `json:"data_product_settings"`
-	TechnicalAssetLinks []TechnicalAssetLink     `json:"technical_asset_links"`
+	ID                            uuid.UUID                `json:"id"`
+	Namespace                     string                   `json:"namespace"`
+	Name                          string                   `json:"name"`
+	Description                   string                   `json:"description"`
+	Status                        OutputPortStatus         `json:"status"`
+	Usage                         NilString                `json:"usage"`
+	AccessType                    OutputPortAccessType     `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType       `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType       `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID                `json:"data_product_id"`
+	Tags                          []Tag                    `json:"tags"`
+	Domain                        Domain                   `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
+	About                         NilString                `json:"about"`
+	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
+	DataProductSettings           []OutputPortSettingValue `json:"data_product_settings"`
+	TechnicalAssetLinks           []TechnicalAssetLink     `json:"technical_asset_links"`
 }
 
 // GetID returns the value of ID.
@@ -5102,6 +5148,16 @@ func (s *GetOutputPortResponse) GetUsage() NilString {
 // GetAccessType returns the value of AccessType.
 func (s *GetOutputPortResponse) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *GetOutputPortResponse) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *GetOutputPortResponse) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetDataProductID returns the value of DataProductID.
@@ -5177,6 +5233,16 @@ func (s *GetOutputPortResponse) SetUsage(val NilString) {
 // SetAccessType sets the value of AccessType.
 func (s *GetOutputPortResponse) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *GetOutputPortResponse) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *GetOutputPortResponse) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetDataProductID sets the value of DataProductID.
@@ -11727,21 +11793,23 @@ func (*SearchOutputPortsResponse) searchOutputPortsRes() {}
 
 // Ref: #/components/schemas/SearchOutputPortsResponseItem
 type SearchOutputPortsResponseItem struct {
-	ID                       uuid.UUID               `json:"id"`
-	Namespace                string                  `json:"namespace"`
-	Name                     string                  `json:"name"`
-	Description              string                  `json:"description"`
-	Status                   OutputPortStatus        `json:"status"`
-	Usage                    NilString               `json:"usage"`
-	AccessType               OutputPortAccessType    `json:"access_type"`
-	DataProductID            uuid.UUID               `json:"data_product_id"`
-	Tags                     []Tag                   `json:"tags"`
-	Domain                   Domain                  `json:"domain"`
-	Lifecycle                NilDataProductLifeCycle `json:"lifecycle"`
-	AbstractDataProductCount int                     `json:"abstract_data_product_count"`
-	TechnicalAssetsCount     int                     `json:"technical_assets_count"`
-	DataProductName          string                  `json:"data_product_name"`
-	QualityStatus            NilDataQualityStatus    `json:"quality_status"`
+	ID                            uuid.UUID               `json:"id"`
+	Namespace                     string                  `json:"namespace"`
+	Name                          string                  `json:"name"`
+	Description                   string                  `json:"description"`
+	Status                        OutputPortStatus        `json:"status"`
+	Usage                         NilString               `json:"usage"`
+	AccessType                    OutputPortAccessType    `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType      `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType      `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID               `json:"data_product_id"`
+	Tags                          []Tag                   `json:"tags"`
+	Domain                        Domain                  `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle `json:"lifecycle"`
+	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
+	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
+	DataProductName               string                  `json:"data_product_name"`
+	QualityStatus                 NilDataQualityStatus    `json:"quality_status"`
 }
 
 // GetID returns the value of ID.
@@ -11777,6 +11845,16 @@ func (s *SearchOutputPortsResponseItem) GetUsage() NilString {
 // GetAccessType returns the value of AccessType.
 func (s *SearchOutputPortsResponseItem) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *SearchOutputPortsResponseItem) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *SearchOutputPortsResponseItem) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetDataProductID returns the value of DataProductID.
@@ -11852,6 +11930,16 @@ func (s *SearchOutputPortsResponseItem) SetUsage(val NilString) {
 // SetAccessType sets the value of AccessType.
 func (s *SearchOutputPortsResponseItem) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *SearchOutputPortsResponseItem) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *SearchOutputPortsResponseItem) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetDataProductID sets the value of DataProductID.

@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import pytest
 
+from app.access_durations.enums import AccessDurationType
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -47,6 +48,8 @@ def dataset_payload():
         "access_type": OutputPortAccessType.RESTRICTED.value,
         "domain_id": str(domain.id),
         "data_product_id": str(data_product.id),
+        "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
+        "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
     }
 
 
@@ -235,6 +238,8 @@ class TestOutputPortRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
+            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
 
         updated_dataset = self.update_output_port(
@@ -261,6 +266,8 @@ class TestOutputPortRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "restricted",
+            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
 
         updated_dataset = self.update_output_port(
@@ -285,6 +292,8 @@ class TestOutputPortRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "restricted",
+            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
 
         updated_dataset = self.update_output_port(
@@ -677,6 +686,8 @@ class TestOutputPortRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
+            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
 
         response = self.update_output_port(
@@ -747,6 +758,8 @@ class TestOutputPortRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
+            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
 
         updated_dataset = self.update_output_port(

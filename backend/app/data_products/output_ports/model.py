@@ -17,6 +17,7 @@ from sqlalchemy.orm import (
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
+from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
 from app.core.webhooks.events import OutputPortEvent
@@ -136,6 +137,26 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
             .scalar_subquery()
         ),
         raiseload=True,
+    )
+
+    data_product_access_duration_type: Mapped[AccessDurationType] = mapped_column(
+        Enum(
+            AccessDurationType,
+            values_callable=lambda enum: [e.value for e in enum],
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
+    )
+
+    exploration_access_duration_type: Mapped[AccessDurationType] = mapped_column(
+        Enum(
+            AccessDurationType,
+            values_callable=lambda enum: [e.value for e in enum],
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
     )
 
     def to_event(self) -> OutputPortEvent:
