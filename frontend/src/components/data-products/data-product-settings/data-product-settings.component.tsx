@@ -230,8 +230,8 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             </Flex>
         ));
     }, [updatedSettings, t]);
-    const isLoading = isFetching || isFetchingDP || isFetchingDS
-    if (!isLoading && updatedSettings.length === 0) return <Empty description={'No settings to show'}/>;
+    const isLoading = isFetching || isFetchingDP || isFetchingDS;
+    if (!isLoading && updatedSettings.length === 0) return <Empty description={'No settings to show'} />;
 
     return (
         <Flex vertical>
@@ -245,11 +245,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                 autoComplete={'off'}
                 labelWrap
                 labelAlign={'left'}
-                disabled={
-                    isLoading ||
-                    !canUpdateProductSettings ||
-                    !canUpdateOutputPortSetting
-                }
+                disabled={isLoading || !canUpdateProductSettings || !canUpdateOutputPortSetting}
                 className={styles.form}
                 onValuesChange={(_, allValues) => {
                     // Trigger form submission after 0.5 seconds of unchanged input values
