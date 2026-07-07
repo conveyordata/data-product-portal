@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { useGetOutputPortAccessDurationsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
+import { formatDate } from '@/utils/date.helper.ts';
 
 type Props = {
     outputPort: SearchOutputPortsResponseItem;
@@ -26,11 +27,12 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
             dataProductTypeChoice === DataProductChoiceOptions.data_product
                 ? accessDurations?.data_product_access_duration
                 : accessDurations?.exploration_access_duration;
+        const expiryDate = new Date(Date.now() + abstractTypeAccessDuration.days * 24 * 60 * 60 * 1000);
         return abstractTypeAccessDuration.is_permanent
             ? t('permanent')
             : t('{{count}} days, access will expire on {{expiryDate}}', {
                   count: abstractTypeAccessDuration.days,
-                  expiryDate: Date.now() + abstractTypeAccessDuration.days,
+                  expiryDate: formatDate(expiryDate),
               });
     }, [accessDurations, dataProductTypeChoice, t]);
 
