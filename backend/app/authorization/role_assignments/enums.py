@@ -6,3 +6,4 @@ class DecisionStatus(StrEnum):
     APPROVED = "approved"
     PENDING = "pending"
     DENIED = "denied"
+    EXPIRED = "expired"

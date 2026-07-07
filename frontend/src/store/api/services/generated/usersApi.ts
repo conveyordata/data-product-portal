@@ -138,7 +138,7 @@ export type Role = {
   id: string;
   prototype: Prototype;
 };
-export type DecisionStatus = "approved" | "pending" | "denied";
+export type DecisionStatus = "approved" | "pending" | "denied" | "expired";
 export type GlobalRoleAssignmentResponse = {
   id: string;
   user: User;
@@ -212,6 +212,11 @@ export type DataProductOutputPortPendingAction = {
   output_port_id: string;
   status: DecisionStatus;
   requested_on: string;
+  requested_duration_days?: number | null;
+  expires_on?: string | null;
+  renewed_on?: string | null;
+  total_range_start?: string | null;
+  total_range_end?: string | null;
   output_port: OutputPort;
   consuming_abstract_data_product: AbstractDataProductInfo;
   requested_by: User;

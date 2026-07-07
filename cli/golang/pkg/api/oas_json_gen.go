@@ -9757,6 +9757,8 @@ func (s *DecisionStatus) Decode(d *jx.Decoder) error {
 		*s = DecisionStatusPending
 	case DecisionStatusDenied:
 		*s = DecisionStatusDenied
+	case DecisionStatusExpired:
+		*s = DecisionStatusExpired
 	default:
 		*s = DecisionStatus(v)
 	}

@@ -545,6 +545,7 @@ export enum DecisionStatus {
   Approved = "approved",
   Pending = "pending",
   Denied = "denied",
+  Expired = "expired",
 }
 export enum OutputPortStatus {
   Pending = "pending",

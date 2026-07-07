@@ -6,6 +6,7 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    Integer,
     String,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -43,6 +44,13 @@ class InputPort(
     requested_on = Column(DateTime(timezone=False), server_default=utcnow())
     approved_on = Column(DateTime(timezone=False))
     denied_on = Column(DateTime(timezone=False))
+    renewed_on = Column(DateTime(timezone=False))
+    expired_on = Column(DateTime(timezone=False))
+
+    requested_duration_days = Column(Integer, nullable=True)
+    expires_on = Column(DateTime(timezone=False))
+    total_range_start = Column(DateTime(timezone=False))
+    total_range_end = Column(DateTime(timezone=False))
 
     # Foreign keys
     consuming_abstract_data_product_id: Mapped[uuid.UUID] = mapped_column(

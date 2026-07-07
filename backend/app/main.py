@@ -14,7 +14,10 @@ from fastapi.routing import APIRoute
 from fastmcp.utilities.lifespan import combine_lifespans
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.abstract_data_product.background_tasks import check_stuck_deletions
+from app.abstract_data_product.background_tasks import (
+    check_stuck_deletions,
+    expire_input_ports,
+)
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import get_oidc
@@ -81,11 +84,13 @@ async def lifespan(_: FastAPI):
     device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
     consumption_metrics_task = asyncio.create_task(report_consumption_metrics_task())
     stuck_deletion_task = asyncio.create_task(check_stuck_deletions())
+    expire_input_ports_task = asyncio.create_task(expire_input_ports())
     yield
     admin_task.cancel()
     device_flow_cleanup_task.cancel()
     consumption_metrics_task.cancel()
     stuck_deletion_task.cancel()
+    expire_input_ports_task.cancel()
 
 
 mcp.add_middleware(LoggingMiddleware())

@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Sequence
 from uuid import UUID
 
@@ -100,6 +100,11 @@ class InputPortService:
                         consuming_data_product.abstract_data_product_type.value
                     ),
                 },
+            )
+
+        if current_link.requested_duration_days:
+            current_link.expires_on = datetime.now(tz=pytz.utc) + timedelta(
+                days=current_link.requested_duration_days
             )
 
         return current_link

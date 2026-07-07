@@ -3503,6 +3503,7 @@ const (
 	DecisionStatusApproved DecisionStatus = "approved"
 	DecisionStatusPending  DecisionStatus = "pending"
 	DecisionStatusDenied   DecisionStatus = "denied"
+	DecisionStatusExpired  DecisionStatus = "expired"
 )
 
 // AllValues returns all DecisionStatus values.
@@ -3511,6 +3512,7 @@ func (DecisionStatus) AllValues() []DecisionStatus {
 		DecisionStatusApproved,
 		DecisionStatusPending,
 		DecisionStatusDenied,
+		DecisionStatusExpired,
 	}
 }
 
@@ -3522,6 +3524,8 @@ func (s DecisionStatus) MarshalText() ([]byte, error) {
 	case DecisionStatusPending:
 		return []byte(s), nil
 	case DecisionStatusDenied:
+		return []byte(s), nil
+	case DecisionStatusExpired:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -3539,6 +3543,9 @@ func (s *DecisionStatus) UnmarshalText(data []byte) error {
 		return nil
 	case DecisionStatusDenied:
 		*s = DecisionStatusDenied
+		return nil
+	case DecisionStatusExpired:
+		*s = DecisionStatusExpired
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

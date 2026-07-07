@@ -41,6 +41,11 @@ class DataProductOutputPortPendingAction:
         requested_by (User):
         denied_by (None | User):
         approved_by (None | User):
+        requested_duration_days (int | None | Unset):
+        expires_on (datetime.datetime | None | Unset):
+        renewed_on (datetime.datetime | None | Unset):
+        total_range_start (datetime.datetime | None | Unset):
+        total_range_end (datetime.datetime | None | Unset):
         pending_action_type (Literal['InputPort'] | Unset):  Default: 'InputPort'.
     """
 
@@ -55,6 +60,11 @@ class DataProductOutputPortPendingAction:
     requested_by: User
     denied_by: None | User
     approved_by: None | User
+    requested_duration_days: int | None | Unset = UNSET
+    expires_on: datetime.datetime | None | Unset = UNSET
+    renewed_on: datetime.datetime | None | Unset = UNSET
+    total_range_start: datetime.datetime | None | Unset = UNSET
+    total_range_end: datetime.datetime | None | Unset = UNSET
     pending_action_type: Literal["InputPort"] | Unset = "InputPort"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -93,6 +103,44 @@ class DataProductOutputPortPendingAction:
         else:
             approved_by = self.approved_by
 
+        requested_duration_days: int | None | Unset
+        if isinstance(self.requested_duration_days, Unset):
+            requested_duration_days = UNSET
+        else:
+            requested_duration_days = self.requested_duration_days
+
+        expires_on: None | str | Unset
+        if isinstance(self.expires_on, Unset):
+            expires_on = UNSET
+        elif isinstance(self.expires_on, datetime.datetime):
+            expires_on = self.expires_on.isoformat()
+        else:
+            expires_on = self.expires_on
+
+        renewed_on: None | str | Unset
+        if isinstance(self.renewed_on, Unset):
+            renewed_on = UNSET
+        elif isinstance(self.renewed_on, datetime.datetime):
+            renewed_on = self.renewed_on.isoformat()
+        else:
+            renewed_on = self.renewed_on
+
+        total_range_start: None | str | Unset
+        if isinstance(self.total_range_start, Unset):
+            total_range_start = UNSET
+        elif isinstance(self.total_range_start, datetime.datetime):
+            total_range_start = self.total_range_start.isoformat()
+        else:
+            total_range_start = self.total_range_start
+
+        total_range_end: None | str | Unset
+        if isinstance(self.total_range_end, Unset):
+            total_range_end = UNSET
+        elif isinstance(self.total_range_end, datetime.datetime):
+            total_range_end = self.total_range_end.isoformat()
+        else:
+            total_range_end = self.total_range_end
+
         pending_action_type = self.pending_action_type
 
         field_dict: dict[str, Any] = {}
@@ -112,6 +160,16 @@ class DataProductOutputPortPendingAction:
                 "approved_by": approved_by,
             }
         )
+        if requested_duration_days is not UNSET:
+            field_dict["requested_duration_days"] = requested_duration_days
+        if expires_on is not UNSET:
+            field_dict["expires_on"] = expires_on
+        if renewed_on is not UNSET:
+            field_dict["renewed_on"] = renewed_on
+        if total_range_start is not UNSET:
+            field_dict["total_range_start"] = total_range_start
+        if total_range_end is not UNSET:
+            field_dict["total_range_end"] = total_range_end
         if pending_action_type is not UNSET:
             field_dict["pending_action_type"] = pending_action_type
 
@@ -176,6 +234,85 @@ class DataProductOutputPortPendingAction:
 
         approved_by = _parse_approved_by(d.pop("approved_by"))
 
+        def _parse_requested_duration_days(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        requested_duration_days = _parse_requested_duration_days(
+            d.pop("requested_duration_days", UNSET)
+        )
+
+        def _parse_expires_on(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                expires_on_type_0 = datetime.datetime.fromisoformat(data)
+
+                return expires_on_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        expires_on = _parse_expires_on(d.pop("expires_on", UNSET))
+
+        def _parse_renewed_on(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                renewed_on_type_0 = datetime.datetime.fromisoformat(data)
+
+                return renewed_on_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        renewed_on = _parse_renewed_on(d.pop("renewed_on", UNSET))
+
+        def _parse_total_range_start(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                total_range_start_type_0 = datetime.datetime.fromisoformat(data)
+
+                return total_range_start_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        total_range_start = _parse_total_range_start(d.pop("total_range_start", UNSET))
+
+        def _parse_total_range_end(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                total_range_end_type_0 = datetime.datetime.fromisoformat(data)
+
+                return total_range_end_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        total_range_end = _parse_total_range_end(d.pop("total_range_end", UNSET))
+
         pending_action_type = cast(
             Literal["InputPort"] | Unset, d.pop("pending_action_type", UNSET)
         )
@@ -198,6 +335,11 @@ class DataProductOutputPortPendingAction:
             requested_by=requested_by,
             denied_by=denied_by,
             approved_by=approved_by,
+            requested_duration_days=requested_duration_days,
+            expires_on=expires_on,
+            renewed_on=renewed_on,
+            total_range_start=total_range_start,
+            total_range_end=total_range_end,
             pending_action_type=pending_action_type,
         )
 

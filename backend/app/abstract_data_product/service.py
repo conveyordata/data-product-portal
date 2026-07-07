@@ -1,5 +1,5 @@
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Sequence
 
 import pytz
@@ -15,6 +15,9 @@ from app.abstract_data_product.model import (
     AbstractDataProduct,
     ensure_abstract_data_product_exists,
 )
+from app.abstract_data_product.type import AbstractDataProductType
+from app.access_durations.enums import AccessDurationType
+from app.access_durations.service import AccessDurationService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as OutputPortRoleAssignmentService,
@@ -118,6 +121,42 @@ class AbstractDataProductService:
                 },
             )
 
+        # Time bound access
+        # If approval_status = APPROVED then add expires_on
+        # Else add expires_on on approval, requested_days have to be available already
+        time_bound: dict[str, int | datetime] = {}
+        if (
+            adp.abstract_data_product_type == AbstractDataProductType.DATA_PRODUCT
+            and output_port.data_product_access_duration_type
+            == AccessDurationType.TIME_BOUND
+        ) or (
+            adp.abstract_data_product_type == AbstractDataProductType.EXPLORATION
+            and output_port.exploration_access_duration_type
+            == AccessDurationType.TIME_BOUND
+        ):
+            access_duration_setting = AccessDurationService(
+                self.db
+            ).get_access_durations_by_type(
+                adp.abstract_data_product_type, AccessDurationType.TIME_BOUND
+            )
+            if (
+                len(access_duration_setting) != 1
+                or access_duration_setting[0].days is None
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Expected exactly one access duration setting for {adp.abstract_data_product_type.value} with type {AccessDurationType.TIME_BOUND.value}, but found {len(access_duration_setting)}",
+                )
+            time_bound = {
+                "requested_duration_days": access_duration_setting[0].days,
+                # "total_range_start": output_port.total_range_start,
+                # "total_range_end": output_port.total_range_end,
+            }
+            if approval_status == DecisionStatus.APPROVED:
+                time_bound["expires_on"] = datetime.now(tz=pytz.utc) + timedelta(
+                    days=access_duration_setting[0].days
+                )
+
         input_port = InputPortModel(
             dataset_id=output_port_id,
             status=approval_status,
@@ -125,6 +164,7 @@ class AbstractDataProductService:
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
             consuming_abstract_data_product_id=adp.id,
+            **time_bound,
         )
         adp.input_ports.append(input_port)
         return input_port

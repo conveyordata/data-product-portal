@@ -9295,6 +9295,65 @@
             "format": "date-time",
             "title": "Requested On"
           },
+          "requested_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Duration Days"
+          },
+          "expires_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires On"
+          },
+          "renewed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Renewed On"
+          },
+          "total_range_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Range Start"
+          },
+          "total_range_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Range End"
+          },
           "output_port": {
             "$ref": "#/components/schemas/OutputPort"
           },
@@ -10311,7 +10370,8 @@
         "enum": [
           "approved",
           "pending",
-          "denied"
+          "denied",
+          "expired"
         ],
         "title": "DecisionStatus"
       },

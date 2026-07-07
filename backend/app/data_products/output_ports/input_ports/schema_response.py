@@ -19,6 +19,12 @@ class BaseDataProductOutputPortAssociationGet(ORMModel):
     status: DecisionStatus
     requested_on: datetime
 
+    requested_duration_days: Optional[int] = None
+    expires_on: Optional[datetime] = None
+    renewed_on: Optional[datetime] = None
+    total_range_start: Optional[datetime] = None
+    total_range_end: Optional[datetime] = None
+
     # Nested schemas
     output_port: OutputPort
     consuming_abstract_data_product: AbstractDataProductInfo
@@ -50,10 +56,6 @@ class BaseDataProductDatasetAssociationGet(ORMModel):
             output_port_id=self.dataset_id,
             output_port=self.dataset.convert(),
         )
-
-
-class DataProductDatasetAssociationGet(BaseDataProductDatasetAssociationGet):
-    pass
 
 
 class DataProductDatasetAssociationsGet(BaseDataProductDatasetAssociationGet):

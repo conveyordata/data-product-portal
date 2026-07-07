@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.type import AbstractDataProductType
@@ -25,16 +27,18 @@ class AccessDurationService:
         )
 
     def get_access_durations_by_type(
-        self, abstract_data_product_type: AbstractDataProductType
+        self,
+        abstract_data_product_type: AbstractDataProductType,
+        access_duration_type: Optional[AccessDurationType] = None,
     ) -> list[AccessDuration]:
-        return (
-            self.db.query(AccessDurationModel)
-            .filter(
-                AccessDurationModel.abstract_data_product_type
-                == abstract_data_product_type,
-            )
-            .all()
+        query = self.db.query(AccessDurationModel).filter(
+            AccessDurationModel.abstract_data_product_type == abstract_data_product_type
         )
+        if access_duration_type:
+            query = query.filter(
+                AccessDurationModel.access_duration_type == access_duration_type
+            )
+        return query.all()
 
     def get_access_duration(
         self,

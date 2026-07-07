@@ -357,7 +357,7 @@ export type Role = {
   id: string;
   prototype: Prototype;
 };
-export type DecisionStatus = "approved" | "pending" | "denied";
+export type DecisionStatus = "approved" | "pending" | "denied" | "expired";
 export type GlobalRoleAssignmentResponse = {
   id: string;
   user: User;
