@@ -2866,18 +2866,15 @@ tests = ["pytest (>=9)", "typing-extensions (>=4.15)"]
 
 [[package]]
 name = "pgvector"
-version = "0.4.2"
+version = "0.5.0"
 description = "pgvector support for Python"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pgvector-0.4.2-py3-none-any.whl", hash = "sha256:549d45f7a18593783d5eec609ea1684a724ba8405c4cb182a0b2b08aeff04e08"},
-    {file = "pgvector-0.4.2.tar.gz", hash = "sha256:322cac0c1dc5d41c9ecf782bd9991b7966685dee3a00bc873631391ed949513a"},
+    {file = "pgvector-0.5.0-py3-none-any.whl", hash = "sha256:fedc9800894e6da2be51358d7b7c574bf34f247ca741a5a09513622135f5964f"},
+    {file = "pgvector-0.5.0.tar.gz", hash = "sha256:07a9dcf735696879406983afc6eba9a787cef7c0cf6c367ca1a5779f036dee74"},
 ]
-
-[package.dependencies]
-numpy = "*"
 
 [[package]]
 name = "pillow"
@@ -4779,4 +4776,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "569bbe8fbb49a37478401ecf200f25c877b68c8a030eac55852862e8bf9dc331"
+content-hash = "ea8e1d731f661059cd821b214ed7876da2a3899686ab89e430b1de18c749d698"
