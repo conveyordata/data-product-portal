@@ -95,6 +95,8 @@ class Settings(BaseSettings):
     SERVE_FRONTEND: bool = False
     FRONTEND_DIST_DIR: str = ""
 
+    TIME_BOUND_ACCESS_ENABLED: bool = True
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

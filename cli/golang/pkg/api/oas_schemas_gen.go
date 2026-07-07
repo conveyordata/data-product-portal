@@ -202,6 +202,157 @@ func (s *AbstractDataProductType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/AccessDuration
+type AccessDuration struct {
+	ID                      uuid.UUID               `json:"id"`
+	AbstractDataProductType AbstractDataProductType `json:"abstract_data_product_type"`
+	AccessDurationType      AccessDurationType      `json:"access_duration_type"`
+	Days                    NilInt                  `json:"days"`
+	IsDefault               bool                    `json:"is_default"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessDuration) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetAbstractDataProductType returns the value of AbstractDataProductType.
+func (s *AccessDuration) GetAbstractDataProductType() AbstractDataProductType {
+	return s.AbstractDataProductType
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDuration) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDuration) GetDays() NilInt {
+	return s.Days
+}
+
+// GetIsDefault returns the value of IsDefault.
+func (s *AccessDuration) GetIsDefault() bool {
+	return s.IsDefault
+}
+
+// SetID sets the value of ID.
+func (s *AccessDuration) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetAbstractDataProductType sets the value of AbstractDataProductType.
+func (s *AccessDuration) SetAbstractDataProductType(val AbstractDataProductType) {
+	s.AbstractDataProductType = val
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDuration) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDuration) SetDays(val NilInt) {
+	s.Days = val
+}
+
+// SetIsDefault sets the value of IsDefault.
+func (s *AccessDuration) SetIsDefault(val bool) {
+	s.IsDefault = val
+}
+
+func (*AccessDuration) getDefaultAccessDurationRes() {}
+
+// Ref: #/components/schemas/AccessDurationType
+type AccessDurationType string
+
+const (
+	AccessDurationTypePermanent AccessDurationType = "permanent"
+	AccessDurationTypeTimeBound AccessDurationType = "time_bound"
+)
+
+// AllValues returns all AccessDurationType values.
+func (AccessDurationType) AllValues() []AccessDurationType {
+	return []AccessDurationType{
+		AccessDurationTypePermanent,
+		AccessDurationTypeTimeBound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AccessDurationType) MarshalText() ([]byte, error) {
+	switch s {
+	case AccessDurationTypePermanent:
+		return []byte(s), nil
+	case AccessDurationTypeTimeBound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AccessDurationType) UnmarshalText(data []byte) error {
+	switch AccessDurationType(data) {
+	case AccessDurationTypePermanent:
+		*s = AccessDurationTypePermanent
+		return nil
+	case AccessDurationTypeTimeBound:
+		*s = AccessDurationTypeTimeBound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AccessDurationUpdate
+type AccessDurationUpdate struct {
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               OptNilInt          `json:"days"`
+	AlternativeAllowed bool               `json:"alternative_allowed"`
+	AlternativeDays    OptNilInt          `json:"alternative_days"`
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDurationUpdate) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDurationUpdate) GetDays() OptNilInt {
+	return s.Days
+}
+
+// GetAlternativeAllowed returns the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) GetAlternativeAllowed() bool {
+	return s.AlternativeAllowed
+}
+
+// GetAlternativeDays returns the value of AlternativeDays.
+func (s *AccessDurationUpdate) GetAlternativeDays() OptNilInt {
+	return s.AlternativeDays
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDurationUpdate) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDurationUpdate) SetDays(val OptNilInt) {
+	s.Days = val
+}
+
+// SetAlternativeAllowed sets the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) SetAlternativeAllowed(val bool) {
+	s.AlternativeAllowed = val
+}
+
+// SetAlternativeDays sets the value of AlternativeDays.
+func (s *AccessDurationUpdate) SetAlternativeDays(val OptNilInt) {
+	s.AlternativeDays = val
+}
+
 // Ref: #/components/schemas/AccessGranularity
 type AccessGranularity string
 
@@ -5914,6 +6065,7 @@ func (*HTTPValidationError) getDataProductSettingsRes()                   {}
 func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
 func (*HTTPValidationError) getDataProductTypeRes()                       {}
 func (*HTTPValidationError) getDataProductsRes()                          {}
+func (*HTTPValidationError) getDefaultAccessDurationRes()                 {}
 func (*HTTPValidationError) getDeviceTokenRes()                           {}
 func (*HTTPValidationError) getDomainRes()                                {}
 func (*HTTPValidationError) getEnvironmentRes()                           {}
@@ -5976,6 +6128,7 @@ func (*HTTPValidationError) setValueForDataProductRes()                   {}
 func (*HTTPValidationError) setValueForOutputPortRes()                    {}
 func (*HTTPValidationError) unlinkInputPortFromDataProductRes()           {}
 func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
+func (*HTTPValidationError) updateAccessDurationRes()                     {}
 func (*HTTPValidationError) updateDataProductAboutRes()                   {}
 func (*HTTPValidationError) updateDataProductLifecycleRes()               {}
 func (*HTTPValidationError) updateDataProductRes()                        {}
@@ -6434,6 +6587,51 @@ func (o NilGlobalRoleAssignmentResponse) Get() (v GlobalRoleAssignmentResponse, 
 
 // Or returns value if set, or given parameter if does not.
 func (o NilGlobalRoleAssignmentResponse) Or(d GlobalRoleAssignmentResponse) GlobalRoleAssignmentResponse {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilInt returns new NilInt with value set to v.
+func NewNilInt(v int) NilInt {
+	return NilInt{
+		Value: v,
+	}
+}
+
+// NilInt is nullable int.
+type NilInt struct {
+	Value int
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilInt) SetTo(v int) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilInt) SetToNull() {
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -12542,6 +12740,21 @@ func (s *ThemeSettings) SetPortalName(val string) {
 	s.PortalName = val
 }
 
+// Ref: #/components/schemas/TimeBoundAccessEnabledResponse
+type TimeBoundAccessEnabledResponse struct {
+	Enabled bool `json:"enabled"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) GetEnabled() bool {
+	return s.Enabled
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
 // Ref: #/components/schemas/UIElementCheckbox
 type UIElementCheckbox struct {
 	InitialValue OptNilBool `json:"initial_value"`
@@ -13040,6 +13253,10 @@ func (*UnlinkOutputPortFromTechnicalAssetNotFoundApplicationJSON) unlinkOutputPo
 type UnlinkOutputPortFromTechnicalAssetOKApplicationJSON jx.Raw
 
 func (*UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) unlinkOutputPortFromTechnicalAssetRes() {}
+
+type UpdateAccessDurationOKApplicationJSON []AccessDuration
+
+func (*UpdateAccessDurationOKApplicationJSON) updateAccessDurationRes() {}
 
 type UpdateDataProductAboutNotFoundApplicationJSON jx.Raw
 

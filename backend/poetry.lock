@@ -242,18 +242,18 @@ test-tox-coverage = ["coverage (>=5.5)"]
 
 [[package]]
 name = "boto3"
-version = "1.43.39"
+version = "1.43.41"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "boto3-1.43.39-py3-none-any.whl", hash = "sha256:f4eef8bf98559342466a9a1a063b7efcf3e337e98a819479bc2f7a603b8b8ba7"},
-    {file = "boto3-1.43.39.tar.gz", hash = "sha256:ca5701ddf1215ba25b9d973d18505bb4def3a75d3daa9b263c6d8c713b601cb3"},
+    {file = "boto3-1.43.41-py3-none-any.whl", hash = "sha256:f48f862d2720ea9203ed2d842d436b8eb2d459ea31654a7ad7c0756fdf36c6b2"},
+    {file = "boto3-1.43.41.tar.gz", hash = "sha256:0f56811f13677bfb4542daa0cce8532c95d9afd27b4ba7b681af36a0568624ad"},
 ]
 
 [package.dependencies]
-botocore = ">=1.43.39,<1.44.0"
+botocore = ">=1.43.41,<1.44.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.19.0,<0.20.0"
 
@@ -262,14 +262,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.43.39"
+version = "1.43.41"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "botocore-1.43.39-py3-none-any.whl", hash = "sha256:7cd5fab9d33f487777e2c508573bca6ae230779230263d47a617f4af960d3003"},
-    {file = "botocore-1.43.39.tar.gz", hash = "sha256:a95b90ea13aca409d79cc90d87c75df7db1a104a4c8e93707b62a3593bfdd17d"},
+    {file = "botocore-1.43.41-py3-none-any.whl", hash = "sha256:0cc6e79b30a2a98374f16a31cd9c7a9106a51b60650bd8c34cc8223f58ae6b8d"},
+    {file = "botocore-1.43.41.tar.gz", hash = "sha256:27627d79af0df7dcb7ecf78d8d3d1310da09a5e9460be30bf759f1c2ed095ee8"},
 ]
 
 [package.dependencies]
@@ -1730,14 +1730,14 @@ files = [
 
 [[package]]
 name = "joserfc"
-version = "1.6.7"
+version = "1.6.8"
 description = "The ultimate Python library for JOSE RFCs, including JWS, JWE, JWK, JWA, JWT"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "joserfc-1.6.7-py3-none-any.whl", hash = "sha256:9e51e4a64840aa1734a058258e80a4480e2ff2d5686e480e7c92c954a92fbe05"},
-    {file = "joserfc-1.6.7.tar.gz", hash = "sha256:6999fe89457069ecacd8cc797c88a805f83054dd883333fa0409f74b46479fd7"},
+    {file = "joserfc-1.6.8-py3-none-any.whl", hash = "sha256:22fb31a69094a5e6f44632002a9df2c30c941fc6c8ce1b037e92c03de954cf9f"},
+    {file = "joserfc-1.6.8.tar.gz", hash = "sha256:878620c553a6ebdd76ccdc356782fee3f735f21a356d079a546b42a4670ace5f"},
 ]
 
 [package.dependencies]
@@ -2866,18 +2866,15 @@ tests = ["pytest (>=9)", "typing-extensions (>=4.15)"]
 
 [[package]]
 name = "pgvector"
-version = "0.4.2"
+version = "0.5.0"
 description = "pgvector support for Python"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pgvector-0.4.2-py3-none-any.whl", hash = "sha256:549d45f7a18593783d5eec609ea1684a724ba8405c4cb182a0b2b08aeff04e08"},
-    {file = "pgvector-0.4.2.tar.gz", hash = "sha256:322cac0c1dc5d41c9ecf782bd9991b7966685dee3a00bc873631391ed949513a"},
+    {file = "pgvector-0.5.0-py3-none-any.whl", hash = "sha256:fedc9800894e6da2be51358d7b7c574bf34f247ca741a5a09513622135f5964f"},
+    {file = "pgvector-0.5.0.tar.gz", hash = "sha256:07a9dcf735696879406983afc6eba9a787cef7c0cf6c367ca1a5779f036dee74"},
 ]
-
-[package.dependencies]
-numpy = "*"
 
 [[package]]
 name = "pillow"
@@ -3018,14 +3015,14 @@ testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
 name = "poethepoet"
-version = "0.47.1"
+version = "0.48.0"
 description = "A task runner that works well with poetry and uv."
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "poethepoet-0.47.1-py3-none-any.whl", hash = "sha256:1738b9f6f1dc2c5d61b3e620aa4a2e7b8c20bccef815c8bfb312ebf87464d671"},
-    {file = "poethepoet-0.47.1.tar.gz", hash = "sha256:bb27f9fbba161c5be11878ad0a6f64ff29b8a68851d1861e4bd30255b753da2a"},
+    {file = "poethepoet-0.48.0-py3-none-any.whl", hash = "sha256:98da6096d060f49b8d84034770265863fb7dc92a40233b7694b9d216ac68737d"},
+    {file = "poethepoet-0.48.0.tar.gz", hash = "sha256:a06f49d244fadfc2e2e7faa78b54e64a9694727e4ce1d50e08f23cea3ded74f1"},
 ]
 
 [package.dependencies]
@@ -3037,14 +3034,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.21.2"
+version = "7.22.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.21.2-py3-none-any.whl", hash = "sha256:8672d5b6dd10713abbe31c58668a6094f2929ffc8618c6f52744a63f2f192623"},
-    {file = "posthog-7.21.2.tar.gz", hash = "sha256:26460ab3589445e969cef51074198685ea27439fc3def6612a9ce1841685acce"},
+    {file = "posthog-7.22.0-py3-none-any.whl", hash = "sha256:e3d63fd67f19ff8b5b375824baea096e5cc71b5fdf92a9241b42efe56f228dbd"},
+    {file = "posthog-7.22.0.tar.gz", hash = "sha256:b734c83eeb9d9a2fc9e2b8f4f02d13441f6a0baa0ac53e27758608e773d8a01f"},
 ]
 
 [package.dependencies]
@@ -3057,7 +3054,8 @@ typing-extensions = ">=4.2.0"
 dev = ["django-stubs", "griffe", "lxml", "mypy", "mypy-baseline", "packaging", "pre-commit", "pydantic (>=2.12.0)", "ruff", "setuptools", "tomli", "tomli_w", "twine", "types-requests", "types-setuptools", "wheel"]
 langchain = ["langchain (>=0.2.0)"]
 otel = ["opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)"]
-test = ["anthropic (>=0.72)", "claude-agent-sdk", "coverage", "django (>=5.2.8,<6.0)", "fastmcp (>=2.0)", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=1.0)", "langchain-community (>=0.4)", "langchain-core (>=1.0)", "langchain-openai (>=1.0)", "langgraph (>=1.0)", "langgraph-checkpoint (>=4.1.1)", "mcp (>=1.26.0)", "openai (>=2.0)", "opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)", "parameterized (>=0.8.1)", "pydantic (>=2.12.0)", "pytest", "pytest-asyncio", "pytest-bdd (>=8.1.0)", "pytest-timeout", "python-dateutil (>=2.9.0.post0)", "tiktoken (>=0.12.0)", "tzdata"]
+test = ["anthropic (>=0.72)", "claude-agent-sdk", "coverage", "django (>=5.2.8,<6.0)", "fastmcp (>=2.0)", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=1.0)", "langchain-community (>=0.4)", "langchain-core (>=1.0)", "langchain-openai (>=1.0)", "langgraph (>=1.0)", "langgraph-checkpoint (>=4.1.1)", "mcp (>=1.26.0)", "openai (>=2.0)", "opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)", "parameterized (>=0.8.1)", "pydantic (>=2.12.0)", "pytest", "pytest-asyncio", "pytest-bdd (>=8.1.0)", "pytest-timeout", "python-dateutil (>=2.9.0.post0)", "tiktoken (>=0.12.0)", "tzdata", "zstandard (>=0.23.0)"]
+zstd = ["zstandard (>=0.23.0)"]
 
 [[package]]
 name = "protobuf"
@@ -4459,14 +4457,14 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
 name = "uvicorn"
-version = "0.49.0"
+version = "0.50.2"
 description = "The lightning-fast ASGI server."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "uvicorn-0.49.0-py3-none-any.whl", hash = "sha256:ba3d14c3ee7e41c6c654c46c9eb489d33213cdd30aa1696eab1374337c13f68f"},
-    {file = "uvicorn-0.49.0.tar.gz", hash = "sha256:ebf4271aa580d9de97f93192d4595176df6e91f9aae919ca73e4fc07df1e66a3"},
+    {file = "uvicorn-0.50.2-py3-none-any.whl", hash = "sha256:4ae72a385630bcc17a0adb8290f26c993865e0b43a2114c2aab96420172c056a"},
+    {file = "uvicorn-0.50.2.tar.gz", hash = "sha256:b92bf03509b82bcb9d49e7335b4fd364518ad021c2dc18b4e6a2fec8c955a0bb"},
 ]
 
 [package.dependencies]
@@ -4474,7 +4472,7 @@ click = ">=7.0"
 h11 = ">=0.8"
 
 [package.extras]
-standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.8.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.15.1) ; sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\"", "watchfiles (>=0.20)", "websockets (>=10.4)"]
+standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.8.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.15.1) ; sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\"", "watchfiles (>=0.20)", "websockets (>=13.0)"]
 
 [[package]]
 name = "watchfiles"
@@ -4779,4 +4777,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "d7dee2f6fb88227aeb4f1bc374ed14a38d3481105eaa15d1ab89765987d97dd0"
+content-hash = "6ae1fb26a8bb3b7be165fbf2bf9c781c5923c519c959a4ca0557f8c29ce8882e"

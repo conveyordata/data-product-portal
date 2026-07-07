@@ -3,6 +3,9 @@
 from .abstract_data_product_info import AbstractDataProductInfo
 from .abstract_data_product_status import AbstractDataProductStatus
 from .abstract_data_product_type import AbstractDataProductType
+from .access_duration import AccessDuration
+from .access_duration_type import AccessDurationType
+from .access_duration_update import AccessDurationUpdate
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
 from .approve_link_between_technical_asset_and_output_port_request import (
@@ -301,6 +304,7 @@ from .technical_asset_status import TechnicalAssetStatus
 from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
 from .theme_settings import ThemeSettings
+from .time_bound_access_enabled_response import TimeBoundAccessEnabledResponse
 from .ui_element_checkbox import UIElementCheckbox
 from .ui_element_metadata import UIElementMetadata
 from .ui_element_metadata_response import UIElementMetadataResponse
@@ -333,6 +337,9 @@ __all__ = (
     "AbstractDataProductInfo",
     "AbstractDataProductStatus",
     "AbstractDataProductType",
+    "AccessDuration",
+    "AccessDurationType",
+    "AccessDurationUpdate",
     "AccessGranularity",
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
@@ -565,6 +572,7 @@ __all__ = (
     "TechnicalInfo",
     "TechnicalMapping",
     "ThemeSettings",
+    "TimeBoundAccessEnabledResponse",
     "UIElementCheckbox",
     "UIElementMetadata",
     "UIElementMetadataResponse",
