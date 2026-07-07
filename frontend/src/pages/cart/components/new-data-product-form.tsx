@@ -90,7 +90,7 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
             <JustificationFormItem />
             <FormItemAccessDuration
                 cartOutputPorts={cartOutputPorts}
-                dataProductTypeChoice={DataProductChoiceOptions.exploration}
+                dataProductTypeChoice={DataProductChoiceOptions.data_product}
             />
             <Form.Item>
                 <Flex justify="end">

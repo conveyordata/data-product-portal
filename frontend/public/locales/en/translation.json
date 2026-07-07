@@ -430,7 +430,7 @@
     "No usage data available. Learn how to set up usage data ingestion in our <2>documentation</2>.": "No usage data available. Learn how to set up usage data ingestion in our <2>documentation</2>.",
     "No users found": "No users found",
     "Not allowed by admin": "Not allowed by admin",
-    "Note the access duration for the output ports requested:": "Note the access duration for the output ports requested:",
+    "Note the access duration for the output ports requested": "Note the access duration for the output ports requested",
     "Notification has been acknowledged": "Notification has been acknowledged",
     "NotificationDataOutputCreated": "<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been created for the <target>{{target_entity}}</target> {{target_entity_type}}",
     "NotificationDataOutputLinkApproved": "<subject>{{subject_entity}}</subject> {{subject_entity_type}} is now linked to the <target>{{target_entity}}</target> {{target_entity_type}}",
