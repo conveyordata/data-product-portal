@@ -593,7 +593,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             <Form.Item<CreateOutputPortRequest>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the Output Port')}
+                tooltip={t('A description for your Output Port')}
                 rules={[
                     {
                         required: true,

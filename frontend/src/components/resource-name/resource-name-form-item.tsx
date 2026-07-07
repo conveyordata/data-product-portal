@@ -38,7 +38,7 @@ export function ResourceNameFormItem({
     const validationRules: Rule[] = [
         {
             required: canEditResourceName,
-            message: t('Please input a namespace'),
+            message: t('Please provide a namespace'),
         },
         {
             validator: async (_, value) => {

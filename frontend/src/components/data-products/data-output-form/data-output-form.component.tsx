@@ -272,7 +272,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             <Form.Item<TechnicalAssetsCreateForm>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the Technical Asset')}
+                tooltip={t('A description for your Technical Asset')}
                 rules={[
                     {
                         required: true,

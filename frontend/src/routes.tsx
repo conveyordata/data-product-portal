@@ -12,6 +12,7 @@ import { Dataset } from '@/pages/dataset/dataset.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { ExplorationPage } from '@/pages/exploration/exploration.page.tsx';
+import { ExplorationEdit } from '@/pages/exploration-edit/exploration-edit.page.tsx';
 import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
 import { Marketplace } from '@/pages/marketplace/marketplace.page.tsx';
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
                             {
                                 path: ApplicationPaths.Exploration,
                                 element: <ExplorationPage />,
+                            },
+                            {
+                                path: ApplicationPaths.ExplorationEdit,
+                                element: <ExplorationEdit />,
                             },
                             {
                                 path: ApplicationPaths.DataOutput,

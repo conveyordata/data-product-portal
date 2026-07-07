@@ -22,7 +22,6 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper';
 import styles from './dataset.module.scss';
 
 export function Dataset() {
@@ -87,13 +86,6 @@ export function Dataset() {
             ),
         );
     }
-
-    useEffect(() => {
-        setItemToLocalStorage(LocalStorageKeys.LastVisitedDatasets, {
-            id: datasetId,
-            timestamp: Date.now(),
-        });
-    }, [datasetId]);
 
     if (isLoading || isLoadingDataProduct) return <LoadingSpinner />;
 

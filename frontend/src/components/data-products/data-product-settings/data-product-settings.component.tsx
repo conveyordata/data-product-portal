@@ -1,4 +1,4 @@
-import { Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
+import { Empty, Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -230,6 +230,8 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             </Flex>
         ));
     }, [updatedSettings, t]);
+    const isLoading = isFetching || isFetchingDP || isFetchingDS;
+    if (!isLoading && updatedSettings.length === 0) return <Empty description={'No settings to show'} />;
 
     return (
         <Flex vertical>
@@ -243,13 +245,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                 autoComplete={'off'}
                 labelWrap
                 labelAlign={'left'}
-                disabled={
-                    isFetching ||
-                    isFetchingDP ||
-                    isFetchingDS ||
-                    !canUpdateProductSettings ||
-                    !canUpdateOutputPortSetting
-                }
+                disabled={isLoading || !canUpdateProductSettings || !canUpdateOutputPortSetting}
                 className={styles.form}
                 onValuesChange={(_, allValues) => {
                     // Trigger form submission after 0.5 seconds of unchanged input values

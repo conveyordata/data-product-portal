@@ -15,7 +15,7 @@ export const ExplorationStart = () => {
     const steps = [
         {
             title: <Text strong>{t('View Your Data Sources')}</Text>,
-            description: (
+            content: (
                 <Text type="secondary">
                     <Trans t={t}>
                         Check the
@@ -28,7 +28,7 @@ export const ExplorationStart = () => {
         },
         {
             title: <Text strong>{t('Run Queries')}</Text>,
-            description: (
+            content: (
                 <Text type="secondary">
                     {t('Open your preferred SQL tool and start querying datasets available in the ')}
                     <Link onClick={() => onTabChange(ExplorationTabKeys.InputPorts)}>{t('Input Ports')}</Link>

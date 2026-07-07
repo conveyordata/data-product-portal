@@ -21,7 +21,6 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import styles from './data-product.module.scss';
 
@@ -46,7 +45,7 @@ export function DataProduct() {
                 ),
                 path: ApplicationPaths.Studio,
             },
-            { title: <>{dataProduct?.name}</> },
+            { title: dataProduct?.name },
         ]);
     }, [setBreadcrumbs, dataProduct, t]);
     const { data: { rolled_up_tags: rolledUpTags = [] } = {} } = useGetDataProductRolledUpTagsQuery(dataProductId, {
@@ -68,21 +67,14 @@ export function DataProduct() {
 
     const dataProductOwners = useGetDataProductOwners(dataProduct?.id);
 
-    function navigateToEditPage() {
+    const navigateToEditPage = () => {
         const destination = getDynamicRoutePath(
             ApplicationPaths.DataProductEdit,
             DynamicPathParams.DataProductId,
             dataProductId,
         );
         return navigate(destination);
-    }
-
-    useEffect(() => {
-        setItemToLocalStorage(LocalStorageKeys.LastVisitedDataProducts, {
-            id: dataProductId,
-            timestamp: Date.now(),
-        });
-    }, [dataProductId]);
+    };
 
     //Only show the spinner when we have no data product to show, if we have one, we want to continue
     //Otherwise updating the settings for examples updates the whole page to a spinner, which is very weird
@@ -96,9 +88,9 @@ export function DataProduct() {
     return (
         <Splitter className={styles.invisibleSplitter}>
             <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false} className={styles.container}>
-                <Flex vertical gap={'middle'} className={styles.mainPanel}>
-                    <Flex justify={'space-between'}>
-                        <Flex gap={'middle'} align={'center'} justify={'center'}>
+                <Flex vertical gap="middle" className={styles.mainPanel}>
+                    <Flex justify="space-between">
+                        <Flex gap="middle" align="center" justify="center">
                             <Icon
                                 component={dataProductTypeIcon}
                                 className={clsx([styles.defaultIcon, styles.iconBorder])}
