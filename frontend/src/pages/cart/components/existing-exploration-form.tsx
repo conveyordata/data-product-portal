@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
+import { FormItemAccessDuration } from '@/pages/cart/components/form-item-access-duration.tsx';
 import { FormIssues } from '@/pages/cart/components/form-item-issues.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { useCartOverlapCheck } from '@/pages/cart/hooks/use-cart-overlap-check.ts';
@@ -17,7 +18,7 @@ import {
     useRequestInputPortsForExplorationMutation,
 } from '@/store/api/services/generated/explorationsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
+import { clearCart, DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { createExplorationIdPath } from '@/types/navigation.ts';
 
@@ -158,6 +159,10 @@ export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExploratio
                     ) : undefined
                 }
                 onChange={handleUserTyping}
+            />
+            <FormItemAccessDuration
+                cartOutputPorts={cartOutputPorts}
+                dataProductTypeChoice={DataProductChoiceOptions.exploration}
             />
             <Form.Item label={null}>
                 <Button
