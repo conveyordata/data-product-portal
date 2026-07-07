@@ -170,7 +170,7 @@ export function DataOutputForm({ mode, dataProductId, dataOutputId }: Props) {
             <Form.Item<TechnicalAssetsCreateForm>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the Technical Asset')}
+                tooltip={t('A description for your Technical Asset')}
                 rules={[
                     {
                         required: true,

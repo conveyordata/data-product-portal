@@ -11,6 +11,7 @@ export enum ApplicationPaths {
     Documentation = '/documentation',
     DataProduct = '/studio/:dataProductId',
     Exploration = '/studio/exploration/:explorationId',
+    ExplorationEdit = '/studio/exploration/:explorationId/edit',
     DataProductNew = '/studio/new',
     DataProductEdit = '/studio/:dataProductId/edit',
     MarketPlaceOutputPort = '/marketplace/:dataProductId/datasets/:datasetId',
@@ -87,6 +88,7 @@ export function createOutputPortPath(
 
 export enum DynamicPathParams {
     DataProductId = 'dataProductId',
+    ExplorationId = 'explorationId',
     DataOutputId = 'dataOutputId',
     DatasetId = 'datasetId',
     EnvironmentId = 'environmentId',

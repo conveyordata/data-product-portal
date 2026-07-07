@@ -26,6 +26,29 @@ const invalidateOutputPort = (
     },
 ];
 
+// Delete deliberately omits the per-id { OutputPort, id } tag: a still-mounted
+// getOutputPort subscription provides that exact tag, so invalidating it would
+// trigger an eager refetch of the just-deleted port and return a 404. The LIST
+// and parent tags still refresh so the deleted row disappears from listings.
+const invalidateDeletedOutputPort = (
+    _: unknown,
+    __: unknown,
+    { dataProductId, id }: { dataProductId: string; id: string },
+) => [
+    {
+        type: TagTypes.OutputPort as const,
+        id: STATIC_TAG_ID.LIST,
+    },
+    {
+        type: TagTypes.DataProductOutputPorts as const,
+        id: dataProductId,
+    },
+    {
+        type: TagTypes.History as const,
+        id: id,
+    },
+];
+
 export const dataProductOutputPortTags = {
     getDataProductOutputPorts: {
         providesTags: (_, __, id) => [
@@ -59,7 +82,7 @@ export const dataProductOutputPortTags = {
         ],
     },
     removeOutputPort: {
-        invalidatesTags: invalidateOutputPort,
+        invalidatesTags: invalidateDeletedOutputPort,
     },
     updateOutputPort: {
         invalidatesTags: invalidateOutputPort,
