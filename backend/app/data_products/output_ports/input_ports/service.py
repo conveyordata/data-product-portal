@@ -19,7 +19,7 @@ from app.core.authz import Action, Authorization
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.pending_actions.schema import DataProductDatasetPendingAction
+from app.pending_actions.schema import DataProductOutputPortPendingAction
 from app.users.schema import User
 
 
@@ -147,7 +147,7 @@ class InputPortService:
 
     def get_user_pending_actions(
         self, user: User
-    ) -> Sequence[DataProductDatasetPendingAction]:
+    ) -> Sequence[DataProductOutputPortPendingAction]:
         requested_associations = (
             self.db.scalars(
                 select(InputPortModel)
@@ -167,7 +167,7 @@ class InputPortService:
 
         authorizer = Authorization()
         return [
-            DataProductDatasetPendingAction.model_validate(a)
+            DataProductOutputPortPendingAction.model_validate(a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),

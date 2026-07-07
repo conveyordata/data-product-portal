@@ -1,12 +1,13 @@
 from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
-from warnings import deprecated
+
+from pydantic import Field
 
 from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.input_ports.schema import InputPortBase
-from app.data_products.output_ports.schema import Dataset, OutputPort
+from app.data_products.output_ports.schema import OutputPort
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -15,7 +16,7 @@ class BaseDataProductOutputPortAssociationGet(ORMModel):
     id: UUID
     justification: str
     consuming_abstract_data_product_id: UUID
-    output_port_id: UUID
+    output_port_id: UUID = Field(validation_alias="dataset_id")
     status: DecisionStatus
     requested_on: datetime
 
@@ -26,40 +27,11 @@ class BaseDataProductOutputPortAssociationGet(ORMModel):
     total_range_end: Optional[datetime] = None
 
     # Nested schemas
-    output_port: OutputPort
+    output_port: OutputPort = Field(validation_alias="dataset")
     consuming_abstract_data_product: AbstractDataProductInfo
     requested_by: User
     denied_by: Optional[User]
     approved_by: Optional[User]
-
-
-@deprecated("Use BaseDataProductOutputPortAssociationGet instead")
-class BaseDataProductDatasetAssociationGet(ORMModel):
-    id: UUID
-    justification: str
-    consuming_abstract_data_product_id: UUID
-    dataset_id: UUID
-    status: DecisionStatus
-    requested_on: datetime
-
-    # Nested schemas
-    dataset: Dataset
-    consuming_abstract_data_product: AbstractDataProductInfo
-    requested_by: User
-    denied_by: Optional[User]
-    approved_by: Optional[User]
-
-    def convert(self) -> BaseDataProductOutputPortAssociationGet:
-        base = self.model_dump(exclude={"dataset_id", "dataset"})
-        return BaseDataProductOutputPortAssociationGet(
-            **base,
-            output_port_id=self.dataset_id,
-            output_port=self.dataset.convert(),
-        )
-
-
-class DataProductDatasetAssociationsGet(BaseDataProductDatasetAssociationGet):
-    pass
 
 
 class DataProductOutputPortAssociationsGet(BaseDataProductOutputPortAssociationGet):

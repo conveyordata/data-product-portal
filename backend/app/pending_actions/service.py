@@ -21,10 +21,7 @@ class PendingActionsService:
         self.db = db
 
     def get_user_pending_actions(self, user: User) -> PendingActionResponse:
-        input_port_actions = [
-            action.convert()
-            for action in InputPortService(self.db).get_user_pending_actions(user)
-        ]
+        input_port_actions = InputPortService(self.db).get_user_pending_actions(user)
 
         data_output_dataset_actions = [
             action.convert()

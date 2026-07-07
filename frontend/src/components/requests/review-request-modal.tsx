@@ -1,11 +1,4 @@
-import {
-    CalendarOutlined,
-    CheckOutlined,
-    CloseOutlined,
-    FileTextOutlined,
-    InfoCircleOutlined,
-    UserOutlined,
-} from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, FileTextOutlined, InfoCircleOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Divider, Flex, Modal, Row, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
@@ -47,6 +40,11 @@ type RequestDetails = {
     hasJustification: boolean;
     requestedOn: string;
     title: string;
+    renewedOn?: string;
+    totalRangeStart?: string;
+    totalRangeEnd?: string;
+    expiresOn?: string;
+    requestedDurationDays?: number;
 };
 
 const abstractDataProductTypeName = (type: AbstractDataProductType) => {
@@ -85,6 +83,11 @@ function getRequestDetails(
             hasJustification: true,
             requestedOn: action.requested_on,
             title: t('Review Output Port Access Request'),
+            renewedOn: action.renewed_on ?? undefined,
+            totalRangeStart: action.total_range_start ?? undefined,
+            totalRangeEnd: action.total_range_end ?? undefined,
+            expiresOn: action.expires_on ?? undefined,
+            requestedDurationDays: action.requested_duration_days ?? undefined,
         };
     }
 
@@ -259,12 +262,36 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                     <Divider style={{ margin: 0 }} />
                                 </>
                             )}
+                            {details.requestedDurationDays && (
+                                <>
+                                    <Flex justify="space-between" gap="large">
+                                        <Flex vertical>
+                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                {t('Access Duration')}
+                                            </Typography.Text>
+                                            <Typography.Text strong>
+                                                {details.requestedDurationDays} {t('days')}
+                                            </Typography.Text>
+                                        </Flex>
+                                        <Flex vertical>
+                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                {t('Calculated End Date')}
+                                            </Typography.Text>
+                                            <Typography.Text strong>
+                                                {formatDate(
+                                                    new Date(
+                                                        Date.now() +
+                                                            details.requestedDurationDays * 24 * 60 * 60 * 1000,
+                                                    ),
+                                                )}
+                                            </Typography.Text>
+                                        </Flex>
+                                    </Flex>
+                                    <Divider style={{ margin: 0 }} />
+                                </>
+                            )}
                             <Flex justify="space-between" gap="large">
                                 <Flex align="center" gap="middle">
-                                    <Avatar
-                                        icon={<UserOutlined />}
-                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                    />
                                     <Flex vertical>
                                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                             {t('Requested By')}
@@ -277,10 +304,6 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                 </Flex>
 
                                 <Flex align="center" gap="middle">
-                                    <Avatar
-                                        icon={<CalendarOutlined />}
-                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                    />
                                     <Flex vertical>
                                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                             {t('Requested On')}

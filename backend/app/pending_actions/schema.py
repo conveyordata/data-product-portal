@@ -9,17 +9,9 @@ from app.data_products.output_port_technical_assets_link.schema_response import 
     TechnicalAssetOutputPortAssociationsGet,
 )
 from app.data_products.output_ports.input_ports.schema_response import (
-    DataProductDatasetAssociationsGet,
     DataProductOutputPortAssociationsGet,
 )
 from app.pending_actions.enums import PendingActionTypes, PendingActionTypesOld
-
-
-@deprecated("Use DataProductOutputPortPendingAction instead")
-class DataProductDatasetPendingAction(DataProductDatasetAssociationsGet):
-    pending_action_type: Literal[PendingActionTypesOld.DataProductDataset] = (
-        PendingActionTypesOld.DataProductDataset
-    )
 
 
 class DataProductOutputPortPendingAction(DataProductOutputPortAssociationsGet):
