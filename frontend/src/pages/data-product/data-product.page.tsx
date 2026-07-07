@@ -21,7 +21,6 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import styles from './data-product.module.scss';
 
@@ -76,13 +75,6 @@ export function DataProduct() {
         );
         return navigate(destination);
     }
-
-    useEffect(() => {
-        setItemToLocalStorage(LocalStorageKeys.LastVisitedDataProducts, {
-            id: dataProductId,
-            timestamp: Date.now(),
-        });
-    }, [dataProductId]);
 
     //Only show the spinner when we have no data product to show, if we have one, we want to continue
     //Otherwise updating the settings for examples updates the whole page to a spinner, which is very weird
