@@ -21,7 +21,6 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import styles from './data-product.module.scss';
 
@@ -61,13 +60,6 @@ export function DataProduct() {
     );
 
     const canEdit = edit_access?.allowed || false;
-
-    useEffect(() => {
-        setItemToLocalStorage(LocalStorageKeys.LastVisitedDataProducts, {
-            id: dataProductId,
-            timestamp: Date.now(),
-        });
-    }, [dataProductId]);
 
     const dataProductTypeIcon = useMemo(() => {
         return getDataProductTypeIcon(dataProduct?.type?.icon_key);
