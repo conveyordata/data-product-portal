@@ -150,7 +150,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
             <JustificationFormItem />
             <FormItemAccessDuration
                 cartOutputPorts={cartOutputPorts}
-                dataProductTypeChoice={DataProductChoiceOptions.exploration}
+                dataProductTypeChoice={DataProductChoiceOptions.data_product}
             />
             <Form.Item label={null}>
                 <Button

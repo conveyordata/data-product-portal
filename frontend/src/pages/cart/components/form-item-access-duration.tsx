@@ -1,4 +1,5 @@
-import { Card, Form, List, theme } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Card, Flex, Form, List, theme } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { OutputPortAccessDuration } from '@/pages/cart/components/output-port-access-duration.tsx';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
@@ -17,15 +18,25 @@ export const FormItemAccessDuration = ({ cartOutputPorts, dataProductTypeChoice 
         <Form.Item>
             <Card
                 size="small"
-                title={t('Note the access duration for the Output Ports requested:')}
+                title={
+                    <Flex gap="small">
+                        <InfoCircleOutlined style={{ color: token.colorInfo }} />
+                        {t('Note the access duration for the Output Ports requested')}
+                    </Flex>
+                }
                 style={{ backgroundColor: token.colorInfoBg, borderColor: token.colorInfoBorder }}
+                styles={{ header: { minHeight: 32 }, body: { padding: '4px 12px' } }}
             >
                 <List
                     split={false}
                     size="small"
                     dataSource={cartOutputPorts}
+                    style={{ paddingLeft: 20 }}
                     renderItem={(cartOutputPort) => (
-                        <List.Item key={cartOutputPort.id} style={{ padding: '2px' }}>
+                        <List.Item
+                            key={cartOutputPort.id}
+                            style={{ padding: '2px 0', display: 'list-item', listStyleType: 'disc' }}
+                        >
                             <OutputPortAccessDuration
                                 outputPort={cartOutputPort}
                                 dataProductTypeChoice={dataProductTypeChoice}
