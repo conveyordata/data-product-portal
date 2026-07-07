@@ -46,7 +46,7 @@ export function DataProduct() {
                 ),
                 path: ApplicationPaths.Studio,
             },
-            { title: <>{dataProduct?.name}</> },
+            { title: dataProduct?.name },
         ]);
     }, [setBreadcrumbs, dataProduct, t]);
     const { data: { rolled_up_tags: rolledUpTags = [] } = {} } = useGetDataProductRolledUpTagsQuery(dataProductId, {
@@ -62,27 +62,27 @@ export function DataProduct() {
 
     const canEdit = edit_access?.allowed || false;
 
-    const dataProductTypeIcon = useMemo(() => {
-        return getDataProductTypeIcon(dataProduct?.type?.icon_key);
-    }, [dataProduct?.type?.icon_key]);
-
-    const dataProductOwners = useGetDataProductOwners(dataProduct?.id);
-
-    function navigateToEditPage() {
-        const destination = getDynamicRoutePath(
-            ApplicationPaths.DataProductEdit,
-            DynamicPathParams.DataProductId,
-            dataProductId,
-        );
-        return navigate(destination);
-    }
-
     useEffect(() => {
         setItemToLocalStorage(LocalStorageKeys.LastVisitedDataProducts, {
             id: dataProductId,
             timestamp: Date.now(),
         });
     }, [dataProductId]);
+
+    const dataProductTypeIcon = useMemo(() => {
+        return getDataProductTypeIcon(dataProduct?.type?.icon_key);
+    }, [dataProduct?.type?.icon_key]);
+
+    const dataProductOwners = useGetDataProductOwners(dataProduct?.id);
+
+    const navigateToEditPage = () => {
+        const destination = getDynamicRoutePath(
+            ApplicationPaths.DataProductEdit,
+            DynamicPathParams.DataProductId,
+            dataProductId,
+        );
+        return navigate(destination);
+    };
 
     //Only show the spinner when we have no data product to show, if we have one, we want to continue
     //Otherwise updating the settings for examples updates the whole page to a spinner, which is very weird
@@ -96,9 +96,9 @@ export function DataProduct() {
     return (
         <Splitter className={styles.invisibleSplitter}>
             <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false} className={styles.container}>
-                <Flex vertical gap={'middle'} className={styles.mainPanel}>
-                    <Flex justify={'space-between'}>
-                        <Flex gap={'middle'} align={'center'} justify={'center'}>
+                <Flex vertical gap="middle" className={styles.mainPanel}>
+                    <Flex justify="space-between">
+                        <Flex gap="middle" align="center" justify="center">
                             <Icon
                                 component={dataProductTypeIcon}
                                 className={clsx([styles.defaultIcon, styles.iconBorder])}
