@@ -49,6 +49,6 @@ def downgrade() -> None:
     op.drop_column("input_ports", "total_range_end")
     op.drop_column("input_ports", "total_range_start")
     op.drop_column("input_ports", "expires_on")
-    op.drop_column("input_ports", "requested_duration")
+    op.drop_column("input_ports", "requested_duration_days")
     op.drop_column("input_ports", "renewed_on")
     op.drop_column("input_ports", "expired_on")
