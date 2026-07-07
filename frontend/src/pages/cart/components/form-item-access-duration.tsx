@@ -17,7 +17,7 @@ export const FormItemAccessDuration = ({ cartOutputPorts, dataProductTypeChoice 
         <Form.Item>
             <Card
                 size="small"
-                title={t('Note the access duration for the output ports requested:')}
+                title={t('Note the access duration for the Output Ports requested:')}
                 style={{ backgroundColor: token.colorInfoBg, borderColor: token.colorInfoBorder }}
             >
                 <List
