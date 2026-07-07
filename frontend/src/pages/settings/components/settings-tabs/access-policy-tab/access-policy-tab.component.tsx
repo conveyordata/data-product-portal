@@ -34,19 +34,21 @@ function toPolicies(durations: AccessDuration[]): ConsumerPolicy[] {
         return acc;
     }, {});
 
-    return (Object.entries(byType) as [AbstractDataProductType, AccessDuration[]][]).map(([type, rows]) => {
-        const defaultRow = rows.find((r) => r.is_default) ?? rows[0];
-        const alternativeRow = rows.find((r) => !r.is_default);
-        return {
-            key: type,
-            durationType: defaultRow.access_duration_type,
-            defaultDays: defaultRow.days,
-            alternativeAllowed: !!alternativeRow,
-            alternativeDays: alternativeRow?.days ?? undefined,
-            defaultId: defaultRow.id,
-            alternativeId: alternativeRow?.id,
-        };
-    });
+    return (Object.entries(byType) as [AbstractDataProductType, AccessDuration[]][])
+        .map(([type, rows]) => {
+            const defaultRow = rows.find((r) => r.is_default) ?? rows[0];
+            const alternativeRow = rows.find((r) => !r.is_default);
+            return {
+                key: type,
+                durationType: defaultRow.access_duration_type,
+                defaultDays: defaultRow.days,
+                alternativeAllowed: !!alternativeRow,
+                alternativeDays: alternativeRow?.days ?? undefined,
+                defaultId: defaultRow.id,
+                alternativeId: alternativeRow?.id,
+            };
+        })
+        .sort((a, b) => a.key.localeCompare(b.key));
 }
 
 export function AccessPolicyTab() {
