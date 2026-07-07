@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.6.1
+
 ### features
 
 - **[SDK]**: Added support for [Infra provisioners](./developer-guide/provisioner) to the SDK. This allows for a robust way to provision infra based on changes in Portal.
