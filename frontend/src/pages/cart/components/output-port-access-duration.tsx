@@ -42,8 +42,7 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
 
     return (
         <Typography.Text>
-            {' '}
-            {t(`${outputPort.name}:`)} {accessDurationString}
+            <Typography.Text>{outputPort.name}:</Typography.Text> {accessDurationString}
         </Typography.Text>
     );
 }
