@@ -72,17 +72,22 @@ const PRODUCT_TYPE_LABELS: Record<string, string> = {
     [AbstractDataProductType.Explorations]: 'Explorations',
 };
 
-function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; rows: AccessDuration[] }) {
+type AccessDurationProps = {
+    abstractDataProductType: AbstractDataProductType;
+    accessDurations: AccessDuration[];
+};
+
+function AccessDurationSection({ abstractDataProductType, accessDurations }: AccessDurationProps) {
     const { t } = useTranslation();
-    const defaultRow = rows.find((r) => r.is_default);
+    const defaultRow = accessDurations.find((r) => r.is_default);
     const [selected, setSelected] = useState<AccessDurationType>(
         defaultRow?.access_duration_type ?? AccessDurationType.Permanent,
     );
 
-    const hasTimeBound = rows.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
-    const hasPermanent = rows.some((r) => r.access_duration_type === AccessDurationType.Permanent);
+    const hasTimeBound = accessDurations.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
+    const hasPermanent = accessDurations.some((r) => r.access_duration_type === AccessDurationType.Permanent);
     const canToggle = hasTimeBound && hasPermanent;
-    const timeBoundDays = rows.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
+    const timeBoundDays = accessDurations.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
 
     const options = [
         {
@@ -110,11 +115,11 @@ function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; 
     ];
 
     return (
-        <Flex vertical gap={8} style={{ marginLeft: 20 }}>
+        <Flex vertical gap={'small'} style={{ marginLeft: 20 }}>
             <Typography.Text type="secondary">
-                {t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[type] })}
+                {t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
             </Typography.Text>
-            <Flex vertical gap={12}>
+            <Flex vertical gap={'small'}>
                 <Radio.Group
                     value={selected}
                     onChange={canToggle ? (e) => setSelected(e.target.value) : undefined}
@@ -126,7 +131,7 @@ function AccessDurationSection({ type, rows }: { type: AbstractDataProductType; 
                         type="info"
                         showIcon={false}
                         title={
-                            <Flex vertical gap={4}>
+                            <Flex vertical gap={'small'}>
                                 <Typography.Text strong>{t('{{days}} days', { days: timeBoundDays })}</Typography.Text>
                                 <Typography.Text type="secondary">
                                     {t('Admin-configured duration policy.')}
@@ -153,10 +158,10 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
 
     const sections = productTypes
         .map((type) => ({
-            type,
-            rows: allDurations.filter((d) => d.abstract_data_product_type === type),
+            abstractDataProductType: type,
+            accessDurations: allDurations.filter((d) => d.abstract_data_product_type === type),
         }))
-        .filter(({ rows }) => rows.length > 0);
+        .filter(({ accessDurations }) => accessDurations.length > 0);
 
     if (!enabled) {
         return (
@@ -169,13 +174,13 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
     }
 
     return (
-        <Flex vertical gap={8}>
+        <Flex vertical gap={'small'}>
             {mode === 'edit' && (
                 <Alert
                     type="warning"
                     showIcon
                     title={
-                        <Flex vertical gap={4}>
+                        <Flex vertical gap={'small'}>
                             <Typography.Text>
                                 {t(
                                     'Only future approved access requests will be affected by changes to the access duration policy.',
@@ -190,8 +195,12 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                     }
                 />
             )}
-            {sections.map(({ type, rows }) => (
-                <AccessDurationSection key={type} type={type} rows={rows} />
+            {sections.map(({ abstractDataProductType, accessDurations }) => (
+                <AccessDurationSection
+                    key={abstractDataProductType}
+                    abstractDataProductType={abstractDataProductType}
+                    accessDurations={accessDurations}
+                />
             ))}
         </Flex>
     );
