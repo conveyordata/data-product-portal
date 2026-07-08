@@ -47,6 +47,8 @@ export function getDecisionStatusLabel(t: TFunction, status: DecisionStatus): st
             return t('Available');
         case DecisionStatus.Denied:
             return t('Rejected');
+        case DecisionStatus.Expired:
+            return t('Expired');
         default:
             return t('Unknown');
     }
@@ -59,6 +61,8 @@ export function getDecisionStatusBadgeStatus(status: DecisionStatus): BadgeProps
         case DecisionStatus.Approved:
             return 'success';
         case DecisionStatus.Denied:
+            return 'error';
+        case DecisionStatus.Expired:
             return 'error';
         default:
             return 'default';

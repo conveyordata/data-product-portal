@@ -435,8 +435,10 @@ export type InputPort = {
   id: string;
   justification: string;
   status: DecisionStatus;
+  expires_on?: string | null;
   output_port_id: string;
   output_port: OutputPort;
+  is_expiring_soon: boolean;
 };
 export type GetDataProductInputPortsResponse = {
   input_ports: InputPort[];

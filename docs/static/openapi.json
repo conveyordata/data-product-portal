@@ -9318,6 +9318,11 @@
             ],
             "title": "Expires On"
           },
+          "is_expiring_soon": {
+            "type": "boolean",
+            "title": "Is Expiring Soon",
+            "default": false
+          },
           "renewed_on": {
             "anyOf": [
               {
@@ -12148,6 +12153,18 @@
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
           },
+          "expires_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires On"
+          },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
@@ -12155,6 +12172,10 @@
           },
           "output_port": {
             "$ref": "#/components/schemas/OutputPort"
+          },
+          "is_expiring_soon": {
+            "type": "boolean",
+            "title": "Is Expiring Soon"
           }
         },
         "type": "object",
@@ -12163,7 +12184,8 @@
           "justification",
           "status",
           "output_port_id",
-          "output_port"
+          "output_port",
+          "is_expiring_soon"
         ],
         "title": "InputPort"
       },
@@ -12953,6 +12975,18 @@
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
           },
+          "expires_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires On"
+          },
           "consuming_abstract_data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -12960,6 +12994,10 @@
           },
           "consuming_abstract_data_product": {
             "$ref": "#/components/schemas/AbstractDataProductInfo"
+          },
+          "is_expiring_soon": {
+            "type": "boolean",
+            "title": "Is Expiring Soon"
           }
         },
         "type": "object",
@@ -12968,7 +13006,8 @@
           "justification",
           "status",
           "consuming_abstract_data_product_id",
-          "consuming_abstract_data_product"
+          "consuming_abstract_data_product",
+          "is_expiring_soon"
         ],
         "title": "OutputPortInputPort"
       },

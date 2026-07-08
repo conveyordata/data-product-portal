@@ -6267,11 +6267,13 @@ func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContract
 
 // Ref: #/components/schemas/InputPort
 type InputPort struct {
-	ID            uuid.UUID      `json:"id"`
-	Justification string         `json:"justification"`
-	Status        DecisionStatus `json:"status"`
-	OutputPortID  uuid.UUID      `json:"output_port_id"`
-	OutputPort    OutputPort     `json:"output_port"`
+	ID             uuid.UUID      `json:"id"`
+	Justification  string         `json:"justification"`
+	Status         DecisionStatus `json:"status"`
+	ExpiresOn      OptNilDateTime `json:"expires_on"`
+	OutputPortID   uuid.UUID      `json:"output_port_id"`
+	OutputPort     OutputPort     `json:"output_port"`
+	IsExpiringSoon bool           `json:"is_expiring_soon"`
 }
 
 // GetID returns the value of ID.
@@ -6289,6 +6291,11 @@ func (s *InputPort) GetStatus() DecisionStatus {
 	return s.Status
 }
 
+// GetExpiresOn returns the value of ExpiresOn.
+func (s *InputPort) GetExpiresOn() OptNilDateTime {
+	return s.ExpiresOn
+}
+
 // GetOutputPortID returns the value of OutputPortID.
 func (s *InputPort) GetOutputPortID() uuid.UUID {
 	return s.OutputPortID
@@ -6297,6 +6304,11 @@ func (s *InputPort) GetOutputPortID() uuid.UUID {
 // GetOutputPort returns the value of OutputPort.
 func (s *InputPort) GetOutputPort() OutputPort {
 	return s.OutputPort
+}
+
+// GetIsExpiringSoon returns the value of IsExpiringSoon.
+func (s *InputPort) GetIsExpiringSoon() bool {
+	return s.IsExpiringSoon
 }
 
 // SetID sets the value of ID.
@@ -6314,6 +6326,11 @@ func (s *InputPort) SetStatus(val DecisionStatus) {
 	s.Status = val
 }
 
+// SetExpiresOn sets the value of ExpiresOn.
+func (s *InputPort) SetExpiresOn(val OptNilDateTime) {
+	s.ExpiresOn = val
+}
+
 // SetOutputPortID sets the value of OutputPortID.
 func (s *InputPort) SetOutputPortID(val uuid.UUID) {
 	s.OutputPortID = val
@@ -6322,6 +6339,11 @@ func (s *InputPort) SetOutputPortID(val uuid.UUID) {
 // SetOutputPort sets the value of OutputPort.
 func (s *InputPort) SetOutputPort(val OutputPort) {
 	s.OutputPort = val
+}
+
+// SetIsExpiringSoon sets the value of IsExpiringSoon.
+func (s *InputPort) SetIsExpiringSoon(val bool) {
+	s.IsExpiringSoon = val
 }
 
 // Ref: #/components/schemas/IsAdminResponse
@@ -9479,8 +9501,10 @@ type OutputPortInputPort struct {
 	ID                             uuid.UUID               `json:"id"`
 	Justification                  string                  `json:"justification"`
 	Status                         DecisionStatus          `json:"status"`
+	ExpiresOn                      OptNilDateTime          `json:"expires_on"`
 	ConsumingAbstractDataProductID uuid.UUID               `json:"consuming_abstract_data_product_id"`
 	ConsumingAbstractDataProduct   AbstractDataProductInfo `json:"consuming_abstract_data_product"`
+	IsExpiringSoon                 bool                    `json:"is_expiring_soon"`
 }
 
 // GetID returns the value of ID.
@@ -9498,6 +9522,11 @@ func (s *OutputPortInputPort) GetStatus() DecisionStatus {
 	return s.Status
 }
 
+// GetExpiresOn returns the value of ExpiresOn.
+func (s *OutputPortInputPort) GetExpiresOn() OptNilDateTime {
+	return s.ExpiresOn
+}
+
 // GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
 func (s *OutputPortInputPort) GetConsumingAbstractDataProductID() uuid.UUID {
 	return s.ConsumingAbstractDataProductID
@@ -9506,6 +9535,11 @@ func (s *OutputPortInputPort) GetConsumingAbstractDataProductID() uuid.UUID {
 // GetConsumingAbstractDataProduct returns the value of ConsumingAbstractDataProduct.
 func (s *OutputPortInputPort) GetConsumingAbstractDataProduct() AbstractDataProductInfo {
 	return s.ConsumingAbstractDataProduct
+}
+
+// GetIsExpiringSoon returns the value of IsExpiringSoon.
+func (s *OutputPortInputPort) GetIsExpiringSoon() bool {
+	return s.IsExpiringSoon
 }
 
 // SetID sets the value of ID.
@@ -9523,6 +9557,11 @@ func (s *OutputPortInputPort) SetStatus(val DecisionStatus) {
 	s.Status = val
 }
 
+// SetExpiresOn sets the value of ExpiresOn.
+func (s *OutputPortInputPort) SetExpiresOn(val OptNilDateTime) {
+	s.ExpiresOn = val
+}
+
 // SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.
 func (s *OutputPortInputPort) SetConsumingAbstractDataProductID(val uuid.UUID) {
 	s.ConsumingAbstractDataProductID = val
@@ -9531,6 +9570,11 @@ func (s *OutputPortInputPort) SetConsumingAbstractDataProductID(val uuid.UUID) {
 // SetConsumingAbstractDataProduct sets the value of ConsumingAbstractDataProduct.
 func (s *OutputPortInputPort) SetConsumingAbstractDataProduct(val AbstractDataProductInfo) {
 	s.ConsumingAbstractDataProduct = val
+}
+
+// SetIsExpiringSoon sets the value of IsExpiringSoon.
+func (s *OutputPortInputPort) SetIsExpiringSoon(val bool) {
+	s.IsExpiringSoon = val
 }
 
 // Ref: #/components/schemas/OutputPortLink

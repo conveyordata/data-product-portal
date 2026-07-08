@@ -214,6 +214,7 @@ export type DataProductOutputPortPendingAction = {
   requested_on: string;
   requested_duration_days?: number | null;
   expires_on?: string | null;
+  is_expiring_soon?: boolean;
   renewed_on?: string | null;
   total_range_start?: string | null;
   total_range_end?: string | null;

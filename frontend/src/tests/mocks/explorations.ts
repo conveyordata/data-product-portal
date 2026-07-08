@@ -45,6 +45,7 @@ const mockInputPorts: InputPort[] = [
         id: 'id-1',
         justification: 'I am your king!',
         status: DecisionStatus.Approved,
+        is_expiring_soon: false,
         output_port_id: 'op-1',
         output_port: {
             id: 'op-1',

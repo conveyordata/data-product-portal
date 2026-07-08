@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
+import AccessExpiryStatus from '@/components/datasets/access-expiry-status/access-expiry-status.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title.tsx';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -52,12 +53,6 @@ export const getDataProductDatasetsColumns = ({
                         linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
                         title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
-                        subtitle={
-                            <Badge
-                                status={getDecisionStatusBadgeStatus(status)}
-                                text={getDecisionStatusLabel(t, status)}
-                            />
-                        }
                     />
                 );
             },
@@ -69,7 +64,22 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Business justification'),
             dataIndex: 'justification',
+            width: '40%',
             render: (_, { justification }) => <Justification justification={justification} />,
+        },
+        {
+            title: t('Status'),
+            dataIndex: 'status',
+            render: (_, { status }) => (
+                <Badge status={getDecisionStatusBadgeStatus(status)} text={getDecisionStatusLabel(t, status)} />
+            ),
+        },
+        {
+            title: t('Access Expires'),
+            dataIndex: 'expires_on',
+            render: (_, { expires_on, is_expiring_soon, status }) => (
+                <AccessExpiryStatus expiresOn={expires_on} isExpiringSoon={is_expiring_soon} status={status} />
+            ),
         },
         {
             title: t('Actions'),

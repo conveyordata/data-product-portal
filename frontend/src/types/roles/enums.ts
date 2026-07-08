@@ -25,6 +25,7 @@ export const DecisionStatus = {
     Approved: 'approved' as ApiDecisionStatus,
     Pending: 'pending' as ApiDecisionStatus,
     Denied: 'denied' as ApiDecisionStatus,
+    Expired: 'expired' as ApiDecisionStatus,
 } as const;
 
 export type DecisionStatus = (typeof DecisionStatus)[keyof typeof DecisionStatus];

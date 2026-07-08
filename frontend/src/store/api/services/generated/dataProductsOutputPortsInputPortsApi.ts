@@ -79,8 +79,10 @@ export type OutputPortInputPort = {
   id: string;
   justification: string;
   status: DecisionStatus;
+  expires_on?: string | null;
   consuming_abstract_data_product_id: string;
   consuming_abstract_data_product: AbstractDataProductInfo;
+  is_expiring_soon: boolean;
 };
 export type GetInputPortsForOutputPortResponse = {
   input_ports: OutputPortInputPort[];

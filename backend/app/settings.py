@@ -96,6 +96,7 @@ class Settings(BaseSettings):
     FRONTEND_DIST_DIR: str = ""
 
     TIME_BOUND_ACCESS_ENABLED: bool = True
+    ACCESS_DURATION_EXPIRING_SOON_DAYS: int = 7
 
 
 class LogLevel(str, Enum):

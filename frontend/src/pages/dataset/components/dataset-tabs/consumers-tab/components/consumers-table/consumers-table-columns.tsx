@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import explorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
+import AccessExpiryStatus from '@/components/datasets/access-expiry-status/access-expiry-status.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -33,11 +34,10 @@ type Props = {
     canRevoke?: boolean;
 };
 type NameColumnProps = {
-    status: DecisionStatus;
     consumingAbstractDataProductId: string;
     consumingAbstractDataProduct: AbstractDataProductInfo;
 };
-const NameColumn = ({ status, consumingAbstractDataProductId, consumingAbstractDataProduct }: NameColumnProps) => {
+const NameColumn = ({ consumingAbstractDataProductId, consumingAbstractDataProduct }: NameColumnProps) => {
     const { t } = useTranslation();
     const popover = (() => {
         switch (consumingAbstractDataProduct.abstract_data_product_type) {
@@ -71,7 +71,6 @@ const NameColumn = ({ status, consumingAbstractDataProductId, consumingAbstractD
             )}
             icon={<CustomSvgIconLoader iconComponent={icon} hasRoundBorder size={'default'} />}
             title={consumingAbstractDataProduct.name}
-            subtitle={<Badge status={getDecisionStatusBadgeStatus(status)} text={getDecisionStatusLabel(t, status)} />}
         />
     );
 };
@@ -98,10 +97,9 @@ export const getConsumerColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id, status }) => {
+            render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id }) => {
                 return (
                     <NameColumn
-                        status={status}
                         consumingAbstractDataProductId={consuming_abstract_data_product_id}
                         consumingAbstractDataProduct={consuming_abstract_data_product}
                     />
@@ -116,6 +114,20 @@ export const getConsumerColumns = ({
             title: t('Business justification'),
             dataIndex: 'justification',
             render: (_, { justification }) => <Justification justification={justification} />,
+        },
+        {
+            title: t('Status'),
+            dataIndex: 'status',
+            render: (_, { status }) => (
+                <Badge status={getDecisionStatusBadgeStatus(status)} text={getDecisionStatusLabel(t, status)} />
+            ),
+        },
+        {
+            title: t('Access Expires'),
+            dataIndex: 'expires_on',
+            render: (_, { expires_on, is_expiring_soon, status }) => (
+                <AccessExpiryStatus expiresOn={expires_on} isExpiringSoon={is_expiring_soon} status={status} />
+            ),
         },
         {
             title: t('Actions'),

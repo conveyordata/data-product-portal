@@ -43,6 +43,7 @@ class DataProductOutputPortPendingAction:
         approved_by (None | User):
         requested_duration_days (int | None | Unset):
         expires_on (datetime.datetime | None | Unset):
+        is_expiring_soon (bool | Unset):  Default: False.
         renewed_on (datetime.datetime | None | Unset):
         total_range_start (datetime.datetime | None | Unset):
         total_range_end (datetime.datetime | None | Unset):
@@ -62,6 +63,7 @@ class DataProductOutputPortPendingAction:
     approved_by: None | User
     requested_duration_days: int | None | Unset = UNSET
     expires_on: datetime.datetime | None | Unset = UNSET
+    is_expiring_soon: bool | Unset = False
     renewed_on: datetime.datetime | None | Unset = UNSET
     total_range_start: datetime.datetime | None | Unset = UNSET
     total_range_end: datetime.datetime | None | Unset = UNSET
@@ -117,6 +119,8 @@ class DataProductOutputPortPendingAction:
         else:
             expires_on = self.expires_on
 
+        is_expiring_soon = self.is_expiring_soon
+
         renewed_on: None | str | Unset
         if isinstance(self.renewed_on, Unset):
             renewed_on = UNSET
@@ -164,6 +168,8 @@ class DataProductOutputPortPendingAction:
             field_dict["requested_duration_days"] = requested_duration_days
         if expires_on is not UNSET:
             field_dict["expires_on"] = expires_on
+        if is_expiring_soon is not UNSET:
+            field_dict["is_expiring_soon"] = is_expiring_soon
         if renewed_on is not UNSET:
             field_dict["renewed_on"] = renewed_on
         if total_range_start is not UNSET:
@@ -262,6 +268,8 @@ class DataProductOutputPortPendingAction:
 
         expires_on = _parse_expires_on(d.pop("expires_on", UNSET))
 
+        is_expiring_soon = d.pop("is_expiring_soon", UNSET)
+
         def _parse_renewed_on(data: object) -> datetime.datetime | None | Unset:
             if data is None:
                 return data
@@ -337,6 +345,7 @@ class DataProductOutputPortPendingAction:
             approved_by=approved_by,
             requested_duration_days=requested_duration_days,
             expires_on=expires_on,
+            is_expiring_soon=is_expiring_soon,
             renewed_on=renewed_on,
             total_range_start=total_range_start,
             total_range_end=total_range_end,

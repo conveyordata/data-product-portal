@@ -22,6 +22,7 @@ class BaseDataProductOutputPortAssociationGet(ORMModel):
 
     requested_duration_days: Optional[int] = None
     expires_on: Optional[datetime] = None
+    is_expiring_soon: bool = False
     renewed_on: Optional[datetime] = None
     total_range_start: Optional[datetime] = None
     total_range_end: Optional[datetime] = None
