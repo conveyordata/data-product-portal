@@ -80,23 +80,23 @@ const FIELD_NAMES: Partial<
 };
 
 function AccessDurationSection({
-    type,
-    rows,
+    abstractDataProductType,
+    accessDurations,
     fieldName,
 }: {
-    type: AbstractDataProductType;
-    rows: AccessDuration[];
+    abstractDataProductType: AbstractDataProductType;
+    accessDurations: AccessDuration[];
     fieldName: (typeof FIELD_NAMES)[keyof typeof FIELD_NAMES];
 }) {
     const { t } = useTranslation();
     const form = Form.useFormInstance<CreateOutputPortRequest>();
-    const defaultRow = rows.find((r) => r.is_default);
+    const defaultRow = accessDurations.find((r) => r.is_default);
     const selected = Form.useWatch(fieldName, form) ?? defaultRow?.access_duration_type ?? AccessDurationType.Permanent;
 
-    const hasTimeBound = rows.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
-    const hasPermanent = rows.some((r) => r.access_duration_type === AccessDurationType.Permanent);
+    const hasTimeBound = accessDurations.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
+    const hasPermanent = accessDurations.some((r) => r.access_duration_type === AccessDurationType.Permanent);
     const canToggle = hasTimeBound && hasPermanent;
-    const timeBoundDays = rows.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
+    const timeBoundDays = accessDurations.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
 
     const options = [
         {
@@ -135,7 +135,7 @@ function AccessDurationSection({
                         options={options}
                         optionType="button"
                         disabled={!canToggle}
-                        key={`${type}-access-duration`}
+                        key={`${abstractDataProductType}-access-duration`}
                     />
                 </Form.Item>
                 {selected === AccessDurationType.TimeBound && timeBoundDays != null && (
@@ -169,11 +169,11 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
     const productTypes = [AbstractDataProductType.DataProducts, AbstractDataProductType.Explorations] as const;
 
     const sections = productTypes
-        .map((type) => ({
-            type,
-            rows: allDurations.filter((d) => d.abstract_data_product_type === type),
+        .map((abstractDataProductType) => ({
+            abstractDataProductType,
+            accessDurations: allDurations.filter((d) => d.abstract_data_product_type === abstractDataProductType),
         }))
-        .filter(({ rows }) => rows.length > 0);
+        .filter(({ accessDurations }) => accessDurations.length > 0);
 
     if (!enabled) {
         return (
@@ -211,19 +211,19 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                     />
                 </Form.Item>
             )}
-            {sections.map(({ type, rows }) => (
+            {sections.map(({ abstractDataProductType, accessDurations }) => (
                 <Form.Item
-                    key={type}
+                    key={abstractDataProductType}
                     required
-                    label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[type] })}
+                    label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
                     tooltip={t(
                         'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
                     )}
                 >
                     <AccessDurationSection
-                        type={type}
-                        rows={rows}
-                        fieldName={FIELD_NAMES[type as keyof typeof FIELD_NAMES]}
+                        abstractDataProductType={abstractDataProductType}
+                        accessDurations={accessDurations}
+                        fieldName={FIELD_NAMES[abstractDataProductType as keyof typeof FIELD_NAMES]}
                     />
                 </Form.Item>
             ))}
