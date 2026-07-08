@@ -692,6 +692,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/plugins/render_technical_asset_access_path
 	RenderTechnicalAssetAccessPath(ctx context.Context, request *RenderTechnicalAssetAccessPathRequest) (RenderTechnicalAssetAccessPathRes, error)
+	// RenewOutputPortAsInputPort invokes renew_output_port_as_input_port operation.
+	//
+	// Renew Output Port As Input Port.
+	//
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/renew
+	RenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (RenewOutputPortAsInputPortRes, error)
 	// ReplaceOutputPortCuratedQueries invokes replace_output_port_curated_queries operation.
 	//
 	// Replace Output Port Curated Queries.
@@ -8157,6 +8163,90 @@ func (c *Client) sendRenderTechnicalAssetAccessPath(ctx context.Context, request
 	}()
 
 	result, err := decodeRenderTechnicalAssetAccessPathResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RenewOutputPortAsInputPort invokes renew_output_port_as_input_port operation.
+//
+// Renew Output Port As Input Port.
+//
+// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/renew
+func (c *Client) RenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (RenewOutputPortAsInputPortRes, error) {
+	res, err := c.sendRenewOutputPortAsInputPort(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (res RenewOutputPortAsInputPortRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/input_ports/renew"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRenewOutputPortAsInputPortRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRenewOutputPortAsInputPortResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

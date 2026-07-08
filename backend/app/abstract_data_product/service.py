@@ -149,13 +149,14 @@ class AbstractDataProductService:
                 )
             time_bound = {
                 "requested_duration_days": access_duration_setting[0].days,
-                # "total_range_start": output_port.total_range_start,
                 # "total_range_end": output_port.total_range_end,
             }
             if approval_status == DecisionStatus.APPROVED:
                 time_bound["expires_on"] = datetime.now(tz=pytz.utc) + timedelta(
                     days=access_duration_setting[0].days
                 )
+                time_bound["total_range_start"] = datetime.now(tz=pytz.utc)
+                time_bound["total_range_end"] = time_bound["expires_on"]
 
         input_port = InputPortModel(
             dataset_id=output_port_id,

@@ -109,6 +109,11 @@ class User(Base, BaseORM):
         back_populates="approved_by",
         lazy="raise",
     )
+    renewed_input_ports: Mapped[list["InputPort"]] = relationship(
+        foreign_keys="InputPort.renewed_by_id",
+        back_populates="renewed_by",
+        lazy="raise",
+    )
 
     # Relationships - Data outputs
     requested_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(

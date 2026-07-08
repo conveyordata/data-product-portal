@@ -29,3 +29,7 @@ class DenyOutputPortAsInputPortRequest(ORMModel):
 
 class RemoveOutputPortAsInputPortRequest(ORMModel):
     consuming_data_product_id: UUID
+
+
+class RenewOutputPortAsInputPortRequest(ORMModel):
+    consuming_data_product_id: UUID

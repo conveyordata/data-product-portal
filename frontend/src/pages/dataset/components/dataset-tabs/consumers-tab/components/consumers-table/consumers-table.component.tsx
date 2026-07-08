@@ -7,7 +7,10 @@ import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type OutputPortInputPort,
+    type RemoveOutputPortAsInputPortApiArg,
+    type RenewOutputPortAsInputPortApiArg,
     useRemoveOutputPortAsInputPortMutation,
+    useRenewOutputPortAsInputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -26,6 +29,9 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
     const { t } = useTranslation();
     const [removeOutputPortAsInputPort, { isLoading: isRemovingOutputPortAsInputPort }] =
         useRemoveOutputPortAsInputPortMutation();
+
+    const [renewOutputPortAsInputPort, { isLoading: isRenewingOutputPortAsInputPort }] =
+        useRenewOutputPortAsInputPortMutation();
 
     const {
         handleAcceptDataProductDatasetLink,
@@ -61,27 +67,43 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
     };
 
     const handleRemoveDatasetFromDataProduct = useCallback(
-        async (dataProductId: string, consumingDataProductName: string, consumingDataProductId: string) => {
+        async (request: RemoveOutputPortAsInputPortApiArg, consuming_data_product_name: string) => {
             try {
-                await removeOutputPortAsInputPort({
-                    outputPortId: outputPortId,
-                    dataProductId,
-                    removeOutputPortAsInputPortRequest: {
-                        consuming_data_product_id: consumingDataProductId,
-                    },
-                }).unwrap();
+                await removeOutputPortAsInputPort(request).unwrap();
                 dispatchMessage({
-                    content: t('Removed Data Product {{name}} as Input Port', { name: consumingDataProductName }),
+                    content: t('Removed Data Product {{name}} as Input Port', { name: consuming_data_product_name }),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to remove Output Port from Data Product'),
+                    content: t('Failed to remove Output Port from Data Product {{name}}', {
+                        name: consuming_data_product_name,
+                    }),
                     type: 'error',
                 });
             }
         },
-        [outputPortId, removeOutputPortAsInputPort, t],
+        [removeOutputPortAsInputPort, t],
+    );
+
+    const handleRenewOutputPortAsInputPort = useCallback(
+        async (request: RenewOutputPortAsInputPortApiArg, consuming_data_product_name: string) => {
+            try {
+                await renewOutputPortAsInputPort(request).unwrap();
+                dispatchMessage({
+                    content: t('Renewed Data Product {{name}} as Input Port', { name: consuming_data_product_name }),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to renew Output Port from Data Product {{name}}', {
+                        name: consuming_data_product_name,
+                    }),
+                    type: 'error',
+                });
+            }
+        },
+        [renewOutputPortAsInputPort, t],
     );
 
     const columns: TableColumnsType<OutputPortInputPort> = useMemo(() => {
@@ -93,7 +115,12 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
             onAcceptDataProductDatasetLink: handleAcceptDataProductDatasetLink,
             onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
             onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
-            isLoading: isRemovingOutputPortAsInputPort || isRejectingDataProductLink || isApprovingDataProductLink,
+            onRenewDataProductDatasetLink: handleRenewOutputPortAsInputPort,
+            isLoading:
+                isRemovingOutputPortAsInputPort ||
+                isRejectingDataProductLink ||
+                isApprovingDataProductLink ||
+                isRenewingOutputPortAsInputPort,
             canApprove: canApprove,
             canRevoke: canRevoke,
         });
@@ -105,9 +132,11 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
         handleAcceptDataProductDatasetLink,
         handleRejectDataProductDatasetLink,
         handleRemoveDatasetFromDataProduct,
+        handleRenewOutputPortAsInputPort,
         isApprovingDataProductLink,
         isRejectingDataProductLink,
         isRemovingOutputPortAsInputPort,
+        isRenewingOutputPortAsInputPort,
         canApprove,
         canRevoke,
     ]);

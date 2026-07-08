@@ -260,6 +260,7 @@ from .render_technical_asset_access_path_request import (
 from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
 )
+from .renew_output_port_as_input_port_request import RenewOutputPortAsInputPortRequest
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
 from .request_input_ports_for_data_product_request import (
     RequestInputPortsForDataProductRequest,
@@ -542,6 +543,7 @@ __all__ = (
     "RemoveOutputPortAsInputPortRequest",
     "RenderTechnicalAssetAccessPathRequest",
     "RenderTechnicalAssetAccessPathResponse",
+    "RenewOutputPortAsInputPortRequest",
     "RequestDataProductRoleAssignment",
     "RequestInputPortsForDataProductRequest",
     "RequestInputPortsForDataProductResponse",

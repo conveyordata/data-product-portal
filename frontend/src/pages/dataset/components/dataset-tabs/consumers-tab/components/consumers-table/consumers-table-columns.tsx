@@ -13,6 +13,8 @@ import {
     type ApproveOutputPortAsInputPortApiArg,
     type DenyOutputPortAsInputPortApiArg,
     type OutputPortInputPort,
+    type RemoveOutputPortAsInputPortApiArg,
+    type RenewOutputPortAsInputPortApiArg,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createAbstractDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
@@ -28,7 +30,14 @@ type Props = {
     dataProductLinks: OutputPortInputPort[];
     onAcceptDataProductDatasetLink: (request: ApproveOutputPortAsInputPortApiArg) => void;
     onRejectDataProductDatasetLink: (request: DenyOutputPortAsInputPortApiArg) => void;
-    onRemoveDataProductDatasetLink: (data_productId: string, name: string, consumingDataProductId: string) => void;
+    onRemoveDataProductDatasetLink: (
+        request: RemoveOutputPortAsInputPortApiArg,
+        consuming_data_product_name: string,
+    ) => void;
+    onRenewDataProductDatasetLink: (
+        request: RenewOutputPortAsInputPortApiArg,
+        consuming_data_product_name: string,
+    ) => void;
     isLoading?: boolean;
     canApprove?: boolean;
     canRevoke?: boolean;
@@ -83,6 +92,7 @@ export const getConsumerColumns = ({
     onRemoveDataProductDatasetLink,
     onRejectDataProductDatasetLink,
     onAcceptDataProductDatasetLink,
+    onRenewDataProductDatasetLink,
     isLoading,
     canApprove,
     canRevoke,
@@ -232,13 +242,40 @@ export const getConsumerColumns = ({
                             type={'link'}
                             onClick={() =>
                                 onRemoveDataProductDatasetLink(
-                                    dataProductId,
+                                    {
+                                        dataProductId,
+                                        outputPortId,
+                                        removeOutputPortAsInputPortRequest: {
+                                            consuming_data_product_id: consuming_data_product_id,
+                                        },
+                                    },
                                     consuming_data_product.name,
-                                    consuming_data_product_id,
                                 )
                             }
                         >
                             {t('Remove')}
+                        </Button>
+                    );
+                }
+
+                if (status === DecisionStatus.Expired) {
+                    return (
+                        <Button
+                            type={'link'}
+                            onClick={() =>
+                                onRenewDataProductDatasetLink(
+                                    {
+                                        dataProductId,
+                                        outputPortId,
+                                        renewOutputPortAsInputPortRequest: {
+                                            consuming_data_product_id: consuming_data_product_id,
+                                        },
+                                    },
+                                    consuming_data_product.name,
+                                )
+                            }
+                        >
+                            {t('Re-approve')}
                         </Button>
                     );
                 }

@@ -106,6 +106,8 @@ class InputPortService:
             current_link.expires_on = datetime.now(tz=pytz.utc) + timedelta(
                 days=current_link.requested_duration_days
             )
+            current_link.total_range_end = current_link.expires_on
+            current_link.total_range_start = datetime.now(tz=pytz.utc)
 
         return current_link
 
@@ -144,6 +146,41 @@ class InputPortService:
         result = copy.deepcopy(current_link)
         self.db.delete(current_link)
         return result
+
+    def renew_output_port_as_input_port(
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
+        actor: User,
+    ) -> InputPortModel:
+        current_link = self.get_link(
+            data_product_id, output_port_id, consuming_data_product_id
+        )
+        if (
+            current_link.status != DecisionStatus.APPROVED
+            and current_link.status != DecisionStatus.EXPIRED
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only approved or expired input ports can be renewed",
+            )
+
+        if not current_link.requested_duration_days:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot renew input port without a requested duration",
+            )
+        now = datetime.now(tz=pytz.utc)
+        current_link.expires_on = now + timedelta(
+            days=current_link.requested_duration_days
+        )
+        current_link.total_range_end = current_link.expires_on
+        current_link.renewed_on = now
+        current_link.renewed_by = actor
+        current_link.status = DecisionStatus.APPROVED
+        return current_link
 
     def get_user_pending_actions(
         self, user: User

@@ -62,6 +62,7 @@ class InputPort(
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    renewed_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
     # Relationships
     dataset: Mapped["Dataset"] = relationship(
@@ -89,6 +90,11 @@ class InputPort(
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id],
         back_populates="denied_input_ports",
+        lazy="joined",
+    )
+    renewed_by: Mapped["User"] = relationship(
+        foreign_keys=[renewed_by_id],
+        back_populates="renewed_input_ports",
         lazy="joined",
     )
 

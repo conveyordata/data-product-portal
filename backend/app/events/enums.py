@@ -35,6 +35,7 @@ class EventType(str, Enum):
     DATA_PRODUCT_DATASET_LINK_APPROVED = "data_product_dataset_link_approved"
     DATA_PRODUCT_DATASET_LINK_DENIED = "data_product_dataset_link_denied"
     DATA_PRODUCT_DATASET_LINK_REMOVED = "data_product_dataset_link_removed"
+    DATA_PRODUCT_DATASET_LINK_RENEWED = "data_product_dataset_link_renewed"
 
     DATASET_CREATED = "dataset_created"
     DATASET_UPDATED = "dataset_updated"

@@ -15,6 +15,7 @@ from app.data_products.output_ports.input_ports.schema_request import (
     ApproveOutputPortAsInputPortRequest,
     DenyOutputPortAsInputPortRequest,
     RemoveOutputPortAsInputPortRequest,
+    RenewOutputPortAsInputPortRequest,
 )
 from app.data_products.output_ports.input_ports.schema_response import (
     GetInputPortsForOutputPortResponse,
@@ -133,6 +134,44 @@ def deny_output_port_as_input_port(
         dataset_id=data_product_link.dataset_id,
         event_id=event_id,
         extra_receiver_ids=[data_product_link.requested_by_id],
+    )
+
+
+@router.post(
+    f"{route}/renew",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                DatasetResolver,
+                object_id="output_port_id",
+            )
+        ),
+    ],
+)
+def renew_output_port_as_input_port(
+    data_product_id: UUID,
+    output_port_id: UUID,
+    body: RenewOutputPortAsInputPortRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    data_product_link = InputPortService(db).renew_output_port_as_input_port(
+        data_product_id=data_product_id,
+        output_port_id=output_port_id,
+        consuming_data_product_id=body.consuming_data_product_id,
+        actor=authenticated_user,
+    )
+
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_DATASET_LINK_RENEWED,
+            subject_id=data_product_link.dataset_id,
+            subject_type=EventReferenceEntity.DATASET,
+            target_id=data_product_link.consuming_abstract_data_product_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        ),
     )
 
 

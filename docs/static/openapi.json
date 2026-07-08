@@ -3277,6 +3277,67 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/renew": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Renew Output Port As Input Port",
+        "operationId": "renew_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/remove": {
       "post": {
         "tags": [
@@ -13897,6 +13958,20 @@
           "technical_asset_access_path"
         ],
         "title": "RenderTechnicalAssetAccessPathResponse"
+      },
+      "RenewOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "RenewOutputPortAsInputPortRequest"
       },
       "RequestDataProductRoleAssignment": {
         "properties": {

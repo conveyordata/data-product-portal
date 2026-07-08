@@ -472,6 +472,20 @@ func encodeRenderTechnicalAssetAccessPathRequest(
 	return nil
 }
 
+func encodeRenewOutputPortAsInputPortRequest(
+	req *RenewOutputPortAsInputPortRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeReplaceOutputPortCuratedQueriesRequest(
 	req *OutputPortCuratedQueriesUpdate,
 	r *http.Request,
