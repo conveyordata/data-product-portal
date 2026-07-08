@@ -21,7 +21,7 @@ export const FormItemAccessDuration = ({ cartOutputPorts, dataProductTypeChoice 
                 title={
                     <Flex gap="small">
                         <InfoCircleOutlined style={{ color: token.colorInfo }} />
-                        {t('Note the access duration for the output ports requested')}
+                        {t('Note the access duration for the Output Ports requested')}
                     </Flex>
                 }
                 style={{ backgroundColor: token.colorInfoBg, borderColor: token.colorInfoBorder }}
