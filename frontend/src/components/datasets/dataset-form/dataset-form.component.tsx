@@ -82,16 +82,16 @@ const FIELD_NAMES: Partial<
 function AccessDurationSection({
     abstractDataProductType,
     accessDurations,
-    fieldName,
+    value,
+    onChange,
 }: {
     abstractDataProductType: AbstractDataProductType;
     accessDurations: AccessDuration[];
-    fieldName: (typeof FIELD_NAMES)[keyof typeof FIELD_NAMES];
+    value?: AccessDurationType;
+    onChange?: (value: AccessDurationType) => void;
 }) {
     const { t } = useTranslation();
-    const form = Form.useFormInstance<CreateOutputPortRequest>();
-    const defaultRow = accessDurations.find((r) => r.is_default);
-    const selected = Form.useWatch(fieldName, form) ?? defaultRow?.access_duration_type ?? AccessDurationType.Permanent;
+    const selected = value ?? AccessDurationType.Permanent;
 
     const hasTimeBound = accessDurations.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
     const hasPermanent = accessDurations.some((r) => r.access_duration_type === AccessDurationType.Permanent);
@@ -126,18 +126,14 @@ function AccessDurationSection({
     return (
         <Flex vertical gap={'small'}>
             <Flex vertical gap={'small'}>
-                <Form.Item
-                    name={fieldName}
-                    noStyle
-                    initialValue={defaultRow?.access_duration_type ?? AccessDurationType.Permanent}
-                >
-                    <Radio.Group
-                        options={options}
-                        optionType="button"
-                        disabled={!canToggle}
-                        key={`${abstractDataProductType}-access-duration`}
-                    />
-                </Form.Item>
+                <Radio.Group
+                    value={selected}
+                    options={options}
+                    optionType="button"
+                    disabled={!canToggle}
+                    onChange={(e) => onChange?.(e.target.value)}
+                    key={`${abstractDataProductType}-access-duration`}
+                />
                 {selected === AccessDurationType.TimeBound && timeBoundDays != null && (
                     <Alert
                         type="info"
@@ -169,10 +165,17 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
     const productTypes = [AbstractDataProductType.DataProducts, AbstractDataProductType.Explorations] as const;
 
     const sections = productTypes
-        .map((abstractDataProductType) => ({
-            abstractDataProductType,
-            accessDurations: allDurations.filter((d) => d.abstract_data_product_type === abstractDataProductType),
-        }))
+        .map((abstractDataProductType) => {
+            const accessDurations = allDurations.filter(
+                (d) => d.abstract_data_product_type === abstractDataProductType,
+            );
+            const defaultRow = accessDurations.find((r) => r.is_default);
+            return {
+                abstractDataProductType,
+                accessDurations,
+                initialValue: defaultRow?.access_duration_type ?? AccessDurationType.Permanent,
+            };
+        })
         .filter(({ accessDurations }) => accessDurations.length > 0);
 
     if (!enabled) {
@@ -211,9 +214,11 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                     />
                 </Form.Item>
             )}
-            {sections.map(({ abstractDataProductType, accessDurations }) => (
+            {sections.map(({ abstractDataProductType, accessDurations, initialValue }) => (
                 <Form.Item
                     key={abstractDataProductType}
+                    name={FIELD_NAMES[abstractDataProductType as keyof typeof FIELD_NAMES]}
+                    initialValue={initialValue}
                     required
                     label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
                     tooltip={t(
@@ -223,7 +228,6 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                     <AccessDurationSection
                         abstractDataProductType={abstractDataProductType}
                         accessDurations={accessDurations}
-                        fieldName={FIELD_NAMES[abstractDataProductType as keyof typeof FIELD_NAMES]}
                     />
                 </Form.Item>
             ))}

@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -112,12 +113,16 @@ class AccessDurationService:
         new_default_type: AccessDurationType,
     ) -> None:
         """Move output ports off an access duration type no longer offered."""
-        if abstract_data_product_type == AbstractDataProductType.DATA_PRODUCT:
-            column = DatasetModel.data_product_access_duration_type
-        elif abstract_data_product_type == AbstractDataProductType.EXPLORATION:
-            column = DatasetModel.exploration_access_duration_type
-        else:
-            return
+        match abstract_data_product_type:
+            case AbstractDataProductType.DATA_PRODUCT:
+                column = DatasetModel.data_product_access_duration_type
+            case AbstractDataProductType.EXPLORATION:
+                column = DatasetModel.exploration_access_duration_type
+            case _:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid abstract data product type: {abstract_data_product_type}",
+                )
 
         outdated_datasets = (
             self.db.scalars(select(DatasetModel).where(column.notin_(allowed_types)))
