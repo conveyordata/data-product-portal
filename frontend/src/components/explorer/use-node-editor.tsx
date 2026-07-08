@@ -21,7 +21,9 @@ const getNodeDimensions = () => {
 };
 
 const defaultDirection = Position.Left;
-const { width: defaultNodeWidth, height: defaultNodeHeight } = getNodeDimensions();
+const { width: rawWidth, height: rawHeight } = getNodeDimensions();
+const defaultNodeWidth = Number.isFinite(rawWidth) ? rawWidth : 200;
+const defaultNodeHeight = Number.isFinite(rawHeight) ? rawHeight : 80;
 
 export function useNodeEditor() {
     const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
