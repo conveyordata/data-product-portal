@@ -85,7 +85,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     ),
                     path: ApplicationPaths.Studio,
                 },
-                { title: <>{currentDataProduct?.name}</>, path: createDataProductIdPath(dataProductId ?? '') },
+                { title: currentDataProduct?.name, path: createDataProductIdPath(dataProductId ?? '') },
                 { title: t('Edit') },
             ]);
         }
@@ -177,7 +177,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const handleDeleteDataProduct = async () => {
         if (canDelete && currentDataProduct) {
             try {
-                await deleteDataProduct(currentDataProduct?.id).unwrap();
+                await deleteDataProduct(currentDataProduct.id).unwrap();
                 dispatchMessage({ content: t('Data Product deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Studio);
             } catch (_error) {
@@ -222,7 +222,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 layout="vertical"
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
-                autoComplete={'off'}
+                autoComplete="off"
                 disabled={isLoading || !canSubmit}
                 initialValues={initialValues}
             >
@@ -240,7 +240,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                     title={t('Are you sure you want to delete this Data Product?')}
                                     onConfirm={handleDeleteDataProduct}
                                     okText={t('Yes')}
-                                    cancelText={t('No')}
+                                    showCancel={false}
                                 >
                                     <Button
                                         className={styles.formButton}

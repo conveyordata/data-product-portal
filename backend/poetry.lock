@@ -242,18 +242,18 @@ test-tox-coverage = ["coverage (>=5.5)"]
 
 [[package]]
 name = "boto3"
-version = "1.43.40"
+version = "1.43.42"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "boto3-1.43.40-py3-none-any.whl", hash = "sha256:5fa80de4b4b7bab383dd8c563e235d51fcc7df4502662af56f0a2472c3c15651"},
-    {file = "boto3-1.43.40.tar.gz", hash = "sha256:a7108b9ce25b8f92d1ce96b9e35090794d5c58b219ff2f6a7a65c8986a4ed6f4"},
+    {file = "boto3-1.43.42-py3-none-any.whl", hash = "sha256:c34a36c9181998dd9b663095b0b0f5f5bc97f3b6846d6a63b31529462091047a"},
+    {file = "boto3-1.43.42.tar.gz", hash = "sha256:f5a7fa503fd902dbd305d52a4571971149acb2c19f02508188f283e244e121e4"},
 ]
 
 [package.dependencies]
-botocore = ">=1.43.40,<1.44.0"
+botocore = ">=1.43.42,<1.44.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.19.0,<0.20.0"
 
@@ -262,14 +262,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.43.40"
+version = "1.43.42"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "botocore-1.43.40-py3-none-any.whl", hash = "sha256:0bc9d352267c9e48415c5d7bb61ff05c3f193eac2fc7e69cfd229a05fbab67d6"},
-    {file = "botocore-1.43.40.tar.gz", hash = "sha256:2085a4314cfd2c8bc1d08ab8039f76c92e99278db0d2a0e2437010526d5d5d70"},
+    {file = "botocore-1.43.42-py3-none-any.whl", hash = "sha256:62aa017eb5bb9791b1bc655571fa1548611e508f35e13e636d3939e1be3745f0"},
+    {file = "botocore-1.43.42.tar.gz", hash = "sha256:d813d5d5707db5f1c73b5d65f6b172c49f38375b23b30c593966fef56f8b5e40"},
 ]
 
 [package.dependencies]
@@ -1068,38 +1068,38 @@ tqdm = ">=4.66,<5.0"
 
 [[package]]
 name = "fastmcp"
-version = "3.4.2"
+version = "3.4.3"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp-3.4.2-py3-none-any.whl", hash = "sha256:c87a62b029f0c5400ada85f683629345d2466c39169f0cb853e487b2f7308c08"},
-    {file = "fastmcp-3.4.2.tar.gz", hash = "sha256:b468722946fc467c3796a6572f7a14d93d48c014cf8fea12910245220cbbe4e1"},
+    {file = "fastmcp-3.4.3-py3-none-any.whl", hash = "sha256:bdf15277800586a033a6e1e95d20301cd508aaa872df3d508c956a2195de6c72"},
+    {file = "fastmcp-3.4.3.tar.gz", hash = "sha256:31e212ae9ff223876c6d7af2082e73f90bc692460e7a054568dfa88719f075ff"},
 ]
 
 [package.dependencies]
-fastmcp-slim = {version = "3.4.2", extras = ["client", "server"]}
+fastmcp-slim = {version = "3.4.3", extras = ["client", "server"]}
 
 [package.extras]
-anthropic = ["fastmcp-slim[anthropic] (==3.4.2)"]
-apps = ["fastmcp-slim[apps] (==3.4.2)"]
-azure = ["fastmcp-slim[azure] (==3.4.2)"]
-code-mode = ["fastmcp-slim[code-mode] (==3.4.2)"]
-gemini = ["fastmcp-slim[gemini] (==3.4.2)"]
-openai = ["fastmcp-slim[openai] (==3.4.2)"]
-tasks = ["fastmcp-slim[tasks] (==3.4.2)"]
+anthropic = ["fastmcp-slim[anthropic] (==3.4.3)"]
+apps = ["fastmcp-slim[apps] (==3.4.3)"]
+azure = ["fastmcp-slim[azure] (==3.4.3)"]
+code-mode = ["fastmcp-slim[code-mode] (==3.4.3)"]
+gemini = ["fastmcp-slim[gemini] (==3.4.3)"]
+openai = ["fastmcp-slim[openai] (==3.4.3)"]
+tasks = ["fastmcp-slim[tasks] (==3.4.3)"]
 
 [[package]]
 name = "fastmcp-slim"
-version = "3.4.2"
+version = "3.4.3"
 description = "The dependency-slim FastMCP package."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastmcp_slim-3.4.2-py3-none-any.whl", hash = "sha256:bdc72492212681ca502755fa8acc0457f559295da1fc3dfc0599adc1c04b82f3"},
-    {file = "fastmcp_slim-3.4.2.tar.gz", hash = "sha256:290646e0955a516235a317151034559aa48336cb843d3f006131aedad8759bb4"},
+    {file = "fastmcp_slim-3.4.3-py3-none-any.whl", hash = "sha256:21ad50465494edb141eed76b177dc788e00e705a5df09b53a31efebeb4432a95"},
+    {file = "fastmcp_slim-3.4.3.tar.gz", hash = "sha256:e3e12ac1e87c5195fa59a1c3cd2d31b487a463c269089fb4020b7571cbb57b29"},
 ]
 
 [package.dependencies]
@@ -2866,18 +2866,15 @@ tests = ["pytest (>=9)", "typing-extensions (>=4.15)"]
 
 [[package]]
 name = "pgvector"
-version = "0.4.2"
+version = "0.5.0"
 description = "pgvector support for Python"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pgvector-0.4.2-py3-none-any.whl", hash = "sha256:549d45f7a18593783d5eec609ea1684a724ba8405c4cb182a0b2b08aeff04e08"},
-    {file = "pgvector-0.4.2.tar.gz", hash = "sha256:322cac0c1dc5d41c9ecf782bd9991b7966685dee3a00bc873631391ed949513a"},
+    {file = "pgvector-0.5.0-py3-none-any.whl", hash = "sha256:fedc9800894e6da2be51358d7b7c574bf34f247ca741a5a09513622135f5964f"},
+    {file = "pgvector-0.5.0.tar.gz", hash = "sha256:07a9dcf735696879406983afc6eba9a787cef7c0cf6c367ca1a5779f036dee74"},
 ]
-
-[package.dependencies]
-numpy = "*"
 
 [[package]]
 name = "pillow"
@@ -3018,14 +3015,14 @@ testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
 name = "poethepoet"
-version = "0.47.1"
+version = "0.48.0"
 description = "A task runner that works well with poetry and uv."
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "poethepoet-0.47.1-py3-none-any.whl", hash = "sha256:1738b9f6f1dc2c5d61b3e620aa4a2e7b8c20bccef815c8bfb312ebf87464d671"},
-    {file = "poethepoet-0.47.1.tar.gz", hash = "sha256:bb27f9fbba161c5be11878ad0a6f64ff29b8a68851d1861e4bd30255b753da2a"},
+    {file = "poethepoet-0.48.0-py3-none-any.whl", hash = "sha256:98da6096d060f49b8d84034770265863fb7dc92a40233b7694b9d216ac68737d"},
+    {file = "poethepoet-0.48.0.tar.gz", hash = "sha256:a06f49d244fadfc2e2e7faa78b54e64a9694727e4ce1d50e08f23cea3ded74f1"},
 ]
 
 [package.dependencies]
@@ -3037,14 +3034,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.21.3"
+version = "7.22.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.21.3-py3-none-any.whl", hash = "sha256:eb6ad7e1704c0797e9cbfe0518bfb40bc3a56e3f140fd565d2a1d854c9615710"},
-    {file = "posthog-7.21.3.tar.gz", hash = "sha256:2192497210bb1291587c51bdd6edc475043aebe03072d718431e710360fcd329"},
+    {file = "posthog-7.22.0-py3-none-any.whl", hash = "sha256:e3d63fd67f19ff8b5b375824baea096e5cc71b5fdf92a9241b42efe56f228dbd"},
+    {file = "posthog-7.22.0.tar.gz", hash = "sha256:b734c83eeb9d9a2fc9e2b8f4f02d13441f6a0baa0ac53e27758608e773d8a01f"},
 ]
 
 [package.dependencies]
@@ -3057,7 +3054,8 @@ typing-extensions = ">=4.2.0"
 dev = ["django-stubs", "griffe", "lxml", "mypy", "mypy-baseline", "packaging", "pre-commit", "pydantic (>=2.12.0)", "ruff", "setuptools", "tomli", "tomli_w", "twine", "types-requests", "types-setuptools", "wheel"]
 langchain = ["langchain (>=0.2.0)"]
 otel = ["opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)"]
-test = ["anthropic (>=0.72)", "claude-agent-sdk", "coverage", "django (>=5.2.8,<6.0)", "fastmcp (>=2.0)", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=1.0)", "langchain-community (>=0.4)", "langchain-core (>=1.0)", "langchain-openai (>=1.0)", "langgraph (>=1.0)", "langgraph-checkpoint (>=4.1.1)", "mcp (>=1.26.0)", "openai (>=2.0)", "opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)", "parameterized (>=0.8.1)", "pydantic (>=2.12.0)", "pytest", "pytest-asyncio", "pytest-bdd (>=8.1.0)", "pytest-timeout", "python-dateutil (>=2.9.0.post0)", "tiktoken (>=0.12.0)", "tzdata"]
+test = ["anthropic (>=0.72)", "claude-agent-sdk", "coverage", "django (>=5.2.8,<6.0)", "fastmcp (>=2.0)", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=1.0)", "langchain-community (>=0.4)", "langchain-core (>=1.0)", "langchain-openai (>=1.0)", "langgraph (>=1.0)", "langgraph-checkpoint (>=4.1.1)", "mcp (>=1.26.0)", "openai (>=2.0)", "opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)", "parameterized (>=0.8.1)", "pydantic (>=2.12.0)", "pytest", "pytest-asyncio", "pytest-bdd (>=8.1.0)", "pytest-timeout", "python-dateutil (>=2.9.0.post0)", "tiktoken (>=0.12.0)", "tzdata", "zstandard (>=0.23.0)"]
+zstd = ["zstandard (>=0.23.0)"]
 
 [[package]]
 name = "protobuf"
@@ -4459,14 +4457,14 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
 name = "uvicorn"
-version = "0.49.0"
+version = "0.50.2"
 description = "The lightning-fast ASGI server."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "uvicorn-0.49.0-py3-none-any.whl", hash = "sha256:ba3d14c3ee7e41c6c654c46c9eb489d33213cdd30aa1696eab1374337c13f68f"},
-    {file = "uvicorn-0.49.0.tar.gz", hash = "sha256:ebf4271aa580d9de97f93192d4595176df6e91f9aae919ca73e4fc07df1e66a3"},
+    {file = "uvicorn-0.50.2-py3-none-any.whl", hash = "sha256:4ae72a385630bcc17a0adb8290f26c993865e0b43a2114c2aab96420172c056a"},
+    {file = "uvicorn-0.50.2.tar.gz", hash = "sha256:b92bf03509b82bcb9d49e7335b4fd364518ad021c2dc18b4e6a2fec8c955a0bb"},
 ]
 
 [package.dependencies]
@@ -4474,7 +4472,7 @@ click = ">=7.0"
 h11 = ">=0.8"
 
 [package.extras]
-standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.8.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.15.1) ; sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\"", "watchfiles (>=0.20)", "websockets (>=10.4)"]
+standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.8.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.15.1) ; sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\"", "watchfiles (>=0.20)", "websockets (>=13.0)"]
 
 [[package]]
 name = "watchfiles"
@@ -4779,4 +4777,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "419336726b9ab3d2ef383d33d649bb449e5d071b0f53970236b13b3f00bbbb5f"
+content-hash = "5de709d5b50a405e80acfc2dbf0d92e62c79e23a202c608da5d095253fc78240"
