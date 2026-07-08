@@ -77,7 +77,7 @@ type AccessDurationProps = {
     accessDurations: AccessDuration[];
 };
 
-function AccessDurationSection({ abstractDataProductType, accessDurations }: AccessDurationProps) {
+function AccessDurationSection({ accessDurations }: AccessDurationProps) {
     const { t } = useTranslation();
     const defaultRow = accessDurations.find((r) => r.is_default);
     const [selected, setSelected] = useState<AccessDurationType>(
@@ -115,10 +115,7 @@ function AccessDurationSection({ abstractDataProductType, accessDurations }: Acc
     ];
 
     return (
-        <Flex vertical gap={'small'} style={{ marginLeft: 20 }}>
-            <Typography.Text type="secondary">
-                {t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
-            </Typography.Text>
+        <Flex vertical gap={'small'}>
             <Flex vertical gap={'small'}>
                 <Radio.Group
                     value={selected}
@@ -165,44 +162,56 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
 
     if (!enabled) {
         return (
-            <Alert
-                type="warning"
-                showIcon
-                title={t('Access duration enforcement is currently disabled by the administrator.')}
-            />
+            <Form.Item>
+                <Alert
+                    type="warning"
+                    showIcon
+                    title={t('Access duration enforcement is currently disabled by the administrator.')}
+                />
+            </Form.Item>
         );
     }
 
     return (
-        <Flex vertical gap={'small'}>
+        <>
             {mode === 'edit' && (
-                <Alert
-                    type="warning"
-                    showIcon
-                    title={
-                        <Flex vertical gap={'small'}>
-                            <Typography.Text>
-                                {t(
-                                    'Only future approved access requests will be affected by changes to the access duration policy.',
-                                )}
-                            </Typography.Text>
-                            <Typography.Text>
-                                {t(
-                                    'Currently active grants continue under their original terms and are not affected by policy changes.',
-                                )}
-                            </Typography.Text>
-                        </Flex>
-                    }
-                />
+                <Form.Item>
+                    <Alert
+                        type="warning"
+                        showIcon
+                        title={
+                            <Flex vertical gap={'small'}>
+                                <Typography.Text>
+                                    {t(
+                                        'Only future approved access requests will be affected by changes to the access duration policy.',
+                                    )}
+                                </Typography.Text>
+                                <Typography.Text>
+                                    {t(
+                                        'Currently active grants continue under their original terms and are not affected by policy changes.',
+                                    )}
+                                </Typography.Text>
+                            </Flex>
+                        }
+                    />
+                </Form.Item>
             )}
             {sections.map(({ abstractDataProductType, accessDurations }) => (
-                <AccessDurationSection
+                <Form.Item
                     key={abstractDataProductType}
-                    abstractDataProductType={abstractDataProductType}
-                    accessDurations={accessDurations}
-                />
+                    required
+                    label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
+                    tooltip={t(
+                        'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
+                    )}
+                >
+                    <AccessDurationSection
+                        abstractDataProductType={abstractDataProductType}
+                        accessDurations={accessDurations}
+                    />
+                </Form.Item>
             ))}
-        </Flex>
+        </>
     );
 }
 
@@ -550,15 +559,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             >
                 <Radio.Group options={accessTypeOptions} />
             </Form.Item>
-            <Form.Item
-                label={t('Access Duration')}
-                tooltip={t(
-                    'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
-                )}
-                required
-            >
-                <AccessDurationInfo mode={mode} />
-            </Form.Item>
+            <AccessDurationInfo mode={mode} />
             <Form.Item<CreateOutputPortRequest> name={'tag_ids'} label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
