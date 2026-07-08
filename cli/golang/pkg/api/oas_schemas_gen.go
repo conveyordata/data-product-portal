@@ -6268,13 +6268,14 @@ func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContract
 
 // Ref: #/components/schemas/InputPort
 type InputPort struct {
-	ID             uuid.UUID      `json:"id"`
-	Justification  string         `json:"justification"`
-	Status         DecisionStatus `json:"status"`
-	ExpiresOn      OptNilDateTime `json:"expires_on"`
-	OutputPortID   uuid.UUID      `json:"output_port_id"`
-	OutputPort     OutputPort     `json:"output_port"`
-	IsExpiringSoon bool           `json:"is_expiring_soon"`
+	ID                    uuid.UUID      `json:"id"`
+	Justification         string         `json:"justification"`
+	Status                DecisionStatus `json:"status"`
+	ExpiresOn             OptNilDateTime `json:"expires_on"`
+	RequestedDurationDays OptNilInt      `json:"requested_duration_days"`
+	OutputPortID          uuid.UUID      `json:"output_port_id"`
+	OutputPort            OutputPort     `json:"output_port"`
+	IsExpiringSoon        bool           `json:"is_expiring_soon"`
 }
 
 // GetID returns the value of ID.
@@ -6295,6 +6296,11 @@ func (s *InputPort) GetStatus() DecisionStatus {
 // GetExpiresOn returns the value of ExpiresOn.
 func (s *InputPort) GetExpiresOn() OptNilDateTime {
 	return s.ExpiresOn
+}
+
+// GetRequestedDurationDays returns the value of RequestedDurationDays.
+func (s *InputPort) GetRequestedDurationDays() OptNilInt {
+	return s.RequestedDurationDays
 }
 
 // GetOutputPortID returns the value of OutputPortID.
@@ -6330,6 +6336,11 @@ func (s *InputPort) SetStatus(val DecisionStatus) {
 // SetExpiresOn sets the value of ExpiresOn.
 func (s *InputPort) SetExpiresOn(val OptNilDateTime) {
 	s.ExpiresOn = val
+}
+
+// SetRequestedDurationDays sets the value of RequestedDurationDays.
+func (s *InputPort) SetRequestedDurationDays(val OptNilInt) {
+	s.RequestedDurationDays = val
 }
 
 // SetOutputPortID sets the value of OutputPortID.
@@ -9503,6 +9514,7 @@ type OutputPortInputPort struct {
 	Justification                  string                  `json:"justification"`
 	Status                         DecisionStatus          `json:"status"`
 	ExpiresOn                      OptNilDateTime          `json:"expires_on"`
+	RequestedDurationDays          OptNilInt               `json:"requested_duration_days"`
 	ConsumingAbstractDataProductID uuid.UUID               `json:"consuming_abstract_data_product_id"`
 	ConsumingAbstractDataProduct   AbstractDataProductInfo `json:"consuming_abstract_data_product"`
 	IsExpiringSoon                 bool                    `json:"is_expiring_soon"`
@@ -9526,6 +9538,11 @@ func (s *OutputPortInputPort) GetStatus() DecisionStatus {
 // GetExpiresOn returns the value of ExpiresOn.
 func (s *OutputPortInputPort) GetExpiresOn() OptNilDateTime {
 	return s.ExpiresOn
+}
+
+// GetRequestedDurationDays returns the value of RequestedDurationDays.
+func (s *OutputPortInputPort) GetRequestedDurationDays() OptNilInt {
+	return s.RequestedDurationDays
 }
 
 // GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
@@ -9561,6 +9578,11 @@ func (s *OutputPortInputPort) SetStatus(val DecisionStatus) {
 // SetExpiresOn sets the value of ExpiresOn.
 func (s *OutputPortInputPort) SetExpiresOn(val OptNilDateTime) {
 	s.ExpiresOn = val
+}
+
+// SetRequestedDurationDays sets the value of RequestedDurationDays.
+func (s *OutputPortInputPort) SetRequestedDurationDays(val OptNilInt) {
+	s.RequestedDurationDays = val
 }
 
 // SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.

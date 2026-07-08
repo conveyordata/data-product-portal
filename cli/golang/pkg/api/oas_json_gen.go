@@ -17313,6 +17313,12 @@ func (s *InputPort) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.RequestedDurationDays.Set {
+			e.FieldStart("requested_duration_days")
+			s.RequestedDurationDays.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("output_port_id")
 		json.EncodeUUID(e, s.OutputPortID)
 	}
@@ -17326,14 +17332,15 @@ func (s *InputPort) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfInputPort = [7]string{
+var jsonFieldsNameOfInputPort = [8]string{
 	0: "id",
 	1: "justification",
 	2: "status",
 	3: "expires_on",
-	4: "output_port_id",
-	5: "output_port",
-	6: "is_expiring_soon",
+	4: "requested_duration_days",
+	5: "output_port_id",
+	6: "output_port",
+	7: "is_expiring_soon",
 }
 
 // Decode decodes InputPort from json.
@@ -17389,8 +17396,18 @@ func (s *InputPort) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"expires_on\"")
 			}
+		case "requested_duration_days":
+			if err := func() error {
+				s.RequestedDurationDays.Reset()
+				if err := s.RequestedDurationDays.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"requested_duration_days\"")
+			}
 		case "output_port_id":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
 				s.OutputPortID = v
@@ -17402,7 +17419,7 @@ func (s *InputPort) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"output_port_id\"")
 			}
 		case "output_port":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.OutputPort.Decode(d); err != nil {
 					return err
@@ -17412,7 +17429,7 @@ func (s *InputPort) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"output_port\"")
 			}
 		case "is_expiring_soon":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsExpiringSoon = bool(v)
@@ -17433,7 +17450,7 @@ func (s *InputPort) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01110111,
+		0b11100111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -22291,6 +22308,12 @@ func (s *OutputPortInputPort) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.RequestedDurationDays.Set {
+			e.FieldStart("requested_duration_days")
+			s.RequestedDurationDays.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("consuming_abstract_data_product_id")
 		json.EncodeUUID(e, s.ConsumingAbstractDataProductID)
 	}
@@ -22304,14 +22327,15 @@ func (s *OutputPortInputPort) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOutputPortInputPort = [7]string{
+var jsonFieldsNameOfOutputPortInputPort = [8]string{
 	0: "id",
 	1: "justification",
 	2: "status",
 	3: "expires_on",
-	4: "consuming_abstract_data_product_id",
-	5: "consuming_abstract_data_product",
-	6: "is_expiring_soon",
+	4: "requested_duration_days",
+	5: "consuming_abstract_data_product_id",
+	6: "consuming_abstract_data_product",
+	7: "is_expiring_soon",
 }
 
 // Decode decodes OutputPortInputPort from json.
@@ -22367,8 +22391,18 @@ func (s *OutputPortInputPort) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"expires_on\"")
 			}
+		case "requested_duration_days":
+			if err := func() error {
+				s.RequestedDurationDays.Reset()
+				if err := s.RequestedDurationDays.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"requested_duration_days\"")
+			}
 		case "consuming_abstract_data_product_id":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
 				s.ConsumingAbstractDataProductID = v
@@ -22380,7 +22414,7 @@ func (s *OutputPortInputPort) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"consuming_abstract_data_product_id\"")
 			}
 		case "consuming_abstract_data_product":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.ConsumingAbstractDataProduct.Decode(d); err != nil {
 					return err
@@ -22390,7 +22424,7 @@ func (s *OutputPortInputPort) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"consuming_abstract_data_product\"")
 			}
 		case "is_expiring_soon":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsExpiringSoon = bool(v)
@@ -22411,7 +22445,7 @@ func (s *OutputPortInputPort) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01110111,
+		0b11100111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

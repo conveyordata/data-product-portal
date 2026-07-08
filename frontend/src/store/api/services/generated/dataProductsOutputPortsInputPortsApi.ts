@@ -97,6 +97,7 @@ export type OutputPortInputPort = {
   justification: string;
   status: DecisionStatus;
   expires_on?: string | null;
+  requested_duration_days?: number | null;
   consuming_abstract_data_product_id: string;
   consuming_abstract_data_product: AbstractDataProductInfo;
   is_expiring_soon: boolean;

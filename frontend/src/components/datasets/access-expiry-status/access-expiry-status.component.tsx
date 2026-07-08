@@ -8,13 +8,20 @@ type Props = {
     expiresOn?: string | null;
     isExpiringSoon: boolean;
     status: DecisionStatus;
+    requestedDurationDays?: number | null;
 };
 
-export default function AccessExpiryStatus({ expiresOn, isExpiringSoon, status }: Props) {
+export default function AccessExpiryStatus({ expiresOn, isExpiringSoon, status, requestedDurationDays }: Props) {
     const { t } = useTranslation();
     return (
         <Flex gap="small" align="center">
-            <Typography.Text>{expiresOn ? formatDateFromISOString(expiresOn) : t('Never')}</Typography.Text>
+            <Typography.Text>
+                {expiresOn
+                    ? formatDateFromISOString(expiresOn)
+                    : requestedDurationDays
+                      ? t('Requested {{count}} days', { count: requestedDurationDays })
+                      : t('Never')}
+            </Typography.Text>
             {isExpiringSoon && status !== DecisionStatus.Expired && (
                 <Tag color="warning" icon={<ClockCircleOutlined />} style={{ width: 'fit-content' }}>
                     {t('Expiring soon')}

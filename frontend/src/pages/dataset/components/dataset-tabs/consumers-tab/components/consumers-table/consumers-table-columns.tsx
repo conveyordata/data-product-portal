@@ -135,8 +135,13 @@ export const getConsumerColumns = ({
         {
             title: t('Access Expires'),
             dataIndex: 'expires_on',
-            render: (_, { expires_on, is_expiring_soon, status }) => (
-                <AccessExpiryStatus expiresOn={expires_on} isExpiringSoon={is_expiring_soon} status={status} />
+            render: (_, { expires_on, is_expiring_soon, status, requested_duration_days }) => (
+                <AccessExpiryStatus
+                    requestedDurationDays={requested_duration_days}
+                    expiresOn={expires_on}
+                    isExpiringSoon={is_expiring_soon}
+                    status={status}
+                />
             ),
         },
         {
@@ -151,6 +156,7 @@ export const getConsumerColumns = ({
                     consuming_abstract_data_product: consuming_data_product,
                     consuming_abstract_data_product_id: consuming_data_product_id,
                     status,
+                    requested_duration_days,
                 },
             ) => {
                 if (status === DecisionStatus.Pending) {
@@ -260,23 +266,56 @@ export const getConsumerColumns = ({
 
                 if (status === DecisionStatus.Expired) {
                     return (
-                        <Button
-                            type={'link'}
-                            onClick={() =>
-                                onRenewDataProductDatasetLink(
+                        <Flex>
+                            <Popconfirm
+                                title={t('Allow Data Product Access')}
+                                description={t(
+                                    'Are you sure you want to re-approve access to Data Product {{name}} for {{ count }} days?',
                                     {
-                                        dataProductId,
-                                        outputPortId,
-                                        renewOutputPortAsInputPortRequest: {
-                                            consuming_data_product_id: consuming_data_product_id,
-                                        },
+                                        name: consuming_data_product.name,
+                                        count: requested_duration_days,
                                     },
-                                    consuming_data_product.name,
-                                )
-                            }
-                        >
-                            {t('Re-approve')}
-                        </Button>
+                                )}
+                                onConfirm={() =>
+                                    onRenewDataProductDatasetLink(
+                                        {
+                                            dataProductId,
+                                            outputPortId,
+                                            renewOutputPortAsInputPortRequest: {
+                                                consuming_data_product_id: consuming_data_product_id,
+                                            },
+                                        },
+                                        consuming_data_product.name,
+                                    )
+                                }
+                                placement={'leftTop'}
+                                okText={t('Confirm')}
+                                cancelText={t('Cancel')}
+                                okButtonProps={{ loading: isLoading }}
+                                autoAdjustOverflow={true}
+                            >
+                                <Button type={'link'} loading={isLoading} disabled={isLoading || !canApprove}>
+                                    {t('Re-approve')}
+                                </Button>
+                            </Popconfirm>
+                            <Button
+                                type={'link'}
+                                onClick={() =>
+                                    onRemoveDataProductDatasetLink(
+                                        {
+                                            dataProductId,
+                                            outputPortId,
+                                            removeOutputPortAsInputPortRequest: {
+                                                consuming_data_product_id: consuming_data_product_id,
+                                            },
+                                        },
+                                        consuming_data_product.name,
+                                    )
+                                }
+                            >
+                                {t('Remove')}
+                            </Button>
+                        </Flex>
                     );
                 }
             },

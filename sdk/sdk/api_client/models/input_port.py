@@ -29,6 +29,7 @@ class InputPort:
         output_port (OutputPort):
         is_expiring_soon (bool):
         expires_on (datetime.datetime | None | Unset):
+        requested_duration_days (int | None | Unset):
     """
 
     id: UUID
@@ -38,6 +39,7 @@ class InputPort:
     output_port: OutputPort
     is_expiring_soon: bool
     expires_on: datetime.datetime | None | Unset = UNSET
+    requested_duration_days: int | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -61,6 +63,12 @@ class InputPort:
         else:
             expires_on = self.expires_on
 
+        requested_duration_days: int | None | Unset
+        if isinstance(self.requested_duration_days, Unset):
+            requested_duration_days = UNSET
+        else:
+            requested_duration_days = self.requested_duration_days
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -75,6 +83,8 @@ class InputPort:
         )
         if expires_on is not UNSET:
             field_dict["expires_on"] = expires_on
+        if requested_duration_days is not UNSET:
+            field_dict["requested_duration_days"] = requested_duration_days
 
         return field_dict
 
@@ -112,6 +122,17 @@ class InputPort:
 
         expires_on = _parse_expires_on(d.pop("expires_on", UNSET))
 
+        def _parse_requested_duration_days(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        requested_duration_days = _parse_requested_duration_days(
+            d.pop("requested_duration_days", UNSET)
+        )
+
         input_port = cls(
             id=id,
             justification=justification,
@@ -120,6 +141,7 @@ class InputPort:
             output_port=output_port,
             is_expiring_soon=is_expiring_soon,
             expires_on=expires_on,
+            requested_duration_days=requested_duration_days,
         )
 
         input_port.additional_properties = d

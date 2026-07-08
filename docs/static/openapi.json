@@ -12226,6 +12226,17 @@
             ],
             "title": "Expires On"
           },
+          "requested_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Duration Days"
+          },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
@@ -13047,6 +13058,17 @@
               }
             ],
             "title": "Expires On"
+          },
+          "requested_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Duration Days"
           },
           "consuming_abstract_data_product_id": {
             "type": "string",

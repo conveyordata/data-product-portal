@@ -14,6 +14,7 @@ class InputPortBase(ORMModel):
     justification: str
     status: DecisionStatus
     expires_on: Optional[datetime] = None
+    requested_duration_days: Optional[int] = None
 
     @computed_field
     def is_expiring_soon(self) -> bool:

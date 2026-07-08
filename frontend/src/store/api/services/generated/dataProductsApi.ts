@@ -436,6 +436,7 @@ export type InputPort = {
   justification: string;
   status: DecisionStatus;
   expires_on?: string | null;
+  requested_duration_days?: number | null;
   output_port_id: string;
   output_port: OutputPort;
   is_expiring_soon: boolean;
