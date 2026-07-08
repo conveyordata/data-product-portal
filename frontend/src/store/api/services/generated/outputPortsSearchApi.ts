@@ -49,6 +49,8 @@ export type SearchOutputPortsResponseItem = {
   status: OutputPortStatus;
   usage: string | null;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   data_product_id: string;
   tags: Tag[];
   domain: Domain;
@@ -81,6 +83,10 @@ export enum OutputPortAccessType {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
 }
 export enum DataQualityStatus {
   Success = "success",

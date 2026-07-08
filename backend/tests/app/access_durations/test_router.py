@@ -4,7 +4,8 @@ from pydantic import ValidationError
 from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.enums import AccessDurationType
 from app.access_durations.schema_request import AccessDurationUpdate
-from tests.factories import AccessDurationFactory
+from tests import test_session
+from tests.factories import AccessDurationFactory, DatasetFactory
 
 ENDPOINT = "/api/v2/access_durations"
 
@@ -237,3 +238,67 @@ class TestAccessDurationsRouter:
         data = response.json()
         assert "enabled" in data
         assert isinstance(data["enabled"], bool)
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_cascades_dropped_type_to_data_product_output_ports(self, client):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=True,
+        )
+        ds = DatasetFactory(
+            data_product_access_duration_type=AccessDurationType.TIME_BOUND,
+            exploration_access_duration_type=AccessDurationType.PERMANENT,
+        )
+
+        response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
+
+        assert response.status_code == 200
+        test_session.refresh(ds)
+        assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
+        assert ds.exploration_access_duration_type == AccessDurationType.PERMANENT
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_leaves_output_ports_on_still_allowed_type(self, client):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.PERMANENT,
+            is_default=True,
+        )
+        ds = DatasetFactory(
+            data_product_access_duration_type=AccessDurationType.PERMANENT,
+            exploration_access_duration_type=AccessDurationType.PERMANENT,
+        )
+
+        payload = {
+            "access_duration_type": "time_bound",
+            "days": 30,
+            "alternative_allowed": True,
+            "alternative_days": None,
+        }
+        response = client.put(f"{ENDPOINT}/data_products", json=payload)
+
+        assert response.status_code == 200
+        test_session.refresh(ds)
+        assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_only_cascades_matching_abstract_type(self, client):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=True,
+        )
+        ds = DatasetFactory(
+            data_product_access_duration_type=AccessDurationType.PERMANENT,
+            exploration_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+
+        response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
+
+        assert response.status_code == 200
+        test_session.refresh(ds)
+        assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
+        assert ds.exploration_access_duration_type == AccessDurationType.TIME_BOUND

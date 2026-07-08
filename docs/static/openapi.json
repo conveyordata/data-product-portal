@@ -8608,6 +8608,12 @@
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
           },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
           "about": {
             "anyOf": [
               {
@@ -8655,6 +8661,8 @@
           "namespace",
           "description",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "tag_ids",
           "owners"
         ],
@@ -10159,6 +10167,12 @@
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
           },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
           "about": {
             "anyOf": [
               {
@@ -10197,6 +10211,8 @@
           "namespace",
           "description",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "tag_ids"
         ],
         "title": "DatasetUpdate"
@@ -11484,6 +11500,12 @@
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
           },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
           "data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -11552,6 +11574,8 @@
           "status",
           "usage",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "data_product_id",
           "tags",
           "domain",
@@ -14399,6 +14423,12 @@
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
           },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
           "data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -14456,6 +14486,8 @@
           "status",
           "usage",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "data_product_id",
           "tags",
           "domain",

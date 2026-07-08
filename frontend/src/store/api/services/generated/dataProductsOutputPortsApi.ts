@@ -485,6 +485,8 @@ export type CreateOutputPortRequest = {
   namespace: string;
   description: string;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   about?: string | null;
   lifecycle_id?: string | null;
   tag_ids: string[];
@@ -635,6 +637,8 @@ export type GetOutputPortResponse = {
   status: OutputPortStatus;
   usage: string | null;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   data_product_id: string;
   tags: Tag[];
   domain: Domain;
@@ -652,6 +656,8 @@ export type DatasetUpdate = {
   namespace: string;
   description: string;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   about?: string | null;
   lifecycle_id?: string | null;
   tag_ids: string[];
@@ -755,6 +761,10 @@ export enum OutputPortAccessType {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
 }
 export enum DataProductSettingType {
   Checkbox = "checkbox",

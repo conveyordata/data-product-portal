@@ -1,6 +1,7 @@
 import factory
 from faker import Faker
 
+from app.access_durations.enums import AccessDurationType
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.status import OutputPortStatus
@@ -25,6 +26,8 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     access_type = OutputPortAccessType.UNRESTRICTED.value
     usage = factory.Faker("word")
     data_product = factory.SubFactory(DataProductFactory)
+    data_product_access_duration_type = AccessDurationType.PERMANENT.value
+    exploration_access_duration_type = AccessDurationType.PERMANENT.value
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):

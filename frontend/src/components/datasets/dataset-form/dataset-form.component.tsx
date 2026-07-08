@@ -72,17 +72,26 @@ const PRODUCT_TYPE_LABELS: Record<string, string> = {
     [AbstractDataProductType.Explorations]: 'Explorations',
 };
 
-type AccessDurationProps = {
-    abstractDataProductType: AbstractDataProductType;
-    accessDurations: AccessDuration[];
+const FIELD_NAMES: Partial<
+    Record<AbstractDataProductType, 'data_product_access_duration_type' | 'exploration_access_duration_type'>
+> = {
+    [AbstractDataProductType.DataProducts]: 'data_product_access_duration_type',
+    [AbstractDataProductType.Explorations]: 'exploration_access_duration_type',
 };
 
-function AccessDurationSection({ accessDurations }: AccessDurationProps) {
+function AccessDurationSection({
+    abstractDataProductType,
+    accessDurations,
+    value,
+    onChange,
+}: {
+    abstractDataProductType: AbstractDataProductType;
+    accessDurations: AccessDuration[];
+    value?: AccessDurationType;
+    onChange?: (value: AccessDurationType) => void;
+}) {
     const { t } = useTranslation();
-    const defaultRow = accessDurations.find((r) => r.is_default);
-    const [selected, setSelected] = useState<AccessDurationType>(
-        defaultRow?.access_duration_type ?? AccessDurationType.Permanent,
-    );
+    const selected = value ?? AccessDurationType.Permanent;
 
     const hasTimeBound = accessDurations.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
     const hasPermanent = accessDurations.some((r) => r.access_duration_type === AccessDurationType.Permanent);
@@ -119,9 +128,11 @@ function AccessDurationSection({ accessDurations }: AccessDurationProps) {
             <Flex vertical gap={'small'}>
                 <Radio.Group
                     value={selected}
-                    onChange={canToggle ? (e) => setSelected(e.target.value) : undefined}
                     options={options}
                     optionType="button"
+                    disabled={!canToggle}
+                    onChange={(e) => onChange?.(e.target.value)}
+                    key={`${abstractDataProductType}-access-duration`}
                 />
                 {selected === AccessDurationType.TimeBound && timeBoundDays != null && (
                     <Alert
@@ -154,10 +165,17 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
     const productTypes = [AbstractDataProductType.DataProducts, AbstractDataProductType.Explorations] as const;
 
     const sections = productTypes
-        .map((type) => ({
-            abstractDataProductType: type,
-            accessDurations: allDurations.filter((d) => d.abstract_data_product_type === type),
-        }))
+        .map((abstractDataProductType) => {
+            const accessDurations = allDurations.filter(
+                (d) => d.abstract_data_product_type === abstractDataProductType,
+            );
+            const defaultRow = accessDurations.find((r) => r.is_default);
+            return {
+                abstractDataProductType,
+                accessDurations,
+                initialValue: defaultRow?.access_duration_type ?? AccessDurationType.Permanent,
+            };
+        })
         .filter(({ accessDurations }) => accessDurations.length > 0);
 
     if (!enabled) {
@@ -196,9 +214,11 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                     />
                 </Form.Item>
             )}
-            {sections.map(({ abstractDataProductType, accessDurations }) => (
+            {sections.map(({ abstractDataProductType, accessDurations, initialValue }) => (
                 <Form.Item
                     key={abstractDataProductType}
+                    name={FIELD_NAMES[abstractDataProductType as keyof typeof FIELD_NAMES]}
+                    initialValue={initialValue}
                     required
                     label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
                     tooltip={t(
@@ -335,6 +355,8 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     tag_ids: values.tag_ids ?? [],
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
+                    data_product_access_duration_type: values.data_product_access_duration_type,
+                    exploration_access_duration_type: values.exploration_access_duration_type,
                 };
                 const response = await createDataset({
                     dataProductId: dataProduct.id,
@@ -373,6 +395,8 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     tag_ids: values.tag_ids,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
+                    data_product_access_duration_type: values.data_product_access_duration_type,
+                    exploration_access_duration_type: values.exploration_access_duration_type,
                 };
 
                 const response = await updateDataset({
@@ -465,6 +489,8 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         lifecycle_id: currentDataset?.lifecycle?.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,
+        data_product_access_duration_type: currentDataset?.data_product_access_duration_type,
+        exploration_access_duration_type: currentDataset?.exploration_access_duration_type,
     };
 
     return (
@@ -572,7 +598,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             <Form.Item<CreateOutputPortRequest>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for your Output Port')}
+                tooltip={t('A description for the Output Port')}
                 rules={[
                     {
                         required: true,
