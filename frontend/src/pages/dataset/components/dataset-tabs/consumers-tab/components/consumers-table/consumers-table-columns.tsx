@@ -157,6 +157,7 @@ export const getConsumerColumns = ({
                     consuming_abstract_data_product_id: consuming_data_product_id,
                     status,
                     requested_duration_days,
+                    is_expiring_soon,
                 },
             ) => {
                 if (status === DecisionStatus.Pending) {
@@ -214,31 +215,70 @@ export const getConsumerColumns = ({
                     );
                 }
                 if (status === DecisionStatus.Approved) {
-                    return (
-                        <Popconfirm
-                            title={t('Revoke Data Product Access')}
-                            description={t('Are you sure you want to revoke access from Data Product {{name}}?', {
-                                name: consuming_data_product.name,
-                            })}
-                            onConfirm={() =>
-                                onRejectDataProductDatasetLink({
-                                    outputPortId,
-                                    dataProductId,
-                                    denyOutputPortAsInputPortRequest: {
-                                        consuming_data_product_id: consuming_data_product_id,
+                    let button = null;
+                    if (is_expiring_soon) {
+                        button = (
+                            <Popconfirm
+                                title={t('Extend Data Product Access')}
+                                description={t(
+                                    'Are you sure you want to extend access for Data Product {{name}} with {{ count }} days?',
+                                    {
+                                        name: consuming_data_product.name,
+                                        count: requested_duration_days,
                                     },
-                                })
-                            }
-                            placement={'leftTop'}
-                            okText={t('Confirm')}
-                            cancelText={t('Cancel')}
-                            okButtonProps={{ loading: isLoading }}
-                            autoAdjustOverflow={true}
-                        >
-                            <Button loading={isLoading} disabled={isLoading || !canRevoke} type={'link'}>
-                                {t('Revoke Access')}
-                            </Button>
-                        </Popconfirm>
+                                )}
+                                onConfirm={() =>
+                                    onRenewDataProductDatasetLink(
+                                        {
+                                            dataProductId,
+                                            outputPortId,
+                                            renewOutputPortAsInputPortRequest: {
+                                                consuming_data_product_id: consuming_data_product_id,
+                                            },
+                                        },
+                                        consuming_data_product.name,
+                                    )
+                                }
+                                placement={'leftTop'}
+                                okText={t('Confirm')}
+                                cancelText={t('Cancel')}
+                                okButtonProps={{ loading: isLoading }}
+                                autoAdjustOverflow={true}
+                            >
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
+                                    {t('Extend')}
+                                </Button>
+                            </Popconfirm>
+                        );
+                    }
+                    return (
+                        <Flex>
+                            {button}
+                            <Popconfirm
+                                title={t('Revoke Data Product Access')}
+                                description={t('Are you sure you want to revoke access from Data Product {{name}}?', {
+                                    name: consuming_data_product.name,
+                                })}
+                                onConfirm={() =>
+                                    onRejectDataProductDatasetLink({
+                                        outputPortId,
+                                        dataProductId,
+                                        denyOutputPortAsInputPortRequest: {
+                                            consuming_data_product_id: consuming_data_product_id,
+                                        },
+                                    })
+                                }
+                                placement={'leftTop'}
+                                okText={t('Confirm')}
+                                cancelText={t('Cancel')}
+                                okButtonProps={{ loading: isLoading }}
+                                autoAdjustOverflow={true}
+                            >
+                                <Button loading={isLoading} disabled={isLoading || !canRevoke} type={'link'}>
+                                    {t('Revoke Access')}
+                                </Button>
+                            </Popconfirm>
+                        </Flex>
                     );
                 }
 
@@ -295,7 +335,7 @@ export const getConsumerColumns = ({
                                 autoAdjustOverflow={true}
                             >
                                 <Button type={'link'} loading={isLoading} disabled={isLoading || !canApprove}>
-                                    {t('Re-approve')}
+                                    {t('Extend')}
                                 </Button>
                             </Popconfirm>
                             <Button
