@@ -124,8 +124,8 @@ function AccessDurationSection({
     ];
 
     return (
-        <Flex vertical gap={8}>
-            <Flex vertical gap={12}>
+        <Flex vertical gap={'small'}>
+            <Flex vertical gap={'small'}>
                 <Form.Item
                     name={fieldName}
                     noStyle
@@ -143,7 +143,7 @@ function AccessDurationSection({
                         type="info"
                         showIcon={false}
                         title={
-                            <Flex vertical gap={4}>
+                            <Flex vertical gap={'small'}>
                                 <Typography.Text strong>{t('{{days}} days', { days: timeBoundDays })}</Typography.Text>
                                 <Typography.Text type="secondary">
                                     {t('Admin-configured duration policy.')}
@@ -195,7 +195,7 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                         type="warning"
                         showIcon
                         title={
-                            <Flex vertical gap={4}>
+                            <Flex vertical gap={'small'}>
                                 <Typography.Text>
                                     {t(
                                         'Only future approved access requests will be affected by changes to the access duration policy.',
