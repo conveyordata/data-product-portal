@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime, timedelta
-from typing import Sequence
+from typing import Optional, Sequence
 
 import pytz
 from fastapi import BackgroundTasks, HTTPException
@@ -82,15 +82,7 @@ class AbstractDataProductService:
         self._ensure_not_deleting(adp)
         # Block if the output port's owning data product is being deleted
         self._ensure_not_deleting(output_port.data_product)
-        if output_port.id in [
-            link.dataset_id
-            for link in adp.input_ports
-            if link.status != DecisionStatus.DENIED
-        ]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Input port connection to Output Port ({output_port_id}) already exists in {adp.abstract_data_product_type} {adp.id}",
-            )
+        renewal_link = self._renewal_link(adp, output_port)
         if output_port.data_product_id == adp.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -152,23 +144,55 @@ class AbstractDataProductService:
                 # "total_range_end": output_port.total_range_end,
             }
             if approval_status == DecisionStatus.APPROVED:
-                time_bound["expires_on"] = datetime.now(tz=pytz.utc) + timedelta(
+                now = datetime.now(tz=pytz.utc)
+                time_bound["expires_on"] = now + timedelta(
                     days=access_duration_setting[0].days
                 )
-                time_bound["total_range_start"] = datetime.now(tz=pytz.utc)
+                if not renewal_link:
+                    time_bound["total_range_start"] = datetime.now(tz=pytz.utc)
+                else:
+                    time_bound["renewed_by"] = actor
+                    time_bound["renewed_on"] = now
                 time_bound["total_range_end"] = time_bound["expires_on"]
+        if not renewal_link:
+            input_port = InputPortModel(
+                dataset_id=output_port_id,
+                status=approval_status,
+                justification=justification,
+                requested_by=actor,
+                requested_on=datetime.now(tz=pytz.utc),
+                consuming_abstract_data_product_id=adp.id,
+                **time_bound,
+            )
+            adp.input_ports.append(input_port)
+            return input_port
+        else:
+            if renewal_link.status == DecisionStatus.EXPIRED:
+                renewal_link.status = approval_status
 
-        input_port = InputPortModel(
-            dataset_id=output_port_id,
-            status=approval_status,
-            justification=justification,
-            requested_by=actor,
-            requested_on=datetime.now(tz=pytz.utc),
-            consuming_abstract_data_product_id=adp.id,
-            **time_bound,
-        )
-        adp.input_ports.append(input_port)
-        return input_port
+            renewal_link.is_renewing = True
+            if approval_status == DecisionStatus.APPROVED:
+                renewal_link.expires_on = time_bound["expires_on"]
+                renewal_link.renewed_by = actor
+                renewal_link.renewed_on = datetime.now(tz=pytz.utc)
+                renewal_link.total_range_end = time_bound["expires_on"]
+            return renewal_link
+
+    def _renewal_link(
+        self, adp: AbstractDataProduct, output_port: OutputPortModel
+    ) -> Optional[InputPortModel]:
+        for link in adp.input_ports:
+            if output_port.id == link.dataset_id:
+                if link.status == DecisionStatus.DENIED:
+                    continue
+                elif link.status == DecisionStatus.EXPIRED or link.is_expiring_soon:
+                    return link
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Input port connection to Output Port ({output_port.id}) already exists in {adp.abstract_data_product_type} {adp.id}",
+                    )
+        return None
 
     def request_input_ports(
         self,

@@ -3,7 +3,10 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { InputPortTable } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-table.component.tsx';
-import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import type {
+    InputPort,
+    RequestInputPortsForDataProductApiArg,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 type Props = {
@@ -12,6 +15,8 @@ type Props = {
     loadingInputPorts: boolean;
     handleRemove: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
+    handleRenewalRequest: (request: RequestInputPortsForDataProductApiArg) => Promise<void>;
+    abstractDataProductId: string;
 };
 
 function filterInputPorts(input_ports: InputPort[], searchTerm: string) {
@@ -30,6 +35,8 @@ export function InputPortTab({
     canRequestAccess,
     handleRemove,
     canRemoveAccess,
+    handleRenewalRequest,
+    abstractDataProductId,
 }: Props) {
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -56,6 +63,8 @@ export function InputPortTab({
                 inputPorts={filteredDatasets}
                 handleRemove={handleRemove}
                 canRemoveAccess={canRemoveAccess}
+                handleRenewalRequest={handleRenewalRequest}
+                abstractDataProductId={abstractDataProductId}
             />
         </Flex>
     );

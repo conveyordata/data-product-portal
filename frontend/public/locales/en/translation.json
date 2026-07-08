@@ -558,6 +558,7 @@
     "Renewed Data Product {{name}} as Input Port": "Renewed Data Product {{name}} as Input Port",
     "Request Details": "Request Details",
     "Request Output Port access": "Request Output Port access",
+    "Request Renewal": "Request Renewal",
     "Request Role": "Request Role",
     "Request to link Output Port {{name}} has been cancelled": "Request to link $t(Output Port) {{name}} has been cancelled",
     "Requested": "Requested",

@@ -2,7 +2,9 @@ import { useCallback } from 'react';
 import { InputPortTab } from '@/components/abstract-data-products/input-port-tab/input-port-tab.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
+    type RequestInputPortsForDataProductApiArg,
     useGetDataProductInputPortsQuery,
+    useRequestInputPortsForDataProductMutation,
     useUnlinkInputPortFromDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -37,6 +39,15 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
         [removeDatasetFromDataProduct, dataProductId],
     );
 
+    const [requestInputPortsForDataProduct] = useRequestInputPortsForDataProductMutation();
+
+    const handleRenewalRequest = useCallback(
+        async (request: RequestInputPortsForDataProductApiArg) => {
+            await requestInputPortsForDataProduct(request).unwrap();
+        },
+        [requestInputPortsForDataProduct],
+    );
+
     return (
         <InputPortTab
             loadingInputPorts={loadingInputPorts}
@@ -44,6 +55,8 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
             canRemoveAccess={canRevokeAccess?.allowed ?? false}
             inputPorts={inputPorts}
             handleRemove={handleRemove}
+            handleRenewalRequest={handleRenewalRequest}
+            abstractDataProductId={dataProductId}
         />
     );
 };

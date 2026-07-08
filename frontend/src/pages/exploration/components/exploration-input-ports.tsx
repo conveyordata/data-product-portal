@@ -3,6 +3,10 @@ import { useSelector } from 'react-redux';
 import { InputPortTab } from '@/components/abstract-data-products/input-port-tab/input-port-tab.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
+    type RequestInputPortsForDataProductApiArg,
+    useRequestInputPortsForDataProductMutation,
+} from '@/store/api/services/generated/dataProductsApi.ts';
+import {
     useGetExplorationInputPortsQuery,
     useGetExplorationQuery,
     useRemoveInputPortFromExplorationMutation,
@@ -18,6 +22,16 @@ export const ExplorationInputPorts = ({ explorationId }: Props) => {
     const { data: exploration } = useGetExplorationQuery(explorationId);
 
     const [removeInputPortFromExploration] = useRemoveInputPortFromExplorationMutation();
+
+    const [requestInputPortsForDataProduct] = useRequestInputPortsForDataProductMutation();
+
+    const handleRenewalRequest = useCallback(
+        async (request: RequestInputPortsForDataProductApiArg) => {
+            await requestInputPortsForDataProduct(request).unwrap();
+        },
+        [requestInputPortsForDataProduct],
+    );
+
     const handleRemove = useCallback(
         async (outputPortId: string) => {
             await removeInputPortFromExploration({ outputPortId, id: explorationId }).unwrap();
@@ -38,6 +52,8 @@ export const ExplorationInputPorts = ({ explorationId }: Props) => {
             canRemoveAccess={isOwner}
             inputPorts={inputPorts}
             handleRemove={handleRemove}
+            handleRenewalRequest={handleRenewalRequest}
+            abstractDataProductId={explorationId}
         />
     );
 };

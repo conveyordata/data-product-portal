@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     UUID,
+    Boolean,
     Column,
     DateTime,
     Enum,
@@ -46,6 +47,7 @@ class InputPort(
     denied_on = Column(DateTime(timezone=False))
     renewed_on = Column(DateTime(timezone=False))
     expired_on = Column(DateTime(timezone=False))
+    is_renewing = Column(Boolean, nullable=False, default=False)
 
     requested_duration_days = Column(Integer, nullable=True)
     expires_on = Column(DateTime(timezone=False))

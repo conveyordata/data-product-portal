@@ -23,6 +23,10 @@ def upgrade() -> None:
         "input_ports",
         sa.Column("renewed_by_id", sa.UUID(), nullable=True),
     )
+    op.add_column(
+        "input_ports",
+        sa.Column("is_renewing", sa.Boolean(), nullable=False, default=False),
+    )
     op.create_foreign_key(
         "fk_input_ports_renewed_by_id_users",
         "input_ports",

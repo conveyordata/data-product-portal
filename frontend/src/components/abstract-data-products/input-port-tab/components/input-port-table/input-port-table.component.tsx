@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import type {
+    InputPort,
+    RequestInputPortsForDataProductApiArg,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import styles from './input-port-table.module.scss';
 import { getDataProductDatasetsColumns } from './input-port-table-columns.tsx';
 
@@ -13,8 +16,17 @@ type Props = {
     handleRemove: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
     loadingInputPorts: boolean;
+    handleRenewalRequest: (request: RequestInputPortsForDataProductApiArg) => Promise<void>;
+    abstractDataProductId: string;
 };
-export function InputPortTable({ canRemoveAccess, handleRemove, inputPorts, loadingInputPorts }: Props) {
+export function InputPortTable({
+    canRemoveAccess,
+    handleRemove,
+    inputPorts,
+    loadingInputPorts,
+    handleRenewalRequest,
+    abstractDataProductId,
+}: Props) {
     const { t } = useTranslation();
 
     const { pagination, handlePaginationChange } = useTablePagination(inputPorts, {
@@ -31,8 +43,10 @@ export function InputPortTable({ canRemoveAccess, handleRemove, inputPorts, load
             canRemoveAccess: canRemoveAccess,
             handleRemove,
             inputPorts: inputPorts,
+            handleRenewalRequest,
+            abstractDataProductId,
         });
-    }, [t, inputPorts, canRemoveAccess, handleRemove]);
+    }, [t, inputPorts, canRemoveAccess, handleRemove, handleRenewalRequest, abstractDataProductId]);
 
     return (
         <Table<InputPort>
