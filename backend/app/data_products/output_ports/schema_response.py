@@ -26,7 +26,7 @@ class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
 
 
 class OutputPortAccessDuration(ORMModel):
-    is_permanent: bool
+    access_duration_type: AccessDurationType
     days: int
 
 

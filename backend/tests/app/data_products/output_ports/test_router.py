@@ -916,11 +916,11 @@ class TestOutputPortRouter:
         assert response.status_code == 200, response.text
         body = response.json()
         assert body["data_product_access_duration"] == {
-            "is_permanent": True,
+            "access_duration_type": "permanent",
             "days": -1,
         }
         assert body["exploration_access_duration"] == {
-            "is_permanent": True,
+            "access_duration_type": "permanent",
             "days": -1,
         }
 
@@ -946,11 +946,11 @@ class TestOutputPortRouter:
         assert response.status_code == 200, response.text
         body = response.json()
         assert body["data_product_access_duration"] == {
-            "is_permanent": False,
+            "access_duration_type": "time_bound",
             "days": 30,
         }
         assert body["exploration_access_duration"] == {
-            "is_permanent": False,
+            "access_duration_type": "time_bound",
             "days": 14,
         }
 

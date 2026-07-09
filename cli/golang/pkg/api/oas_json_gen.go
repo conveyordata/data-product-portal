@@ -21026,8 +21026,8 @@ func (s *OutputPortAccessDuration) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *OutputPortAccessDuration) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("is_permanent")
-		e.Bool(s.IsPermanent)
+		e.FieldStart("access_duration_type")
+		s.AccessDurationType.Encode(e)
 	}
 	{
 		e.FieldStart("days")
@@ -21036,7 +21036,7 @@ func (s *OutputPortAccessDuration) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfOutputPortAccessDuration = [2]string{
-	0: "is_permanent",
+	0: "access_duration_type",
 	1: "days",
 }
 
@@ -21049,17 +21049,15 @@ func (s *OutputPortAccessDuration) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "is_permanent":
+		case "access_duration_type":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Bool()
-				s.IsPermanent = bool(v)
-				if err != nil {
+				if err := s.AccessDurationType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_permanent\"")
+				return errors.Wrap(err, "decode field \"access_duration_type\"")
 			}
 		case "days":
 			requiredBitSet[0] |= 1 << 1

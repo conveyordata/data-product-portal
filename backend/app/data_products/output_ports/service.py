@@ -140,52 +140,41 @@ class OutputPortService:
 
         dataset = self.get_visible_dataset(id, user, data_product_id)
 
-        access_durations = self.db.scalars(
-            select(AccessDurationModel).where(
-                AccessDurationModel.access_duration_type
-                == AccessDurationType.TIME_BOUND
-            )
-        ).all()
-
-        access_duration_types_days = {
-            access_duration.abstract_data_product_type: access_duration.days
-            for access_duration in access_durations
+        time_bound_days: dict[AbstractDataProductType, int] = {
+            row.abstract_data_product_type: row.days
+            for row in self.db.scalars(
+                select(AccessDurationModel).where(
+                    AccessDurationModel.access_duration_type
+                    == AccessDurationType.TIME_BOUND
+                )
+            ).all()
         }
-
-        if dataset.data_product_access_duration_type == AccessDurationType.PERMANENT:
-            data_product_access_duration = OutputPortAccessDuration(
-                is_permanent=True, days=-1
-            )
-        elif dataset.data_product_access_duration_type == AccessDurationType.TIME_BOUND:
-            data_product_access_duration = OutputPortAccessDuration(
-                is_permanent=False,
-                days=access_duration_types_days[AbstractDataProductType.DATA_PRODUCT],
-            )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Access duration type is not valid.",
-            )
-
-        if dataset.exploration_access_duration_type == AccessDurationType.PERMANENT:
-            exploration_access_duration = OutputPortAccessDuration(
-                is_permanent=True, days=-1
-            )
-        elif dataset.exploration_access_duration_type == AccessDurationType.TIME_BOUND:
-            exploration_access_duration = OutputPortAccessDuration(
-                is_permanent=False,
-                days=access_duration_types_days[AbstractDataProductType.EXPLORATION],
-            )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Access duration type is not valid.",
-            )
 
         return GetOutputPortAccessDurationsResponse(
             id=dataset.id,
-            data_product_access_duration=data_product_access_duration,
-            exploration_access_duration=exploration_access_duration,
+            data_product_access_duration=self._make_access_duration(
+                dataset.data_product_access_duration_type,
+                AbstractDataProductType.DATA_PRODUCT,
+                time_bound_days,
+            ),
+            exploration_access_duration=self._make_access_duration(
+                dataset.exploration_access_duration_type,
+                AbstractDataProductType.EXPLORATION,
+                time_bound_days,
+            ),
+        )
+
+    @staticmethod
+    def _make_access_duration(
+        duration_type: AccessDurationType,
+        product_type: AbstractDataProductType,
+        time_bound_days: dict[AbstractDataProductType, int],
+    ) -> OutputPortAccessDuration:
+        return OutputPortAccessDuration(
+            access_duration_type=duration_type,
+            days=-1
+            if duration_type == AccessDurationType.PERMANENT
+            else time_bound_days.get(product_type, -1),
         )
 
     def get_visible_dataset(

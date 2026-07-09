@@ -9,7 +9,6 @@ import styles from '@/components/data-products/data-product-form/data-product-fo
 import { DataProductFormItems } from '@/components/data-products/data-product-form/data-product-form-items.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
-import { FormItemAccessDuration } from '@/pages/cart/components/form-item-access-duration.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
@@ -19,7 +18,7 @@ import {
     useCreateDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart, DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
+import { clearCart } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 
@@ -88,10 +87,6 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
         >
             <DataProductFormItems form={form} mode={'create'} setAreFormItemsLoading={setAreFormItemsLoading} />
             <JustificationFormItem />
-            <FormItemAccessDuration
-                cartOutputPorts={cartOutputPorts}
-                dataProductTypeChoice={DataProductChoiceOptions.data_product}
-            />
             <Form.Item>
                 <Flex justify="end">
                     <Button

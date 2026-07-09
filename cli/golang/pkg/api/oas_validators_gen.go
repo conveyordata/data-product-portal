@@ -2297,6 +2297,40 @@ func (s *GetInputPortsForOutputPortResponse) Validate() error {
 	return nil
 }
 
+func (s *GetOutputPortAccessDurationsResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.DataProductAccessDuration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data_product_access_duration",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ExplorationAccessDuration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration_access_duration",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *GetOutputPortResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3180,6 +3214,29 @@ func (s *OutputPort) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "tags",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortAccessDuration) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_duration_type",
 			Error: err,
 		})
 	}

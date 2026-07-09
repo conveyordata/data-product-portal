@@ -6,6 +6,8 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.access_duration_type import AccessDurationType
+
 T = TypeVar("T", bound="OutputPortAccessDuration")
 
 
@@ -13,16 +15,16 @@ T = TypeVar("T", bound="OutputPortAccessDuration")
 class OutputPortAccessDuration:
     """
     Attributes:
-        is_permanent (bool):
+        access_duration_type (AccessDurationType):
         days (int):
     """
 
-    is_permanent: bool
+    access_duration_type: AccessDurationType
     days: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        is_permanent = self.is_permanent
+        access_duration_type = self.access_duration_type.value
 
         days = self.days
 
@@ -30,7 +32,7 @@ class OutputPortAccessDuration:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "is_permanent": is_permanent,
+                "access_duration_type": access_duration_type,
                 "days": days,
             }
         )
@@ -40,12 +42,12 @@ class OutputPortAccessDuration:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        is_permanent = d.pop("is_permanent")
+        access_duration_type = AccessDurationType(d.pop("access_duration_type"))
 
         days = d.pop("days")
 
         output_port_access_duration = cls(
-            is_permanent=is_permanent,
+            access_duration_type=access_duration_type,
             days=days,
         )
 
