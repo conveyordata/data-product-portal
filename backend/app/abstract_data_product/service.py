@@ -69,7 +69,39 @@ class AbstractDataProductService:
         *,
         actor: User,
     ) -> InputPortModel:
-        output_port = ensure_output_port_exists(
+        output_port = self._load_output_port_for_link(output_port_id)
+
+        # Block if the consumer is being deleted
+        self._ensure_not_deleting(adp)
+        # Block if the output port's owning data product is being deleted
+        self._ensure_not_deleting(output_port.data_product)
+        renewal_link = self._renewal_link(adp, output_port)
+        self._ensure_not_own_dataset(adp, output_port)
+        self._ensure_visible_to_actor(output_port, actor)
+
+        approval_status = self._approval_status_for(output_port)
+        self._capture_approval_event(
+            adp, output_port, output_port_id, approval_status, actor
+        )
+        time_bound = self._time_bound_fields(
+            adp, output_port, approval_status, renewal_link, actor=actor
+        )
+
+        if renewal_link is None:
+            return self._create_input_port(
+                adp,
+                output_port_id,
+                justification,
+                approval_status,
+                time_bound,
+                actor=actor,
+            )
+        return self._apply_renewal(
+            renewal_link, approval_status, time_bound, actor=actor
+        )
+
+    def _load_output_port_for_link(self, output_port_id: UUID) -> OutputPortModel:
+        return ensure_output_port_exists(
             output_port_id,
             self.db,
             options=[
@@ -78,105 +110,159 @@ class AbstractDataProductService:
                 .selectinload(AbstractDataProduct.input_ports)
             ],
         )
-        # Block if the consumer is being deleted
-        self._ensure_not_deleting(adp)
-        # Block if the output port's owning data product is being deleted
-        self._ensure_not_deleting(output_port.data_product)
-        renewal_link = self._renewal_link(adp, output_port)
+
+    def _ensure_not_own_dataset(
+        self, adp: AbstractDataProduct, output_port: OutputPortModel
+    ) -> None:
         if output_port.data_product_id == adp.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot link own dataset to data product",
             )
 
+    def _ensure_visible_to_actor(
+        self, output_port: OutputPortModel, actor: User
+    ) -> None:
         if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private output port",
             )
 
-        approval_status = (
-            DecisionStatus.PENDING
-            if output_port.access_type != OutputPortAccessType.UNRESTRICTED
-            else DecisionStatus.APPROVED
+    def _approval_status_for(self, output_port: OutputPortModel) -> DecisionStatus:
+        if output_port.access_type == OutputPortAccessType.UNRESTRICTED:
+            return DecisionStatus.APPROVED
+        return DecisionStatus.PENDING
+
+    def _capture_approval_event(
+        self,
+        adp: AbstractDataProduct,
+        output_port: OutputPortModel,
+        output_port_id: UUID,
+        approval_status: DecisionStatus,
+        actor: User,
+    ) -> None:
+        if approval_status != DecisionStatus.APPROVED or not self.posthog:
+            return
+        self.posthog.capture(
+            distinct_id=actor.id,
+            event="Input Port Approved",
+            properties={
+                "data_product_id": str(output_port.data_product_id),
+                "output_port_id": str(output_port_id),
+                "consuming_data_product_id": str(adp.id),
+                "type": str(adp.abstract_data_product_type.value),
+            },
         )
 
-        if approval_status == DecisionStatus.APPROVED and self.posthog:
-            self.posthog.capture(
-                distinct_id=actor.id,
-                event="Input Port Approved",
-                properties={
-                    "data_product_id": str(output_port.data_product_id),
-                    "output_port_id": str(output_port_id),
-                    "consuming_data_product_id": str(adp.id),
-                    "type": str(adp.abstract_data_product_type.value),
-                },
+    def _is_time_bound(
+        self, adp: AbstractDataProduct, output_port: OutputPortModel
+    ) -> bool:
+        if adp.abstract_data_product_type == AbstractDataProductType.DATA_PRODUCT:
+            return (
+                output_port.data_product_access_duration_type
+                == AccessDurationType.TIME_BOUND
             )
+        if adp.abstract_data_product_type == AbstractDataProductType.EXPLORATION:
+            return (
+                output_port.exploration_access_duration_type
+                == AccessDurationType.TIME_BOUND
+            )
+        return False
 
-        # Time bound access
-        # If approval_status = APPROVED then add expires_on
-        # Else add expires_on on approval, requested_days have to be available already
-        time_bound: dict[str, int | datetime] = {}
+    def _access_duration_days(
+        self, abstract_data_product_type: AbstractDataProductType
+    ) -> int:
+        access_duration_settings = AccessDurationService(
+            self.db
+        ).get_access_durations_by_type(
+            abstract_data_product_type, AccessDurationType.TIME_BOUND
+        )
         if (
-            adp.abstract_data_product_type == AbstractDataProductType.DATA_PRODUCT
-            and output_port.data_product_access_duration_type
-            == AccessDurationType.TIME_BOUND
-        ) or (
-            adp.abstract_data_product_type == AbstractDataProductType.EXPLORATION
-            and output_port.exploration_access_duration_type
-            == AccessDurationType.TIME_BOUND
+            len(access_duration_settings) != 1
+            or access_duration_settings[0].days is None
         ):
-            access_duration_setting = AccessDurationService(
-                self.db
-            ).get_access_durations_by_type(
-                adp.abstract_data_product_type, AccessDurationType.TIME_BOUND
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Expected exactly one access duration setting for {abstract_data_product_type.value} with type {AccessDurationType.TIME_BOUND.value}, but found {len(access_duration_settings)}",
             )
-            if (
-                len(access_duration_setting) != 1
-                or access_duration_setting[0].days is None
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Expected exactly one access duration setting for {adp.abstract_data_product_type.value} with type {AccessDurationType.TIME_BOUND.value}, but found {len(access_duration_setting)}",
-                )
-            time_bound = {
-                "requested_duration_days": access_duration_setting[0].days,
-                # "total_range_end": output_port.total_range_end,
-            }
-            if approval_status == DecisionStatus.APPROVED:
-                now = datetime.now(tz=pytz.utc)
-                time_bound["expires_on"] = now + timedelta(
-                    days=access_duration_setting[0].days
-                )
-                if not renewal_link:
-                    time_bound["total_range_start"] = datetime.now(tz=pytz.utc)
-                else:
-                    time_bound["renewed_by"] = actor
-                    time_bound["renewed_on"] = now
-                time_bound["total_range_end"] = time_bound["expires_on"]
-        if not renewal_link:
-            input_port = InputPortModel(
-                dataset_id=output_port_id,
-                status=approval_status,
-                justification=justification,
-                requested_by=actor,
-                requested_on=datetime.now(tz=pytz.utc),
-                consuming_abstract_data_product_id=adp.id,
-                **time_bound,
-            )
-            adp.input_ports.append(input_port)
-            return input_port
-        else:
-            if renewal_link.status == DecisionStatus.EXPIRED:
-                renewal_link.status = approval_status
+        return access_duration_settings[0].days
 
-            renewal_link.is_renewing = approval_status != DecisionStatus.APPROVED
-            if approval_status == DecisionStatus.APPROVED:
-                renewal_link.expires_on = time_bound["expires_on"]
-                renewal_link.renewed_by = actor
-                renewal_link.renewed_on = datetime.now(tz=pytz.utc)
-                renewal_link.total_range_end = time_bound["expires_on"]
-            return renewal_link
+    def _time_bound_fields(
+        self,
+        adp: AbstractDataProduct,
+        output_port: OutputPortModel,
+        approval_status: DecisionStatus,
+        renewal_link: Optional[InputPortModel],
+        *,
+        actor: User,
+    ) -> dict[str, int | datetime | User]:
+        """Compute time-bound fields for a request.
+
+        If approved, sets expires_on (and total_range_start for a fresh
+        request, or renewed_by/renewed_on for a renewal). Otherwise, only
+        requested_duration_days is set - the rest is filled in on approval.
+        """
+        if not self._is_time_bound(adp, output_port):
+            return {}
+
+        days = self._access_duration_days(adp.abstract_data_product_type)
+        time_bound: dict[str, int | datetime | User] = {"requested_duration_days": days}
+        if approval_status != DecisionStatus.APPROVED:
+            return time_bound
+
+        now = datetime.now(tz=pytz.utc)
+        expires_on = now + timedelta(days=days)
+        time_bound["expires_on"] = expires_on
+        time_bound["total_range_end"] = expires_on
+        if renewal_link is None:
+            time_bound["total_range_start"] = now
+        else:
+            time_bound["renewed_by"] = actor
+            time_bound["renewed_on"] = now
+        return time_bound
+
+    def _create_input_port(
+        self,
+        adp: AbstractDataProduct,
+        output_port_id: UUID,
+        justification: str,
+        approval_status: DecisionStatus,
+        time_bound: dict[str, int | datetime | User],
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        input_port = InputPortModel(
+            dataset_id=output_port_id,
+            status=approval_status,
+            justification=justification,
+            requested_by=actor,
+            requested_on=datetime.now(tz=pytz.utc),
+            consuming_abstract_data_product_id=adp.id,
+            **time_bound,
+        )
+        adp.input_ports.append(input_port)
+        return input_port
+
+    def _apply_renewal(
+        self,
+        renewal_link: InputPortModel,
+        approval_status: DecisionStatus,
+        time_bound: dict[str, int | datetime | User],
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        if renewal_link.status == DecisionStatus.EXPIRED:
+            renewal_link.status = approval_status
+
+        # Still in flight until an approval decision extends the expiry below.
+        renewal_link.is_renewing = approval_status != DecisionStatus.APPROVED
+        if approval_status == DecisionStatus.APPROVED:
+            renewal_link.expires_on = time_bound["expires_on"]
+            renewal_link.renewed_by = actor
+            renewal_link.renewed_on = datetime.now(tz=pytz.utc)
+            renewal_link.total_range_end = time_bound["expires_on"]
+        return renewal_link
 
     def _renewal_link(
         self, adp: AbstractDataProduct, output_port: OutputPortModel

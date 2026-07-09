@@ -7,8 +7,10 @@ from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.logging import logger
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import SessionLocal
+from app.exceptions import InvalidInputPortState
 
 CHECK_INTERVAL_SECONDS = 600  # run every 10 minutes
 STUCK_THRESHOLD_SECONDS = 3600  # warn after 1 hour in DELETING
@@ -70,13 +72,32 @@ async def expire_input_ports() -> None:
                     .all()
                 )
                 for input_port in expired_ports:
-                    logger.info(
-                        f"[InputPort Expiry] Expiring input port {input_port.id} "
-                        f"for dataset {input_port.dataset_id} and consuming data product "
-                        f"{input_port.consuming_abstract_data_product_id}."
-                    )
-                    input_port.expired_on = now
-                    input_port.status = DecisionStatus.EXPIRED
+                    if not input_port.is_renewing:
+                        logger.info(
+                            f"[InputPort Expiry] Expiring input port {input_port.id} "
+                            f"for dataset {input_port.dataset_id} and consuming data product "
+                            f"{input_port.consuming_abstract_data_product_id}."
+                        )
+                        input_port.expired_on = now
+                        input_port.status = DecisionStatus.EXPIRED
+                    elif (
+                        input_port.is_renewing
+                        and input_port.dataset.access_type
+                        != OutputPortAccessType.UNRESTRICTED
+                    ):
+                        logger.info(
+                            f"[InputPort Expiry] Placing input port {input_port.id} under Pending"
+                            f"for dataset {input_port.dataset_id} and consuming data product "
+                            f"{input_port.consuming_abstract_data_product_id}."
+                        )
+                        input_port.expired_on = now
+                        input_port.status = DecisionStatus.PENDING
+                    else:
+                        raise InvalidInputPortState(
+                            f"The {input_port.id} has is_renewing {input_port.is_renewing} and "
+                            f"{input_port.dataset.access_type} which is impossible since it "
+                            "should have been auto-approved."
+                        )
 
                 db.commit()
         except Exception as e:

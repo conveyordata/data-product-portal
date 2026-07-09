@@ -4,3 +4,7 @@ class DataProductPortalException(Exception):
 
 class NotFoundInDB(DataProductPortalException):
     pass
+
+
+class InvalidInputPortState(DataProductPortalException):
+    pass
