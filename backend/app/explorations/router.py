@@ -11,7 +11,7 @@ from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import InputPort
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
-from app.core.authz.resolvers import EmptyResolver, ExplorationResolver
+from app.core.authz.resolvers import EmptyResolver
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.database.database import get_db_session
 from app.explorations.schema_request import (
@@ -190,37 +190,43 @@ def remove_exploration(
 @router.post(
     "/{id}/finalizers",
     dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.GLOBAL__CREATE_EXPLORATION, ExplorationResolver
-            )
-        )
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_EXPLORATION, EmptyResolver))
     ],
 )
 def add_exploration_finalizer(
     id: UUID,
     request: FinalizerRequest,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
+    exp = ExplorationService(db).get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
     ExplorationService(db).add_finalizer(id, request.finalizer)
 
 
 @router.delete(
     "/{id}/finalizers/{finalizer}",
     dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.GLOBAL__CREATE_EXPLORATION, ExplorationResolver
-            )
-        )
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_EXPLORATION, EmptyResolver))
     ],
 )
 def remove_exploration_finalizer(
     id: UUID,
     finalizer: str,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     service = ExplorationService(db)
+    exp = service.get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
     should_delete = service.remove_finalizer(id, finalizer)
     if should_delete:
         service.remove_exploration(id)
