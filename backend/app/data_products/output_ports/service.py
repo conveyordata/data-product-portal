@@ -17,6 +17,9 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.input_ports.model import (
     InputPort as DataProductDatasetAssociationModel,
 )
+from app.abstract_data_product.type import AbstractDataProductType
+from app.access_durations.enums import AccessDurationType
+from app.access_durations.model import AccessDuration as AccessDurationModel
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
@@ -45,6 +48,10 @@ from app.data_products.output_ports.schema_request import (
     DatasetStatusUpdate,
     DatasetUpdate,
     DatasetUsageUpdate,
+)
+from app.data_products.output_ports.schema_response import (
+    GetOutputPortAccessDurationsResponse,
+    OutputPortAccessDuration,
 )
 from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
@@ -126,6 +133,49 @@ class OutputPortService:
             dataset.lifecycle = default_lifecycle
         dataset.domain = dataset.data_product.domain
         return dataset
+
+    def get_access_durations(
+        self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
+    ) -> GetOutputPortAccessDurationsResponse:
+
+        dataset = self.get_visible_dataset(id, user, data_product_id)
+
+        time_bound_days: dict[AbstractDataProductType, int] = {
+            row.abstract_data_product_type: row.days
+            for row in self.db.scalars(
+                select(AccessDurationModel).where(
+                    AccessDurationModel.access_duration_type
+                    == AccessDurationType.TIME_BOUND
+                )
+            ).all()
+        }
+
+        return GetOutputPortAccessDurationsResponse(
+            id=dataset.id,
+            data_product_access_duration=self._make_access_duration(
+                dataset.data_product_access_duration_type,
+                AbstractDataProductType.DATA_PRODUCT,
+                time_bound_days,
+            ),
+            exploration_access_duration=self._make_access_duration(
+                dataset.exploration_access_duration_type,
+                AbstractDataProductType.EXPLORATION,
+                time_bound_days,
+            ),
+        )
+
+    @staticmethod
+    def _make_access_duration(
+        duration_type: AccessDurationType,
+        product_type: AbstractDataProductType,
+        time_bound_days: dict[AbstractDataProductType, int],
+    ) -> OutputPortAccessDuration:
+        return OutputPortAccessDuration(
+            access_duration_type=duration_type,
+            days=-1
+            if duration_type == AccessDurationType.PERMANENT
+            else time_bound_days.get(product_type, -1),
+        )
 
     def get_visible_dataset(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None

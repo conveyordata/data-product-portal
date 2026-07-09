@@ -25,6 +25,17 @@ class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
     technical_asset: TechnicalAsset = Field(validation_alias="data_output")
 
 
+class OutputPortAccessDuration(ORMModel):
+    access_duration_type: AccessDurationType
+    days: int
+
+
+class GetOutputPortAccessDurationsResponse(ORMModel):
+    id: UUID
+    data_product_access_duration: OutputPortAccessDuration
+    exploration_access_duration: OutputPortAccessDuration
+
+
 class BaseOutputPortGet(ORMModel):
     id: UUID
     namespace: str

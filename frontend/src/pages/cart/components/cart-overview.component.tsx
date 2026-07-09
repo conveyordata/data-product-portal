@@ -1,14 +1,15 @@
 import { DeleteOutlined, WarningTwoTone } from '@ant-design/icons';
-import { Button, Card, Collapse, Descriptions, Skeleton, Space, Tag, Tooltip, Typography, theme } from 'antd';
+import { Button, Card, Collapse, Descriptions, Flex, Skeleton, Space, Tag, Tooltip, Typography, theme } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useCartOverlapCheck } from '@/pages/cart/hooks/use-cart-overlap-check.ts';
 import { useAppDispatch } from '@/store';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { removeDatasetFromCart } from '@/store/features/cart/cart-slice.ts';
+import { type DataProductChoiceOptions, removeDatasetFromCart } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
+import { OutputPortAccessDuration } from './output-port-access-duration';
 
 type CartOverviewItemProps = {
     outputPort: SearchOutputPortsResponseItem;
@@ -108,6 +109,7 @@ type CartOverviewProps = {
     loading?: boolean;
     selectedDataProductId?: string;
     selectedExplorationId?: string;
+    dataProductTypeChoice: DataProductChoiceOptions | null;
 };
 
 export const CartOverview = ({
@@ -115,6 +117,7 @@ export const CartOverview = ({
     loading,
     selectedDataProductId,
     selectedExplorationId,
+    dataProductTypeChoice,
 }: CartOverviewProps) => {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
@@ -132,7 +135,18 @@ export const CartOverview = ({
                     accordion
                     items={cartOutputPorts?.map((outputPort) => {
                         return {
-                            label: outputPort.name,
+                            label: (
+                                <Flex vertical gap="small">
+                                    <Typography.Text>{outputPort.name}</Typography.Text>
+                                    {dataProductTypeChoice && (
+                                        <OutputPortAccessDuration
+                                            outputPort={outputPort}
+                                            dataProductTypeChoice={dataProductTypeChoice}
+                                        />
+                                    )}
+                                </Flex>
+                            ),
+                            styles: { header: { alignItems: 'center' } },
                             children: <CartOverviewItem outputPort={outputPort} />,
                             extra: (
                                 <Space size={'small'} align={'center'}>

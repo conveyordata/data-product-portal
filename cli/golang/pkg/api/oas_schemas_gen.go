@@ -5094,6 +5094,45 @@ func (s *GetInputPortsForOutputPortResponse) SetInputPorts(val []OutputPortInput
 
 func (*GetInputPortsForOutputPortResponse) getInputPortsForOutputPortRes() {}
 
+// Ref: #/components/schemas/GetOutputPortAccessDurationsResponse
+type GetOutputPortAccessDurationsResponse struct {
+	ID                        uuid.UUID                `json:"id"`
+	DataProductAccessDuration OutputPortAccessDuration `json:"data_product_access_duration"`
+	ExplorationAccessDuration OutputPortAccessDuration `json:"exploration_access_duration"`
+}
+
+// GetID returns the value of ID.
+func (s *GetOutputPortAccessDurationsResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetDataProductAccessDuration returns the value of DataProductAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) GetDataProductAccessDuration() OutputPortAccessDuration {
+	return s.DataProductAccessDuration
+}
+
+// GetExplorationAccessDuration returns the value of ExplorationAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) GetExplorationAccessDuration() OutputPortAccessDuration {
+	return s.ExplorationAccessDuration
+}
+
+// SetID sets the value of ID.
+func (s *GetOutputPortAccessDurationsResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetDataProductAccessDuration sets the value of DataProductAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) SetDataProductAccessDuration(val OutputPortAccessDuration) {
+	s.DataProductAccessDuration = val
+}
+
+// SetExplorationAccessDuration sets the value of ExplorationAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) SetExplorationAccessDuration(val OutputPortAccessDuration) {
+	s.ExplorationAccessDuration = val
+}
+
+func (*GetOutputPortAccessDurationsResponse) getOutputPortAccessDurationsRes() {}
+
 // Ref: #/components/schemas/GetOutputPortResponse
 type GetOutputPortResponse struct {
 	ID                            uuid.UUID                `json:"id"`
@@ -6141,6 +6180,7 @@ func (*HTTPValidationError) getExplorationsRes()                          {}
 func (*HTTPValidationError) getInputPortsForOutputPortRes()               {}
 func (*HTTPValidationError) getJwtTokenRes()                              {}
 func (*HTTPValidationError) getLatestDataQualitySummaryForOutputPortRes() {}
+func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
 func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
 func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
@@ -9004,6 +9044,32 @@ func (s *OutputPort) SetDataProductID(val uuid.UUID) {
 // SetTags sets the value of Tags.
 func (s *OutputPort) SetTags(val []Tag) {
 	s.Tags = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessDuration
+type OutputPortAccessDuration struct {
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               int                `json:"days"`
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *OutputPortAccessDuration) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *OutputPortAccessDuration) GetDays() int {
+	return s.Days
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *OutputPortAccessDuration) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *OutputPortAccessDuration) SetDays(val int) {
+	s.Days = val
 }
 
 // Ref: #/components/schemas/OutputPortAccessType

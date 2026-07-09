@@ -1,7 +1,9 @@
 from copy import deepcopy
+from uuid import uuid4
 
 import pytest
 
+from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.enums import AccessDurationType
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
@@ -13,6 +15,7 @@ from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests import test_session
 from tests.factories import (
+    AccessDurationFactory,
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -894,3 +897,84 @@ class TestOutputPortRouter:
     @staticmethod
     def _op_endpoint(dp_id):
         return ENDPOINT.format(dp_id)
+
+    @staticmethod
+    def get_access_durations(client, data_product_id, output_port_id):
+        return client.get(
+            f"{ENDPOINT.format(data_product_id)}/{output_port_id}/access_durations"
+        )
+
+    def test_both_permanent(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(
+            data_product_access_duration_type=AccessDurationType.PERMANENT,
+            exploration_access_duration_type=AccessDurationType.PERMANENT,
+        )
+
+        response = self.get_access_durations(client, ds.data_product_id, ds.id)
+
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["data_product_access_duration"] == {
+            "access_duration_type": "permanent",
+            "days": -1,
+        }
+        assert body["exploration_access_duration"] == {
+            "access_duration_type": "permanent",
+            "days": -1,
+        }
+
+    def test_time_bound_returns_configured_days(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.EXPLORATION,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=14,
+        )
+        ds = DatasetFactory(
+            data_product_access_duration_type=AccessDurationType.TIME_BOUND,
+            exploration_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+
+        response = self.get_access_durations(client, ds.data_product_id, ds.id)
+
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["data_product_access_duration"] == {
+            "access_duration_type": "time_bound",
+            "days": 30,
+        }
+        assert body["exploration_access_duration"] == {
+            "access_duration_type": "time_bound",
+            "days": 14,
+        }
+
+    def test_private_dataset_forbidden_for_non_member(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
+
+        response = self.get_access_durations(client, ds.data_product_id, ds.id)
+
+        assert response.status_code == 403
+
+    def test_unknown_output_port_returns_404(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        dp = DataProductFactory()
+
+        response = self.get_access_durations(client, dp.id, uuid4())
+
+        assert response.status_code == 404
+
+    def test_wrong_data_product_id_returns_404(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory()
+        other_dp = DataProductFactory()
+
+        response = self.get_access_durations(client, other_dp.id, ds.id)
+
+        assert response.status_code == 404

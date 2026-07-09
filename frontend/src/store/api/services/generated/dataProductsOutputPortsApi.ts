@@ -190,6 +190,14 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    getOutputPortAccessDurations: build.query<
+      GetOutputPortAccessDurationsApiResponse,
+      GetOutputPortAccessDurationsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/access_durations`,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -325,6 +333,12 @@ export type SetValueForOutputPortApiArg = {
   id: string;
   settingId: string;
   value: string;
+};
+export type GetOutputPortAccessDurationsApiResponse =
+  /** status 200 Successful Response */ GetOutputPortAccessDurationsResponse;
+export type GetOutputPortAccessDurationsApiArg = {
+  dataProductId: string;
+  id: string;
 };
 export type OutputPortQueryStatsResponse = {
   date: string;
@@ -739,6 +753,15 @@ export type Graph = {
   edges: Edge[];
   nodes: Node[];
 };
+export type OutputPortAccessDuration = {
+  access_duration_type: AccessDurationType;
+  days: number;
+};
+export type GetOutputPortAccessDurationsResponse = {
+  id: string;
+  data_product_access_duration: OutputPortAccessDuration;
+  exploration_access_duration: OutputPortAccessDuration;
+};
 export enum QueryStatsGranularity {
   Day = "day",
   Week = "week",
@@ -849,4 +872,6 @@ export const {
   useGetOutputPortGraphDataQuery,
   useLazyGetOutputPortGraphDataQuery,
   useSetValueForOutputPortMutation,
+  useGetOutputPortAccessDurationsQuery,
+  useLazyGetOutputPortAccessDurationsQuery,
 } = injectedRtkApi;

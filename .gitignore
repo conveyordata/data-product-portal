@@ -185,3 +185,5 @@ yarn.lock
 
 # superpower
 docs/superpowers/
+
+.python-version

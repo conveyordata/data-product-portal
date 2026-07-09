@@ -196,6 +196,7 @@ function ExplorationsCart() {
                     cartOutputPorts={cartOutputPorts}
                     selectedDataProductId={selectedDataProductId}
                     selectedExplorationId={selectedExplorationId}
+                    dataProductTypeChoice={dataProductTypeChoice}
                 />
             </Col>
         </Row>

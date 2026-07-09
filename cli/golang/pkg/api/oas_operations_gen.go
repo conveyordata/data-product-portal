@@ -65,6 +65,7 @@ const (
 	GetJwtTokenOperation                              OperationName = "GetJwtToken"
 	GetLatestDataQualitySummaryForOutputPortOperation OperationName = "GetLatestDataQualitySummaryForOutputPort"
 	GetOutputPortOperation                            OperationName = "GetOutputPort"
+	GetOutputPortAccessDurationsOperation             OperationName = "GetOutputPortAccessDurations"
 	GetOutputPortCuratedQueriesOperation              OperationName = "GetOutputPortCuratedQueries"
 	GetOutputPortQueryStatsOperation                  OperationName = "GetOutputPortQueryStats"
 	GetOutputPortSchemaOperation                      OperationName = "GetOutputPortSchema"
