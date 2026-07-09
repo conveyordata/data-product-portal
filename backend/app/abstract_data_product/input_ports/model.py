@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
@@ -18,6 +19,7 @@ from app.core.webhooks.events import (
 )
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
+from app.settings import settings
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
@@ -99,6 +101,16 @@ class InputPort(
         back_populates="renewed_input_ports",
         lazy="joined",
     )
+
+    @property
+    def is_expiring_soon(self) -> bool:
+        if not self.expires_on:
+            return False
+        return (
+            self.expires_on
+            - timedelta(days=settings.ACCESS_DURATION_EXPIRING_SOON_DAYS)
+            < datetime.now()
+        )
 
     def to_event(self) -> InputPortEvent:
         return InputPortEvent(

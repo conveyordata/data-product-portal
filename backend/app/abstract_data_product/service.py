@@ -170,7 +170,7 @@ class AbstractDataProductService:
             if renewal_link.status == DecisionStatus.EXPIRED:
                 renewal_link.status = approval_status
 
-            renewal_link.is_renewing = True
+            renewal_link.is_renewing = approval_status != DecisionStatus.APPROVED
             if approval_status == DecisionStatus.APPROVED:
                 renewal_link.expires_on = time_bound["expires_on"]
                 renewal_link.renewed_by = actor
