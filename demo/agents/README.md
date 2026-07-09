@@ -8,11 +8,11 @@ The company is **SwiftGear**, a specialty outdoor gear retailer. Their data team
 
 ### Domains
 
-| Domain | Description |
-| --- | --- |
-| **Sales** | Responsible for all activities related to sales transactions, order management, and subscription revenue. |
-| **Marketing** | Focused on customer acquisition, demographic data, and behavioral analytics. |
-| **Logistics** | Manages inventory levels, warehouse operations, and stock lifecycle tracking. |
+| Domain        | Description                                                                                               |
+|---------------|-----------------------------------------------------------------------------------------------------------|
+| **Sales**     | Responsible for all activities related to sales transactions, order management, and subscription revenue. |
+| **Marketing** | Focused on customer acquisition, demographic data, and behavioral analytics.                              |
+| **Logistics** | Manages inventory levels, warehouse operations, and stock lifecycle tracking.                             |
 
 ### Conceptual Data Model
 
@@ -28,29 +28,29 @@ Each data product owns a dedicated PostgreSQL schema in the `dpp_demo` database,
 
 #### `inventory_snapshot` schema
 
-| Table | Description |
-| --- | --- |
-| `inventory_latest` | Current stock snapshot: SKU, quantity on hand, warehouse |
-| `stock_levels` | Historical log of stock levels; includes a `is_retired` flag |
+| Table              | Description                                                  |
+|--------------------|--------------------------------------------------------------|
+| `inventory_latest` | Current stock snapshot: SKU, quantity on hand, warehouse     |
+| `stock_levels`     | Historical log of stock levels; includes a `is_retired` flag |
 
 **Semantic gotcha:** Always filter `is_retired = FALSE` from `stock_levels` when computing sellable inventory. Use `inventory_latest` for current counts.
 
 #### `sales_transaction_ledger` schema
 
-| Table | Description |
-| --- | --- |
-| `orders` | Order headers: customer, amount, status, timestamps |
-| `order_items` | Line items: order, SKU, quantity, price |
-| `recurring_revenue` | Subscription MRR/ARR, status, churn dates |
+| Table               | Description                                         |
+|---------------------|-----------------------------------------------------|
+| `orders`            | Order headers: customer, amount, status, timestamps |
+| `order_items`       | Line items: order, SKU, quantity, price             |
+| `recurring_revenue` | Subscription MRR/ARR, status, churn dates           |
 
 **Semantic gotcha:** All monetary values are stored in **cents**. Divide by 100 for dollar amounts. The `calculated_total` column is a legacy error — ignore it.
 
 #### `customer_demographic_master` schema
 
-| Table | Description |
-| --- | --- |
-| `customers` | Master customer records: email, name, signup date |
-| `web_sessions` | Anonymous session logs: page paths, timestamps |
+| Table          | Description                                       |
+|----------------|---------------------------------------------------|
+| `customers`    | Master customer records: email, name, signup date |
+| `web_sessions` | Anonymous session logs: page paths, timestamps    |
 
 **Semantic gotcha:** `acquired_by` in `customers` is an internal admin ID, not a customer ID — never join it to the customers table. Web session `user_id` is an anonymous UUID and cannot be joined directly to customers.
 
@@ -123,10 +123,10 @@ This triggers the provisioner for each product, which:
 
 After creation, the portal shows three data products, each with:
 
-| Data Product | Domain | Namespace | Agent User |
-| --- | --- | --- | --- |
-| Inventory Snapshot | Logistics | `inventory-snapshot` | `inventory_snapshot_user` |
-| Sales Transaction Ledger | Sales | `sales-transaction-ledger` | `sales_transaction_ledger_user` |
+| Data Product                | Domain    | Namespace                     | Agent User                         |
+|-----------------------------|-----------|-------------------------------|------------------------------------|
+| Inventory Snapshot          | Logistics | `inventory-snapshot`          | `inventory_snapshot_user`          |
+| Sales Transaction Ledger    | Sales     | `sales-transaction-ledger`    | `sales_transaction_ledger_user`    |
 | Customer Demographic Master | Marketing | `customer-demographic-master` | `customer_demographic_master_user` |
 
 Each agent can only query its own schema. Try asking the **Inventory Snapshot** agent:
@@ -161,6 +161,7 @@ The agent now has access to both `sales_transaction_ledger` and `inventory_snaps
 Each data product gets two technical assets automatically:
 
 ### OSI Semantic Model TA
+
 Points to `/products/{namespace}/osi.yml` — the semantic model mounted into the Agno container. It encodes:
 - Correct field expressions (e.g. `total_amount / 100.0` for dollar amounts)
 - Business rules and AI gotchas
@@ -168,9 +169,11 @@ Points to `/products/{namespace}/osi.yml` — the semantic model mounted into th
 - Cross-domain relationships
 
 ### PostgreSQL TA
+
 Grants schema-level SELECT access in `dpp_demo`. The result string `dpp_demo.{schema}.*` is shown in the portal UI.
 
 ### Agno Link
+
 The Agno plugin generates a link to `https://os.agno.com/chat?type=agent&id={namespace}`. Clicking it opens the agent chat for that data product in Agno's hosted UI.
 
 ## Toil & Maintenance

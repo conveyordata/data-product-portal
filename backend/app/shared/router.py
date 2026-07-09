@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Security
 
+from app.access_durations.router import router as access_duration
 from app.authorization.role_assignments.router import router as role_assignment
 from app.authorization.roles.router import router as role
 from app.authorization.router import router as authorization
@@ -63,3 +64,4 @@ router.include_router(notification)
 router.include_router(resource_name)
 router.include_router(plugin)
 router.include_router(exploration)
+router.include_router(access_duration)

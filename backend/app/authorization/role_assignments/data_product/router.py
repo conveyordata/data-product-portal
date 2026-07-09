@@ -147,12 +147,14 @@ def request_data_product_role_assignment(
         data_product_id=role_assignment.data_product_id,
         action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
     )
-    background_tasks.add_task(
-        email.send_role_assignment_request_email,
-        deepcopy(role_assignment.user),
-        deepcopy(role_assignment.data_product),
-        [deepcopy(approver) for approver in approvers],
-    )
+    other_approvers = [a for a in approvers if a != user]
+    if other_approvers:
+        background_tasks.add_task(
+            email.send_role_assignment_request_email,
+            deepcopy(role_assignment.user),
+            deepcopy(role_assignment.data_product),
+            [deepcopy(approver) for approver in other_approvers],
+        )
     return role_assignment
 
 

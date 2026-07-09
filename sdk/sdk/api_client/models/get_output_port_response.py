@@ -7,6 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.access_duration_type import AccessDurationType
 from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
 
@@ -32,6 +33,8 @@ class GetOutputPortResponse:
         status (OutputPortStatus):
         usage (None | str):
         access_type (OutputPortAccessType):
+        data_product_access_duration_type (AccessDurationType):
+        exploration_access_duration_type (AccessDurationType):
         data_product_id (UUID):
         tags (list[Tag]):
         domain (Domain):
@@ -49,6 +52,8 @@ class GetOutputPortResponse:
     status: OutputPortStatus
     usage: None | str
     access_type: OutputPortAccessType
+    data_product_access_duration_type: AccessDurationType
+    exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
     tags: list[Tag]
     domain: Domain
@@ -76,6 +81,10 @@ class GetOutputPortResponse:
         usage = self.usage
 
         access_type = self.access_type.value
+
+        data_product_access_duration_type = self.data_product_access_duration_type.value
+
+        exploration_access_duration_type = self.exploration_access_duration_type.value
 
         data_product_id = str(self.data_product_id)
 
@@ -121,6 +130,8 @@ class GetOutputPortResponse:
                 "status": status,
                 "usage": usage,
                 "access_type": access_type,
+                "data_product_access_duration_type": data_product_access_duration_type,
+                "exploration_access_duration_type": exploration_access_duration_type,
                 "data_product_id": data_product_id,
                 "tags": tags,
                 "domain": domain,
@@ -161,6 +172,14 @@ class GetOutputPortResponse:
         usage = _parse_usage(d.pop("usage"))
 
         access_type = OutputPortAccessType(d.pop("access_type"))
+
+        data_product_access_duration_type = AccessDurationType(
+            d.pop("data_product_access_duration_type")
+        )
+
+        exploration_access_duration_type = AccessDurationType(
+            d.pop("exploration_access_duration_type")
+        )
 
         data_product_id = UUID(d.pop("data_product_id"))
 
@@ -228,6 +247,8 @@ class GetOutputPortResponse:
             status=status,
             usage=usage,
             access_type=access_type,
+            data_product_access_duration_type=data_product_access_duration_type,
+            exploration_access_duration_type=exploration_access_duration_type,
             data_product_id=data_product_id,
             tags=tags,
             domain=domain,

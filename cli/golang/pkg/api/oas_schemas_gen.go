@@ -202,6 +202,157 @@ func (s *AbstractDataProductType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/AccessDuration
+type AccessDuration struct {
+	ID                      uuid.UUID               `json:"id"`
+	AbstractDataProductType AbstractDataProductType `json:"abstract_data_product_type"`
+	AccessDurationType      AccessDurationType      `json:"access_duration_type"`
+	Days                    NilInt                  `json:"days"`
+	IsDefault               bool                    `json:"is_default"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessDuration) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetAbstractDataProductType returns the value of AbstractDataProductType.
+func (s *AccessDuration) GetAbstractDataProductType() AbstractDataProductType {
+	return s.AbstractDataProductType
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDuration) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDuration) GetDays() NilInt {
+	return s.Days
+}
+
+// GetIsDefault returns the value of IsDefault.
+func (s *AccessDuration) GetIsDefault() bool {
+	return s.IsDefault
+}
+
+// SetID sets the value of ID.
+func (s *AccessDuration) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetAbstractDataProductType sets the value of AbstractDataProductType.
+func (s *AccessDuration) SetAbstractDataProductType(val AbstractDataProductType) {
+	s.AbstractDataProductType = val
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDuration) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDuration) SetDays(val NilInt) {
+	s.Days = val
+}
+
+// SetIsDefault sets the value of IsDefault.
+func (s *AccessDuration) SetIsDefault(val bool) {
+	s.IsDefault = val
+}
+
+func (*AccessDuration) getDefaultAccessDurationRes() {}
+
+// Ref: #/components/schemas/AccessDurationType
+type AccessDurationType string
+
+const (
+	AccessDurationTypePermanent AccessDurationType = "permanent"
+	AccessDurationTypeTimeBound AccessDurationType = "time_bound"
+)
+
+// AllValues returns all AccessDurationType values.
+func (AccessDurationType) AllValues() []AccessDurationType {
+	return []AccessDurationType{
+		AccessDurationTypePermanent,
+		AccessDurationTypeTimeBound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AccessDurationType) MarshalText() ([]byte, error) {
+	switch s {
+	case AccessDurationTypePermanent:
+		return []byte(s), nil
+	case AccessDurationTypeTimeBound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AccessDurationType) UnmarshalText(data []byte) error {
+	switch AccessDurationType(data) {
+	case AccessDurationTypePermanent:
+		*s = AccessDurationTypePermanent
+		return nil
+	case AccessDurationTypeTimeBound:
+		*s = AccessDurationTypeTimeBound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/AccessDurationUpdate
+type AccessDurationUpdate struct {
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               OptNilInt          `json:"days"`
+	AlternativeAllowed bool               `json:"alternative_allowed"`
+	AlternativeDays    OptNilInt          `json:"alternative_days"`
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDurationUpdate) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDurationUpdate) GetDays() OptNilInt {
+	return s.Days
+}
+
+// GetAlternativeAllowed returns the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) GetAlternativeAllowed() bool {
+	return s.AlternativeAllowed
+}
+
+// GetAlternativeDays returns the value of AlternativeDays.
+func (s *AccessDurationUpdate) GetAlternativeDays() OptNilInt {
+	return s.AlternativeDays
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDurationUpdate) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDurationUpdate) SetDays(val OptNilInt) {
+	s.Days = val
+}
+
+// SetAlternativeAllowed sets the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) SetAlternativeAllowed(val bool) {
+	s.AlternativeAllowed = val
+}
+
+// SetAlternativeDays sets the value of AlternativeDays.
+func (s *AccessDurationUpdate) SetAlternativeDays(val OptNilInt) {
+	s.AlternativeDays = val
+}
+
 // Ref: #/components/schemas/AccessGranularity
 type AccessGranularity string
 
@@ -796,14 +947,16 @@ func (*CreateOutputPortNotFoundApplicationJSON) createOutputPortRes() {}
 
 // Ref: #/components/schemas/CreateOutputPortRequest
 type CreateOutputPortRequest struct {
-	Name        string               `json:"name"`
-	Namespace   string               `json:"namespace"`
-	Description string               `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
-	About       OptNilString         `json:"about"`
-	LifecycleID OptNilUUID           `json:"lifecycle_id"`
-	TagIds      []uuid.UUID          `json:"tag_ids"`
-	Owners      []uuid.UUID          `json:"owners"`
+	Name                          string               `json:"name"`
+	Namespace                     string               `json:"namespace"`
+	Description                   string               `json:"description"`
+	AccessType                    OutputPortAccessType `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
+	About                         OptNilString         `json:"about"`
+	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID          `json:"tag_ids"`
+	Owners                        []uuid.UUID          `json:"owners"`
 }
 
 // GetName returns the value of Name.
@@ -824,6 +977,16 @@ func (s *CreateOutputPortRequest) GetDescription() string {
 // GetAccessType returns the value of AccessType.
 func (s *CreateOutputPortRequest) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *CreateOutputPortRequest) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *CreateOutputPortRequest) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetAbout returns the value of About.
@@ -864,6 +1027,16 @@ func (s *CreateOutputPortRequest) SetDescription(val string) {
 // SetAccessType sets the value of AccessType.
 func (s *CreateOutputPortRequest) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *CreateOutputPortRequest) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *CreateOutputPortRequest) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetAbout sets the value of About.
@@ -3177,13 +3350,15 @@ func (s *DatasetStatusUpdate) SetStatus(val OutputPortStatus) {
 
 // Ref: #/components/schemas/DatasetUpdate
 type DatasetUpdate struct {
-	Name        string               `json:"name"`
-	Namespace   string               `json:"namespace"`
-	Description string               `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
-	About       OptNilString         `json:"about"`
-	LifecycleID OptNilUUID           `json:"lifecycle_id"`
-	TagIds      []uuid.UUID          `json:"tag_ids"`
+	Name                          string               `json:"name"`
+	Namespace                     string               `json:"namespace"`
+	Description                   string               `json:"description"`
+	AccessType                    OutputPortAccessType `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
+	About                         OptNilString         `json:"about"`
+	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID          `json:"tag_ids"`
 }
 
 // GetName returns the value of Name.
@@ -3204,6 +3379,16 @@ func (s *DatasetUpdate) GetDescription() string {
 // GetAccessType returns the value of AccessType.
 func (s *DatasetUpdate) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *DatasetUpdate) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *DatasetUpdate) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetAbout returns the value of About.
@@ -3239,6 +3424,16 @@ func (s *DatasetUpdate) SetDescription(val string) {
 // SetAccessType sets the value of AccessType.
 func (s *DatasetUpdate) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *DatasetUpdate) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *DatasetUpdate) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetAbout sets the value of About.
@@ -4899,23 +5094,64 @@ func (s *GetInputPortsForOutputPortResponse) SetInputPorts(val []OutputPortInput
 
 func (*GetInputPortsForOutputPortResponse) getInputPortsForOutputPortRes() {}
 
+// Ref: #/components/schemas/GetOutputPortAccessDurationsResponse
+type GetOutputPortAccessDurationsResponse struct {
+	ID                        uuid.UUID                `json:"id"`
+	DataProductAccessDuration OutputPortAccessDuration `json:"data_product_access_duration"`
+	ExplorationAccessDuration OutputPortAccessDuration `json:"exploration_access_duration"`
+}
+
+// GetID returns the value of ID.
+func (s *GetOutputPortAccessDurationsResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetDataProductAccessDuration returns the value of DataProductAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) GetDataProductAccessDuration() OutputPortAccessDuration {
+	return s.DataProductAccessDuration
+}
+
+// GetExplorationAccessDuration returns the value of ExplorationAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) GetExplorationAccessDuration() OutputPortAccessDuration {
+	return s.ExplorationAccessDuration
+}
+
+// SetID sets the value of ID.
+func (s *GetOutputPortAccessDurationsResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetDataProductAccessDuration sets the value of DataProductAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) SetDataProductAccessDuration(val OutputPortAccessDuration) {
+	s.DataProductAccessDuration = val
+}
+
+// SetExplorationAccessDuration sets the value of ExplorationAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) SetExplorationAccessDuration(val OutputPortAccessDuration) {
+	s.ExplorationAccessDuration = val
+}
+
+func (*GetOutputPortAccessDurationsResponse) getOutputPortAccessDurationsRes() {}
+
 // Ref: #/components/schemas/GetOutputPortResponse
 type GetOutputPortResponse struct {
-	ID                  uuid.UUID                `json:"id"`
-	Namespace           string                   `json:"namespace"`
-	Name                string                   `json:"name"`
-	Description         string                   `json:"description"`
-	Status              OutputPortStatus         `json:"status"`
-	Usage               NilString                `json:"usage"`
-	AccessType          OutputPortAccessType     `json:"access_type"`
-	DataProductID       uuid.UUID                `json:"data_product_id"`
-	Tags                []Tag                    `json:"tags"`
-	Domain              Domain                   `json:"domain"`
-	Lifecycle           NilDataProductLifeCycle  `json:"lifecycle"`
-	About               NilString                `json:"about"`
-	RolledUpTags        []Tag                    `json:"rolled_up_tags"`
-	DataProductSettings []OutputPortSettingValue `json:"data_product_settings"`
-	TechnicalAssetLinks []TechnicalAssetLink     `json:"technical_asset_links"`
+	ID                            uuid.UUID                `json:"id"`
+	Namespace                     string                   `json:"namespace"`
+	Name                          string                   `json:"name"`
+	Description                   string                   `json:"description"`
+	Status                        OutputPortStatus         `json:"status"`
+	Usage                         NilString                `json:"usage"`
+	AccessType                    OutputPortAccessType     `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType       `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType       `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID                `json:"data_product_id"`
+	Tags                          []Tag                    `json:"tags"`
+	Domain                        Domain                   `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
+	About                         NilString                `json:"about"`
+	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
+	DataProductSettings           []OutputPortSettingValue `json:"data_product_settings"`
+	TechnicalAssetLinks           []TechnicalAssetLink     `json:"technical_asset_links"`
 }
 
 // GetID returns the value of ID.
@@ -4951,6 +5187,16 @@ func (s *GetOutputPortResponse) GetUsage() NilString {
 // GetAccessType returns the value of AccessType.
 func (s *GetOutputPortResponse) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *GetOutputPortResponse) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *GetOutputPortResponse) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetDataProductID returns the value of DataProductID.
@@ -5026,6 +5272,16 @@ func (s *GetOutputPortResponse) SetUsage(val NilString) {
 // SetAccessType sets the value of AccessType.
 func (s *GetOutputPortResponse) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *GetOutputPortResponse) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *GetOutputPortResponse) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetDataProductID sets the value of DataProductID.
@@ -5914,6 +6170,7 @@ func (*HTTPValidationError) getDataProductSettingsRes()                   {}
 func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
 func (*HTTPValidationError) getDataProductTypeRes()                       {}
 func (*HTTPValidationError) getDataProductsRes()                          {}
+func (*HTTPValidationError) getDefaultAccessDurationRes()                 {}
 func (*HTTPValidationError) getDeviceTokenRes()                           {}
 func (*HTTPValidationError) getDomainRes()                                {}
 func (*HTTPValidationError) getEnvironmentRes()                           {}
@@ -5923,6 +6180,7 @@ func (*HTTPValidationError) getExplorationsRes()                          {}
 func (*HTTPValidationError) getInputPortsForOutputPortRes()               {}
 func (*HTTPValidationError) getJwtTokenRes()                              {}
 func (*HTTPValidationError) getLatestDataQualitySummaryForOutputPortRes() {}
+func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
 func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
 func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
@@ -5976,6 +6234,7 @@ func (*HTTPValidationError) setValueForDataProductRes()                   {}
 func (*HTTPValidationError) setValueForOutputPortRes()                    {}
 func (*HTTPValidationError) unlinkInputPortFromDataProductRes()           {}
 func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
+func (*HTTPValidationError) updateAccessDurationRes()                     {}
 func (*HTTPValidationError) updateDataProductAboutRes()                   {}
 func (*HTTPValidationError) updateDataProductLifecycleRes()               {}
 func (*HTTPValidationError) updateDataProductRes()                        {}
@@ -6434,6 +6693,51 @@ func (o NilGlobalRoleAssignmentResponse) Get() (v GlobalRoleAssignmentResponse, 
 
 // Or returns value if set, or given parameter if does not.
 func (o NilGlobalRoleAssignmentResponse) Or(d GlobalRoleAssignmentResponse) GlobalRoleAssignmentResponse {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilInt returns new NilInt with value set to v.
+func NewNilInt(v int) NilInt {
+	return NilInt{
+		Value: v,
+	}
+}
+
+// NilInt is nullable int.
+type NilInt struct {
+	Value int
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilInt) SetTo(v int) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilInt) SetToNull() {
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8740,6 +9044,32 @@ func (s *OutputPort) SetDataProductID(val uuid.UUID) {
 // SetTags sets the value of Tags.
 func (s *OutputPort) SetTags(val []Tag) {
 	s.Tags = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessDuration
+type OutputPortAccessDuration struct {
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               int                `json:"days"`
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *OutputPortAccessDuration) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *OutputPortAccessDuration) GetDays() int {
+	return s.Days
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *OutputPortAccessDuration) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *OutputPortAccessDuration) SetDays(val int) {
+	s.Days = val
 }
 
 // Ref: #/components/schemas/OutputPortAccessType
@@ -11529,21 +11859,23 @@ func (*SearchOutputPortsResponse) searchOutputPortsRes() {}
 
 // Ref: #/components/schemas/SearchOutputPortsResponseItem
 type SearchOutputPortsResponseItem struct {
-	ID                       uuid.UUID               `json:"id"`
-	Namespace                string                  `json:"namespace"`
-	Name                     string                  `json:"name"`
-	Description              string                  `json:"description"`
-	Status                   OutputPortStatus        `json:"status"`
-	Usage                    NilString               `json:"usage"`
-	AccessType               OutputPortAccessType    `json:"access_type"`
-	DataProductID            uuid.UUID               `json:"data_product_id"`
-	Tags                     []Tag                   `json:"tags"`
-	Domain                   Domain                  `json:"domain"`
-	Lifecycle                NilDataProductLifeCycle `json:"lifecycle"`
-	AbstractDataProductCount int                     `json:"abstract_data_product_count"`
-	TechnicalAssetsCount     int                     `json:"technical_assets_count"`
-	DataProductName          string                  `json:"data_product_name"`
-	QualityStatus            NilDataQualityStatus    `json:"quality_status"`
+	ID                            uuid.UUID               `json:"id"`
+	Namespace                     string                  `json:"namespace"`
+	Name                          string                  `json:"name"`
+	Description                   string                  `json:"description"`
+	Status                        OutputPortStatus        `json:"status"`
+	Usage                         NilString               `json:"usage"`
+	AccessType                    OutputPortAccessType    `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType      `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType      `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID               `json:"data_product_id"`
+	Tags                          []Tag                   `json:"tags"`
+	Domain                        Domain                  `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle `json:"lifecycle"`
+	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
+	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
+	DataProductName               string                  `json:"data_product_name"`
+	QualityStatus                 NilDataQualityStatus    `json:"quality_status"`
 }
 
 // GetID returns the value of ID.
@@ -11579,6 +11911,16 @@ func (s *SearchOutputPortsResponseItem) GetUsage() NilString {
 // GetAccessType returns the value of AccessType.
 func (s *SearchOutputPortsResponseItem) GetAccessType() OutputPortAccessType {
 	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *SearchOutputPortsResponseItem) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *SearchOutputPortsResponseItem) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetDataProductID returns the value of DataProductID.
@@ -11654,6 +11996,16 @@ func (s *SearchOutputPortsResponseItem) SetUsage(val NilString) {
 // SetAccessType sets the value of AccessType.
 func (s *SearchOutputPortsResponseItem) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *SearchOutputPortsResponseItem) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *SearchOutputPortsResponseItem) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetDataProductID sets the value of DataProductID.
@@ -12542,6 +12894,21 @@ func (s *ThemeSettings) SetPortalName(val string) {
 	s.PortalName = val
 }
 
+// Ref: #/components/schemas/TimeBoundAccessEnabledResponse
+type TimeBoundAccessEnabledResponse struct {
+	Enabled bool `json:"enabled"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) GetEnabled() bool {
+	return s.Enabled
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
 // Ref: #/components/schemas/UIElementCheckbox
 type UIElementCheckbox struct {
 	InitialValue OptNilBool `json:"initial_value"`
@@ -13040,6 +13407,10 @@ func (*UnlinkOutputPortFromTechnicalAssetNotFoundApplicationJSON) unlinkOutputPo
 type UnlinkOutputPortFromTechnicalAssetOKApplicationJSON jx.Raw
 
 func (*UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) unlinkOutputPortFromTechnicalAssetRes() {}
+
+type UpdateAccessDurationOKApplicationJSON []AccessDuration
+
+func (*UpdateAccessDurationOKApplicationJSON) updateAccessDurationRes() {}
 
 type UpdateDataProductAboutNotFoundApplicationJSON jx.Raw
 

@@ -5,6 +5,7 @@ services:
       service: mailhog
 
   portal:
+    platform: linux/amd64
     extends:
       file: ../../compose.yaml
       service: portal
@@ -17,9 +18,17 @@ services:
       # Override the PWD-based config.js mount from the base service (last mount wins)
       - ../../frontend/config.docker.js:/frontend_dist/config.js
       - .:/demo/agents
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5050/" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   provisioner:
-    build: ./provisioner
+    platform: linux/amd64
+    build:
+      context: ../..
+      dockerfile: demo/agents/provisioner/Dockerfile
     env_file:
       - .env.portal
     volumes:
@@ -28,6 +37,8 @@ services:
     depends_on:
       postgresql-demo:
         condition: service_healthy
+      portal:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6060"]
       interval: 5s
@@ -35,6 +46,7 @@ services:
       retries: 10
 
   agent:
+    platform: linux/amd64
     build: ./agent
     env_file:
       - .env.secret

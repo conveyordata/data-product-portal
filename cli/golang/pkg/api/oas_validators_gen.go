@@ -60,6 +60,74 @@ func (s AbstractDataProductType) Validate() error {
 	}
 }
 
+func (s *AccessDuration) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AbstractDataProductType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "abstract_data_product_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.AccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_duration_type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s AccessDurationType) Validate() error {
+	switch s {
+	case "permanent":
+		return nil
+	case "time_bound":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *AccessDurationUpdate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_duration_type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AccessGranularity) Validate() error {
 	switch s {
 	case "schema":
@@ -269,6 +337,28 @@ func (s *CreateOutputPortRequest) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "access_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.DataProductAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data_product_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ExplorationAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration_access_duration_type",
 			Error: err,
 		})
 	}
@@ -1254,6 +1344,28 @@ func (s *DatasetUpdate) Validate() error {
 		})
 	}
 	if err := func() error {
+		if err := s.DataProductAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data_product_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ExplorationAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if s.TagIds == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -2183,6 +2295,40 @@ func (s *GetInputPortsForOutputPortResponse) Validate() error {
 	return nil
 }
 
+func (s *GetOutputPortAccessDurationsResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.DataProductAccessDuration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data_product_access_duration",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ExplorationAccessDuration.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration_access_duration",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *GetOutputPortResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -2208,6 +2354,28 @@ func (s *GetOutputPortResponse) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "access_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.DataProductAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data_product_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ExplorationAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration_access_duration_type",
 			Error: err,
 		})
 	}
@@ -3044,6 +3212,29 @@ func (s *OutputPort) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "tags",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortAccessDuration) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_duration_type",
 			Error: err,
 		})
 	}
@@ -4269,6 +4460,28 @@ func (s *SearchOutputPortsResponseItem) Validate() error {
 		})
 	}
 	if err := func() error {
+		if err := s.DataProductAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data_product_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ExplorationAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if s.Tags == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -4680,6 +4893,31 @@ func (s UIElementType) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s UpdateAccessDurationOKApplicationJSON) Validate() error {
+	alias := ([]AccessDuration)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *UpdateOutputPortQueryStatus) Validate() error {

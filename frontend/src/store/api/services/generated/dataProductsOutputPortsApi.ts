@@ -190,6 +190,14 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    getOutputPortAccessDurations: build.query<
+      GetOutputPortAccessDurationsApiResponse,
+      GetOutputPortAccessDurationsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/access_durations`,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -325,6 +333,12 @@ export type SetValueForOutputPortApiArg = {
   id: string;
   settingId: string;
   value: string;
+};
+export type GetOutputPortAccessDurationsApiResponse =
+  /** status 200 Successful Response */ GetOutputPortAccessDurationsResponse;
+export type GetOutputPortAccessDurationsApiArg = {
+  dataProductId: string;
+  id: string;
 };
 export type OutputPortQueryStatsResponse = {
   date: string;
@@ -485,6 +499,8 @@ export type CreateOutputPortRequest = {
   namespace: string;
   description: string;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   about?: string | null;
   lifecycle_id?: string | null;
   tag_ids: string[];
@@ -635,6 +651,8 @@ export type GetOutputPortResponse = {
   status: OutputPortStatus;
   usage: string | null;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   data_product_id: string;
   tags: Tag[];
   domain: Domain;
@@ -652,6 +670,8 @@ export type DatasetUpdate = {
   namespace: string;
   description: string;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   about?: string | null;
   lifecycle_id?: string | null;
   tag_ids: string[];
@@ -733,6 +753,15 @@ export type Graph = {
   edges: Edge[];
   nodes: Node[];
 };
+export type OutputPortAccessDuration = {
+  access_duration_type: AccessDurationType;
+  days: number;
+};
+export type GetOutputPortAccessDurationsResponse = {
+  id: string;
+  data_product_access_duration: OutputPortAccessDuration;
+  exploration_access_duration: OutputPortAccessDuration;
+};
 export enum QueryStatsGranularity {
   Day = "day",
   Week = "week",
@@ -755,6 +784,10 @@ export enum OutputPortAccessType {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
 }
 export enum DataProductSettingType {
   Checkbox = "checkbox",
@@ -839,4 +872,6 @@ export const {
   useGetOutputPortGraphDataQuery,
   useLazyGetOutputPortGraphDataQuery,
   useSetValueForOutputPortMutation,
+  useGetOutputPortAccessDurationsQuery,
+  useLazyGetOutputPortAccessDurationsQuery,
 } = injectedRtkApi;

@@ -201,6 +201,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
             <Form.Item<DataProductCreate>
                 name={'domain_id'}
                 label={t('Domain')}
+                tooltip={t('The domain to which this Data Product belongs')}
                 rules={[
                     {
                         required: true,
@@ -227,7 +228,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
             <Form.Item<DataProductCreate>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the Data Product')}
+                tooltip={t('A description for your Data Product')}
                 rules={[
                     {
                         required: true,

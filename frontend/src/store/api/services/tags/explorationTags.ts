@@ -14,6 +14,12 @@ export const explorationTags = {
     createExploration: {
         invalidatesTags: [{ type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST }],
     },
+    removeExploration: {
+        invalidatesTags: (_, __, id) => [
+            { type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST },
+            { type: TagTypes.Exploration, id },
+        ],
+    },
     requestInputPortsForExploration: {
         invalidatesTags: (_, __, arg) => [
             { type: TagTypes.DataProduct, id: arg.id },

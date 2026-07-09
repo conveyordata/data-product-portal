@@ -50,13 +50,13 @@ class AbstractEventHandler(ABC):
         elif event_type == "data_product.event":
             parsed_event = CloudEventDataProductEvent.from_dict(payload)
             return await self.on_data_product_event(parsed_event.data)
-        elif event_type == "output_port.role_assignment.event":
+        elif event_type == "output_port_role_assignment.event":
             parsed_event = CloudEventOutputPortRoleAssignmentEvent.from_dict(payload)
             return await self.on_output_port_role_assignment_event(parsed_event.data)
         elif event_type == "technical_asset.event":
             parsed_event = CloudEventTechnicalAssetEvent.from_dict(payload)
             return await self.on_technical_asset_event(parsed_event.data)
-        elif event_type == "data_product.role_assignment.event":
+        elif event_type == "data_product_role_assignment.event":
             parsed_event = CloudEventDataProductRoleAssignmentEvent.from_dict(payload)
             return await self.on_data_product_role_assignment_event(parsed_event.data)
         elif event_type == "output_port_technical_asset_link.event":
@@ -93,7 +93,7 @@ class AbstractEventHandler(ABC):
     async def on_output_port_role_assignment_event(
         self, data: OutputPortRoleAssignmentEvent
     ) -> Any:
-        """Handler for the parsed payload of 'output_port.role_assignment.event'"""
+        """Handler for the parsed payload of 'output_port_role_assignment.event'"""
         pass
 
     @abstractmethod
@@ -105,7 +105,7 @@ class AbstractEventHandler(ABC):
     async def on_data_product_role_assignment_event(
         self, data: DataProductRoleAssignmentEvent
     ) -> Any:
-        """Handler for the parsed payload of 'data_product.role_assignment.event'"""
+        """Handler for the parsed payload of 'data_product_role_assignment.event'"""
         pass
 
     @abstractmethod

@@ -3,7 +3,7 @@
   "info": {
     "title": "Data product portal",
     "summary": "Backend API implementation for Data product portal",
-    "version": "0.6.0"
+    "version": "0.6.1"
   },
   "paths": {
     "/api/v2/authz/access/{action}": {
@@ -1420,6 +1420,59 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/access_durations": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Get Output Port Access Durations",
+        "operationId": "get_output_port_access_durations",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOutputPortAccessDurationsResponse"
+                }
               }
             }
           },
@@ -7154,6 +7207,148 @@
         }
       }
     },
+    "/api/v2/access_durations/enabled": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Is Time Bound Access Enabled",
+        "operationId": "is_time_bound_access_enabled",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeBoundAccessEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/access_durations/{abstract_data_product_type}/default": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Get Default Access Duration",
+        "operationId": "get_default_access_duration",
+        "parameters": [
+          {
+            "name": "abstract_data_product_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AbstractDataProductType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessDuration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/access_durations": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Get All Access Durations",
+        "operationId": "get_all_access_durations",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AccessDuration"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Access Durations"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/access_durations/{abstract_data_product_type}": {
+      "put": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Update Access Duration",
+        "operationId": "update_access_duration",
+        "parameters": [
+          {
+            "name": "abstract_data_product_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AbstractDataProductType"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessDurationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessDuration"
+                  },
+                  "title": "Response Update Access Duration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
@@ -7589,6 +7784,92 @@
           "explorations"
         ],
         "title": "AbstractDataProductType"
+      },
+      "AccessDuration": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "abstract_data_product_type": {
+            "$ref": "#/components/schemas/AbstractDataProductType"
+          },
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "abstract_data_product_type",
+          "access_duration_type",
+          "days",
+          "is_default"
+        ],
+        "title": "AccessDuration"
+      },
+      "AccessDurationType": {
+        "type": "string",
+        "enum": [
+          "permanent",
+          "time_bound"
+        ],
+        "title": "AccessDurationType"
+      },
+      "AccessDurationUpdate": {
+        "properties": {
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days"
+          },
+          "alternative_allowed": {
+            "type": "boolean",
+            "title": "Alternative Allowed"
+          },
+          "alternative_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alternative Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_duration_type",
+          "alternative_allowed"
+        ],
+        "title": "AccessDurationUpdate"
       },
       "AccessGranularity": {
         "type": "string",
@@ -8380,6 +8661,12 @@
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
           },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
           "about": {
             "anyOf": [
               {
@@ -8427,6 +8714,8 @@
           "namespace",
           "description",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "tag_ids",
           "owners"
         ],
@@ -9931,6 +10220,12 @@
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
           },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
           "about": {
             "anyOf": [
               {
@@ -9969,6 +10264,8 @@
           "namespace",
           "description",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "tag_ids"
         ],
         "title": "DatasetUpdate"
@@ -11220,6 +11517,28 @@
         ],
         "title": "GetInputPortsForOutputPortResponse"
       },
+      "GetOutputPortAccessDurationsResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_access_duration": {
+            "$ref": "#/components/schemas/OutputPortAccessDuration"
+          },
+          "exploration_access_duration": {
+            "$ref": "#/components/schemas/OutputPortAccessDuration"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_access_duration",
+          "exploration_access_duration"
+        ],
+        "title": "GetOutputPortAccessDurationsResponse"
+      },
       "GetOutputPortResponse": {
         "properties": {
           "id": {
@@ -11255,6 +11574,12 @@
           },
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
+          },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
           },
           "data_product_id": {
             "type": "string",
@@ -11324,6 +11649,8 @@
           "status",
           "usage",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "data_product_id",
           "tags",
           "domain",
@@ -12246,6 +12573,23 @@
           "tags"
         ],
         "title": "OutputPort"
+      },
+      "OutputPortAccessDuration": {
+        "properties": {
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_duration_type",
+          "days"
+        ],
+        "title": "OutputPortAccessDuration"
       },
       "OutputPortAccessType": {
         "type": "string",
@@ -14171,6 +14515,12 @@
           "access_type": {
             "$ref": "#/components/schemas/OutputPortAccessType"
           },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
           "data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -14228,6 +14578,8 @@
           "status",
           "usage",
           "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
           "data_product_id",
           "tags",
           "domain",
@@ -14725,6 +15077,19 @@
           "portal_name"
         ],
         "title": "ThemeSettings"
+      },
+      "TimeBoundAccessEnabledResponse": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "title": "TimeBoundAccessEnabledResponse"
       },
       "UIElementCheckbox": {
         "properties": {

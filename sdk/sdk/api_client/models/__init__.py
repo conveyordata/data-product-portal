@@ -3,6 +3,9 @@
 from .abstract_data_product_info import AbstractDataProductInfo
 from .abstract_data_product_status import AbstractDataProductStatus
 from .abstract_data_product_type import AbstractDataProductType
+from .access_duration import AccessDuration
+from .access_duration_type import AccessDurationType
+from .access_duration_update import AccessDurationUpdate
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
 from .approve_link_between_technical_asset_and_output_port_request import (
@@ -161,6 +164,9 @@ from .get_exploration_input_ports_response import GetExplorationInputPortsRespon
 from .get_exploration_response import GetExplorationResponse
 from .get_explorations_response import GetExplorationsResponse
 from .get_input_ports_for_output_port_response import GetInputPortsForOutputPortResponse
+from .get_output_port_access_durations_response import (
+    GetOutputPortAccessDurationsResponse,
+)
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
@@ -202,6 +208,7 @@ from .osi_semantic_model_technical_asset_configuration import (
     OSISemanticModelTechnicalAssetConfiguration,
 )
 from .output_port import OutputPort
+from .output_port_access_duration import OutputPortAccessDuration
 from .output_port_access_type import OutputPortAccessType
 from .output_port_curated_queries import OutputPortCuratedQueries
 from .output_port_curated_queries_update import OutputPortCuratedQueriesUpdate
@@ -301,6 +308,7 @@ from .technical_asset_status import TechnicalAssetStatus
 from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
 from .theme_settings import ThemeSettings
+from .time_bound_access_enabled_response import TimeBoundAccessEnabledResponse
 from .ui_element_checkbox import UIElementCheckbox
 from .ui_element_metadata import UIElementMetadata
 from .ui_element_metadata_response import UIElementMetadataResponse
@@ -333,6 +341,9 @@ __all__ = (
     "AbstractDataProductInfo",
     "AbstractDataProductStatus",
     "AbstractDataProductType",
+    "AccessDuration",
+    "AccessDurationType",
+    "AccessDurationUpdate",
     "AccessGranularity",
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
@@ -459,6 +470,7 @@ __all__ = (
     "GetExplorationResponse",
     "GetExplorationsResponse",
     "GetInputPortsForOutputPortResponse",
+    "GetOutputPortAccessDurationsResponse",
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",
@@ -490,6 +502,7 @@ __all__ = (
     "OIDCTokenResponse",
     "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
+    "OutputPortAccessDuration",
     "OutputPortAccessType",
     "OutputPortCuratedQueries",
     "OutputPortCuratedQueriesUpdate",
@@ -565,6 +578,7 @@ __all__ = (
     "TechnicalInfo",
     "TechnicalMapping",
     "ThemeSettings",
+    "TimeBoundAccessEnabledResponse",
     "UIElementCheckbox",
     "UIElementMetadata",
     "UIElementMetadataResponse",

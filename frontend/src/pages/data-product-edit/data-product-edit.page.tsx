@@ -11,5 +11,5 @@ export function DataProductEdit() {
         return null;
     }
 
-    return <DataProductForm dataProductId={dataProductId} mode={'edit'} />;
+    return <DataProductForm dataProductId={dataProductId} mode="edit" />;
 }

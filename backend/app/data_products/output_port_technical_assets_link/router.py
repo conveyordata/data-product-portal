@@ -177,13 +177,14 @@ def link_output_port_to_technical_asset(
         dataset_link.dataset_id,
         Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
     )
-    if authenticated_user not in approvers:
+    other_approvers = [a for a in approvers if a != authenticated_user]
+    if other_approvers:
         background_tasks.add_task(
             email.send_link_dataset_email(
                 dataset_link.dataset,
                 dataset_link.data_output,
                 requester=deepcopy(authenticated_user),
-                approvers=[deepcopy(approver) for approver in approvers],
+                approvers=[deepcopy(approver) for approver in other_approvers],
             )
         )
     return LinkTechnicalAssetsToOutputPortResponse(link_id=dataset_link.id)

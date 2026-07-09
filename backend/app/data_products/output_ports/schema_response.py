@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import Field
 
+from app.access_durations.enums import AccessDurationType
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import (
     OutputPortSettingValue,
@@ -24,6 +25,17 @@ class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
     technical_asset: TechnicalAsset = Field(validation_alias="data_output")
 
 
+class OutputPortAccessDuration(ORMModel):
+    access_duration_type: AccessDurationType
+    days: int
+
+
+class GetOutputPortAccessDurationsResponse(ORMModel):
+    id: UUID
+    data_product_access_duration: OutputPortAccessDuration
+    exploration_access_duration: OutputPortAccessDuration
+
+
 class BaseOutputPortGet(ORMModel):
     id: UUID
     namespace: str
@@ -32,6 +44,8 @@ class BaseOutputPortGet(ORMModel):
     status: OutputPortStatus
     usage: Optional[str]
     access_type: OutputPortAccessType
+    data_product_access_duration_type: AccessDurationType
+    exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
 
     # Nested schemas
