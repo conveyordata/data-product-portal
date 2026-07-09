@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
-import { AccessDurationOverview } from '@/pages/cart/components/access-duration-overview';
 import { FormIssues } from '@/pages/cart/components/form-item-issues.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { useCartOverlapCheck } from '@/pages/cart/hooks/use-cart-overlap-check.ts';
@@ -18,7 +17,7 @@ import {
     useRequestInputPortsForDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart, DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
+import { clearCart } from '@/store/features/cart/cart-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 
@@ -148,10 +147,6 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
             </Form.Item>
             <FormIssues submitFormIssues={submitFormIssues} />
             <JustificationFormItem />
-            <AccessDurationOverview
-                cartOutputPorts={cartOutputPorts}
-                dataProductTypeChoice={DataProductChoiceOptions.data_product}
-            />
             <Form.Item label={null}>
                 <Button
                     type="primary"
