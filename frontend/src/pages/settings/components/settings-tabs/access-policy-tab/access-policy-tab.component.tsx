@@ -34,19 +34,21 @@ function toPolicies(durations: AccessDuration[]): ConsumerPolicy[] {
         return acc;
     }, {});
 
-    return (Object.entries(byType) as [AbstractDataProductType, AccessDuration[]][]).map(([type, rows]) => {
-        const defaultRow = rows.find((r) => r.is_default) ?? rows[0];
-        const alternativeRow = rows.find((r) => !r.is_default);
-        return {
-            key: type,
-            durationType: defaultRow.access_duration_type,
-            defaultDays: defaultRow.days,
-            alternativeAllowed: !!alternativeRow,
-            alternativeDays: alternativeRow?.days ?? undefined,
-            defaultId: defaultRow.id,
-            alternativeId: alternativeRow?.id,
-        };
-    });
+    return (Object.entries(byType) as [AbstractDataProductType, AccessDuration[]][])
+        .map(([type, rows]) => {
+            const defaultRow = rows.find((r) => r.is_default) ?? rows[0];
+            const alternativeRow = rows.find((r) => !r.is_default);
+            return {
+                key: type,
+                durationType: defaultRow.access_duration_type,
+                defaultDays: defaultRow.days,
+                alternativeAllowed: !!alternativeRow,
+                alternativeDays: alternativeRow?.days ?? undefined,
+                defaultId: defaultRow.id,
+                alternativeId: alternativeRow?.id,
+            };
+        })
+        .sort((a, b) => a.key.localeCompare(b.key));
 }
 
 export function AccessPolicyTab() {
@@ -90,7 +92,7 @@ export function AccessPolicyTab() {
             key: 'consumer_type',
             width: 200,
             render: (_, record) => (
-                <Flex align="center" gap={8}>
+                <Flex align="center" gap={'small'}>
                     <AbstractProductIcon type={record.key} />
                     <Typography.Text strong>{t(PRODUCT_TYPE_LABELS[record.key] ?? record.key)}</Typography.Text>
                 </Flex>
@@ -98,7 +100,7 @@ export function AccessPolicyTab() {
         },
         {
             title: (
-                <Flex align="center" gap={8}>
+                <Flex align="center" gap={'small'}>
                     {t('Default duration')}
                     <Tooltip title={t('The default access duration assigned when a request is approved.')}>
                         <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
@@ -108,7 +110,7 @@ export function AccessPolicyTab() {
             key: 'duration',
             width: 320,
             render: (_, record) => (
-                <Flex align="center" gap={8}>
+                <Flex align="center" gap={'small'}>
                     <Select
                         value={record.durationType}
                         onChange={(val: AccessDurationType) =>
@@ -135,7 +137,7 @@ export function AccessPolicyTab() {
         },
         {
             title: (
-                <Flex align="center" gap={8}>
+                <Flex align="center" gap={'small'}>
                     {t('Alternative allowed')}
                     <Tooltip
                         title={t(
@@ -153,7 +155,7 @@ export function AccessPolicyTab() {
                 const label = isTimeBound ? t('Permanent allowed') : t('Time-bound allowed');
 
                 return (
-                    <Flex align="center" gap={8}>
+                    <Flex align="center" gap={'small'}>
                         <Checkbox
                             checked={record.alternativeAllowed}
                             onChange={(e) => {
@@ -180,8 +182,8 @@ export function AccessPolicyTab() {
     ];
 
     return (
-        <Flex vertical gap={8}>
-            <Flex vertical gap={8}>
+        <Flex vertical gap={'small'}>
+            <Flex vertical gap={'small'}>
                 <Typography.Title level={3}>{t('Access Duration Settings')}</Typography.Title>
                 <Typography.Text type="secondary">
                     {t('Configure default access durations for Explorations and Data Products.')}

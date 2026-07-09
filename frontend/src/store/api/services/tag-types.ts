@@ -35,6 +35,7 @@ export enum TagTypes {
     History = 'History',
     Notifications = 'Notifications',
     PendingAction = 'PendingAction',
+    AccessDuration = 'AccessDuration',
 }
 
 export const STATIC_TAG_ID = {

@@ -1,5 +1,7 @@
 from typing import Optional
 
+from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.type import AbstractDataProductType
@@ -7,6 +9,7 @@ from app.access_durations.enums import AccessDurationType
 from app.access_durations.model import AccessDuration as AccessDurationModel
 from app.access_durations.schema_request import AccessDurationUpdate
 from app.access_durations.schema_response import AccessDuration
+from app.data_products.output_ports.model import Dataset as DatasetModel
 
 
 class AccessDurationService:
@@ -82,6 +85,8 @@ class AccessDurationService:
             )
         )
 
+        allowed_types = {update.access_duration_type}
+
         if update.alternative_allowed:
             alternative_type = (
                 AccessDurationType.PERMANENT
@@ -96,6 +101,41 @@ class AccessDurationService:
                     is_default=False,
                 )
             )
+            allowed_types.add(alternative_type)
+
+        self._cascade_output_ports(
+            abstract_data_product_type, allowed_types, update.access_duration_type
+        )
 
         self.db.commit()
         return self.get_access_durations_by_type(abstract_data_product_type)
+
+    def _cascade_output_ports(
+        self,
+        abstract_data_product_type: AbstractDataProductType,
+        allowed_types: set[AccessDurationType],
+        new_default_type: AccessDurationType,
+    ) -> None:
+        """Move output ports off an access duration type no longer offered."""
+        match abstract_data_product_type:
+            case AbstractDataProductType.DATA_PRODUCT:
+                column = DatasetModel.data_product_access_duration_type
+            case AbstractDataProductType.EXPLORATION:
+                column = DatasetModel.exploration_access_duration_type
+            case _:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid abstract data product type: {abstract_data_product_type}",
+                )
+
+        outdated_datasets = (
+            self.db.scalars(select(DatasetModel).where(column.notin_(allowed_types)))
+            .unique()
+            .all()
+        )
+
+        for dataset in outdated_datasets:
+            if abstract_data_product_type == AbstractDataProductType.DATA_PRODUCT:
+                dataset.data_product_access_duration_type = new_default_type
+            else:
+                dataset.exploration_access_duration_type = new_default_type
