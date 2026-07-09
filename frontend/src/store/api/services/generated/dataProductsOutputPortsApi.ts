@@ -754,7 +754,7 @@ export type Graph = {
   nodes: Node[];
 };
 export type OutputPortAccessDuration = {
-  is_permanent: boolean;
+  access_duration_type: AccessDurationType;
   days: number;
 };
 export type GetOutputPortAccessDurationsResponse = {

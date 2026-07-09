@@ -120,7 +120,7 @@ class AccessDurationService:
                 column = DatasetModel.exploration_access_duration_type
             case _:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"Invalid abstract data product type: {abstract_data_product_type}",
                 )
 

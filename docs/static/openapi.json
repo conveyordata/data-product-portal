@@ -12576,9 +12576,8 @@
       },
       "OutputPortAccessDuration": {
         "properties": {
-          "is_permanent": {
-            "type": "boolean",
-            "title": "Is Permanent"
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
           },
           "days": {
             "type": "integer",
@@ -12587,7 +12586,7 @@
         },
         "type": "object",
         "required": [
-          "is_permanent",
+          "access_duration_type",
           "days"
         ],
         "title": "OutputPortAccessDuration"

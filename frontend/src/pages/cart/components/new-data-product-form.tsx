@@ -9,7 +9,7 @@ import styles from '@/components/data-products/data-product-form/data-product-fo
 import { DataProductFormItems } from '@/components/data-products/data-product-form/data-product-form-items.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
-import { FormItemAccessDuration } from '@/pages/cart/components/form-item-access-duration.tsx';
+import { AccessDurationOverview } from '@/pages/cart/components/access-duration-overview';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
@@ -88,7 +88,7 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
         >
             <DataProductFormItems form={form} mode={'create'} setAreFormItemsLoading={setAreFormItemsLoading} />
             <JustificationFormItem />
-            <FormItemAccessDuration
+            <AccessDurationOverview
                 cartOutputPorts={cartOutputPorts}
                 dataProductTypeChoice={DataProductChoiceOptions.data_product}
             />

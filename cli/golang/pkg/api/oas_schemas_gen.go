@@ -9048,13 +9048,13 @@ func (s *OutputPort) SetTags(val []Tag) {
 
 // Ref: #/components/schemas/OutputPortAccessDuration
 type OutputPortAccessDuration struct {
-	IsPermanent bool `json:"is_permanent"`
-	Days        int  `json:"days"`
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               int                `json:"days"`
 }
 
-// GetIsPermanent returns the value of IsPermanent.
-func (s *OutputPortAccessDuration) GetIsPermanent() bool {
-	return s.IsPermanent
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *OutputPortAccessDuration) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
 }
 
 // GetDays returns the value of Days.
@@ -9062,9 +9062,9 @@ func (s *OutputPortAccessDuration) GetDays() int {
 	return s.Days
 }
 
-// SetIsPermanent sets the value of IsPermanent.
-func (s *OutputPortAccessDuration) SetIsPermanent(val bool) {
-	s.IsPermanent = val
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *OutputPortAccessDuration) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
 }
 
 // SetDays sets the value of Days.

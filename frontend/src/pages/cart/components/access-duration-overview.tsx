@@ -10,11 +10,12 @@ type Props = {
     dataProductTypeChoice: DataProductChoiceOptions;
 };
 
-export const FormItemAccessDuration = ({ cartOutputPorts, dataProductTypeChoice }: Props) => {
+export const AccessDurationOverview = ({ cartOutputPorts, dataProductTypeChoice }: Props) => {
     const { t } = useTranslation();
     const { token } = theme.useToken();
 
     return (
+        // Form.Item is used to ensure that the card is aligned with other form items in the checkout page
         <Form.Item>
             <Card
                 size="small"
@@ -27,6 +28,7 @@ export const FormItemAccessDuration = ({ cartOutputPorts, dataProductTypeChoice 
                 style={{ backgroundColor: token.colorInfoBg, borderColor: token.colorInfoBorder }}
                 styles={{ header: { minHeight: 32 }, body: { padding: '4px 12px' } }}
             >
+                {/* List is used although deprecated, switching to Listy when available */}
                 <List
                     split={false}
                     size="small"

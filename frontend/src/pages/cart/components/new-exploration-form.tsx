@@ -9,7 +9,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import styles from '@/components/data-products/data-product-form/data-product-form.module.scss';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
-import { FormItemAccessDuration } from '@/pages/cart/components/form-item-access-duration.tsx';
+import { AccessDurationOverview } from '@/pages/cart/components/access-duration-overview';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -181,7 +181,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                 />
             </Form.Item>
             <JustificationFormItem />
-            <FormItemAccessDuration
+            <AccessDurationOverview
                 cartOutputPorts={cartOutputPorts}
                 dataProductTypeChoice={DataProductChoiceOptions.exploration}
             />

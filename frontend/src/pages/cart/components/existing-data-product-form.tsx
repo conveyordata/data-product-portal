@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
-import { FormItemAccessDuration } from '@/pages/cart/components/form-item-access-duration.tsx';
+import { AccessDurationOverview } from '@/pages/cart/components/access-duration-overview';
 import { FormIssues } from '@/pages/cart/components/form-item-issues.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { useCartOverlapCheck } from '@/pages/cart/hooks/use-cart-overlap-check.ts';
@@ -148,7 +148,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
             </Form.Item>
             <FormIssues submitFormIssues={submitFormIssues} />
             <JustificationFormItem />
-            <FormItemAccessDuration
+            <AccessDurationOverview
                 cartOutputPorts={cartOutputPorts}
                 dataProductTypeChoice={DataProductChoiceOptions.data_product}
             />
