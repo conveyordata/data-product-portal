@@ -75,7 +75,6 @@ Add:
 | Add | Meaning |
 | --- | --- |
 | link access indicator — reused `status`, or a new `is_active` | how the link signals "has access" for counts / graph / ordering / filtering; derived from its requests, not stored. Two options — see Open Questions. |
-| `UniqueConstraint(dataset_id, consuming_abstract_data_product_id)` | one link per (output port, consumer), so a re-request adds a request to the existing link instead of creating a duplicate link. |
 
 Remove (moved to `input_port_requests`, or dropped as now computed):
 
@@ -101,7 +100,7 @@ Requests reference the link one-directionally via `input_port_id`; the link hold
 | Column | Meaning |
 | --- | --- |
 | `id` | PK |
-| `input_port_id` → input_ports (ON DELETE CASCADE) | the link this request belongs to |
+| `input_port_id` → input_ports | the link this request belongs to |
 | `status` | PENDING → APPROVED / DENIED |
 | `justification` | the consumer's reason for this request; on a renewal the previous request's justification is reused |
 | `requested_duration_days` (nullable) | requested window length; NULL = permanent |
@@ -131,14 +130,14 @@ All paths stay on `/api/v2`; changes are additive.
 
 * `GET /data_products/{id}/input_ports` and `GET /explorations/{id}/input_ports` — list a consumer's input ports. Response adds `is_expired`, `is_expiring_soon`, the effective end date (`valid_until`) and the request history; grant fields come from the active request, not the flat link.
 * `POST /data_products/{id}/input_ports` and `POST /explorations/{id}/input_ports` — request access; also the single entry point for renewal. If a link already exists for that (consumer, output port), it adds a new request instead of failing as "already exists" or mutating the old grant; on a renewal the previous justification is reused. Blocked only if a request is already PENDING on that link.
-* `DELETE /data_products/{id}/input_ports/{output_port_id}` (and exploration equivalent) — unlink; deletes the link, and its requests are removed by the FK cascade.
+* `DELETE /data_products/{id}/input_ports/{output_port_id}` (and exploration equivalent) — unlink;
 
 **Producer side** (an output port owner managing consumers):
 
 * `GET /data_products/{dp}/output_ports/{op}/input_ports` — list the consumers of an output port; same additive response changes as the consumer list.
 * `POST .../input_ports/approve` and `POST .../input_ports/deny` — decide the link's single PENDING request; sets `status` and `decided_by/on`, and on approve sets `valid_from/valid_until` from the requested duration.
 * `POST .../input_ports/renew` — producer-initiated extension; adds a new APPROVED request (`decided_by` = the producer) rather than overwriting the current grant's dates.
-* `POST .../input_ports/remove` — revoke; deletes the link (FK cascade removes its requests).
+* `POST .../input_ports/remove` — revoke; deletes the link
 
 **Approver queue:**
 
@@ -146,22 +145,22 @@ All paths stay on `/api/v2`; changes are additive.
 
 ### Edge cases and outcomes
 
-| # | Scenario | Outcome |
-| --- | --- | --- |
-| 1 | Unrestricted OP, permanent | Request auto-approved, `valid_until=NULL` → has access, no expiry |
-| 2 | Unrestricted OP, time-bound | Auto-approved, `valid_from=now`, `valid_until=now+days` → access until it lapses |
-| 3 | Restricted OP, time-bound, request | Request PENDING (`requested_duration_days` set) → no access; on approve → `valid_from/until` set |
-| 4 | Restricted OP request denied | Request DENIED; the link stays, shown as denied; no access |
-| 5 | Re-request after denial | New request on the same link — no duplicate link |
-| 6 | Active grant + renewal denied | R1 still active → has access; R2 shown as denied. Both visible in history |
-| 7 | Active grant + renewal approved | R2 approved with a later `valid_until`; effective end = latest window; R1 historical |
-| 8 | Renewal after expiry | Old grant lapsed → no access; renewal request → approve → has access again |
+| # | Scenario | Outcome                                                                                              |
+| --- | --- |------------------------------------------------------------------------------------------------------|
+| 1 | Unrestricted OP, permanent | Request auto-approved, `valid_until=NULL` → has access, no expiry                                    |
+| 2 | Unrestricted OP, time-bound | Auto-approved, `valid_from=now`, `valid_until=now+days` → access until it lapses                     |
+| 3 | Restricted OP, time-bound, request | Request PENDING (`requested_duration_days` set) → no access; on approve → `valid_from/until` set     |
+| 4 | Restricted OP request denied | Request DENIED; the link stays, shown as denied; no access                                           |
+| 5 | Re-request after denial | New request on the same link — no duplicate link                                                     |
+| 6 | Active grant + renewal denied | R1 still active → has access; R2 shown as denied. Both visible in history                            |
+| 7 | Active grant + renewal approved | R2 approved with a later `valid_until`; effective end = latest window; R1 historical                 |
+| 8 | Renewal after expiry | Old grant lapsed → no access; renewal request → approve → has access again                           |
 | 9 | Expiring soon | Backend sets `is_expiring_soon` from `valid_until`; UI shows renew button + warning; no state change |
-| 10 | Permanent grant | `valid_until=NULL` → no expiry, no extend |
-| 11 | Producer extend | Producer adds a new approved request (`decided_by` = producer) |
-| 12 | Second request while one pending | Blocked (one pending per link) → 400; DB partial-unique-index backstop |
-| 13 | Remove / unlink | Delete the link; requests removed by FK cascade |
-| 14 | Grant lapses while renewal still pending | No access until re-approval (a natural gap — replaces today's "renewing → PENDING") |
+| 10 | Permanent grant | `valid_until=NULL` → no expiry, no extend                                                            |
+| 11 | Producer extend | Producer adds a new approved request (`decided_by` = producer)                                       |
+| 12 | Second request while one pending | Blocked (one pending per link) → 400; DB partial-unique-index backstop                               |
+| 13 | Remove / unlink | Delete the link -> Maybe w never want to delete the ink, just put it on inactive to keep the audit   |
+| 14 | Grant lapses while renewal still pending | No access until re-approval (a natural gap — replaces today's "renewing → PENDING")                  |
 
 ## Open Questions
 
@@ -182,3 +181,7 @@ The link needs a queryable "does this consumer currently have access" signal for
 
 One of the main outcomes is that we remove a background task and introduce more computed fields in the backend.
 Is this also part of this ADR as a general decision, or is thsi function creep?
+
+### Do we allow deletes on input ports?
+
+Deleting an input port and wihtout a cascade keeps the history of the audit, but not the link to the port. Do we want to keep the input_port itself?
