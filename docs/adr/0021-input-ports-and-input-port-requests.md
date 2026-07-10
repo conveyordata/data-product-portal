@@ -70,7 +70,9 @@ Keep (identity only):
 | `id` | PK |
 | `dataset_id` → datasets | the output port |
 | `consuming_abstract_data_product_id` → abstract_data_products | the consuming data product / exploration |
+| `created_by` | owner, the one we need to notify for renewals | 
 | `created_on`, `updated_on` | audit |
+
 
 Add:
 
