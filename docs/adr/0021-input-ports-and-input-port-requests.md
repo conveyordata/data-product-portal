@@ -54,6 +54,7 @@ The link table keeps only identity (which consumer consumes which output port). 
 * **Good, because** an active grant can coexist with a pending or denied renewal.
 * **Good, because** access and expiry are computed live, removing the background task and its edge cases.
 * **Good, because** a denial justification fits naturally on the request row.
+* **Good, because** bugs are easier to fix and figure out since we have an audit trail, reducing the mental burden for everyone
 * **Neutral, because** the "does this link currently grant access" signal must be re-expressed (see Open Questions).
 * **Bad, because** it requires a new table and a one-time backfill migration.
 
