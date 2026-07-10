@@ -142,9 +142,12 @@ The provisioner reacts to events, so expiry is handled by a job rather than comp
 * For each link whose effective grant window has passed and whose access-ended event has not yet been sent: emit the access-ended event (the provisioner revokes infra), set the link `status` to `EXPIRED` when no request is pending (otherwise leave it `PENDING`), and set `expiry_event_sent`.
 * `expiry_event_sent` is the delivery guarantee: if emitting the event fails, the next daily run or startup retries it. The same marker is reset when a new grant is approved so a later expiry fires again.
 
-### Other computed field
+### Computed fields (for the UI)
 
-* `is_expiring_soon` — computed in the backend from `valid_until` and returned by the API; drives the renew button and warning banner. Not a status and not persisted.
+As agreed in the meeting, the background task owns the state logic; a couple of convenience fields are exposed for easy UI rendering. They are computed (not persisted). If querying or consistency ever needs it, they could instead be columns on `input_ports` maintained by the background task.
+
+* `is_expiring_soon` — an approved grant is within the expiring-soon threshold of `valid_until`. Drives the renew button and warning banner.
+* `is_renewing` — the link has an active grant and a renewal request is currently PENDING. Lets the UI show a "renewing" state.
 
 ### Endpoint changes
 
@@ -154,7 +157,7 @@ All paths stay on `/api/v2`; changes are additive.
 
 * `GET /data_products/{id}/input_ports` and `GET /explorations/{id}/input_ports` — list a consumer's input ports. Response adds `is_expiring_soon` and the effective end date (`valid_until`); the link `status` now includes `EXPIRED`; grant fields come from the active request.
 * `GET /input_ports/{id}/requests` — list all requests for a given input port (the audit/history view).
-* `POST /data_products/{id}/input_ports` and `POST /explorations/{id}/input_ports` — request access; also the single entry point for renewal. If a link already exists for that (consumer, output port), it adds a new request instead of failing as "already exists" or mutating the old grant; on a renewal the previous justification is reused. Blocked only if a request is already PENDING on that link.
+* `POST /data_products/{id}/input_ports` and `POST /explorations/{id}/input_ports` — request access; also the single entry point for renewal. If a link already exists for that (consumer, output port), it adds a new request instead of failing as "already exists" or mutating the old grant; on a renewal the previous justification is reused. Blocked if a request is already PENDING on the link, or if the current active grant is permanent (`valid_until = NULL`) — permanent access never lapses, so there is nothing to renew. Changing permanent access to time-bound is not possible in place today; the input port must be deleted and recreated (see Deletion).
 * `DELETE /data_products/{id}/input_ports/{output_port_id}` (and exploration equivalent) — unlink.
 
 **Producer side** (an output port owner managing consumers):
@@ -170,7 +173,9 @@ All paths stay on `/api/v2`; changes are additive.
 
 ### Deletion
 
-Deleting an input port stays, and for now it cascades its requests. A later iteration may replace hard delete with **cancellation** — keeping the link and its full request history for audit instead of removing it.
+Deleting an input port stays, and it cascades its requests.
+
+Because permanent access cannot be re-scoped in place, changing a permanent grant to time-bound today means deleting the input port and recreating it (which loses the audit trail). A `CANCELLED` state / cancel action was considered — ending a grant while keeping the link and its request history, and re-scoping permanent access without delete-and-recreate — but it is out of scope for this story (see Open Questions).
 
 ### Edge cases and outcomes
 
@@ -188,7 +193,8 @@ Deleting an input port stays, and for now it cascades its requests. A later iter
 | 10 | Permanent grant | `valid_until=NULL` → APPROVED, no expiry, no extend |
 | 11 | Producer extend | Producer adds a new approved request (`decided_by` = producer) |
 | 12 | Second request while one pending | Blocked (one pending per link) → 400; DB partial-unique-index backstop |
-| 13 | Remove / unlink | Delete the link, cascading its requests (a future iteration may cancel instead, to keep the audit trail) |
+| 12b | New request while the current grant is permanent | Blocked → 400; permanent access has nothing to renew. To re-scope it to time-bound, delete the input port and recreate it |
+| 13 | Remove / unlink | Delete the link, cascading its requests |
 | 14 | Grant lapses while renewal still pending | Daily job emits the access-ended event (infra revoked); link `status` is PENDING until re-approval |
 
 ### Backward compatibility
