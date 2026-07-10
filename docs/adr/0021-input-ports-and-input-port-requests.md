@@ -90,7 +90,7 @@ Remove (moved to `input_port_requests`, or dropped):
 
 | Removed column | What happens to it |
 | --- | --- |
-| `justification` | moved to the request (each request has its own reason; also allows a denial justification later) |
+| `justification` | moved to the request, can be copied over for renewals (each request has its own reason; also allows a denial justification later) |
 | `requested_on`, `requested_by_id` | moved to the request |
 | `approved_on`, `approved_by_id` | moved to the request as `decided_on` / `decided_by_id` |
 | `denied_on`, `denied_by_id` | moved to the request as `decided_on` / `decided_by_id` |
