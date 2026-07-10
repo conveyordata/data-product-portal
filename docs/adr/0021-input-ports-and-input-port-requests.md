@@ -47,6 +47,7 @@ The link table keeps only identity (which consumer consumes which output port). 
 * **Bad, because** renewals overwrite the grant in place, so there is no history.
 * **Bad, because** denials and renewals cannot be audited, and a denial justification cannot be added.
 * **Bad, because** it needs an `EXPIRED` status maintained by a background task and an `is_renewing` flag to track in-flight renewals.
+* **Bad, because** it's easy for bugs to slip in and hard to figure them out since we will miss an audit trail
 
 ### Option 2: Split into link + requests
 
