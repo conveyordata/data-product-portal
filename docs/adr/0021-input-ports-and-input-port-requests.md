@@ -112,6 +112,7 @@ Requests reference the link one-directionally via `input_port_id`; the link hold
 | `input_port_id` → input_ports | the link this request belongs to |
 | `status` | `PENDING / APPROVED / DENIED` |
 | `justification` | the consumer's reason for this request; on a renewal the previous request's justification is reused |
+| `access_duration_type` | `PERMANENT` or `TIME_BOUND` — stated explicitly on the request (also derivable from `valid_until` / `requested_duration_days`, but stored for clarity) |
 | `requested_duration_days` (nullable) | requested window length; NULL = permanent |
 | `requested_on`, `requested_by_id` → users | when / who requested |
 | `decided_on` (nullable), `decided_by_id` (nullable) → users | when / who approved or denied (which one is told by `status`) |
