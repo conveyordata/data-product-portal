@@ -32,6 +32,7 @@ from app.core.auth.jwt import JWTToken
 from app.core.logging import logger
 from app.data_output_configuration.glue.schema import GlueTechnicalAssetConfiguration
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
+from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import DataOutputService
 from app.database.database import SessionLocal
 from app.mcp.deps import get_db_session
@@ -93,36 +94,27 @@ class GlueMCPPlugin(MCPPlugin):
 
     Step 4: CHECK ACCESS — TRY CONSUMING DATA PRODUCTS FIRST 🔑
     ────────────────────────────────────────────────────────────
-    IMPORTANT: Users typically access data through CONSUMING data products.
+    get_aws_credentials(namespace, environment)
+    Try consuming data product namespaces first, then the owner namespace.
+    Use the same namespace for ALL subsequent calls.
 
-    A. For EACH data_product in data_product_links:
-       1. namespace = data_product.namespace
-       2. get_aws_credentials(namespace, environment)
-       3. SUCCESS → use this namespace for ALL subsequent calls
-       4. FAILED  → try next consuming product
-    B. If all fail, try the owner data product namespace.
-    C. If everything fails → tell user which products to request access from.
-
-    ⚠️  Use the SAME namespace for every subsequent tool call!
-
-    Step 5: GET GLUE DATABASE NAME
-    ───────────────────────────────
+    Step 5: GET DATABASE NAME
+    ──────────────────────────
     get_glue_database(environment, technical_asset_id)
-    → Derives the fully-qualified Glue database name from the technical asset.
+    → Returns the fully-qualified Athena database name for the environment
+      (e.g. 'datalake_prod_my-product__sales').
+    → Use this name directly in SQL queries — no prefix computation needed.
 
-    Step 6: LIST AVAILABLE TABLES
-    ───────────────────────────────
+    Step 6: LIST TABLES
+    ────────────────────
     list_glue_tables(data_product_namespace, environment, database_name)
-    → database_name may need an environment prefix (e.g. 'datalake_experimentation_')
-    → Returns table names in the database.
 
     Step 7: EXECUTE QUERY
     ──────────────────────
-    query_athena(data_product_namespace, env, query, prefix, bucket)
-    → Returns query_execution_id.
-    → CRITICAL: use fully-qualified names with double-quotes for hyphens:
-      ✓ SELECT * FROM "datalake_experimentation_sales-data__sales"."users"
-      ✗ SELECT * FROM users  (missing database)
+    query_athena(data_product_namespace, env, query, bucket)
+    → Use the database name from get_glue_database directly in the SQL:
+      SELECT * FROM "datalake_prod_my-product__sales"."users"
+    → Always quote names that contain hyphens.
 
     Step 8: GET RESULTS
     ────────────────────
@@ -130,15 +122,6 @@ class GlueMCPPlugin(MCPPlugin):
     → RUNNING → wait 3-5 s and retry
     → SUCCEEDED → return formatted rows
     → FAILED    → show error
-
-    ✓ DO:
-    - Use get_database_prefix to build correct database names
-    - Use get_bucket to get the correct S3 results bucket per environment
-    - Always quote database/table names containing hyphens or underscores
-
-    ✗ DON'T:
-    - Don't skip get_glue_database — the name contains environment + suffix
-    - Don't use unqualified table names
 """
 
     def register_tools(self, mcp: FastMCP) -> None:
@@ -166,33 +149,22 @@ class GlueMCPPlugin(MCPPlugin):
             return _fetch_aws_credentials(data_product_namespace, env)
 
         @mcp.tool
-        def get_database_prefix(environment: str) -> str:
-            """Return the Athena database name prefix for a given environment.
-            Use the result when constructing fully-qualified database names.
-
-            Args:
-                environment: The environment name (e.g. 'prod', 'dev').
-            """
-            return f"{settings.AWS_ATHENA_PREFIX}_{environment}_"
-
-        @mcp.tool
         def get_glue_database(
             environment: str,
             technical_asset_id: str,
             db: Session = Depends(get_db_session),
-        ) -> str:
-            """Derive the fully-qualified Glue/Athena database name for a technical asset.
+        ) -> str | Dict[str, str]:
+            """Get the fully-qualified Athena/Glue database name for a technical asset.
 
-            Reads the result_string_template stored on the PlatformService (e.g.
-            '{database}__{database_suffix}.{table}'), renders it via the plugin's
-            render_template, then takes the database portion (before the first '.')
-            and prepends the environment prefix.
+            Reads database_name directly from the environment-specific AWSGlueConfig
+            stored on the platform service configuration — no prefix computation needed.
 
             Args:
                 environment: The environment name (e.g. 'prod', 'dev').
                 technical_asset_id: UUID of the Glue technical asset.
             Returns:
-                The fully-qualified Glue database name (e.g. 'prefix_env_db__suffix').
+                The fully-qualified database name (e.g. 'datalake_prod_mydb__sales'),
+                ready to use in SQL queries.
             """
             asset_uuid = UUID(technical_asset_id)
             do = ensure_technical_asset_exists(asset_uuid, db=db)
@@ -202,15 +174,29 @@ class GlueMCPPlugin(MCPPlugin):
 
             configuration: DataOutputConfiguration = data_output.configuration  # type: ignore[assignment]
             if not isinstance(configuration, GlueTechnicalAssetConfiguration):
-                return f"Technical asset {technical_asset_id} is not a Glue asset"
+                return {
+                    "error": f"Technical asset {technical_asset_id} is not a Glue asset"
+                }
 
-            # Use the DB-stored template (e.g. "{database}__{database_suffix}.{table}")
-            # render_template fills in the config fields; we only want the database part.
-            rendered = configuration.render_template(
-                data_output.service.result_string_template
-            )
-            database_name = rendered.split(".")[0]  # "db__suffix" (table stripped)
-            return f"{settings.AWS_ATHENA_PREFIX}_{environment}_{database_name}"
+            env_configs = [
+                EnvironmentConfigsGetItem.model_validate(e)
+                for e in data_output.environment_configurations
+            ]
+            for tech_info in compute_technical_info(
+                configuration, data_output.service, env_configs
+            ):
+                if tech_info.environment.lower() == environment.lower():
+                    if not tech_info.info:
+                        return {
+                            "error": f"No Glue info rendered for environment '{environment}'"
+                        }
+                    return tech_info.info.split(".")[
+                        0
+                    ]  # database part before the table
+
+            return {
+                "error": f"Environment '{environment}' not found for this technical asset"
+            }
 
         @mcp.tool
         def get_bucket(environment_id: str) -> Dict[str, Any]:
@@ -352,34 +338,29 @@ class GlueMCPPlugin(MCPPlugin):
             data_product_namespace: str,
             env: str,
             query: str,
-            prefix: str,
             bucket: str,
         ) -> Dict[str, Any]:
             """Run an Athena query using temporary credentials for a data product and environment.
 
-            Use get_database_prefix for the `prefix` argument and get_bucket for `bucket`.
+            Use get_bucket for the `bucket` argument.
+            Use the database name returned by get_glue_database directly in the SQL.
 
             CRITICAL: Use the SAME data_product_namespace that worked in get_aws_credentials().
 
             SQL SYNTAX:
-            - Always use fully qualified names: database.table
-            - Quote names containing hyphens or special characters:
-              ✓ SELECT * FROM "datalake_experimentation_sales-data__sales"."users"
+            - Use the full database name from get_glue_database in every query
+            - Quote names that contain hyphens or special characters:
+              ✓ SELECT * FROM "datalake_prod_sales-data__sales"."users"
               ✗ SELECT * FROM users
 
             Args:
                 data_product_namespace: The namespace with access (consuming data product).
                 env: The environment.
                 query: SQL query to execute.
-                prefix: Database prefix — use get_database_prefix.
                 bucket: S3 results bucket — use get_bucket.
             Returns:
                 {'query_execution_id': '...', ...} or {'error': '...'}.
             """
-            if not settings.AWS_ATHENA_PREFIX:
-                return {"error": "AWS_ATHENA_PREFIX not configured."}
-            if not prefix:
-                return {"error": "prefix is required. Use get_database_prefix."}
             if not bucket:
                 return {"error": "bucket is required. Use get_bucket."}
 
