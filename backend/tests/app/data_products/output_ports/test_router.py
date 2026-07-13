@@ -16,7 +16,6 @@ from app.settings import settings
 from tests import test_session
 from tests.factories import (
     AccessDurationFactory,
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
@@ -28,6 +27,7 @@ from tests.factories import (
     InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 from tests.webhook_util import assert_event_in_queue
@@ -380,7 +380,7 @@ class TestOutputPortRouter:
         data_product = DataProductFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
-        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
+        TechnicalAssetOutputPortAssociationFactory(dataset=ds, data_output=data_output)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         dataset = self.get_output_port(client, ds.id, data_product.id)
         assert dataset.status_code == 200
@@ -393,7 +393,7 @@ class TestOutputPortRouter:
         data_product = DataProductFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
-        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
+        TechnicalAssetOutputPortAssociationFactory(dataset=ds, data_output=data_output)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         dataset = self.get_output_port(client, ds.id, ds.data_product.id)
         assert dataset.status_code == 200

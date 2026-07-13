@@ -5,7 +5,9 @@ from sqlalchemy import select
 from app.configuration.platforms.platform_services.model import PlatformService
 from tests import test_session
 from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.data_outputs_datasets import (
+    TechnicalAssetOutputPortAssociationFactory,
+)
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_products_datasets import InputPortFactory
 from tests.factories.dataset import DatasetFactory
@@ -44,7 +46,7 @@ def add_random_data(
         for _ in range(random.randint(0, 3)):
             data_output = random.choice(data_outputs)
 
-            DataOutputDatasetAssociationFactory(
+            TechnicalAssetOutputPortAssociationFactory(
                 data_output=data_output,
                 dataset=dataset,
             )

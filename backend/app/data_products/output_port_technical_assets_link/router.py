@@ -22,7 +22,7 @@ from app.data_products.output_port_technical_assets_link.schema_response import 
     LinkTechnicalAssetsToOutputPortResponse,
 )
 from app.data_products.output_port_technical_assets_link.service import (
-    DataOutputDatasetService,
+    TechnicalAssetOutputPortService,
 )
 from app.data_products.technical_assets import email
 from app.data_products.technical_assets.service import DataOutputService
@@ -59,7 +59,7 @@ def approve_output_port_technical_asset_link(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    output_link = DataOutputDatasetService(db).approve_data_output_link(
+    output_link = TechnicalAssetOutputPortService(db).approve_data_output_link(
         data_product_id=data_product_id,
         technical_asset_id=link_request.technical_asset_id,
         output_port_id=output_port_id,
@@ -102,7 +102,7 @@ def deny_output_port_technical_asset_link(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    output_link = DataOutputDatasetService(db).deny_data_output_link(
+    output_link = TechnicalAssetOutputPortService(db).deny_data_output_link(
         data_product_id=data_product_id,
         technical_asset_id=link_request.technical_asset_id,
         output_port_id=output_port_id,

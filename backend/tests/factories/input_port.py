@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import factory
 
 from app.abstract_data_product.input_ports.model import (
@@ -21,3 +23,4 @@ class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
     consuming_abstract_data_product = factory.SubFactory(DataProductFactory)
     dataset = factory.SubFactory(DatasetFactory)
     requested_by = factory.SubFactory(UserFactory)
+    created_on = factory.LazyFunction(lambda: datetime.now(timezone.utc))

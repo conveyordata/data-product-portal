@@ -1,6 +1,5 @@
 from .. import test_session
 from .access_duration import AccessDurationFactory
-from .data_outputs_datasets import DataOutputDatasetAssociationFactory
 from .data_product import DataProductFactory
 from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
@@ -29,6 +28,7 @@ from .role_assignment_global import GlobalRoleAssignmentFactory
 from .s3_data_output import S3DataOutputFactory
 from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
+from .technical_asset_output_ports import TechnicalAssetOutputPortAssociationFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
 
@@ -47,7 +47,7 @@ def reset_unique_fakers() -> None:
 
 factories = [
     AccessDurationFactory,
-    DataOutputDatasetAssociationFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     DataProductFactory,
     DataProductSettingFactory,
     DataProductSettingValueFactory,

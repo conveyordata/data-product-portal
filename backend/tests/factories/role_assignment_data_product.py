@@ -6,6 +6,7 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.authz.authorization import Authorization
 from tests import test_session
+from tests.factories import RoleFactory
 
 
 class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -15,7 +16,7 @@ class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     id = factory.Faker("uuid4")
     data_product_id = factory.Faker("uuid4")
     user_id = factory.Faker("uuid4")
-    role_id = factory.Faker("uuid4")
+    role_id = factory.SubFactory(RoleFactory)
     decision = DecisionStatus.APPROVED
 
     @factory.post_generation
