@@ -12,7 +12,6 @@ from app.core.authz import Action
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
@@ -29,6 +28,7 @@ from tests.factories import (
     RoleFactory,
     TagFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 from tests.factories.data_product_setting_value import DataProductSettingValueFactory
@@ -515,7 +515,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        DataOutputDatasetAssociationFactory(data_output=ta, dataset=dataset)
+        TechnicalAssetOutputPortAssociationFactory(data_output=ta, dataset=dataset)
         downstream_dataset = DatasetFactory()
         InputPortFactory(
             dataset=dataset,
@@ -529,7 +529,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         dataset = DatasetFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        DataOutputDatasetAssociationFactory(data_output=ta, dataset=dataset)
+        TechnicalAssetOutputPortAssociationFactory(data_output=ta, dataset=dataset)
         exp = ExplorationFactory()
         InputPortFactory(
             dataset=dataset,

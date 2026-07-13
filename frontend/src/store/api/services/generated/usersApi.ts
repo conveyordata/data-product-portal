@@ -43,7 +43,12 @@ const injectedRtkApi = api.injectEndpoints({
       GetUserRequestsApiResponse,
       GetUserRequestsApiArg
     >({
-      query: () => ({ url: `/api/v2/users/current/my_requests` }),
+      query: (queryArg) => ({
+        url: `/api/v2/users/current/my_requests`,
+        params: {
+          hide_old_inactive: queryArg,
+        },
+      }),
     }),
     getCurrentUser: build.query<
       GetCurrentUserApiResponse,
@@ -74,7 +79,8 @@ export type GetUserPendingActionsApiResponse =
 export type GetUserPendingActionsApiArg = void;
 export type GetUserRequestsApiResponse =
   /** status 200 Successful Response */ MyRequestsResponse;
-export type GetUserRequestsApiArg = void;
+export type GetUserRequestsApiArg =
+  /** Filter out inactive requests older than 30 days */ boolean | undefined;
 export type GetCurrentUserApiResponse =
   /** status 200 Successful Response */ User;
 export type GetCurrentUserApiArg = void;

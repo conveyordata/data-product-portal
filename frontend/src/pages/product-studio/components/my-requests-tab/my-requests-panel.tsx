@@ -1,5 +1,5 @@
-import { Flex, Input, Table } from 'antd';
-import { parseAsString, useQueryState } from 'nuqs';
+import { Flex, Input, Radio, Table, Tooltip } from 'antd';
+import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
@@ -11,7 +11,12 @@ import { useGetUserRequestsQuery } from '@/store/api/services/generated/usersApi
 export function MyRequestsTab() {
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
-    const { data: { my_requests: myRequests = [] } = {}, isFetching } = useGetUserRequestsQuery();
+    const [filterOutOldInactiveRequests, setFilterOutOldInactiveRequests] = useQueryState(
+        'filterOutOldInactiveRequests',
+        parseAsBoolean.withDefault(true),
+    );
+    const { data: { my_requests: myRequests = [] } = {}, isFetching } =
+        useGetUserRequestsQuery(filterOutOldInactiveRequests);
     const { pagination, handlePaginationChange } = useTablePagination([]);
 
     const tableData: TableRow[] = useMemo(() => {
@@ -22,13 +27,31 @@ export function MyRequestsTab() {
 
     return (
         <Flex vertical gap="small">
-            <Input.Search
-                placeholder={t('Search requests...')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ maxWidth: 400 }}
-                allowClear
-            />
+            <Flex gap={'small'} align="center">
+                <Input.Search
+                    placeholder={t('Search requests...')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ maxWidth: 400 }}
+                    allowClear
+                />
+                <Radio.Group
+                    value={filterOutOldInactiveRequests}
+                    onChange={(e) => setFilterOutOldInactiveRequests(e.target.value)}
+                    optionType="button"
+                >
+                    <Radio.Button value={true}>
+                        <Tooltip
+                            title={t(
+                                'Active requests are either pending requests, or requests approved/denied over the last 30 days',
+                            )}
+                        >
+                            {t('Active requests')}
+                        </Tooltip>
+                    </Radio.Button>
+                    <Radio.Button value={false}>{t('All requests')}</Radio.Button>
+                </Radio.Group>
+            </Flex>
             <Table
                 columns={columns}
                 loading={isFetching}
