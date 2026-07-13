@@ -16,6 +16,7 @@ class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     justification = factory.Faker("text", max_nb_chars=20)
+    decision_note = factory.Faker("text", max_nb_chars=20)
     status = DecisionStatus.APPROVED
     consuming_abstract_data_product = factory.SubFactory(DataProductFactory)
     dataset = factory.SubFactory(DatasetFactory)

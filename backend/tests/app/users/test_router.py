@@ -274,3 +274,10 @@ class TestUsersRouter:
         response = client.get("/api/v2/users/current")
         assert response.status_code == 200, response.text
         assert response.json()["id"] == str(user.id)
+
+    def test_get_current_user_my_requests(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        InputPortFactory(requested_by=user)
+        response = client.get("/api/v2/users/current/my_requests")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["my_requests"]) == 1

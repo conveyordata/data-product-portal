@@ -6,7 +6,7 @@ const injectedRtkApi = api.injectEndpoints({
       GetInputPortsForOutputPortApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/`,
       }),
     }),
     approveOutputPortAsInputPort: build.mutation<
@@ -79,6 +79,7 @@ export type OutputPortInputPort = {
   id: string;
   justification: string;
   status: DecisionStatus;
+  decision_note?: string | null;
   consuming_abstract_data_product_id: string;
   consuming_abstract_data_product: AbstractDataProductInfo;
 };
@@ -97,9 +98,11 @@ export type HttpValidationError = {
 };
 export type ApproveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
+  decision_note?: string | null;
 };
 export type DenyOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
+  decision_note: string;
 };
 export type RemoveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;

@@ -29,11 +29,13 @@ from app.events.service import EventService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter(tags=["Data Products - Output ports - Input ports"])
-route = "/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports"
+router = APIRouter(
+    tags=["Data Products - Output ports - Input ports"],
+    prefix="/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports",
+)
 
 
-@router.get(route)
+@router.get("/")
 def get_input_ports_for_output_port(
     data_product_id: UUID,
     output_port_id: UUID,
@@ -50,7 +52,7 @@ def get_input_ports_for_output_port(
 
 
 @router.post(
-    f"{route}/approve",
+    "/approve",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -73,6 +75,7 @@ def approve_output_port_as_input_port(
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
         actor=authenticated_user,
+        decision_note=body.decision_note,
     )
 
     event_id = EventService(db).create_event(
@@ -94,7 +97,7 @@ def approve_output_port_as_input_port(
 
 
 @router.post(
-    f"{route}/deny",
+    "/deny",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -117,6 +120,7 @@ def deny_output_port_as_input_port(
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
         actor=authenticated_user,
+        decision_note=body.decision_note,
     )
 
     event_id = EventService(db).create_event(
@@ -137,7 +141,7 @@ def deny_output_port_as_input_port(
 
 
 @router.post(
-    f"{route}/remove",
+    "/remove",
     dependencies=[
         Depends(
             Authorization.enforce(

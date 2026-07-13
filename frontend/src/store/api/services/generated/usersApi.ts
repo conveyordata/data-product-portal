@@ -39,6 +39,12 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/v2/users/current/pending_actions` }),
     }),
+    getUserRequests: build.query<
+      GetUserRequestsApiResponse,
+      GetUserRequestsApiArg
+    >({
+      query: () => ({ url: `/api/v2/users/current/my_requests` }),
+    }),
     getCurrentUser: build.query<
       GetCurrentUserApiResponse,
       GetCurrentUserApiArg
@@ -66,6 +72,9 @@ export type MarkTourAsSeenApiArg = void;
 export type GetUserPendingActionsApiResponse =
   /** status 200 Successful Response */ PendingActionResponse;
 export type GetUserPendingActionsApiArg = void;
+export type GetUserRequestsApiResponse =
+  /** status 200 Successful Response */ MyRequestsResponse;
+export type GetUserRequestsApiArg = void;
 export type GetCurrentUserApiResponse =
   /** status 200 Successful Response */ User;
 export type GetCurrentUserApiArg = void;
@@ -205,11 +214,12 @@ export type AbstractDataProductInfo = {
   namespace: string;
   abstract_data_product_type: AbstractDataProductType;
 };
-export type DataProductOutputPortPendingAction = {
+export type InputPortRequest = {
   id: string;
   justification: string;
   consuming_abstract_data_product_id: string;
   output_port_id: string;
+  decision_note: string | null;
   status: DecisionStatus;
   requested_on: string;
   output_port: OutputPort;
@@ -217,7 +227,7 @@ export type DataProductOutputPortPendingAction = {
   requested_by: User;
   denied_by: User | null;
   approved_by: User | null;
-  pending_action_type?: "InputPort";
+  request_type?: "InputPort";
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
@@ -350,7 +360,7 @@ export type OwnedTechnicalAsset = {
       } & SnowflakeTechnicalAssetConfiguration);
   owner: DataProduct;
 };
-export type TechnicalAssetOutputPortPendingAction = {
+export type TechnicalAssetOutputPortRequest = {
   id: string;
   output_port_id: string;
   output_port: OutputPort;
@@ -363,9 +373,9 @@ export type TechnicalAssetOutputPortPendingAction = {
   requested_by: User;
   denied_by: User | null;
   approved_by: User | null;
-  pending_action_type?: "TechnicalAssetOutputPort";
+  request_type?: "TechnicalAssetOutputPort";
 };
-export type DataProductRoleAssignmentPendingAction = {
+export type DataProductRoleAssignmentRequest = {
   id: string;
   data_product: DataProduct;
   user: User;
@@ -375,13 +385,20 @@ export type DataProductRoleAssignmentPendingAction = {
   requested_by: User | null;
   decided_on: string | null;
   decided_by: User | null;
-  pending_action_type?: "DataProductRoleAssignment";
+  request_type?: "DataProductRoleAssignment";
 };
 export type PendingActionResponse = {
   pending_actions: (
-    | DataProductOutputPortPendingAction
-    | TechnicalAssetOutputPortPendingAction
-    | DataProductRoleAssignmentPendingAction
+    | InputPortRequest
+    | TechnicalAssetOutputPortRequest
+    | DataProductRoleAssignmentRequest
+  )[];
+};
+export type MyRequestsResponse = {
+  my_requests: (
+    | InputPortRequest
+    | TechnicalAssetOutputPortRequest
+    | DataProductRoleAssignmentRequest
   )[];
 };
 export const {
@@ -393,6 +410,8 @@ export const {
   useMarkTourAsSeenMutation,
   useGetUserPendingActionsQuery,
   useLazyGetUserPendingActionsQuery,
+  useGetUserRequestsQuery,
+  useLazyGetUserRequestsQuery,
   useGetCurrentUserQuery,
   useLazyGetCurrentUserQuery,
 } = injectedRtkApi;

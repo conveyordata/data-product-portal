@@ -1,6 +1,6 @@
 import copy
 from datetime import datetime
-from typing import Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
 import pytz
@@ -19,8 +19,10 @@ from app.core.authz import Action, Authorization
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.pending_actions.schema import DataProductDatasetPendingAction
 from app.users.schema import User
+from app.users.schema_response import (
+    InputPortRequest,
+)
 
 
 class InputPortService:
@@ -72,6 +74,7 @@ class InputPortService:
         output_port_id: UUID,
         consuming_data_product_id: UUID,
         actor: User,
+        decision_note: Optional[str] = None,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -85,6 +88,7 @@ class InputPortService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
+        current_link.decision_note = decision_note
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
@@ -111,6 +115,7 @@ class InputPortService:
         output_port_id: UUID,
         consuming_data_product_id: UUID,
         actor: User,
+        decision_note: str,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -124,6 +129,7 @@ class InputPortService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
+        current_link.decision_note = decision_note
         return current_link
 
     def remove_output_port_as_input_port(
@@ -140,9 +146,7 @@ class InputPortService:
         self.db.delete(current_link)
         return result
 
-    def get_user_pending_actions(
-        self, user: User
-    ) -> Sequence[DataProductDatasetPendingAction]:
+    def get_user_pending_actions(self, user: User) -> Sequence[InputPortRequest]:
         requested_associations = (
             self.db.scalars(
                 select(InputPortModel)
@@ -162,7 +166,7 @@ class InputPortService:
 
         authorizer = Authorization()
         return [
-            DataProductDatasetPendingAction.model_validate(a)
+            InputPortRequest.model_validate(a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
@@ -171,3 +175,16 @@ class InputPortService:
                 act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
         ]
+
+    def get_user_requests(self, user: User) -> Sequence[InputPortRequest]:
+        requested_associations = (
+            self.db.scalars(
+                select(InputPortModel)
+                .where(InputPortModel.requested_by_id == user.id)
+                .order_by(asc(InputPortModel.requested_on))
+            )
+            .unique()
+            .all()
+        )
+
+        return requested_associations

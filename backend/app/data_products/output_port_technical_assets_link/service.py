@@ -17,8 +17,10 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.pending_actions.schema import DataOutputDatasetPendingAction
 from app.users.schema import User
+from app.users.schema_response import (
+    TechnicalAssetOutputPortRequest,
+)
 
 
 class DataOutputDatasetService:
@@ -119,9 +121,27 @@ class DataOutputDatasetService:
         self.db.commit()
         return current_link
 
+    def get_user_requests(self, user: User):
+        requested_associations = (
+            self.db.scalars(
+                select(DataOutputDatasetAssociationModel)
+                .where(
+                    DataOutputDatasetAssociationModel.requested_by_id == user.id,
+                )
+                .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+            )
+            .unique()
+            .all()
+        )
+
+        return [
+            TechnicalAssetOutputPortRequest.model_validate(a)
+            for a in requested_associations
+        ]
+
     def get_user_pending_actions(
         self, user: User
-    ) -> Sequence[DataOutputDatasetPendingAction]:
+    ) -> Sequence[TechnicalAssetOutputPortRequest]:
         requested_associations = (
             self.db.scalars(
                 select(DataOutputDatasetAssociationModel)
@@ -143,7 +163,7 @@ class DataOutputDatasetService:
 
         authorizer = Authorization()
         return [
-            DataOutputDatasetPendingAction.model_validate(a)
+            TechnicalAssetOutputPortRequest.model_validate(a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),

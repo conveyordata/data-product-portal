@@ -3102,7 +3102,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports": {
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/": {
       "get": {
         "tags": [
           "Data Products - Output ports - Input ports"
@@ -5167,6 +5167,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PendingActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/my_requests": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Requests",
+        "operationId": "get_user_requests",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyRequestsResponse"
                 }
               }
             }
@@ -7912,6 +7933,17 @@
             "type": "string",
             "format": "uuid",
             "title": "Consuming Data Product Id"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
           }
         },
         "type": "object",
@@ -9266,87 +9298,6 @@
         ],
         "title": "DataProductLifeCyclesGetItem"
       },
-      "DataProductOutputPortPendingAction": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          },
-          "consuming_abstract_data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Consuming Abstract Data Product Id"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Requested On"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          },
-          "consuming_abstract_data_product": {
-            "$ref": "#/components/schemas/AbstractDataProductInfo"
-          },
-          "requested_by": {
-            "$ref": "#/components/schemas/User"
-          },
-          "denied_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pending_action_type": {
-            "type": "string",
-            "const": "InputPort",
-            "title": "Pending Action Type",
-            "default": "InputPort"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "justification",
-          "consuming_abstract_data_product_id",
-          "output_port_id",
-          "status",
-          "requested_on",
-          "output_port",
-          "consuming_abstract_data_product",
-          "requested_by",
-          "denied_by",
-          "approved_by"
-        ],
-        "title": "DataProductOutputPortPendingAction"
-      },
       "DataProductRoleAssignmentEvent": {
         "properties": {
           "id": {
@@ -9374,7 +9325,7 @@
         "title": "DataProductRoleAssignmentEvent",
         "description": "Fired on insert, update, and delete of a data-product role assignment."
       },
-      "DataProductRoleAssignmentPendingAction": {
+      "DataProductRoleAssignmentRequest": {
         "properties": {
           "id": {
             "type": "string",
@@ -9444,10 +9395,10 @@
               }
             ]
           },
-          "pending_action_type": {
+          "request_type": {
             "type": "string",
             "const": "DataProductRoleAssignment",
-            "title": "Pending Action Type",
+            "title": "Request Type",
             "default": "DataProductRoleAssignment"
           }
         },
@@ -9463,7 +9414,7 @@
           "decided_on",
           "decided_by"
         ],
-        "title": "DataProductRoleAssignmentPendingAction"
+        "title": "DataProductRoleAssignmentRequest"
       },
       "DataProductRoleAssignmentResponse": {
         "properties": {
@@ -10389,11 +10340,16 @@
             "type": "string",
             "format": "uuid",
             "title": "Consuming Data Product Id"
+          },
+          "decision_note": {
+            "type": "string",
+            "title": "Decision Note"
           }
         },
         "type": "object",
         "required": [
-          "consuming_data_product_id"
+          "consuming_data_product_id",
+          "decision_note"
         ],
         "title": "DenyOutputPortAsInputPortRequest"
       },
@@ -12088,6 +12044,17 @@
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
           },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
           "output_port_id": {
             "type": "string",
             "format": "uuid",
@@ -12130,6 +12097,99 @@
           "consuming_abstract_data_product_type"
         ],
         "title": "InputPortEvent"
+      },
+      "InputPortRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "requested_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested On"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          },
+          "consuming_abstract_data_product": {
+            "$ref": "#/components/schemas/AbstractDataProductInfo"
+          },
+          "requested_by": {
+            "$ref": "#/components/schemas/User"
+          },
+          "denied_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_type": {
+            "type": "string",
+            "const": "InputPort",
+            "title": "Request Type",
+            "default": "InputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "consuming_abstract_data_product_id",
+          "output_port_id",
+          "decision_note",
+          "status",
+          "requested_on",
+          "output_port",
+          "consuming_abstract_data_product",
+          "requested_by",
+          "denied_by",
+          "approved_by"
+        ],
+        "title": "InputPortRequest"
       },
       "IsAdminResponse": {
         "properties": {
@@ -12319,6 +12379,32 @@
           "role_id"
         ],
         "title": "ModifyOutputPortRoleAssignment"
+      },
+      "MyRequestsResponse": {
+        "properties": {
+          "my_requests": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/InputPortRequest"
+                },
+                {
+                  "$ref": "#/components/schemas/TechnicalAssetOutputPortRequest"
+                },
+                {
+                  "$ref": "#/components/schemas/DataProductRoleAssignmentRequest"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "My Requests"
+          }
+        },
+        "type": "object",
+        "required": [
+          "my_requests"
+        ],
+        "title": "MyRequestsResponse"
       },
       "Node": {
         "properties": {
@@ -12892,6 +12978,17 @@
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"
           },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
           "consuming_abstract_data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -13364,13 +13461,13 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/DataProductOutputPortPendingAction"
+                  "$ref": "#/components/schemas/InputPortRequest"
                 },
                 {
-                  "$ref": "#/components/schemas/TechnicalAssetOutputPortPendingAction"
+                  "$ref": "#/components/schemas/TechnicalAssetOutputPortRequest"
                 },
                 {
-                  "$ref": "#/components/schemas/DataProductRoleAssignmentPendingAction"
+                  "$ref": "#/components/schemas/DataProductRoleAssignmentRequest"
                 }
               ]
             },
@@ -14915,7 +15012,7 @@
         ],
         "title": "TechnicalAssetLink"
       },
-      "TechnicalAssetOutputPortPendingAction": {
+      "TechnicalAssetOutputPortRequest": {
         "properties": {
           "id": {
             "type": "string",
@@ -14993,10 +15090,10 @@
               }
             ]
           },
-          "pending_action_type": {
+          "request_type": {
             "type": "string",
             "const": "TechnicalAssetOutputPort",
-            "title": "Pending Action Type",
+            "title": "Request Type",
             "default": "TechnicalAssetOutputPort"
           }
         },
@@ -15015,7 +15112,7 @@
           "denied_by",
           "approved_by"
         ],
-        "title": "TechnicalAssetOutputPortPendingAction"
+        "title": "TechnicalAssetOutputPortRequest"
       },
       "TechnicalAssetStatus": {
         "type": "string",

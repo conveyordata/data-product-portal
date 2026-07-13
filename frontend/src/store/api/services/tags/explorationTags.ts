@@ -12,7 +12,7 @@ export const explorationTags = {
         providesTags: (response) => (response?.id ? [{ type: TagTypes.Exploration, id: response?.id }] : []),
     },
     createExploration: {
-        invalidatesTags: [{ type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST }],
+        invalidatesTags: [{ type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST }, { type: TagTypes.MyRequests }],
     },
     removeExploration: {
         invalidatesTags: (_, __, id) => [
@@ -29,6 +29,7 @@ export const explorationTags = {
             })),
             ...arg.requestInputPortsForExplorationRequest.output_ports.map((id) => ({ type: TagTypes.History, id })),
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
+            { type: TagTypes.MyRequests },
         ],
     },
     getExplorationInputPorts: {

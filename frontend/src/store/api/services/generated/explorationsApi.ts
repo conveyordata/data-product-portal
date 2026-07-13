@@ -211,6 +211,7 @@ export type InputPort = {
   id: string;
   justification: string;
   status: DecisionStatus;
+  decision_note?: string | null;
   output_port_id: string;
   output_port: OutputPort;
 };

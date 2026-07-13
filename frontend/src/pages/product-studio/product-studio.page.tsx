@@ -6,10 +6,11 @@ import { DataProductOutlined, ExplorationOutlined, OutputPortOutlined } from '@/
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { ExplorationsTab } from '@/pages/product-studio/components/explorations-tab/explorations-tab.component';
+import { MyRequestsTab } from '@/pages/product-studio/components/my-requests-tab/my-requests-panel.tsx';
+import { PendingAccessRequestsTab } from '@/pages/product-studio/components/pending-access-requests-tab/pending-access-requests-tab.tsx';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi';
 import { DataProductsTab } from './components/data-products-tab/data-products-tab.component';
 import { OutputPortsTab } from './components/output-ports-tab/output-ports-tab.component';
-import { PendingAccessRequestsView } from './components/requests-panel/pending-access-requests-view';
 import { TabKeys } from './product-studio-tabkeys';
 
 export function ProductStudio() {
@@ -55,15 +56,21 @@ export function ProductStudio() {
             children: <OutputPortsTab />,
         },
         {
-            key: TabKeys.Requests,
+            key: TabKeys.MyRequests,
+            label: t('My Requests'),
+            icon: <InboxOutlined />,
+            children: <MyRequestsTab />,
+        },
+        {
+            key: TabKeys.PendingRequests,
             label: (
                 <Space>
-                    {t('Requests')}
+                    {t('Pending Requests')}
                     <Badge count={pendingCount} color={token.colorPrimary} />
                 </Space>
             ),
             icon: <InboxOutlined />,
-            children: <PendingAccessRequestsView />,
+            children: <PendingAccessRequestsTab />,
         },
     ];
 

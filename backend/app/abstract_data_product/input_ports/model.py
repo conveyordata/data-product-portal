@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     UUID,
@@ -54,6 +54,7 @@ class InputPort(
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    decision_note: Mapped[Optional[str]] = mapped_column(nullable=True)
 
     # Relationships
     dataset: Mapped["Dataset"] = relationship(

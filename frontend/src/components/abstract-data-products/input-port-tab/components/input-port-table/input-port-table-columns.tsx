@@ -3,9 +3,9 @@ import type { TFunction } from 'i18next';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
-import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title.tsx';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
+import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -69,7 +69,12 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Business justification'),
             dataIndex: 'justification',
-            render: (_, { justification }) => <Justification justification={justification} />,
+            render: (_, { justification }) => <EllipsisParagraph text={justification} />,
+        },
+        {
+            title: t('Decision note'),
+            dataIndex: 'decision_note',
+            render: (_, { decision_note: decisionNote }) => <EllipsisParagraph text={decisionNote} />,
         },
         {
             title: t('Actions'),
