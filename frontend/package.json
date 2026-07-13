@@ -3,6 +3,10 @@
     "private": true,
     "version": "0.0.0",
     "type": "module",
+    "os": [
+        "darwin",
+        "linux"
+    ],
     "scripts": {
         "build": "vite build",
         "build:prd": "vite build --mode production",
@@ -93,7 +97,7 @@
     },
     "engines": {
         "node": ">= 22.0",
-        "npm": ">= 10.1"
+        "npm": ">= 11.11.0"
     },
     "overrides": {
         "i18next-parser": {
