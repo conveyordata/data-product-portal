@@ -336,18 +336,16 @@ WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS=True
 This will trigger a reconcile for every consumer when a Technical Asset is added or removed from an Output Port.
 However this results in a lot of reconciles and can be slow, we generally recommend against this pattern.
 
-### What happens when my provisioner is down for multiple hours?
+### What happens if my provisioner is down for multiple hours?
 
-When your provisioner is down for a long time, you will have missed events.
-When you fix the problem, and start your provisioner again, we will re-enqueue events for all resources using the
-`list_ids` function that you have to implement
+When your provisioner is down for a long time, webhook events will not be delivered. When you restart it, the `ReconcileManager` performs a startup resync by calling your optional `list_ids()` implementation and enqueuing a reconcile for every returned resource ID.
 
-### Can I write my provisioner in opentofu or terraform
+### Can I write my provisioner with OpenTofu or Terraform?
 
-Yes you can for sure! Use the same pattern as in the example.
-So:
-- When you get an event get the resource using the SDK
-- Check if the resource is in deleting state, if so run the tofu/terraform destroy command and remove the finalizer
-- If the resource is not in deleting state, add the finalizer when needed and run the tofu/terraform apply command to provision the resource
+Yes. Use the same pattern as in the example provisioner:
 
-You can pass variables to your tofu/terraform commands using the resource data you get from the SDK.
+- On each event, fetch the resource via the SDK.
+- If the resource is in the `DELETING` state, run `tofu destroy` / `terraform destroy` and then remove the finalizer.
+- Otherwise, add the finalizer as needed and run `tofu apply` / `terraform apply` to provision the resource.
+
+You can pass variables to OpenTofu/Terraform using the resource data you get from the SDK.
