@@ -132,7 +132,7 @@ To run the integration tests, execute the following commands:
 
 ```sh
 poetry install --with test
-docker compose --file test-compose.yaml up
+docker compose up -d postgresql
 poetry run pytest -v
 ```
 

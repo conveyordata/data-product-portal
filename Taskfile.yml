@@ -124,9 +124,9 @@ tasks:
     dir: backend
     cmds:
       - poetry install --with test
-      - docker compose --file test-compose.yaml up -d
+      - docker compose up -d postgresql
       - poetry run pytest -v
-      - docker compose --file test-compose.yaml kill
+      - docker compose kill
 
   test:frontend:
     desc: "Run the tests for the frontend"
