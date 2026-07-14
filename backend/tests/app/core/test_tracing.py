@@ -28,21 +28,24 @@ def _uninstrument():
 class TestTracing:
     def test_tracing_setup_does_not_raise(self):
         """The full tracing setup block must complete without error."""
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
-            OTLPSpanExporter,
-        )
-        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-        from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
-
         with (
-            patch.object(OTLPSpanExporter, "__init__", return_value=None),
-            patch.object(BatchSpanProcessor, "__init__", return_value=None),
+            patch(
+                "opentelemetry.exporter.otlp.proto.grpc.trace_exporter.OTLPSpanExporter"
+            ),
+            patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"),
             patch("opentelemetry.trace.set_tracer_provider"),
-            patch.object(FastAPIInstrumentor, "instrument_app") as mock_instrument,
+            patch(
+                "opentelemetry.instrumentation.fastapi.FastAPIInstrumentor.instrument_app"
+            ) as mock_instrument,
         ):
             from opentelemetry import trace
+            from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+                OTLPSpanExporter,
+            )
+            from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
             from opentelemetry.sdk.resources import Resource
+            from opentelemetry.sdk.trace import TracerProvider
+            from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
             provider = TracerProvider(
                 resource=Resource.create({"service.name": "test"})
