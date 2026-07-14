@@ -1,10 +1,10 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, func, select
+from sqlalchemy import asc, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.model import (
@@ -155,19 +155,26 @@ class RoleAssignmentService:
         return self.db.scalar(query)
 
     def get_user_requests(
-        self, user: User
+        self,
+        user: User,
+        hide_old_inactive: bool,
     ) -> Sequence[DataProductRoleAssignmentRequest]:
-        actions = (
-            self.db.scalars(
-                select(DataProductRoleAssignmentModel)
-                .filter(
-                    DataProductRoleAssignmentModel.user_id == user.id,
-                )
-                .order_by(asc(DataProductRoleAssignmentModel.requested_on))
+        query = (
+            select(DataProductRoleAssignmentModel)
+            .filter(
+                DataProductRoleAssignmentModel.user_id == user.id,
             )
-            .unique()
-            .all()
+            .order_by(asc(DataProductRoleAssignmentModel.requested_on))
         )
+        if hide_old_inactive:
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.where(
+                or_(
+                    DataProductRoleAssignmentModel.decision == DecisionStatus.PENDING,
+                    DataProductRoleAssignmentModel.requested_on >= thirty_days_ago,
+                )
+            )
+        actions = self.db.scalars(query).unique().all()
         return [
             DataProductRoleAssignmentRequest.model_validate(action)
             for action in actions

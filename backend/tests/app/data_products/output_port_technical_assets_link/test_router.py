@@ -11,7 +11,6 @@ from tests.conftest import (
     webhook_v2_input_port_events_from_technical_asset_output_port_link,
 )
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
@@ -19,6 +18,7 @@ from tests.factories import (
     InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 from tests.webhook_util import assert_event_in_queue, assert_event_not_in_queue
@@ -327,7 +327,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_link_between_technical_asset_and_output_port(
@@ -344,7 +344,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_link_between_technical_asset_and_output_port(
@@ -355,7 +355,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     @pytest.mark.usefixtures("admin")
     def test_approve_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
 
@@ -366,7 +366,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
 
     def test_not_owner_cannot_approved_link(self, client):
         ds = DatasetFactory()
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
 
@@ -387,7 +387,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.deny_link_between_technical_asset_and_output_port(
@@ -404,7 +404,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.deny_link_between_technical_asset_and_output_port(
@@ -415,7 +415,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     @pytest.mark.usefixtures("admin")
     def test_deny_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
 
@@ -426,7 +426,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
 
     def test_not_owner_cannot_deny_link(self, client):
         ds = DatasetFactory()
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
 
@@ -450,7 +450,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
         )
         data_output = TechnicalAssetFactory(owner=ds.data_product)
-        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
+        TechnicalAssetOutputPortAssociationFactory(dataset=ds, data_output=data_output)
 
         response = self.request_data_output_dataset_unlink_new(
             client, ds.data_product.id, data_output.id, ds.id
@@ -461,7 +461,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     def test_remove_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
         data_output = TechnicalAssetFactory(owner=ds.data_product)
-        DataOutputDatasetAssociationFactory(dataset=ds, data_output=data_output)
+        TechnicalAssetOutputPortAssociationFactory(dataset=ds, data_output=data_output)
 
         response = self.request_data_output_dataset_unlink_new(
             client, ds.data_product.id, data_output.id, ds.id
@@ -483,7 +483,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataOutputDatasetAssociationFactory(dataset=ds)
+        link = TechnicalAssetOutputPortAssociationFactory(dataset=ds)
         response = client.get(
             f"/api/v2/data_products/{link.data_output.owner.id}/technical_assets"
         )
@@ -535,7 +535,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, data_output=technical_asset
         )
         owner_id = link.data_output.owner.id
@@ -558,7 +558,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_link_between_technical_asset_and_output_port(
@@ -579,7 +579,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        link = DataOutputDatasetAssociationFactory(
+        link = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.deny_link_between_technical_asset_and_output_port(

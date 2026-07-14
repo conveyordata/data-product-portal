@@ -1621,6 +1621,7 @@ func (s *BitolContractRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode BitolContractRequest to nil")
 	}
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -4989,6 +4990,7 @@ func (s *DataProductCreate) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode DataProductCreate to nil")
 	}
 	var requiredBitSet [2]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -8414,6 +8416,7 @@ func (s *DataProductUpdate) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode DataProductUpdate to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -23362,6 +23365,7 @@ func (s *OutputPortSchemaResponse) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode OutputPortSchemaResponse to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -28168,6 +28172,7 @@ func (s *SchemaObjectRequest) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode SchemaObjectRequest to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -28370,6 +28375,7 @@ func (s *SchemaObjectResponse) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode SchemaObjectResponse to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {

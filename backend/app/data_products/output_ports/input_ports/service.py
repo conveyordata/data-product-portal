@@ -1,11 +1,10 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
-import pytz
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
@@ -100,7 +99,9 @@ class InputPortService:
                 detail="There is no pending request",
             )
         pending_request.approve_input_port_request(
-            now=datetime.now(tz=pytz.utc), decided_by=actor, decision_note=decision_note
+            now=datetime.now(timezone.utc),
+            decided_by=actor,
+            decision_note=decision_note,
         )
 
         consuming_data_product = current_link.consuming_abstract_data_product
@@ -155,7 +156,7 @@ class InputPortService:
 
         current_link.status = InputPortStatus.DENIED
         pending_request.decided_by = actor
-        pending_request.decided_on = datetime.now(tz=pytz.utc)
+        pending_request.decided_on = datetime.now(timezone.utc)
         pending_request.decision_note = decision_note
         pending_request.decision = DecisionStatus.DENIED
         return current_link
@@ -206,17 +207,26 @@ class InputPortService:
             )
         ]
 
-    def get_user_requests(self, user: User) -> Sequence[InputPortRequest]:
-        requested_associations = (
-            self.db.scalars(
-                select(InputPortModel)
-                .join(InputPortRequestModel)
-                .where(InputPortRequestModel.requested_by_id == user.id)
-                .options(selectinload(InputPortModel.requests))
-                .order_by(asc(InputPortRequestModel.requested_on))
-            )
-            .unique()
-            .all()
+    def get_user_requests(
+        self, user: User, hide_old_inactive: bool
+    ) -> Sequence[InputPortRequest]:
+        query = (
+            select(InputPortModel)
+            .join(InputPortRequestModel)
+            .where(InputPortRequestModel.requested_by_id == user.id)
+            .options(selectinload(InputPortModel.requests))
+            .order_by(asc(InputPortRequestModel.requested_on))
         )
+
+        if hide_old_inactive:
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.where(
+                or_(
+                    InputPortModel.status == InputPortStatus.PENDING,
+                    InputPortRequestModel.requested_on >= thirty_days_ago,
+                )
+            )
+
+        requested_associations = self.db.scalars(query).unique().all()
 
         return requested_associations

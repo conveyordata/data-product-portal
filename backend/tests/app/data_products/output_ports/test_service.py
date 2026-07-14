@@ -7,7 +7,6 @@ from app.data_products.output_ports.service import OutputPortService
 from app.settings import settings
 from tests import test_session
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
@@ -16,6 +15,7 @@ from tests.factories import (
     InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 
@@ -64,7 +64,7 @@ class TestDatasetsService:
     def test_recalculate_search_with_technical_asset(self):
         ds = DatasetFactory()
         data_output = TechnicalAssetFactory(owner=ds.data_product)
-        DataOutputDatasetAssociationFactory(data_output=data_output, dataset=ds)
+        TechnicalAssetOutputPortAssociationFactory(data_output=data_output, dataset=ds)
         OutputPortService(test_session).recalculate_search(ds.id)
 
     def test_recalculate_search_for_all_output_ports(self):

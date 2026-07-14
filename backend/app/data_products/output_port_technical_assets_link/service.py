@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Sequence
 from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -23,7 +23,7 @@ from app.users.schema_response import (
 )
 
 
-class DataOutputDatasetService:
+class TechnicalAssetOutputPortService:
     def __init__(self, db: Session):
         self.db = db
 
@@ -121,18 +121,25 @@ class DataOutputDatasetService:
         self.db.commit()
         return current_link
 
-    def get_user_requests(self, user: User):
-        requested_associations = (
-            self.db.scalars(
-                select(DataOutputDatasetAssociationModel)
-                .where(
-                    DataOutputDatasetAssociationModel.requested_by_id == user.id,
-                )
-                .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+    def get_user_requests(self, user: User, hide_old_inactive: bool):
+        query = (
+            select(DataOutputDatasetAssociationModel)
+            .where(
+                DataOutputDatasetAssociationModel.requested_by_id == user.id,
             )
-            .unique()
-            .all()
+            .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
         )
+
+        if hide_old_inactive:
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.where(
+                or_(
+                    DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
+                    DataOutputDatasetAssociationModel.requested_on >= thirty_days_ago,
+                )
+            )
+
+        requested_associations = self.db.scalars(query).unique().all()
 
         return [
             TechnicalAssetOutputPortRequest.model_validate(a)

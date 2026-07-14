@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import authorize_user, get_authenticated_user
@@ -96,8 +96,11 @@ def get_user_pending_actions(
 def get_user_requests(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
+    hide_old_inactive: bool = Query(
+        default=True, description="Filter out inactive requests older than 30 days"
+    ),
 ) -> MyRequestsResponse:
-    return UserService(db).get_user_requests(authenticated_user)
+    return UserService(db).get_user_requests(authenticated_user, hide_old_inactive)
 
 
 @router.get("/current")

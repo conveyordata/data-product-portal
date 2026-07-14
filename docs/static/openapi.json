@@ -5181,6 +5181,20 @@
         ],
         "summary": "Get User Requests",
         "operationId": "get_user_requests",
+        "parameters": [
+          {
+            "name": "hide_old_inactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Filter out inactive requests older than 30 days",
+              "default": true,
+              "title": "Hide Old Inactive"
+            },
+            "description": "Filter out inactive requests older than 30 days"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5188,6 +5202,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MyRequestsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }

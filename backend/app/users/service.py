@@ -9,7 +9,7 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
 from app.data_products.output_port_technical_assets_link.service import (
-    DataOutputDatasetService,
+    TechnicalAssetOutputPortService,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.users.model import User, ensure_user_exists
@@ -74,7 +74,7 @@ class UserService:
     def get_user_pending_actions(self, user: User) -> PendingActionResponse:
         input_port_actions = InputPortService(self.db).get_user_pending_actions(user)
 
-        data_output_dataset_actions = DataOutputDatasetService(
+        data_output_dataset_actions = TechnicalAssetOutputPortService(
             self.db
         ).get_user_pending_actions(user)
         data_product_role_assignment_actions = RoleAssignmentService(
@@ -91,13 +91,17 @@ class UserService:
             )
         )
 
-    def get_user_requests(self, user: User) -> MyRequestsResponse:
-        input_port_requests = InputPortService(self.db).get_user_requests(user)
-        technical_asset_output_port_requests = DataOutputDatasetService(
+    def get_user_requests(
+        self, user: User, hide_old_inactive: bool
+    ) -> MyRequestsResponse:
+        input_port_requests = InputPortService(self.db).get_user_requests(
+            user, hide_old_inactive
+        )
+        technical_asset_output_port_requests = TechnicalAssetOutputPortService(
             self.db
-        ).get_user_requests(user)
+        ).get_user_requests(user, hide_old_inactive)
         data_product_role_requests = RoleAssignmentService(self.db).get_user_requests(
-            user
+            user, hide_old_inactive
         )
         return MyRequestsResponse(
             my_requests=sorted(

@@ -8,7 +8,6 @@ from tests.app.data_products.output_port_technical_assets_link.test_router impor
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
@@ -17,6 +16,7 @@ from tests.factories import (
     InputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 
@@ -214,7 +214,7 @@ class TestUsersRouter:
 
     def test_get_pending_actions_no_action(self, client):
         ds = DatasetFactory()
-        DataOutputDatasetAssociationFactory(dataset=ds)
+        TechnicalAssetOutputPortAssociationFactory(dataset=ds)
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json() == {"pending_actions": []}
 

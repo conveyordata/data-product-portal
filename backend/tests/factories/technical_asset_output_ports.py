@@ -10,7 +10,9 @@ from .dataset import DatasetFactory
 from .user import UserFactory
 
 
-class DataOutputDatasetAssociationFactory(factory.alchemy.SQLAlchemyModelFactory):
+class TechnicalAssetOutputPortAssociationFactory(
+    factory.alchemy.SQLAlchemyModelFactory
+):
     class Meta:
         model = DataOutputDatasetAssociation
 
