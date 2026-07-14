@@ -2,7 +2,7 @@ import { Form, Input, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 export type RevokeModal = {
-    decision_note: string;
+    decisionNote: string;
 };
 
 type Props = {
@@ -22,7 +22,7 @@ export function RevokeAccessModal({ onClose, onReject, open, consumerName }: Pro
     };
 
     const handleFinish = (values: RevokeModal) => {
-        onReject(values.decision_note);
+        onReject(values.decisionNote);
     };
 
     return (

@@ -1,7 +1,8 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Optional
 
+from fastapi import HTTPException
 from sqlalchemy import (
     UUID,
     Boolean,
@@ -14,6 +15,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from starlette import status
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.access_durations.enums import AccessDurationType
@@ -70,39 +72,36 @@ class InputPort(
     )
 
     @property
-    def _current_request(self) -> "InputPortRequest":
-        # TODO: handle here different ordering when renewals are implemented.
+    def latest_request(self) -> "InputPortRequest":
         return max(self.requests, key=lambda request: request.requested_on)
 
     @property
     def justification(self) -> str:
-        return self._current_request.justification
+        return self.latest_request.justification
 
     @property
     def decision_note(self) -> Optional[str]:
-        return self._current_request.decision_note
+        return self.latest_request.decision_note
 
     @property
     def requested_on(self) -> datetime:
-        return self._current_request.requested_on
+        return self.latest_request.requested_on
 
     @property
     def requested_by(self) -> "User":
-        return self._current_request.requested_by
+        return self.latest_request.requested_by
 
     @property
     def approved_by(self) -> Optional["User"]:
-        request = self._current_request
+        request = self.latest_request
         return (
             request.decided_by if request.decision == DecisionStatus.APPROVED else None
         )
 
     @property
     def denied_by(self) -> Optional["User"]:
-        request = self._current_request
-        return (
-            request.decided_by if request.decision == DecisionStatus.DENIED else None
-        )
+        request = self.latest_request
+        return request.decided_by if request.decision == DecisionStatus.DENIED else None
 
     def to_event(self) -> InputPortEvent:
         return InputPortEvent(
@@ -161,3 +160,30 @@ class InputPortRequest(
         foreign_keys=[decided_by_id],
         lazy="joined",
     )
+
+    def approve_input_port_request(
+        self,
+        *,
+        now: datetime,
+        decided_by: Optional["User"] = None,
+        decision_note: Optional[str] = None,
+    ):
+        self.valid_from = now
+        self.decided_on = now
+        self.decided_by = decided_by
+        self.decision_note = decision_note
+        self.decision = DecisionStatus.APPROVED
+        self.input_port.status = InputPortStatus.APPROVED
+
+        match self.access_duration_type:
+            case AccessDurationType.PERMANENT:
+                self.valid_until = None
+            case AccessDurationType.TIME_BOUND:
+                if self.requested_duration_days is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="Requested duration days is required for TIME_BOUND access duration type",
+                    )
+                self.valid_until = now.date() + timedelta(
+                    days=self.requested_duration_days
+                )

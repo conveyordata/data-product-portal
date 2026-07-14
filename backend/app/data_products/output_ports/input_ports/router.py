@@ -70,7 +70,7 @@ def approve_output_port_as_input_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_link = InputPortService(db).approve_output_port_as_input_port(
+    input_port = InputPortService(db).approve_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
@@ -81,17 +81,17 @@ def approve_output_port_as_input_port(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
-            subject_id=data_product_link.dataset_id,
+            subject_id=input_port.dataset_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=data_product_link.consuming_abstract_data_product_id,
+            target_id=input_port.consuming_abstract_data_product_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=data_product_link.dataset_id,
+        dataset_id=input_port.dataset_id,
         event_id=event_id,
-        extra_receiver_ids=[data_product_link.requested_by_id],
+        extra_receiver_ids=[input_port.requested_by.id],
     )
     RefreshInfrastructureLambda().trigger()
 
@@ -136,7 +136,7 @@ def deny_output_port_as_input_port(
     NotificationService(db).create_dataset_notifications(
         dataset_id=data_product_link.dataset_id,
         event_id=event_id,
-        extra_receiver_ids=[data_product_link.requested_by_id],
+        extra_receiver_ids=[data_product_link.requested_by.id],
     )
 
 
@@ -178,6 +178,6 @@ def remove_output_port_as_input_port(
         NotificationService(db).create_dataset_notifications(
             dataset_id=data_product_link.dataset_id,
             event_id=event_id,
-            extra_receiver_ids=[data_product_link.requested_by_id],
+            extra_receiver_ids=[data_product_link.requested_by.id],
         )
     RefreshInfrastructureLambda().trigger()

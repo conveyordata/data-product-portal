@@ -21,6 +21,12 @@ class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @factory.post_generation
     def request(obj, create, extracted, **kwargs):
+        """
+        A request is automatically created for the input port you create.
+        Set the attributes of the request following this pattern:
+        `InputPortFactory(request__requested_by=UserFactory())`
+        """
+
         if not create or extracted is False:
             return
         from .input_port_request import InputPortRequestFactory

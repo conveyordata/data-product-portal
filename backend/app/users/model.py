@@ -111,6 +111,16 @@ class User(Base, BaseORM):
         lazy="raise",
     )
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, User):
+            return NotImplemented
+        if self.id is None or other.id is None:
+            return self is other
+        return self.id == other.id
+
+    def __hash__(self) -> int:
+        return hash(self.id) if self.id is not None else id(self)
+
 
 def ensure_user_exists(user_id: UUID, db: Session) -> User:
     return ensure_exists(user_id, db, User)

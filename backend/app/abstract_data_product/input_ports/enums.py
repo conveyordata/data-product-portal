@@ -1,5 +1,6 @@
 from enum import UNIQUE, StrEnum, verify
 
+
 @verify(UNIQUE)
 class InputPortStatus(StrEnum):
     PENDING = "pending"

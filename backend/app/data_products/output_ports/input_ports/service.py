@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime,timedelta
+from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -11,9 +11,10 @@ from sqlalchemy.orm import Session, selectinload
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
+)
+from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
-from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
@@ -43,10 +44,10 @@ class InputPortService:
         return current_link
 
     def get_link(
-            self,
-            data_product_id: UUID,
-            output_port_id: UUID,
-            consuming_data_product_id: UUID,
+        self,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
     ) -> InputPortModel:
         current_link = self.db.scalar(
             select(InputPortModel)
@@ -62,6 +63,7 @@ class InputPortService:
             .where(
                 Dataset.data_product_id == data_product_id,
             )
+            .options(selectinload(InputPortModel.requests)),
         )
         if not current_link:
             raise HTTPException(
@@ -71,13 +73,13 @@ class InputPortService:
         return current_link
 
     def approve_output_port_as_input_port(
-            self,
-            *,
-            data_product_id: UUID,
-            output_port_id: UUID,
-            consuming_data_product_id: UUID,
-            actor: User,
-            decision_note: Optional[str] = None,
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
+        actor: User,
+        decision_note: Optional[str] = None,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -88,33 +90,18 @@ class InputPortService:
                 detail="Approval request already decided",
             )
 
-        current_link.status = InputPortStatus.APPROVED
-        pending_request: Optional[InputPortRequestModel] = self.db.scalar(
-            select(InputPortRequestModel).where(InputPortRequestModel.decision == DecisionStatus.PENDING,
-                                                InputPortRequestModel.input_port_id == current_link.id))
-        if pending_request is None:
+        pending_request = current_link.latest_request
+        if (
+            pending_request is None
+            or pending_request.decision != DecisionStatus.PENDING
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no pending request",
             )
-        now = datetime.now(tz=pytz.utc)
-        pending_request.decided_by = actor
-        pending_request.decided_on = now
-        pending_request.decision_note = decision_note
-        pending_request.decision = DecisionStatus.APPROVED
-        pending_request.valid_from = now
-
-        match pending_request.access_duration_type:
-            case AccessDurationType.PERMANENT:
-                pending_request.valid_until = None
-            case AccessDurationType.TIME_BOUND:
-                if pending_request.requested_duration_days is None:
-                    raise HTTPException(
-                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                        detail="Requested duration days is required for TIME_BOUND access duration type",
-                    )
-                pending_request.valid_until = now.date() + timedelta(days = pending_request.requested_duration_days)
-
+        pending_request.approve_input_port_request(
+            now=datetime.now(tz=pytz.utc), decided_by=actor, decision_note=decision_note
+        )
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
@@ -135,13 +122,13 @@ class InputPortService:
         return current_link
 
     def deny_output_port_as_input_port(
-            self,
-            *,
-            data_product_id: UUID,
-            output_port_id: UUID,
-            consuming_data_product_id: UUID,
-            actor: User,
-            decision_note: str,
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
+        actor: User,
+        decision_note: str,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -154,14 +141,16 @@ class InputPortService:
 
         pending_request: Optional[InputPortRequestModel] = self.db.scalar(
             select(InputPortRequestModel).where(
-                InputPortRequestModel.decision == DecisionStatus.PENDING,
+                InputPortRequestModel.decision.in_(
+                    [DecisionStatus.PENDING, DecisionStatus.APPROVED]
+                ),
                 InputPortRequestModel.input_port_id == current_link.id,
             )
         )
         if pending_request is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="There is no pending request",
+                detail="There is no pending or approved request to deny",
             )
 
         current_link.status = InputPortStatus.DENIED
@@ -172,11 +161,11 @@ class InputPortService:
         return current_link
 
     def remove_output_port_as_input_port(
-            self,
-            *,
-            data_product_id: UUID,
-            output_port_id: UUID,
-            consuming_data_product_id: UUID,
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id

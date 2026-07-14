@@ -282,6 +282,16 @@ class TestInputPortsRouter:
         )
         assert response.status_code == 200, response.text
 
+    def test_deny_output_port_as_input_port_revoke_approved(self, client):
+        link = self.create_link_with_status(DecisionStatus.APPROVED)
+        response = self.deny_output_port_as_input_port(
+            client,
+            link.dataset.data_product.id,
+            link.dataset.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+
     def test_deny_output_port_as_input_port_reasoning_required(self, client):
         link = self.create_link_with_status()
         response = client.post(
