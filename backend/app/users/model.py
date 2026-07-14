@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     )
     from app.data_products.output_ports.model import (
         Dataset,
-        InputPort,
     )
     from app.explorations.model import Exploration
     from app.users.notifications.model import Notification
@@ -94,21 +93,6 @@ class User(Base, BaseORM):
         lazy="select",
     )
     datasets: Mapped[list["Dataset"]] = association_proxy("dataset_roles", "dataset")
-    requested_input_ports: Mapped[list["InputPort"]] = relationship(
-        foreign_keys="InputPort.requested_by_id",
-        back_populates="requested_by",
-        lazy="raise",
-    )
-    denied_input_ports: Mapped[list["InputPort"]] = relationship(
-        foreign_keys="InputPort.denied_by_id",
-        back_populates="denied_by",
-        lazy="raise",
-    )
-    approved_input_ports: Mapped[list["InputPort"]] = relationship(
-        foreign_keys="InputPort.approved_by_id",
-        back_populates="approved_by",
-        lazy="raise",
-    )
 
     # Relationships - Data outputs
     requested_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(

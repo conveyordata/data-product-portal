@@ -1,5 +1,6 @@
 import factory
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
@@ -7,7 +8,6 @@ from app.authorization.role_assignments.enums import DecisionStatus
 
 from .data_product import DataProductFactory
 from .dataset import DatasetFactory
-from .user import UserFactory
 
 
 class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -15,9 +15,20 @@ class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = InputPort
 
     id = factory.Faker("uuid4")
-    justification = factory.Faker("text", max_nb_chars=20)
-    decision_note = factory.Faker("text", max_nb_chars=20)
-    status = DecisionStatus.APPROVED
+    status = InputPortStatus.APPROVED
     consuming_abstract_data_product = factory.SubFactory(DataProductFactory)
     dataset = factory.SubFactory(DatasetFactory)
-    requested_by = factory.SubFactory(UserFactory)
+
+    @factory.post_generation
+    def request(obj, create, extracted, **kwargs):
+        if not create or extracted is False:
+            return
+        from .input_port_request import InputPortRequestFactory
+
+        decision = (
+            DecisionStatus.APPROVED
+            if obj.status == InputPortStatus.EXPIRED
+            else DecisionStatus(obj.status.value)
+        )
+        kwargs.setdefault("decision", decision)
+        InputPortRequestFactory(input_port=obj, **kwargs)

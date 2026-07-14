@@ -1,16 +1,19 @@
 import copy
-from datetime import datetime
+from datetime import datetime,timedelta
 from typing import Optional, Sequence
 from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
+    InputPortRequest as InputPortRequestModel,
 )
+from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
@@ -40,10 +43,10 @@ class InputPortService:
         return current_link
 
     def get_link(
-        self,
-        data_product_id: UUID,
-        output_port_id: UUID,
-        consuming_data_product_id: UUID,
+            self,
+            data_product_id: UUID,
+            output_port_id: UUID,
+            consuming_data_product_id: UUID,
     ) -> InputPortModel:
         current_link = self.db.scalar(
             select(InputPortModel)
@@ -68,13 +71,13 @@ class InputPortService:
         return current_link
 
     def approve_output_port_as_input_port(
-        self,
-        *,
-        data_product_id: UUID,
-        output_port_id: UUID,
-        consuming_data_product_id: UUID,
-        actor: User,
-        decision_note: Optional[str] = None,
+            self,
+            *,
+            data_product_id: UUID,
+            output_port_id: UUID,
+            consuming_data_product_id: UUID,
+            actor: User,
+            decision_note: Optional[str] = None,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -85,10 +88,33 @@ class InputPortService:
                 detail="Approval request already decided",
             )
 
-        current_link.status = DecisionStatus.APPROVED
-        current_link.approved_by = actor
-        current_link.approved_on = datetime.now(tz=pytz.utc)
-        current_link.decision_note = decision_note
+        current_link.status = InputPortStatus.APPROVED
+        pending_request: Optional[InputPortRequestModel] = self.db.scalar(
+            select(InputPortRequestModel).where(InputPortRequestModel.decision == DecisionStatus.PENDING,
+                                                InputPortRequestModel.input_port_id == current_link.id))
+        if pending_request is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no pending request",
+            )
+        now = datetime.now(tz=pytz.utc)
+        pending_request.decided_by = actor
+        pending_request.decided_on = now
+        pending_request.decision_note = decision_note
+        pending_request.decision = DecisionStatus.APPROVED
+        pending_request.valid_from = now
+
+        match pending_request.access_duration_type:
+            case AccessDurationType.PERMANENT:
+                pending_request.valid_until = None
+            case AccessDurationType.TIME_BOUND:
+                if pending_request.requested_duration_days is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="Requested duration days is required for TIME_BOUND access duration type",
+                    )
+                pending_request.valid_until = now.date() + timedelta(days = pending_request.requested_duration_days)
+
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
@@ -109,13 +135,13 @@ class InputPortService:
         return current_link
 
     def deny_output_port_as_input_port(
-        self,
-        *,
-        data_product_id: UUID,
-        output_port_id: UUID,
-        consuming_data_product_id: UUID,
-        actor: User,
-        decision_note: str,
+            self,
+            *,
+            data_product_id: UUID,
+            output_port_id: UUID,
+            consuming_data_product_id: UUID,
+            actor: User,
+            decision_note: str,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -126,18 +152,31 @@ class InputPortService:
                 detail="Approval request already decided",
             )
 
-        current_link.status = DecisionStatus.DENIED
-        current_link.denied_by = actor
-        current_link.denied_on = datetime.now(tz=pytz.utc)
-        current_link.decision_note = decision_note
+        pending_request: Optional[InputPortRequestModel] = self.db.scalar(
+            select(InputPortRequestModel).where(
+                InputPortRequestModel.decision == DecisionStatus.PENDING,
+                InputPortRequestModel.input_port_id == current_link.id,
+            )
+        )
+        if pending_request is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no pending request",
+            )
+
+        current_link.status = InputPortStatus.DENIED
+        pending_request.decided_by = actor
+        pending_request.decided_on = datetime.now(tz=pytz.utc)
+        pending_request.decision_note = decision_note
+        pending_request.decision = DecisionStatus.DENIED
         return current_link
 
     def remove_output_port_as_input_port(
-        self,
-        *,
-        data_product_id: UUID,
-        output_port_id: UUID,
-        consuming_data_product_id: UUID,
+            self,
+            *,
+            data_product_id: UUID,
+            output_port_id: UUID,
+            consuming_data_product_id: UUID,
     ) -> InputPortModel:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
@@ -150,7 +189,8 @@ class InputPortService:
         requested_associations = (
             self.db.scalars(
                 select(InputPortModel)
-                .where(InputPortModel.status == DecisionStatus.PENDING)
+                .join(InputPortRequestModel)
+                .where(InputPortRequestModel.decision == DecisionStatus.PENDING)
                 .where(
                     InputPortModel.dataset.has(
                         DatasetModel.assignments.any(
@@ -158,7 +198,8 @@ class InputPortService:
                         )
                     )
                 )
-                .order_by(asc(InputPortModel.requested_on))
+                .options(selectinload(InputPortModel.requests))
+                .order_by(asc(InputPortRequestModel.requested_on))
             )
             .unique()
             .all()
@@ -180,8 +221,10 @@ class InputPortService:
         requested_associations = (
             self.db.scalars(
                 select(InputPortModel)
-                .where(InputPortModel.requested_by_id == user.id)
-                .order_by(asc(InputPortModel.requested_on))
+                .join(InputPortRequestModel)
+                .where(InputPortRequestModel.requested_by_id == user.id)
+                .options(selectinload(InputPortModel.requests))
+                .order_by(asc(InputPortRequestModel.requested_on))
             )
             .unique()
             .all()
