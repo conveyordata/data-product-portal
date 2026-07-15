@@ -112,7 +112,7 @@ Requests reference the link one-directionally via `input_port_id`; the link hold
 | `input_port_id` → input_ports | the link this request belongs to |
 | `status` | `PENDING / APPROVED / DENIED` |
 | `justification` | the consumer's reason for this request; on a renewal the previous request's justification is reused |
-| `access_duration_type` | `PERMANENT` or `TIME_BOUND` — stated explicitly on the request (also derivable from `valid_until` / `requested_duration_days`, but stored for clarity) |
+| `access_duration_type` | `PERMANENT` or `TIME_BOUND` — stored on the request (also derivable from `valid_until` / `requested_duration_days`, but kept for clarity) |
 | `requested_duration_days` (nullable) | requested window length; NULL = permanent |
 | `requested_on`, `requested_by_id` → users | when / who requested |
 | `decided_on` (nullable), `decided_by_id` (nullable) → users | when / who approved or denied (which one is told by `status`) |
@@ -122,18 +122,22 @@ Requests reference the link one-directionally via `input_port_id`; the link hold
 
 `valid_from` / `valid_until` are dates (day granularity, no time-of-day); `valid_until` is inclusive — access is valid through that day.
 
+`access_duration_type` and `requested_duration_days` are set when the request is created, from the output port's access-duration policy for the consuming type (the admin default configured for a data product or an exploration). `valid_from` and `valid_until` are set when the request is approved.
+
 Constraint: at most one PENDING request per link (partial unique index). A new request is allowed at any time as long as none is currently pending.
 
 ### Link status
 
-The link `status` uses a four-value enum (`PENDING / APPROVED / DENIED / EXPIRED`); the request `status` uses the three-value `DecisionStatus`. The link status expresses the **current access state**, resolved in this order:
+The link `status` uses a four-value enum (`PENDING / APPROVED / DENIED / EXPIRED`); the request `decision` uses the three-value `DecisionStatus`. `status` is a stored column, but it is written in only one place: a `recompute_status` method that derives it from the request rows and runs after every request change (the daily job runs the same logic for the `EXPIRED` transition). It uses two accessors on the link — the active grant (the single approved request whose window covers today) and the pending request — and resolves the current access state in this order:
 
-1. **APPROVED** — an approved request's window still includes today (`valid_until ≥ today`, or NULL for permanent). The consumer has access. A pending or denied renewal does not change this.
-2. **PENDING** — there is no currently-valid grant and there is a pending request (a first request, or a renewal after the grant lapsed).
-3. **EXPIRED** — there is no currently-valid grant and no pending request, but a prior grant was approved and its window has passed. Set by the daily job.
+1. **APPROVED** — there is an active grant: an approved request whose window includes today (`valid_from ≤ today ≤ valid_until`, with `NULL` meaning open-ended). The consumer has access. A pending or denied renewal does not change this.
+2. **PENDING** — there is no active grant and there is a pending request (a first request, or a renewal after the grant lapsed).
+3. **EXPIRED** — there is no active grant and no pending request, but a prior grant was approved and its window has passed. Set by the daily job.
 4. **DENIED** — the latest decided request was denied, and no pending request.
 
 So an active grant with a pending renewal reads `APPROVED`; once that grant lapses while the renewal is still pending it reads `PENDING`.
+
+When a renewal is approved while a grant is still active, its window starts the day after the current grant's `valid_until`, so at most one grant covers any given day and no existing grant is modified. If the previous grant has already lapsed, the new window starts today.
 
 ### Expiry background task
 

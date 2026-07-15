@@ -113,17 +113,8 @@ class InputPortService:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
         )
-        if current_link.status != DecisionStatus.PENDING:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Approval request already decided",
-            )
-
-        pending_request = current_link.latest_request
-        if (
-            pending_request is None
-            or pending_request.decision != DecisionStatus.PENDING
-        ):
+        pending_request = current_link.pending_request
+        if pending_request is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no pending request",
@@ -134,6 +125,7 @@ class InputPortService:
             decided_by=actor,
             decision_note=decision_note,
         )
+        current_link.recompute_status()
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
@@ -165,31 +157,18 @@ class InputPortService:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
         )
-        if current_link.status not in (DecisionStatus.PENDING, DecisionStatus.APPROVED):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Approval request already decided",
-            )
-
-        pending_request: Optional[InputPortRequestModel] = self.db.scalar(
-            select(InputPortRequestModel).where(
-                InputPortRequestModel.decision.in_(
-                    [DecisionStatus.PENDING, DecisionStatus.APPROVED]
-                ),
-                InputPortRequestModel.input_port_id == current_link.id,
-            )
-        )
-        if pending_request is None:
+        target = current_link.pending_request or current_link.active_grant
+        if target is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no pending or approved request to deny",
             )
 
-        current_link.status = InputPortStatus.DENIED
-        pending_request.decided_by = actor
-        pending_request.decided_on = datetime.now(timezone.utc)
-        pending_request.decision_note = decision_note
-        pending_request.decision = DecisionStatus.DENIED
+        target.decided_by = actor
+        target.decided_on = datetime.now(timezone.utc)
+        target.decision_note = decision_note
+        target.decision = DecisionStatus.DENIED
+        current_link.recompute_status()
         return current_link
 
     def remove_output_port_as_input_port(

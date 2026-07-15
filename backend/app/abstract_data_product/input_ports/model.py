@@ -72,6 +72,39 @@ class InputPort(
         return max(self.requests, key=lambda request: request.requested_on)
 
     @property
+    def active_grant(self) -> Optional["InputPortRequest"]:
+        today = date.today()
+        return next(
+            (
+                request
+                for request in self.requests
+                if request.decision == DecisionStatus.APPROVED
+                and (request.valid_from is None or request.valid_from <= today)
+                and (request.valid_until is None or request.valid_until >= today)
+            ),
+            None,
+        )
+
+    @property
+    def pending_request(self) -> Optional["InputPortRequest"]:
+        return next(
+            (
+                request
+                for request in self.requests
+                if request.decision == DecisionStatus.PENDING
+            ),
+            None,
+        )
+
+    def recompute_status(self) -> None:
+        if self.active_grant is not None:
+            self.status = InputPortStatus.APPROVED
+        elif self.pending_request is not None:
+            self.status = InputPortStatus.PENDING
+        else:
+            self.status = InputPortStatus.DENIED
+
+    @property
     def justification(self) -> str:
         return self.latest_request.justification
 
@@ -89,10 +122,8 @@ class InputPort(
 
     @property
     def approved_by(self) -> Optional["User"]:
-        request = self.latest_request
-        return (
-            request.decided_by if request.decision == DecisionStatus.APPROVED else None
-        )
+        grant = self.active_grant
+        return grant.decided_by if grant is not None else None
 
     @property
     def denied_by(self) -> Optional["User"]:
