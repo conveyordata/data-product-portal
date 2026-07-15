@@ -19,6 +19,13 @@ from tests.factories import (
     UserFactory,
 )
 
+SEARCH_EMBEDDING = [1.0, *([0.0] * 383)]
+
+
+class StaticEmbeddingModel:
+    def embed(self, query):
+        return [SEARCH_EMBEDDING]
+
 
 class TestDatasetsService:
     def test_private_dataset_not_visible(self):
@@ -163,6 +170,120 @@ class TestDatasetsService:
             "Owner should also see public datasets"
         )
 
+    def test_search_output_ports_matches_partial_prefix(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        wind_dataset = DatasetFactory(
+            name="Wind Turbine Output", description="Renewable generation metrics"
+        )
+        unrelated_dataset = DatasetFactory(
+            name="Finance Budget", description="Quarterly accounting metrics"
+        )
+        self.set_search_state(wind_dataset, unrelated_dataset)
+
+        partial_results = self.search_with_static_embeddings("win", user, limit=1)
+        full_word_results = self.search_with_static_embeddings("wind", user, limit=1)
+
+        assert [result.id for result in partial_results] == [wind_dataset.id]
+        assert [result.id for result in full_word_results] == [wind_dataset.id]
+
+    def test_search_output_ports_matches_multi_word_partial_prefix_case_insensitive(
+        self,
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        clinical_dataset = DatasetFactory(
+            name="Clinical Dataset", description="Patient outcome measures"
+        )
+        unrelated_dataset = DatasetFactory(
+            name="Marketing Metrics", description="Campaign performance"
+        )
+        self.set_search_state(clinical_dataset, unrelated_dataset)
+
+        results = self.search_with_static_embeddings("CLIN DATA", user, limit=1)
+
+        assert [result.id for result in results] == [clinical_dataset.id]
+
+    def test_search_output_ports_preserves_or_operator(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        finance_dataset = DatasetFactory(
+            name="Finance Ledger", description="Accounting metrics"
+        )
+        budget_dataset = DatasetFactory(
+            name="Budget Forecast", description="Planning metrics"
+        )
+        unrelated_dataset = DatasetFactory(
+            name="Telemetry Events", description="Device metrics"
+        )
+        self.set_search_state(finance_dataset, budget_dataset, unrelated_dataset)
+
+        results = self.search_with_static_embeddings(
+            "finance OR budget", user, limit=2
+        )
+
+        assert {result.id for result in results} == {
+            finance_dataset.id,
+            budget_dataset.id,
+        }
+
+    def test_search_output_ports_preserves_exclusion_operator(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        excluded_dataset = DatasetFactory(
+            name="Finance Budget", description="Restricted budget planning"
+        )
+        matching_dataset = DatasetFactory(
+            name="Finance Forecast", description="Revenue planning"
+        )
+        unrelated_dataset = DatasetFactory(
+            name="Marketing Leads", description="Pipeline metrics"
+        )
+        self.set_search_state(excluded_dataset, matching_dataset, unrelated_dataset)
+
+        results = self.search_with_static_embeddings("finance -budget", user, limit=1)
+
+        assert [result.id for result in results] == [matching_dataset.id]
+
+    def test_search_output_ports_preserves_quoted_phrase_operator(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        reversed_dataset = DatasetFactory(
+            name="Alpha Data Customer", description="Reversed word order"
+        )
+        phrase_dataset = DatasetFactory(
+            name="Zulu Customer Data", description="Customer data mart"
+        )
+        self.set_search_state(reversed_dataset, phrase_dataset)
+
+        results = self.search_with_static_embeddings('"customer data"', user, limit=1)
+
+        assert [result.id for result in results] == [phrase_dataset.id]
+
+    def test_search_output_ports_preserves_accented_unicode_terms(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        unrelated_dataset = DatasetFactory(
+            name="Aachen Mobility", description="Regional transport metrics"
+        )
+        unicode_dataset = DatasetFactory(
+            name="München Mobility", description="Regional transport metrics"
+        )
+        self.set_search_state(unrelated_dataset, unicode_dataset)
+
+        results = self.search_with_static_embeddings("München", user, limit=1)
+
+        assert [result.id for result in results] == [unicode_dataset.id]
+
+    def test_search_output_ports_handles_empty_punctuation_and_stop_word_queries(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        alpha_dataset = DatasetFactory(name="Alpha Dataset")
+        zulu_dataset = DatasetFactory(name="Zulu Dataset")
+        self.set_search_state(alpha_dataset, zulu_dataset)
+
+        whitespace_results = self.search_with_static_embeddings("   ", user, limit=2)
+        punctuation_results = self.search_with_static_embeddings("?!...", user, limit=2)
+        stop_word_results = self.search_with_static_embeddings("the and", user, limit=2)
+
+        expected_default_order = [alpha_dataset.id, zulu_dataset.id]
+        assert [result.id for result in whitespace_results] == expected_default_order
+        assert [result.id for result in punctuation_results] == expected_default_order
+        assert {result.id for result in stop_word_results} == set(expected_default_order)
+
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:
         return test_session.get(
@@ -170,4 +291,20 @@ class TestDatasetsService:
             dataset.id,
             options=[selectinload(Dataset.data_product_links)],
             populate_existing=True,
+        )
+
+    @staticmethod
+    def set_search_state(*datasets: Dataset) -> None:
+        for dataset in datasets:
+            dataset.embeddings = SEARCH_EMBEDDING
+            OutputPortService._recalculate_search_vector(dataset)
+            test_session.add(dataset)
+        test_session.commit()
+
+    @staticmethod
+    def search_with_static_embeddings(query: str, user, limit: int):
+        service = OutputPortService(test_session)
+        service.embedding_model = StaticEmbeddingModel()
+        return service.search_output_ports(
+            query=query, limit=limit, user=user, current_user_assigned=False
         )
