@@ -286,29 +286,29 @@ begin
 
     -- Revenue dashboard - input ports
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), revenue_dashboard, production_planning_insights_forecast, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), revenue_dashboard, production_planning_insights_forecast, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed to predict our revenue', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), CURRENT_DATE, (CURRENT_DATE + INTERVAL '90 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), revenue_dashboard, sales_performance_model_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), revenue_dashboard, sales_performance_model_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed to predict our revenue', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), CURRENT_DATE, (CURRENT_DATE + INTERVAL '90 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), revenue_dashboard, order_fulfillment_analysis_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), revenue_dashboard, order_fulfillment_analysis_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed to predict our revenue', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), revenue_dashboard, inventory_management_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), revenue_dashboard, inventory_management_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -322,8 +322,8 @@ begin
 
     -- Expense forecasting input ports
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES ('0658e52e-b69e-4787-b7b1-df215d75329c', expense_forecasting, production_planning_insights_forecast, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES ('0658e52e-b69e-4787-b7b1-df215d75329c', expense_forecasting, production_planning_insights_forecast, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -364,36 +364,36 @@ begin
 
     -- Data privacy compliance - input ports
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), data_privacy_compliance, user_feedback_insights_report, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), data_privacy_compliance, user_feedback_insights_report, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed to check for GDPR compliance', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), data_privacy_compliance, release_engagement_by_segment, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), data_privacy_compliance, release_engagement_by_segment, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed to check for GDPR compliance', NULL, 'TIME_BOUND', 5, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), CURRENT_DATE, (CURRENT_DATE + INTERVAL '5 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), data_privacy_compliance, release_impact_summary, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), data_privacy_compliance, release_impact_summary, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed to check for GDPR compliance', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), data_privacy_compliance, customer_segmentation_weekly_output_port_id, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), data_privacy_compliance, customer_segmentation_weekly_output_port_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed to check for GDPR compliance', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), data_privacy_compliance, dei_insights_dashboard_ds, 'DENIED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), data_privacy_compliance, dei_insights_dashboard_ds, 'DENIED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -407,15 +407,15 @@ begin
 
     -- Cash flow monitoring - input ports
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), cash_flow_monitoring, sales_performance_model_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), cash_flow_monitoring, sales_performance_model_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed for cash flow monitoring', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), cash_flow_monitoring, inventory_management_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), cash_flow_monitoring, inventory_management_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -428,15 +428,15 @@ begin
 
     -- Fraud detection - input ports
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), fraud_detection, sales_performance_model_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), fraud_detection, sales_performance_model_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed for fraud detection', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), fraud_detection, inventory_management_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), fraud_detection, inventory_management_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -456,22 +456,22 @@ begin
 
      -- Financial risk - input ports
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), financial_risk_assessment, sales_performance_model_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), financial_risk_assessment, sales_performance_model_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed for detecting financial risks', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), financial_risk_assessment, inventory_management_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), financial_risk_assessment, inventory_management_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed for detecting financial risks', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), financial_risk_assessment, margin_trends_by_product, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), financial_risk_assessment, margin_trends_by_product, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -485,8 +485,8 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('f3a95935-5a3e-4427-be75-a01a40a53f55', 'weekly_feature_summary', feature_usage_metrics, 'Weekly Feature Summary', 'Aggregated weekly feature usage', 'Provides weekly trends for product teams. Key objectives: - Identify adoption patterns - Support roadmap planning - Enable executive reporting', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)returning id into feature_usage_metrics_weekly;
 
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), financial_risk_assessment, feature_usage_metrics_daily, 'PENDING', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), financial_risk_assessment, feature_usage_metrics_daily, 'PENDING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -504,15 +504,15 @@ begin
         VALUES (gen_random_uuid(), 'active', '{}', 'CEO Question exploration', 'ceo_question_exploration', 'explorations', 'To answer a question from the CEO', customer_domain_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into ceo_question;
     INSERT INTO public.explorations (id, owner_id) VALUES (ceo_question, john_id);
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), ceo_question, sales_performance_model_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), ceo_question, sales_performance_model_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed for answering a question from the CEO', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), ceo_question, inventory_management_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), ceo_question, inventory_management_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
@@ -523,15 +523,15 @@ begin
         VALUES (gen_random_uuid(), 'active', '{}', 'COO Question exploration', 'coo_question_exploration', 'explorations', 'To answer a question from the COO', customer_domain_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into coo_question;
     INSERT INTO public.explorations (id, owner_id) VALUES (coo_question, jane_id);
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), coo_question, sales_performance_model_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), coo_question, sales_performance_model_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Needed for answering a question from the COO', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
     WITH link AS (
-        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, expiry_event_sent, created_on, updated_on, deleted_at)
-        VALUES (gen_random_uuid(), coo_question, inventory_management_output_port, 'APPROVED', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), coo_question, inventory_management_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
         RETURNING id
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
