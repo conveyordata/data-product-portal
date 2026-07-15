@@ -114,6 +114,7 @@ select = [
     "RSE", #flake8-raise
     "T20", #flake-8 print
     "TC", #flake8-type-checking
+    "TID251", #flake8-tidy-imports banned-api
     "FURB",
     "PERF",
     "FLY",
@@ -124,3 +125,6 @@ select = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"starlette.status".msg = "Use `from fastapi import status` instead."

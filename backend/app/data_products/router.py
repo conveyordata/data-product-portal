@@ -6,11 +6,11 @@ from fastapi import (
     BackgroundTasks,
     Depends,
     Query,
+    status,
 )
 from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
-from starlette import status
 
 from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import InputPort
