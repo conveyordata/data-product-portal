@@ -86,8 +86,8 @@ format = "ruff format"
 ruff = ["lint", "format"]
 ty = "uvx ty check"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
-up = "docker compose -f test-compose.yaml up -d"
-down = "docker compose -f test-compose.yaml down"
+up = "docker compose up -d postgresql"
+down = "docker compose down postgresql"
 poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --upgrade"
 
 [tool.mypy]
