@@ -77,15 +77,6 @@ def upgrade() -> None:
         "input_port_requests",
         "decision != 'DENIED' OR decision_note IS NOT NULL",
     )
-    op.add_column(
-        "input_ports",
-        sa.Column(
-            "expiry_event_sent",
-            sa.Boolean(),
-            server_default=sa.false(),
-            nullable=False,
-        ),
-    )
     op.execute(
         """
         INSERT INTO input_port_requests (id, input_port_id, decision, justification, decision_note,
@@ -109,7 +100,9 @@ def upgrade() -> None:
                    WHEN 'APPROVED' THEN ip.approved_on
                    WHEN 'DENIED' THEN ip.denied_on
                    END,
-               NULL,
+               CASE ip.status
+                   WHEN 'APPROVED' THEN ip.approved_on
+                   END,
                NULL,
                ip.created_on,
                ip.updated_on
@@ -217,5 +210,4 @@ def downgrade() -> None:
         "input_ports",
         "status != 'DENIED' OR decision_note IS NOT NULL",
     )
-    op.drop_column("input_ports", "expiry_event_sent")
     op.drop_table("input_port_requests")

@@ -1,11 +1,9 @@
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
-from fastapi import HTTPException
 from sqlalchemy import (
     UUID,
-    Boolean,
     Column,
     Date,
     DateTime,
@@ -15,7 +13,6 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from starlette import status
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.access_durations.enums import AccessDurationType
@@ -43,7 +40,6 @@ class InputPort(
         Enum(InputPortStatus, native_enum=False),
         default=InputPortStatus.PENDING,
     )
-    expiry_event_sent: Mapped[bool] = mapped_column(Boolean, default=False)
 
     consuming_abstract_data_product_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("abstract_data_products.id")
@@ -160,30 +156,3 @@ class InputPortRequest(
         foreign_keys=[decided_by_id],
         lazy="joined",
     )
-
-    def approve_input_port_request(
-        self,
-        *,
-        now: datetime,
-        decided_by: Optional["User"] = None,
-        decision_note: Optional[str] = None,
-    ):
-        self.valid_from = now
-        self.decided_on = now
-        self.decided_by = decided_by
-        self.decision_note = decision_note
-        self.decision = DecisionStatus.APPROVED
-        self.input_port.status = InputPortStatus.APPROVED
-
-        match self.access_duration_type:
-            case AccessDurationType.PERMANENT:
-                self.valid_until = None
-            case AccessDurationType.TIME_BOUND:
-                if self.requested_duration_days is None:
-                    raise HTTPException(
-                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                        detail="Requested duration days is required for TIME_BOUND access duration type",
-                    )
-                self.valid_until = now.date() + timedelta(
-                    days=self.requested_duration_days
-                )

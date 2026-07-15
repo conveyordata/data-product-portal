@@ -27,6 +27,7 @@ from app.core.authz import Action
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
@@ -120,7 +121,8 @@ class AbstractDataProductService:
             input_port=input_port,
         )
         if output_port.access_type == OutputPortAccessType.UNRESTRICTED:
-            request.approve_input_port_request(
+            InputPortService(self.db).approve_request(
+                request,
                 now=datetime.now(tz=pytz.utc),
                 decision_note="Auto approved for unrestricted output port",
             )

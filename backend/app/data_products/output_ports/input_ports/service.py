@@ -14,6 +14,7 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
+from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
@@ -22,6 +23,7 @@ from app.core.authz import Action, Authorization
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_response import (
     InputPortRequest,
@@ -71,6 +73,34 @@ class InputPortService:
             )
         return current_link
 
+    def approve_request(
+        self,
+        request: InputPortRequestModel,
+        *,
+        now: datetime,
+        decided_by: Optional[UserModel] = None,
+        decision_note: Optional[str] = None,
+    ) -> None:
+        request.valid_from = now
+        request.decided_on = now
+        request.decided_by = decided_by
+        request.decision_note = decision_note
+        request.decision = DecisionStatus.APPROVED
+        request.input_port.status = InputPortStatus.APPROVED
+
+        match request.access_duration_type:
+            case AccessDurationType.PERMANENT:
+                request.valid_until = None
+            case AccessDurationType.TIME_BOUND:
+                if request.requested_duration_days is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="Requested duration days is required for TIME_BOUND access duration type",
+                    )
+                request.valid_until = now.date() + timedelta(
+                    days=request.requested_duration_days
+                )
+
     def approve_output_port_as_input_port(
         self,
         *,
@@ -98,7 +128,8 @@ class InputPortService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no pending request",
             )
-        pending_request.approve_input_port_request(
+        self.approve_request(
+            pending_request,
             now=datetime.now(timezone.utc),
             decided_by=actor,
             decision_note=decision_note,
@@ -175,6 +206,7 @@ class InputPortService:
         self.db.delete(current_link)
         return result
 
+    # Future refactor: query and return InputPortRequests instead of InputPorts
     def get_user_pending_actions(self, user: User) -> Sequence[InputPortRequest]:
         requested_associations = (
             self.db.scalars(
@@ -207,6 +239,7 @@ class InputPortService:
             )
         ]
 
+    # Future refactor: query and return InputPortRequests instead of InputPorts
     def get_user_requests(
         self, user: User, hide_old_inactive: bool
     ) -> Sequence[InputPortRequest]:
