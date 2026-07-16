@@ -16,7 +16,6 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DataProductTypeFactory,
-    DatasetFactory,
     DomainFactory,
     EnvironmentFactory,
     EnvPlatformConfigFactory,
@@ -24,6 +23,7 @@ from tests.factories import (
     GlobalRoleAssignmentFactory,
     InputPortFactory,
     LifecycleFactory,
+    OutputPortFactory,
     PlatformFactory,
     RoleFactory,
     TagFactory,
@@ -96,7 +96,7 @@ class TestDataProductsRouter:
     def test_create_data_product_with_input_ports(
         self, payload, client, user_with_create_data_product_rights
     ):
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         payload["input_ports"] = {
             "output_ports": [str(ds.id)],
             "justification": "I am your king",
@@ -513,10 +513,10 @@ class TestDataProductsRouter:
 
     def test_get_data_product_graph_data_level3(self, client):
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
         TechnicalAssetOutputPortAssociationFactory(data_output=ta, dataset=dataset)
-        downstream_dataset = DatasetFactory()
+        downstream_dataset = OutputPortFactory()
         InputPortFactory(
             dataset=dataset,
             consuming_abstract_data_product=downstream_dataset.data_product,
@@ -527,7 +527,7 @@ class TestDataProductsRouter:
 
     def test_get_data_product_graph_data_exploration_included(self, client):
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
         TechnicalAssetOutputPortAssociationFactory(data_output=ta, dataset=dataset)
         exp = ExplorationFactory()
@@ -793,7 +793,7 @@ class TestDataProductsRouter:
         )
 
     def test_get_output_ports(self, client: TestClient):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         response = self.get_output_ports(client, dataset.data_product.id)
         assert response.status_code == 200, f"Response failed with: {response.text}"
         assert len(response.json()["output_ports"]) == 1
@@ -802,7 +802,7 @@ class TestDataProductsRouter:
     def test_get_rolled_up_tags(self, client: TestClient):
         data_product = DataProductFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         response = self.get_rolled_up_tags(client, dataset.data_product.id)
         assert response.status_code == 200, f"Response failed with: {response.text}"
         assert len(response.json()["rolled_up_tags"]) == 2

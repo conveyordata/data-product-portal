@@ -10,7 +10,7 @@ from app.shared.model import BaseORM, utcnow
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
 
 
@@ -49,7 +49,7 @@ class Tag(Base, BaseORM):
     value = Column(String)
 
     # Relationships
-    datasets: Mapped[list["Dataset"]] = relationship(
+    datasets: Mapped[list["OutputPort"]] = relationship(
         secondary=tag_dataset_table, lazy="raise", back_populates="tags"
     )
     data_products: Mapped[list["DataProduct"]] = relationship(

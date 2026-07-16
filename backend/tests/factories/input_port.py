@@ -7,7 +7,7 @@ from app.abstract_data_product.input_ports.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 
 from .data_product import DataProductFactory
-from .dataset import DatasetFactory
+from .dataset import OutputPortFactory
 
 
 class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -17,7 +17,7 @@ class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
     id = factory.Faker("uuid4")
     status = InputPortStatus.APPROVED
     consuming_abstract_data_product = factory.SubFactory(DataProductFactory)
-    dataset = factory.SubFactory(DatasetFactory)
+    dataset = factory.SubFactory(OutputPortFactory)
 
     @factory.post_generation
     def request(obj, create, extracted, **kwargs):

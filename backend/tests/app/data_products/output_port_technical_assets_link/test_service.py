@@ -7,7 +7,7 @@ from app.data_products.output_port_technical_assets_link.service import (
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
+    OutputPortFactory,
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
@@ -17,7 +17,7 @@ class TestDataOutputDatasetService:
     def test_get_user_requests(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         dp = DataProductFactory()
-        ds = DatasetFactory(data_product=dp)
+        ds = OutputPortFactory(data_product=dp)
 
         pending_recent = TechnicalAssetOutputPortAssociationFactory(
             dataset=ds, requested_by=user, status=DecisionStatus.PENDING

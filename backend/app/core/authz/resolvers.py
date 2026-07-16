@@ -18,12 +18,14 @@ from app.data_products.model import DataProduct
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import get_db_session
 from app.explorations.model import Exploration
 
-Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[TechnicalAsset], None]
+Model: TypeAlias = Union[
+    Type[DataProduct], Type[OutputPort], Type[TechnicalAsset], None
+]
 
 
 class SubjectResolver(ABC):
@@ -117,7 +119,7 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
 
 
 class DatasetResolver(SubjectResolver):
-    model: Model = Dataset
+    model: Model = OutputPort
 
     @classmethod
     async def resolve_domain(

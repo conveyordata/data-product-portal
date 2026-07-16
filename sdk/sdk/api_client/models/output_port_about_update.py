@@ -6,29 +6,27 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.output_port_status import OutputPortStatus
-
-T = TypeVar("T", bound="DatasetStatusUpdate")
+T = TypeVar("T", bound="OutputPortAboutUpdate")
 
 
 @_attrs_define
-class DatasetStatusUpdate:
+class OutputPortAboutUpdate:
     """
     Attributes:
-        status (OutputPortStatus):
+        about (str):
     """
 
-    status: OutputPortStatus
+    about: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        status = self.status.value
+        about = self.about
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "status": status,
+                "about": about,
             }
         )
 
@@ -37,14 +35,14 @@ class DatasetStatusUpdate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        status = OutputPortStatus(d.pop("status"))
+        about = d.pop("about")
 
-        dataset_status_update = cls(
-            status=status,
+        output_port_about_update = cls(
+            about=about,
         )
 
-        dataset_status_update.additional_properties = d
-        return dataset_status_update
+        output_port_about_update.additional_properties = d
+        return output_port_about_update
 
     @property
     def additional_keys(self) -> list[str]:

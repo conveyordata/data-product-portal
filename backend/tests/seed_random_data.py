@@ -10,7 +10,7 @@ from tests.factories.data_outputs_datasets import (
 )
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_products_datasets import InputPortFactory
-from tests.factories.dataset import DatasetFactory
+from tests.factories.dataset import OutputPortFactory
 
 
 def add_random_data(
@@ -40,7 +40,7 @@ def add_random_data(
 
     # Create datasets and associate them with random data products and data outputs
     for _ in range(nr_of_datasets):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         # Add data outputs to the dataset
         for _ in range(random.randint(0, 3)):

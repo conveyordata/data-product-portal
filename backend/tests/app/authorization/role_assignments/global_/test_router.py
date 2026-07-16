@@ -8,7 +8,7 @@ from app.authorization.roles.schema import Role, Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
-from tests.factories.dataset import DatasetFactory
+from tests.factories.dataset import OutputPortFactory
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.global_.schema import GlobalRoleAssignment
@@ -55,7 +55,7 @@ class TestGlobalRoleAssignmentsRouter:
 
     def test_become_admin(self, client: TestClient):
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
 
         delete = client.delete(
             f"/api/v2/data_products/{ds.data_product_id}/output_ports/{ds.id}"

@@ -39,15 +39,15 @@ from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
-    DatasetAboutUpdate,
-    DatasetStatusUpdate,
     DatasetUpdate,
-    DatasetUsageUpdate,
+    OutputPortAboutUpdate,
+    OutputPortStatusUpdate,
+    OutputPortUsageUpdate,
 )
 from app.data_products.output_ports.schema_response import (
     GetOutputPortAccessDurationsResponse,
@@ -67,10 +67,10 @@ from app.users.schema import User
 
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
     return [
-        selectinload(DatasetModel.data_product_links)
+        selectinload(OutputPortModel.data_product_links)
         .selectinload(InputPortModel.consuming_abstract_data_product)
         .raiseload("*"),
-        selectinload(DatasetModel.data_output_links)
+        selectinload(OutputPortModel.data_output_links)
         .selectinload(DataOutputDatasetAssociationModel.data_output)
         .options(
             joinedload(TechnicalAssetModel.configuration),
@@ -83,7 +83,7 @@ def get_dataset_load_options() -> Sequence[ExecutableOption]:
 class OutputPortService:
     def __init__(self, db: Session):
         self.db = db
-        self.namespace_validator = NamespaceValidator(DatasetModel)
+        self.namespace_validator = NamespaceValidator(OutputPortModel)
         self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
 
     def _ensure_data_product_not_deleting(self, data_product_id: UUID) -> None:
@@ -96,47 +96,47 @@ class OutputPortService:
 
     def get_dataset(
         self, id: UUID, data_product_id: Optional[UUID] = None
-    ) -> DatasetModel:
+    ) -> OutputPortModel:
         """DB fetch with all required eager loads, lifecycle defaulting, and tag roll-up.
 
         Does not enforce any visibility policy — callers decide whether to gate on user.
         """
-        query = select(DatasetModel).where(DatasetModel.id == id)
+        query = select(OutputPortModel).where(OutputPortModel.id == id)
 
         if data_product_id is not None:
-            query = query.where(DatasetModel.data_product_id == data_product_id)
+            query = query.where(OutputPortModel.data_product_id == data_product_id)
 
-        dataset = self.db.scalar(
+        output_port = self.db.scalar(
             query.options(
-                selectinload(DatasetModel.data_output_links),
-                selectinload(DatasetModel.data_product_settings),
+                selectinload(OutputPortModel.data_output_links),
+                selectinload(OutputPortModel.data_product_settings),
             )
         )
 
-        if not dataset:
+        if not output_port:
             raise self.not_found_exception(id)
 
         rolled_up_tags = set()
-        for output_link in dataset.data_output_links:
+        for output_link in output_port.data_output_links:
             rolled_up_tags.update(output_link.data_output.tags)
 
-        dataset.rolled_up_tags = rolled_up_tags
+        output_port.rolled_up_tags = rolled_up_tags
 
-        if not dataset.lifecycle:
+        if not output_port.lifecycle:
             default_lifecycle = self.db.scalar(
                 select(DataProductLifeCycleModel).where(
                     DataProductLifeCycleModel.is_default
                 )
             )
-            dataset.lifecycle = default_lifecycle
-        dataset.domain = dataset.data_product.domain
-        return dataset
+            output_port.lifecycle = default_lifecycle
+        output_port.domain = output_port.data_product.domain
+        return output_port
 
     def get_access_durations(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
     ) -> GetOutputPortAccessDurationsResponse:
 
-        dataset = self.get_visible_dataset(id, user, data_product_id)
+        dataset = self.get_visible_output_port(id, user, data_product_id)
 
         time_bound_days: dict[AbstractDataProductType, int] = {
             row.abstract_data_product_type: row.days
@@ -175,9 +175,9 @@ class OutputPortService:
             else time_bound_days.get(product_type, -1),
         )
 
-    def get_visible_dataset(
+    def get_visible_output_port(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
-    ) -> DatasetModel:
+    ) -> OutputPortModel:
         """Fetch a dataset, raising 403 if the user cannot see it as a consumer.
 
         Use this for endpoints where dataset visibility must be enforced.
@@ -199,20 +199,20 @@ class OutputPortService:
         limit: int,
         user: UserModel,
         current_user_assigned: bool,
-    ) -> Sequence[DatasetModel]:
+    ) -> Sequence[OutputPortModel]:
         """An attempt was made to use the elbow method to determine a cut-off for returned results.
         The results of this method were quite poor, hence the search currently works as a sorting operation only,
         no filtering is applied other than the limit.
         """
-        ordered_by = DatasetModel.name.asc()
+        ordered_by = OutputPortModel.name.asc()
         if query:
             query_embedding = self.embedding_model.embed(query)
             semantic_score = (
-                1 - DatasetModel.embeddings.cosine_distance(*query_embedding)
+                1 - OutputPortModel.embeddings.cosine_distance(*query_embedding)
             ).label("semantic_score")
             ts_query = func.websearch_to_tsquery("english", query)
             keyword_score = func.coalesce(
-                func.ts_rank_cd(DatasetModel.search_vector, ts_query, 32), 0
+                func.ts_rank_cd(OutputPortModel.search_vector, ts_query, 32), 0
             ).label("keyword_score")
 
             semantic_weight = 2.0 / 3.0
@@ -224,20 +224,20 @@ class OutputPortService:
             )
 
         stmt = (
-            select(DatasetModel)
+            select(OutputPortModel)
             .order_by(ordered_by)
             # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .limit(limit * 2)
         )
         if current_user_assigned:
-            stmt = stmt.where(DatasetModel.assignments.any(user_id=user.id))
+            stmt = stmt.where(OutputPortModel.assignments.any(user_id=user.id))
         stmt = stmt.options(
-            undefer(DatasetModel.abstract_data_product_count),
-            undefer(DatasetModel.technical_assets_count),
+            undefer(OutputPortModel.abstract_data_product_count),
+            undefer(OutputPortModel.technical_assets_count),
         )
         results = self.db.scalars(stmt).unique().all()
 
-        visible_candidates: list[DatasetModel] = []
+        visible_candidates: list[OutputPortModel] = []
         for dataset in results:
             if self.is_visible_to_user(dataset, user):
                 dataset.domain = dataset.data_product.domain
@@ -251,8 +251,8 @@ class OutputPortService:
     @staticmethod
     def recalculate_embeddings_load_options():
         return [
-            selectinload(DatasetModel.data_product),
-            selectinload(DatasetModel.data_output_links).selectinload(
+            selectinload(OutputPortModel.data_product),
+            selectinload(OutputPortModel.data_output_links).selectinload(
                 DataOutputDatasetAssociationModel.data_output
             ),
         ]
@@ -263,8 +263,8 @@ class OutputPortService:
         self.db.flush()
         datasets = (
             self.db.scalars(
-                select(DatasetModel)
-                .where(DatasetModel.data_product_id == data_product_id)
+                select(OutputPortModel)
+                .where(OutputPortModel.data_product_id == data_product_id)
                 .options(*self.recalculate_embeddings_load_options()),
             )
             .unique()
@@ -274,14 +274,14 @@ class OutputPortService:
 
     def recalculate_search(self, dataset_id: UUID) -> None:
         dataset = self.db.scalar(
-            select(DatasetModel)
-            .where(DatasetModel.id == dataset_id)
+            select(OutputPortModel)
+            .where(OutputPortModel.id == dataset_id)
             .options(*self.recalculate_embeddings_load_options())
         )
         self._recalculate_embeddings_and_search_vector([dataset])
 
     def _recalculate_embeddings_and_search_vector(
-        self, datasets: Sequence[DatasetModel]
+        self, datasets: Sequence[OutputPortModel]
     ) -> None:
         embeddings = self.embedding_model.embed(
             DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
@@ -292,15 +292,15 @@ class OutputPortService:
             self.db.add(dataset)
 
     @staticmethod
-    def _recalculate_search_vector(dataset: DatasetModel) -> None:
-        dataset.search_vector = func.setweight(
-            func.to_tsvector("english", dataset.name), "A"
+    def _recalculate_search_vector(output_port: OutputPortModel) -> None:
+        output_port.search_vector = func.setweight(
+            func.to_tsvector("english", output_port.name), "A"
         ).op("||")(
-            func.setweight(func.to_tsvector("english", dataset.description), "B")
+            func.setweight(func.to_tsvector("english", output_port.description), "B")
         )
 
     def recalculate_search_for_all_output_ports(self, batch_size: int = 50) -> None:
-        dataset_ids = self.db.scalars(select(DatasetModel.id)).all()
+        dataset_ids = self.db.scalars(select(OutputPortModel.id)).all()
 
         # Process in batches to reduce load
         for i in range(0, len(dataset_ids), batch_size):
@@ -308,8 +308,8 @@ class OutputPortService:
 
             batch_datasets = (
                 self.db.scalars(
-                    select(DatasetModel)
-                    .where(DatasetModel.id.in_(batch_ids))
+                    select(OutputPortModel)
+                    .where(OutputPortModel.id.in_(batch_ids))
                     .options(*self.recalculate_embeddings_load_options())
                 )
                 .unique()
@@ -331,7 +331,7 @@ class OutputPortService:
 
     def create_output_port(
         self, data_product_id: UUID, dataset: CreateOutputPortRequest
-    ) -> DatasetModel:
+    ) -> OutputPortModel:
         self._ensure_data_product_not_deleting(data_product_id)
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -347,14 +347,14 @@ class OutputPortService:
         dataset_schema["data_product_id"] = data_product_id
         tags = self._fetch_tags(dataset_schema.pop("tag_ids", []))
         _ = dataset_schema.pop("owners", [])
-        model = DatasetModel(**dataset_schema, tags=tags)
+        model = OutputPortModel(**dataset_schema, tags=tags)
 
         self.db.add(model)
         self.db.flush()
         self.recalculate_search(model.id)
         return model
 
-    def remove_dataset(self, id: UUID, data_product_id: UUID) -> DatasetModel:
+    def remove_dataset(self, id: UUID, data_product_id: UUID) -> OutputPortModel:
         self._ensure_data_product_not_deleting(data_product_id)
         dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
@@ -401,37 +401,37 @@ class OutputPortService:
         self.db.commit()
         return current_dataset.id
 
-    def update_dataset_about(
+    def update_output_port_about(
         self,
         id: UUID,
         data_product_id: UUID,
-        dataset: DatasetAboutUpdate,
+        output_port: OutputPortAboutUpdate,
     ) -> None:
         self._ensure_data_product_not_deleting(data_product_id)
         current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        current_dataset.about = dataset.about
+        current_dataset.about = output_port.about
         self.db.commit()
 
     def update_dataset_status(
         self,
         id: UUID,
         data_product_id: UUID,
-        dataset: DatasetStatusUpdate,
+        output_port: OutputPortStatusUpdate,
     ) -> None:
         self._ensure_data_product_not_deleting(data_product_id)
-        current_dataset = ensure_output_port_exists(
+        current_output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        current_dataset.status = dataset.status
+        current_output_port.status = output_port.status
         self.db.commit()
 
     def update_dataset_usage(
         self,
         id: UUID,
-        usage: DatasetUsageUpdate,
-    ) -> DatasetModel:
+        usage: OutputPortUsageUpdate,
+    ) -> OutputPortModel:
         current_dataset = ensure_output_port_exists(id, self.db)
         self._ensure_data_product_not_deleting(current_dataset.data_product_id)
         current_dataset.usage = usage.usage
@@ -439,16 +439,16 @@ class OutputPortService:
         return current_dataset
 
     def get_graph_data(self, id: UUID, data_product_id: UUID, level: int) -> Graph:
-        dataset: DatasetModel | None = self.db.scalar(
-            select(DatasetModel)
-            .where(DatasetModel.id == id)
-            .where(DatasetModel.data_product_id == data_product_id)
+        output_port: OutputPortModel | None = self.db.scalar(
+            select(OutputPortModel)
+            .where(OutputPortModel.id == id)
+            .where(OutputPortModel.data_product_id == data_product_id)
             .options(
-                selectinload(DatasetModel.data_product_links),
-                selectinload(DatasetModel.data_output_links),
+                selectinload(OutputPortModel.data_product_links),
+                selectinload(OutputPortModel.data_output_links),
             )
         )
-        if not dataset:
+        if not output_port:
             raise self.not_found_exception(id)
         nodes = [
             Node(
@@ -456,14 +456,14 @@ class OutputPortService:
                 isMain=True,
                 data=NodeData(
                     id=id,
-                    name=dataset.name,
-                    link_to_id=dataset.data_product_id,
+                    name=output_port.name,
+                    link_to_id=output_port.data_product_id,
                 ),
                 type=NodeType.outputPortNode,
             )
         ]
         edges = []
-        for downstream_products in dataset.data_product_links:
+        for downstream_products in output_port.data_product_links:
             nodes.append(
                 get_graph_data_from_abstract_data_product(
                     str(downstream_products.consuming_abstract_data_product_id),
@@ -472,14 +472,14 @@ class OutputPortService:
             )
             edges.append(
                 Edge(
-                    id=f"{downstream_products.id}-{dataset.id}",
+                    id=f"{downstream_products.id}-{output_port.id}",
                     target=downstream_products.consuming_abstract_data_product_id,
-                    source=dataset.id,
+                    source=output_port.id,
                     animated=downstream_products.status == DecisionStatus.APPROVED,
                 )
             )
 
-        for data_output_link in dataset.data_output_links:
+        for data_output_link in output_port.data_output_links:
             data_output = data_output_link.data_output
             nodes.append(
                 Node(
@@ -495,9 +495,9 @@ class OutputPortService:
             )
             edges.append(
                 Edge(
-                    id=f"{data_output.id}-{dataset.id}",
+                    id=f"{data_output.id}-{output_port.id}",
                     source=data_output.id,
-                    target=dataset.id,
+                    target=output_port.id,
                     animated=data_output_link.status == DecisionStatus.APPROVED,
                 )
             )
@@ -523,47 +523,47 @@ class OutputPortService:
                 )
 
         # if no data outputs are linked yet, still show the owner data product
-        if level >= 2 and not dataset.data_output_links:
+        if level >= 2 and not output_port.data_output_links:
             nodes.append(
                 Node(
-                    id=f"{dataset.data_product.id}_2",
+                    id=f"{output_port.data_product.id}_2",
                     data=NodeData(
-                        id=f"{dataset.data_product.id}",
-                        name=dataset.data_product.name,
-                        icon_key=dataset.data_product.type.icon_key,
+                        id=f"{output_port.data_product.id}",
+                        name=output_port.data_product.name,
+                        icon_key=output_port.data_product.type.icon_key,
                     ),
                     type=NodeType.dataProductNode,
                 )
             )
             edges.append(
                 Edge(
-                    id=f"{dataset.data_product.id}-{dataset.id}-2",
-                    target=dataset.id,
-                    source=f"{dataset.data_product.id}_2",
+                    id=f"{output_port.data_product.id}-{output_port.id}-2",
+                    target=output_port.id,
+                    source=f"{output_port.data_product.id}_2",
                     animated=True,
                 )
             )
 
         return Graph(nodes=set(nodes), edges=set(edges))
 
-    def is_visible_to_user(self, dataset: DatasetModel, user: UserModel) -> bool:
+    def is_visible_to_user(self, output_port: OutputPortModel, user: UserModel) -> bool:
         if (
-            dataset.access_type != OutputPortAccessType.PRIVATE
+            output_port.access_type != OutputPortAccessType.PRIVATE
             or Authorization().has_admin_role(user_id=str(user.id))
             or DatasetRoleAssignmentService(self.db).has_assignment(
-                dataset_id=dataset.id, user=user
+                dataset_id=output_port.id, user=user
             )
         ):
             return True
-        dataset = self.db.scalar(
-            select(DatasetModel)
-            .where(DatasetModel.id == dataset.id)
-            .options(selectinload(DatasetModel.data_product_links))
+        output_port = self.db.scalar(
+            select(OutputPortModel)
+            .where(OutputPortModel.id == output_port.id)
+            .options(selectinload(OutputPortModel.data_product_links))
         )
 
         consuming_data_products = {
             link.consuming_abstract_data_product
-            for link in dataset.data_product_links
+            for link in output_port.data_product_links
             if link.status == DecisionStatus.APPROVED
         }
 
@@ -578,13 +578,13 @@ class OutputPortService:
     def get_output_ports(
         self, data_product_id: Optional[UUID], user: User
     ) -> Sequence[OutputPort]:
-        query = select(DatasetModel)
+        query = select(OutputPortModel)
         if data_product_id is not None:
             ensure_data_product_exists(data_product_id, self.db)
-            query = query.filter(DatasetModel.data_product_id == data_product_id)
+            query = query.filter(OutputPortModel.data_product_id == data_product_id)
 
         results = self.db.scalars(query).unique().all()
-        visible_candidates: list[DatasetModel] = []
+        visible_candidates: list[OutputPortModel] = []
         for dataset in results:
             if self.is_visible_to_user(dataset, user):
                 dataset.domain = dataset.data_product.domain
@@ -595,22 +595,22 @@ class OutputPortService:
     def get_consuming_data_products(
         self, output_port_id: UUID, data_product_id: UUID
     ) -> Sequence[InputPort]:
-        dataset = self.db.scalar(
-            select(DatasetModel)
-            .where(DatasetModel.id == output_port_id)
-            .where(DatasetModel.data_product_id == data_product_id)
+        output_port = self.db.scalar(
+            select(OutputPortModel)
+            .where(OutputPortModel.id == output_port_id)
+            .where(OutputPortModel.data_product_id == data_product_id)
             .options(
-                selectinload(DatasetModel.data_product_links).selectinload(
+                selectinload(OutputPortModel.data_product_links).selectinload(
                     InputPortModel.consuming_abstract_data_product
                 ),
-                selectinload(DatasetModel.data_product_links).selectinload(
+                selectinload(OutputPortModel.data_product_links).selectinload(
                     InputPortModel.requests
                 ),
             )
         )
-        if not dataset:
+        if not output_port:
             raise self.not_found_exception(output_port_id)
-        return dataset.data_product_links
+        return output_port.data_product_links
 
     def not_found_exception(self, output_port_id: UUID) -> HTTPException:
         return HTTPException(

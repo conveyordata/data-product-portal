@@ -1195,7 +1195,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetAboutUpdate"
+                "$ref": "#/components/schemas/OutputPortAboutUpdate"
               }
             }
           }
@@ -1266,7 +1266,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetStatusUpdate"
+                "$ref": "#/components/schemas/OutputPortStatusUpdate"
               }
             }
           }
@@ -10153,31 +10153,6 @@
         ],
         "title": "DatabricksTechnicalAssetConfiguration"
       },
-      "DatasetAboutUpdate": {
-        "properties": {
-          "about": {
-            "type": "string",
-            "title": "About"
-          }
-        },
-        "type": "object",
-        "required": [
-          "about"
-        ],
-        "title": "DatasetAboutUpdate"
-      },
-      "DatasetStatusUpdate": {
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/OutputPortStatus"
-          }
-        },
-        "type": "object",
-        "required": [
-          "status"
-        ],
-        "title": "DatasetStatusUpdate"
-      },
       "DatasetUpdate": {
         "properties": {
           "name": {
@@ -12684,6 +12659,19 @@
         ],
         "title": "OutputPort"
       },
+      "OutputPortAboutUpdate": {
+        "properties": {
+          "about": {
+            "type": "string",
+            "title": "About"
+          }
+        },
+        "type": "object",
+        "required": [
+          "about"
+        ],
+        "title": "OutputPortAboutUpdate"
+      },
       "OutputPortAccessDuration": {
         "properties": {
           "access_duration_type": {
@@ -13344,6 +13332,18 @@
           "archived"
         ],
         "title": "OutputPortStatus"
+      },
+      "OutputPortStatusUpdate": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/OutputPortStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "OutputPortStatusUpdate"
       },
       "OutputPortTechnicalAssetLinkEvent": {
         "properties": {

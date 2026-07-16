@@ -9,15 +9,15 @@ from app.mcp.mcp import (
 )
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     DomainFactory,
+    OutputPortFactory,
     TechnicalAssetFactory,
 )
 
 
 def test_search_output_ports(session):
-    ds1 = DatasetFactory(name="Customer Data")
-    ds2 = DatasetFactory(name="Sales Data")
+    ds1 = OutputPortFactory(name="Customer Data")
+    ds2 = OutputPortFactory(name="Sales Data")
     OutputPortService(db=session).recalculate_search_for_all_output_ports()
 
     result = search_output_ports(query="Data", db=session)
@@ -30,7 +30,7 @@ def test_search_output_ports(session):
 
 
 def test_search_output_ports_no_query(session):
-    DatasetFactory(name="Customer Data")
+    OutputPortFactory(name="Customer Data")
     OutputPortService(db=session).recalculate_search_for_all_output_ports()
 
     result = search_output_ports(query=None, db=session)
@@ -46,7 +46,7 @@ def test_get_data_product_details(session):
 
 
 def test_get_output_port_details(session):
-    ds = DatasetFactory()
+    ds = OutputPortFactory()
     result = get_output_port_details(output_port_id=str(ds.id), db=session)
     assert result["id"] == ds.id
 

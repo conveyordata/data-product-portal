@@ -463,7 +463,7 @@ def get_output_port_details(
     db: Session = Depends(get_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
-    dataset = OutputPortService(db).get_visible_dataset(
+    dataset = OutputPortService(db).get_visible_output_port(
         id=UUID(output_port_id), user=user
     )
     return GetOutputPortResponse.model_validate(dataset).model_dump()
@@ -663,14 +663,14 @@ def get_output_port_resource(
     db: Session = Depends(get_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> str:
-    dataset = OutputPortService(db).get_visible_dataset(
+    output_port = OutputPortService(db).get_visible_output_port(
         id=UUID(output_port_id), user=user
     )
 
-    if not dataset:
+    if not output_port:
         return f"Error: Output port {output_port_id} not found"
     # Convert to Pydantic model and then to formatted string
-    ds_data = GetOutputPortResponse.model_validate(dataset)
+    ds_data = GetOutputPortResponse.model_validate(output_port)
 
     return f"""
 # Output port: {ds_data.name}

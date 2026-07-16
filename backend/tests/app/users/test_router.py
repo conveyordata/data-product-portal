@@ -10,10 +10,10 @@ from tests.app.data_products.output_port_technical_assets_link.test_router impor
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     TechnicalAssetOutputPortAssociationFactory,
@@ -213,7 +213,7 @@ class TestUsersRouter:
                 assert user_data["can_become_admin"] is True
 
     def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         TechnicalAssetOutputPortAssociationFactory(dataset=ds)
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json() == {"pending_actions": []}
@@ -249,7 +249,7 @@ class TestUsersRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        ds = DatasetFactory(data_product=data_product)
+        ds = OutputPortFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[

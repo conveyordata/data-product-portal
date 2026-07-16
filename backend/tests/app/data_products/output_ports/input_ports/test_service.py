@@ -5,8 +5,8 @@ from app.data_products.output_ports.input_ports.service import InputPortService
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     InputPortFactory,
+    OutputPortFactory,
     UserFactory,
 )
 
@@ -15,7 +15,7 @@ class TestInputPortService:
     def test_get_user_requests(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         dp = DataProductFactory()
-        ds = DatasetFactory(data_product=dp)
+        ds = OutputPortFactory(data_product=dp)
         pending_recent = InputPortFactory(
             consuming_abstract_data_product=dp,
             dataset=ds,

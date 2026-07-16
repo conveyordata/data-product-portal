@@ -711,7 +711,7 @@ func encodeUpdateOutputPortRequest(
 }
 
 func encodeUpdateOutputPortAboutRequest(
-	req *DatasetAboutUpdate,
+	req *OutputPortAboutUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -739,7 +739,7 @@ func encodeUpdateOutputPortQueryStatsRequest(
 }
 
 func encodeUpdateOutputPortStatusRequest(
-	req *DatasetStatusUpdate,
+	req *OutputPortStatusUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
