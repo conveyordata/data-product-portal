@@ -29,7 +29,7 @@ class RoleAssignmentService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def get_assignment(self, id_: UUID) -> RoleAssignmentOld:
+    def get_assignment(self, id_: UUID) -> DatasetRoleAssignmentModel:
         return ensure_exists(id_, self.db, DatasetRoleAssignmentModel)
 
     def list_assignments(
@@ -42,7 +42,7 @@ class RoleAssignmentService:
     ) -> Sequence[RoleAssignmentOld]:
         query = select(DatasetRoleAssignmentModel)
         if dataset_id is not None:
-            query = query.where(DatasetRoleAssignmentModel.dataset_id == dataset_id)
+            query = query.where(DatasetRoleAssignmentModel.output_port_id == dataset_id)
         if user_id is not None:
             query = query.where(DatasetRoleAssignmentModel.user_id == user_id)
         if role_id is not None:
@@ -68,7 +68,7 @@ class RoleAssignmentService:
         existing_assignment = self.db.scalar(
             select(DatasetRoleAssignmentModel).where(
                 DatasetRoleAssignmentModel.user_id == user_id,
-                DatasetRoleAssignmentModel.dataset_id == dataset_id,
+                DatasetRoleAssignmentModel.output_port_id == dataset_id,
             )
         )
         if existing_assignment:
@@ -85,7 +85,7 @@ class RoleAssignmentService:
         role_assignment = DatasetRoleAssignmentModel(
             role_id=role_id,
             user_id=user_id,
-            dataset_id=dataset_id,
+            output_port_id=dataset_id,
             data_product_id=output_port.data_product_id,
             requested_on=datetime.now(),
             requested_by_id=actor.id,
@@ -105,7 +105,7 @@ class RoleAssignmentService:
 
     def update_assignment(
         self, request: UpdateOutputPortRoleAssignment, *, actor: User
-    ) -> RoleAssignmentOld:
+    ) -> DatasetRoleAssignmentModel:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
 
@@ -127,7 +127,7 @@ class RoleAssignmentService:
             assignment.role is not None
             and assignment.role.prototype == Prototype.OWNER
             and assignment.decision == DecisionStatus.APPROVED
-            and self._count_owners(assignment.dataset_id) <= 1
+            and self._count_owners(assignment.output_port_id) <= 1
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
@@ -138,7 +138,7 @@ class RoleAssignmentService:
         query = (
             select(func.count())
             .select_from(DatasetRoleAssignmentModel)
-            .where(DatasetRoleAssignmentModel.dataset_id == dataset_id)
+            .where(DatasetRoleAssignmentModel.output_port_id == dataset_id)
             .join(Role)
             .where(Role.prototype == Prototype.OWNER)
         )
@@ -177,7 +177,7 @@ class RoleAssignmentService:
                 )
                 .join(Role, DatasetRoleAssignmentModel.role_id == Role.id)
                 .where(
-                    DatasetRoleAssignmentModel.dataset_id == dataset_id,
+                    DatasetRoleAssignmentModel.output_port_id == dataset_id,
                     DatasetRoleAssignmentModel.decision == DecisionStatus.APPROVED,
                     Role.permissions.contains([action]),
                 )

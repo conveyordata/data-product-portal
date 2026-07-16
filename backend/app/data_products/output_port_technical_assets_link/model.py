@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Sequence
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.webhooks.events import OutputPortTechnicalAssetLinkEvent, V2Event
@@ -33,7 +33,9 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
 
     # Foreign keys
     data_output_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_outputs.id"))
-    dataset_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("datasets.id"))
+    output_port_id: Mapped[uuid.UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id")
+    )
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
@@ -44,12 +46,11 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
         order_by="TechnicalAsset.name",
         lazy="joined",
     )
-    outputPort: Mapped["OutputPort"] = relationship(
+    output_port: Mapped["OutputPort"] = relationship(
         back_populates="data_output_links",
         order_by="OutputPort.name",
         lazy="joined",
     )
-    dataset = synonym("outputPort")
     requested_by: Mapped["User"] = relationship(
         foreign_keys=[requested_by_id],
         back_populates="requested_dataoutputs",
@@ -81,7 +82,7 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
                 return []
             input_ports = (
                 db.query(InputPort)
-                .filter(InputPort.dataset_id == self.dataset_id)
+                .filter(InputPort.output_port_id == self.output_port_id)
                 .all()
             )
             return [ip.to_event() for ip in input_ports]
@@ -90,9 +91,9 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     def to_event(self) -> OutputPortTechnicalAssetLinkEvent:
         return OutputPortTechnicalAssetLinkEvent(
             id=self.id,
-            data_product_id=self.outputPort.data_product_id
+            data_product_id=self.output_port.data_product_id
             if self.data_output is None
             else self.data_output.owner_id,
-            output_port_id=self.dataset_id,
+            output_port_id=self.output_port_id,
             technical_asset_id=self.data_output_id,
         )

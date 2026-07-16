@@ -22,8 +22,8 @@ from app.data_products.output_ports.query_stats.service import (
 )
 from tests.factories import (
     DataProductFactory,
-    DatasetQueryStatsFactory,
     OutputPortFactory,
+    OutputPortQueryStatsFactory,
 )
 
 
@@ -37,15 +37,15 @@ def dataset_with_two_stats(session: Session):
 
     session.add_all(
         [
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=today,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer1.id,
                 query_count=50,
             ),
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=today,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer2.id,
                 query_count=75,
             ),
@@ -67,15 +67,15 @@ def dataset_with_daily_history(session: Session):
 
     session.add_all(
         [
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=today,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer1.id,
                 query_count=100,
             ),
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=yesterday,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer2.id,
                 query_count=200,
             ),
@@ -84,9 +84,9 @@ def dataset_with_daily_history(session: Session):
 
     other_dataset = OutputPortFactory()
     session.add(
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=today,
-            dataset_id=other_dataset.id,
+            output_port_id=other_dataset.id,
             consumer_data_product_id=consumer1.id,
             query_count=999,
         )
@@ -98,18 +98,20 @@ def dataset_with_daily_history(session: Session):
 
 class TestDatasetQueryStatsDailyService:
     @staticmethod
-    def _fetch_stats(session, dataset_id, consumer_id, target_date, *, multiple=False):
+    def _fetch_stats(
+        session, output_port_id, consumer_id, target_date, *, multiple=False
+    ):
         """Return DatasetQueryStatsDaily rows for a dataset/consumer/date combo."""
         query = session.query(DatasetQueryStatsDaily).filter_by(
             date=target_date,
-            dataset_id=dataset_id,
+            output_port_id=output_port_id,
             consumer_data_product_id=consumer_id,
         )
         return query.all() if multiple else query.first()
 
     def test_update_query_stats_daily_single_record(self, session: Session):
         """Test updating query stats with a single record."""
-        dataset = OutputPortFactory()
+        output_port = OutputPortFactory()
         consumer = DataProductFactory()
         today = date.today()
 
@@ -122,13 +124,13 @@ class TestDatasetQueryStatsDailyService:
         ]
 
         service = OutputPortStatsService(session)
-        service.update_query_stats(dataset.id, updates)
+        service.update_query_stats(output_port.id, updates)
 
-        stats = self._fetch_stats(session, dataset.id, consumer.id, today)
+        stats = self._fetch_stats(session, output_port.id, consumer.id, today)
 
         assert stats is not None
         assert stats.query_count == 100
-        assert stats.dataset_id == dataset.id
+        assert stats.output_port_id == output_port.id
         assert stats.consumer_data_product_id == consumer.id
 
     def test_update_query_stats_daily_with_overlapping_updates(
@@ -213,15 +215,15 @@ class TestDatasetQueryStatsDailyService:
         start_of_week = base_date - timedelta(days=base_date.weekday())
         middle_of_week = start_of_week + timedelta(days=2)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=start_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=120,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=middle_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=180,
         )
@@ -268,15 +270,15 @@ class TestDatasetQueryStatsDailyService:
         recent_date = date.today() - timedelta(days=10)
         old_date = date.today() - timedelta(days=120)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=recent_date,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=50,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=old_date,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=75,
         )

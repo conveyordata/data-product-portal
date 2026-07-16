@@ -186,7 +186,7 @@ class TestExplorationRouter:
         exploration = ExplorationFactory(owner=user)
         input_port = InputPortFactory(consuming_abstract_data_product=exploration)
         response = client.delete(
-            f"{ROUTE}/{exploration.id}/input_ports/{input_port.dataset.id}",
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}",
         )
         assert response.status_code == 200, response.text
 
@@ -194,7 +194,7 @@ class TestExplorationRouter:
         exploration = ExplorationFactory()
         input_port = InputPortFactory(consuming_abstract_data_product=exploration)
         response = client.delete(
-            f"{ROUTE}/{exploration.id}/input_ports/{input_port.dataset.id}",
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}",
         )
         assert response.status_code == 403, response.text
 

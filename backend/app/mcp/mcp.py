@@ -818,7 +818,7 @@ def get_user_roles(
             assignment_data = DatasetRoleAssignmentResponse.model_validate(
                 assignment
             ).model_dump()
-            ds_id = str(assignment.dataset_id)
+            ds_id = str(assignment.output_port_id)
             if ds_id not in dataset_roles:
                 dataset_roles[ds_id] = []
             dataset_roles[ds_id].append(assignment_data)

@@ -16,13 +16,13 @@ class BaseInputPortGet(ORMModel):
     id: UUID
     justification: str
     consuming_abstract_data_product_id: UUID
-    output_port_id: UUID = Field(validation_alias="dataset_id")
+    output_port_id: UUID = Field(validation_alias="output_port_id")
     decision_note: Optional[str]
     status: DecisionStatus
     requested_on: datetime
 
     # Nested schemas
-    output_port: OutputPort = Field(validation_alias="dataset")
+    output_port: OutputPort = Field(validation_alias="output_port")
     consuming_abstract_data_product: AbstractDataProductInfo
     requested_by: User
     denied_by: Optional[User]

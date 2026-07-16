@@ -43,11 +43,11 @@ class TechnicalAssetOutputPortService:
             select(DataOutputDatasetAssociationModel)
             .where(
                 DataOutputDatasetAssociationModel.data_output_id == technical_asset_id,
-                DataOutputDatasetAssociationModel.dataset_id == output_port_id,
+                DataOutputDatasetAssociationModel.output_port_id == output_port_id,
             )
             .join(
                 OutputPort,
-                OutputPort.id == DataOutputDatasetAssociationModel.dataset_id,
+                OutputPort.id == DataOutputDatasetAssociationModel.output_port_id,
             )
             .where(
                 OutputPort.data_product_id == data_product_id,
@@ -156,7 +156,7 @@ class TechnicalAssetOutputPortService:
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
                 )
                 .where(
-                    DataOutputDatasetAssociationModel.dataset.has(
+                    DataOutputDatasetAssociationModel.output_port.has(
                         OutputPortModel.assignments.any(
                             DatasetRoleAssignmentModel.user_id == user.id
                         )
@@ -174,8 +174,8 @@ class TechnicalAssetOutputPortService:
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.dataset.data_product.domain),
-                obj=str(a.dataset_id),
+                dom=str(a.output_port.data_product.domain),
+                obj=str(a.output_port_id),
                 act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
             )
         ]

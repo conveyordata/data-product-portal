@@ -52,7 +52,7 @@ class AbstractDataProductService:
             self.db.scalars(
                 select(InputPortModel)
                 .options(
-                    selectinload(InputPortModel.dataset),
+                    selectinload(InputPortModel.output_port),
                     selectinload(InputPortModel.requests),
                 )
                 .filter(
@@ -83,7 +83,7 @@ class AbstractDataProductService:
         self._ensure_not_deleting(adp)
         self._ensure_not_deleting(output_port.data_product)
         if output_port.id in [
-            link.dataset_id
+            link.output_port_id
             for link in adp.input_ports
             if link.status != DecisionStatus.DENIED
         ]:
@@ -109,7 +109,7 @@ class AbstractDataProductService:
             else InputPortStatus.APPROVED
         )
         input_port = InputPortModel(
-            dataset_id=output_port_id,
+            output_port_id=output_port_id,
             status=input_port_approval_status,
             consuming_abstract_data_product_id=adp.id,
         )
@@ -163,8 +163,8 @@ class AbstractDataProductService:
                 detail=f"Abstract data product {id} not found",
             )
         input_ports = [
-            self._add_single_input_port(adp, dataset_id, justification, actor=actor)
-            for dataset_id in output_port_ids
+            self._add_single_input_port(adp, output_port_id, justification, actor=actor)
+            for output_port_id in output_port_ids
         ]
         self.db.flush()
         return input_ports
@@ -185,7 +185,7 @@ class AbstractDataProductService:
             (
                 dataset
                 for dataset in adp.input_ports
-                if dataset.dataset_id == output_port_id
+                if dataset.output_port_id == output_port_id
             ),
             None,
         )
@@ -205,11 +205,11 @@ class AbstractDataProductService:
         actor: User,
     ):
         for input_port in input_ports:
-            if input_port.dataset.access_type != OutputPortAccessType.UNRESTRICTED:
+            if input_port.output_port.access_type != OutputPortAccessType.UNRESTRICTED:
                 approvers = OutputPortRoleAssignmentService(
                     self.db
                 ).users_with_authz_action(
-                    input_port.dataset_id,
+                    input_port.output_port_id,
                     Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 )
                 other_approvers = [a for a in approvers if a != actor]
@@ -217,7 +217,7 @@ class AbstractDataProductService:
                     background_tasks.add_task(
                         email.send_dataset_link_email(
                             input_port.consuming_abstract_data_product,
-                            input_port.dataset,
+                            input_port.output_port,
                             requester=deepcopy(actor),
                             approvers=[
                                 deepcopy(approver) for approver in other_approvers

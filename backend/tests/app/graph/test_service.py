@@ -32,7 +32,7 @@ class TestGraphServiceEnumMatching:
         # Create links with different statuses
         InputPortFactory(
             consuming_abstract_data_product=consumer_approved,
-            dataset=dataset,
+            output_port=dataset,
             status=DecisionStatus.APPROVED,
         )
 
@@ -60,7 +60,7 @@ class TestGraphServiceEnumMatching:
         # Create links with different statuses
         InputPortFactory(
             consuming_abstract_data_product=consumer_pending,
-            dataset=dataset,
+            output_port=dataset,
             status=DecisionStatus.PENDING,
         )
 
@@ -88,7 +88,7 @@ class TestGraphServiceEnumMatching:
         # Create links with different statuses
         InputPortFactory(
             consuming_abstract_data_product=consumer_denied,
-            dataset=dataset,
+            output_port=dataset,
             status=DecisionStatus.DENIED,
         )
 

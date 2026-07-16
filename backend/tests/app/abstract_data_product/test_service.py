@@ -25,7 +25,7 @@ class TestAbstractDataProductService:
         output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
-            dataset=output_port,
+            output_port=output_port,
             request__requested_by=actor,
             status=DecisionStatus.PENDING,
         )
@@ -34,7 +34,7 @@ class TestAbstractDataProductService:
             permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            dataset=output_port,
+            output_port=output_port,
             role_id=approver_role.id,
             user_id=actor.id,
         )
@@ -60,7 +60,7 @@ class TestAbstractDataProductService:
         output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
-            dataset=output_port,
+            output_port=output_port,
             request__requested_by=actor,
             status=DecisionStatus.PENDING,
         )
@@ -70,7 +70,7 @@ class TestAbstractDataProductService:
         )
         for user in [actor, other_approver]:
             DatasetRoleAssignmentFactory(
-                dataset=output_port,
+                output_port=output_port,
                 role_id=approver_role.id,
                 user_id=user.id,
             )

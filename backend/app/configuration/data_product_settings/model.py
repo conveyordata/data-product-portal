@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.configuration.data_product_settings.enums import (
     DataProductSettingScope,
@@ -30,7 +30,9 @@ class DataProductSettingValue(Base, BaseORM):
     data_product_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_products.id"), nullable=True
     )
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"), nullable=True)
+    output_port_id: Mapped[UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id"), nullable=True
+    )
 
     # Relationships
     data_product_setting: Mapped["DataProductSetting"] = relationship(
@@ -43,12 +45,11 @@ class DataProductSettingValue(Base, BaseORM):
         order_by="DataProduct.name",
         lazy="raise",
     )
-    outputPort: Mapped["OutputPort"] = relationship(
+    output_port: Mapped["OutputPort"] = relationship(
         back_populates="data_product_settings",
         order_by="OutputPort.name",
         lazy="raise",
     )
-    dataset = synonym("outputPort")
 
 
 class DataProductSetting(Base, BaseORM):

@@ -214,7 +214,7 @@ class TestUsersRouter:
 
     def test_get_pending_actions_no_action(self, client):
         ds = OutputPortFactory()
-        TechnicalAssetOutputPortAssociationFactory(dataset=ds)
+        TechnicalAssetOutputPortAssociationFactory(output_port=ds)
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json() == {"pending_actions": []}
 
@@ -228,7 +228,7 @@ class TestUsersRouter:
             ],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, dataset_id=input_port.dataset.id
+            user_id=user.id, role_id=role.id, output_port_id=input_port.output_port.id
         )
 
         response = client.get("/api/v2/users/current/pending_actions")
@@ -256,7 +256,9 @@ class TestUsersRouter:
                 AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST
             ],
         )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
 
         response = client.post(
             f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, ds.id)}/add",

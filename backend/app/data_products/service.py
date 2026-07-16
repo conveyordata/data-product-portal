@@ -299,7 +299,7 @@ class DataProductService(AbstractDataProductService):
                 select(TechnicalAssetModel)
                 .options(
                     joinedload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DataOutputDatasetAssociation.output_port)
                     .selectinload(OutputPortModel.data_product_links)
                 )
                 .filter_by(owner_id=id)
@@ -314,9 +314,9 @@ class DataProductService(AbstractDataProductService):
                 Node(
                     id=upstream_datasets.id,
                     data=NodeData(
-                        id=upstream_datasets.dataset_id,
-                        name=upstream_datasets.dataset.name,
-                        link_to_id=upstream_datasets.dataset.data_product_id,
+                        id=upstream_datasets.output_port_id,
+                        name=upstream_datasets.output_port.name,
+                        link_to_id=upstream_datasets.output_port.data_product_id,
                     ),
                     type=NodeType.outputPortNode,
                 )
@@ -355,19 +355,19 @@ class DataProductService(AbstractDataProductService):
                 for downstream_datasets in data_output.dataset_links:
                     nodes.append(
                         Node(
-                            id=f"{downstream_datasets.dataset_id}_2",
+                            id=f"{downstream_datasets.output_port_id}_2",
                             data=NodeData(
-                                id=f"{downstream_datasets.dataset_id}",
-                                name=downstream_datasets.dataset.name,
-                                link_to_id=downstream_datasets.dataset.data_product_id,
+                                id=f"{downstream_datasets.output_port_id}",
+                                name=downstream_datasets.output_port.name,
+                                link_to_id=downstream_datasets.output_port.data_product_id,
                             ),
                             type=NodeType.outputPortNode,
                         )
                     )
                     edges.append(
                         Edge(
-                            id=f"{downstream_datasets.dataset_id}-{data_output.id}-2",
-                            target=f"{downstream_datasets.dataset_id}_2",
+                            id=f"{downstream_datasets.output_port_id}-{data_output.id}-2",
+                            target=f"{downstream_datasets.output_port_id}_2",
                             source=data_output.id,
                             animated=downstream_datasets.status
                             == DecisionStatus.APPROVED,
@@ -376,7 +376,7 @@ class DataProductService(AbstractDataProductService):
                     if level >= 3:
                         for (
                             downstream_dps
-                        ) in downstream_datasets.dataset.data_product_links:
+                        ) in downstream_datasets.output_port.data_product_links:
                             node_id = f"{downstream_dps.id}_3"
                             nodes.append(
                                 get_graph_data_from_abstract_data_product(
@@ -388,10 +388,10 @@ class DataProductService(AbstractDataProductService):
                                 Edge(
                                     id=(
                                         f"{downstream_dps.id}-"
-                                        f"{downstream_datasets.dataset.id}-3"
+                                        f"{downstream_datasets.output_port.id}-3"
                                     ),
                                     target=node_id,
-                                    source=f"{downstream_datasets.dataset.id}_2",
+                                    source=f"{downstream_datasets.output_port.id}_2",
                                     animated=downstream_dps.status
                                     == DecisionStatus.APPROVED,
                                 )
